@@ -1135,6 +1135,7 @@ class TabContent {
     required this.tabId,
     this.fullContentMarkdown,
     this.fullContentPlain,
+    required this.isProbablyReaderable,
     this.extractedContentMarkdown,
     this.extractedContentPlain,
   });
@@ -1145,6 +1146,8 @@ class TabContent {
 
   String? fullContentPlain;
 
+  bool isProbablyReaderable;
+
   String? extractedContentMarkdown;
 
   String? extractedContentPlain;
@@ -1154,6 +1157,7 @@ class TabContent {
       tabId,
       fullContentMarkdown,
       fullContentPlain,
+      isProbablyReaderable,
       extractedContentMarkdown,
       extractedContentPlain,
     ];
@@ -1165,8 +1169,9 @@ class TabContent {
       tabId: result[0]! as String,
       fullContentMarkdown: result[1] as String?,
       fullContentPlain: result[2] as String?,
-      extractedContentMarkdown: result[3] as String?,
-      extractedContentPlain: result[4] as String?,
+      isProbablyReaderable: result[3]! as bool,
+      extractedContentMarkdown: result[4] as String?,
+      extractedContentPlain: result[5] as String?,
     );
   }
 }

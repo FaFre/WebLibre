@@ -1,4 +1,4 @@
-import { Readability } from '@mozilla/readability';
+import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import TurndownService from 'turndown';
 
 const removeMarkdown = require('remove-markdown');
@@ -7,6 +7,7 @@ const turndownService = new TurndownService();
 
 function parseReaderable(document, options) {
   const clonedDoc = document.cloneNode(true);
+  const readable = isProbablyReaderable(clonedDoc);
 
   const fullMarkdown = turndownService.turndown(clonedDoc.body.innerHTML);
 
@@ -23,6 +24,7 @@ function parseReaderable(document, options) {
 
     response = {
       ...response,
+      isProbablyReaderable: readable ? 1 : 0,
       extractedContentMarkdown: extractedMarkdown,
       extractedContentPlain: removeMarkdown(extractedMarkdown)
     };

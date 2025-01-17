@@ -288,20 +288,9 @@ class SearchScreen extends HookConsumerWidget {
                               result.extractedContent ?? result.fullContent;
 
                           return ListTile(
-                            title: Markdown(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.zero,
-                              data: result.title,
-                              physics: const NeverScrollableScrollPhysics(),
-                            ),
+                            title: MarkdownBody(data: result.title),
                             subtitle: (!headHasMatch && bodyResult != null)
-                                ? Markdown(
-                                    shrinkWrap: true,
-                                    padding: EdgeInsets.zero,
-                                    data: bodyResult,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                  )
+                                ? MarkdownBody(data: bodyResult)
                                 : null,
                           );
                         },

@@ -114,6 +114,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     String id, {
     Value<String?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
+    Value<bool> isProbablyReaderable = const Value.absent(),
     Value<String?> extractedContentMarkdown = const Value.absent(),
     Value<String?> extractedContentPlain = const Value.absent(),
     Value<String?> fullContentMarkdown = const Value.absent(),
@@ -121,6 +122,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
   }) async {
     final doUpdate = url != const Value.absent() ||
         title != const Value.absent() ||
+        isProbablyReaderable != const Value.absent() ||
         extractedContentMarkdown != const Value.absent() ||
         extractedContentPlain != const Value.absent() ||
         fullContentMarkdown != const Value.absent() ||
@@ -132,6 +134,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
         TabCompanion(
           url: url,
           title: title,
+          isProbablyReaderable: isProbablyReaderable,
           extractedContentMarkdown: extractedContentMarkdown,
           extractedContentPlain: extractedContentPlain,
           fullContentMarkdown: fullContentMarkdown,

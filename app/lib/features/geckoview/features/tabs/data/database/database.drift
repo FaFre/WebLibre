@@ -17,6 +17,7 @@ CREATE TABLE tab (
   order_key TEXT NOT NULL,
   url TEXT,
   title TEXT,
+  is_probably_readerable BOOL,
   extracted_content_markdown TEXT,
   extracted_content_plain TEXT,
   full_content_markdown TEXT,

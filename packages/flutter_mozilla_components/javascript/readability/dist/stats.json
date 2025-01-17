@@ -1,10 +1,10 @@
 {
-  "hash": "e972bd2742adaf1dd89a",
+  "hash": "a0b270ca122ccf1c69b1",
   "version": "5.96.1",
-  "time": 1769,
-  "builtAt": 1730911086642,
+  "time": 676,
+  "builtAt": 1736365755248,
   "publicPath": "auto",
-  "outputPath": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/dist",
+  "outputPath": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/dist",
   "assetsByChunkName": {
     "main": [
       "readability.min.js"
@@ -14,14 +14,14 @@
     {
       "type": "asset",
       "name": "readability.min.js",
-      "size": 48006,
+      "size": 48065,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
       "info": {
         "javascriptModule": false,
         "minimized": true,
-        "size": 48006
+        "size": 48065
       },
       "chunkNames": [
         "main"
@@ -43,9 +43,9 @@
       "initial": true,
       "entry": true,
       "recorded": false,
-      "size": 120760,
+      "size": 120878,
       "sizes": {
-        "javascript": 120090,
+        "javascript": 120208,
         "runtime": 670
       },
       "names": [
@@ -59,7 +59,7 @@
         "readability.min.js"
       ],
       "auxiliaryFiles": [],
-      "hash": "e213d94771310f354882",
+      "hash": "fd19b958f18c40df17b3",
       "childrenByOrder": {},
       "id": 792,
       "siblings": [],
@@ -78,9 +78,9 @@
           "codeGenerated": true,
           "buildTimeExecuted": false,
           "cached": false,
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
           "name": "./node_modules/@mozilla/readability/Readability-readerable.js",
-          "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+          "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
           "index": 3,
           "preOrderIndex": 3,
           "index2": 1,
@@ -89,16 +89,16 @@
           "optional": false,
           "orphan": false,
           "dependent": true,
-          "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "issuerName": "./node_modules/@mozilla/readability/index.js",
           "issuerPath": [
             {
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "name": "./src/index.js",
               "id": null
             },
             {
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "name": "./node_modules/@mozilla/readability/index.js",
               "id": 396
             }
@@ -114,10 +114,10 @@
           "assets": [],
           "reasons": [
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
               "module": "./node_modules/@mozilla/readability/Readability-readerable.js",
               "moduleName": "./node_modules/@mozilla/readability/Readability-readerable.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
               "resolvedModule": "./node_modules/@mozilla/readability/Readability-readerable.js",
               "type": "cjs self exports reference",
               "active": true,
@@ -128,10 +128,10 @@
               "resolvedModuleId": 804
             },
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "module": "./node_modules/@mozilla/readability/index.js",
               "moduleName": "./node_modules/@mozilla/readability/index.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "resolvedModule": "./node_modules/@mozilla/readability/index.js",
               "type": "cjs require",
               "active": true,
@@ -163,9 +163,9 @@
           "codeGenerated": true,
           "buildTimeExecuted": false,
           "cached": false,
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
           "name": "./node_modules/@mozilla/readability/Readability.js",
-          "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+          "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
           "index": 2,
           "preOrderIndex": 2,
           "index2": 0,
@@ -174,16 +174,16 @@
           "optional": false,
           "orphan": false,
           "dependent": true,
-          "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "issuerName": "./node_modules/@mozilla/readability/index.js",
           "issuerPath": [
             {
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "name": "./src/index.js",
               "id": null
             },
             {
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "name": "./node_modules/@mozilla/readability/index.js",
               "id": 396
             }
@@ -199,10 +199,10 @@
           "assets": [],
           "reasons": [
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
               "module": "./node_modules/@mozilla/readability/Readability.js",
               "moduleName": "./node_modules/@mozilla/readability/Readability.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
               "resolvedModule": "./node_modules/@mozilla/readability/Readability.js",
               "type": "cjs self exports reference",
               "active": true,
@@ -213,10 +213,10 @@
               "resolvedModuleId": 238
             },
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "module": "./node_modules/@mozilla/readability/index.js",
               "moduleName": "./node_modules/@mozilla/readability/index.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "resolvedModule": "./node_modules/@mozilla/readability/index.js",
               "type": "cjs require",
               "active": true,
@@ -248,9 +248,9 @@
           "codeGenerated": true,
           "buildTimeExecuted": false,
           "cached": false,
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "name": "./node_modules/@mozilla/readability/index.js",
-          "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "index": 1,
           "preOrderIndex": 1,
           "index2": 2,
@@ -259,11 +259,11 @@
           "optional": false,
           "orphan": false,
           "dependent": true,
-          "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "issuerName": "./src/index.js",
           "issuerPath": [
             {
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "name": "./src/index.js",
               "id": null
             }
@@ -279,10 +279,10 @@
           "assets": [],
           "reasons": [
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "module": "./node_modules/@mozilla/readability/index.js",
               "moduleName": "./node_modules/@mozilla/readability/index.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
               "resolvedModule": "./node_modules/@mozilla/readability/index.js",
               "type": "cjs self exports reference",
               "active": true,
@@ -293,30 +293,44 @@
               "resolvedModuleId": 396
             },
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
               "module": "./src/index.js + 1 modules",
               "moduleName": "./src/index.js + 1 modules",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "resolvedModule": "./src/index.js",
               "type": "harmony side effect evaluation",
               "active": true,
               "explanation": "",
               "userRequest": "@mozilla/readability",
-              "loc": "7:0-51",
+              "loc": "7:0-73",
               "moduleId": 922,
               "resolvedModuleId": null
             },
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
               "module": "./src/index.js + 1 modules",
               "moduleName": "./src/index.js + 1 modules",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "resolvedModule": "./src/index.js",
               "type": "harmony import specifier",
               "active": true,
               "explanation": "",
               "userRequest": "@mozilla/readability",
-              "loc": "18:19-30",
+              "loc": "13:17-37",
+              "moduleId": 922,
+              "resolvedModuleId": null
+            },
+            {
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+              "module": "./src/index.js + 1 modules",
+              "moduleName": "./src/index.js + 1 modules",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "resolvedModule": "./src/index.js",
+              "type": "harmony import specifier",
+              "active": true,
+              "explanation": "",
+              "userRequest": "@mozilla/readability",
+              "loc": "19:19-30",
               "moduleId": 922,
               "resolvedModuleId": null
             }
@@ -342,9 +356,9 @@
           "codeGenerated": true,
           "buildTimeExecuted": false,
           "cached": false,
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
           "name": "./node_modules/remove-markdown/index.js",
-          "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+          "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
           "index": 5,
           "preOrderIndex": 5,
           "index2": 4,
@@ -353,11 +367,11 @@
           "optional": false,
           "orphan": false,
           "dependent": true,
-          "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "issuerName": "./src/index.js",
           "issuerPath": [
             {
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "name": "./src/index.js",
               "id": null
             }
@@ -373,10 +387,10 @@
           "assets": [],
           "reasons": [
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
               "module": "./src/index.js + 1 modules",
               "moduleName": "./src/index.js + 1 modules",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "resolvedModule": "./src/index.js",
               "type": "cjs require",
               "active": true,
@@ -387,10 +401,10 @@
               "resolvedModuleId": null
             },
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
               "module": "./node_modules/remove-markdown/index.js",
               "moduleName": "./node_modules/remove-markdown/index.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
               "resolvedModule": "./node_modules/remove-markdown/index.js",
               "type": "cjs self exports reference",
               "active": true,
@@ -414,17 +428,17 @@
           "type": "module",
           "moduleType": "javascript/esm",
           "layer": null,
-          "size": 27608,
+          "size": 27726,
           "sizes": {
-            "javascript": 27608
+            "javascript": 27726
           },
           "built": true,
           "codeGenerated": true,
           "buildTimeExecuted": false,
           "cached": false,
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
           "name": "./src/index.js + 1 modules",
-          "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "index": 0,
           "preOrderIndex": 0,
           "index2": 5,
@@ -483,17 +497,17 @@
               "type": "module",
               "moduleType": "javascript/auto",
               "layer": null,
-              "size": 2546,
+              "size": 2664,
               "sizes": {
-                "javascript": 2546
+                "javascript": 2664
               },
               "built": true,
               "codeGenerated": false,
               "buildTimeExecuted": false,
               "cached": false,
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "name": "./src/index.js",
-              "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "index": 0,
               "preOrderIndex": 0,
               "index2": 5,
@@ -534,9 +548,9 @@
               "codeGenerated": false,
               "buildTimeExecuted": false,
               "cached": false,
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
               "name": "./node_modules/turndown/lib/turndown.browser.es.js",
-              "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+              "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
               "index": 4,
               "preOrderIndex": 4,
               "index2": 3,
@@ -545,11 +559,11 @@
               "optional": false,
               "orphan": false,
               "dependent": true,
-              "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "issuerName": "./src/index.js",
               "issuerPath": [
                 {
-                  "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+                  "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
                   "name": "./src/index.js",
                   "id": null
                 }
@@ -563,10 +577,10 @@
               "assets": [],
               "reasons": [
                 {
-                  "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+                  "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
                   "module": "./src/index.js",
                   "moduleName": "./src/index.js",
-                  "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+                  "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
                   "resolvedModule": "./src/index.js",
                   "type": "harmony side effect evaluation",
                   "active": true,
@@ -577,10 +591,10 @@
                   "resolvedModuleId": null
                 },
                 {
-                  "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+                  "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
                   "module": "./src/index.js",
                   "moduleName": "./src/index.js",
-                  "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+                  "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
                   "resolvedModule": "./src/index.js",
                   "type": "harmony import specifier",
                   "active": true,
@@ -729,17 +743,17 @@
       "type": "module",
       "moduleType": "javascript/esm",
       "layer": null,
-      "size": 27608,
+      "size": 27726,
       "sizes": {
-        "javascript": 27608
+        "javascript": 27726
       },
       "built": true,
       "codeGenerated": true,
       "buildTimeExecuted": false,
       "cached": false,
-      "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
       "name": "./src/index.js + 1 modules",
-      "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
       "index": 0,
       "preOrderIndex": 0,
       "index2": 5,
@@ -797,17 +811,17 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 2546,
+          "size": 2664,
           "sizes": {
-            "javascript": 2546
+            "javascript": 2664
           },
           "built": true,
           "codeGenerated": false,
           "buildTimeExecuted": false,
           "cached": false,
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "name": "./src/index.js",
-          "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "index": 0,
           "preOrderIndex": 0,
           "index2": 5,
@@ -847,9 +861,9 @@
           "codeGenerated": false,
           "buildTimeExecuted": false,
           "cached": false,
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
           "name": "./node_modules/turndown/lib/turndown.browser.es.js",
-          "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+          "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
           "index": 4,
           "preOrderIndex": 4,
           "index2": 3,
@@ -857,11 +871,11 @@
           "cacheable": true,
           "optional": false,
           "orphan": false,
-          "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "issuerName": "./src/index.js",
           "issuerPath": [
             {
-              "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "name": "./src/index.js",
               "id": null
             }
@@ -875,10 +889,10 @@
           "assets": [],
           "reasons": [
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "module": "./src/index.js",
               "moduleName": "./src/index.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "resolvedModule": "./src/index.js",
               "type": "harmony side effect evaluation",
               "active": true,
@@ -889,10 +903,10 @@
               "resolvedModuleId": null
             },
             {
-              "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "module": "./src/index.js",
               "moduleName": "./src/index.js",
-              "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+              "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
               "resolvedModule": "./src/index.js",
               "type": "harmony import specifier",
               "active": true,
@@ -928,9 +942,9 @@
       "codeGenerated": true,
       "buildTimeExecuted": false,
       "cached": false,
-      "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
       "name": "./node_modules/@mozilla/readability/index.js",
-      "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
       "index": 1,
       "preOrderIndex": 1,
       "index2": 2,
@@ -938,11 +952,11 @@
       "cacheable": true,
       "optional": false,
       "orphan": false,
-      "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+      "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
       "issuerName": "./src/index.js",
       "issuerPath": [
         {
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "name": "./src/index.js",
           "id": null
         }
@@ -958,10 +972,10 @@
       "assets": [],
       "reasons": [
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "module": "./node_modules/@mozilla/readability/index.js",
           "moduleName": "./node_modules/@mozilla/readability/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "resolvedModule": "./node_modules/@mozilla/readability/index.js",
           "type": "cjs self exports reference",
           "active": true,
@@ -972,30 +986,44 @@
           "resolvedModuleId": 396
         },
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
           "module": "./src/index.js + 1 modules",
           "moduleName": "./src/index.js + 1 modules",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "resolvedModule": "./src/index.js",
           "type": "harmony side effect evaluation",
           "active": true,
           "explanation": "",
           "userRequest": "@mozilla/readability",
-          "loc": "7:0-51",
+          "loc": "7:0-73",
           "moduleId": 922,
           "resolvedModuleId": null
         },
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
           "module": "./src/index.js + 1 modules",
           "moduleName": "./src/index.js + 1 modules",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "resolvedModule": "./src/index.js",
           "type": "harmony import specifier",
           "active": true,
           "explanation": "",
           "userRequest": "@mozilla/readability",
-          "loc": "18:19-30",
+          "loc": "13:17-37",
+          "moduleId": 922,
+          "resolvedModuleId": null
+        },
+        {
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+          "module": "./src/index.js + 1 modules",
+          "moduleName": "./src/index.js + 1 modules",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModule": "./src/index.js",
+          "type": "harmony import specifier",
+          "active": true,
+          "explanation": "",
+          "userRequest": "@mozilla/readability",
+          "loc": "19:19-30",
           "moduleId": 922,
           "resolvedModuleId": null
         }
@@ -1021,9 +1049,9 @@
       "codeGenerated": false,
       "buildTimeExecuted": false,
       "cached": false,
-      "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
       "name": "./node_modules/turndown/lib/turndown.browser.es.js",
-      "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
       "index": 4,
       "preOrderIndex": 4,
       "index2": 3,
@@ -1031,11 +1059,11 @@
       "cacheable": true,
       "optional": false,
       "orphan": true,
-      "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+      "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
       "issuerName": "./src/index.js",
       "issuerPath": [
         {
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "name": "./src/index.js",
           "id": null
         }
@@ -1049,10 +1077,10 @@
       "assets": [],
       "reasons": [
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "module": "./src/index.js",
           "moduleName": "./src/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "resolvedModule": "./src/index.js",
           "type": "harmony side effect evaluation",
           "active": true,
@@ -1063,10 +1091,10 @@
           "resolvedModuleId": null
         },
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "module": "./src/index.js",
           "moduleName": "./src/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "resolvedModule": "./src/index.js",
           "type": "harmony import specifier",
           "active": true,
@@ -1100,9 +1128,9 @@
       "codeGenerated": true,
       "buildTimeExecuted": false,
       "cached": false,
-      "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
       "name": "./node_modules/remove-markdown/index.js",
-      "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
       "index": 5,
       "preOrderIndex": 5,
       "index2": 4,
@@ -1110,11 +1138,11 @@
       "cacheable": true,
       "optional": false,
       "orphan": false,
-      "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+      "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
       "issuerName": "./src/index.js",
       "issuerPath": [
         {
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "name": "./src/index.js",
           "id": null
         }
@@ -1130,10 +1158,10 @@
       "assets": [],
       "reasons": [
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js|b30ecb37559a8d7773ad4932c7b03100",
           "module": "./src/index.js + 1 modules",
           "moduleName": "./src/index.js + 1 modules",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "resolvedModule": "./src/index.js",
           "type": "cjs require",
           "active": true,
@@ -1144,10 +1172,10 @@
           "resolvedModuleId": null
         },
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
           "module": "./node_modules/remove-markdown/index.js",
           "moduleName": "./node_modules/remove-markdown/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
           "resolvedModule": "./node_modules/remove-markdown/index.js",
           "type": "cjs self exports reference",
           "active": true,
@@ -1179,9 +1207,9 @@
       "codeGenerated": true,
       "buildTimeExecuted": false,
       "cached": false,
-      "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
       "name": "./node_modules/@mozilla/readability/Readability.js",
-      "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
       "index": 2,
       "preOrderIndex": 2,
       "index2": 0,
@@ -1189,16 +1217,16 @@
       "cacheable": true,
       "optional": false,
       "orphan": false,
-      "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+      "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
       "issuerName": "./node_modules/@mozilla/readability/index.js",
       "issuerPath": [
         {
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "name": "./src/index.js",
           "id": null
         },
         {
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "name": "./node_modules/@mozilla/readability/index.js",
           "id": 396
         }
@@ -1214,10 +1242,10 @@
       "assets": [],
       "reasons": [
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
           "module": "./node_modules/@mozilla/readability/Readability.js",
           "moduleName": "./node_modules/@mozilla/readability/Readability.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability.js",
           "resolvedModule": "./node_modules/@mozilla/readability/Readability.js",
           "type": "cjs self exports reference",
           "active": true,
@@ -1228,10 +1256,10 @@
           "resolvedModuleId": 238
         },
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "module": "./node_modules/@mozilla/readability/index.js",
           "moduleName": "./node_modules/@mozilla/readability/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "resolvedModule": "./node_modules/@mozilla/readability/index.js",
           "type": "cjs require",
           "active": true,
@@ -1263,9 +1291,9 @@
       "codeGenerated": true,
       "buildTimeExecuted": false,
       "cached": false,
-      "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
       "name": "./node_modules/@mozilla/readability/Readability-readerable.js",
-      "nameForCondition": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
       "index": 3,
       "preOrderIndex": 3,
       "index2": 1,
@@ -1273,16 +1301,16 @@
       "cacheable": true,
       "optional": false,
       "orphan": false,
-      "issuer": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+      "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
       "issuerName": "./node_modules/@mozilla/readability/index.js",
       "issuerPath": [
         {
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
           "name": "./src/index.js",
           "id": null
         },
         {
-          "identifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "name": "./node_modules/@mozilla/readability/index.js",
           "id": 396
         }
@@ -1298,10 +1326,10 @@
       "assets": [],
       "reasons": [
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
           "module": "./node_modules/@mozilla/readability/Readability-readerable.js",
           "moduleName": "./node_modules/@mozilla/readability/Readability-readerable.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/Readability-readerable.js",
           "resolvedModule": "./node_modules/@mozilla/readability/Readability-readerable.js",
           "type": "cjs self exports reference",
           "active": true,
@@ -1312,10 +1340,10 @@
           "resolvedModuleId": 804
         },
         {
-          "moduleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "module": "./node_modules/@mozilla/readability/index.js",
           "moduleName": "./node_modules/@mozilla/readability/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/Repos/kagi_bang_bang/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/@mozilla/readability/index.js",
           "resolvedModule": "./node_modules/@mozilla/readability/index.js",
           "type": "cjs require",
           "active": true,
@@ -1450,11 +1478,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 48006
+          "size": 48065
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 48006,
+      "assetsSize": 48065,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,
@@ -1472,11 +1500,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 48006
+          "size": 48065
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 48006,
+      "assetsSize": 48065,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,

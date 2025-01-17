@@ -1024,6 +1024,7 @@ data class TabContent (
   val tabId: String,
   val fullContentMarkdown: String? = null,
   val fullContentPlain: String? = null,
+  val isProbablyReaderable: Boolean,
   val extractedContentMarkdown: String? = null,
   val extractedContentPlain: String? = null
 )
@@ -1033,9 +1034,10 @@ data class TabContent (
       val tabId = pigeonVar_list[0] as String
       val fullContentMarkdown = pigeonVar_list[1] as String?
       val fullContentPlain = pigeonVar_list[2] as String?
-      val extractedContentMarkdown = pigeonVar_list[3] as String?
-      val extractedContentPlain = pigeonVar_list[4] as String?
-      return TabContent(tabId, fullContentMarkdown, fullContentPlain, extractedContentMarkdown, extractedContentPlain)
+      val isProbablyReaderable = pigeonVar_list[3] as Boolean
+      val extractedContentMarkdown = pigeonVar_list[4] as String?
+      val extractedContentPlain = pigeonVar_list[5] as String?
+      return TabContent(tabId, fullContentMarkdown, fullContentPlain, isProbablyReaderable, extractedContentMarkdown, extractedContentPlain)
     }
   }
   fun toList(): List<Any?> {
@@ -1043,6 +1045,7 @@ data class TabContent (
       tabId,
       fullContentMarkdown,
       fullContentPlain,
+      isProbablyReaderable,
       extractedContentMarkdown,
       extractedContentPlain,
     )

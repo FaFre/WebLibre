@@ -142,11 +142,9 @@ class LandingContent extends HookConsumerWidget {
                     textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              Markdown(
+              MarkdownBody(
                 data: changelogAsset.data ?? '',
                 selectable: true,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
               ),
             ],
           ),

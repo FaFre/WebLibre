@@ -205,6 +205,11 @@ class Tab extends Table with TableInfo<Tab, TabData> {
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       $customConstraints: '');
+  late final GeneratedColumn<bool> isProbablyReaderable = GeneratedColumn<bool>(
+      'is_probably_readerable', aliasedName, true,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   late final GeneratedColumn<String> extractedContentMarkdown =
       GeneratedColumn<String>('extracted_content_markdown', aliasedName, true,
           type: DriftSqlType.string,
@@ -237,6 +242,7 @@ class Tab extends Table with TableInfo<Tab, TabData> {
         orderKey,
         url,
         title,
+        isProbablyReaderable,
         extractedContentMarkdown,
         extractedContentPlain,
         fullContentMarkdown,
@@ -264,6 +270,8 @@ class Tab extends Table with TableInfo<Tab, TabData> {
           .read(DriftSqlType.string, data['${effectivePrefix}url']),
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title']),
+      isProbablyReaderable: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool, data['${effectivePrefix}is_probably_readerable']),
       extractedContentMarkdown: attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}extracted_content_markdown']),
@@ -294,6 +302,7 @@ class TabData extends DataClass implements Insertable<TabData> {
   final String orderKey;
   final String? url;
   final String? title;
+  final bool? isProbablyReaderable;
   final String? extractedContentMarkdown;
   final String? extractedContentPlain;
   final String? fullContentMarkdown;
@@ -305,6 +314,7 @@ class TabData extends DataClass implements Insertable<TabData> {
       required this.orderKey,
       this.url,
       this.title,
+      this.isProbablyReaderable,
       this.extractedContentMarkdown,
       this.extractedContentPlain,
       this.fullContentMarkdown,
@@ -323,6 +333,9 @@ class TabData extends DataClass implements Insertable<TabData> {
     }
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || isProbablyReaderable != null) {
+      map['is_probably_readerable'] = Variable<bool>(isProbablyReaderable);
     }
     if (!nullToAbsent || extractedContentMarkdown != null) {
       map['extracted_content_markdown'] =
@@ -350,6 +363,8 @@ class TabData extends DataClass implements Insertable<TabData> {
       orderKey: serializer.fromJson<String>(json['order_key']),
       url: serializer.fromJson<String?>(json['url']),
       title: serializer.fromJson<String?>(json['title']),
+      isProbablyReaderable:
+          serializer.fromJson<bool?>(json['is_probably_readerable']),
       extractedContentMarkdown:
           serializer.fromJson<String?>(json['extracted_content_markdown']),
       extractedContentPlain:
@@ -370,6 +385,7 @@ class TabData extends DataClass implements Insertable<TabData> {
       'order_key': serializer.toJson<String>(orderKey),
       'url': serializer.toJson<String?>(url),
       'title': serializer.toJson<String?>(title),
+      'is_probably_readerable': serializer.toJson<bool?>(isProbablyReaderable),
       'extracted_content_markdown':
           serializer.toJson<String?>(extractedContentMarkdown),
       'extracted_content_plain':
@@ -386,6 +402,7 @@ class TabData extends DataClass implements Insertable<TabData> {
           String? orderKey,
           Value<String?> url = const Value.absent(),
           Value<String?> title = const Value.absent(),
+          Value<bool?> isProbablyReaderable = const Value.absent(),
           Value<String?> extractedContentMarkdown = const Value.absent(),
           Value<String?> extractedContentPlain = const Value.absent(),
           Value<String?> fullContentMarkdown = const Value.absent(),
@@ -397,6 +414,9 @@ class TabData extends DataClass implements Insertable<TabData> {
         orderKey: orderKey ?? this.orderKey,
         url: url.present ? url.value : this.url,
         title: title.present ? title.value : this.title,
+        isProbablyReaderable: isProbablyReaderable.present
+            ? isProbablyReaderable.value
+            : this.isProbablyReaderable,
         extractedContentMarkdown: extractedContentMarkdown.present
             ? extractedContentMarkdown.value
             : this.extractedContentMarkdown,
@@ -419,6 +439,9 @@ class TabData extends DataClass implements Insertable<TabData> {
       orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
       url: data.url.present ? data.url.value : this.url,
       title: data.title.present ? data.title.value : this.title,
+      isProbablyReaderable: data.isProbablyReaderable.present
+          ? data.isProbablyReaderable.value
+          : this.isProbablyReaderable,
       extractedContentMarkdown: data.extractedContentMarkdown.present
           ? data.extractedContentMarkdown.value
           : this.extractedContentMarkdown,
@@ -443,6 +466,7 @@ class TabData extends DataClass implements Insertable<TabData> {
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
+          ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
           ..write('fullContentMarkdown: $fullContentMarkdown, ')
@@ -459,6 +483,7 @@ class TabData extends DataClass implements Insertable<TabData> {
       orderKey,
       url,
       title,
+      isProbablyReaderable,
       extractedContentMarkdown,
       extractedContentPlain,
       fullContentMarkdown,
@@ -473,6 +498,7 @@ class TabData extends DataClass implements Insertable<TabData> {
           other.orderKey == this.orderKey &&
           other.url == this.url &&
           other.title == this.title &&
+          other.isProbablyReaderable == this.isProbablyReaderable &&
           other.extractedContentMarkdown == this.extractedContentMarkdown &&
           other.extractedContentPlain == this.extractedContentPlain &&
           other.fullContentMarkdown == this.fullContentMarkdown &&
@@ -486,6 +512,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
   final Value<String> orderKey;
   final Value<String?> url;
   final Value<String?> title;
+  final Value<bool?> isProbablyReaderable;
   final Value<String?> extractedContentMarkdown;
   final Value<String?> extractedContentPlain;
   final Value<String?> fullContentMarkdown;
@@ -498,6 +525,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
     this.orderKey = const Value.absent(),
     this.url = const Value.absent(),
     this.title = const Value.absent(),
+    this.isProbablyReaderable = const Value.absent(),
     this.extractedContentMarkdown = const Value.absent(),
     this.extractedContentPlain = const Value.absent(),
     this.fullContentMarkdown = const Value.absent(),
@@ -511,6 +539,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
     required String orderKey,
     this.url = const Value.absent(),
     this.title = const Value.absent(),
+    this.isProbablyReaderable = const Value.absent(),
     this.extractedContentMarkdown = const Value.absent(),
     this.extractedContentPlain = const Value.absent(),
     this.fullContentMarkdown = const Value.absent(),
@@ -526,6 +555,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
     Expression<String>? orderKey,
     Expression<String>? url,
     Expression<String>? title,
+    Expression<bool>? isProbablyReaderable,
     Expression<String>? extractedContentMarkdown,
     Expression<String>? extractedContentPlain,
     Expression<String>? fullContentMarkdown,
@@ -539,6 +569,8 @@ class TabCompanion extends UpdateCompanion<TabData> {
       if (orderKey != null) 'order_key': orderKey,
       if (url != null) 'url': url,
       if (title != null) 'title': title,
+      if (isProbablyReaderable != null)
+        'is_probably_readerable': isProbablyReaderable,
       if (extractedContentMarkdown != null)
         'extracted_content_markdown': extractedContentMarkdown,
       if (extractedContentPlain != null)
@@ -557,6 +589,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
       Value<String>? orderKey,
       Value<String?>? url,
       Value<String?>? title,
+      Value<bool?>? isProbablyReaderable,
       Value<String?>? extractedContentMarkdown,
       Value<String?>? extractedContentPlain,
       Value<String?>? fullContentMarkdown,
@@ -569,6 +602,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
       orderKey: orderKey ?? this.orderKey,
       url: url ?? this.url,
       title: title ?? this.title,
+      isProbablyReaderable: isProbablyReaderable ?? this.isProbablyReaderable,
       extractedContentMarkdown:
           extractedContentMarkdown ?? this.extractedContentMarkdown,
       extractedContentPlain:
@@ -597,6 +631,10 @@ class TabCompanion extends UpdateCompanion<TabData> {
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
+    }
+    if (isProbablyReaderable.present) {
+      map['is_probably_readerable'] =
+          Variable<bool>(isProbablyReaderable.value);
     }
     if (extractedContentMarkdown.present) {
       map['extracted_content_markdown'] =
@@ -630,6 +668,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
+          ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
           ..write('fullContentMarkdown: $fullContentMarkdown, ')
@@ -1308,6 +1347,7 @@ typedef $TabCreateCompanionBuilder = TabCompanion Function({
   required String orderKey,
   Value<String?> url,
   Value<String?> title,
+  Value<bool?> isProbablyReaderable,
   Value<String?> extractedContentMarkdown,
   Value<String?> extractedContentPlain,
   Value<String?> fullContentMarkdown,
@@ -1321,6 +1361,7 @@ typedef $TabUpdateCompanionBuilder = TabCompanion Function({
   Value<String> orderKey,
   Value<String?> url,
   Value<String?> title,
+  Value<bool?> isProbablyReaderable,
   Value<String?> extractedContentMarkdown,
   Value<String?> extractedContentPlain,
   Value<String?> fullContentMarkdown,
@@ -1365,6 +1406,10 @@ class $TabFilterComposer extends Composer<_$TabDatabase, Tab> {
 
   ColumnFilters<String> get title => $composableBuilder(
       column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isProbablyReaderable => $composableBuilder(
+      column: $table.isProbablyReaderable,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get extractedContentMarkdown => $composableBuilder(
       column: $table.extractedContentMarkdown,
@@ -1426,6 +1471,10 @@ class $TabOrderingComposer extends Composer<_$TabDatabase, Tab> {
   ColumnOrderings<String> get title => $composableBuilder(
       column: $table.title, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get isProbablyReaderable => $composableBuilder(
+      column: $table.isProbablyReaderable,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get extractedContentMarkdown => $composableBuilder(
       column: $table.extractedContentMarkdown,
       builder: (column) => ColumnOrderings(column));
@@ -1485,6 +1534,9 @@ class $TabAnnotationComposer extends Composer<_$TabDatabase, Tab> {
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<bool> get isProbablyReaderable => $composableBuilder(
+      column: $table.isProbablyReaderable, builder: (column) => column);
 
   GeneratedColumn<String> get extractedContentMarkdown => $composableBuilder(
       column: $table.extractedContentMarkdown, builder: (column) => column);
@@ -1550,6 +1602,7 @@ class $TabTableManager extends RootTableManager<
             Value<String> orderKey = const Value.absent(),
             Value<String?> url = const Value.absent(),
             Value<String?> title = const Value.absent(),
+            Value<bool?> isProbablyReaderable = const Value.absent(),
             Value<String?> extractedContentMarkdown = const Value.absent(),
             Value<String?> extractedContentPlain = const Value.absent(),
             Value<String?> fullContentMarkdown = const Value.absent(),
@@ -1563,6 +1616,7 @@ class $TabTableManager extends RootTableManager<
             orderKey: orderKey,
             url: url,
             title: title,
+            isProbablyReaderable: isProbablyReaderable,
             extractedContentMarkdown: extractedContentMarkdown,
             extractedContentPlain: extractedContentPlain,
             fullContentMarkdown: fullContentMarkdown,
@@ -1576,6 +1630,7 @@ class $TabTableManager extends RootTableManager<
             required String orderKey,
             Value<String?> url = const Value.absent(),
             Value<String?> title = const Value.absent(),
+            Value<bool?> isProbablyReaderable = const Value.absent(),
             Value<String?> extractedContentMarkdown = const Value.absent(),
             Value<String?> extractedContentPlain = const Value.absent(),
             Value<String?> fullContentMarkdown = const Value.absent(),
@@ -1589,6 +1644,7 @@ class $TabTableManager extends RootTableManager<
             orderKey: orderKey,
             url: url,
             title: title,
+            isProbablyReaderable: isProbablyReaderable,
             extractedContentMarkdown: extractedContentMarkdown,
             extractedContentPlain: extractedContentPlain,
             fullContentMarkdown: fullContentMarkdown,

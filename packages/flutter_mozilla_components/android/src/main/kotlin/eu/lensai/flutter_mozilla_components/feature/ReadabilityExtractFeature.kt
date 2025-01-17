@@ -12,6 +12,7 @@ import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.support.ktx.android.org.json.tryGetInt
 import mozilla.components.support.ktx.android.org.json.tryGetString
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.filterChanged
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
@@ -48,6 +49,7 @@ class ReadabilityExtractFeature(
                         tabId = tabId,
                         fullContentMarkdown = message.tryGetString("fullContentMarkdown"),
                         fullContentPlain = message.tryGetString("fullContentPlain"),
+                        isProbablyReaderable = message.tryGetInt("isProbablyReaderable") == 1,
                         extractedContentMarkdown = message.tryGetString("extractedContentMarkdown"),
                         extractedContentPlain = message.tryGetString("extractedContentPlain")
                     )

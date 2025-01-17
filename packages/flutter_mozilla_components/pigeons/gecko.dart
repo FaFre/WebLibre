@@ -525,6 +525,7 @@ class TabContent {
   final String tabId;
   final String? fullContentMarkdown;
   final String? fullContentPlain;
+  final bool isProbablyReaderable;
   final String? extractedContentMarkdown;
   final String? extractedContentPlain;
 
@@ -532,6 +533,7 @@ class TabContent {
     this.tabId,
     this.fullContentMarkdown,
     this.fullContentPlain,
+    this.isProbablyReaderable,
     this.extractedContentMarkdown,
     this.extractedContentPlain,
   );

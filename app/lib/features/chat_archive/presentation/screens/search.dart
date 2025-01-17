@@ -83,9 +83,7 @@ class ChatArchiveSearchScreen extends HookConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Markdown(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
+                          MarkdownBody(
                             data: '## ${chat.title}',
                           ),
                           if (chatEntity.dateTime != null)
@@ -93,9 +91,7 @@ class ChatArchiveSearchScreen extends HookConsumerWidget {
                               chatEntity.dateTime!.formatWithMinutePrecision(),
                             ),
                           const SizedBox(height: 8.0),
-                          Markdown(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
+                          MarkdownBody(
                             data: chat.contentSnippet,
                           ),
                         ],
