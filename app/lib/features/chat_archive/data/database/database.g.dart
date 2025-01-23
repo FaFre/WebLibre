@@ -403,8 +403,8 @@ abstract class _$ChatSearchDatabase extends GeneratedDatabase {
           chatFts,
         }).map((QueryRow row) => ChatQueryResult(
           fileName: row.read<String>('file_name'),
-          title: row.read<String>('title'),
-          contentSnippet: row.read<String>('content_snippet'),
+          title: row.readNullable<String>('title'),
+          contentSnippet: row.readNullable<String>('content_snippet'),
         ));
   }
 
@@ -702,11 +702,11 @@ class $ChatSearchDatabaseManager {
 
 class ChatQueryResult {
   final String fileName;
-  final String title;
-  final String contentSnippet;
+  final String? title;
+  final String? contentSnippet;
   ChatQueryResult({
     required this.fileName,
-    required this.title,
-    required this.contentSnippet,
+    this.title,
+    this.contentSnippet,
   });
 }

@@ -1,29 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'cache.dart';
+part of 'auth.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$iconCacheSizeMegabytesHash() =>
-    r'43162fce3ce8b04a5a55ed52021b274afbde2861';
+String _$authRepositoryHash() => r'90ea6f082ef968831763c7f7ee31863f1fe329fe';
 
-/// See also [iconCacheSizeMegabytes].
-@ProviderFor(iconCacheSizeMegabytes)
-final iconCacheSizeMegabytesProvider =
-    AutoDisposeStreamProvider<double>.internal(
-  iconCacheSizeMegabytes,
-  name: r'iconCacheSizeMegabytesProvider',
+/// See also [AuthRepository].
+@ProviderFor(AuthRepository)
+final authRepositoryProvider =
+    AutoDisposeNotifierProvider<AuthRepository, void>.internal(
+  AuthRepository.new,
+  name: r'authRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$iconCacheSizeMegabytesHash,
+      : _$authRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef IconCacheSizeMegabytesRef = AutoDisposeStreamProviderRef<double>;
+typedef _$AuthRepository = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -91,7 +91,17 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
   }
 
   Selectable<BangData> queryBangs(String searchString) {
-    return db.bangQuery(query: db.buildFtsQuery(searchString));
+    final ftsQuery = db.buildFtsQuery(searchString);
+
+    if (ftsQuery.isNotEmpty) {
+      return db.queryBangs(
+        query: ftsQuery,
+      );
+    } else {
+      return db.queryBangsBasic(
+        query: db.buildLikeQuery(searchString),
+      );
+    }
   }
 
   Future<int> addSearchEntry(String trigger, String searchQuery) {

@@ -25,6 +25,14 @@ CREATE TABLE tab (
   timestamp DATETIME NOT NULL
 );
 
+import '../../features/vector_store/data/database/vector_store.drift'; 
+
+-- automativcally remove documents and embeddings on delete
+-- isnert and updates are managed code side
+CREATE TRIGGER tab_document_delete AFTER DELETE ON tab BEGIN
+  DELETE FROM document WHERE main_document_id = old.id;
+END;
+
 CREATE VIRTUAL TABLE tab_fts 
   USING fts5(
     title,
@@ -54,6 +62,9 @@ CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN
     tab_fts(rowid, title, url, extracted_content_plain, full_content_plain) 
     VALUES (new.rowid, new.title, new.url, new.extracted_content_plain, new.full_content_plain);
 END;
+
+optimizeFtsIndex:
+  INSERT INTO tab_fts(tab_fts) VALUES ('optimize');
 
 containersWithCount WITH ContainerDataWithCount:
   SELECT 

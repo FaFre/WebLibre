@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:lensai/core/models.dart';
 import 'package:lensai/data/database/functions/lexo_rank_functions.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:path/path.dart' as p;
@@ -8,13 +11,16 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
+import 'package:sqlite3_vec/sqlite3_vec.dart';
 import 'package:universal_io/io.dart';
 
 part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 TabDatabase tabDatabase(Ref ref) {
-  return TabDatabase(
+  final dimensions = ref.watch(embeddingDimensionsProvider);
+
+  final db = TabDatabase(
     LazyDatabase(() async {
       // put the database file, called db.sqlite here, into the documents folder
       // for your app.
@@ -33,6 +39,8 @@ TabDatabase tabDatabase(Ref ref) {
       // Explicitly tell it about the correct temporary directory.
       sqlite3.tempDirectory = cachebase;
 
+      Sqlite3Vec.ensureExtensionLoaded();
+
       return NativeDatabase.createInBackground(
         file,
         setup: (database) {
@@ -40,5 +48,12 @@ TabDatabase tabDatabase(Ref ref) {
         },
       );
     }),
+    embeddingDimensions: dimensions,
   );
+
+  ref.onDispose(() {
+    unawaited(db.close());
+  });
+
+  return db;
 }

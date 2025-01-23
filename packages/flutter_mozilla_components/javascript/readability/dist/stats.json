@@ -1,8 +1,8 @@
 {
-  "hash": "a0b270ca122ccf1c69b1",
-  "version": "5.96.1",
-  "time": 676,
-  "builtAt": 1736365755248,
+  "hash": "68fe8281f85d9e1fa8f9",
+  "version": "5.97.1",
+  "time": 560,
+  "builtAt": 1737227987116,
   "publicPath": "auto",
   "outputPath": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/dist",
   "assetsByChunkName": {
@@ -14,14 +14,14 @@
     {
       "type": "asset",
       "name": "readability.min.js",
-      "size": 48065,
+      "size": 49051,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
       "info": {
         "javascriptModule": false,
         "minimized": true,
-        "size": 48065
+        "size": 49051
       },
       "chunkNames": [
         "main"
@@ -43,9 +43,9 @@
       "initial": true,
       "entry": true,
       "recorded": false,
-      "size": 120878,
+      "size": 122485,
       "sizes": {
-        "javascript": 120208,
+        "javascript": 121815,
         "runtime": 670
       },
       "names": [
@@ -59,7 +59,7 @@
         "readability.min.js"
       ],
       "auxiliaryFiles": [],
-      "hash": "fd19b958f18c40df17b3",
+      "hash": "bf73e1848f9bdc88f1b3",
       "childrenByOrder": {},
       "id": 792,
       "siblings": [],
@@ -316,7 +316,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "@mozilla/readability",
-              "loc": "13:17-37",
+              "loc": "44:17-37",
               "moduleId": 922,
               "resolvedModuleId": null
             },
@@ -330,7 +330,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "@mozilla/readability",
-              "loc": "19:19-30",
+              "loc": "45:19-30",
               "moduleId": 922,
               "resolvedModuleId": null
             }
@@ -428,9 +428,9 @@
           "type": "module",
           "moduleType": "javascript/esm",
           "layer": null,
-          "size": 27726,
+          "size": 29333,
           "sizes": {
-            "javascript": 27726
+            "javascript": 29333
           },
           "built": true,
           "codeGenerated": true,
@@ -497,9 +497,9 @@
               "type": "module",
               "moduleType": "javascript/auto",
               "layer": null,
-              "size": 2664,
+              "size": 4271,
               "sizes": {
-                "javascript": 2664
+                "javascript": 4271
               },
               "built": true,
               "codeGenerated": false,
@@ -743,9 +743,9 @@
       "type": "module",
       "moduleType": "javascript/esm",
       "layer": null,
-      "size": 27726,
+      "size": 29333,
       "sizes": {
-        "javascript": 27726
+        "javascript": 29333
       },
       "built": true,
       "codeGenerated": true,
@@ -811,9 +811,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 2664,
+          "size": 4271,
           "sizes": {
-            "javascript": 2664
+            "javascript": 4271
           },
           "built": true,
           "codeGenerated": false,
@@ -1009,7 +1009,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "@mozilla/readability",
-          "loc": "13:17-37",
+          "loc": "44:17-37",
           "moduleId": 922,
           "resolvedModuleId": null
         },
@@ -1023,7 +1023,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "@mozilla/readability",
-          "loc": "19:19-30",
+          "loc": "45:19-30",
           "moduleId": 922,
           "resolvedModuleId": null
         }
@@ -1478,11 +1478,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 48065
+          "size": 49051
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 48065,
+      "assetsSize": 49051,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,
@@ -1500,11 +1500,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 48065
+          "size": 49051
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 48065,
+      "assetsSize": 49051,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,

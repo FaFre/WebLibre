@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:lensai/features/search/domain/entities/abstract/i_query_builder.dart';
 import 'package:lensai/features/search/domain/entities/bareword.dart';
+import 'package:lensai/features/search/domain/unix_tokenizer.dart';
 
 typedef _Phrase = List<Bareword>;
 
@@ -228,7 +229,26 @@ mixin PrefixQueryBuilderMixin implements IQueryBuilder {
       tokenLimit: ftsTokenLimit,
     );
 
-    return queryBuilder.build();
+    if (queryBuilder.hasTokens) {
+      return queryBuilder.build();
+    }
+
+    return '';
+  }
+
+  @override
+  String buildLikeQuery(String input) {
+    final likeQueryBuilder = UnixLikeQueryBuilder.tokenize(
+      input: input,
+      minTokenLength: 1,
+      tokenLimit: 5,
+    );
+
+    if (likeQueryBuilder.hasTokens) {
+      return likeQueryBuilder.build();
+    }
+
+    return '';
   }
 }
 
@@ -241,6 +261,25 @@ mixin TrigramQueryBuilderMixin implements IQueryBuilder {
       tokenLimit: ftsTokenLimit,
     );
 
-    return queryBuilder.build();
+    if (queryBuilder.hasTokens) {
+      return queryBuilder.build();
+    }
+
+    return '';
+  }
+
+  @override
+  String buildLikeQuery(String input) {
+    final likeQueryBuilder = UnixLikeQueryBuilder.tokenize(
+      input: input,
+      minTokenLength: 1,
+      tokenLimit: 5,
+    );
+
+    if (likeQueryBuilder.hasTokens) {
+      return likeQueryBuilder.build();
+    }
+
+    return '';
   }
 }

@@ -1,8 +1,8 @@
 class TabQueryResult {
   final String id;
 
-  final String title;
-  final String url;
+  final String? title;
+  final String? url;
 
   final String? extractedContent;
   final String? fullContent;

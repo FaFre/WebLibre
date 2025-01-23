@@ -1,14 +1,18 @@
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/search.dart';
 import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
-import 'package:lensai/features/bangs/presentation/widgets/search_field.dart';
+import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/controllers/overlay_dialog.dart';
+import 'package:lensai/features/search/domain/providers/search_suggestions.dart';
+import 'package:lensai/features/search/presentation/widgets/search_field.dart';
+import 'package:lensai/features/search/presentation/widgets/search_suggestion_list.dart';
+import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/selectable_chips.dart';
 
 class SiteSearch extends HookConsumerWidget {
@@ -25,6 +29,17 @@ class SiteSearch extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
+    final searchTextController = useTextEditingController();
+
+    useListenableCallback(
+      searchTextController,
+      () async {
+        ref
+            .read(searchSuggestionsProvider().notifier)
+            .addQuery(searchTextController.text);
+      },
+    );
+
     final selectedBang = ref.watch(
       selectedBangDataProvider(domain: domain)
           .select((value) => value.valueOrNull),
@@ -32,17 +47,17 @@ class SiteSearch extends HookConsumerWidget {
 
     final activeBang = selectedBang ?? availableBangs.firstOrNull;
 
-    final textController = useTextEditingController();
-
-    Future<void> submitSearch() async {
+    Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
         final searchUri = await ref.read(
-          triggerBangSearchProvider(activeBang, textController.text).future,
+          triggerBangSearchProvider(activeBang, query).future,
         );
 
         await ref.read(tabRepositoryProvider.notifier).addTab(url: searchUri);
 
-        ref.read(overlayDialogControllerProvider.notifier).dismiss();
+        if (context.mounted) {
+          context.pop();
+        }
       }
     }
 
@@ -82,21 +97,29 @@ class SiteSearch extends HookConsumerWidget {
             ),
           ),
           SearchField(
-            textController: textController,
+            textEditingController: searchTextController,
             activeBang: activeBang,
             onFieldSubmitted: (_) async {
-              await submitSearch();
+              await submitSearch(searchTextController.text);
             },
           ),
-          const SizedBox(
-            height: 12,
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: submitSearch,
-              label: const Text('Search on Site'),
-              icon: const Icon(MdiIcons.cloudSearch),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 150),
+            child: FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return CustomScrollView(
+                  shrinkWrap: true,
+                  controller: controller,
+                  slivers: [
+                    SearchSuggestionList(
+                      searchTextController: searchTextController,
+                      submitSearch: submitSearch,
+                      showHistory: false,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],

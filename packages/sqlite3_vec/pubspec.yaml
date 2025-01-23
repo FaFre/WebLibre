@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sqlite3: ^2.6.0
+  sqlite3: ^2.7.2
 
 dev_dependencies:
   flutter_test:

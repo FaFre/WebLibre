@@ -91,9 +91,10 @@ class ChatArchiveSearchScreen extends HookConsumerWidget {
                               chatEntity.dateTime!.formatWithMinutePrecision(),
                             ),
                           const SizedBox(height: 8.0),
-                          MarkdownBody(
-                            data: chat.contentSnippet,
-                          ),
+                          if (chat.contentSnippet != null)
+                            MarkdownBody(
+                              data: chat.contentSnippet!,
+                            ),
                         ],
                       ),
                     ),

@@ -18,9 +18,19 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: $BrowserRouteExtension._fromState,
       routes: [
         GoRouteData.$route(
+          path: 'page/:url',
+          name: 'WebPageRoute',
+          factory: $WebPageRouteExtension._fromState,
+        ),
+        GoRouteData.$route(
           path: 'about',
           name: 'AboutRoute',
           factory: $AboutRouteExtension._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'userAuth',
+          name: 'UserAuthRoute',
+          factory: $UserAuthRouteExtension._fromState,
         ),
         GoRouteData.$route(
           path: 'search/:searchText',
@@ -76,11 +86,47 @@ extension $BrowserRouteExtension on BrowserRoute {
   void replace(BuildContext context) => context.replace(location);
 }
 
+extension $WebPageRouteExtension on WebPageRoute {
+  static WebPageRoute _fromState(GoRouterState state) => WebPageRoute(
+        url: state.pathParameters['url']!,
+      );
+
+  String get location => GoRouteData.$location(
+        '/page/${Uri.encodeComponent(url)}',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
 extension $AboutRouteExtension on AboutRoute {
   static AboutRoute _fromState(GoRouterState state) => AboutRoute();
 
   String get location => GoRouteData.$location(
         '/about',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $UserAuthRouteExtension on UserAuthRoute {
+  static UserAuthRoute _fromState(GoRouterState state) => UserAuthRoute();
+
+  String get location => GoRouteData.$location(
+        '/userAuth',
       );
 
   void go(BuildContext context) => context.go(location);

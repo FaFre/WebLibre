@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/geckoview/domain/entities/readerable_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:lensai/features/user/domain/repositories/settings.dart';
 import 'package:lensai/presentation/widgets/animate_gradient_shader.dart';
 
 class ReaderButton extends HookConsumerWidget {
@@ -13,6 +14,10 @@ class ReaderButton extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     final readerChanging = ref.watch(readerableScreenControllerProvider);
+
+    final enableReadability = ref.watch(
+      settingsRepositoryProvider.select((value) => value.enableReadability),
+    );
 
     final readerabilityState = ref.watch(
       selectedTabStateProvider.select(
@@ -34,7 +39,8 @@ class ReaderButton extends HookConsumerWidget {
     );
 
     return Visibility(
-      visible: readerabilityState.readerable,
+      visible: readerabilityState.readerable &&
+          (enableReadability || readerabilityState.active),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: 15.0,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:lensai/features/chat_archive/data/database/database.dart';
@@ -12,7 +14,7 @@ part 'providers.g.dart';
 
 @Riverpod()
 ChatSearchDatabase chatSearchDatabase(Ref ref) {
-  return ChatSearchDatabase(
+  final db = ChatSearchDatabase(
     LazyDatabase(() async {
       // Also work around limitations on old Android versions
       if (Platform.isAndroid) {
@@ -29,4 +31,10 @@ ChatSearchDatabase chatSearchDatabase(Ref ref) {
       return NativeDatabase.memory();
     }),
   );
+
+  ref.onDispose(() {
+    unawaited(db.close());
+  });
+
+  return db;
 }

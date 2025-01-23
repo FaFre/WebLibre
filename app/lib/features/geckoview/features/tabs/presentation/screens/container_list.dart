@@ -122,30 +122,6 @@ class ContainerListScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Containers'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final initialColor =
-                  await ref.read(unusedRandomContainerColorProvider.future);
-
-              if (context.mounted) {
-                final result = await showDialog<ContainerResult?>(
-                  context: context,
-                  builder: (context) => ContainerDialog.create(
-                    initialColor: initialColor,
-                  ),
-                );
-
-                if (result != null) {
-                  await ref
-                      .read(containerRepositoryProvider.notifier)
-                      .addContainer(name: result.name, color: result.color);
-                }
-              }
-            },
-            icon: const Icon(Icons.add),
-          ),
-        ],
       ),
       body: HookConsumer(
         builder: (context, ref, child) {
@@ -205,6 +181,28 @@ class ContainerListScreen extends HookConsumerWidget {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final initialColor =
+              await ref.read(unusedRandomContainerColorProvider.future);
+
+          if (context.mounted) {
+            final result = await showDialog<ContainerResult?>(
+              context: context,
+              builder: (context) => ContainerDialog.create(
+                initialColor: initialColor,
+              ),
+            );
+
+            if (result != null) {
+              await ref
+                  .read(containerRepositoryProvider.notifier)
+                  .addContainer(name: result.name, color: result.color);
+            }
+          }
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

@@ -1,0 +1,65 @@
+import 'package:lensai/features/chat/features/chat_store/data/database/converters/chat_metadata_converter.dart';
+
+CREATE TABLE chat_data (
+  chat_id TEXT PRIMARY KEY NOT NULL,
+  metadata TEXT NOT NULL MAPPED BY `const ChatMetadataConverter()`
+);
+
+CREATE TABLE chat_message (
+  message_id TEXT PRIMARY KEY NOT NULL,
+  chat_id TEXT NOT NULL,
+  order_key TEXT NOT NULL,
+  message_json TEXT NOT NULL
+);
+CREATE UNIQUE INDEX group_order_idx on chat_message (chat_id, order_key);
+
+leadingOrderKey:
+  SELECT lexo_rank_previous(
+    :bucket, 
+    (
+      SELECT order_key 
+      FROM chat_message 
+      WHERE chat_id = :chat_id 
+      ORDER BY order_key 
+      LIMIT 1
+    )
+  );
+
+trailingOrderKey:
+  SELECT lexo_rank_next(
+    :bucket, 
+    (
+      SELECT order_key 
+      FROM chat_message 
+      WHERE chat_id = :chat_id 
+      ORDER BY order_key DESC 
+      LIMIT 1
+    )
+  );
+
+orderKeyBeforeIndex:
+  WITH ordered_table AS 
+  (
+    SELECT message_id,
+      order_key,
+      LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key,
+      ROW_NUMBER() OVER (ORDER BY order_key) AS row_idx,
+      COUNT(*) OVER () as total_rows
+    FROM chat_message 
+    WHERE chat_id = :chat_id 
+  )
+  SELECT lexo_rank_reorder_after(order_key, next_order_key)
+  FROM ordered_table
+  WHERE row_idx = MIN(:row_idx, total_rows);
+
+messageIndex:
+  WITH ordered_table AS 
+  (
+    SELECT message_id,
+      ROW_NUMBER() OVER (ORDER BY order_key) AS row_idx
+    FROM chat_message 
+    WHERE chat_id = :chat_id 
+  )
+  SELECT row_idx
+  FROM ordered_table
+  WHERE message_id = :message_id;

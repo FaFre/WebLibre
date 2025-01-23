@@ -7,7 +7,7 @@ part of 'providers.dart';
 // **************************************************************************
 
 String _$chatSearchDatabaseHash() =>
-    r'99700f1a2c25b24742c60fa8dd91fe744dcf21be';
+    r'17c972b3da21b6a2365cc5fd56a4eade0ac0a3f3';
 
 /// See also [chatSearchDatabase].
 @ProviderFor(chatSearchDatabase)

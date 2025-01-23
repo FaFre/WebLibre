@@ -680,6 +680,304 @@ class TabCompanion extends UpdateCompanion<TabData> {
   }
 }
 
+class Document extends Table with TableInfo<Document, DocumentData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Document(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> documentId = GeneratedColumn<String>(
+      'document_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL PRIMARY KEY');
+  late final GeneratedColumn<String> mainDocumentId = GeneratedColumn<String>(
+      'main_document_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  late final GeneratedColumn<String> contextId = GeneratedColumn<String>(
+      'context_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  late final GeneratedColumn<String> contentHash = GeneratedColumn<String>(
+      'content_hash', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
+      'metadata', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [documentId, mainDocumentId, contextId, content, contentHash, metadata];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'document';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {documentId};
+  @override
+  DocumentData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DocumentData(
+      documentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}document_id'])!,
+      mainDocumentId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}main_document_id']),
+      contextId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}context_id']),
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      contentHash: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content_hash'])!,
+      metadata: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}metadata']),
+    );
+  }
+
+  @override
+  Document createAlias(String alias) {
+    return Document(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class DocumentData extends DataClass implements Insertable<DocumentData> {
+  final String documentId;
+  final String? mainDocumentId;
+  final String? contextId;
+  final String content;
+  final String contentHash;
+  final String? metadata;
+  const DocumentData(
+      {required this.documentId,
+      this.mainDocumentId,
+      this.contextId,
+      required this.content,
+      required this.contentHash,
+      this.metadata});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['document_id'] = Variable<String>(documentId);
+    if (!nullToAbsent || mainDocumentId != null) {
+      map['main_document_id'] = Variable<String>(mainDocumentId);
+    }
+    if (!nullToAbsent || contextId != null) {
+      map['context_id'] = Variable<String>(contextId);
+    }
+    map['content'] = Variable<String>(content);
+    map['content_hash'] = Variable<String>(contentHash);
+    if (!nullToAbsent || metadata != null) {
+      map['metadata'] = Variable<String>(metadata);
+    }
+    return map;
+  }
+
+  factory DocumentData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DocumentData(
+      documentId: serializer.fromJson<String>(json['document_id']),
+      mainDocumentId: serializer.fromJson<String?>(json['main_document_id']),
+      contextId: serializer.fromJson<String?>(json['context_id']),
+      content: serializer.fromJson<String>(json['content']),
+      contentHash: serializer.fromJson<String>(json['content_hash']),
+      metadata: serializer.fromJson<String?>(json['metadata']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'document_id': serializer.toJson<String>(documentId),
+      'main_document_id': serializer.toJson<String?>(mainDocumentId),
+      'context_id': serializer.toJson<String?>(contextId),
+      'content': serializer.toJson<String>(content),
+      'content_hash': serializer.toJson<String>(contentHash),
+      'metadata': serializer.toJson<String?>(metadata),
+    };
+  }
+
+  DocumentData copyWith(
+          {String? documentId,
+          Value<String?> mainDocumentId = const Value.absent(),
+          Value<String?> contextId = const Value.absent(),
+          String? content,
+          String? contentHash,
+          Value<String?> metadata = const Value.absent()}) =>
+      DocumentData(
+        documentId: documentId ?? this.documentId,
+        mainDocumentId:
+            mainDocumentId.present ? mainDocumentId.value : this.mainDocumentId,
+        contextId: contextId.present ? contextId.value : this.contextId,
+        content: content ?? this.content,
+        contentHash: contentHash ?? this.contentHash,
+        metadata: metadata.present ? metadata.value : this.metadata,
+      );
+  DocumentData copyWithCompanion(DocumentCompanion data) {
+    return DocumentData(
+      documentId:
+          data.documentId.present ? data.documentId.value : this.documentId,
+      mainDocumentId: data.mainDocumentId.present
+          ? data.mainDocumentId.value
+          : this.mainDocumentId,
+      contextId: data.contextId.present ? data.contextId.value : this.contextId,
+      content: data.content.present ? data.content.value : this.content,
+      contentHash:
+          data.contentHash.present ? data.contentHash.value : this.contentHash,
+      metadata: data.metadata.present ? data.metadata.value : this.metadata,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DocumentData(')
+          ..write('documentId: $documentId, ')
+          ..write('mainDocumentId: $mainDocumentId, ')
+          ..write('contextId: $contextId, ')
+          ..write('content: $content, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('metadata: $metadata')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      documentId, mainDocumentId, contextId, content, contentHash, metadata);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DocumentData &&
+          other.documentId == this.documentId &&
+          other.mainDocumentId == this.mainDocumentId &&
+          other.contextId == this.contextId &&
+          other.content == this.content &&
+          other.contentHash == this.contentHash &&
+          other.metadata == this.metadata);
+}
+
+class DocumentCompanion extends UpdateCompanion<DocumentData> {
+  final Value<String> documentId;
+  final Value<String?> mainDocumentId;
+  final Value<String?> contextId;
+  final Value<String> content;
+  final Value<String> contentHash;
+  final Value<String?> metadata;
+  final Value<int> rowid;
+  const DocumentCompanion({
+    this.documentId = const Value.absent(),
+    this.mainDocumentId = const Value.absent(),
+    this.contextId = const Value.absent(),
+    this.content = const Value.absent(),
+    this.contentHash = const Value.absent(),
+    this.metadata = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DocumentCompanion.insert({
+    required String documentId,
+    this.mainDocumentId = const Value.absent(),
+    this.contextId = const Value.absent(),
+    required String content,
+    required String contentHash,
+    this.metadata = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : documentId = Value(documentId),
+        content = Value(content),
+        contentHash = Value(contentHash);
+  static Insertable<DocumentData> custom({
+    Expression<String>? documentId,
+    Expression<String>? mainDocumentId,
+    Expression<String>? contextId,
+    Expression<String>? content,
+    Expression<String>? contentHash,
+    Expression<String>? metadata,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (documentId != null) 'document_id': documentId,
+      if (mainDocumentId != null) 'main_document_id': mainDocumentId,
+      if (contextId != null) 'context_id': contextId,
+      if (content != null) 'content': content,
+      if (contentHash != null) 'content_hash': contentHash,
+      if (metadata != null) 'metadata': metadata,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DocumentCompanion copyWith(
+      {Value<String>? documentId,
+      Value<String?>? mainDocumentId,
+      Value<String?>? contextId,
+      Value<String>? content,
+      Value<String>? contentHash,
+      Value<String?>? metadata,
+      Value<int>? rowid}) {
+    return DocumentCompanion(
+      documentId: documentId ?? this.documentId,
+      mainDocumentId: mainDocumentId ?? this.mainDocumentId,
+      contextId: contextId ?? this.contextId,
+      content: content ?? this.content,
+      contentHash: contentHash ?? this.contentHash,
+      metadata: metadata ?? this.metadata,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (documentId.present) {
+      map['document_id'] = Variable<String>(documentId.value);
+    }
+    if (mainDocumentId.present) {
+      map['main_document_id'] = Variable<String>(mainDocumentId.value);
+    }
+    if (contextId.present) {
+      map['context_id'] = Variable<String>(contextId.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (contentHash.present) {
+      map['content_hash'] = Variable<String>(contentHash.value);
+    }
+    if (metadata.present) {
+      map['metadata'] = Variable<String>(metadata.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DocumentCompanion(')
+          ..write('documentId: $documentId, ')
+          ..write('mainDocumentId: $mainDocumentId, ')
+          ..write('contextId: $contextId, ')
+          ..write('content: $content, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('metadata: $metadata, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class TabFts extends Table
     with TableInfo<TabFts, TabFt>, VirtualTableInfo<TabFts, TabFt> {
   @override
@@ -927,11 +1225,344 @@ class TabFtsCompanion extends UpdateCompanion<TabFt> {
   }
 }
 
+class DocumentVec extends Table with TableInfo<DocumentVec, DocumentVecData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  DocumentVec(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL PRIMARY KEY');
+  late final GeneratedColumn<String> mainDocumentId = GeneratedColumn<String>(
+      'main_document_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  late final GeneratedColumn<String> contextId = GeneratedColumn<String>(
+      'context_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  late final GeneratedColumn<Uint8List> embedding = GeneratedColumn<Uint8List>(
+      'embedding', aliasedName, false,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  late final GeneratedColumn<String> contentHash = GeneratedColumn<String>(
+      'content_hash', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  late final GeneratedColumn<double> distance = GeneratedColumn<double>(
+      'distance', aliasedName, true,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  late final GeneratedColumn<int> k = GeneratedColumn<int>(
+      'k', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, mainDocumentId, contextId, embedding, contentHash, distance, k];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'document_vec';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DocumentVecData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DocumentVecData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      mainDocumentId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}main_document_id']),
+      contextId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}context_id']),
+      embedding: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}embedding'])!,
+      contentHash: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content_hash'])!,
+      distance: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}distance']),
+      k: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}k']),
+    );
+  }
+
+  @override
+  DocumentVec createAlias(String alias) {
+    return DocumentVec(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class DocumentVecData extends DataClass implements Insertable<DocumentVecData> {
+  /// dummy definition of virtual table
+  /// keep in sync with defined table definition
+  final String id;
+  final String? mainDocumentId;
+  final String? contextId;
+  final Uint8List embedding;
+  final String contentHash;
+  final double? distance;
+  final int? k;
+  const DocumentVecData(
+      {required this.id,
+      this.mainDocumentId,
+      this.contextId,
+      required this.embedding,
+      required this.contentHash,
+      this.distance,
+      this.k});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || mainDocumentId != null) {
+      map['main_document_id'] = Variable<String>(mainDocumentId);
+    }
+    if (!nullToAbsent || contextId != null) {
+      map['context_id'] = Variable<String>(contextId);
+    }
+    map['embedding'] = Variable<Uint8List>(embedding);
+    map['content_hash'] = Variable<String>(contentHash);
+    if (!nullToAbsent || distance != null) {
+      map['distance'] = Variable<double>(distance);
+    }
+    if (!nullToAbsent || k != null) {
+      map['k'] = Variable<int>(k);
+    }
+    return map;
+  }
+
+  factory DocumentVecData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DocumentVecData(
+      id: serializer.fromJson<String>(json['id']),
+      mainDocumentId: serializer.fromJson<String?>(json['main_document_id']),
+      contextId: serializer.fromJson<String?>(json['context_id']),
+      embedding: serializer.fromJson<Uint8List>(json['embedding']),
+      contentHash: serializer.fromJson<String>(json['content_hash']),
+      distance: serializer.fromJson<double?>(json['distance']),
+      k: serializer.fromJson<int?>(json['k']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'main_document_id': serializer.toJson<String?>(mainDocumentId),
+      'context_id': serializer.toJson<String?>(contextId),
+      'embedding': serializer.toJson<Uint8List>(embedding),
+      'content_hash': serializer.toJson<String>(contentHash),
+      'distance': serializer.toJson<double?>(distance),
+      'k': serializer.toJson<int?>(k),
+    };
+  }
+
+  DocumentVecData copyWith(
+          {String? id,
+          Value<String?> mainDocumentId = const Value.absent(),
+          Value<String?> contextId = const Value.absent(),
+          Uint8List? embedding,
+          String? contentHash,
+          Value<double?> distance = const Value.absent(),
+          Value<int?> k = const Value.absent()}) =>
+      DocumentVecData(
+        id: id ?? this.id,
+        mainDocumentId:
+            mainDocumentId.present ? mainDocumentId.value : this.mainDocumentId,
+        contextId: contextId.present ? contextId.value : this.contextId,
+        embedding: embedding ?? this.embedding,
+        contentHash: contentHash ?? this.contentHash,
+        distance: distance.present ? distance.value : this.distance,
+        k: k.present ? k.value : this.k,
+      );
+  DocumentVecData copyWithCompanion(DocumentVecCompanion data) {
+    return DocumentVecData(
+      id: data.id.present ? data.id.value : this.id,
+      mainDocumentId: data.mainDocumentId.present
+          ? data.mainDocumentId.value
+          : this.mainDocumentId,
+      contextId: data.contextId.present ? data.contextId.value : this.contextId,
+      embedding: data.embedding.present ? data.embedding.value : this.embedding,
+      contentHash:
+          data.contentHash.present ? data.contentHash.value : this.contentHash,
+      distance: data.distance.present ? data.distance.value : this.distance,
+      k: data.k.present ? data.k.value : this.k,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DocumentVecData(')
+          ..write('id: $id, ')
+          ..write('mainDocumentId: $mainDocumentId, ')
+          ..write('contextId: $contextId, ')
+          ..write('embedding: $embedding, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('distance: $distance, ')
+          ..write('k: $k')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, mainDocumentId, contextId,
+      $driftBlobEquality.hash(embedding), contentHash, distance, k);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DocumentVecData &&
+          other.id == this.id &&
+          other.mainDocumentId == this.mainDocumentId &&
+          other.contextId == this.contextId &&
+          $driftBlobEquality.equals(other.embedding, this.embedding) &&
+          other.contentHash == this.contentHash &&
+          other.distance == this.distance &&
+          other.k == this.k);
+}
+
+class DocumentVecCompanion extends UpdateCompanion<DocumentVecData> {
+  final Value<String> id;
+  final Value<String?> mainDocumentId;
+  final Value<String?> contextId;
+  final Value<Uint8List> embedding;
+  final Value<String> contentHash;
+  final Value<double?> distance;
+  final Value<int?> k;
+  final Value<int> rowid;
+  const DocumentVecCompanion({
+    this.id = const Value.absent(),
+    this.mainDocumentId = const Value.absent(),
+    this.contextId = const Value.absent(),
+    this.embedding = const Value.absent(),
+    this.contentHash = const Value.absent(),
+    this.distance = const Value.absent(),
+    this.k = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DocumentVecCompanion.insert({
+    required String id,
+    this.mainDocumentId = const Value.absent(),
+    this.contextId = const Value.absent(),
+    required Uint8List embedding,
+    required String contentHash,
+    this.distance = const Value.absent(),
+    this.k = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        embedding = Value(embedding),
+        contentHash = Value(contentHash);
+  static Insertable<DocumentVecData> custom({
+    Expression<String>? id,
+    Expression<String>? mainDocumentId,
+    Expression<String>? contextId,
+    Expression<Uint8List>? embedding,
+    Expression<String>? contentHash,
+    Expression<double>? distance,
+    Expression<int>? k,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (mainDocumentId != null) 'main_document_id': mainDocumentId,
+      if (contextId != null) 'context_id': contextId,
+      if (embedding != null) 'embedding': embedding,
+      if (contentHash != null) 'content_hash': contentHash,
+      if (distance != null) 'distance': distance,
+      if (k != null) 'k': k,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DocumentVecCompanion copyWith(
+      {Value<String>? id,
+      Value<String?>? mainDocumentId,
+      Value<String?>? contextId,
+      Value<Uint8List>? embedding,
+      Value<String>? contentHash,
+      Value<double?>? distance,
+      Value<int?>? k,
+      Value<int>? rowid}) {
+    return DocumentVecCompanion(
+      id: id ?? this.id,
+      mainDocumentId: mainDocumentId ?? this.mainDocumentId,
+      contextId: contextId ?? this.contextId,
+      embedding: embedding ?? this.embedding,
+      contentHash: contentHash ?? this.contentHash,
+      distance: distance ?? this.distance,
+      k: k ?? this.k,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (mainDocumentId.present) {
+      map['main_document_id'] = Variable<String>(mainDocumentId.value);
+    }
+    if (contextId.present) {
+      map['context_id'] = Variable<String>(contextId.value);
+    }
+    if (embedding.present) {
+      map['embedding'] = Variable<Uint8List>(embedding.value);
+    }
+    if (contentHash.present) {
+      map['content_hash'] = Variable<String>(contentHash.value);
+    }
+    if (distance.present) {
+      map['distance'] = Variable<double>(distance.value);
+    }
+    if (k.present) {
+      map['k'] = Variable<int>(k.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DocumentVecCompanion(')
+          ..write('id: $id, ')
+          ..write('mainDocumentId: $mainDocumentId, ')
+          ..write('contextId: $contextId, ')
+          ..write('embedding: $embedding, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('distance: $distance, ')
+          ..write('k: $k, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$TabDatabase extends GeneratedDatabase {
   _$TabDatabase(QueryExecutor e) : super(e);
   $TabDatabaseManager get managers => $TabDatabaseManager(this);
   late final Container container = Container(this);
   late final Tab tab = Tab(this);
+  late final Document document = Document(this);
+  late final Trigger tabDocumentDelete = Trigger(
+      'CREATE TRIGGER tab_document_delete AFTER DELETE ON tab BEGIN DELETE FROM document WHERE main_document_id = old.id;END',
+      'tab_document_delete');
   late final TabFts tabFts = TabFts(this);
   late final Trigger tabAfterInsert = Trigger(
       'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
@@ -942,8 +1573,28 @@ abstract class _$TabDatabase extends GeneratedDatabase {
   late final Trigger tabAfterUpdate = Trigger(
       'CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
       'tab_after_update');
+  late final Index documentMainDocumentId = Index('document_main_document_id',
+      'CREATE INDEX document_main_document_id ON document (main_document_id)');
+  late final Index documentContextId = Index('document_context_id',
+      'CREATE INDEX document_context_id ON document (context_id)');
+  late final DocumentVec documentVec = DocumentVec(this);
+  late final Trigger documentDelete = Trigger(
+      'CREATE TRIGGER document_delete AFTER DELETE ON document BEGIN DELETE FROM document_vec WHERE id = old.document_id;END',
+      'document_delete');
+  late final Trigger documentUpdateDelete = Trigger(
+      'CREATE TRIGGER document_update_delete AFTER UPDATE ON document BEGIN DELETE FROM document_vec WHERE id = new.document_id AND content_hash != new.content_hash;END',
+      'document_update_delete');
   late final ContainerDao containerDao = ContainerDao(this as TabDatabase);
   late final TabDao tabDao = TabDao(this as TabDatabase);
+  late final VectorDao vectorDao = VectorDao(this as TabDatabase);
+  Future<int> optimizeFtsIndex() {
+    return customInsert(
+      'INSERT INTO tab_fts (tab_fts) VALUES (\'optimize\')',
+      variables: [],
+      updates: {tabFts},
+    );
+  }
+
   Selectable<ContainerDataWithCount> containersWithCount() {
     return customSelect(
         'SELECT container.*, tab_agg.tab_count FROM container LEFT JOIN (SELECT container_id, COUNT(*) AS tab_count, MAX(timestamp) AS last_updated FROM tab GROUP BY container_id) AS tab_agg ON container.id = tab_agg.container_id ORDER BY tab_agg.last_updated DESC NULLS FIRST',
@@ -1017,8 +1668,8 @@ abstract class _$TabDatabase extends GeneratedDatabase {
           tabFts,
         }).map((QueryRow row) => TabQueryResult(
           id: row.read<String>('id'),
-          title: row.read<String>('title'),
-          url: row.read<String>('url'),
+          title: row.readNullable<String>('title'),
+          url: row.readNullable<String>('url'),
           weightedRank: row.read<double>('weighted_rank'),
         ));
   }
@@ -1043,11 +1694,51 @@ abstract class _$TabDatabase extends GeneratedDatabase {
           tabFts,
         }).map((QueryRow row) => TabQueryResult(
           id: row.read<String>('id'),
-          title: row.read<String>('title'),
-          url: row.read<String>('url'),
-          extractedContent: row.read<String>('extracted_content'),
-          fullContent: row.read<String>('full_content'),
+          title: row.readNullable<String>('title'),
+          url: row.readNullable<String>('url'),
+          extractedContent: row.readNullable<String>('extracted_content'),
+          fullContent: row.readNullable<String>('full_content'),
           weightedRank: row.read<double>('weighted_rank'),
+        ));
+  }
+
+  Selectable<DocumentData> missingDocumentEmbeddings(
+      {String? mainDocumentId, String? contextId}) {
+    return customSelect(
+        'SELECT doc.* FROM document AS doc WHERE doc.main_document_id IS COALESCE(?1, doc.main_document_id) AND doc.context_id IS COALESCE(?2, doc.context_id) AND NOT EXISTS (SELECT 1 AS _c0 FROM document_vec AS vec WHERE vec.id = doc.document_id)',
+        variables: [
+          Variable<String>(mainDocumentId),
+          Variable<String>(contextId)
+        ],
+        readsFrom: {
+          document,
+          documentVec,
+        }).asyncMap(document.mapFromRow);
+  }
+
+  Selectable<VectorResult> queryVectors(
+      {required Uint8List searchVectors,
+      int? k,
+      String? mainDocumentId,
+      String? contextId}) {
+    return customSelect(
+        'SELECT vec.id, doc.main_document_id, doc.context_id, doc.content, doc.metadata, vec.distance FROM document_vec AS vec INNER JOIN document AS doc ON doc.document_id = vec.id WHERE vec.embedding MATCH ?1 AND vec.k = ?2 AND vec.main_document_id IS COALESCE(?3, vec.main_document_id) AND vec.context_id IS COALESCE(?4, vec.context_id) ORDER BY vec.distance',
+        variables: [
+          Variable<Uint8List>(searchVectors),
+          Variable<int>(k),
+          Variable<String>(mainDocumentId),
+          Variable<String>(contextId)
+        ],
+        readsFrom: {
+          documentVec,
+          document,
+        }).map((QueryRow row) => VectorResult(
+          id: row.read<String>('id'),
+          mainDocumentId: row.readNullable<String>('main_document_id'),
+          contextId: row.readNullable<String>('context_id'),
+          content: row.read<String>('content'),
+          metadata: row.readNullable<String>('metadata'),
+          distance: row.readNullable<double>('distance'),
         ));
   }
 
@@ -1055,8 +1746,21 @@ abstract class _$TabDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [container, tab, tabFts, tabAfterInsert, tabAfterDelete, tabAfterUpdate];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        container,
+        tab,
+        document,
+        tabDocumentDelete,
+        tabFts,
+        tabAfterInsert,
+        tabAfterDelete,
+        tabAfterUpdate,
+        documentMainDocumentId,
+        documentContextId,
+        documentVec,
+        documentDelete,
+        documentUpdateDelete
+      ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -1065,6 +1769,13 @@ abstract class _$TabDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('tab', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('tab',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('document', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
@@ -1086,6 +1797,20 @@ abstract class _$TabDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.update),
             result: [
               TableUpdate('tab_fts', kind: UpdateKind.insert),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('document',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('document_vec', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('document',
+                limitUpdateKind: UpdateKind.update),
+            result: [
+              TableUpdate('document_vec', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -1120,7 +1845,7 @@ final class $ContainerReferences
 
   $TabProcessedTableManager get tabRefs {
     final manager = $TabTableManager($_db, $_db.tab)
-        .filter((f) => f.containerId.id($_item.id));
+        .filter((f) => f.containerId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_tabRefsTable($_db));
     return ProcessedTableManager(
@@ -1377,9 +2102,10 @@ final class $TabReferences extends BaseReferences<_$TabDatabase, Tab, TabData> {
       .createAlias($_aliasNameGenerator(db.tab.containerId, db.container.id));
 
   $ContainerProcessedTableManager? get containerId {
-    if ($_item.containerId == null) return null;
+    final $_column = $_itemColumn<String>('container_id');
+    if ($_column == null) return null;
     final manager = $ContainerTableManager($_db, $_db.container)
-        .filter((f) => f.id($_item.containerId!));
+        .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_containerIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -1703,6 +2429,185 @@ typedef $TabProcessedTableManager = ProcessedTableManager<
     (TabData, $TabReferences),
     TabData,
     PrefetchHooks Function({bool containerId})>;
+typedef $DocumentCreateCompanionBuilder = DocumentCompanion Function({
+  required String documentId,
+  Value<String?> mainDocumentId,
+  Value<String?> contextId,
+  required String content,
+  required String contentHash,
+  Value<String?> metadata,
+  Value<int> rowid,
+});
+typedef $DocumentUpdateCompanionBuilder = DocumentCompanion Function({
+  Value<String> documentId,
+  Value<String?> mainDocumentId,
+  Value<String?> contextId,
+  Value<String> content,
+  Value<String> contentHash,
+  Value<String?> metadata,
+  Value<int> rowid,
+});
+
+class $DocumentFilterComposer extends Composer<_$TabDatabase, Document> {
+  $DocumentFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mainDocumentId => $composableBuilder(
+      column: $table.mainDocumentId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get contextId => $composableBuilder(
+      column: $table.contextId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get contentHash => $composableBuilder(
+      column: $table.contentHash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get metadata => $composableBuilder(
+      column: $table.metadata, builder: (column) => ColumnFilters(column));
+}
+
+class $DocumentOrderingComposer extends Composer<_$TabDatabase, Document> {
+  $DocumentOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mainDocumentId => $composableBuilder(
+      column: $table.mainDocumentId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get contextId => $composableBuilder(
+      column: $table.contextId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get contentHash => $composableBuilder(
+      column: $table.contentHash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get metadata => $composableBuilder(
+      column: $table.metadata, builder: (column) => ColumnOrderings(column));
+}
+
+class $DocumentAnnotationComposer extends Composer<_$TabDatabase, Document> {
+  $DocumentAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => column);
+
+  GeneratedColumn<String> get mainDocumentId => $composableBuilder(
+      column: $table.mainDocumentId, builder: (column) => column);
+
+  GeneratedColumn<String> get contextId =>
+      $composableBuilder(column: $table.contextId, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get contentHash => $composableBuilder(
+      column: $table.contentHash, builder: (column) => column);
+
+  GeneratedColumn<String> get metadata =>
+      $composableBuilder(column: $table.metadata, builder: (column) => column);
+}
+
+class $DocumentTableManager extends RootTableManager<
+    _$TabDatabase,
+    Document,
+    DocumentData,
+    $DocumentFilterComposer,
+    $DocumentOrderingComposer,
+    $DocumentAnnotationComposer,
+    $DocumentCreateCompanionBuilder,
+    $DocumentUpdateCompanionBuilder,
+    (DocumentData, BaseReferences<_$TabDatabase, Document, DocumentData>),
+    DocumentData,
+    PrefetchHooks Function()> {
+  $DocumentTableManager(_$TabDatabase db, Document table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $DocumentFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $DocumentOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $DocumentAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> documentId = const Value.absent(),
+            Value<String?> mainDocumentId = const Value.absent(),
+            Value<String?> contextId = const Value.absent(),
+            Value<String> content = const Value.absent(),
+            Value<String> contentHash = const Value.absent(),
+            Value<String?> metadata = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DocumentCompanion(
+            documentId: documentId,
+            mainDocumentId: mainDocumentId,
+            contextId: contextId,
+            content: content,
+            contentHash: contentHash,
+            metadata: metadata,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String documentId,
+            Value<String?> mainDocumentId = const Value.absent(),
+            Value<String?> contextId = const Value.absent(),
+            required String content,
+            required String contentHash,
+            Value<String?> metadata = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DocumentCompanion.insert(
+            documentId: documentId,
+            mainDocumentId: mainDocumentId,
+            contextId: contextId,
+            content: content,
+            contentHash: contentHash,
+            metadata: metadata,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $DocumentProcessedTableManager = ProcessedTableManager<
+    _$TabDatabase,
+    Document,
+    DocumentData,
+    $DocumentFilterComposer,
+    $DocumentOrderingComposer,
+    $DocumentAnnotationComposer,
+    $DocumentCreateCompanionBuilder,
+    $DocumentUpdateCompanionBuilder,
+    (DocumentData, BaseReferences<_$TabDatabase, Document, DocumentData>),
+    DocumentData,
+    PrefetchHooks Function()>;
 typedef $TabFtsCreateCompanionBuilder = TabFtsCompanion Function({
   required String title,
   required String url,
@@ -1854,6 +2759,208 @@ typedef $TabFtsProcessedTableManager = ProcessedTableManager<
     (TabFt, BaseReferences<_$TabDatabase, TabFts, TabFt>),
     TabFt,
     PrefetchHooks Function()>;
+typedef $DocumentVecCreateCompanionBuilder = DocumentVecCompanion Function({
+  required String id,
+  Value<String?> mainDocumentId,
+  Value<String?> contextId,
+  required Uint8List embedding,
+  required String contentHash,
+  Value<double?> distance,
+  Value<int?> k,
+  Value<int> rowid,
+});
+typedef $DocumentVecUpdateCompanionBuilder = DocumentVecCompanion Function({
+  Value<String> id,
+  Value<String?> mainDocumentId,
+  Value<String?> contextId,
+  Value<Uint8List> embedding,
+  Value<String> contentHash,
+  Value<double?> distance,
+  Value<int?> k,
+  Value<int> rowid,
+});
+
+class $DocumentVecFilterComposer extends Composer<_$TabDatabase, DocumentVec> {
+  $DocumentVecFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mainDocumentId => $composableBuilder(
+      column: $table.mainDocumentId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get contextId => $composableBuilder(
+      column: $table.contextId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get embedding => $composableBuilder(
+      column: $table.embedding, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get contentHash => $composableBuilder(
+      column: $table.contentHash, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get distance => $composableBuilder(
+      column: $table.distance, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get k => $composableBuilder(
+      column: $table.k, builder: (column) => ColumnFilters(column));
+}
+
+class $DocumentVecOrderingComposer
+    extends Composer<_$TabDatabase, DocumentVec> {
+  $DocumentVecOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mainDocumentId => $composableBuilder(
+      column: $table.mainDocumentId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get contextId => $composableBuilder(
+      column: $table.contextId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get embedding => $composableBuilder(
+      column: $table.embedding, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get contentHash => $composableBuilder(
+      column: $table.contentHash, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get distance => $composableBuilder(
+      column: $table.distance, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get k => $composableBuilder(
+      column: $table.k, builder: (column) => ColumnOrderings(column));
+}
+
+class $DocumentVecAnnotationComposer
+    extends Composer<_$TabDatabase, DocumentVec> {
+  $DocumentVecAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mainDocumentId => $composableBuilder(
+      column: $table.mainDocumentId, builder: (column) => column);
+
+  GeneratedColumn<String> get contextId =>
+      $composableBuilder(column: $table.contextId, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get embedding =>
+      $composableBuilder(column: $table.embedding, builder: (column) => column);
+
+  GeneratedColumn<String> get contentHash => $composableBuilder(
+      column: $table.contentHash, builder: (column) => column);
+
+  GeneratedColumn<double> get distance =>
+      $composableBuilder(column: $table.distance, builder: (column) => column);
+
+  GeneratedColumn<int> get k =>
+      $composableBuilder(column: $table.k, builder: (column) => column);
+}
+
+class $DocumentVecTableManager extends RootTableManager<
+    _$TabDatabase,
+    DocumentVec,
+    DocumentVecData,
+    $DocumentVecFilterComposer,
+    $DocumentVecOrderingComposer,
+    $DocumentVecAnnotationComposer,
+    $DocumentVecCreateCompanionBuilder,
+    $DocumentVecUpdateCompanionBuilder,
+    (
+      DocumentVecData,
+      BaseReferences<_$TabDatabase, DocumentVec, DocumentVecData>
+    ),
+    DocumentVecData,
+    PrefetchHooks Function()> {
+  $DocumentVecTableManager(_$TabDatabase db, DocumentVec table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $DocumentVecFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $DocumentVecOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $DocumentVecAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String?> mainDocumentId = const Value.absent(),
+            Value<String?> contextId = const Value.absent(),
+            Value<Uint8List> embedding = const Value.absent(),
+            Value<String> contentHash = const Value.absent(),
+            Value<double?> distance = const Value.absent(),
+            Value<int?> k = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DocumentVecCompanion(
+            id: id,
+            mainDocumentId: mainDocumentId,
+            contextId: contextId,
+            embedding: embedding,
+            contentHash: contentHash,
+            distance: distance,
+            k: k,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            Value<String?> mainDocumentId = const Value.absent(),
+            Value<String?> contextId = const Value.absent(),
+            required Uint8List embedding,
+            required String contentHash,
+            Value<double?> distance = const Value.absent(),
+            Value<int?> k = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DocumentVecCompanion.insert(
+            id: id,
+            mainDocumentId: mainDocumentId,
+            contextId: contextId,
+            embedding: embedding,
+            contentHash: contentHash,
+            distance: distance,
+            k: k,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $DocumentVecProcessedTableManager = ProcessedTableManager<
+    _$TabDatabase,
+    DocumentVec,
+    DocumentVecData,
+    $DocumentVecFilterComposer,
+    $DocumentVecOrderingComposer,
+    $DocumentVecAnnotationComposer,
+    $DocumentVecCreateCompanionBuilder,
+    $DocumentVecUpdateCompanionBuilder,
+    (
+      DocumentVecData,
+      BaseReferences<_$TabDatabase, DocumentVec, DocumentVecData>
+    ),
+    DocumentVecData,
+    PrefetchHooks Function()>;
 
 class $TabDatabaseManager {
   final _$TabDatabase _db;
@@ -1861,5 +2968,9 @@ class $TabDatabaseManager {
   $ContainerTableManager get container =>
       $ContainerTableManager(_db, _db.container);
   $TabTableManager get tab => $TabTableManager(_db, _db.tab);
+  $DocumentTableManager get document =>
+      $DocumentTableManager(_db, _db.document);
   $TabFtsTableManager get tabFts => $TabFtsTableManager(_db, _db.tabFts);
+  $DocumentVecTableManager get documentVec =>
+      $DocumentVecTableManager(_db, _db.documentVec);
 }

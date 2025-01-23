@@ -6,7 +6,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
-GoRouter router(Ref ref) => GoRouter(
-      debugLogDiagnostics: true,
-      routes: $appRoutes,
-    );
+GoRouter router(Ref ref) {
+  return GoRouter(
+    debugLogDiagnostics: true,
+    routes: $appRoutes,
+  );
+}

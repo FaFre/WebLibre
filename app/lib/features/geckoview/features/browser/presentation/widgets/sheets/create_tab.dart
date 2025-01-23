@@ -79,10 +79,10 @@ class CreateTabSheetWidget extends HookConsumerWidget {
         TabBar(
           controller: tabController,
           tabs: [
-            Tab(
-              icon: Icon(KagiTool.search.icon),
-              text: 'Search',
-            ),
+            // Tab(
+            //   icon: Icon(KagiTool.search.icon),
+            //   text: 'Search',
+            // ),
             Tab(
               icon: Icon(KagiTool.summarizer.icon),
               text: 'Summarize',
@@ -99,10 +99,10 @@ class CreateTabSheetWidget extends HookConsumerWidget {
           child: ExpandablePageView(
             controller: pageController,
             children: [
-              SearchTab(
-                sharedContent: sharedContent,
-                onSubmit: onSubmit,
-              ),
+              // SearchTab(
+              //   sharedContent: sharedContent,
+              //   onSubmit: onSubmit,
+              // ),
               SummarizeTab(
                 sharedContent: sharedContent,
                 onSubmit: onSubmit,

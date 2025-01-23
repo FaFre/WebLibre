@@ -3,4 +3,5 @@ abstract interface class IQueryBuilder {
   int get ftsMinTokenLength;
 
   String buildFtsQuery(String input);
+  String buildLikeQuery(String input);
 }

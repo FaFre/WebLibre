@@ -1095,16 +1095,40 @@ abstract class _$BangDatabase extends GeneratedDatabase {
     );
   }
 
-  Selectable<BangData> bangQuery({required String query}) {
+  Selectable<BangData> queryBangs({required String query}) {
     return customSelect(
-        'SELECT b.*, bf.frequency, bf.last_used FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" ORDER BY RANK, bf.frequency NULLS LAST',
+        'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
         variables: [
           Variable<String>(query)
         ],
         readsFrom: {
           bangFrequency,
-          bang,
           bangFts,
+          bang,
+        }).map((QueryRow row) => BangData(
+          websiteName: row.read<String>('website_name'),
+          domain: row.read<String>('domain'),
+          trigger: row.read<String>('trigger'),
+          urlTemplate: row.read<String>('url_template'),
+          category: row.readNullable<String>('category'),
+          subCategory: row.readNullable<String>('sub_category'),
+          format: BangTable.$converterformat
+              .fromSql(row.readNullable<String>('format')),
+          frequency: row.readNullable<int>('frequency'),
+          lastUsed: row.readNullable<DateTime>('last_used'),
+        ));
+  }
+
+  Selectable<BangData> queryBangsBasic({required String query}) {
+    return customSelect(
+        'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1 ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
+        variables: [
+          Variable<String>(query)
+        ],
+        readsFrom: {
+          bangFrequency,
+          bangFts,
+          bang,
         }).map((QueryRow row) => BangData(
           websiteName: row.read<String>('website_name'),
           domain: row.read<String>('domain'),
@@ -1236,8 +1260,8 @@ final class $BangTableReferences
                   db.bang.trigger, db.bangFrequency.trigger));
 
   $BangFrequencyProcessedTableManager get bangFrequencyRefs {
-    final manager = $BangFrequencyTableManager($_db, $_db.bangFrequency)
-        .filter((f) => f.trigger.trigger($_item.trigger));
+    final manager = $BangFrequencyTableManager($_db, $_db.bangFrequency).filter(
+        (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!));
 
     final cache = $_typedResult.readTableOrNull(_bangFrequencyRefsTable($_db));
     return ProcessedTableManager(
@@ -1251,8 +1275,8 @@ final class $BangTableReferences
               $_aliasNameGenerator(db.bang.trigger, db.bangHistory.trigger));
 
   $BangHistoryProcessedTableManager get bangHistoryRefs {
-    final manager = $BangHistoryTableManager($_db, $_db.bangHistory)
-        .filter((f) => f.trigger.trigger($_item.trigger));
+    final manager = $BangHistoryTableManager($_db, $_db.bangHistory).filter(
+        (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!));
 
     final cache = $_typedResult.readTableOrNull(_bangHistoryRefsTable($_db));
     return ProcessedTableManager(
@@ -1704,8 +1728,10 @@ final class $BangFrequencyReferences
       $_aliasNameGenerator(db.bangFrequency.trigger, db.bang.trigger));
 
   $BangTableProcessedTableManager get trigger {
+    final $_column = $_itemColumn<String>('trigger')!;
+
     final manager = $BangTableTableManager($_db, $_db.bang)
-        .filter((f) => f.trigger($_item.trigger!));
+        .filter((f) => f.trigger.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_triggerTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
@@ -1941,8 +1967,10 @@ final class $BangHistoryReferences
       $_aliasNameGenerator(db.bangHistory.trigger, db.bang.trigger));
 
   $BangTableProcessedTableManager get trigger {
+    final $_column = $_itemColumn<String>('trigger')!;
+
     final manager = $BangTableTableManager($_db, $_db.bang)
-        .filter((f) => f.trigger($_item.trigger!));
+        .filter((f) => f.trigger.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_triggerTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(

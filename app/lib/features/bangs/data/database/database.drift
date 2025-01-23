@@ -72,20 +72,56 @@ END;
 optimizeFtsIndex:
   INSERT INTO bang_fts(bang_fts) VALUES ('optimize');
 
-bangQuery WITH BangData:
-  SELECT
+queryBangs WITH BangData:
+  WITH weights AS (
+    SELECT 
+      -- Customize these weights (higher = more important)
+      10.0 AS "trigger",       -- Title matches are most important
+      5.0 AS website_name           -- URL matches are quite important
+  )
+  SELECT 
     b.*,
     bf.frequency,
-    bf.last_used
-  FROM
+    bf.last_used,
+    bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
+  FROM 
     bang_fts(:query) fts
   INNER JOIN
     bang b ON b.rowid = fts.rowid
   LEFT JOIN
     bang_frequency bf ON b."trigger" = bf."trigger"
-  ORDER BY
-    RANK,
-    bf.frequency NULLS LAST;
+  CROSS JOIN 
+    weights
+  ORDER BY 
+  	weighted_rank ASC,
+  	bf.frequency NULLS LAST;
+
+queryBangsBasic WITH BangData:
+  WITH weights AS (
+    SELECT 
+      -- Customize these weights (higher = more important)
+      10.0 AS "trigger",       -- Title matches are most important
+      5.0 AS website_name           -- URL matches are quite important
+  )
+  SELECT 
+    b.*,
+    bf.frequency,
+    bf.last_used,
+    bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
+  FROM 
+    bang_fts fts
+  INNER JOIN
+    bang b ON b.rowid = fts.rowid
+  LEFT JOIN
+    bang_frequency bf ON b."trigger" = bf."trigger"
+  CROSS JOIN 
+    weights
+  WHERE 
+  	fts."trigger" LIKE :query OR
+  	fts.website_name LIKE :query
+  ORDER BY 
+  	weighted_rank ASC,
+  	bf.frequency NULLS LAST;
 
 categoriesJson:
   WITH categories AS (

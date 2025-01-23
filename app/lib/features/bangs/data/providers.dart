@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:lensai/features/bangs/data/database/database.dart';
@@ -13,7 +15,7 @@ part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 BangDatabase bangDatabase(Ref ref) {
-  return BangDatabase(
+  final db = BangDatabase(
     LazyDatabase(() async {
       // put the database file, called db.sqlite here, into the documents folder
       // for your app.
@@ -35,4 +37,10 @@ BangDatabase bangDatabase(Ref ref) {
       return NativeDatabase.createInBackground(file);
     }),
   );
+
+  ref.onDispose(() {
+    unawaited(db.close());
+  });
+
+  return db;
 }

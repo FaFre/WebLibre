@@ -17,10 +17,10 @@ class _OverlayPortalControllerHook extends Hook<OverlayPortalController> {
 
 class _OverlayPortalControllerHookState
     extends HookState<OverlayPortalController, _OverlayPortalControllerHook> {
-  late final controller = OverlayPortalController();
+  late final _controller = OverlayPortalController();
 
   @override
-  OverlayPortalController build(BuildContext context) => controller;
+  OverlayPortalController build(BuildContext context) => _controller;
 
   @override
   String get debugLabel => 'useOverlayPortalController';

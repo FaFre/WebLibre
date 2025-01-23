@@ -110,38 +110,25 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     );
   }
 
-  Future<void> updateTab(
+  Future<void> updateTabContent(
     String id, {
-    Value<String?> url = const Value.absent(),
-    Value<String?> title = const Value.absent(),
-    Value<bool> isProbablyReaderable = const Value.absent(),
-    Value<String?> extractedContentMarkdown = const Value.absent(),
-    Value<String?> extractedContentPlain = const Value.absent(),
-    Value<String?> fullContentMarkdown = const Value.absent(),
-    Value<String?> fullContentPlain = const Value.absent(),
+    required bool isProbablyReaderable,
+    required String? extractedContentMarkdown,
+    required String? extractedContentPlain,
+    required String? fullContentMarkdown,
+    required String? fullContentPlain,
   }) async {
-    final doUpdate = url != const Value.absent() ||
-        title != const Value.absent() ||
-        isProbablyReaderable != const Value.absent() ||
-        extractedContentMarkdown != const Value.absent() ||
-        extractedContentPlain != const Value.absent() ||
-        fullContentMarkdown != const Value.absent() ||
-        fullContentPlain != const Value.absent();
+    final statement = _updateByIdStatement(id);
 
-    if (doUpdate) {
-      final statement = _updateByIdStatement(id);
-      await statement.write(
-        TabCompanion(
-          url: url,
-          title: title,
-          isProbablyReaderable: isProbablyReaderable,
-          extractedContentMarkdown: extractedContentMarkdown,
-          extractedContentPlain: extractedContentPlain,
-          fullContentMarkdown: fullContentMarkdown,
-          fullContentPlain: fullContentPlain,
-        ),
-      );
-    }
+    await statement.write(
+      TabCompanion(
+        isProbablyReaderable: Value(isProbablyReaderable),
+        extractedContentMarkdown: Value(extractedContentMarkdown),
+        extractedContentPlain: Value(extractedContentPlain),
+        fullContentMarkdown: Value(fullContentMarkdown),
+        fullContentPlain: Value(fullContentPlain),
+      ),
+    );
   }
 
   Future<void> updateTabs(
@@ -209,7 +196,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
 
     if (ftsQuery.isNotEmpty) {
       return db.queryTabsFullContent(
-        query: db.buildFtsQuery(searchString),
+        query: ftsQuery,
         snippetLength: snippetLength,
         beforeMatch: matchPrefix,
         afterMatch: matchSuffix,

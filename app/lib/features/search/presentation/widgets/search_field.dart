@@ -3,8 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
-import 'package:lensai/features/geckoview/features/browser/presentation/widgets/speech_to_text_button.dart';
 import 'package:lensai/features/user/domain/repositories/settings.dart';
+import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 
 class SearchField extends HookConsumerWidget {
   final TextEditingController textEditingController;
@@ -64,14 +64,6 @@ class SearchField extends HookConsumerWidget {
                 },
               ),
       ),
-      // autovalidateMode: AutovalidateMode.onUserInteraction,
-      // validator: (value) {
-      //   if (value?.isEmpty ?? true) {
-      //     return '';
-      //   }
-
-      //   return null;
-      // },
       onTapOutside: (focusNode != null)
           ? (event) {
               focusNode!.unfocus();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lensai/core/routing/dialog_page.dart';
+import 'package:lensai/data/models/web_page_info.dart';
 import 'package:lensai/features/about/presentation/screens/about.dart';
 import 'package:lensai/features/bangs/presentation/screens/categories.dart';
 import 'package:lensai/features/bangs/presentation/screens/list.dart';
@@ -8,10 +9,12 @@ import 'package:lensai/features/bangs/presentation/screens/search.dart';
 import 'package:lensai/features/chat_archive/presentation/screens/detail.dart';
 import 'package:lensai/features/chat_archive/presentation/screens/list.dart';
 import 'package:lensai/features/chat_archive/presentation/screens/search.dart';
+import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/web_page_dialog.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/screens/browser.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:lensai/features/search/presentation/screens/search.dart';
 import 'package:lensai/features/settings/presentation/screens/settings.dart';
+import 'package:lensai/features/user/presentation/screens/auth.dart';
 
 part 'routes.g.dart';
 
@@ -19,9 +22,17 @@ part 'routes.g.dart';
   name: 'BrowserRoute',
   path: '/',
   routes: [
+    TypedGoRoute<WebPageRoute>(
+      name: 'WebPageRoute',
+      path: 'page/:url',
+    ),
     TypedGoRoute<AboutRoute>(
       name: 'AboutRoute',
       path: 'about',
+    ),
+    TypedGoRoute<UserAuthRoute>(
+      name: 'UserAuthRoute',
+      path: 'userAuth',
     ),
     TypedGoRoute<SearchRoute>(
       name: 'SearchRoute',
@@ -60,10 +71,33 @@ class BrowserRoute extends GoRouteData {
   }
 }
 
+class WebPageRoute extends GoRouteData {
+  final String url;
+
+  const WebPageRoute({required this.url});
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(
+      builder: (_) => WebPageDialog(
+        url: Uri.parse(url),
+        precachedInfo: state.extra as WebPageInfo?,
+      ),
+    );
+  }
+}
+
 class AboutRoute extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const AboutDialogScreen());
+  }
+}
+
+class UserAuthRoute extends GoRouteData {
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(builder: (_) => const UserAuthScreen());
   }
 }
 

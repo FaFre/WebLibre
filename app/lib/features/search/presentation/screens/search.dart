@@ -19,6 +19,7 @@ import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/con
 import 'package:lensai/features/search/domain/providers/search_suggestions.dart';
 import 'package:lensai/features/search/presentation/widgets/bang_chips.dart';
 import 'package:lensai/features/search/presentation/widgets/search_field.dart';
+import 'package:lensai/features/search/presentation/widgets/search_suggestion_list.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -166,76 +167,9 @@ class SearchScreen extends HookConsumerWidget {
                 ),
               ),
             ),
-            HookConsumer(
-              builder: (context, ref, child) {
-                useListenableSelector(
-                  searchTextController,
-                  () => searchTextController.text.isNotEmpty,
-                );
-
-                final suggestions =
-                    useStream(ref.watch(searchSuggestionsProvider()));
-
-                final searchHistory = ref.watch(searchHistoryProvider);
-
-                final searchText = searchTextController.text;
-
-                if ((!searchText.isNotEmpty || !suggestions.hasData) &&
-                    (searchHistory.value?.isNotEmpty ?? false)) {
-                  final entries = searchHistory.value!;
-
-                  return SliverList.builder(
-                    itemCount: entries.length,
-                    itemBuilder: (context, index) {
-                      final query = entries[index].searchQuery;
-
-                      return ListTile(
-                        leading: const Icon(Icons.history),
-                        title: Text(query),
-                        onLongPress: () {
-                          searchTextController.text = query;
-                        },
-                        onTap: () async {
-                          await submitSearch(query);
-                        },
-                        trailing: IconButton(
-                          onPressed: () async {
-                            await ref
-                                .read(bangDataRepositoryProvider.notifier)
-                                .removeSearchEntry(query);
-                          },
-                          icon: const Icon(Icons.close),
-                        ),
-                      );
-                    },
-                  );
-                }
-
-                final prioritizedSuggestions = [
-                  if (searchText.isNotEmpty) searchText,
-                  if (suggestions.data != null)
-                    ...suggestions.data!
-                        .whereNot((suggestion) => suggestion == searchText),
-                ];
-
-                return SliverList.builder(
-                  itemCount: prioritizedSuggestions.length,
-                  itemBuilder: (context, index) {
-                    final suggestion = prioritizedSuggestions[index];
-
-                    return ListTile(
-                      leading: const Icon(Icons.search),
-                      title: Text(suggestion),
-                      onLongPress: () {
-                        searchTextController.text = suggestion;
-                      },
-                      onTap: () async {
-                        await submitSearch(suggestion);
-                      },
-                    );
-                  },
-                );
-              },
+            SearchSuggestionList(
+              searchTextController: searchTextController,
+              submitSearch: submitSearch,
             ),
             const SliverToBoxAdapter(
               child: Divider(),
@@ -274,7 +208,9 @@ class SearchScreen extends HookConsumerWidget {
                   child: tabs.when(
                     data: (data) {
                       if (data == null) {
-                        return const SizedBox.shrink();
+                        return const SliverToBoxAdapter(
+                          child: SizedBox.shrink(),
+                        );
                       }
 
                       return SliverList.builder(
@@ -283,12 +219,14 @@ class SearchScreen extends HookConsumerWidget {
                           final result = data[index];
 
                           final headHasMatch =
-                              result.title.contains(_matchPrefix);
+                              result.title?.contains(_matchPrefix) ?? false;
                           final bodyResult =
                               result.extractedContent ?? result.fullContent;
 
                           return ListTile(
-                            title: MarkdownBody(data: result.title),
+                            title: (result.title != null)
+                                ? MarkdownBody(data: result.title!)
+                                : null,
                             subtitle: (!headHasMatch && bodyResult != null)
                                 ? MarkdownBody(data: bodyResult)
                                 : null,

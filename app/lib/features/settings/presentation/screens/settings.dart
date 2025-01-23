@@ -8,7 +8,7 @@ import 'package:lensai/features/settings/presentation/controllers/save_settings.
 import 'package:lensai/features/settings/presentation/widgets/bang_group_list_tile.dart';
 import 'package:lensai/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:lensai/features/user/data/models/settings.dart';
-import 'package:lensai/features/user/domain/providers/cache.dart';
+import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
 import 'package:lensai/features/user/domain/repositories/settings.dart';
 
@@ -146,11 +146,6 @@ class SettingsScreen extends HookConsumerWidget {
                       );
                 },
               ),
-              const SizedBox(
-                height: 16,
-              ),
-              _buildSection(theme, 'Content Blocking'),
-              _buildSubSection(theme, 'Lists'),
               const SizedBox(
                 height: 16,
               ),

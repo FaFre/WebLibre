@@ -26,3 +26,15 @@ class ViewTabsSheet extends Sheet {
   @override
   List<Object?> get hashParameters => [];
 }
+
+class TabQaChatSheet extends Sheet {
+  final String chatId;
+
+  TabQaChatSheet({required this.chatId});
+
+  @override
+  bool get cacheHash => true;
+
+  @override
+  List<Object?> get hashParameters => [chatId];
+}

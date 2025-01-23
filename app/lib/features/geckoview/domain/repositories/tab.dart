@@ -78,13 +78,13 @@ class TabRepository extends _$TabRepository {
 
     final tabContentSub =
         tabContentService.tabContentStream.listen((content) async {
-      await _db.tabDao.updateTab(
+      await _db.tabDao.updateTabContent(
         content.tabId,
-        isProbablyReaderable: Value(content.isProbablyReaderable),
-        extractedContentMarkdown: Value(content.extractedContentMarkdown),
-        extractedContentPlain: Value(content.extractedContentPlain),
-        fullContentMarkdown: Value(content.fullContentMarkdown),
-        fullContentPlain: Value(content.fullContentPlain),
+        isProbablyReaderable: content.isProbablyReaderable,
+        extractedContentMarkdown: content.extractedContentMarkdown,
+        extractedContentPlain: content.extractedContentPlain,
+        fullContentMarkdown: content.fullContentMarkdown,
+        fullContentPlain: content.fullContentPlain,
       );
     });
 

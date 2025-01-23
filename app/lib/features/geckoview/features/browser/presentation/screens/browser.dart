@@ -5,6 +5,8 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
+import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
@@ -17,18 +19,20 @@ import 'package:lensai/features/geckoview/features/browser/domain/services/engin
 import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/web_page_dialog.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/app_bar_title.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/browser_view.dart';
+import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/sheets/create_tab.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
-import 'package:lensai/features/geckoview/features/controllers/bottom_sheet.dart';
-import 'package:lensai/features/geckoview/features/controllers/overlay_dialog.dart';
 import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page_visibility.dart';
 import 'package:lensai/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/widgets/reader_appearance_button.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:lensai/features/geckoview/features/tabs/features/chat/presentation/widgets/tab_qa_chat.dart';
 import 'package:lensai/features/kagi/data/entities/modes.dart';
 import 'package:lensai/features/user/domain/repositories/settings.dart';
+import 'package:lensai/presentation/hooks/draggable_scrollable_controller.dart';
+import 'package:lensai/presentation/hooks/menu_controller.dart';
 import 'package:lensai/presentation/hooks/overlay_portal_controller.dart';
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
 import 'package:share_plus/share_plus.dart';
@@ -52,7 +56,8 @@ class BrowserScreen extends HookConsumerWidget {
     final selectedTabId =
         ref.watch(selectedTabStateProvider.select((value) => value?.id));
 
-    final menuController = useMemoized(() => MenuController());
+    final trippleDotMenuController = useMenuController();
+    final tabMenuController = useMenuController();
 
     final lastBackButtonPress = useRef<DateTime?>(null);
 
@@ -120,24 +125,13 @@ class BrowserScreen extends HookConsumerWidget {
                             return (tabState != null)
                                 ? AppBarTitle(
                                     tab: tabState,
-                                    onTap: () {
-                                      ref
-                                          .read(
-                                            overlayDialogControllerProvider
-                                                .notifier,
-                                          )
-                                          .show(
-                                            WebPageDialog(
-                                              url: tabState.url,
-                                              precachedInfo: tabState,
-                                              onDismiss: ref
-                                                  .read(
-                                                    overlayDialogControllerProvider
-                                                        .notifier,
-                                                  )
-                                                  .dismiss,
-                                            ),
-                                          );
+                                    onTap: () async {
+                                      await context.push(
+                                        WebPageRoute(
+                                          url: tabState.url.toString(),
+                                        ).location,
+                                        extra: tabState,
+                                      );
                                     },
                                   )
                                 : const SizedBox.shrink();
@@ -261,22 +255,58 @@ class BrowserScreen extends HookConsumerWidget {
                     //       ),
                     //     ),
                     //   ),
-                    TabsActionButton(
-                      isActive: displayedSheet is ViewTabsSheet,
-                      onTap: () {
-                        if (displayedSheet case ViewTabsSheet()) {
-                          ref
-                              .read(bottomSheetControllerProvider.notifier)
-                              .dismiss();
-                        } else {
-                          ref
-                              .read(bottomSheetControllerProvider.notifier)
-                              .show(ViewTabsSheet());
-                        }
+                    MenuAnchor(
+                      controller: tabMenuController,
+                      builder: (context, controller, child) {
+                        return child!;
                       },
+                      menuChildren: [
+                        if (selectedTabId != null)
+                          MenuItemButton(
+                            onPressed: () async {
+                              await ref
+                                  .read(
+                                    tabRepositoryProvider.notifier,
+                                  )
+                                  .closeTab(selectedTabId);
+                            },
+                            leadingIcon: const Icon(Icons.close),
+                            child: const Text('Close Tab'),
+                          ),
+                        MenuItemButton(
+                          onPressed: () async {
+                            await ref
+                                .read(tabRepositoryProvider.notifier)
+                                .addTab(url: Uri.https('kagi.com'));
+                          },
+                          leadingIcon: const Icon(Icons.add),
+                          child: const Text('Add Tab'),
+                        ),
+                      ],
+                      child: TabsActionButton(
+                        isActive: displayedSheet is ViewTabsSheet,
+                        onTap: () {
+                          if (displayedSheet case ViewTabsSheet()) {
+                            ref
+                                .read(bottomSheetControllerProvider.notifier)
+                                .dismiss();
+                          } else {
+                            ref
+                                .read(bottomSheetControllerProvider.notifier)
+                                .show(ViewTabsSheet());
+                          }
+                        },
+                        onLongPress: () {
+                          if (tabMenuController.isOpen) {
+                            tabMenuController.close();
+                          } else {
+                            tabMenuController.open();
+                          }
+                        },
+                      ),
                     ),
                     MenuAnchor(
-                      controller: menuController,
+                      controller: trippleDotMenuController,
                       builder: (context, controller, child) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 4.0),
@@ -487,7 +517,7 @@ class BrowserScreen extends HookConsumerWidget {
                               );
 
                               await controller.reload();
-                              menuController.close();
+                              trippleDotMenuController.close();
                             },
                             leadingIcon: const Icon(Icons.refresh),
                             child: const Text('Reload'),
@@ -514,7 +544,7 @@ class BrowserScreen extends HookConsumerWidget {
                                               );
 
                                               await controller.goBack();
-                                              menuController.close();
+                                              trippleDotMenuController.close();
                                             },
                                             icon: const Icon(Icons.arrow_back),
                                           )
@@ -526,7 +556,7 @@ class BrowserScreen extends HookConsumerWidget {
                                                         .notifier,
                                                   )
                                                   .closeTab(selectedTabId);
-                                              menuController.close();
+                                              trippleDotMenuController.close();
                                             },
                                             icon: const Icon(Icons.close),
                                           ),
@@ -546,7 +576,7 @@ class BrowserScreen extends HookConsumerWidget {
                                               );
 
                                               await controller.goForward();
-                                              menuController.close();
+                                              trippleDotMenuController.close();
                                             }
                                           : null,
                                       icon: const Icon(Icons.arrow_forward),
@@ -556,6 +586,15 @@ class BrowserScreen extends HookConsumerWidget {
                               );
                             },
                           ),
+                        MenuItemButton(
+                          onPressed: () async {
+                            final x =
+                                await context.push(UserAuthRoute().location);
+                            print(x);
+                          },
+                          leadingIcon: const Icon(Icons.info),
+                          child: const Text('Auth'),
+                        ),
                       ],
                     ),
                   ],
@@ -744,25 +783,36 @@ class BrowserScreen extends HookConsumerWidget {
                   return false;
                 },
                 child: switch (displayedSheet) {
-                  ViewTabsSheet() => DraggableScrollableSheet(
-                      key: ValueKey(displayedSheet),
-                      expand: false,
-                      minChildSize: 0.1,
-                      maxChildSize: _realtiveSafeArea(context),
-                      builder: (context, scrollController) {
-                        return ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(28),
-                            topRight: Radius.circular(28),
-                          ),
-                          child: ViewTabsSheetWidget(
-                            sheetScrollController: scrollController,
-                            onClose: () {
-                              ref
-                                  .read(bottomSheetControllerProvider.notifier)
-                                  .dismiss();
-                            },
-                          ),
+                  ViewTabsSheet() => HookBuilder(
+                      builder: (localContext) {
+                        final draggableScrollableController =
+                            useDraggableScrollableController();
+
+                        return DraggableScrollableSheet(
+                          key: ValueKey(displayedSheet),
+                          controller: draggableScrollableController,
+                          expand: false,
+                          minChildSize: 0.1,
+                          maxChildSize: _realtiveSafeArea(context),
+                          builder: (context, scrollController) {
+                            return ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(28),
+                                topRight: Radius.circular(28),
+                              ),
+                              child: ViewTabsSheetWidget(
+                                sheetScrollController: scrollController,
+                                draggableScrollableController:
+                                    draggableScrollableController,
+                                onClose: () {
+                                  ref
+                                      .read(bottomSheetControllerProvider
+                                          .notifier)
+                                      .dismiss();
+                                },
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -791,6 +841,60 @@ class BrowserScreen extends HookConsumerWidget {
                               activeKagiTool.value = tool;
                             },
                           ),
+                        );
+                      },
+                    ),
+                  final TabQaChatSheet parameter => HookBuilder(
+                      builder: (localContext) {
+                        final draggableScrollableController =
+                            useDraggableScrollableController();
+
+                        return DraggableScrollableSheet(
+                          key: ValueKey(displayedSheet),
+                          controller: draggableScrollableController,
+                          expand: false,
+                          minChildSize: 0.1,
+                          maxChildSize: _realtiveSafeArea(context),
+                          builder: (context, scrollController) {
+                            return ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(28),
+                                topRight: Radius.circular(28),
+                              ),
+                              child: Column(
+                                children: [
+                                  DraggableScrollableHeader(
+                                    controller: draggableScrollableController,
+                                    child: Material(
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        child: Center(
+                                          child: Container(
+                                            width: 40,
+                                            height: 4,
+                                            margin: const EdgeInsets.symmetric(
+                                              vertical: 16.0,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[300],
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: TabQaChat(
+                                      chatId: parameter.chatId,
+                                      scrollController: scrollController,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
