@@ -11,6 +11,7 @@ import mozilla.components.feature.app.links.AppLinksUseCases
 import mozilla.components.feature.downloads.DownloadsUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.session.SettingsUseCases
+import mozilla.components.feature.session.TrackingProtectionUseCases
 import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 
@@ -49,4 +50,6 @@ class UseCases(
     val customTabsUseCases: CustomTabsUseCases by lazy { CustomTabsUseCases(store, sessionUseCases.loadUrl) }
 
     val appLinksUseCases by lazy { AppLinksUseCases(context) }
+
+    //val trackingProtectionUseCases by lazy { TrackingProtectionUseCases(store, engine) }
 }

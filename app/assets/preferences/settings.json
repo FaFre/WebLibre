@@ -1,0 +1,261 @@
+{
+    "system": {
+        "incognito_mode": {
+            "preferences": {
+                "privacy.sanitize.sanitizeOnShutdown": true,
+                "privacy.clearOnShutdown.cache": true,
+                "privacy.clearOnShutdown_v2.cache": true,
+                "privacy.clearOnShutdown.downloads": true,
+                "privacy.clearOnShutdown.formdata": true,
+                "privacy.clearOnShutdown.history": true,
+                "privacy.clearOnShutdown_v2.historyFormDataAndDownloads": true,
+                "privacy.clearOnShutdown.cookies": true,
+                "privacy.clearOnShutdown.offlineApps": true,
+                "privacy.clearOnShutdown.sessions": true,
+                "privacy.clearOnShutdown_v2.cookiesAndStorage": true,
+                "privacy.clearSiteData.cache": true,
+                "privacy.clearSiteData.cookiesAndStorage": false,
+                "privacy.clearSiteData.historyFormDataAndDownloads": true,
+                "privacy.cpd.cache": true,
+                "privacy.clearHistory.cache": true,
+                "privacy.cpd.formdata": true,
+                "privacy.cpd.history": true,
+                "privacy.clearHistory.historyFormDataAndDownloads": true,
+                "privacy.cpd.cookies": false,
+                "privacy.cpd.sessions": true,
+                "privacy.cpd.offlineApps": false,
+                "privacy.clearHistory.cookiesAndStorage": false,
+                "privacy.sanitize.timeSpan": 0
+            }
+        }
+    },
+    "user": {
+        "Safe Browsing": {
+            "description": "Google Safe Browsing is a service from Google that warns users when they attempt to navigate to a dangerous website or download dangerous files.",
+            "preferences": {
+                "browser.safebrowsing.downloads.remote.enabled": {
+                    "value": false,
+                    "title": "Disable Google Safe Browsing for downloads",
+                    "description": "To verify the safety of certain executable files, GeckoView may submit some information about the file, including the name, origin, size and a cryptographic hash of the contents, to the Google Safe Browsing service which helps GeckoView determine whether or not the file should be blocked."
+                }
+            }
+        },
+        "Block Implicit Outbound": {
+            "description": "Control not explicitly user invoked interactions",
+            "preferences": {
+                "network.prefetch-next": {
+                    "value": false,
+                    "title": "Disable link prefetching"
+                },
+                "network.dns.disablePrefetch": {
+                    "value": true,
+                    "title": "Disable DNS prefetching"
+                },
+                "network.dns.disablePrefetchFromHTTPS": {
+                    "value": true,
+                    "title": "Disable HTTPS DNS prefetching"
+                },
+                "network.predictor.enabled": {
+                    "value": false,
+                    "title": "Disable prefetching predictor"
+                },
+                "network.predictor.enable-prefetch": {
+                    "value": false,
+                    "title": "Disable prefetching predictions"
+                },
+                "network.http.speculative-parallel-limit": {
+                    "value": 0,
+                    "title": "Disable link-mouseover opening connection to linked server"
+                }
+            }
+        },
+        "DNS": {
+            "description": "Improve DNS and Proxy/SOCKS security",
+            "preferences": {
+                "network.trr.mode": {
+                    "value": 3,
+                    "title": "Enable DNS over HTTPS",
+                    "requireUserOptIn": true
+                },
+                "network.trr.uri": {
+                    "value": "https://dns.quad9.net/dns-query",
+                    "title": "Use quad9 for Trusted Recursive Resolver (TRR)",
+                    "description": "Quad9 is a privacy-focused DNS resolver that provides malware blocking and security features.",
+                    "requireUserOptIn": true
+                },
+                "network.trr.custom.uri": {
+                    "value": "https://dns.quad9.net/dns-query",
+                    "title": "Use quad9 for custom Trusted Recursive Resolver (TRR)",
+                    "description": "Quad9 is a privacy-focused DNS resolver that provides malware blocking and security features.",
+                    "requireUserOptIn": true
+                },
+                "network.dns.native_https_query": {
+                    "value": true,
+                    "title": "Enable native DNS HTTPS Query",
+                    "description": "DNS over HTTPS",
+                    "shouldBeDefault": true
+                },
+                "network.proxy.socks_remote_dns": {
+                    "value": true,
+                    "title": "Set the proxy server to do any DNS lookups when using SOCKS",
+                    "description": "e.g. in Tor, this stops your local DNS server from knowing your Tor destination as a remote Tor node will handle the DNS request"
+                },
+                "network.file.disable_unc_paths": {
+                    "value": true,
+                    "title": "Disable using UNC (Uniform Naming Convention) paths",
+                    "description": "Warning: Can break extensions for profiles on network shares",
+                    "requireUserOptIn": true
+                },
+                "network.gio.supported-protocols": {
+                    "value": "",
+                    "title": "Disable GIO as a potential proxy bypass vector"
+                },
+                "media.peerconnection.ice.proxy_only_if_behind_proxy": {
+                    "value": true,
+                    "title": "Force WebRTC inside the proxy"
+                },
+                "media.peerconnection.ice.default_address_only": {
+                    "value": true,
+                    "title": "Force a single network interface for ICE candidates generation",
+                    "description": "When using a system-wide proxy, it uses the proxy interface"
+                }
+            }
+        },
+        "Disk Avoidance": {
+            "description": "Control what data to persist to disk",
+            "preferences": {
+                "browser.cache.disk.enable": {
+                    "value": false,
+                    "title": "Disable disk cache",
+                    "description": "Don't cache data to disk. Might impact performance negatively",
+                    "requireUserOptIn": true
+                },
+                "browser.privatebrowsing.forceMediaMemoryCache": {
+                    "value": true,
+                    "title": "Set media cache in Private Browsing to in-memory"
+                },
+                "media.memory_cache_max_size": {
+                    "value": 65536,
+                    "title": "Increase in-memory media cache maximum size"
+                },
+                "browser.sessionstore.privacy_level": {
+                    "value": 2,
+                    "title": "Disable storing extra session data",
+                    "description": "Extra session data such as form content, cookies and POST data"
+                }
+            }
+        },
+        "Secure Connections": {
+            "description": "SSL/TLS / OCSP / CERTS / HPKP",
+            "preferences": {
+                "security.ssl.require_safe_negotiation": {
+                    "value": true,
+                    "title": "Require safe negotiation",
+                    "description": "Blocks connections to servers that don't support RFC 5746 as they're potentially vulnerable to a MiTM attack."
+                },
+                "security.tls.enable_0rtt_data": {
+                    "value": false,
+                    "title": "Disable TLS1.3 0-RTT (round-trip time)",
+                    "description": "This data is not forward secret, as it is encrypted solely under keys derived using the offered PSK. There are no guarantees of non-replay between connections."
+                },
+                "security.OCSP.enabled": {
+                    "value": 1,
+                    "title": "Enforce OCSP fetching to confirm current validity of certificates"
+                },
+                "security.OCSP.require": {
+                    "value": true,
+                    "title": "Set OCSP fetch failures to hard-fail",
+                    "description": "When a CA cannot be reached to validate a cert, GeckoView just continues the connection (=soft-fail). Setting this pref to true tells GeckoView to instead terminate the connection (=hard-fail)."
+                },
+                "security.cert_pinning.enforcement_level": {
+                    "value": 2,
+                    "title": "Enable strict PKP (Public Key Pinning)"
+                },
+                "security.remote_settings.crlite_filters.enabled": {
+                    "value": true,
+                    "title": "Enable CRLite"
+                },
+                "security.pki.crlite_mode": {
+                    "value": 2,
+                    "title": "Enable CRLite for PKI"
+                },
+                "security.tls.enable_kyber": {
+                    "value": true,
+                    "title": "Enable Post-Quantum Kyber TLS"
+                },
+                "network.http.http3.enable_kyber": {
+                    "value": true,
+                    "title": "Enable HTTP3 Post-Quantum Kyber TLS"
+                },
+                "security.ssl.treat_unsafe_negotiation_as_broken": {
+                    "value": true,
+                    "title": "Display warning on the padlock for 'broken security'"
+                },
+                "browser.xul.error_pages.expert_bad_cert": {
+                    "value": true,
+                    "title": "Display advanced information on Insecure Connection warning pages"
+                },
+                "dom.security.https_first": {
+                    "value": true,
+                    "title": "Attempt to establish HTTPS connections first before falling back to HTTP",
+                    "shouldBeDefault": true
+                }
+            }
+        },
+        "Miscelaneous": {
+            "preferences": {
+                "permissions.manager.defaultsUrl": {
+                    "value": "",
+                    "title": "Remove special permissions for certain mozilla domains"
+                },
+                "network.IDN_show_punycode": {
+                    "value": true,
+                    "title": "Use Punycode in Internationalized Domain Names to eliminate possible spoofing"
+                },
+                "extensions.enabledScopes": {
+                    "value": 5,
+                    "title": "Limit allowed extension directories",
+                    "description": "Only allow profile and application directories",
+                    "shouldBeDefault": true
+                },
+                "extensions.postDownloadThirdPartyPrompt": {
+                    "value": false,
+                    "title": "Disable bypassing 3rd party extension install prompts"
+                },
+                "pdfjs.enableScripting": {
+                    "value": false,
+                    "title": "Disable PDFJS scripting"
+                }
+            }
+        },
+        "Privacy": {
+            "preferences": {
+                "privacy.globalprivacycontrol.enabled": {
+                    "value": true,
+                    "title": "Enable Global Privacy Control (GPC)",
+                    "shouldBeDefault": true
+                },
+                "browser.contentblocking.category": {
+                    "value": "strict",
+                    "title": "Enable ETP Strict Mode",
+                    "description": "ETP Strict Mode enables Total Cookie Protection (TCP)"
+                },
+                "network.http.referer.XOriginTrimmingPolicy": {
+                    "value": 2,
+                    "title": "Trim cross-origin referrers",
+                    "description": "Trims down referrers to just the scheme, hostname and port"
+                },
+                "general.useragent.updates.enabled": {
+                    "value": false,
+                    "title": "Disable automatic User Agent updates",
+                    "description": "This preference controls whether Firefox automatically updates its User-Agent string. When set to false, it prevents Firefox from automatically updating the browser's User-Agent string, which is a text identifier that tells websites which browser and version you're using."
+                },
+                "dom.private-attribution.submission.enabled": {
+                    "value": false,
+                    "title": "Disable Private Attribution Submission Control",
+                    "shouldBeDefault": true
+                }
+            }
+        }
+    }
+}

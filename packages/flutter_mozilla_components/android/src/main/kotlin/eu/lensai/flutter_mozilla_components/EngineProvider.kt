@@ -6,6 +6,7 @@ package eu.lensai.flutter_mozilla_components
 
 import android.content.Context
 import eu.lensai.flutter_mozilla_components.feature.CookieManagerFeature
+import eu.lensai.flutter_mozilla_components.feature.PrefManagerFeature
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.concept.engine.DefaultSettings
@@ -31,6 +32,7 @@ object EngineProvider {
 
             // About config it's no longer enabled by default
             builder.aboutConfigEnabled(true)
+            builder.extensionsProcessEnabled(true)
             builder.extensionsWebAPIEnabled(true)
             builder.consoleOutput(true)
 
@@ -47,6 +49,7 @@ object EngineProvider {
         return GeckoEngine(context, defaultSettings, runtime).also {
             WebCompatFeature.install(it)
             CookieManagerFeature.install(it)
+            PrefManagerFeature.install(it)
         }
     }
 

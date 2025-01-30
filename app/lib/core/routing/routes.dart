@@ -13,6 +13,8 @@ import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/
 import 'package:lensai/features/geckoview/features/browser/presentation/screens/browser.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:lensai/features/search/presentation/screens/search.dart';
+import 'package:lensai/features/settings/presentation/screens/browser_hardening.dart';
+import 'package:lensai/features/settings/presentation/screens/browser_hardening_group.dart';
 import 'package:lensai/features/settings/presentation/screens/settings.dart';
 import 'package:lensai/features/user/presentation/screens/auth.dart';
 
@@ -180,11 +182,41 @@ class ContainerListRoute extends GoRouteData {
 @TypedGoRoute<SettingsRoute>(
   name: 'SettingsRoute',
   path: '/settings',
+  routes: [
+    TypedGoRoute<BrowserHardeningRoute>(
+      name: 'BrowserHardeningRoute',
+      path: 'hardening',
+      routes: [
+        TypedGoRoute<BrowserHardeningGroupRoute>(
+          name: 'BrowserHardeningGroupRoute',
+          path: 'group/:group',
+        ),
+      ],
+    ),
+  ],
 )
 class SettingsRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SettingsScreen();
+  }
+}
+
+class BrowserHardeningRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const BrowserHardeningScreen();
+  }
+}
+
+class BrowserHardeningGroupRoute extends GoRouteData {
+  final String group;
+
+  const BrowserHardeningGroupRoute({required this.group});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BrowserHardeningGroupScreen(groupName: group);
   }
 }
 

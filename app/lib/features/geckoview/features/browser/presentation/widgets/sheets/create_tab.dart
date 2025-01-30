@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:lensai/features/kagi/data/entities/modes.dart';
-import 'package:lensai/features/kagi/presentation/tabs/search_tab.dart';
 import 'package:lensai/features/kagi/presentation/tabs/summarize_tab.dart';
 import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
 import 'package:lensai/presentation/hooks/sync_page_tab.dart';

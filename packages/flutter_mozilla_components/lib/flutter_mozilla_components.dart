@@ -8,6 +8,7 @@ export 'src/domain/services/gecko_engine_settings.dart';
 export 'src/domain/services/gecko_event.dart';
 export 'src/domain/services/gecko_find_in_page.dart';
 export 'src/domain/services/gecko_icon.dart';
+export 'src/domain/services/gecko_pref.dart';
 export 'src/domain/services/gecko_readerable.dart';
 export 'src/domain/services/gecko_selection_action.dart';
 export 'src/domain/services/gecko_session.dart';
@@ -17,10 +18,14 @@ export 'src/domain/services/gecko_tab_content.dart';
 export 'src/geckoview_widget.dart';
 export 'src/pigeons/gecko.g.dart'
     show
+        ColorScheme,
+        CookieBannerHandlingMode,
         CookieSameSiteStatus,
+        GeckoEngineSettings,
         GeckoSuggestion,
         GeckoSuggestionType,
         HistoryMetadataKey,
+        HttpsOnlyMode,
         IconSource,
         IconType,
         Resource,
@@ -28,5 +33,7 @@ export 'src/pigeons/gecko.g.dart'
         SecurityInfoState,
         TabContent,
         TabContentState,
+        TrackingProtectionPolicy,
+        WebContentIsolationStrategy,
         WebExtensionActionType,
         WebExtensionData;

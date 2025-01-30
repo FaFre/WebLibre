@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:lensai/core/routing/routes.dart';
+import 'package:lensai/data/models/drag_data.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,4 +12,20 @@ GoRouter router(Ref ref) {
     debugLogDiagnostics: true,
     routes: $appRoutes,
   );
+}
+
+@Riverpod()
+class WillAcceptDrop extends _$WillAcceptDrop {
+  void setData(DropTargetData data) {
+    state = data;
+  }
+
+  void clear() {
+    state = null;
+  }
+
+  @override
+  DropTargetData? build() {
+    return null;
+  }
 }

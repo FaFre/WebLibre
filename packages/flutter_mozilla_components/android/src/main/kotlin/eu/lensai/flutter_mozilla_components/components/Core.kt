@@ -2,6 +2,7 @@ package eu.lensai.flutter_mozilla_components.components
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import eu.lensai.flutter_mozilla_components.Components
 import eu.lensai.flutter_mozilla_components.interceptor.AppRequestInterceptor
@@ -25,7 +26,10 @@ import mozilla.components.browser.thumbnails.ThumbnailsMiddleware
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.concept.engine.DefaultSettings
 import mozilla.components.concept.engine.Engine
+import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
+import mozilla.components.concept.engine.fission.WebContentIsolationStrategy
+import mozilla.components.concept.engine.mediaquery.PreferredColorScheme
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.amo.AMOAddonsProvider
@@ -54,20 +58,39 @@ class Core(private val context: Context,
         PreferenceManager.getDefaultSharedPreferences(context)
     }
 
-    private val engineSettings by lazy {
-        DefaultSettings().apply {
+    val engineSettings by lazy {
+        DefaultSettings(
             //historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage)
-            requestInterceptor = AppRequestInterceptor(context)
-            remoteDebuggingEnabled = prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_remote_debugging), false)
-            testingModeEnabled = prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_testing_mode), false)
-            historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage)
-            trackingProtectionPolicy = createTrackingProtectionPolicy(prefs)
-            httpsOnlyMode = Engine.HttpsOnlyMode.ENABLED
-            globalPrivacyControlEnabled = prefs.getBoolean(
-                context.getPreferenceKey(R.string.pref_key_global_privacy_control),
-                false,
-            )
-        }
+            requestInterceptor = AppRequestInterceptor(context),
+            historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage),
+            testingModeEnabled = false,
+            remoteDebuggingEnabled = false,
+            automaticFontSizeAdjustment = true,
+            fontInflationEnabled = true,
+            suspendMediaWhenInactive = false,
+            getDesktopMode = {
+                store.state.desktopMode
+            },
+            enterpriseRootsEnabled = false,
+            emailTrackerBlockingPrivateBrowsing = true,
+//            clearColor = ContextCompat.getColor(
+//                context,
+//                R.color.fx_mobile_layer_color_1,
+//            ),
+
+            trackingProtectionPolicy = createTrackingProtectionPolicy(TrackingProtectionPolicy.strict()),
+            //FP Protection is handled by trackingPolicy
+            //fingerprintingProtection
+            //fingerprintingProtectionPrivateBrowsing
+            httpsOnlyMode = Engine.HttpsOnlyMode.ENABLED,
+            globalPrivacyControlEnabled = true,
+            preferredColorScheme = PreferredColorScheme.Dark,
+            cookieBannerHandlingMode = EngineSession.CookieBannerHandlingMode.REJECT_ALL,
+            cookieBannerHandlingModePrivateBrowsing = EngineSession.CookieBannerHandlingMode.REJECT_ALL,
+            cookieBannerHandlingGlobalRules = true,
+            cookieBannerHandlingGlobalRulesSubFrames = true,
+            webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE
+        )
     }
 
     val engine: Engine by lazy {
@@ -136,7 +159,17 @@ class Core(private val context: Context,
 //                PromptMiddleware(),
                 SessionPrioritizationMiddleware(),
                 RecordingDevicesMiddleware(context, components.notificationsDelegate),
-            ) + EngineMiddleware.create(engine),
+            ) + EngineMiddleware.create(
+                engine,
+                // We are disabling automatic suspending of engine sessions under memory pressure.
+                // Instead we solely rely on GeckoView and the Android system to reclaim memory
+                // when needed. For details, see:
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=1752594
+                // https://github.com/mozilla-mobile/fenix/issues/12731
+                // https://github.com/mozilla-mobile/android-components/issues/11300
+                // https://github.com/mozilla-mobile/android-components/issues/11653
+                trimMemoryAutomatically = false,
+            )
         ).apply {
             components.events.registerFlowEvents(this)
 
@@ -191,11 +224,10 @@ class Core(private val context: Context,
      * @return the constructed tracking protection policy based on preferences.
      */
     private fun createTrackingProtectionPolicy(
-        prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context),
-        normalMode: Boolean = prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_tracking_protection_normal), true),
-        privateMode: Boolean = prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_tracking_protection_private), true),
+        trackingPolicy: EngineSession. TrackingProtectionPolicyForSessionTypes,
+        normalMode: Boolean = true,
+        privateMode: Boolean = true,
     ): TrackingProtectionPolicy {
-        val trackingPolicy = TrackingProtectionPolicy.recommended()
         return when {
             normalMode && privateMode -> trackingPolicy
             normalMode && !privateMode -> trackingPolicy.forRegularSessionsOnly()

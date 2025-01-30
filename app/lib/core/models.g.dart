@@ -6,7 +6,7 @@ part of 'models.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$chatModelHash() => r'e7538b9f0dd43ea64953164c5402e76fde96f5e9';
+String _$chatModelHash() => r'9e44e8fa1d688968841933aac8e13212cf41f4ed';
 
 /// See also [chatModel].
 @ProviderFor(chatModel)
@@ -22,7 +22,7 @@ final chatModelProvider = Provider<ChatOpenAI>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ChatModelRef = ProviderRef<ChatOpenAI>;
-String _$embeddingModelHash() => r'5d65c75df195a26adefac5a75f0e8f6b0f1b8590';
+String _$embeddingModelHash() => r'40111a5f08b43afe6edd399ff0e6c022b3387265';
 
 /// See also [embeddingModel].
 @ProviderFor(embeddingModel)

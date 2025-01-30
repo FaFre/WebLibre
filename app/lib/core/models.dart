@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -18,7 +16,7 @@ part 'models.g.dart';
 
 @Riverpod(keepAlive: true)
 ChatOpenAI chatModel(Ref ref) {
-  final openaiApiKey = 'FfTBKW1t5dOOXVoiaF2hbXPAHiz3fvfy';
+  const openaiApiKey = 'FfTBKW1t5dOOXVoiaF2hbXPAHiz3fvfy';
   return ChatOpenAI(
     apiKey: openaiApiKey,
     baseUrl: 'https://api.deepinfra.com/v1/openai',
@@ -30,7 +28,7 @@ ChatOpenAI chatModel(Ref ref) {
 
 @Riverpod(keepAlive: true)
 OpenAIEmbeddings embeddingModel(Ref ref) {
-  final openaiApiKey = 'FfTBKW1t5dOOXVoiaF2hbXPAHiz3fvfy';
+  const openaiApiKey = 'FfTBKW1t5dOOXVoiaF2hbXPAHiz3fvfy';
   return OpenAIEmbeddings(
     apiKey: openaiApiKey,
     baseUrl: 'https://api.deepinfra.com/v1/openai',

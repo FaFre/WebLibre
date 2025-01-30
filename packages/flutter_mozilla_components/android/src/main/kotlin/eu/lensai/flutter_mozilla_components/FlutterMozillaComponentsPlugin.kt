@@ -10,6 +10,7 @@ import eu.lensai.flutter_mozilla_components.api.GeckoCookieApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoFindApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoIconsApiImpl
+import eu.lensai.flutter_mozilla_components.api.GeckoPrefApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoSelectionActionControllerImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoSessionApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoSuggestionApiImpl
@@ -22,6 +23,7 @@ import eu.lensai.flutter_mozilla_components.pigeons.GeckoCookieApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoFindApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoIconsApi
+import eu.lensai.flutter_mozilla_components.pigeons.GeckoPrefApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSelectionActionController
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSessionApi
@@ -91,6 +93,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     GeckoTabsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTabsApiImpl())
     GeckoIconsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoIconsApiImpl())
     GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
+    GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
     GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())
     GeckoSelectionActionController.setUp(_flutterPluginBinding.binaryMessenger, GeckoSelectionActionControllerImpl(
       selectionActionDelegate

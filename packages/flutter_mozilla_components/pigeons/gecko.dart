@@ -539,6 +539,63 @@ class TabContent {
   );
 }
 
+enum TrackingProtectionPolicy {
+  none,
+  recommended,
+  strict,
+  custom,
+}
+
+enum HttpsOnlyMode {
+  disabled,
+  privateOnly,
+  enabled,
+}
+
+enum ColorScheme {
+  system,
+  light,
+  dark,
+}
+
+enum CookieBannerHandlingMode {
+  disabled,
+  rejectAll,
+  rejectOrAcceptAll,
+}
+
+enum WebContentIsolationStrategy {
+  isolateNothing,
+  isolateEverything,
+  isolateHighValue,
+}
+
+class GeckoEngineSettings {
+  final bool? javascriptEnabled;
+  final TrackingProtectionPolicy? trackingProtectionPolicy;
+  final HttpsOnlyMode? httpsOnlyMode;
+  final bool? globalPrivacyControlEnabled;
+  final ColorScheme? preferredColorScheme;
+  final CookieBannerHandlingMode? cookieBannerHandlingMode;
+  final CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing;
+  final bool? cookieBannerHandlingGlobalRules;
+  final bool? cookieBannerHandlingGlobalRulesSubFrames;
+  final WebContentIsolationStrategy? webContentIsolationStrategy;
+
+  GeckoEngineSettings(
+    this.javascriptEnabled,
+    this.trackingProtectionPolicy,
+    this.httpsOnlyMode,
+    this.globalPrivacyControlEnabled,
+    this.preferredColorScheme,
+    this.cookieBannerHandlingMode,
+    this.cookieBannerHandlingModePrivateBrowsing,
+    this.cookieBannerHandlingGlobalRules,
+    this.cookieBannerHandlingGlobalRulesSubFrames,
+    this.webContentIsolationStrategy,
+  );
+}
+
 // /// Represents all the different supported types of data that can be found from long clicking
 // /// an element.
 // sealed class HitResult {
@@ -614,7 +671,8 @@ abstract class GeckoBrowserApi {
 
 @HostApi()
 abstract class GeckoEngineSettingsApi {
-  void javaScriptEnabled(bool state);
+  void setDefaultSettings(GeckoEngineSettings settings);
+  void updateRuntimeSettings(GeckoEngineSettings settings);
 }
 
 @HostApi()
@@ -802,6 +860,16 @@ abstract class GeckoFindApi {
 abstract class GeckoIconsApi {
   @async
   IconResult loadIcon(IconRequest request);
+}
+
+@HostApi()
+abstract class GeckoPrefApi {
+  @async
+  Map<String, Object> getPrefs(List<String>? preferenceFilter);
+  @async
+  Map<String, Object> applyPrefs(String prefBuffer);
+  @async
+  void resetPrefs(List<String>? preferenceNames);
 }
 
 @HostApi()

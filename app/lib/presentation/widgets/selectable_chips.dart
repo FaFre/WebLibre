@@ -29,6 +29,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final Widget? Function(T item)? itemAvatar;
   final int? Function(T item)? itemBadgeCount;
 
+  final Widget Function(Widget child, S item)? itemWrap;
+
   final void Function(T item)? onSelected;
   final void Function(T item)? onDeleted;
 
@@ -37,6 +39,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     required this.itemLabel,
     this.itemAvatar,
     this.itemBadgeCount,
+    this.itemWrap,
     required this.availableItems,
     this.selectedItem,
     this.maxCount = 25,
@@ -76,7 +79,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
           itemCount: items.length,
           itemBuilder: (context, index) {
             final item = items[index];
-            return Padding(
+            final child = Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: _BadgeWrapper(
                 count: itemBadgeCount?.call(item),
@@ -101,6 +104,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                 ),
               ),
             );
+
+            return (itemWrap != null) ? itemWrap!(child, item) : child;
           },
         );
       },

@@ -4,7 +4,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/core/providers.dart';
 import 'package:lensai/core/routing/routes.dart';
+import 'package:lensai/data/models/drag_data.dart';
 import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
@@ -16,7 +18,6 @@ import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/create_tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/engine_settings.dart';
-import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/web_page_dialog.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/app_bar_title.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/browser_view.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
@@ -164,7 +165,8 @@ class BrowserScreen extends HookConsumerWidget {
                                     //         preferredTool: KagiTool.search,
                                     //       ),
                                     //     );
-                                    await context.push(SearchRoute().location);
+                                    await context
+                                        .push(const SearchRoute().location);
                                   },
                                   icon: Icon(KagiTool.search.icon),
                                 ),
@@ -588,12 +590,18 @@ class BrowserScreen extends HookConsumerWidget {
                           ),
                         MenuItemButton(
                           onPressed: () async {
-                            final x =
-                                await context.push(UserAuthRoute().location);
-                            print(x);
+                            await context.push(UserAuthRoute().location);
                           },
                           leadingIcon: const Icon(Icons.info),
                           child: const Text('Auth'),
+                        ),
+                        MenuItemButton(
+                          onPressed: () async {
+                            await context
+                                .push(BrowserHardeningRoute().location);
+                          },
+                          leadingIcon: const Icon(Icons.info),
+                          child: const Text('Pref'),
                         ),
                       ],
                     ),
@@ -603,169 +611,190 @@ class BrowserScreen extends HookConsumerWidget {
             );
           },
         ),
-        body: OverlayPortal(
-          controller: overlayController,
-          overlayChildBuilder: (context) {
-            return displayedOverlayDialog!;
+        body: DragTarget<TabDragData>(
+          onMove: (details) {
+            ref
+                .read(willAcceptDropProvider.notifier)
+                .setData(DeleteDropData(details.data.tabId));
           },
-          child: Listener(
-            onPointerDown: (displayedSheet != null)
-                ? (_) {
-                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
-                  }
-                : null,
-            child: HookConsumer(
-              builder: (context, ref, child) {
-                return BackButtonListener(
-                  onBackButtonPressed: () async {
-                    final tabState = (selectedTabId != null)
-                        ? ref.read(tabStateProvider(selectedTabId))
-                        : null;
-
-                    final tabCount =
-                        ref.read(tabListProvider.select((tabs) => tabs.length));
-
-                    //Don't do anything if a child route is active
-                    if (GoRouterState.of(context).topRoute?.path !=
-                        BrowserRoute().location) {
-                      return false;
-                    }
-
-                    if (displayedSheet != null) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .dismiss();
-                      return true;
-                    }
-
-                    if (displayedOverlayDialog != null) {
-                      ref
-                          .read(overlayDialogControllerProvider.notifier)
-                          .dismiss();
-                      return true;
-                    }
-
-                    if (tabState?.isFullScreen == true) {
-                      await ref
-                          .read(selectedTabSessionNotifierProvider)
-                          .exitFullscreen();
-                      return true;
-                    }
-
-                    if (tabState?.historyState.canGoBack == true) {
-                      lastBackButtonPress.value = null;
-
-                      final controller = ref.read(
-                        tabSessionProvider(tabId: selectedTabId).notifier,
-                      );
-
-                      await controller.goBack();
-                      return true;
-                    }
-
-                    if (lastBackButtonPress.value != null &&
-                        DateTime.now().difference(lastBackButtonPress.value!) <
-                            const Duration(seconds: 2)) {
-                      lastBackButtonPress.value = null;
-
-                      if (tabState != null && tabCount > 1) {
-                        await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .closeTab(tabState.id);
-                        return true;
-                      } else {
-                        //Mark back as unhandled and navigator will pop
-                        return false;
-                      }
-                    } else {
-                      lastBackButtonPress.value = DateTime.now();
-                      ScaffoldMessenger.of(context)
-                        ..clearSnackBars()
-                        ..showSnackBar(
-                          SnackBar(
-                            content: (tabCount > 1)
-                                ? const Text(
-                                    'Please click BACK again to close current tab',
-                                  )
-                                : const Text(
-                                    'Please click BACK again to exit app',
-                                  ),
-                          ),
-                        );
-
-                      return true;
-                    }
-                  },
-                  child: Stack(
-                    children: [
-                      SafeArea(
-                        child: Stack(
-                          children: [
-                            const BrowserView(),
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Consumer(
-                                builder: (context, ref, child) {
-                                  final value = ref.watch(
-                                    selectedTabStateProvider.select(
-                                      (state) {
-                                        if (state?.isLoading == true) {
-                                          return state?.progress ?? 100;
-                                        }
-
-                                        //When not loading we assumed finished
-                                        return 100;
-                                      },
-                                    ),
-                                  );
-
-                                  return Visibility(
-                                    visible: value < 100,
-                                    child: LinearProgressIndicator(
-                                      value: value / 100,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Consumer(
-                                builder: (context, ref, child) {
-                                  final value = ref.watch(
-                                    selectedTabStateProvider.select(
-                                      (state) => EdgeInsets.only(
-                                        bottom: (state?.isLoading == true &&
-                                                state?.progress != null &&
-                                                state!.progress < 100)
-                                            ? 4.0
-                                            : 0.0,
-                                      ),
-                                    ),
-                                  );
-
-                                  return FindInPageWidget(padding: value);
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (displayedSheet != null)
-                        ModalBarrier(
-                          color: Theme.of(context).dialogTheme.barrierColor ??
-                              Colors.black54,
-                        ),
-                    ],
-                  ),
-                );
+          onLeave: (data) {
+            ref.read(willAcceptDropProvider.notifier).clear();
+          },
+          onAcceptWithDetails: (details) async {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .closeTab(details.data.tabId);
+          },
+          builder: (context, _, __) {
+            return OverlayPortal(
+              controller: overlayController,
+              overlayChildBuilder: (context) {
+                return displayedOverlayDialog!;
               },
-            ),
-          ),
+              child: Listener(
+                onPointerDown: (displayedSheet != null)
+                    ? (_) {
+                        ref
+                            .read(bottomSheetControllerProvider.notifier)
+                            .dismiss();
+                      }
+                    : null,
+                child: HookConsumer(
+                  builder: (context, ref, child) {
+                    return BackButtonListener(
+                      onBackButtonPressed: () async {
+                        final tabState = (selectedTabId != null)
+                            ? ref.read(tabStateProvider(selectedTabId))
+                            : null;
+
+                        final tabCount = ref.read(
+                            tabListProvider.select((tabs) => tabs.length));
+
+                        //Don't do anything if a child route is active
+                        if (GoRouterState.of(context).topRoute?.path !=
+                            BrowserRoute().location) {
+                          return false;
+                        }
+
+                        if (displayedSheet != null) {
+                          ref
+                              .read(bottomSheetControllerProvider.notifier)
+                              .dismiss();
+                          return true;
+                        }
+
+                        if (displayedOverlayDialog != null) {
+                          ref
+                              .read(overlayDialogControllerProvider.notifier)
+                              .dismiss();
+                          return true;
+                        }
+
+                        if (tabState?.isFullScreen == true) {
+                          await ref
+                              .read(selectedTabSessionNotifierProvider)
+                              .exitFullscreen();
+                          return true;
+                        }
+
+                        if (tabState?.historyState.canGoBack == true) {
+                          lastBackButtonPress.value = null;
+
+                          final controller = ref.read(
+                            tabSessionProvider(tabId: selectedTabId).notifier,
+                          );
+
+                          await controller.goBack();
+                          return true;
+                        }
+
+                        if (lastBackButtonPress.value != null &&
+                            DateTime.now()
+                                    .difference(lastBackButtonPress.value!) <
+                                const Duration(seconds: 2)) {
+                          lastBackButtonPress.value = null;
+
+                          if (tabState != null && tabCount > 1) {
+                            await ref
+                                .read(tabRepositoryProvider.notifier)
+                                .closeTab(tabState.id);
+                            return true;
+                          } else {
+                            //Mark back as unhandled and navigator will pop
+                            return false;
+                          }
+                        } else {
+                          lastBackButtonPress.value = DateTime.now();
+                          ScaffoldMessenger.of(context)
+                            ..clearSnackBars()
+                            ..showSnackBar(
+                              SnackBar(
+                                content: (tabCount > 1)
+                                    ? const Text(
+                                        'Please click BACK again to close current tab',
+                                      )
+                                    : const Text(
+                                        'Please click BACK again to exit app',
+                                      ),
+                              ),
+                            );
+
+                          return true;
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          SafeArea(
+                            child: Stack(
+                              children: [
+                                const BrowserView(),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Consumer(
+                                    builder: (context, ref, child) {
+                                      final value = ref.watch(
+                                        selectedTabStateProvider.select(
+                                          (state) {
+                                            if (state?.isLoading == true) {
+                                              return state?.progress ?? 100;
+                                            }
+
+                                            //When not loading we assumed finished
+                                            return 100;
+                                          },
+                                        ),
+                                      );
+
+                                      return Visibility(
+                                        visible: value < 100,
+                                        child: LinearProgressIndicator(
+                                          value: value / 100,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: Consumer(
+                                    builder: (context, ref, child) {
+                                      final value = ref.watch(
+                                        selectedTabStateProvider.select(
+                                          (state) => EdgeInsets.only(
+                                            bottom: (state?.isLoading == true &&
+                                                    state?.progress != null &&
+                                                    state!.progress < 100)
+                                                ? 4.0
+                                                : 0.0,
+                                          ),
+                                        ),
+                                      );
+
+                                      return FindInPageWidget(padding: value);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (displayedSheet != null)
+                            ModalBarrier(
+                              color:
+                                  Theme.of(context).dialogTheme.barrierColor ??
+                                      Colors.black54,
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         ),
         floatingActionButton: ReaderAppearanceButton(),
         bottomSheet: (displayedSheet != null)

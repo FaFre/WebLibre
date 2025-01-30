@@ -1,7 +1,9 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/data/models/bang.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
 import 'package:lensai/features/settings/presentation/controllers/save_settings.dart';
@@ -50,6 +52,17 @@ class SettingsScreen extends HookConsumerWidget {
             controller: controller,
             children: [
               _buildSection(theme, 'General'),
+              Card(
+                child: ListTile(
+                  title: const Text('Browser Hardening'),
+                  trailing: IconButton(
+                    onPressed: () async {
+                      await context.push(BrowserHardeningRoute().location);
+                    },
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ),
+              ),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),

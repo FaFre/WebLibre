@@ -259,6 +259,20 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       path: '/settings',
       name: 'SettingsRoute',
       factory: $SettingsRouteExtension._fromState,
+      routes: [
+        GoRouteData.$route(
+          path: 'hardening',
+          name: 'BrowserHardeningRoute',
+          factory: $BrowserHardeningRouteExtension._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'group/:group',
+              name: 'BrowserHardeningGroupRoute',
+              factory: $BrowserHardeningGroupRouteExtension._fromState,
+            ),
+          ],
+        ),
+      ],
     );
 
 extension $SettingsRouteExtension on SettingsRoute {
@@ -266,6 +280,44 @@ extension $SettingsRouteExtension on SettingsRoute {
 
   String get location => GoRouteData.$location(
         '/settings',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $BrowserHardeningRouteExtension on BrowserHardeningRoute {
+  static BrowserHardeningRoute _fromState(GoRouterState state) =>
+      BrowserHardeningRoute();
+
+  String get location => GoRouteData.$location(
+        '/settings/hardening',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $BrowserHardeningGroupRouteExtension on BrowserHardeningGroupRoute {
+  static BrowserHardeningGroupRoute _fromState(GoRouterState state) =>
+      BrowserHardeningGroupRoute(
+        group: state.pathParameters['group']!,
+      );
+
+  String get location => GoRouteData.$location(
+        '/settings/hardening/group/${Uri.encodeComponent(group)}',
       );
 
   void go(BuildContext context) => context.go(location);

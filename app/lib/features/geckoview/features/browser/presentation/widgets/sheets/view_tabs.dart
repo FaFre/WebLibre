@@ -3,24 +3,74 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/core/providers.dart';
+import 'package:lensai/data/models/drag_data.dart';
 import 'package:lensai/data/models/equatable_iterable.dart';
+import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/tab_action.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
-import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
-import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:reorderable_grid/reorderable_grid.dart';
+import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
+
+class _TabDraggable extends HookConsumerWidget {
+  final String tabId;
+  final String? activeTabId;
+
+  final void Function() onClose;
+
+  _TabDraggable({
+    required this.tabId,
+    required this.activeTabId,
+    required this.onClose,
+  }) : super(key: ValueKey(tabId));
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tab = ref.watch(tabStateProvider(tabId));
+
+    if (tab == null) {
+      return const SizedBox.shrink();
+    }
+
+    return TabPreview(
+      tab: tab,
+      isActive: tabId == activeTabId,
+      onTap: () async {
+        if (tabId != activeTabId) {
+          //Close first to avoid rebuilds
+          onClose();
+          await ref.read(tabRepositoryProvider.notifier).selectTab(tab.id);
+        } else {
+          onClose();
+        }
+      },
+      onDoubleTap: () {
+        ref.read(overlayDialogControllerProvider.notifier).show(
+              TabActionDialog(
+                initialTab: tab,
+                onDismiss:
+                    ref.read(overlayDialogControllerProvider.notifier).dismiss,
+              ),
+            );
+      },
+      onDelete: () async {
+        await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
+      },
+    );
+  }
+}
 
 class _Tab extends HookConsumerWidget {
   static const headerSize = 124.0;
@@ -194,133 +244,164 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
               child: _Tab(onClose: onClose),
             ),
             Expanded(
-              child: CustomScrollView(
-                controller: sheetScrollController,
-                slivers: [
-                  HookConsumer(
-                    builder: (context, ref, child) {
-                      final container = ref.watch(selectedContainerProvider);
+              child: HookConsumer(
+                builder: (context, ref, child) {
+                  final container = ref.watch(selectedContainerProvider);
 
-                      final filteredTabs = ref
-                          .watch(
-                            seamlessFilteredTabsProvider(container).select(
-                              (value) =>
-                                  EquatableCollection(value, immutable: true),
+                  final filteredTabs = ref
+                      .watch(
+                        seamlessFilteredTabsProvider(container).select(
+                          (value) =>
+                              EquatableCollection(value, immutable: true),
+                        ),
+                      )
+                      .collection;
+
+                  final activeTab = ref.watch(selectedTabProvider);
+
+                  final itemHeight = useMemoized(
+                    () => _calculateItemHeight(
+                      screenWidth: MediaQuery.of(context).size.width,
+                      childAspectRatio: 0.75,
+                      horizontalPadding: 4.0,
+                      mainAxisSpacing: 8.0,
+                      crossAxisSpacing: 8.0,
+                      crossAxisCount: 2,
+                    ),
+                    [MediaQuery.of(context).size.width],
+                  );
+
+                  useEffect(
+                    () {
+                      final index = filteredTabs
+                          .indexWhere((webView) => webView == activeTab);
+
+                      if (index > -1) {
+                        final offset = (index ~/ 2) * itemHeight;
+
+                        if (offset != sheetScrollController.offset) {
+                          unawaited(
+                            sheetScrollController.animateTo(
+                              offset,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            ),
+                          );
+                        }
+                      }
+
+                      return null;
+                    },
+                    [filteredTabs, activeTab],
+                  );
+
+                  final tabs = useMemoized(
+                    () {
+                      return filteredTabs
+                          .mapIndexed(
+                            (index, tabId) => CustomDraggable(
+                              key: Key(tabId),
+                              data: TabDragData(tabId),
+                              child: Consumer(
+                                child: _TabDraggable(
+                                  tabId: tabId,
+                                  activeTabId: activeTab,
+                                  onClose: onClose,
+                                ),
+                                builder: (context, ref, child) {
+                                  final dragData = ref.watch(
+                                    willAcceptDropProvider.select((value) {
+                                      final dragTabId = switch (value) {
+                                        ContainerDropData() => value.tabId,
+                                        DeleteDropData() => value.tabId,
+                                        null => null,
+                                      };
+
+                                      return (dragTabId == tabId)
+                                          ? value
+                                          : null;
+                                    }),
+                                  );
+
+                                  return switch (dragData) {
+                                    ContainerDropData() => Opacity(
+                                        opacity: 0.3,
+                                        child: Transform.scale(
+                                          scale: 0.9,
+                                          child: child,
+                                        ),
+                                      ),
+                                    DeleteDropData() => Opacity(
+                                        opacity: 0.3,
+                                        child: ColorFiltered(
+                                          colorFilter: const ColorFilter.mode(
+                                            Colors.red,
+                                            BlendMode.modulate,
+                                          ),
+                                          child: child,
+                                        ),
+                                      ),
+                                    null => child!,
+                                  };
+                                },
+                              ),
                             ),
                           )
-                          .collection;
+                          .toList();
+                    },
+                    [
+                      EquatableCollection(filteredTabs, immutable: true),
+                      activeTab,
+                    ],
+                  );
 
-                      final activeTab = ref.watch(selectedTabProvider);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ReorderableBuilder(
+                      scrollController: sheetScrollController,
+                      children: tabs,
+                      onDragStarted: (index) {
+                        ref.read(willAcceptDropProvider.notifier).clear();
+                      },
+                      onReorderPositions: (positions) async {
+                        assert(
+                          positions.length == 1,
+                          'Not ready for multiple reorders',
+                        );
 
-                      final itemHeight = useMemoized(
-                        () => _calculateItemHeight(
-                          screenWidth: MediaQuery.of(context).size.width,
-                          childAspectRatio: 0.75,
-                          horizontalPadding: 4.0,
-                          mainAxisSpacing: 8.0,
-                          crossAxisSpacing: 8.0,
-                          crossAxisCount: 2,
-                        ),
-                        [MediaQuery.of(context).size.width],
-                      );
+                        final oldIndex = positions.first.oldIndex;
+                        final newIndex = positions.first.newIndex;
 
-                      useEffect(
-                        () {
-                          final index = filteredTabs
-                              .indexWhere((webView) => webView == activeTab);
+                        final containerRepository =
+                            ref.read(containerRepositoryProvider.notifier);
 
-                          if (index > -1) {
-                            final offset = (index ~/ 2) * itemHeight;
+                        final tabId = filteredTabs[oldIndex];
+                        final containerId = await ref
+                            .read(tabDataRepositoryProvider.notifier)
+                            .containerTabId(tabId);
 
-                            if (offset != sheetScrollController.offset) {
-                              unawaited(
-                                sheetScrollController.animateTo(
-                                  offset,
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.easeInOut,
-                                ),
-                              );
-                            }
-                          }
+                        final String key;
+                        if (newIndex <= 0) {
+                          key = await containerRepository
+                              .getLeadingOrderKey(containerId);
+                        } else if (newIndex >= filteredTabs.length - 1) {
+                          key = await containerRepository
+                              .getTrailingOrderKey(containerId);
+                        } else {
+                          final orderAfterIndex = newIndex;
+                          key = await containerRepository.getOrderKeyAfterTab(
+                            filteredTabs[orderAfterIndex],
+                            containerId,
+                          );
+                        }
 
-                          return null;
-                        },
-                        [filteredTabs, activeTab],
-                      );
-
-                      final tabs = useMemoized(
-                        () {
-                          return filteredTabs
-                              .mapIndexed(
-                                (index, tabId) =>
-                                    ReorderableGridDelayedDragStartListener(
-                                  key: ValueKey(tabId),
-                                  index: index,
-                                  child: Consumer(
-                                    builder: (context, ref, child) {
-                                      final tab =
-                                          ref.watch(tabStateProvider(tabId));
-                                      return (tab != null)
-                                          ? TabPreview(
-                                              tab: tab,
-                                              isActive: tabId == activeTab,
-                                              onTap: () async {
-                                                if (tabId != activeTab) {
-                                                  //Close first to avoid rebuilds
-                                                  onClose();
-                                                  await ref
-                                                      .read(
-                                                        tabRepositoryProvider
-                                                            .notifier,
-                                                      )
-                                                      .selectTab(tab.id);
-                                                } else {
-                                                  onClose();
-                                                }
-                                              },
-                                              onDoubleTap: () {
-                                                ref
-                                                    .read(
-                                                      overlayDialogControllerProvider
-                                                          .notifier,
-                                                    )
-                                                    .show(
-                                                      TabActionDialog(
-                                                        initialTab: tab,
-                                                        onDismiss: ref
-                                                            .read(
-                                                              overlayDialogControllerProvider
-                                                                  .notifier,
-                                                            )
-                                                            .dismiss,
-                                                      ),
-                                                    );
-                                              },
-                                              onDelete: () async {
-                                                await ref
-                                                    .read(
-                                                      tabRepositoryProvider
-                                                          .notifier,
-                                                    )
-                                                    .closeTab(tab.id);
-                                              },
-                                            )
-                                          : const SizedBox.shrink();
-                                    },
-                                  ),
-                                ),
-                              )
-                              .toList();
-                        },
-                        [
-                          EquatableCollection(filteredTabs, immutable: true),
-                          activeTab,
-                        ],
-                      );
-
-                      return SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        sliver: SliverReorderableGrid(
+                        await ref
+                            .read(tabDataRepositoryProvider.notifier)
+                            .assignOrderKey(tabId, key);
+                      },
+                      builder: (children) {
+                        return GridView.builder(
+                          controller: sheetScrollController,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                             //Sync values for itemHeight calculation _calculateItemHeight
@@ -329,42 +410,13 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             crossAxisSpacing: 8.0,
                             crossAxisCount: 2,
                           ),
-                          itemCount: tabs.length,
-                          itemBuilder: (context, index) => tabs[index],
-                          onReorder: (oldIndex, newIndex) async {
-                            final containerRepository =
-                                ref.read(containerRepositoryProvider.notifier);
-
-                            final tabId = filteredTabs[oldIndex];
-                            final containerId = await ref
-                                .read(tabDataRepositoryProvider.notifier)
-                                .containerTabId(tabId);
-
-                            final String key;
-                            if (newIndex <= 0) {
-                              key = await containerRepository
-                                  .getLeadingOrderKey(containerId);
-                            } else if (newIndex >= filteredTabs.length - 1) {
-                              key = await containerRepository
-                                  .getTrailingOrderKey(containerId);
-                            } else {
-                              final orderAfterIndex = newIndex;
-                              key =
-                                  await containerRepository.getOrderKeyAfterTab(
-                                filteredTabs[orderAfterIndex],
-                                containerId,
-                              );
-                            }
-
-                            await ref
-                                .read(tabDataRepositoryProvider.notifier)
-                                .assignOrderKey(tabId, key);
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                          itemCount: children.length,
+                          itemBuilder: (context, index) => children[index],
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -376,13 +428,14 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              await ref
-                  .read(tabRepositoryProvider.notifier)
-                  .addTab(url: Uri.https('kagi.com'));
+              await ref.read(tabRepositoryProvider.notifier).addTab(
+                    url: Uri.https('setcookie.net'),
+                    // contextId: uuid.v4(),
+                  );
 
               onClose();
             },
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ],
