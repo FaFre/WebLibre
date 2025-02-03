@@ -7,7 +7,7 @@ part of 'chat_metadata.dart';
 // **************************************************************************
 
 String _$chatMetadataRepositoryHash() =>
-    r'72a0226ed7e87f452f4dfe44594bb30663c2db45';
+    r'bd6b28b9d034ee82f95e974e4bf8f553546e835a';
 
 /// Copied from Dart SDK
 class _SystemHash {

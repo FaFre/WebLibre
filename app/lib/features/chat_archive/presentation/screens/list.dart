@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/date_time.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/chat_archive/domain/repositories/archive.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -41,9 +42,10 @@ class ChatArchiveListScreen extends HookConsumerWidget {
 
                     return ListTile(
                       title: Text(chat.toString()),
-                      subtitle: (chat.dateTime != null)
-                          ? Text(chat.dateTime!.formatWithMinutePrecision())
-                          : null,
+                      subtitle: chat.dateTime.mapNotNull(
+                        (chatTime) =>
+                            Text(chatTime.formatWithMinutePrecision()),
+                      ),
                       onTap: () async {
                         await context.push(
                           ChatArchiveDetailRoute(fileName: chat.fileName)

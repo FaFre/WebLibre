@@ -73,7 +73,7 @@ extension $PreferenceSettingGroupCopyWith on PreferenceSettingGroup {
 abstract class _$PreferenceSettingCWProxy {
   PreferenceSetting value(Object value);
 
-  PreferenceSetting title(String title);
+  PreferenceSetting title(String? title);
 
   PreferenceSetting description(String? description);
 
@@ -91,7 +91,7 @@ abstract class _$PreferenceSettingCWProxy {
   /// ````
   PreferenceSetting call({
     Object value,
-    String title,
+    String? title,
     String? description,
     Object? actualValue,
     bool requireUserOptIn,
@@ -109,7 +109,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
   PreferenceSetting value(Object value) => this(value: value);
 
   @override
-  PreferenceSetting title(String title) => this(title: title);
+  PreferenceSetting title(String? title) => this(title: title);
 
   @override
   PreferenceSetting description(String? description) =>
@@ -151,7 +151,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
       title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
-          : title as String,
+          : title as String?,
       description: description == const $CopyWithPlaceholder()
           ? _value.description
           // ignore: cast_nullable_to_non_nullable
@@ -186,7 +186,7 @@ extension $PreferenceSettingCopyWith on PreferenceSetting {
 PreferenceSetting _$PreferenceSettingFromJson(Map<String, dynamic> json) =>
     PreferenceSetting(
       value: json['value'] as Object,
-      title: json['title'] as String,
+      title: json['title'] as String?,
       description: json['description'] as String?,
       requireUserOptIn: json['requireUserOptIn'] as bool? ?? false,
       shouldBeDefault: json['shouldBeDefault'] as bool? ?? false,

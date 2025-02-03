@@ -282,11 +282,11 @@ class WebExtensionPromptFeature(
         var title = context.getString(MozComp.string.mozac_feature_addons_cant_install_extension, "")
         val message = when (exception) {
             is WebExtensionInstallException.Blocklisted -> {
-                context.getString(MozComp.string.mozac_feature_addons_blocklisted_1, addonName)
+                context.getString(MozComp.string.mozac_feature_addons_blocklisted_2, addonName)
             }
 
             is WebExtensionInstallException.SoftBlocked -> {
-                context.getString(MozComp.string.mozac_feature_addons_soft_blocked, addonName)
+                context.getString(MozComp.string.mozac_feature_addons_soft_blocked_1, addonName)
             }
 
             is WebExtensionInstallException.UserCancelled -> {

@@ -6,24 +6,22 @@ part of 'engine_settings.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$engineSettingsServiceHash() =>
-    r'051d7b6f65eb5dcb07405b4af1bdadd8dd74fdc0';
+String _$engineSettingsReplicationServiceHash() =>
+    r'0729260eeb34b58470622ac9a3a6abb257730a61';
 
-/// See also [engineSettingsService].
-@ProviderFor(engineSettingsService)
-final engineSettingsServiceProvider =
-    Provider<GeckoEngineSettingsService>.internal(
-  engineSettingsService,
-  name: r'engineSettingsServiceProvider',
+/// See also [EngineSettingsReplicationService].
+@ProviderFor(EngineSettingsReplicationService)
+final engineSettingsReplicationServiceProvider =
+    NotifierProvider<EngineSettingsReplicationService, void>.internal(
+  EngineSettingsReplicationService.new,
+  name: r'engineSettingsReplicationServiceProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$engineSettingsServiceHash,
+      : _$engineSettingsReplicationServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef EngineSettingsServiceRef = ProviderRef<GeckoEngineSettingsService>;
+typedef _$EngineSettingsReplicationService = Notifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

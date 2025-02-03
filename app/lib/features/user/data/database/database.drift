@@ -1,5 +1,6 @@
 CREATE TABLE setting (
   "key" TEXT PRIMARY KEY NOT NULL,
+  partition_key TEXT,
   "value" ANY
 ) STRICT;
 

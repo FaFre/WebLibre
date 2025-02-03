@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/data/models/equatable_iterable.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/bangs/domain/providers/search.dart';
@@ -223,9 +224,9 @@ class SearchScreen extends HookConsumerWidget {
                               result.extractedContent ?? result.fullContent;
 
                           return ListTile(
-                            title: (result.title != null)
-                                ? MarkdownBody(data: result.title!)
-                                : null,
+                            title: result.title.mapNotNull(
+                              (title) => MarkdownBody(data: title),
+                            ),
                             subtitle: (!headHasMatch && bodyResult != null)
                                 ? MarkdownBody(data: bodyResult)
                                 : null,

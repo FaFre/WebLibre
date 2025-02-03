@@ -8,6 +8,7 @@ import eu.lensai.flutter_mozilla_components.Components
 import eu.lensai.flutter_mozilla_components.interceptor.AppRequestInterceptor
 import eu.lensai.flutter_mozilla_components.services.DownloadService
 import eu.lensai.flutter_mozilla_components.EngineProvider
+import eu.lensai.flutter_mozilla_components.PermissionStorage
 import eu.lensai.flutter_mozilla_components.services.MediaSessionService
 import eu.lensai.flutter_mozilla_components.activities.NotificationActivity
 import eu.lensai.flutter_mozilla_components.R
@@ -211,6 +212,8 @@ class Core(private val context: Context,
      * A convenience accessor to the [PlacesHistoryStorage].
      */
     val historyStorage by lazy { lazyHistoryStorage.value }
+
+    val permissionStorage by lazy { PermissionStorage( geckoSitePermissionsStorage ) }
 
     /**
      * Constructs a [TrackingProtectionPolicy] based on current preferences.

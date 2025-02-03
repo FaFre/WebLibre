@@ -13,11 +13,6 @@ class Container extends Table with TableInfo<Container, ContainerData> {
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'PRIMARY KEY NOT NULL');
-  late final GeneratedColumn<String> contextualIdentity =
-      GeneratedColumn<String>('contextual_identity', aliasedName, true,
-          type: DriftSqlType.string,
-          requiredDuringInsert: false,
-          $customConstraints: '');
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, true,
       type: DriftSqlType.string,
@@ -29,15 +24,14 @@ class Container extends Table with TableInfo<Container, ContainerData> {
               requiredDuringInsert: true,
               $customConstraints: 'NOT NULL')
           .withConverter<Color>(Container.$convertercolor);
-  late final GeneratedColumnWithTypeConverter<IconData?, String> icon =
-      GeneratedColumn<String>('icon', aliasedName, true,
+  late final GeneratedColumnWithTypeConverter<ContainerMetadata?, String>
+      metadata = GeneratedColumn<String>('metadata', aliasedName, true,
               type: DriftSqlType.string,
               requiredDuringInsert: false,
               $customConstraints: '')
-          .withConverter<IconData?>(Container.$convertericonn);
+          .withConverter<ContainerMetadata?>(Container.$convertermetadatan);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, contextualIdentity, name, color, icon];
+  List<GeneratedColumn> get $columns => [id, name, color, metadata];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -51,14 +45,13 @@ class Container extends Table with TableInfo<Container, ContainerData> {
     return ContainerData(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      contextualIdentity: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}contextual_identity']),
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name']),
       color: Container.$convertercolor.fromSql(attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}color'])!),
-      icon: Container.$convertericonn.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}icon'])),
+      metadata: Container.$convertermetadatan.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}metadata'])),
     );
   }
 
@@ -68,69 +61,62 @@ class Container extends Table with TableInfo<Container, ContainerData> {
   }
 
   static TypeConverter<Color, int> $convertercolor = const ColorConverter();
-  static TypeConverter<IconData, String> $convertericon =
-      const IconDataTypeConverter();
-  static TypeConverter<IconData?, String?> $convertericonn =
-      NullAwareTypeConverter.wrap($convertericon);
+  static TypeConverter<ContainerMetadata, String> $convertermetadata =
+      const ContainerMetadataConverter();
+  static TypeConverter<ContainerMetadata?, String?> $convertermetadatan =
+      NullAwareTypeConverter.wrap($convertermetadata);
   @override
   bool get dontWriteConstraints => true;
 }
 
 class ContainerCompanion extends UpdateCompanion<ContainerData> {
   final Value<String> id;
-  final Value<String?> contextualIdentity;
   final Value<String?> name;
   final Value<Color> color;
-  final Value<IconData?> icon;
+  final Value<ContainerMetadata?> metadata;
   final Value<int> rowid;
   const ContainerCompanion({
     this.id = const Value.absent(),
-    this.contextualIdentity = const Value.absent(),
     this.name = const Value.absent(),
     this.color = const Value.absent(),
-    this.icon = const Value.absent(),
+    this.metadata = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ContainerCompanion.insert({
     required String id,
-    this.contextualIdentity = const Value.absent(),
     this.name = const Value.absent(),
     required Color color,
-    this.icon = const Value.absent(),
+    this.metadata = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         color = Value(color);
   static Insertable<ContainerData> custom({
     Expression<String>? id,
-    Expression<String>? contextualIdentity,
     Expression<String>? name,
     Expression<int>? color,
-    Expression<String>? icon,
+    Expression<String>? metadata,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (contextualIdentity != null) 'contextual_identity': contextualIdentity,
       if (name != null) 'name': name,
       if (color != null) 'color': color,
-      if (icon != null) 'icon': icon,
+      if (metadata != null) 'metadata': metadata,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   ContainerCompanion copyWith(
       {Value<String>? id,
-      Value<String?>? contextualIdentity,
       Value<String?>? name,
       Value<Color>? color,
-      Value<IconData?>? icon,
+      Value<ContainerMetadata?>? metadata,
       Value<int>? rowid}) {
     return ContainerCompanion(
       id: id ?? this.id,
-      contextualIdentity: contextualIdentity ?? this.contextualIdentity,
       name: name ?? this.name,
       color: color ?? this.color,
-      icon: icon ?? this.icon,
+      metadata: metadata ?? this.metadata,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -141,9 +127,6 @@ class ContainerCompanion extends UpdateCompanion<ContainerData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
-    if (contextualIdentity.present) {
-      map['contextual_identity'] = Variable<String>(contextualIdentity.value);
-    }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
@@ -151,9 +134,9 @@ class ContainerCompanion extends UpdateCompanion<ContainerData> {
       map['color'] =
           Variable<int>(Container.$convertercolor.toSql(color.value));
     }
-    if (icon.present) {
-      map['icon'] =
-          Variable<String>(Container.$convertericonn.toSql(icon.value));
+    if (metadata.present) {
+      map['metadata'] =
+          Variable<String>(Container.$convertermetadatan.toSql(metadata.value));
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -165,10 +148,9 @@ class ContainerCompanion extends UpdateCompanion<ContainerData> {
   String toString() {
     return (StringBuffer('ContainerCompanion(')
           ..write('id: $id, ')
-          ..write('contextualIdentity: $contextualIdentity, ')
           ..write('name: $name, ')
           ..write('color: $color, ')
-          ..write('icon: $icon, ')
+          ..write('metadata: $metadata, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1597,18 +1579,18 @@ abstract class _$TabDatabase extends GeneratedDatabase {
 
   Selectable<ContainerDataWithCount> containersWithCount() {
     return customSelect(
-        'SELECT container.*, tab_agg.tab_count FROM container LEFT JOIN (SELECT container_id, COUNT(*) AS tab_count, MAX(timestamp) AS last_updated FROM tab GROUP BY container_id) AS tab_agg ON container.id = tab_agg.container_id ORDER BY tab_agg.last_updated DESC NULLS FIRST',
+        'SELECT container.*, tab_agg.tab_count FROM container LEFT JOIN (SELECT container_id, COUNT(*) AS tab_count, MAX(timestamp) AS last_updated FROM tab GROUP BY container_id) AS tab_agg ON container.id = tab_agg.container_id ORDER BY tab_agg.last_updated DESC NULLS LAST',
         variables: [],
         readsFrom: {
           container,
           tab,
         }).map((QueryRow row) => ContainerDataWithCount(
           id: row.read<String>('id'),
-          contextualIdentity: row.readNullable<String>('contextual_identity'),
           name: row.readNullable<String>('name'),
           color: Container.$convertercolor.fromSql(row.read<int>('color')),
-          icon: NullAwareTypeConverter.wrapFromSql(
-              Container.$convertericon, row.readNullable<String>('icon')),
+          metadata: NullAwareTypeConverter.wrapFromSql(
+              Container.$convertermetadata,
+              row.readNullable<String>('metadata')),
           tabCount: row.readNullable<int>('tab_count'),
         ));
   }
@@ -1819,18 +1801,16 @@ abstract class _$TabDatabase extends GeneratedDatabase {
 
 typedef $ContainerCreateCompanionBuilder = ContainerCompanion Function({
   required String id,
-  Value<String?> contextualIdentity,
   Value<String?> name,
   required Color color,
-  Value<IconData?> icon,
+  Value<ContainerMetadata?> metadata,
   Value<int> rowid,
 });
 typedef $ContainerUpdateCompanionBuilder = ContainerCompanion Function({
   Value<String> id,
-  Value<String?> contextualIdentity,
   Value<String?> name,
   Value<Color> color,
-  Value<IconData?> icon,
+  Value<ContainerMetadata?> metadata,
   Value<int> rowid,
 });
 
@@ -1864,10 +1844,6 @@ class $ContainerFilterComposer extends Composer<_$TabDatabase, Container> {
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get contextualIdentity => $composableBuilder(
-      column: $table.contextualIdentity,
-      builder: (column) => ColumnFilters(column));
-
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
 
@@ -1876,9 +1852,9 @@ class $ContainerFilterComposer extends Composer<_$TabDatabase, Container> {
           column: $table.color,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
-  ColumnWithTypeConverterFilters<IconData?, IconData, String> get icon =>
-      $composableBuilder(
-          column: $table.icon,
+  ColumnWithTypeConverterFilters<ContainerMetadata?, ContainerMetadata, String>
+      get metadata => $composableBuilder(
+          column: $table.metadata,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
   Expression<bool> tabRefs(Expression<bool> Function($TabFilterComposer f) f) {
@@ -1913,18 +1889,14 @@ class $ContainerOrderingComposer extends Composer<_$TabDatabase, Container> {
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get contextualIdentity => $composableBuilder(
-      column: $table.contextualIdentity,
-      builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get color => $composableBuilder(
       column: $table.color, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get icon => $composableBuilder(
-      column: $table.icon, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get metadata => $composableBuilder(
+      column: $table.metadata, builder: (column) => ColumnOrderings(column));
 }
 
 class $ContainerAnnotationComposer extends Composer<_$TabDatabase, Container> {
@@ -1938,17 +1910,14 @@ class $ContainerAnnotationComposer extends Composer<_$TabDatabase, Container> {
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get contextualIdentity => $composableBuilder(
-      column: $table.contextualIdentity, builder: (column) => column);
-
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Color, int> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<IconData?, String> get icon =>
-      $composableBuilder(column: $table.icon, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<ContainerMetadata?, String> get metadata =>
+      $composableBuilder(column: $table.metadata, builder: (column) => column);
 
   Expression<T> tabRefs<T extends Object>(
       Expression<T> Function($TabAnnotationComposer a) f) {
@@ -1996,34 +1965,30 @@ class $ContainerTableManager extends RootTableManager<
               $ContainerAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String?> contextualIdentity = const Value.absent(),
             Value<String?> name = const Value.absent(),
             Value<Color> color = const Value.absent(),
-            Value<IconData?> icon = const Value.absent(),
+            Value<ContainerMetadata?> metadata = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ContainerCompanion(
             id: id,
-            contextualIdentity: contextualIdentity,
             name: name,
             color: color,
-            icon: icon,
+            metadata: metadata,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String id,
-            Value<String?> contextualIdentity = const Value.absent(),
             Value<String?> name = const Value.absent(),
             required Color color,
-            Value<IconData?> icon = const Value.absent(),
+            Value<ContainerMetadata?> metadata = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ContainerCompanion.insert(
             id: id,
-            contextualIdentity: contextualIdentity,
             name: name,
             color: color,
-            icon: icon,
+            metadata: metadata,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

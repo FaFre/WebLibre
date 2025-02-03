@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/database/database.dart';
 import 'package:lensai/features/bangs/data/models/bang.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
@@ -20,7 +21,7 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
 
   SingleSelectable<int> getBangCount({Iterable<BangGroup>? groups}) {
     return db.bang.count(
-      where: (groups != null) ? (t) => t.group.isInValues(groups) : null,
+      where: groups.mapNotNull((groups) => (t) => t.group.isInValues(groups)),
     );
   }
 

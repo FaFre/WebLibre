@@ -17,7 +17,6 @@ part 'search.g.dart';
 class ChatArchiveSearchRepository extends _$ChatArchiveSearchRepository {
   late Completer<void> _populatedCompleter;
   late StreamController<List<ChatQueryResult>> _streamController;
-  late ChatSearchDatabase _searchDatabase;
 
   Future<ChatCompanion?> _readChat(ChatEntity chat) async {
     final contentResult = await ref
@@ -64,7 +63,9 @@ class ChatArchiveSearchRepository extends _$ChatArchiveSearchRepository {
   }) async {
     if (input.isNotEmpty) {
       await _populatedCompleter.future;
-      await _searchDatabase.searchDao
+      await ref
+          .read(chatSearchDatabaseProvider)
+          .searchDao
           .queryChats(
             searchString: input,
             snippetLength: snippetLength,
@@ -81,11 +82,12 @@ class ChatArchiveSearchRepository extends _$ChatArchiveSearchRepository {
   Stream<List<ChatQueryResult>> build() async* {
     _populatedCompleter = Completer();
     _streamController = StreamController();
-    _searchDatabase = ref.watch(chatSearchDatabaseProvider);
+
+    final searchDatabase = ref.watch(chatSearchDatabaseProvider);
 
     // populate with initial chats
-    await _searchDatabase.searchDao.deleteAllChats();
-    await _searchDatabase.searchDao.indexChats(await _availableChats());
+    await searchDatabase.searchDao.deleteAllChats();
+    await searchDatabase.searchDao.indexChats(await _availableChats());
     _populatedCompleter.complete();
 
     final changeStreamSubscription =
@@ -98,11 +100,11 @@ class ChatArchiveSearchRepository extends _$ChatArchiveSearchRepository {
           if (chat.name != null) {
             final companion = await _readChat(chat);
             if (companion != null) {
-              await _searchDatabase.searchDao.upsertChat(companion);
+              await searchDatabase.searchDao.upsertChat(companion);
             }
           }
         case ChangeType.REMOVE:
-          await _searchDatabase.searchDao.deleteChat(chat.fileName);
+          await searchDatabase.searchDao.deleteChat(chat.fileName);
       }
     });
 

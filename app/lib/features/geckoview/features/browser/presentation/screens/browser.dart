@@ -17,7 +17,6 @@ import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/create_tab.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/services/engine_settings.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/app_bar_title.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/browser_view.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
@@ -31,7 +30,6 @@ import 'package:lensai/features/geckoview/features/readerview/presentation/widge
 import 'package:lensai/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/chat/presentation/widgets/tab_qa_chat.dart';
 import 'package:lensai/features/kagi/data/entities/modes.dart';
-import 'package:lensai/features/user/domain/repositories/settings.dart';
 import 'package:lensai/presentation/hooks/draggable_scrollable_controller.dart';
 import 'package:lensai/presentation/hooks/menu_controller.dart';
 import 'package:lensai/presentation/hooks/overlay_portal_controller.dart';
@@ -77,15 +75,8 @@ class BrowserScreen extends HookConsumerWidget {
       },
     );
 
-    ref.listen(
-      settingsRepositoryProvider.select((value) => value.enableJavascript),
-      (previous, next) async {
-        await ref.read(engineSettingsServiceProvider).javaScriptEnabled(next);
-      },
-    );
-
     // ref.listen(
-    //   settingsRepositoryProvider
+    //   generalSettingsRepositoryProvider
     //       .select((value) => value.valueOrNull?.kagiSession),
     //   (previous, next) async {
     //     if (next != null && next.isNotEmpty) {
@@ -598,7 +589,7 @@ class BrowserScreen extends HookConsumerWidget {
                         MenuItemButton(
                           onPressed: () async {
                             await context
-                                .push(BrowserHardeningRoute().location);
+                                .push(WebEngineHardeningRoute().location);
                           },
                           leadingIcon: const Icon(Icons.info),
                           child: const Text('Pref'),
@@ -648,7 +639,8 @@ class BrowserScreen extends HookConsumerWidget {
                             : null;
 
                         final tabCount = ref.read(
-                            tabListProvider.select((tabs) => tabs.length));
+                          tabListProvider.select((tabs) => tabs.length),
+                        );
 
                         //Don't do anything if a child route is active
                         if (GoRouterState.of(context).topRoute?.path !=

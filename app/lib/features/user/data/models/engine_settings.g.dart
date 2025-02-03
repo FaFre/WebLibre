@@ -225,22 +225,22 @@ Map<String, dynamic> _$EngineSettingsToJson(EngineSettings instance) =>
     <String, dynamic>{
       'javascriptEnabled': instance.javascriptEnabled,
       'trackingProtectionPolicy':
-          _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy],
-      'httpsOnlyMode': _$HttpsOnlyModeEnumMap[instance.httpsOnlyMode],
-      'globalPrivacyControlEnabled': instance.globalPrivacyControlEnabled,
+          _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,
+      'httpsOnlyMode': _$HttpsOnlyModeEnumMap[instance.httpsOnlyMode]!,
       'preferredColorScheme':
-          _$ColorSchemeEnumMap[instance.preferredColorScheme],
+          _$ColorSchemeEnumMap[instance.preferredColorScheme]!,
+      'globalPrivacyControlEnabled': instance.globalPrivacyControlEnabled,
       'cookieBannerHandlingMode':
-          _$CookieBannerHandlingModeEnumMap[instance.cookieBannerHandlingMode],
+          _$CookieBannerHandlingModeEnumMap[instance.cookieBannerHandlingMode]!,
       'cookieBannerHandlingModePrivateBrowsing':
           _$CookieBannerHandlingModeEnumMap[
-              instance.cookieBannerHandlingModePrivateBrowsing],
+              instance.cookieBannerHandlingModePrivateBrowsing]!,
       'cookieBannerHandlingGlobalRules':
           instance.cookieBannerHandlingGlobalRules,
       'cookieBannerHandlingGlobalRulesSubFrames':
           instance.cookieBannerHandlingGlobalRulesSubFrames,
       'webContentIsolationStrategy': _$WebContentIsolationStrategyEnumMap[
-          instance.webContentIsolationStrategy],
+          instance.webContentIsolationStrategy]!,
     };
 
 const _$TrackingProtectionPolicyEnumMap = {

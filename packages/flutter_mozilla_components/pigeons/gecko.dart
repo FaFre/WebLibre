@@ -835,6 +835,7 @@ abstract class GeckoTabsApi {
   String duplicateTab({
     required String? selectTabId,
     required bool selectNewTab,
+    required String? newContextId,
   });
 
   void moveTabs({
@@ -1015,4 +1016,20 @@ abstract class GeckoTabContentEvents {
     int timestamp,
     TabContent content,
   );
+}
+
+@HostApi()
+abstract class GeckoDeleteBrowsingDataController {
+  @async
+  void deleteTabs();
+  @async
+  void deleteBrowsingHistory();
+  @async
+  void deleteCookiesAndSiteData();
+  @async
+  void deleteCachedFiles();
+  @async
+  void deleteSitePermissions();
+  @async
+  void deleteDownloads();
 }

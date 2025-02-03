@@ -2017,7 +2017,7 @@ interface GeckoTabsApi {
   fun selectOrAddTabByHistory(url: String, historyMetadata: HistoryMetadataKey): String
   /** Selects an already existing tab displaying [url] or otherwise creates a new tab. */
   fun selectOrAddTabByUrl(url: String, private: Boolean, source: SourceValue, flags: LoadUrlFlagsValue, ignoreFragment: Boolean): String
-  fun duplicateTab(selectTabId: String?, selectNewTab: Boolean): String
+  fun duplicateTab(selectTabId: String?, selectNewTab: Boolean, newContextId: String?): String
   fun moveTabs(tabIds: List<String>, targetTabId: String, placeAfter: Boolean)
   fun migratePrivateTabUseCase(tabId: String, alternativeUrl: String?): String
 
@@ -2287,8 +2287,9 @@ interface GeckoTabsApi {
             val args = message as List<Any?>
             val selectTabIdArg = args[0] as String?
             val selectNewTabArg = args[1] as Boolean
+            val newContextIdArg = args[2] as String?
             val wrapped: List<Any?> = try {
-              listOf(api.duplicateTab(selectTabIdArg, selectNewTabArg))
+              listOf(api.duplicateTab(selectTabIdArg, selectNewTabArg, newContextIdArg))
             } catch (exception: Throwable) {
               wrapError(exception)
             }
@@ -3210,6 +3211,129 @@ class GeckoTabContentEvents(private val binaryMessenger: BinaryMessenger, privat
       } else {
         callback(Result.failure(createConnectionError(channelName)))
       } 
+    }
+  }
+}
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface GeckoDeleteBrowsingDataController {
+  fun deleteTabs(callback: (Result<Unit>) -> Unit)
+  fun deleteBrowsingHistory(callback: (Result<Unit>) -> Unit)
+  fun deleteCookiesAndSiteData(callback: (Result<Unit>) -> Unit)
+  fun deleteCachedFiles(callback: (Result<Unit>) -> Unit)
+  fun deleteSitePermissions(callback: (Result<Unit>) -> Unit)
+  fun deleteDownloads(callback: (Result<Unit>) -> Unit)
+
+  companion object {
+    /** The codec used by GeckoDeleteBrowsingDataController. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoDeleteBrowsingDataController` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoDeleteBrowsingDataController?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.deleteTabs{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteBrowsingHistory$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.deleteBrowsingHistory{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteCookiesAndSiteData$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.deleteCookiesAndSiteData{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteCachedFiles$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.deleteCachedFiles{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteSitePermissions$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.deleteSitePermissions{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteDownloads$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.deleteDownloads{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                reply.reply(wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }

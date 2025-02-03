@@ -1,34 +1,4 @@
 {
-    "system": {
-        "incognito_mode": {
-            "preferences": {
-                "privacy.sanitize.sanitizeOnShutdown": true,
-                "privacy.clearOnShutdown.cache": true,
-                "privacy.clearOnShutdown_v2.cache": true,
-                "privacy.clearOnShutdown.downloads": true,
-                "privacy.clearOnShutdown.formdata": true,
-                "privacy.clearOnShutdown.history": true,
-                "privacy.clearOnShutdown_v2.historyFormDataAndDownloads": true,
-                "privacy.clearOnShutdown.cookies": true,
-                "privacy.clearOnShutdown.offlineApps": true,
-                "privacy.clearOnShutdown.sessions": true,
-                "privacy.clearOnShutdown_v2.cookiesAndStorage": true,
-                "privacy.clearSiteData.cache": true,
-                "privacy.clearSiteData.cookiesAndStorage": false,
-                "privacy.clearSiteData.historyFormDataAndDownloads": true,
-                "privacy.cpd.cache": true,
-                "privacy.clearHistory.cache": true,
-                "privacy.cpd.formdata": true,
-                "privacy.cpd.history": true,
-                "privacy.clearHistory.historyFormDataAndDownloads": true,
-                "privacy.cpd.cookies": false,
-                "privacy.cpd.sessions": true,
-                "privacy.cpd.offlineApps": false,
-                "privacy.clearHistory.cookiesAndStorage": false,
-                "privacy.sanitize.timeSpan": 0
-            }
-        }
-    },
     "user": {
         "Safe Browsing": {
             "description": "Google Safe Browsing is a service from Google that warns users when they attempt to navigate to a dangerous website or download dangerous files.",
@@ -114,34 +84,15 @@
                     "value": true,
                     "title": "Force WebRTC inside the proxy"
                 },
+                "media.peerconnection.enabled": {
+                    "value": false,
+                    "title": "Disable WebRTC PeerConnection",
+                    "description": "Prevent exposing local IP Address"
+                },
                 "media.peerconnection.ice.default_address_only": {
                     "value": true,
                     "title": "Force a single network interface for ICE candidates generation",
                     "description": "When using a system-wide proxy, it uses the proxy interface"
-                }
-            }
-        },
-        "Disk Avoidance": {
-            "description": "Control what data to persist to disk",
-            "preferences": {
-                "browser.cache.disk.enable": {
-                    "value": false,
-                    "title": "Disable disk cache",
-                    "description": "Don't cache data to disk. Might impact performance negatively",
-                    "requireUserOptIn": true
-                },
-                "browser.privatebrowsing.forceMediaMemoryCache": {
-                    "value": true,
-                    "title": "Set media cache in Private Browsing to in-memory"
-                },
-                "media.memory_cache_max_size": {
-                    "value": 65536,
-                    "title": "Increase in-memory media cache maximum size"
-                },
-                "browser.sessionstore.privacy_level": {
-                    "value": 2,
-                    "title": "Disable storing extra session data",
-                    "description": "Extra session data such as form content, cookies and POST data"
                 }
             }
         },
@@ -202,6 +153,135 @@
                 }
             }
         },
+        "Privacy": {
+            "preferences": {
+                "network.http.referer.XOriginTrimmingPolicy": {
+                    "value": 2,
+                    "title": "Trim cross-origin referrers",
+                    "description": "Trims down referrers to just the scheme, hostname and port"
+                },
+                "network.http.referer.XOriginPolicy": {
+                    "value": 2,
+                    "title": "Only send cross-origin referer if host matches"
+                },
+                "network.http.referer.disallowCrossSiteRelaxingDefault": {
+                    "value": true,
+                    "title": "Disallow relaxing referrer policy for cross-site requests"
+                },
+                "network.http.referer.disallowCrossSiteRelaxingDefault.top_navigation": {
+                    "value": true,
+                    "title": "Disallow relaxing referrer policy for cross-site requests",
+                    "description": "On top navigation"
+                },
+                "general.useragent.updates.enabled": {
+                    "value": false,
+                    "title": "Disable automatic User Agent updates",
+                    "description": "This preference controls whether Firefox automatically updates its User-Agent string. When set to false, it prevents Firefox from automatically updating the browser's User-Agent string, which is a text identifier that tells websites which browser and version you're using."
+                },
+                "privacy.query_stripping.enabled": {
+                    "value": true,
+                    "title": "Strip known tracking query parameters from URLs"
+                },
+                "dom.private-attribution.submission.enabled": {
+                    "value": false,
+                    "title": "Disable Private Attribution Submission Control",
+                    "shouldBeDefault": true
+                },
+                "privacy.trackingprotection.enabled": {
+                    "value": true,
+                    "title": "Enable Tracking Protection"
+                },
+                "privacy.trackingprotection.socialtracking.enabled": {
+                    "value": true,
+                    "title": "Enable Social Tracking Protection"
+                },
+                "privacy.trackingprotection.cryptomining.enabled": {
+                    "value": true,
+                    "title": "Enable Cryptomining Protection"
+                },
+                "privacy.trackingprotection.fingerprinting.enabled": {
+                    "value": true,
+                    "title": "Enable Fingerprinting Tracking Protection"
+                }
+            }
+        },
+        "Resist Fingerprinting": {
+            "description": "Advanced Fingerprinting protection. This might break websites. For best results make sure to enable \"Privacy\" hardenings.",
+            "preferences": {
+                "privacy.resistFingerprinting": {
+                    "value": true,
+                    "title": "Resist Fingerprinting"
+                },
+                "privacy.resistFingerprinting.letterboxing": {
+                    "value": true,
+                    "title": "Enable Letterboxing"
+                },
+                "webgl.disabled": {
+                    "value": true,
+                    "title": "Disable WebGL (Web Graphics Library)"
+                },
+                "privacy.partition.network_state.ocsp_cache": {
+                    "value": true,
+                    "title": "Enable OCSP cache"
+                }
+            }
+        },
+        "Attack Surface Reduction": {
+            "preferences": {
+                "pdfjs.enableScripting": {
+                    "value": false,
+                    "title": "Disable PDFJS scripting"
+                },
+                "mathml.disabled": {
+                    "value": true,
+                    "title": "Disable MathML (Mathematical Markup Language)"
+                },
+                "gfx.font_rendering.graphite.enabled": {
+                    "value": false,
+                    "title": "Disable graphite"
+                },
+                "javascript.options.ion": {
+                    "value": false,
+                    "title": "Disable Ion"
+                },
+                "javascript.options.baselinejit": {
+                    "value": false,
+                    "title": "Disable baseline JIT"
+                },
+                "javascript.options.jit_trustedprincipals": {
+                    "value": false,
+                    "title": "Disable JIT trustedprincipals"
+                },
+                "javascript.options.asmjs": {
+                    "value": false,
+                    "title": "Disable asm.js"
+                }
+            }
+        },
+        "Disk Avoidance": {
+            "description": "Control what data to persist to disk",
+            "preferences": {
+                "browser.cache.disk.enable": {
+                    "value": false,
+                    "title": "Disable disk cache",
+                    "description": "Don't cache data to disk. Might impact performance negatively",
+                    "requireUserOptIn": true
+                },
+                "browser.privatebrowsing.forceMediaMemoryCache": {
+                    "value": true,
+                    "title": "Set media cache in Private Browsing to in-memory"
+                },
+                "media.memory_cache_max_size": {
+                    "value": 65536,
+                    "title": "Increase in-memory media cache maximum size"
+                },
+                "browser.sessionstore.privacy_level": {
+                    "value": 2,
+                    "title": "Disable storing extra session data",
+                    "description": "Extra session data such as form content, cookies and POST data"
+                }
+            }
+        },
         "Miscelaneous": {
             "preferences": {
                 "permissions.manager.defaultsUrl": {
@@ -212,48 +292,13 @@
                     "value": true,
                     "title": "Use Punycode in Internationalized Domain Names to eliminate possible spoofing"
                 },
-                "extensions.enabledScopes": {
-                    "value": 5,
-                    "title": "Limit allowed extension directories",
-                    "description": "Only allow profile and application directories",
-                    "shouldBeDefault": true
-                },
                 "extensions.postDownloadThirdPartyPrompt": {
                     "value": false,
                     "title": "Disable bypassing 3rd party extension install prompts"
                 },
-                "pdfjs.enableScripting": {
+                "layout.css.visited_links_enabled": {
                     "value": false,
-                    "title": "Disable PDFJS scripting"
-                }
-            }
-        },
-        "Privacy": {
-            "preferences": {
-                "privacy.globalprivacycontrol.enabled": {
-                    "value": true,
-                    "title": "Enable Global Privacy Control (GPC)",
-                    "shouldBeDefault": true
-                },
-                "browser.contentblocking.category": {
-                    "value": "strict",
-                    "title": "Enable ETP Strict Mode",
-                    "description": "ETP Strict Mode enables Total Cookie Protection (TCP)"
-                },
-                "network.http.referer.XOriginTrimmingPolicy": {
-                    "value": 2,
-                    "title": "Trim cross-origin referrers",
-                    "description": "Trims down referrers to just the scheme, hostname and port"
-                },
-                "general.useragent.updates.enabled": {
-                    "value": false,
-                    "title": "Disable automatic User Agent updates",
-                    "description": "This preference controls whether Firefox automatically updates its User-Agent string. When set to false, it prevents Firefox from automatically updating the browser's User-Agent string, which is a text identifier that tells websites which browser and version you're using."
-                },
-                "dom.private-attribution.submission.enabled": {
-                    "value": false,
-                    "title": "Disable Private Attribution Submission Control",
-                    "shouldBeDefault": true
+                    "title": "Disable coloring of visited links"
                 }
             }
         }

@@ -65,6 +65,18 @@ RouteBase get $browserRoute => GoRouteData.$route(
           path: 'containers',
           name: 'ContainerListRoute',
           factory: $ContainerListRouteExtension._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'create',
+              name: 'ContainerCreateRoute',
+              factory: $ContainerCreateRouteExtension._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'edit',
+              name: 'ContainerEditRoute',
+              factory: $ContainerEditRouteExtension._fromState,
+            ),
+          ],
         ),
       ],
     );
@@ -255,20 +267,73 @@ extension $ContainerListRouteExtension on ContainerListRoute {
   void replace(BuildContext context) => context.replace(location);
 }
 
+extension $ContainerCreateRouteExtension on ContainerCreateRoute {
+  static ContainerCreateRoute _fromState(GoRouterState state) =>
+      ContainerCreateRoute();
+
+  String get location => GoRouteData.$location(
+        '/containers/create',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $ContainerEditRouteExtension on ContainerEditRoute {
+  static ContainerEditRoute _fromState(GoRouterState state) =>
+      ContainerEditRoute();
+
+  String get location => GoRouteData.$location(
+        '/containers/edit',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
 RouteBase get $settingsRoute => GoRouteData.$route(
       path: '/settings',
       name: 'SettingsRoute',
       factory: $SettingsRouteExtension._fromState,
       routes: [
         GoRouteData.$route(
-          path: 'hardening',
-          name: 'BrowserHardeningRoute',
-          factory: $BrowserHardeningRouteExtension._fromState,
+          path: 'general',
+          name: 'GeneralSettingsRoute',
+          factory: $GeneralSettingsRouteExtension._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'bang',
+          name: 'BangSettingsRoute',
+          factory: $BangSettingsRouteExtension._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'web_engine',
+          name: 'WebEngineSettingsRoute',
+          factory: $WebEngineSettingsRouteExtension._fromState,
           routes: [
             GoRouteData.$route(
-              path: 'group/:group',
-              name: 'BrowserHardeningGroupRoute',
-              factory: $BrowserHardeningGroupRouteExtension._fromState,
+              path: 'hardening',
+              name: 'WebEngineHardeningRoute',
+              factory: $WebEngineHardeningRouteExtension._fromState,
+              routes: [
+                GoRouteData.$route(
+                  path: 'group/:group',
+                  name: 'WebEngineHardeningGroupRoute',
+                  factory: $WebEngineHardeningGroupRouteExtension._fromState,
+                ),
+              ],
             ),
           ],
         ),
@@ -292,12 +357,12 @@ extension $SettingsRouteExtension on SettingsRoute {
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $BrowserHardeningRouteExtension on BrowserHardeningRoute {
-  static BrowserHardeningRoute _fromState(GoRouterState state) =>
-      BrowserHardeningRoute();
+extension $GeneralSettingsRouteExtension on GeneralSettingsRoute {
+  static GeneralSettingsRoute _fromState(GoRouterState state) =>
+      GeneralSettingsRoute();
 
   String get location => GoRouteData.$location(
-        '/settings/hardening',
+        '/settings/general',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -310,14 +375,69 @@ extension $BrowserHardeningRouteExtension on BrowserHardeningRoute {
   void replace(BuildContext context) => context.replace(location);
 }
 
-extension $BrowserHardeningGroupRouteExtension on BrowserHardeningGroupRoute {
-  static BrowserHardeningGroupRoute _fromState(GoRouterState state) =>
-      BrowserHardeningGroupRoute(
+extension $BangSettingsRouteExtension on BangSettingsRoute {
+  static BangSettingsRoute _fromState(GoRouterState state) =>
+      BangSettingsRoute();
+
+  String get location => GoRouteData.$location(
+        '/settings/bang',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $WebEngineSettingsRouteExtension on WebEngineSettingsRoute {
+  static WebEngineSettingsRoute _fromState(GoRouterState state) =>
+      WebEngineSettingsRoute();
+
+  String get location => GoRouteData.$location(
+        '/settings/web_engine',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $WebEngineHardeningRouteExtension on WebEngineHardeningRoute {
+  static WebEngineHardeningRoute _fromState(GoRouterState state) =>
+      WebEngineHardeningRoute();
+
+  String get location => GoRouteData.$location(
+        '/settings/web_engine/hardening',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $WebEngineHardeningGroupRouteExtension
+    on WebEngineHardeningGroupRoute {
+  static WebEngineHardeningGroupRoute _fromState(GoRouterState state) =>
+      WebEngineHardeningGroupRoute(
         group: state.pathParameters['group']!,
       );
 
   String get location => GoRouteData.$location(
-        '/settings/hardening/group/${Uri.encodeComponent(group)}',
+        '/settings/web_engine/hardening/group/${Uri.encodeComponent(group)}',
       );
 
   void go(BuildContext context) => context.go(location);

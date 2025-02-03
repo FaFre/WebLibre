@@ -7,7 +7,7 @@ part of 'document.dart';
 // **************************************************************************
 
 String _$documentRepositoryHash() =>
-    r'0c93116e0f9887d452b7c493dd4da45e5bf0c2d4';
+    r'60e5a0c889d9659c8e0e254c59225c2041a0cb56';
 
 /// See also [DocumentRepository].
 @ProviderFor(DocumentRepository)

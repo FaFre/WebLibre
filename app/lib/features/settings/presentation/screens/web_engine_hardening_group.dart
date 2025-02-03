@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
+import 'package:lensai/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 import 'package:lensai/features/settings/presentation/widgets/hardening_group_icon.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 
-class BrowserHardeningGroupScreen extends HookConsumerWidget {
+class WebEngineHardeningGroupScreen extends HookConsumerWidget {
   final String groupName;
 
-  const BrowserHardeningGroupScreen({super.key, required this.groupName});
+  const WebEngineHardeningGroupScreen({super.key, required this.groupName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings =
-        ref.watch(preferenceSettingsGroupRepositoryProvider(groupName));
+    final settings = ref.watch(
+      preferenceSettingsGroupRepositoryProvider(
+        PreferencePartition.user,
+        groupName,
+      ),
+    );
 
     final theme = Theme.of(context);
 
@@ -36,18 +42,20 @@ class BrowserHardeningGroupScreen extends HookConsumerWidget {
                           color: theme.colorScheme.onPrimaryContainer,
                         ),
                       ),
-                      subtitle: (group.description != null)
-                          ? Text(
-                              group.description!,
-                              style: TextStyle(
-                                color: theme.colorScheme.onPrimaryContainer,
-                              ),
-                            )
-                          : null,
+                      subtitle: group.description.mapNotNull(
+                        (description) => Text(
+                          description,
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
                       onChanged: (value) async {
                         final notifier = ref.read(
-                          preferenceSettingsGroupRepositoryProvider(groupName)
-                              .notifier,
+                          preferenceSettingsGroupRepositoryProvider(
+                            PreferencePartition.user,
+                            groupName,
+                          ).notifier,
                         );
 
                         if (value) {
@@ -71,16 +79,17 @@ class BrowserHardeningGroupScreen extends HookConsumerWidget {
                             Expanded(
                               child: SwitchListTile(
                                 value: setting.value.isActive,
-                                title: Text(setting.value.title),
-                                subtitle: (setting.value.description != null)
-                                    ? Text(setting.value.description!)
-                                    : null,
+                                title: Text(setting.value.title ?? setting.key),
+                                subtitle: setting.value.description.mapNotNull(
+                                  (description) => Text(description),
+                                ),
                                 secondary: HardeningGroupIcon(
                                   isActive: setting.value.isActive,
                                 ),
                                 onChanged: (value) async {
                                   final notifier = ref.read(
                                     preferenceSettingsGroupRepositoryProvider(
+                                      PreferencePartition.user,
                                       groupName,
                                     ).notifier,
                                   );
@@ -96,16 +105,16 @@ class BrowserHardeningGroupScreen extends HookConsumerWidget {
                           else
                             Expanded(
                               child: ListTile(
-                                title: Text(setting.value.title),
-                                subtitle: (setting.value.description != null)
-                                    ? Text(setting.value.description!)
-                                    : null,
+                                title: Text(setting.value.title ?? setting.key),
+                                subtitle: setting.value.description.mapNotNull(
+                                  (description) => Text(description),
+                                ),
                                 leading: HardeningGroupIcon(
                                   isActive: setting.value.isActive,
                                 ),
-                                trailing: Padding(
-                                  padding: const EdgeInsets.only(right: 18.0),
-                                  child: const Icon(Icons.check),
+                                trailing: const Padding(
+                                  padding: EdgeInsets.only(right: 18.0),
+                                  child: Icon(Icons.check),
                                 ),
                               ),
                             ),
@@ -121,8 +130,12 @@ class BrowserHardeningGroupScreen extends HookConsumerWidget {
         error: (error, stackTrace) => FailureWidget(
           title: 'Could not load preference settings',
           exception: error,
-          onRetry: () =>
-              ref.refresh(preferenceSettingsGroupRepositoryProvider(groupName)),
+          onRetry: () => ref.refresh(
+            preferenceSettingsGroupRepositoryProvider(
+              PreferencePartition.user,
+              groupName,
+            ),
+          ),
         ),
         loading: () => const SizedBox.shrink(),
       ),

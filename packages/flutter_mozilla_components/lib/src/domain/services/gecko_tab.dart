@@ -142,12 +142,14 @@ class GeckoTabService {
   }
 
   Future<String> duplicateTab({
-    String? selectTabId,
+    required String? selectTabId,
+    required String? newContextId,
     bool selectNewTab = true,
   }) {
     return _api.duplicateTab(
       selectTabId: selectTabId,
       selectNewTab: selectNewTab,
+      newContextId: newContextId,
     );
   }
 

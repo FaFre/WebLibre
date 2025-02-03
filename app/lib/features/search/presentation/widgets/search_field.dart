@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
-import 'package:lensai/features/user/domain/repositories/settings.dart';
+import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 
 class SearchField extends HookConsumerWidget {
@@ -25,11 +25,7 @@ class SearchField extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final incognitoEnabled = ref.watch(
-      settingsRepositoryProvider.select(
-        (value) => value.incognitoMode,
-      ),
-    );
+    final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
     final hasText = useListenableSelector(
       textEditingController,

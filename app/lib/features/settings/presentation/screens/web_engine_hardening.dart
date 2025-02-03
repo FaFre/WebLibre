@@ -4,17 +4,20 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/data/models/equatable_iterable.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
+import 'package:lensai/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 import 'package:lensai/features/settings/presentation/widgets/hardening_group_icon.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 
-class BrowserHardeningScreen extends HookConsumerWidget {
-  const BrowserHardeningScreen();
+class WebEngineHardeningScreen extends HookConsumerWidget {
+  const WebEngineHardeningScreen();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final preferenceGroups =
-        ref.watch(preferenceSettingsGeneralRepositoryProvider);
+    final preferenceGroups = ref.watch(
+      unifiedPreferenceSettingsRepositoryProvider(PreferencePartition.user),
+    );
 
     final allGroupsActive = useMemoized(
       () =>
@@ -28,7 +31,7 @@ class BrowserHardeningScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Browser Hardening')),
+      appBar: AppBar(title: const Text('Web Engine Hardening')),
       body: preferenceGroups.when(
         data: (data) {
           return Column(
@@ -49,7 +52,9 @@ class BrowserHardeningScreen extends HookConsumerWidget {
                       ),
                       onChanged: (value) async {
                         final notifier = ref.read(
-                          preferenceSettingsGeneralRepositoryProvider.notifier,
+                          unifiedPreferenceSettingsRepositoryProvider(
+                            PreferencePartition.user,
+                          ).notifier,
                         );
 
                         if (value) {
@@ -71,9 +76,9 @@ class BrowserHardeningScreen extends HookConsumerWidget {
                           Expanded(
                             child: ListTile(
                               title: Text(group.key),
-                              subtitle: (group.value.description != null)
-                                  ? Text(group.value.description!)
-                                  : null,
+                              subtitle: group.value.description.mapNotNull(
+                                (description) => Text(description),
+                              ),
                               leading: HardeningGroupIcon(
                                 isActive: group.value.isActive,
                                 isPartlyActive: group.value.isPartlyActive,
@@ -81,7 +86,7 @@ class BrowserHardeningScreen extends HookConsumerWidget {
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () async {
                                 await context.push(
-                                  BrowserHardeningGroupRoute(
+                                  WebEngineHardeningGroupRoute(
                                     group: group.key,
                                   ).location,
                                 );
@@ -100,8 +105,11 @@ class BrowserHardeningScreen extends HookConsumerWidget {
         error: (error, stackTrace) => FailureWidget(
           title: 'Could not load preference settings',
           exception: error,
-          onRetry: () =>
-              ref.refresh(preferenceSettingsGeneralRepositoryProvider),
+          onRetry: () => ref.refresh(
+            unifiedPreferenceSettingsRepositoryProvider(
+              PreferencePartition.user,
+            ),
+          ),
         ),
         loading: () => const SizedBox.shrink(),
       ),

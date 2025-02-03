@@ -8,13 +8,21 @@ import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/services/delete_browser_data.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/services/engine_settings.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/vector_store/domain/repositories/document.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
+import 'package:lensai/features/user/domain/repositories/general_settings.dart';
+import 'package:lensai/features/user/domain/services/local_authentication.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;
+  final FutureOr<void> Function()? postInitializationStep;
 
-  const BrowserView({this.screenshotPeriod = const Duration(seconds: 10)});
+  const BrowserView({
+    this.screenshotPeriod = const Duration(seconds: 10),
+    this.postInitializationStep,
+  });
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _BrowserViewState();
@@ -64,6 +72,15 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     return GeckoView(
       preInitializationStep: () async {
         await ref
+            .read(generalSettingsRepositoryProvider.notifier)
+            .fetch()
+            .then((settings) {
+          ref
+              .read(deleteBrowserDataServiceProvider.notifier)
+              .deleteData(settings.deleteBrowsingDataOnQuit);
+        });
+
+        await ref
             .read(eventServiceProvider)
             .viewReadyStateEvents
             .firstWhere((state) => state == true)
@@ -76,6 +93,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             return true;
           },
         );
+      },
+      postInitializationStep: () async {
+        await widget.postInitializationStep?.call();
       },
     );
   }
@@ -109,6 +129,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       cacheRepositoryProvider,
       (previous, next) {},
     );
+
+    ref.listenManual(
+      engineSettingsReplicationServiceProvider,
+      (previous, next) {},
+    );
   }
 
   @override
@@ -124,6 +149,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _periodicScreenshotUpdate?.cancel();
           _timerPaused = true;
         }
+
+        ref
+            .read(localAuthenticationServiceProvider.notifier)
+            .evictCacheOnBackground();
       case AppLifecycleState.resumed:
         if (_timerPaused) {
           _periodicScreenshotUpdate =

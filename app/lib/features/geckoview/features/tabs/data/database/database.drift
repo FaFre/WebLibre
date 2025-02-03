@@ -1,14 +1,13 @@
 import 'package:lensai/data/database/converters/color.dart';
-import 'package:lensai/data/database/converters/icon_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
 
 CREATE TABLE container (
   id TEXT PRIMARY KEY NOT NULL,
-  contextual_identity TEXT,
   name TEXT,
   color INTEGER NOT NULL MAPPED BY `const ColorConverter()`,
-  icon TEXT MAPPED BY `const IconDataTypeConverter()`
+  metadata TEXT MAPPED BY `const ContainerMetadataConverter()`
 ) WITH ContainerData;
 
 CREATE TABLE tab ( 
@@ -79,7 +78,7 @@ containersWithCount WITH ContainerDataWithCount:
     FROM tab
     GROUP BY container_id
   ) AS tab_agg ON container.id = tab_agg.container_id
-  ORDER BY tab_agg.last_updated DESC NULLS FIRST;
+  ORDER BY tab_agg.last_updated DESC NULLS LAST;
 
 leadingOrderKey(:container_id AS TEXT OR NULL, :bucket AS INTEGER):
   SELECT lexo_rank_previous(

@@ -1,3 +1,4 @@
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:lexo_rank/lexo_rank/lexo_rank_bucket.dart';
 import 'package:sqlite3/common.dart';
@@ -27,8 +28,8 @@ String _previousRankOrMiddle(List<Object?> args) {
 }
 
 String _reorderAfter(List<Object?> args) {
-  final first = (args[0] != null) ? LexoRank.parse(args[0]! as String) : null;
-  final last = (args[1] != null) ? LexoRank.parse(args[1]! as String) : null;
+  final first = args[0].mapNotNull((arg) => LexoRank.parse(arg as String));
+  final last = args[1].mapNotNull((arg) => LexoRank.parse(arg as String));
 
   if (first == null) {
     throw Exception('Tab not found');

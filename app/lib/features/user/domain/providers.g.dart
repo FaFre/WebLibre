@@ -90,5 +90,23 @@ final pocketBaseProvider = Provider<PocketBase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PocketBaseRef = ProviderRef<PocketBase>;
+String _$incognitoModeEnabledHash() =>
+    r'3968c2d4945be09a0bc08ce0d70b0390187c44e8';
+
+/// See also [incognitoModeEnabled].
+@ProviderFor(incognitoModeEnabled)
+final incognitoModeEnabledProvider = AutoDisposeProvider<bool>.internal(
+  incognitoModeEnabled,
+  name: r'incognitoModeEnabledProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$incognitoModeEnabledHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef IncognitoModeEnabledRef = AutoDisposeProviderRef<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

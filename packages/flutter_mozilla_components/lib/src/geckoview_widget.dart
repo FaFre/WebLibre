@@ -10,8 +10,13 @@ import 'package:flutter_mozilla_components/src/domain/services/gecko_browser.dar
 
 class GeckoView extends StatefulWidget {
   final FutureOr<void> Function()? preInitializationStep;
+  final FutureOr<void> Function()? postInitializationStep;
 
-  const GeckoView({super.key, this.preInitializationStep});
+  const GeckoView({
+    super.key,
+    this.preInitializationStep,
+    this.postInitializationStep,
+  });
 
   @override
   State<GeckoView> createState() => _GeckoViewState();
@@ -70,6 +75,7 @@ class _GeckoViewState extends State<GeckoView> {
                 Duration(milliseconds: ((1000 / 60) * 2).toInt()),
               ).whenComplete(() async {
                 await browserService.showNativeFragment();
+                await widget.postInitializationStep?.call();
               });
             });
           })

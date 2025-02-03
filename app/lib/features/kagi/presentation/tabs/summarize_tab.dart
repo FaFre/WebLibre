@@ -10,7 +10,7 @@ import 'package:lensai/features/geckoview/features/browser/presentation/widgets/
 import 'package:lensai/features/kagi/data/entities/modes.dart';
 import 'package:lensai/features/kagi/utils/url_builder.dart' as uri_builder;
 import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
-import 'package:lensai/features/user/domain/repositories/settings.dart';
+import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/presentation/widgets/website_title_tile.dart';
 import 'package:lensai/utils/uri_parser.dart' as uri_parser;
 
@@ -21,11 +21,7 @@ class _InputField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final incognitoEnabled = ref.watch(
-      settingsRepositoryProvider.select(
-        (value) => value.incognitoMode,
-      ),
-    );
+    final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
     return TextFormField(
       controller: controller,

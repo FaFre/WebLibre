@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
@@ -21,9 +22,8 @@ class BangListScreen extends HookConsumerWidget {
     final bangsAsync = ref.watch(
       bangDataListProvider(
         filter: (
-          categoryFilter: (category != null)
-              ? (category: category!, subCategory: subCategory)
-              : null,
+          categoryFilter: category.mapNotNull(
+              (category) => (category: category, subCategory: subCategory)),
           domain: null,
           groups: null,
           orderMostFrequentFirst: null,

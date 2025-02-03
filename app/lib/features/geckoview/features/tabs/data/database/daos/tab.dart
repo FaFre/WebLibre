@@ -41,7 +41,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return query.map((row) => row.read(db.tab.id)!);
   }
 
-  SingleSelectable<String?> tabContainerId(String tabId) {
+  SingleOrNullSelectable<String?> tabContainerId(String tabId) {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.containerId])
       ..where(db.tab.id.equals(tabId));
@@ -49,7 +49,41 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return query.map((row) => row.read(db.tab.containerId));
   }
 
-  Future<String> upsertTab(
+  Future<String> upsertContainerTabTransactional(
+    Future<String> Function() createTab, {
+    Value<String?> containerId = const Value.absent(),
+    Value<String?> orderKey = const Value.absent(),
+  }) {
+    return db.transaction(() async {
+      final tabId = await createTab();
+
+      final currentOrderKey = orderKey.value ??
+          await db.containerDao
+              .generateLeadingOrderKey(containerId.value)
+              .getSingle();
+
+      await db.tab.insertOne(
+        TabCompanion.insert(
+          id: tabId,
+          timestamp: DateTime.now(),
+          containerId: containerId,
+          orderKey: currentOrderKey,
+        ),
+        onConflict: DoUpdate(
+          (old) => TabCompanion.custom(
+            containerId:
+                (containerId.present) ? Variable(containerId.value) : null,
+            orderKey: (orderKey.present) ? Variable(orderKey.value) : null,
+          ),
+        ),
+      );
+
+      return tabId;
+    });
+  }
+
+  //Upsert an tab only if there is no container assigned yet
+  Future<String> upsertUnassignedTab(
     String tabId, {
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
@@ -73,6 +107,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
                 (containerId.present) ? Variable(containerId.value) : null,
             orderKey: (orderKey.present) ? Variable(orderKey.value) : null,
           ),
+          where: (old) => old.containerId.isNull(),
         ),
       );
 

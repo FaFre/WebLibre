@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:flutter/widgets.dart' show Color, IconData;
+import 'package:flutter/widgets.dart' show Color;
 import 'package:lensai/data/database/converters/color.dart';
-import 'package:lensai/data/database/converters/icon_data.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/database/daos/container.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';

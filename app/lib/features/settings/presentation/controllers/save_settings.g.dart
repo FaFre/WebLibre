@@ -6,22 +6,39 @@ part of 'save_settings.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$saveSettingsControllerHash() =>
-    r'7ffcef95b48dce1f80b56fb3580282ff3df240b4';
+String _$saveGeneralSettingsControllerHash() =>
+    r'ad8b60839cbcb05a964f57e32fc5d9c1aba30377';
 
-/// See also [SaveSettingsController].
-@ProviderFor(SaveSettingsController)
-final saveSettingsControllerProvider =
-    AsyncNotifierProvider<SaveSettingsController, void>.internal(
-  SaveSettingsController.new,
-  name: r'saveSettingsControllerProvider',
+/// See also [SaveGeneralSettingsController].
+@ProviderFor(SaveGeneralSettingsController)
+final saveGeneralSettingsControllerProvider =
+    AsyncNotifierProvider<SaveGeneralSettingsController, void>.internal(
+  SaveGeneralSettingsController.new,
+  name: r'saveGeneralSettingsControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$saveSettingsControllerHash,
+      : _$saveGeneralSettingsControllerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SaveSettingsController = AsyncNotifier<void>;
+typedef _$SaveGeneralSettingsController = AsyncNotifier<void>;
+String _$saveEngineSettingsControllerHash() =>
+    r'4ca0ee76a41a72a8e6eacdb0e39045c667390c00';
+
+/// See also [SaveEngineSettingsController].
+@ProviderFor(SaveEngineSettingsController)
+final saveEngineSettingsControllerProvider =
+    AsyncNotifierProvider<SaveEngineSettingsController, void>.internal(
+  SaveEngineSettingsController.new,
+  name: r'saveEngineSettingsControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$saveEngineSettingsControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$SaveEngineSettingsController = AsyncNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

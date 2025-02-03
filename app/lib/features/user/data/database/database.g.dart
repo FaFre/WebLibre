@@ -13,13 +13,18 @@ class Setting extends Table with TableInfo<Setting, SettingData> {
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'PRIMARY KEY NOT NULL');
+  late final GeneratedColumn<String> partitionKey = GeneratedColumn<String>(
+      'partition_key', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   late final GeneratedColumn<DriftAny> value = GeneratedColumn<DriftAny>(
       'value', aliasedName, true,
       type: DriftSqlType.any,
       requiredDuringInsert: false,
       $customConstraints: '');
   @override
-  List<GeneratedColumn> get $columns => [key, value];
+  List<GeneratedColumn> get $columns => [key, partitionKey, value];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -33,6 +38,8 @@ class Setting extends Table with TableInfo<Setting, SettingData> {
     return SettingData(
       key: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
+      partitionKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}partition_key']),
       value: attachedDatabase.typeMapping
           .read(DriftSqlType.any, data['${effectivePrefix}value']),
     );
@@ -51,12 +58,16 @@ class Setting extends Table with TableInfo<Setting, SettingData> {
 
 class SettingData extends DataClass implements Insertable<SettingData> {
   final String key;
+  final String? partitionKey;
   final DriftAny? value;
-  const SettingData({required this.key, this.value});
+  const SettingData({required this.key, this.partitionKey, this.value});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['key'] = Variable<String>(key);
+    if (!nullToAbsent || partitionKey != null) {
+      map['partition_key'] = Variable<String>(partitionKey);
+    }
     if (!nullToAbsent || value != null) {
       map['value'] = Variable<DriftAny>(value);
     }
@@ -68,6 +79,7 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SettingData(
       key: serializer.fromJson<String>(json['key']),
+      partitionKey: serializer.fromJson<String?>(json['partition_key']),
       value: serializer.fromJson<DriftAny?>(json['value']),
     );
   }
@@ -76,19 +88,27 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'key': serializer.toJson<String>(key),
+      'partition_key': serializer.toJson<String?>(partitionKey),
       'value': serializer.toJson<DriftAny?>(value),
     };
   }
 
   SettingData copyWith(
-          {String? key, Value<DriftAny?> value = const Value.absent()}) =>
+          {String? key,
+          Value<String?> partitionKey = const Value.absent(),
+          Value<DriftAny?> value = const Value.absent()}) =>
       SettingData(
         key: key ?? this.key,
+        partitionKey:
+            partitionKey.present ? partitionKey.value : this.partitionKey,
         value: value.present ? value.value : this.value,
       );
   SettingData copyWithCompanion(SettingCompanion data) {
     return SettingData(
       key: data.key.present ? data.key.value : this.key,
+      partitionKey: data.partitionKey.present
+          ? data.partitionKey.value
+          : this.partitionKey,
       value: data.value.present ? data.value.value : this.value,
     );
   }
@@ -97,51 +117,62 @@ class SettingData extends DataClass implements Insertable<SettingData> {
   String toString() {
     return (StringBuffer('SettingData(')
           ..write('key: $key, ')
+          ..write('partitionKey: $partitionKey, ')
           ..write('value: $value')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(key, value);
+  int get hashCode => Object.hash(key, partitionKey, value);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SettingData &&
           other.key == this.key &&
+          other.partitionKey == this.partitionKey &&
           other.value == this.value);
 }
 
 class SettingCompanion extends UpdateCompanion<SettingData> {
   final Value<String> key;
+  final Value<String?> partitionKey;
   final Value<DriftAny?> value;
   final Value<int> rowid;
   const SettingCompanion({
     this.key = const Value.absent(),
+    this.partitionKey = const Value.absent(),
     this.value = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SettingCompanion.insert({
     required String key,
+    this.partitionKey = const Value.absent(),
     this.value = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : key = Value(key);
   static Insertable<SettingData> custom({
     Expression<String>? key,
+    Expression<String>? partitionKey,
     Expression<DriftAny>? value,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (key != null) 'key': key,
+      if (partitionKey != null) 'partition_key': partitionKey,
       if (value != null) 'value': value,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   SettingCompanion copyWith(
-      {Value<String>? key, Value<DriftAny?>? value, Value<int>? rowid}) {
+      {Value<String>? key,
+      Value<String?>? partitionKey,
+      Value<DriftAny?>? value,
+      Value<int>? rowid}) {
     return SettingCompanion(
       key: key ?? this.key,
+      partitionKey: partitionKey ?? this.partitionKey,
       value: value ?? this.value,
       rowid: rowid ?? this.rowid,
     );
@@ -152,6 +183,9 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
     final map = <String, Expression>{};
     if (key.present) {
       map['key'] = Variable<String>(key.value);
+    }
+    if (partitionKey.present) {
+      map['partition_key'] = Variable<String>(partitionKey.value);
     }
     if (value.present) {
       map['value'] = Variable<DriftAny>(value.value);
@@ -166,6 +200,7 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
   String toString() {
     return (StringBuffer('SettingCompanion(')
           ..write('key: $key, ')
+          ..write('partitionKey: $partitionKey, ')
           ..write('value: $value, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -396,11 +431,13 @@ abstract class _$UserDatabase extends GeneratedDatabase {
 
 typedef $SettingCreateCompanionBuilder = SettingCompanion Function({
   required String key,
+  Value<String?> partitionKey,
   Value<DriftAny?> value,
   Value<int> rowid,
 });
 typedef $SettingUpdateCompanionBuilder = SettingCompanion Function({
   Value<String> key,
+  Value<String?> partitionKey,
   Value<DriftAny?> value,
   Value<int> rowid,
 });
@@ -415,6 +452,9 @@ class $SettingFilterComposer extends Composer<_$UserDatabase, Setting> {
   });
   ColumnFilters<String> get key => $composableBuilder(
       column: $table.key, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get partitionKey => $composableBuilder(
+      column: $table.partitionKey, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DriftAny> get value => $composableBuilder(
       column: $table.value, builder: (column) => ColumnFilters(column));
@@ -431,6 +471,10 @@ class $SettingOrderingComposer extends Composer<_$UserDatabase, Setting> {
   ColumnOrderings<String> get key => $composableBuilder(
       column: $table.key, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get partitionKey => $composableBuilder(
+      column: $table.partitionKey,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DriftAny> get value => $composableBuilder(
       column: $table.value, builder: (column) => ColumnOrderings(column));
 }
@@ -445,6 +489,9 @@ class $SettingAnnotationComposer extends Composer<_$UserDatabase, Setting> {
   });
   GeneratedColumn<String> get key =>
       $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get partitionKey => $composableBuilder(
+      column: $table.partitionKey, builder: (column) => column);
 
   GeneratedColumn<DriftAny> get value =>
       $composableBuilder(column: $table.value, builder: (column) => column);
@@ -474,21 +521,25 @@ class $SettingTableManager extends RootTableManager<
               $SettingAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> key = const Value.absent(),
+            Value<String?> partitionKey = const Value.absent(),
             Value<DriftAny?> value = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SettingCompanion(
             key: key,
+            partitionKey: partitionKey,
             value: value,
             rowid: rowid,
           ),
           createCompanionCallback: ({
             required String key,
+            Value<String?> partitionKey = const Value.absent(),
             Value<DriftAny?> value = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               SettingCompanion.insert(
             key: key,
+            partitionKey: partitionKey,
             value: value,
             rowid: rowid,
           ),

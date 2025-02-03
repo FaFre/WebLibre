@@ -11,11 +11,16 @@ import 'package:lensai/features/chat_archive/presentation/screens/list.dart';
 import 'package:lensai/features/chat_archive/presentation/screens/search.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/web_page_dialog.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/screens/browser.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:lensai/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:lensai/features/search/presentation/screens/search.dart';
-import 'package:lensai/features/settings/presentation/screens/browser_hardening.dart';
-import 'package:lensai/features/settings/presentation/screens/browser_hardening_group.dart';
+import 'package:lensai/features/settings/presentation/screens/bang_settings.dart';
+import 'package:lensai/features/settings/presentation/screens/general_settings.dart';
 import 'package:lensai/features/settings/presentation/screens/settings.dart';
+import 'package:lensai/features/settings/presentation/screens/web_engine_hardening.dart';
+import 'package:lensai/features/settings/presentation/screens/web_engine_hardening_group.dart';
+import 'package:lensai/features/settings/presentation/screens/web_engine_settings.dart';
 import 'package:lensai/features/user/presentation/screens/auth.dart';
 
 part 'routes.g.dart';
@@ -63,6 +68,16 @@ part 'routes.g.dart';
     TypedGoRoute<ContainerListRoute>(
       name: 'ContainerListRoute',
       path: 'containers',
+      routes: [
+        TypedGoRoute<ContainerCreateRoute>(
+          name: 'ContainerCreateRoute',
+          path: 'create',
+        ),
+        TypedGoRoute<ContainerEditRoute>(
+          name: 'ContainerEditRoute',
+          path: 'edit',
+        ),
+      ],
     ),
   ],
 )
@@ -179,17 +194,49 @@ class ContainerListRoute extends GoRouteData {
   }
 }
 
+class ContainerEditRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ContainerEditScreen.edit(
+      initialContainer: state.extra! as ContainerData,
+    );
+  }
+}
+
+class ContainerCreateRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ContainerEditScreen.create(
+      initialContainer: state.extra! as ContainerData,
+    );
+  }
+}
+
 @TypedGoRoute<SettingsRoute>(
   name: 'SettingsRoute',
   path: '/settings',
   routes: [
-    TypedGoRoute<BrowserHardeningRoute>(
-      name: 'BrowserHardeningRoute',
-      path: 'hardening',
+    TypedGoRoute<GeneralSettingsRoute>(
+      name: 'GeneralSettingsRoute',
+      path: 'general',
+    ),
+    TypedGoRoute<BangSettingsRoute>(
+      name: 'BangSettingsRoute',
+      path: 'bang',
+    ),
+    TypedGoRoute<WebEngineSettingsRoute>(
+      name: 'WebEngineSettingsRoute',
+      path: 'web_engine',
       routes: [
-        TypedGoRoute<BrowserHardeningGroupRoute>(
-          name: 'BrowserHardeningGroupRoute',
-          path: 'group/:group',
+        TypedGoRoute<WebEngineHardeningRoute>(
+          name: 'WebEngineHardeningRoute',
+          path: 'hardening',
+          routes: [
+            TypedGoRoute<WebEngineHardeningGroupRoute>(
+              name: 'WebEngineHardeningGroupRoute',
+              path: 'group/:group',
+            ),
+          ],
         ),
       ],
     ),
@@ -202,21 +249,42 @@ class SettingsRoute extends GoRouteData {
   }
 }
 
-class BrowserHardeningRoute extends GoRouteData {
+class GeneralSettingsRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const BrowserHardeningScreen();
+    return const GeneralSettingsScreen();
   }
 }
 
-class BrowserHardeningGroupRoute extends GoRouteData {
+class BangSettingsRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const BangSettingsScreen();
+  }
+}
+
+class WebEngineSettingsRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const WebEngineSettingsScreen();
+  }
+}
+
+class WebEngineHardeningRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const WebEngineHardeningScreen();
+  }
+}
+
+class WebEngineHardeningGroupRoute extends GoRouteData {
   final String group;
 
-  const BrowserHardeningGroupRoute({required this.group});
+  const WebEngineHardeningGroupRoute({required this.group});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BrowserHardeningGroupScreen(groupName: group);
+    return WebEngineHardeningGroupScreen(groupName: group);
   }
 }
 

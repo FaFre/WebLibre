@@ -10,6 +10,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 import 'package:lensai/core/http_error_handler.dart';
 import 'package:lensai/data/models/web_page_info.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
 import 'package:lensai/utils/lru_cache.dart';
@@ -267,7 +268,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       url.origin,
       await BrowserIcon.fromBytes(
         result.image,
-        dominantColor: (result.color != null) ? Color(result.color!) : null,
+        dominantColor: result.color.mapNotNull((color) => Color(color)),
         source: result.source,
       ),
     );

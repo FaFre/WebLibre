@@ -1,0 +1,80 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:drift/drift.dart';
+import 'package:lensai/extensions/nullable.dart';
+import 'package:lensai/features/user/data/models/general_settings.dart';
+import 'package:lensai/features/user/data/providers.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'general_settings.g.dart';
+
+typedef UpdateGeneralSettingsFunc = GeneralSettings Function(
+  GeneralSettings currentSettings,
+);
+
+@Riverpod(keepAlive: true)
+class GeneralSettingsRepository extends _$GeneralSettingsRepository {
+  final _partitionKey = 'general';
+
+  GeneralSettings _deserializeSettings(
+    List<MapEntry<String, DriftAny?>> entries,
+  ) {
+    final settings = Map.fromEntries(entries);
+
+    final db = ref.read(userDatabaseProvider);
+
+    return GeneralSettings.fromJson({
+      'themeMode':
+          settings['themeMode']?.readAs(DriftSqlType.string, db.typeMapping),
+      'enableReadability': settings['enableReadability']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'deleteBrowsingDataOnQuit': settings['deleteBrowsingDataOnQuit']
+          ?.readAs(DriftSqlType.string, db.typeMapping)
+          .mapNotNull(jsonDecode),
+    });
+  }
+
+  //Eager fetch, when up to date settings are required
+  Future<GeneralSettings> fetch() async {
+    return ref
+        .read(userDatabaseProvider)
+        .settingDao
+        .allSettingsOfPartitionKey(_partitionKey)
+        .get()
+        .then(_deserializeSettings);
+  }
+
+  Future<void> updateSettings(UpdateGeneralSettingsFunc updateWithCurrent) {
+    final oldJson = state.toJson();
+    final newJson = updateWithCurrent(state).toJson();
+
+    final db = ref.read(userDatabaseProvider);
+
+    return db.transaction(() async {
+      for (final MapEntry(:key, :value) in newJson.entries) {
+        if (oldJson[key] != value) {
+          await db.settingDao.updateSetting(key, _partitionKey, value);
+        }
+      }
+    });
+  }
+
+  @override
+  GeneralSettings build() {
+    final db = ref.watch(userDatabaseProvider);
+
+    final watchSub =
+        db.settingDao.allSettingsOfPartitionKey(_partitionKey).watch().listen(
+      (event) {
+        state = _deserializeSettings(event);
+      },
+    );
+
+    ref.onDispose(() {
+      unawaited(watchSub.cancel());
+    });
+
+    return GeneralSettings.withDefaults();
+  }
+}

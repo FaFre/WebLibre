@@ -1,118 +1,16 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/core/routing/routes.dart';
+import 'package:lensai/core/uuid.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_dialog.dart';
+import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-
-class _ContainerTile extends HookWidget {
-  final ContainerData container;
-  final bool isSelected;
-
-  final void Function(ContainerResult edited) onEdit;
-  final void Function() onDelete;
-  final void Function() onTap;
-
-  const _ContainerTile(
-    this.container, {
-    required this.isSelected,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onTap,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final menuController = useMemoized(() => MenuController());
-
-    return ListTile(
-      selected: isSelected,
-      leading: CircleAvatar(backgroundColor: container.color),
-      title: Text(container.name ?? 'New Container'),
-      trailing: MenuAnchor(
-        controller: menuController,
-        builder: (context, controller, child) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 4.0),
-            child: InkWell(
-              onTap: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 8.0),
-                child: Icon(Icons.more_vert),
-              ),
-            ),
-          );
-        },
-        menuChildren: [
-          MenuItemButton(
-            onPressed: () async {
-              final result = await showDialog<ContainerResult?>(
-                context: context,
-                builder: (context) => ContainerDialog.edit(
-                  name: container.name,
-                  initialColor: container.color,
-                ),
-              );
-
-              if (result != null) {
-                onEdit(result);
-              }
-            },
-            leadingIcon: const Icon(Icons.edit),
-            child: const Text('Edit'),
-          ),
-          MenuItemButton(
-            onPressed: () async {
-              final result = await showDialog<bool?>(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Delete Container'),
-                    content: const Text(
-                      'Are you sure you want to delete this container and close all attached tabs?',
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context, false);
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context, true);
-                        },
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  );
-                },
-              );
-
-              if (result == true) {
-                onDelete();
-              }
-            },
-            leadingIcon: const Icon(Icons.delete),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-      onTap: onTap,
-    );
-  }
-}
 
 class ContainerListScreen extends HookConsumerWidget {
   const ContainerListScreen();
@@ -139,29 +37,36 @@ class ContainerListScreen extends HookConsumerWidget {
                     itemCount: containers.length,
                     itemBuilder: (context, index) {
                       final container = containers[index];
-                      return _ContainerTile(
-                        container,
+                      return Slidable(
                         key: ValueKey(container.id),
-                        isSelected: container.id == selectedContainer,
-                        onEdit: (edited) async {
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                id: container.id,
-                                name: edited.name,
-                                color: edited.color,
-                              );
-                        },
-                        onDelete: () async {
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .deleteContainer(container.id);
-                        },
-                        onTap: () {
-                          ref
-                              .read(selectedContainerProvider.notifier)
-                              .toggleContainer(container.id);
-                        },
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          children: [
+                            SlidableAction(
+                              onPressed: (context) async {
+                                await ref
+                                    .read(containerRepositoryProvider.notifier)
+                                    .deleteContainer(container.id);
+                              },
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.errorContainer,
+                              foregroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .onErrorContainer,
+                              icon: Icons.delete,
+                              label: 'Delete',
+                            ),
+                          ],
+                        ),
+                        child: ContainerListTile(
+                          container,
+                          isSelected: container.id == selectedContainer,
+                          onTap: () async {
+                            await ref
+                                .read(selectedContainerProvider.notifier)
+                                .toggleContainer(container.id);
+                          },
+                        ),
                       );
                     },
                   );
@@ -170,12 +75,9 @@ class ContainerListScreen extends HookConsumerWidget {
               error: (error, stackTrace) => SizedBox.shrink(),
               loading: () => ListView.builder(
                 itemCount: 3,
-                itemBuilder: (context, index) => _ContainerTile(
+                itemBuilder: (context, index) => ContainerListTile(
                   ContainerData(id: 'null', color: Colors.transparent),
                   isSelected: false,
-                  onEdit: (_) {},
-                  onDelete: () {},
-                  onTap: () {},
                 ),
               ),
             ),
@@ -188,17 +90,15 @@ class ContainerListScreen extends HookConsumerWidget {
               await ref.read(unusedRandomContainerColorProvider.future);
 
           if (context.mounted) {
-            final result = await showDialog<ContainerResult?>(
-              context: context,
-              builder: (context) => ContainerDialog.create(
-                initialColor: initialColor,
-              ),
+            final result = await context.push<ContainerData?>(
+              ContainerCreateRoute().location,
+              extra: ContainerData(id: uuid.v7(), color: initialColor),
             );
 
             if (result != null) {
               await ref
                   .read(containerRepositoryProvider.notifier)
-                  .addContainer(name: result.name, color: result.color);
+                  .addContainer(result);
             }
           }
         },

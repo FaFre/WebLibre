@@ -27,6 +27,24 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
+    private fun updateFingerprintingProtection(trackingProtectionPolicy: eu.lensai.flutter_mozilla_components.pigeons.TrackingProtectionPolicy) {
+        when(trackingProtectionPolicy) {
+            eu.lensai.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> {
+                components.core.engineSettings.fingerprintingProtection = true
+                components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
+            }
+            eu.lensai.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.RECOMMENDED -> {
+                components.core.engineSettings.fingerprintingProtection = false
+                components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
+            }
+            eu.lensai.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> TODO()
+            eu.lensai.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.NONE -> {
+                components.core.engineSettings.fingerprintingProtection = false
+                components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
+            }
+        }
+    }
+
     override fun setDefaultSettings(settings: GeckoEngineSettings) {
         if(settings.javascriptEnabled != null) {
             components.core.engineSettings.javascriptEnabled = settings.javascriptEnabled;
@@ -38,6 +56,8 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
                 eu.lensai.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> TrackingProtectionPolicy.strict()
                 eu.lensai.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> TODO()
             }
+
+            updateFingerprintingProtection(settings.trackingProtectionPolicy)
         }
         if(settings.httpsOnlyMode != null) {
             components.core.engineSettings.httpsOnlyMode = when(settings.httpsOnlyMode) {
@@ -89,13 +109,18 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         //First parse and set default values
         setDefaultSettings(settings);
 
+        var reloadSession = false
+
         //Then copy default settings into runtime
         if(settings.javascriptEnabled != null) {
             components.core.engine.settings.javascriptEnabled = components.core.engineSettings.javascriptEnabled
+            reloadSession = true
         }
         if(settings.trackingProtectionPolicy != null) {
             components.useCases.settingsUseCases.updateTrackingProtection(components.core.engineSettings.trackingProtectionPolicy!!)
-            components.useCases.sessionUseCases.reload()
+            components.core.engine.settings.fingerprintingProtection = components.core.engineSettings.fingerprintingProtection
+            components.core.engine.settings.fingerprintingProtectionPrivateBrowsing = components.core.engineSettings.fingerprintingProtectionPrivateBrowsing
+            reloadSession = true
         }
         if(settings.httpsOnlyMode != null) {
             components.core.engineSettings.httpsOnlyMode = components.core.engineSettings.httpsOnlyMode
@@ -105,12 +130,15 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         }
         if(settings.preferredColorScheme != null) {
             components.core.engineSettings.preferredColorScheme = components.core.engineSettings.preferredColorScheme
+            reloadSession = true
         }
         if(settings.cookieBannerHandlingMode != null) {
             components.core.engineSettings.cookieBannerHandlingMode = components.core.engineSettings.cookieBannerHandlingMode
+            reloadSession = true
         }
         if(settings.cookieBannerHandlingModePrivateBrowsing != null) {
             components.core.engineSettings.cookieBannerHandlingModePrivateBrowsing = components.core.engineSettings.cookieBannerHandlingModePrivateBrowsing
+            reloadSession = true
         }
         if(settings.cookieBannerHandlingGlobalRules != null) {
             components.core.engineSettings.cookieBannerHandlingGlobalRules = components.core.engineSettings.cookieBannerHandlingGlobalRules
@@ -120,6 +148,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         }
         if(settings.webContentIsolationStrategy != null) {
             components.core.engineSettings.webContentIsolationStrategy = components.core.engineSettings.webContentIsolationStrategy
+        }
+
+        if(reloadSession) {
+            components.useCases.sessionUseCases.reload()
         }
     }
 }

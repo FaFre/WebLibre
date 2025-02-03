@@ -1,3 +1,5 @@
+import 'package:lensai/extensions/nullable.dart';
+
 class ChatEntity {
   static final _namePattern = RegExp(r"^(.*?) - (.*?)\.md$");
 
@@ -14,7 +16,7 @@ class ChatEntity {
     return ChatEntity._(
       fileName,
       name: match?.group(1),
-      dateTime: (match != null) ? DateTime.tryParse(match.group(2)!) : null,
+      dateTime: match.mapNotNull((match) => DateTime.tryParse(match.group(2)!)),
     );
   }
 

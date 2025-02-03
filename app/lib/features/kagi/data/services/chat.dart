@@ -17,7 +17,7 @@ class KagiChatService extends _$KagiChatService {
     throw Exception('Not implemented !');
 
     // final kagiSession =
-    //     ref.read(settingsRepositoryProvider).valueOrNull?.kagiSession;
+    //     ref.read(generalSettingsRepositoryProvider).valueOrNull?.kagiSession;
 
     // return Result.fromAsync(
     //   () async {

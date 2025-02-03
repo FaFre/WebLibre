@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:lensai/utils/debouncer.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -19,31 +20,59 @@ part 'tab.g.dart';
 class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
 
-  late TabDatabase _db;
-
   Future<String> addTab({
     Uri? url,
     bool selectTab = true,
     bool startLoading = true,
     String? parentId,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
-    String? contextId,
     Source source = Internal.newTab,
     bool private = false,
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
-  }) {
-    return _tabsService.addTab(
-      url: url,
-      selectTab: selectTab,
-      startLoading: startLoading,
-      parentId: parentId,
-      flags: flags,
-      contextId: contextId,
-      source: source,
-      private: private,
-      historyMetadata: historyMetadata,
-      additionalHeaders: additionalHeaders,
+  }) async {
+    final selectedContainer =
+        await ref.read(selectedContainerProvider.notifier).fetchData();
+
+    return ref.read(tabDatabaseProvider).tabDao.upsertContainerTabTransactional(
+      () {
+        return _tabsService.addTab(
+          url: url,
+          selectTab: selectTab,
+          startLoading: startLoading,
+          parentId: parentId,
+          flags: flags,
+          contextId: selectedContainer?.metadata.contextualIdentity,
+          source: source,
+          private: private,
+          historyMetadata: historyMetadata,
+          additionalHeaders: additionalHeaders,
+        );
+      },
+      containerId: Value(selectedContainer?.id),
+    );
+  }
+
+  Future<String> duplicateTab({
+    required String? selectTabId,
+    String? containerId,
+    bool selectTab = true,
+  }) async {
+    final containerData = await containerId.mapNotNull(
+      (containerId) => ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainerData(containerId),
+    );
+
+    return ref.read(tabDatabaseProvider).tabDao.upsertContainerTabTransactional(
+      () {
+        return _tabsService.duplicateTab(
+          selectTabId: selectTabId,
+          newContextId: containerData?.metadata.contextualIdentity,
+          selectNewTab: selectTab,
+        );
+      },
+      containerId: Value(containerData?.id),
     );
   }
 
@@ -67,18 +96,19 @@ class TabRepository extends _$TabRepository {
     final tabStateDebouncer = Debouncer(const Duration(seconds: 3));
     Map<String, TabState>? debounceStartValue;
 
-    _db = ref.watch(tabDatabaseProvider);
+    final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
       (tabId) async {
         final containerId = ref.read(selectedContainerProvider);
-        await _db.tabDao.upsertTab(tabId, containerId: Value(containerId));
+        await db.tabDao
+            .upsertUnassignedTab(tabId, containerId: Value(containerId));
       },
     );
 
     final tabContentSub =
         tabContentService.tabContentStream.listen((content) async {
-      await _db.tabDao.updateTabContent(
+      await db.tabDao.updateTabContent(
         content.tabId,
         isProbablyReaderable: content.isProbablyReaderable,
         extractedContentMarkdown: content.extractedContentMarkdown,
@@ -92,7 +122,7 @@ class TabRepository extends _$TabRepository {
       selectedTabProvider,
       (previous, tabId) async {
         if (tabId != null) {
-          await _db.tabDao.touchTab(tabId, timestamp: DateTime.now());
+          await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
         }
       },
     );
@@ -104,7 +134,7 @@ class TabRepository extends _$TabRepository {
         final syncTabs = next.isNotEmpty || (previous?.isNotEmpty ?? false);
 
         if (syncTabs) {
-          await _db.tabDao.syncTabs(retainTabIds: next);
+          await db.tabDao.syncTabs(retainTabIds: next);
         }
       },
     );
@@ -120,7 +150,7 @@ class TabRepository extends _$TabRepository {
         }
 
         tabStateDebouncer.eventOccured(() async {
-          await _db.tabDao.updateTabs(debounceStartValue, next);
+          await db.tabDao.updateTabs(debounceStartValue, next);
         });
       },
     );

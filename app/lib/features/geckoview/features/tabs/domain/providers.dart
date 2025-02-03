@@ -59,12 +59,6 @@ AsyncValue<List<ContainerDataWithCount>> filteredContainersWithCount(
 }
 
 @Riverpod()
-Stream<String?> tabContainerId(Ref ref, String tabId) {
-  final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.tabContainerId(tabId).watchSingle();
-}
-
-@Riverpod()
 Stream<List<String>> containerTabIds(
   Ref ref,
   String? containerId,

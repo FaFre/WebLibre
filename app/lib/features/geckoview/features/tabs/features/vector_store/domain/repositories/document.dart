@@ -6,6 +6,7 @@ import 'package:langchain/langchain.dart' as langchain;
 import 'package:langchain/langchain.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:lensai/core/models.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/database/daos/vector.dart';
@@ -41,21 +42,21 @@ class DocumentRepository extends _$DocumentRepository {
           chunkOverlap: chunkOverlap,
         );
 
-        final splittedWithSource = (splitted != null)
-            ? (
-                mainDocumentId: splitted.mainDocumentId,
-                parts: splitted.parts
-                    .map(
-                      (part) => part.copyWith(
-                        metadata: {
-                          ...part.metadata,
-                          'source': part.id,
-                        },
-                      ),
-                    )
-                    .toList()
-              )
-            : null;
+        final splittedWithSource = splitted.mapNotNull(
+          (splitted) => (
+            mainDocumentId: splitted.mainDocumentId,
+            parts: splitted.parts
+                .map(
+                  (part) => part.copyWith(
+                    metadata: {
+                      ...part.metadata,
+                      'source': part.id,
+                    },
+                  ),
+                )
+                .toList()
+          ),
+        );
 
         await _vectorDao.insertDocuments(
           splittedWithSource?.parts ?? [doc],

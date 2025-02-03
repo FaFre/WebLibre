@@ -33,6 +33,7 @@ import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.LastMediaAccessState
 import mozilla.components.browser.state.state.ReaderState
 import mozilla.components.browser.state.state.SessionState
+import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.state.recover.RecoverableTab
 import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
@@ -450,17 +451,33 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    override fun duplicateTab(selectTabId: String?, selectNewTab: Boolean): String {
+    override fun duplicateTab(
+        selectTabId: String?,
+        selectNewTab: Boolean,
+        newContextId: String?
+    ): String {
         try {
             val tabState = selectTabId?.let { components.core.store.state.findTab(it) }
                 ?: throw IllegalArgumentException("Tab not found")
 
-            return components.useCases.tabsUseCases.duplicateTab(
-                tab = tabState,
-                selectNewTab = selectNewTab
-            ).also {
-                logger.debug("$TAG: Duplicated tab $selectTabId to new tab $it")
-            }
+            val duplicate = createTab(
+                url = tabState.content.url,
+                private = tabState.content.private,
+                contextId = newContextId,
+                parent = tabState,
+                engineSessionState = tabState.engineState.engineSessionState,
+            )
+
+            components.core.store.dispatch(
+                TabListAction.AddTabAction(
+                    duplicate,
+                    select = selectNewTab,
+                ),
+            )
+
+            logger.debug("$TAG: Duplicated tab $selectTabId to new tab ${duplicate.id}")
+
+            return duplicate.id
         } catch (e: Exception) {
             logger.error("$TAG: Failed to duplicate tab", e)
             throw e

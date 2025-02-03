@@ -25,7 +25,7 @@
 //   @override
 //   Widget build(BuildContext context, WidgetRef ref) {
 //     final incognitoEnabled = ref.watch(
-//       settingsRepositoryProvider.select((value) => value.incognitoMode),
+//       generalSettingsRepositoryProvider.select((value) => value.incognitoMode),
 //     );
 
 //     final researchVariant = ref.watch(activeResearchVariantProvider);

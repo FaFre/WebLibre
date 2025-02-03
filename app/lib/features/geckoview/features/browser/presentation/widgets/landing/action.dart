@@ -13,7 +13,7 @@ class LandingAction extends HookConsumerWidget {
     final sessionTokenAvailable = false;
 
     // ref.watch(
-    //   settingsRepositoryProvider.select(
+    //   generalSettingsRepositoryProvider.select(
     //     (value) => value.valueOrNull?.kagiSession?.isNotEmpty ?? false,
     //   ),
     // );

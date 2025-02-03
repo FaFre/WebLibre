@@ -7,7 +7,7 @@ part of 'tab_search.dart';
 // **************************************************************************
 
 String _$tabSearchRepositoryHash() =>
-    r'9bd42f89bcc3a8d94add093076737dd57383bae2';
+    r'57d130f50aa3feb7a31d27f9a5b54234e0e7064f';
 
 /// See also [TabSearchRepository].
 @ProviderFor(TabSearchRepository)

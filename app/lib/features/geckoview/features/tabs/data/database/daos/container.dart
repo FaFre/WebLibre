@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/core/uuid.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 
@@ -12,26 +11,24 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     with _$ContainerDaoMixin {
   ContainerDao(super.db);
 
-  Future<void> addContainer({String? name, required Color color}) {
+  Future<void> addContainer(ContainerData container) {
     return db.container.insertOne(
       ContainerCompanion.insert(
-        id: uuid.v7(),
-        name: Value(name),
-        color: color,
+        id: container.id,
+        name: Value(container.name),
+        color: container.color,
+        metadata: Value(container.metadata),
       ),
     );
   }
 
-  Future<void> replaceContainer(
-    String id, {
-    required String? name,
-    required Color color,
-  }) {
+  Future<void> replaceContainer(ContainerData container) {
     return db.container.replaceOne(
       ContainerCompanion(
-        id: Value(id),
-        name: Value(name),
-        color: Value(color),
+        id: Value(container.id),
+        name: Value(container.name),
+        color: Value(container.color),
+        metadata: Value(container.metadata),
       ),
     );
   }

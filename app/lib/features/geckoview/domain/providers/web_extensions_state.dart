@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/domain/entities/equatable_image.dart';
 import 'package:lensai/extensions/image.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/web_extension_state.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/utils/image_helper.dart';
@@ -33,12 +34,10 @@ class WebExtensionsState extends _$WebExtensionsState {
           title: data.title,
           enabled: data.enabled ?? current.enabled,
           badgeText: data.badgeText,
-          badgeTextColor: (data.badgeTextColor != null)
-              ? Color(data.badgeTextColor!)
-              : null,
-          badgeBackgroundColor: (data.badgeBackgroundColor != null)
-              ? Color(data.badgeBackgroundColor!)
-              : null,
+          badgeTextColor:
+              data.badgeTextColor.mapNotNull((color) => Color(color)),
+          badgeBackgroundColor:
+              data.badgeBackgroundColor.mapNotNull((color) => Color(color)),
         );
     } else {
       if (state.containsKey(extensionId)) {

@@ -1,20 +1,103 @@
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:lensai/data/database/converters/icon_data.dart';
 
+part 'container_data.g.dart';
+
+@CopyWith()
+@JsonSerializable()
+class ContainerAuthSettings with FastEquatable {
+  final bool authenticationRequired;
+  final bool lockOnAppBackground;
+  final Duration? lockTimeout;
+
+  ContainerAuthSettings({
+    required this.authenticationRequired,
+    required this.lockOnAppBackground,
+    required this.lockTimeout,
+  });
+
+  ContainerAuthSettings.withDefaults({
+    bool? authenticationRequired,
+    bool? lockOnAppBackground,
+    Duration? lockTimeout,
+  }) : this(
+          authenticationRequired: authenticationRequired ?? false,
+          lockOnAppBackground: lockOnAppBackground ?? false,
+          lockTimeout: lockTimeout,
+        );
+
+  factory ContainerAuthSettings.fromJson(Map<String, dynamic> json) =>
+      _$ContainerAuthSettingsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ContainerAuthSettingsToJson(this);
+
+  @override
+  List<Object?> get hashParameters => [
+        authenticationRequired,
+        lockOnAppBackground,
+        lockTimeout,
+      ];
+
+  @override
+  bool get cacheHash => true;
+}
+
+@CopyWith()
+@JsonSerializable(constructor: 'withDefaults')
+class ContainerMetadata with FastEquatable {
+  @IconDataJsonConverter()
+  final IconData? iconData;
+  final String? contextualIdentity;
+  final ContainerAuthSettings authSettings;
+
+  ContainerMetadata({
+    required this.iconData,
+    required this.contextualIdentity,
+    required this.authSettings,
+  });
+
+  ContainerMetadata.withDefaults({
+    IconData? iconData,
+    String? contextualIdentity,
+    ContainerAuthSettings? authSettings,
+  }) : this(
+          iconData: iconData,
+          contextualIdentity: contextualIdentity,
+          authSettings: authSettings ?? ContainerAuthSettings.withDefaults(),
+        );
+
+  factory ContainerMetadata.fromJson(Map<String, dynamic> json) =>
+      _$ContainerMetadataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ContainerMetadataToJson(this);
+
+  @override
+  List<Object?> get hashParameters => [
+        iconData,
+        contextualIdentity,
+        authSettings,
+      ];
+
+  @override
+  bool get cacheHash => true;
+}
+
+@CopyWith()
 class ContainerData with FastEquatable {
   final String id;
-  final String? contextualIdentity;
   final String? name;
   final Color color;
-  final IconData? icon;
+  final ContainerMetadata metadata;
 
   ContainerData({
     required this.id,
-    this.contextualIdentity,
     this.name,
     required this.color,
-    this.icon,
-  });
+    ContainerMetadata? metadata,
+  }) : metadata = metadata ?? ContainerMetadata.withDefaults();
 
   @override
   bool get cacheHash => true;
@@ -22,10 +105,9 @@ class ContainerData with FastEquatable {
   @override
   List<Object?> get hashParameters => [
         id,
-        contextualIdentity,
         name,
         color,
-        icon,
+        metadata,
       ];
 }
 
@@ -34,10 +116,9 @@ class ContainerDataWithCount extends ContainerData {
 
   ContainerDataWithCount({
     required super.id,
-    super.contextualIdentity,
     super.name,
     required super.color,
-    super.icon,
+    super.metadata,
     required this.tabCount,
   });
 

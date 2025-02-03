@@ -8,7 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/bangs/domain/repositories/search.dart';
 import 'package:lensai/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
-import 'package:lensai/features/user/domain/repositories/settings.dart';
+import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 
@@ -20,9 +20,7 @@ class BangSearchScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resultsAsync = ref.watch(bangSearchProvider);
-    final incognitoEnabled = ref.watch(
-      settingsRepositoryProvider.select((value) => value.incognitoMode),
-    );
+    final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
     final textEditingController =
         useTextEditingController(text: initialSearchText);

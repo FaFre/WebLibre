@@ -2,6 +2,7 @@ import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:lensai/features/kagi/data/entities/modes.dart';
 import 'package:lensai/features/kagi/presentation/tabs/summarize_tab.dart';
@@ -24,9 +25,8 @@ class CreateTabSheetWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sharedContent = useMemoized(
-      () => (parameter.content != null)
-          ? SharedContent.parse(parameter.content!)
-          : null,
+      () => parameter.content
+          .mapNotNull((content) => SharedContent.parse(content)),
       [parameter],
     );
 

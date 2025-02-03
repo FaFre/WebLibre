@@ -7,7 +7,7 @@ part of 'container.dart';
 // **************************************************************************
 
 String _$containerRepositoryHash() =>
-    r'89ad15861fb213d6a3fa51232fd0ff9943f51e92';
+    r'b965883f2279b6f0148592bbac5ff40a60798f51';
 
 /// See also [ContainerRepository].
 @ProviderFor(ContainerRepository)

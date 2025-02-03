@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lensai/features/user/data/providers.dart';
+import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -46,4 +47,12 @@ PocketBase pocketBase(Ref ref) {
   final authStore = ref.watch(authStoreProvider);
 
   return PocketBase('http://192.168.2.104:8090', authStore: authStore);
+}
+
+@Riverpod()
+bool incognitoModeEnabled(Ref ref) {
+  return ref.watch(
+    generalSettingsRepositoryProvider
+        .select((value) => value.deleteBrowsingDataOnQuit != null),
+  );
 }

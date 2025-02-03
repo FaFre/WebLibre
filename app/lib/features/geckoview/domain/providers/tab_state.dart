@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/extensions/image.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/find_result_state.dart';
 import 'package:lensai/features/geckoview/domain/entities/history_state.dart';
 import 'package:lensai/features/geckoview/domain/entities/readerable_state.dart';
@@ -39,10 +40,10 @@ class TabStates extends _$TabStates {
   Future<void> _onIconChange(IconChangeEvent event) async {
     final IconChangeEvent(:tabId, :bytes) = event;
 
-    final image = (bytes != null)
-        ? (await tryDecodeImage(bytes)
-            .then((image) async => image?.toEquatable()))
-        : null;
+    final image = await bytes.mapNotNull(
+      (bytes) =>
+          tryDecodeImage(bytes).then((image) async => image?.toEquatable()),
+    );
 
     final current = state[tabId] ?? TabState.$default(tabId);
     state = {...state}..[tabId] = current.copyWith.icon(image);
@@ -51,10 +52,10 @@ class TabStates extends _$TabStates {
   Future<void> _onThumbnailChange(ThumbnailEvent event) async {
     final ThumbnailEvent(:tabId, :bytes) = event;
 
-    final image = (bytes != null)
-        ? (await tryDecodeImage(bytes)
-            .then((image) async => image?.toEquatable()))
-        : null;
+    final image = await bytes.mapNotNull(
+      (bytes) =>
+          tryDecodeImage(bytes).then((image) async => image?.toEquatable()),
+    );
 
     final current = state[tabId] ?? TabState.$default(tabId);
     state = {...state}..[tabId] = current.copyWith.thumbnail(image);

@@ -56,15 +56,15 @@ class _TabDraggable extends HookConsumerWidget {
           onClose();
         }
       },
-      onDoubleTap: () {
-        ref.read(overlayDialogControllerProvider.notifier).show(
-              TabActionDialog(
-                initialTab: tab,
-                onDismiss:
-                    ref.read(overlayDialogControllerProvider.notifier).dismiss,
-              ),
-            );
-      },
+      // onDoubleTap: () {
+      //   ref.read(overlayDialogControllerProvider.notifier).show(
+      //         TabActionDialog(
+      //           initialTab: tab,
+      //           onDismiss:
+      //               ref.read(overlayDialogControllerProvider.notifier).dismiss,
+      //         ),
+      //       );
+      // },
       onDelete: () async {
         await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
       },
@@ -178,8 +178,8 @@ class _Tab extends HookConsumerWidget {
 
                     return ContainerChips(
                       selectedContainer: selectedContainer,
-                      onSelected: (container) {
-                        ref
+                      onSelected: (container) async {
+                        await ref
                             .read(selectedContainerProvider.notifier)
                             .setContainerId(container.id);
                       },

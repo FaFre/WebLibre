@@ -40,7 +40,7 @@ class PreferenceSetting with FastEquatable {
 
   bool get isActive => value == actualValue;
 
-  final String title;
+  final String? title;
   final String? description;
 
   final bool requireUserOptIn;

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:exceptions/exceptions.dart';
 import 'package:lensai/domain/services/generic_website.dart';
-import 'package:lensai/features/bangs/data/database/database.dart';
 import 'package:lensai/features/bangs/data/models/bang.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/data/models/search_history_entry.dart';
@@ -14,23 +13,27 @@ part 'data.g.dart';
 
 @Riverpod(keepAlive: true)
 class BangDataRepository extends _$BangDataRepository {
-  late BangDatabase _db;
-
   @override
-  void build() {
-    _db = ref.watch(bangDatabaseProvider);
-  }
+  void build() {}
 
   Stream<BangData?> watchBang(String? trigger) {
     if (trigger != null) {
-      return _db.bangDao.getBangData(trigger).watchSingleOrNull();
+      return ref
+          .read(bangDatabaseProvider)
+          .bangDao
+          .getBangData(trigger)
+          .watchSingleOrNull();
     } else {
       return Stream.value(null);
     }
   }
 
   Stream<Map<String, List<String>>> watchCategories() {
-    return _db.categoriesJson().watchSingle().map((json) {
+    return ref
+        .read(bangDatabaseProvider)
+        .categoriesJson()
+        .watchSingle()
+        .map((json) {
       final decoded = jsonDecode(json) as Map<String, dynamic>;
       return decoded.map(
         (key, value) => MapEntry(key, (value as List<dynamic>).cast()),
@@ -39,7 +42,10 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<int> watchBangCount(BangGroup group) {
-    return _db.bangDao.getBangCount(groups: [group]).watchSingle();
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .getBangCount(groups: [group]).watchSingle();
   }
 
   Stream<List<BangData>> watchBangs({
@@ -48,7 +54,9 @@ class BangDataRepository extends _$BangDataRepository {
     ({String category, String? subCategory})? categoryFilter,
     bool? orderMostFrequentFirst,
   }) {
-    return _db.bangDao
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
         .getBangDataList(
           groups: groups,
           domain: domain,
@@ -60,15 +68,25 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<List<BangData>> watchFrequentBangs({Iterable<BangGroup>? groups}) {
-    return _db.bangDao.getFrequentBangDataList(groups: groups).watch();
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .getFrequentBangDataList(groups: groups)
+        .watch();
   }
 
   Stream<List<SearchHistoryEntry>> watchSearchHistory({required int limit}) {
-    return _db.searchHistoryEntries(limit: limit).watch();
+    return ref
+        .read(bangDatabaseProvider)
+        .searchHistoryEntries(limit: limit)
+        .watch();
   }
 
   Future<void> increaseFrequency(String trigger) {
-    return _db.bangDao.increaseBangFrequency(trigger);
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .increaseBangFrequency(trigger);
   }
 
   Future<void> addSearchEntry(
@@ -76,17 +94,21 @@ class BangDataRepository extends _$BangDataRepository {
     String searchQuery, {
     required int maxEntryCount,
   }) {
+    final db = ref.read(bangDatabaseProvider);
     //Pack in a transaction to bundle rebuilds of watch() queries
-    return _db.transaction(
+    return db.transaction(
       () async {
-        await _db.bangDao.addSearchEntry(trigger, searchQuery);
-        await _db.evictHistoryEntries(limit: maxEntryCount);
+        await db.bangDao.addSearchEntry(trigger, searchQuery);
+        await db.evictHistoryEntries(limit: maxEntryCount);
       },
     );
   }
 
   Future<void> removeSearchEntry(String searchQuery) {
-    return _db.bangDao.removeSearchEntry(searchQuery);
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .removeSearchEntry(searchQuery);
   }
 
   Future<Result<BangData>> ensureIconAvailable(BangData bang) async {
@@ -110,10 +132,13 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Future<int> resetFrequencies() {
-    return _db.bangFrequency.deleteAll();
+    return ref.read(bangDatabaseProvider).bangFrequency.deleteAll();
   }
 
   Future<int> resetFrequency(String trigger) {
-    return _db.bangFrequency.deleteWhere((t) => t.trigger.equals(trigger));
+    return ref
+        .read(bangDatabaseProvider)
+        .bangFrequency
+        .deleteWhere((t) => t.trigger.equals(trigger));
   }
 }

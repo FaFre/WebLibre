@@ -11,10 +11,6 @@ part 'sync.g.dart';
 
 @Riverpod(keepAlive: true)
 class BangSyncRepository extends _$BangSyncRepository {
-  late BangDatabase _db;
-
-  BangSyncRepository();
-
   static Future<Result<void>> _fetchAndSync({
     required BangSourceService sourceService,
     required BangDatabase db,
@@ -51,22 +47,22 @@ class BangSyncRepository extends _$BangSyncRepository {
   ) async {
     try {
       return Result.success(
-        await _db.computeWithDatabase(
-          connect: BangDatabase.new,
-          computation: (db) async {
-            final ref = ProviderContainer();
-            final result = await _fetchAndSync(
-              sourceService: ref.read(bangSourceServiceProvider.notifier),
-              db: db,
-              url: Uri.parse(group.url),
-              group: group,
-              syncInterval: syncInterval,
-            );
+        await ref.read(bangDatabaseProvider).computeWithDatabase(
+              connect: BangDatabase.new,
+              computation: (db) async {
+                final ref = ProviderContainer();
+                final result = await _fetchAndSync(
+                  sourceService: ref.read(bangSourceServiceProvider.notifier),
+                  db: db,
+                  url: Uri.parse(group.url),
+                  group: group,
+                  syncInterval: syncInterval,
+                );
 
-            //Throw if necessary
-            return result.value;
-          },
-        ),
+                //Throw if necessary
+                return result.value;
+              },
+            ),
       );
     } catch (e) {
       return Result.failure(
@@ -80,7 +76,11 @@ class BangSyncRepository extends _$BangSyncRepository {
   }
 
   Stream<DateTime?> watchLastSyncOfGroup(BangGroup group) {
-    return _db.syncDao.lastSyncOfGroup(group).watchSingleOrNull();
+    return ref
+        .read(bangDatabaseProvider)
+        .syncDao
+        .lastSyncOfGroup(group)
+        .watchSingleOrNull();
   }
 
   Future<Map<BangGroup, Result<void>>> syncBangGroups({
@@ -100,7 +100,5 @@ class BangSyncRepository extends _$BangSyncRepository {
   }
 
   @override
-  void build() {
-    _db = ref.watch(bangDatabaseProvider);
-  }
+  void build() {}
 }
