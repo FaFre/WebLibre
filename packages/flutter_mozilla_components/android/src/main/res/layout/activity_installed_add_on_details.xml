@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- This Source Code Form is subject to the terms of the Mozilla Public
+<?xml version="1.0" encoding="utf-8"?><!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -77,7 +77,7 @@
             android:layout_gravity="center_vertical|end"
             android:layout_below="@+id/permissions"
             android:background="?android:attr/selectableItemBackground"
-            android:checked="false"
+            android:checked="true"
             android:clickable="true"
             android:focusable="true"
             android:text="@string/mozac_feature_addons_settings_allow_in_private_browsing"
@@ -85,12 +85,13 @@
             android:textSize="18sp"/>
 
         <Button
-                android:id="@+id/remove_add_on"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/allow_in_private_browsing_switch"
-                android:layout_marginTop="16dp"
-                android:textColor="@color/photonRed50"
-                android:text="@string/mozac_feature_addons_remove" />
+            android:id="@+id/remove_add_on"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/allow_in_private_browsing_switch"
+            android:layout_marginTop="16dp"
+            android:text="@string/mozac_feature_addons_remove"
+            android:textAlignment="center"
+            android:textColor="@color/photonRed50" />
     </RelativeLayout>
 </ScrollView>

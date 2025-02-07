@@ -127,7 +127,8 @@ queryTabsBasic WITH TabQueryResult:
     t.id,
     highlight(tab_fts, 0, :beforeMatch, :afterMatch) AS title,
     highlight(tab_fts, 1, :beforeMatch, :afterMatch) AS url,
-    bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank
+    bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank,
+    t.url AS clean_url
   FROM tab_fts fts
   INNER JOIN
     tab t ON t.rowid = fts.rowid 
@@ -157,7 +158,8 @@ queryTabsFullContent WITH TabQueryResult:
       (
         bm25(tab_fts, weights.title_weight, weights.url_weight, 
             weights.extracted_weight, weights.full_weight)
-      ) AS weighted_rank
+      ) AS weighted_rank,
+      t.url AS clean_url
     FROM tab_fts(:query) fts
     INNER JOIN
       tab t ON t.rowid = fts.rowid

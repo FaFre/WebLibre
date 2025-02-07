@@ -7,15 +7,13 @@ import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/providers.dart';
 import 'package:lensai/data/models/drag_data.dart';
-import 'package:lensai/data/models/equatable_iterable.dart';
-import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/tab_action.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -94,7 +92,9 @@ class _Tab extends HookConsumerWidget {
       searchTextController,
       () async {
         await ref
-            .read(tabSearchRepositoryProvider.notifier)
+            .read(
+              tabSearchRepositoryProvider(TabSearchPartition.preview).notifier,
+            )
             .addQuery(searchTextController.text);
       },
     );
@@ -248,14 +248,12 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                 builder: (context, ref, child) {
                   final container = ref.watch(selectedContainerProvider);
 
-                  final filteredTabs = ref
-                      .watch(
-                        seamlessFilteredTabsProvider(container).select(
-                          (value) =>
-                              EquatableCollection(value, immutable: true),
-                        ),
-                      )
-                      .collection;
+                  final filteredTabIds = ref.watch(
+                    seamlessFilteredTabIdsProvider(
+                      TabSearchPartition.preview,
+                      ContainerFilterById(containerId: container),
+                    ),
+                  );
 
                   final activeTab = ref.watch(selectedTabProvider);
 
@@ -273,7 +271,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                   useEffect(
                     () {
-                      final index = filteredTabs
+                      final index = filteredTabIds.collection
                           .indexWhere((webView) => webView == activeTab);
 
                       if (index > -1) {
@@ -292,12 +290,12 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                       return null;
                     },
-                    [filteredTabs, activeTab],
+                    [filteredTabIds, activeTab],
                   );
 
                   final tabs = useMemoized(
                     () {
-                      return filteredTabs
+                      return filteredTabIds.collection
                           .mapIndexed(
                             (index, tabId) => CustomDraggable(
                               key: Key(tabId),
@@ -350,7 +348,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           .toList();
                     },
                     [
-                      EquatableCollection(filteredTabs, immutable: true),
+                      filteredTabIds,
                       activeTab,
                     ],
                   );
@@ -375,7 +373,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                         final containerRepository =
                             ref.read(containerRepositoryProvider.notifier);
 
-                        final tabId = filteredTabs[oldIndex];
+                        final tabId = filteredTabIds.collection[oldIndex];
                         final containerId = await ref
                             .read(tabDataRepositoryProvider.notifier)
                             .containerTabId(tabId);
@@ -384,13 +382,14 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                         if (newIndex <= 0) {
                           key = await containerRepository
                               .getLeadingOrderKey(containerId);
-                        } else if (newIndex >= filteredTabs.length - 1) {
+                        } else if (newIndex >=
+                            filteredTabIds.collection.length - 1) {
                           key = await containerRepository
                               .getTrailingOrderKey(containerId);
                         } else {
                           final orderAfterIndex = newIndex;
                           key = await containerRepository.getOrderKeyAfterTab(
-                            filteredTabs[orderAfterIndex],
+                            filteredTabIds.collection[orderAfterIndex],
                             containerId,
                           );
                         }

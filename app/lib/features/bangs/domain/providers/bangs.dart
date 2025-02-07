@@ -58,17 +58,6 @@ Stream<List<SearchHistoryEntry>> searchHistory(Ref ref) {
 }
 
 @Riverpod()
-Future<BangData> bangDataEnsureIcon(
-  Ref ref,
-  BangData bang,
-) {
-  final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  return repository.ensureIconAvailable(bang).then(
-        (value) => value.value,
-      );
-}
-
-@Riverpod()
 Stream<DateTime?> lastSyncOfGroup(
   Ref ref,
   BangGroup group,

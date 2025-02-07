@@ -9,7 +9,7 @@ final _apiInstance = GeckoSuggestionApi();
 
 class GeckoSuggestionsService extends GeckoSuggestionEvents {
   final GeckoSuggestionApi _api;
-  final _suggestionsSubject = BehaviorSubject<List<GeckoSuggestion>>();
+  final _suggestionsSubject = PublishSubject<List<GeckoSuggestion>>();
 
   Stream<List<GeckoSuggestion>> get suggestionsStream =>
       _suggestionsSubject.stream;
@@ -26,7 +26,7 @@ class GeckoSuggestionsService extends GeckoSuggestionEvents {
     );
   }
 
-  Future<void> onInputChanged(
+  Future<void> querySuggestions(
     String text, {
     List<GeckoSuggestionType> providers = const [
       GeckoSuggestionType.session,
@@ -34,7 +34,11 @@ class GeckoSuggestionsService extends GeckoSuggestionEvents {
       GeckoSuggestionType.history,
     ],
   }) {
-    return _api.onInputChanged(text, providers);
+    return _api.querySuggestions(text, providers);
+  }
+
+  Future<AutocompleteResult?> getAutocompleteSuggestion(String query) {
+    return _api.getAutocompleteSuggestion(query);
   }
 
   @override

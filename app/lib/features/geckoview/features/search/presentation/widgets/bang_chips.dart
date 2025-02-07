@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/repositories/search.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
+import 'package:lensai/presentation/widgets/bang_icon.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/selectable_chips.dart';
 
@@ -75,7 +75,8 @@ class BangChips extends HookConsumerWidget {
                 Expanded(
                   child: SelectableChips(
                     itemId: (bang) => bang.trigger,
-                    itemAvatar: (bang) => BangIcon(bang, iconSize: 20),
+                    itemAvatar: (bang) =>
+                        UrlIcon(bang.getUrl(''), iconSize: 20),
                     itemLabel: (bang) => Text(bang.websiteName),
                     availableItems: availableBangs,
                     selectedItem: activeBang,

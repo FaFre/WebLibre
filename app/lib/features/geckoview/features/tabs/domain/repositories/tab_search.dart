@@ -6,6 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'tab_search.g.dart';
 
+enum TabSearchPartition { preview, search }
+
 @Riverpod()
 class TabSearchRepository extends _$TabSearchRepository {
   Future<void> addQuery(
@@ -35,7 +37,7 @@ class TabSearchRepository extends _$TabSearchRepository {
   }
 
   @override
-  Future<List<TabQueryResult>?> build() {
+  Future<List<TabQueryResult>?> build(TabSearchPartition partition) {
     return Future.value();
   }
 }

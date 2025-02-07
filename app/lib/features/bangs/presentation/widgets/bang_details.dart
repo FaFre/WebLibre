@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
+import 'package:lensai/presentation/widgets/bang_icon.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 
 class BangDetails extends HookConsumerWidget {
@@ -38,7 +38,7 @@ class BangDetails extends HookConsumerWidget {
             children: [
               Row(
                 children: [
-                  BangIcon(bangData),
+                  UrlIcon(bangData.getUrl(''), iconSize: 34.0),
                   const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(

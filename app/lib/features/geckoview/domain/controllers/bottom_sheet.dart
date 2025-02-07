@@ -29,7 +29,9 @@ class BottomSheetExtend extends _$BottomSheetExtend {
   late StreamController<double> _extentStreamController;
 
   void add(double extent) {
-    _extentStreamController.add(extent);
+    if (!_extentStreamController.isClosed) {
+      _extentStreamController.add(extent);
+    }
   }
 
   @override

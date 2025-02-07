@@ -14,7 +14,7 @@ import 'package:lensai/features/geckoview/features/browser/presentation/screens/
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/screens/container_list.dart';
-import 'package:lensai/features/search/presentation/screens/search.dart';
+import 'package:lensai/features/geckoview/features/search/presentation/screens/search.dart';
 import 'package:lensai/features/settings/presentation/screens/bang_settings.dart';
 import 'package:lensai/features/settings/presentation/screens/general_settings.dart';
 import 'package:lensai/features/settings/presentation/screens/settings.dart';

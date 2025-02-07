@@ -18,6 +18,7 @@ class ContainerChips extends HookConsumerWidget {
   final bool displayMenu;
 
   final ContainerData? selectedContainer;
+  final bool Function(ContainerDataWithCount)? containerFilter;
   final void Function(ContainerDataWithCount)? onSelected;
   final void Function(ContainerDataWithCount)? onDeleted;
 
@@ -27,6 +28,7 @@ class ContainerChips extends HookConsumerWidget {
     required this.selectedContainer,
     required this.onSelected,
     required this.onDeleted,
+    this.containerFilter,
     this.searchTextController,
     this.displayMenu = true,
   });
@@ -39,12 +41,16 @@ class ContainerChips extends HookConsumerWidget {
     );
 
     final containersAsync =
-        ref.watch(filteredContainersWithCountProvider(searchText));
+        ref.watch(matchSortedContainersWithCountProvider(searchText));
 
     final dragTargetTabId = useValueNotifier<String?>(null);
 
     return containersAsync.when(
-      data: (availableContainers) {
+      data: (containers) {
+        final availableContainers = containerFilter
+                .mapNotNull((filter) => containers.where(filter).toList()) ??
+            containers;
+
         if (selectedContainer == null &&
             availableContainers.isEmpty &&
             !displayMenu) {

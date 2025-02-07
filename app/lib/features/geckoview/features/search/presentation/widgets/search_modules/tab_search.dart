@@ -1,0 +1,152 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/extensions/nullable.dart';
+import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:lensai/presentation/hooks/listenable_callback.dart';
+import 'package:lensai/presentation/widgets/bang_icon.dart';
+import 'package:sliver_tools/sliver_tools.dart';
+
+class TabSearch extends HookConsumerWidget {
+  static const _matchPrefix = '***';
+  static const _matchSuffix = '***';
+
+  final TextEditingController searchTextController;
+
+  const TabSearch({required this.searchTextController});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedContainer = useState<ContainerData?>(
+      ref.read(
+        selectedContainerDataProvider.select((value) => value.valueOrNull),
+      ),
+    );
+
+    final tabs = ref
+        .watch(
+          seamlessFilteredTabPreviewsProvider(
+            TabSearchPartition.search,
+            (selectedContainer.value != null)
+                ? ContainerFilterById(containerId: selectedContainer.value!.id)
+                : ContainerFilterDisabled(),
+          ),
+        )
+        .collection;
+
+    useListenableCallback(
+      searchTextController,
+      () async {
+        await ref
+            .read(
+              tabSearchRepositoryProvider(TabSearchPartition.search).notifier,
+            )
+            .addQuery(
+              searchTextController.text,
+              // ignore: avoid_redundant_argument_values
+              matchPrefix: _matchPrefix,
+              // ignore: avoid_redundant_argument_values
+              matchSuffix: _matchSuffix,
+            );
+      },
+    );
+
+    return MultiSliver(
+      children: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tabs',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                ContainerChips(
+                  displayMenu: false,
+                  selectedContainer: selectedContainer.value,
+                  onSelected: (container) {
+                    selectedContainer.value = container;
+                  },
+                  onDeleted: (container) {
+                    selectedContainer.value = null;
+                  },
+                  containerFilter: (container) => (container.tabCount ?? 0) > 0,
+                  searchTextController: searchTextController,
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverList.builder(
+          itemCount: tabs.length,
+          itemBuilder: (context, index) {
+            final result = tabs[index];
+
+            final urlHasMatch =
+                result.highlightedUrl?.contains(_matchPrefix) ?? false;
+            final bodyHasMatch =
+                result.content?.contains(_matchPrefix) ?? false;
+
+            return ListTile(
+              leading: RepaintBoundary(
+                child: (result.icon != null)
+                    ? RawImage(
+                        image: result.icon?.value,
+                        height: 24,
+                        width: 24,
+                      )
+                    : UrlIcon(result.url, iconSize: 24),
+              ),
+              title: result.title.mapNotNull(
+                (title) => MarkdownBody(
+                  data: title,
+                  styleSheet: MarkdownStyleSheet(
+                    p: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                  ),
+                ),
+              ),
+              subtitle: MarkdownBody(
+                data: (bodyHasMatch && !urlHasMatch)
+                    ? result.content!
+                    : result.highlightedUrl ?? result.url.toString(),
+                styleSheet: MarkdownStyleSheet(
+                  p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                  a: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        decoration: TextDecoration.none,
+                      ),
+                ),
+              ),
+              onTap: () async {
+                await ref
+                    .read(tabRepositoryProvider.notifier)
+                    .selectTab(result.id);
+
+                if (context.mounted) {
+                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+
+                  context.pop();
+                }
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+}

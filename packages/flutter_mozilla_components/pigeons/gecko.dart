@@ -596,6 +596,17 @@ class GeckoEngineSettings {
   );
 }
 
+class AutocompleteResult {
+  final String input;
+  final String text;
+  final String url;
+  final String source;
+  final int totalItems;
+
+  AutocompleteResult(
+      this.input, this.text, this.url, this.source, this.totalItems);
+}
+
 // /// Represents all the different supported types of data that can be found from long clicking
 // /// an element.
 // sealed class HitResult {
@@ -998,7 +1009,9 @@ abstract class GeckoAddonEvents {
 
 @HostApi()
 abstract class GeckoSuggestionApi {
-  void onInputChanged(String text, List<GeckoSuggestionType> providers);
+  @async
+  AutocompleteResult? getAutocompleteSuggestion(String query);
+  void querySuggestions(String text, List<GeckoSuggestionType> providers);
 }
 
 @FlutterApi()

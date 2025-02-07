@@ -1157,6 +1157,36 @@ data class GeckoEngineSettings (
     )
   }
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class AutocompleteResult (
+  val input: String,
+  val text: String,
+  val url: String,
+  val source: String,
+  val totalItems: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): AutocompleteResult {
+      val input = pigeonVar_list[0] as String
+      val text = pigeonVar_list[1] as String
+      val url = pigeonVar_list[2] as String
+      val source = pigeonVar_list[3] as String
+      val totalItems = pigeonVar_list[4] as Long
+      return AutocompleteResult(input, text, url, source, totalItems)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      input,
+      text,
+      url,
+      source,
+      totalItems,
+    )
+  }
+}
 private open class GeckoPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -1365,6 +1395,11 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
           GeckoEngineSettings.fromList(it)
         }
       }
+      170.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AutocompleteResult.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -1532,6 +1567,10 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       is GeckoEngineSettings -> {
         stream.write(169)
+        writeValue(stream, value.toList())
+      }
+      is AutocompleteResult -> {
+        stream.write(170)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -3129,7 +3168,8 @@ class GeckoAddonEvents(private val binaryMessenger: BinaryMessenger, private val
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoSuggestionApi {
-  fun onInputChanged(text: String, providers: List<GeckoSuggestionType>)
+  fun getAutocompleteSuggestion(query: String, callback: (Result<AutocompleteResult?>) -> Unit)
+  fun querySuggestions(text: String, providers: List<GeckoSuggestionType>)
 
   companion object {
     /** The codec used by GeckoSuggestionApi. */
@@ -3141,14 +3181,34 @@ interface GeckoSuggestionApi {
     fun setUp(binaryMessenger: BinaryMessenger, api: GeckoSuggestionApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.onInputChanged$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.getAutocompleteSuggestion$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val queryArg = args[0] as String
+            api.getAutocompleteSuggestion(queryArg) { result: Result<AutocompleteResult?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.querySuggestions$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val textArg = args[0] as String
             val providersArg = args[1] as List<GeckoSuggestionType>
             val wrapped: List<Any?> = try {
-              api.onInputChanged(textArg, providersArg)
+              api.querySuggestions(textArg, providersArg)
               listOf(null)
             } catch (exception: Throwable) {
               wrapError(exception)

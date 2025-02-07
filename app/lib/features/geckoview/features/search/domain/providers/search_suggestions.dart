@@ -11,14 +11,14 @@ ISearchSuggestionProvider defaultSearchSuggestions(Ref ref) {
   return ref.watch(kagiAutosuggestServiceProvider.notifier);
 }
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 class SearchSuggestions extends _$SearchSuggestions {
   late void Function(String query) _addQueryBinding;
 
   void addQuery(String query) => _addQueryBinding(query);
 
   @override
-  Raw<Stream<List<String>>> build({
+  Stream<List<String>> build({
     ISearchSuggestionProvider? suggestionsProvider,
   }) {
     final defaultProvider = ref.watch(defaultSearchSuggestionsProvider);

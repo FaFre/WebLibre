@@ -25,4 +25,8 @@
         <item name="android:background">?android:attr/colorBackground</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
+
+    <style name="AddonsActivityTheme" parent="Theme.AppCompat.Light">
+        <item name="mozac_primary_text_color">@color/photonDarkGrey90</item>
+    </style>
 </resources>

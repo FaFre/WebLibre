@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/search.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
-import 'package:lensai/features/search/domain/providers/search_suggestions.dart';
-import 'package:lensai/features/search/presentation/widgets/search_field.dart';
-import 'package:lensai/features/search/presentation/widgets/search_suggestion_list.dart';
+import 'package:lensai/features/geckoview/features/search/domain/providers/search_suggestions.dart';
+import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_field.dart';
+import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
+import 'package:lensai/presentation/widgets/bang_icon.dart';
 import 'package:lensai/presentation/widgets/selectable_chips.dart';
 
 class SiteSearch extends HookConsumerWidget {
@@ -70,7 +70,7 @@ class SiteSearch extends HookConsumerWidget {
             width: double.maxFinite,
             child: SelectableChips(
               itemId: (bang) => bang.trigger,
-              itemAvatar: (bang) => BangIcon(bang, iconSize: 20),
+              itemAvatar: (bang) => UrlIcon(bang.getUrl(''), iconSize: 20),
               itemLabel: (bang) => Text(bang.websiteName),
               availableItems: availableBangs,
               selectedItem: selectedBang,
@@ -98,9 +98,10 @@ class SiteSearch extends HookConsumerWidget {
           SearchField(
             textEditingController: searchTextController,
             activeBang: activeBang,
-            onFieldSubmitted: (_) async {
+            onSubmitted: (_) async {
               await submitSearch(searchTextController.text);
             },
+            showSuggestions: false,
           ),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 150),
@@ -111,10 +112,12 @@ class SiteSearch extends HookConsumerWidget {
                   shrinkWrap: true,
                   controller: controller,
                   slivers: [
-                    SearchSuggestionList(
+                    SearchTermSuggestions(
                       searchTextController: searchTextController,
+                      activeBang: activeBang,
                       submitSearch: submitSearch,
                       showHistory: false,
+                      showChips: false,
                     ),
                   ],
                 );

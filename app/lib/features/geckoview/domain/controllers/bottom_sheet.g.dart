@@ -23,7 +23,7 @@ final bottomSheetControllerProvider =
 );
 
 typedef _$BottomSheetController = AutoDisposeNotifier<Sheet?>;
-String _$bottomSheetExtendHash() => r'81ae254499d1d7f57309274b0f18747b94d6dda3';
+String _$bottomSheetExtendHash() => r'7e11b9047c15bdeb4dfcb488a8573daadb64e25c';
 
 /// See also [BottomSheetExtend].
 @ProviderFor(BottomSheetExtend)

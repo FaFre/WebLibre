@@ -6,7 +6,7 @@ part of 'create_tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$createTabStreamHash() => r'05ad914e41e0d346e082e4638afe5fe5a04052f1';
+String _$createTabStreamHash() => r'2e802a10ecaf1862074f32b76e89c26997bdd7b2';
 
 /// See also [CreateTabStream].
 @ProviderFor(CreateTabStream)

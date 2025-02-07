@@ -74,6 +74,25 @@ final tabContentServiceProvider = Provider<GeckoTabContentService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TabContentServiceRef = ProviderRef<GeckoTabContentService>;
+String _$engineSuggestionsServiceHash() =>
+    r'f7414b335564578b2c7f6a86baf8bf13f2d5ba2d';
+
+/// See also [engineSuggestionsService].
+@ProviderFor(engineSuggestionsService)
+final engineSuggestionsServiceProvider =
+    Provider<GeckoSuggestionsService>.internal(
+  engineSuggestionsService,
+  name: r'engineSuggestionsServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$engineSuggestionsServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef EngineSuggestionsServiceRef = ProviderRef<GeckoSuggestionsService>;
 String _$selectedTabSessionNotifierHash() =>
     r'aef19991d5b05a2bb28e8a6ccb57dc75c2f3148f';
 

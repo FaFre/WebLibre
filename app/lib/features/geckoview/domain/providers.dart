@@ -108,6 +108,17 @@ GeckoTabContentService tabContentService(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
+GeckoSuggestionsService engineSuggestionsService(Ref ref) {
+  final service = GeckoSuggestionsService.setUp();
+
+  ref.onDispose(() {
+    service.dispose();
+  });
+
+  return service;
+}
+
+@Riverpod(keepAlive: true)
 class EngineReadyState extends _$EngineReadyState {
   @override
   bool build() {

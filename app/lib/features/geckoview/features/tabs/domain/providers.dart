@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -37,7 +38,7 @@ Stream<List<ContainerDataWithCount>> containersWithCount(
 }
 
 @Riverpod()
-AsyncValue<List<ContainerDataWithCount>> filteredContainersWithCount(
+AsyncValue<List<ContainerDataWithCount>> matchSortedContainersWithCount(
   Ref ref,
   String? searchText,
 ) {
@@ -48,7 +49,7 @@ AsyncValue<List<ContainerDataWithCount>> filteredContainersWithCount(
       }
 
       return value.whenData(
-        (cb) => TokenizedFilter(
+        (cb) => TokenizedFilter.sort(
           items: cb,
           toString: (item) => item.name,
           query: searchText!,
@@ -61,8 +62,14 @@ AsyncValue<List<ContainerDataWithCount>> filteredContainersWithCount(
 @Riverpod()
 Stream<List<String>> containerTabIds(
   Ref ref,
-  String? containerId,
+  ContainerFilter containerFilter,
 ) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.containerTabIds(containerId).watch();
+
+  switch (containerFilter) {
+    case ContainerFilterById(:final containerId):
+      return db.tabDao.containerTabIds(containerId).watch();
+    case ContainerFilterDisabled():
+      return db.tabDao.allTabIds().watch();
+  }
 }

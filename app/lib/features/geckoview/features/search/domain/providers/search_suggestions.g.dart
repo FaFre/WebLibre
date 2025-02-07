@@ -25,7 +25,7 @@ final defaultSearchSuggestionsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DefaultSearchSuggestionsRef = ProviderRef<ISearchSuggestionProvider>;
-String _$searchSuggestionsHash() => r'ecc378aca325cc6759292a06d8d4d5ace910eb7f';
+String _$searchSuggestionsHash() => r'8d1fb72cab374491a53f7a814f87af6a26356f42';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -49,10 +49,10 @@ class _SystemHash {
 }
 
 abstract class _$SearchSuggestions
-    extends BuildlessNotifier<Raw<Stream<List<String>>>> {
+    extends BuildlessAutoDisposeStreamNotifier<List<String>> {
   late final ISearchSuggestionProvider? suggestionsProvider;
 
-  Raw<Stream<List<String>>> build({
+  Stream<List<String>> build({
     ISearchSuggestionProvider? suggestionsProvider,
   });
 }
@@ -62,7 +62,7 @@ abstract class _$SearchSuggestions
 const searchSuggestionsProvider = SearchSuggestionsFamily();
 
 /// See also [SearchSuggestions].
-class SearchSuggestionsFamily extends Family<Raw<Stream<List<String>>>> {
+class SearchSuggestionsFamily extends Family<AsyncValue<List<String>>> {
   /// See also [SearchSuggestions].
   const SearchSuggestionsFamily();
 
@@ -100,8 +100,8 @@ class SearchSuggestionsFamily extends Family<Raw<Stream<List<String>>>> {
 }
 
 /// See also [SearchSuggestions].
-class SearchSuggestionsProvider
-    extends NotifierProviderImpl<SearchSuggestions, Raw<Stream<List<String>>>> {
+class SearchSuggestionsProvider extends AutoDisposeStreamNotifierProviderImpl<
+    SearchSuggestions, List<String>> {
   /// See also [SearchSuggestions].
   SearchSuggestionsProvider({
     ISearchSuggestionProvider? suggestionsProvider,
@@ -132,7 +132,7 @@ class SearchSuggestionsProvider
   final ISearchSuggestionProvider? suggestionsProvider;
 
   @override
-  Raw<Stream<List<String>>> runNotifierBuild(
+  Stream<List<String>> runNotifierBuild(
     covariant SearchSuggestions notifier,
   ) {
     return notifier.build(
@@ -157,7 +157,7 @@ class SearchSuggestionsProvider
   }
 
   @override
-  NotifierProviderElement<SearchSuggestions, Raw<Stream<List<String>>>>
+  AutoDisposeStreamNotifierProviderElement<SearchSuggestions, List<String>>
       createElement() {
     return _SearchSuggestionsProviderElement(this);
   }
@@ -179,13 +179,15 @@ class SearchSuggestionsProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SearchSuggestionsRef on NotifierProviderRef<Raw<Stream<List<String>>>> {
+mixin SearchSuggestionsRef
+    on AutoDisposeStreamNotifierProviderRef<List<String>> {
   /// The parameter `suggestionsProvider` of this provider.
   ISearchSuggestionProvider? get suggestionsProvider;
 }
 
-class _SearchSuggestionsProviderElement extends NotifierProviderElement<
-    SearchSuggestions, Raw<Stream<List<String>>>> with SearchSuggestionsRef {
+class _SearchSuggestionsProviderElement
+    extends AutoDisposeStreamNotifierProviderElement<SearchSuggestions,
+        List<String>> with SearchSuggestionsRef {
   _SearchSuggestionsProviderElement(super.provider);
 
   @override

@@ -1,7 +1,9 @@
 package eu.lensai.flutter_mozilla_components.api
 
 import eu.lensai.flutter_mozilla_components.GlobalComponents
+import eu.lensai.flutter_mozilla_components.api.GeckoDeleteBrowsingDataControllerImpl.Companion
 import eu.lensai.flutter_mozilla_components.ext.toWebPBytes
+import eu.lensai.flutter_mozilla_components.pigeons.AutocompleteResult
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestion
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -10,6 +12,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import mozilla.components.concept.engine.Engine
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
 class GeckoSuggestionApiImpl(
@@ -23,7 +27,28 @@ class GeckoSuggestionApiImpl(
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    override fun onInputChanged(text: String, providers: List<GeckoSuggestionType>) {
+    override fun getAutocompleteSuggestion(
+        query: String,
+        callback: (Result<AutocompleteResult?>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                val suggestion = components.core.historyStorage.getAutocompleteSuggestion(query)
+
+                callback(Result.success( suggestion?.let { AutocompleteResult(
+                    input = it.input,
+                    url = it.url,
+                    text = it.text,
+                    totalItems = it.totalItems.toLong(),
+                    source = it.source
+                )}
+
+                ))
+            }
+        }
+    }
+
+    override fun querySuggestions(text: String, providers: List<GeckoSuggestionType>) {
         for(provider in providers) {
             coroutineScope.launch {
                 val results = when(provider) {

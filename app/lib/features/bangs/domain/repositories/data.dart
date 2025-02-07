@@ -111,26 +111,6 @@ class BangDataRepository extends _$BangDataRepository {
         .removeSearchEntry(searchQuery);
   }
 
-  Future<Result<BangData>> ensureIconAvailable(BangData bang) async {
-    if (bang.icon != null) {
-      return Result.success(bang);
-    }
-
-    final url = bang.getUrl('');
-
-    final websiteProvider = ref.read(genericWebsiteServiceProvider.notifier);
-    final cachedIcon = await websiteProvider.getCachedIcon(url);
-
-    if (cachedIcon != null) {
-      return Result.success(bang.copyWith.icon(cachedIcon));
-    }
-
-    return websiteProvider.fetchPageInfo(url).then(
-          (result) => result
-              .flatMap((pageInfo) => bang.copyWith.icon(pageInfo.favicon)),
-        );
-  }
-
   Future<int> resetFrequencies() {
     return ref.read(bangDatabaseProvider).bangFrequency.deleteAll();
   }

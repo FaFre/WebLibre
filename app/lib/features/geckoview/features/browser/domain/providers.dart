@@ -3,9 +3,14 @@
 import 'dart:async';
 
 import 'package:lensai/data/models/equatable_iterable.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
+import 'package:lensai/features/geckoview/domain/entities/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
+import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
+import 'package:lensai/features/geckoview/features/search/domain/entities/tab_preview.dart';
+import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:lensai/features/kagi/data/entities/modes.dart';
@@ -87,27 +92,48 @@ class ShowFindInPage extends _$ShowFindInPage {
 }
 
 @Riverpod()
-List<String> availableTabIds(
+EquatableCollection<List<String>> availableTabIds(
   Ref ref,
-  String? containerId,
+  ContainerFilter containerFilter,
 ) {
   final containerTabs = ref.watch(
-    containerTabIdsProvider(containerId).select((value) => value.valueOrNull),
+    containerTabIdsProvider(containerFilter)
+        .select((value) => value.valueOrNull),
   );
-  final tabStates = ref.watch(tabListProvider);
+  final tabList = ref.watch(tabListProvider);
 
-  return containerTabs?.where((tabId) => tabStates.contains(tabId)).toList() ??
-      [];
+  return EquatableCollection(
+    containerTabs?.where((tabId) => tabList.contains(tabId)).toList() ?? [],
+    immutable: true,
+  );
 }
 
 @Riverpod()
-List<String> seamlessFilteredTabs(
+EquatableCollection<Map<String, TabState>> availableTabStates(
   Ref ref,
-  String? containerId,
+  ContainerFilter containerFilter,
+) {
+  final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
+  final tabStates = ref.watch(tabStatesProvider);
+
+  return EquatableCollection(
+    {
+      for (final tabId in availableTabs.collection)
+        if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
+    },
+    immutable: true,
+  );
+}
+
+@Riverpod()
+EquatableCollection<List<String>> seamlessFilteredTabIds(
+  Ref ref,
+  TabSearchPartition searchPartition,
+  ContainerFilter containerFilter,
 ) {
   final tabSearchResults = ref
       .watch(
-        tabSearchRepositoryProvider.select(
+        tabSearchRepositoryProvider(searchPartition).select(
           (value) => EquatableCollection(
             value.valueOrNull?.map((tab) => tab.id).toList(),
             immutable: true,
@@ -116,17 +142,74 @@ List<String> seamlessFilteredTabs(
       )
       .collection;
 
-  final availableTabs = ref
-      .watch(
-        availableTabIdsProvider(containerId).select(
-          (value) => EquatableCollection(value, immutable: true),
-        ),
-      )
-      .collection;
+  final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
 
   if (tabSearchResults == null) {
     return availableTabs;
   }
 
-  return tabSearchResults.where((tab) => availableTabs.contains(tab)).toList();
+  return EquatableCollection(
+    tabSearchResults
+        .where((tab) => availableTabs.collection.contains(tab))
+        .toList(),
+    immutable: true,
+  );
+}
+
+@Riverpod()
+EquatableCollection<List<TabPreview>> seamlessFilteredTabPreviews(
+  Ref ref,
+  TabSearchPartition searchPartition,
+  ContainerFilter containerFilter,
+) {
+  final tabSearchResults = ref
+      .watch(
+        tabSearchRepositoryProvider(searchPartition).select(
+          (value) => EquatableCollection(
+            value.valueOrNull,
+            immutable: true,
+          ),
+        ),
+      )
+      .collection;
+
+  final availableTabStates =
+      ref.watch(availableTabStatesProvider(containerFilter));
+
+  if (tabSearchResults == null) {
+    return EquatableCollection(
+      availableTabStates.collection.values
+          .map(
+            (state) => TabPreview(
+              id: state.id,
+              title: state.title,
+              icon: state.icon,
+              url: state.url,
+              highlightedUrl: null,
+              content: null,
+            ),
+          )
+          .toList(),
+      immutable: true,
+    );
+  }
+
+  return EquatableCollection(
+    tabSearchResults
+        .where((tab) => availableTabStates.collection.containsKey(tab.id))
+        .map((tab) {
+          return TabPreview(
+            id: tab.id,
+            title: tab.title ?? availableTabStates.collection[tab.id]!.title,
+            icon: null,
+            url: tab.cleanUrl.mapNotNull(Uri.tryParse) ??
+                availableTabStates.collection[tab.id]!.url,
+            highlightedUrl: tab.url,
+            content: tab.extractedContent ?? tab.fullContent,
+          );
+        })
+        .whereType<TabPreview>()
+        .toList(),
+    immutable: true,
+  );
 }

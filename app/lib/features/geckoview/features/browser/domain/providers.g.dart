@@ -158,23 +158,23 @@ class _SelectedBangDataProviderElement
   String? get domain => (origin as SelectedBangDataProvider).domain;
 }
 
-String _$availableTabIdsHash() => r'646d42c747d815496849c7342903caf48258a8ab';
+String _$availableTabIdsHash() => r'd8b55b012b38111c8d5e069987a55645d1a71b89';
 
 /// See also [availableTabIds].
 @ProviderFor(availableTabIds)
 const availableTabIdsProvider = AvailableTabIdsFamily();
 
 /// See also [availableTabIds].
-class AvailableTabIdsFamily extends Family<List<String>> {
+class AvailableTabIdsFamily extends Family<EquatableCollection<List<String>>> {
   /// See also [availableTabIds].
   const AvailableTabIdsFamily();
 
   /// See also [availableTabIds].
   AvailableTabIdsProvider call(
-    String? containerId,
+    ContainerFilter containerFilter,
   ) {
     return AvailableTabIdsProvider(
-      containerId,
+      containerFilter,
     );
   }
 
@@ -183,7 +183,7 @@ class AvailableTabIdsFamily extends Family<List<String>> {
     covariant AvailableTabIdsProvider provider,
   ) {
     return call(
-      provider.containerId,
+      provider.containerFilter,
     );
   }
 
@@ -203,14 +203,15 @@ class AvailableTabIdsFamily extends Family<List<String>> {
 }
 
 /// See also [availableTabIds].
-class AvailableTabIdsProvider extends AutoDisposeProvider<List<String>> {
+class AvailableTabIdsProvider
+    extends AutoDisposeProvider<EquatableCollection<List<String>>> {
   /// See also [availableTabIds].
   AvailableTabIdsProvider(
-    String? containerId,
+    ContainerFilter containerFilter,
   ) : this._internal(
           (ref) => availableTabIds(
             ref as AvailableTabIdsRef,
-            containerId,
+            containerFilter,
           ),
           from: availableTabIdsProvider,
           name: r'availableTabIdsProvider',
@@ -221,7 +222,7 @@ class AvailableTabIdsProvider extends AutoDisposeProvider<List<String>> {
           dependencies: AvailableTabIdsFamily._dependencies,
           allTransitiveDependencies:
               AvailableTabIdsFamily._allTransitiveDependencies,
-          containerId: containerId,
+          containerFilter: containerFilter,
         );
 
   AvailableTabIdsProvider._internal(
@@ -231,14 +232,15 @@ class AvailableTabIdsProvider extends AutoDisposeProvider<List<String>> {
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.containerId,
+    required this.containerFilter,
   }) : super.internal();
 
-  final String? containerId;
+  final ContainerFilter containerFilter;
 
   @override
   Override overrideWith(
-    List<String> Function(AvailableTabIdsRef provider) create,
+    EquatableCollection<List<String>> Function(AvailableTabIdsRef provider)
+        create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -249,25 +251,27 @@ class AvailableTabIdsProvider extends AutoDisposeProvider<List<String>> {
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        containerId: containerId,
+        containerFilter: containerFilter,
       ),
     );
   }
 
   @override
-  AutoDisposeProviderElement<List<String>> createElement() {
+  AutoDisposeProviderElement<EquatableCollection<List<String>>>
+      createElement() {
     return _AvailableTabIdsProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is AvailableTabIdsProvider && other.containerId == containerId;
+    return other is AvailableTabIdsProvider &&
+        other.containerFilter == containerFilter;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, containerId.hashCode);
+    hash = _SystemHash.combine(hash, containerFilter.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -275,46 +279,50 @@ class AvailableTabIdsProvider extends AutoDisposeProvider<List<String>> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin AvailableTabIdsRef on AutoDisposeProviderRef<List<String>> {
-  /// The parameter `containerId` of this provider.
-  String? get containerId;
+mixin AvailableTabIdsRef
+    on AutoDisposeProviderRef<EquatableCollection<List<String>>> {
+  /// The parameter `containerFilter` of this provider.
+  ContainerFilter get containerFilter;
 }
 
 class _AvailableTabIdsProviderElement
-    extends AutoDisposeProviderElement<List<String>> with AvailableTabIdsRef {
+    extends AutoDisposeProviderElement<EquatableCollection<List<String>>>
+    with AvailableTabIdsRef {
   _AvailableTabIdsProviderElement(super.provider);
 
   @override
-  String? get containerId => (origin as AvailableTabIdsProvider).containerId;
+  ContainerFilter get containerFilter =>
+      (origin as AvailableTabIdsProvider).containerFilter;
 }
 
-String _$seamlessFilteredTabsHash() =>
-    r'1abfb0e9ae834cdde5ab64b6174f24f45f36a272';
+String _$availableTabStatesHash() =>
+    r'ca42dc8cb88070fb58ab085ab6c9bcbf31ef4f0b';
 
-/// See also [seamlessFilteredTabs].
-@ProviderFor(seamlessFilteredTabs)
-const seamlessFilteredTabsProvider = SeamlessFilteredTabsFamily();
+/// See also [availableTabStates].
+@ProviderFor(availableTabStates)
+const availableTabStatesProvider = AvailableTabStatesFamily();
 
-/// See also [seamlessFilteredTabs].
-class SeamlessFilteredTabsFamily extends Family<List<String>> {
-  /// See also [seamlessFilteredTabs].
-  const SeamlessFilteredTabsFamily();
+/// See also [availableTabStates].
+class AvailableTabStatesFamily
+    extends Family<EquatableCollection<Map<String, TabState>>> {
+  /// See also [availableTabStates].
+  const AvailableTabStatesFamily();
 
-  /// See also [seamlessFilteredTabs].
-  SeamlessFilteredTabsProvider call(
-    String? containerId,
+  /// See also [availableTabStates].
+  AvailableTabStatesProvider call(
+    ContainerFilter containerFilter,
   ) {
-    return SeamlessFilteredTabsProvider(
-      containerId,
+    return AvailableTabStatesProvider(
+      containerFilter,
     );
   }
 
   @override
-  SeamlessFilteredTabsProvider getProviderOverride(
-    covariant SeamlessFilteredTabsProvider provider,
+  AvailableTabStatesProvider getProviderOverride(
+    covariant AvailableTabStatesProvider provider,
   ) {
     return call(
-      provider.containerId,
+      provider.containerFilter,
     );
   }
 
@@ -330,76 +338,80 @@ class SeamlessFilteredTabsFamily extends Family<List<String>> {
       _allTransitiveDependencies;
 
   @override
-  String? get name => r'seamlessFilteredTabsProvider';
+  String? get name => r'availableTabStatesProvider';
 }
 
-/// See also [seamlessFilteredTabs].
-class SeamlessFilteredTabsProvider extends AutoDisposeProvider<List<String>> {
-  /// See also [seamlessFilteredTabs].
-  SeamlessFilteredTabsProvider(
-    String? containerId,
+/// See also [availableTabStates].
+class AvailableTabStatesProvider
+    extends AutoDisposeProvider<EquatableCollection<Map<String, TabState>>> {
+  /// See also [availableTabStates].
+  AvailableTabStatesProvider(
+    ContainerFilter containerFilter,
   ) : this._internal(
-          (ref) => seamlessFilteredTabs(
-            ref as SeamlessFilteredTabsRef,
-            containerId,
+          (ref) => availableTabStates(
+            ref as AvailableTabStatesRef,
+            containerFilter,
           ),
-          from: seamlessFilteredTabsProvider,
-          name: r'seamlessFilteredTabsProvider',
+          from: availableTabStatesProvider,
+          name: r'availableTabStatesProvider',
           debugGetCreateSourceHash:
               const bool.fromEnvironment('dart.vm.product')
                   ? null
-                  : _$seamlessFilteredTabsHash,
-          dependencies: SeamlessFilteredTabsFamily._dependencies,
+                  : _$availableTabStatesHash,
+          dependencies: AvailableTabStatesFamily._dependencies,
           allTransitiveDependencies:
-              SeamlessFilteredTabsFamily._allTransitiveDependencies,
-          containerId: containerId,
+              AvailableTabStatesFamily._allTransitiveDependencies,
+          containerFilter: containerFilter,
         );
 
-  SeamlessFilteredTabsProvider._internal(
+  AvailableTabStatesProvider._internal(
     super._createNotifier, {
     required super.name,
     required super.dependencies,
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.containerId,
+    required this.containerFilter,
   }) : super.internal();
 
-  final String? containerId;
+  final ContainerFilter containerFilter;
 
   @override
   Override overrideWith(
-    List<String> Function(SeamlessFilteredTabsRef provider) create,
+    EquatableCollection<Map<String, TabState>> Function(
+            AvailableTabStatesRef provider)
+        create,
   ) {
     return ProviderOverride(
       origin: this,
-      override: SeamlessFilteredTabsProvider._internal(
-        (ref) => create(ref as SeamlessFilteredTabsRef),
+      override: AvailableTabStatesProvider._internal(
+        (ref) => create(ref as AvailableTabStatesRef),
         from: from,
         name: null,
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        containerId: containerId,
+        containerFilter: containerFilter,
       ),
     );
   }
 
   @override
-  AutoDisposeProviderElement<List<String>> createElement() {
-    return _SeamlessFilteredTabsProviderElement(this);
+  AutoDisposeProviderElement<EquatableCollection<Map<String, TabState>>>
+      createElement() {
+    return _AvailableTabStatesProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SeamlessFilteredTabsProvider &&
-        other.containerId == containerId;
+    return other is AvailableTabStatesProvider &&
+        other.containerFilter == containerFilter;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, containerId.hashCode);
+    hash = _SystemHash.combine(hash, containerFilter.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -407,19 +419,333 @@ class SeamlessFilteredTabsProvider extends AutoDisposeProvider<List<String>> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SeamlessFilteredTabsRef on AutoDisposeProviderRef<List<String>> {
-  /// The parameter `containerId` of this provider.
-  String? get containerId;
+mixin AvailableTabStatesRef
+    on AutoDisposeProviderRef<EquatableCollection<Map<String, TabState>>> {
+  /// The parameter `containerFilter` of this provider.
+  ContainerFilter get containerFilter;
 }
 
-class _SeamlessFilteredTabsProviderElement
-    extends AutoDisposeProviderElement<List<String>>
-    with SeamlessFilteredTabsRef {
-  _SeamlessFilteredTabsProviderElement(super.provider);
+class _AvailableTabStatesProviderElement extends AutoDisposeProviderElement<
+    EquatableCollection<Map<String, TabState>>> with AvailableTabStatesRef {
+  _AvailableTabStatesProviderElement(super.provider);
 
   @override
-  String? get containerId =>
-      (origin as SeamlessFilteredTabsProvider).containerId;
+  ContainerFilter get containerFilter =>
+      (origin as AvailableTabStatesProvider).containerFilter;
+}
+
+String _$seamlessFilteredTabIdsHash() =>
+    r'2e29ca53c35be89972d3f9aea24198fe1feb9e05';
+
+/// See also [seamlessFilteredTabIds].
+@ProviderFor(seamlessFilteredTabIds)
+const seamlessFilteredTabIdsProvider = SeamlessFilteredTabIdsFamily();
+
+/// See also [seamlessFilteredTabIds].
+class SeamlessFilteredTabIdsFamily
+    extends Family<EquatableCollection<List<String>>> {
+  /// See also [seamlessFilteredTabIds].
+  const SeamlessFilteredTabIdsFamily();
+
+  /// See also [seamlessFilteredTabIds].
+  SeamlessFilteredTabIdsProvider call(
+    TabSearchPartition searchPartition,
+    ContainerFilter containerFilter,
+  ) {
+    return SeamlessFilteredTabIdsProvider(
+      searchPartition,
+      containerFilter,
+    );
+  }
+
+  @override
+  SeamlessFilteredTabIdsProvider getProviderOverride(
+    covariant SeamlessFilteredTabIdsProvider provider,
+  ) {
+    return call(
+      provider.searchPartition,
+      provider.containerFilter,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'seamlessFilteredTabIdsProvider';
+}
+
+/// See also [seamlessFilteredTabIds].
+class SeamlessFilteredTabIdsProvider
+    extends AutoDisposeProvider<EquatableCollection<List<String>>> {
+  /// See also [seamlessFilteredTabIds].
+  SeamlessFilteredTabIdsProvider(
+    TabSearchPartition searchPartition,
+    ContainerFilter containerFilter,
+  ) : this._internal(
+          (ref) => seamlessFilteredTabIds(
+            ref as SeamlessFilteredTabIdsRef,
+            searchPartition,
+            containerFilter,
+          ),
+          from: seamlessFilteredTabIdsProvider,
+          name: r'seamlessFilteredTabIdsProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$seamlessFilteredTabIdsHash,
+          dependencies: SeamlessFilteredTabIdsFamily._dependencies,
+          allTransitiveDependencies:
+              SeamlessFilteredTabIdsFamily._allTransitiveDependencies,
+          searchPartition: searchPartition,
+          containerFilter: containerFilter,
+        );
+
+  SeamlessFilteredTabIdsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.searchPartition,
+    required this.containerFilter,
+  }) : super.internal();
+
+  final TabSearchPartition searchPartition;
+  final ContainerFilter containerFilter;
+
+  @override
+  Override overrideWith(
+    EquatableCollection<List<String>> Function(
+            SeamlessFilteredTabIdsRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: SeamlessFilteredTabIdsProvider._internal(
+        (ref) => create(ref as SeamlessFilteredTabIdsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        searchPartition: searchPartition,
+        containerFilter: containerFilter,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<EquatableCollection<List<String>>>
+      createElement() {
+    return _SeamlessFilteredTabIdsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SeamlessFilteredTabIdsProvider &&
+        other.searchPartition == searchPartition &&
+        other.containerFilter == containerFilter;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, searchPartition.hashCode);
+    hash = _SystemHash.combine(hash, containerFilter.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SeamlessFilteredTabIdsRef
+    on AutoDisposeProviderRef<EquatableCollection<List<String>>> {
+  /// The parameter `searchPartition` of this provider.
+  TabSearchPartition get searchPartition;
+
+  /// The parameter `containerFilter` of this provider.
+  ContainerFilter get containerFilter;
+}
+
+class _SeamlessFilteredTabIdsProviderElement
+    extends AutoDisposeProviderElement<EquatableCollection<List<String>>>
+    with SeamlessFilteredTabIdsRef {
+  _SeamlessFilteredTabIdsProviderElement(super.provider);
+
+  @override
+  TabSearchPartition get searchPartition =>
+      (origin as SeamlessFilteredTabIdsProvider).searchPartition;
+  @override
+  ContainerFilter get containerFilter =>
+      (origin as SeamlessFilteredTabIdsProvider).containerFilter;
+}
+
+String _$seamlessFilteredTabPreviewsHash() =>
+    r'7a70eb2f3f59de5188d94a73790e39c339a6293b';
+
+/// See also [seamlessFilteredTabPreviews].
+@ProviderFor(seamlessFilteredTabPreviews)
+const seamlessFilteredTabPreviewsProvider = SeamlessFilteredTabPreviewsFamily();
+
+/// See also [seamlessFilteredTabPreviews].
+class SeamlessFilteredTabPreviewsFamily
+    extends Family<EquatableCollection<List<TabPreview>>> {
+  /// See also [seamlessFilteredTabPreviews].
+  const SeamlessFilteredTabPreviewsFamily();
+
+  /// See also [seamlessFilteredTabPreviews].
+  SeamlessFilteredTabPreviewsProvider call(
+    TabSearchPartition searchPartition,
+    ContainerFilter containerFilter,
+  ) {
+    return SeamlessFilteredTabPreviewsProvider(
+      searchPartition,
+      containerFilter,
+    );
+  }
+
+  @override
+  SeamlessFilteredTabPreviewsProvider getProviderOverride(
+    covariant SeamlessFilteredTabPreviewsProvider provider,
+  ) {
+    return call(
+      provider.searchPartition,
+      provider.containerFilter,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'seamlessFilteredTabPreviewsProvider';
+}
+
+/// See also [seamlessFilteredTabPreviews].
+class SeamlessFilteredTabPreviewsProvider
+    extends AutoDisposeProvider<EquatableCollection<List<TabPreview>>> {
+  /// See also [seamlessFilteredTabPreviews].
+  SeamlessFilteredTabPreviewsProvider(
+    TabSearchPartition searchPartition,
+    ContainerFilter containerFilter,
+  ) : this._internal(
+          (ref) => seamlessFilteredTabPreviews(
+            ref as SeamlessFilteredTabPreviewsRef,
+            searchPartition,
+            containerFilter,
+          ),
+          from: seamlessFilteredTabPreviewsProvider,
+          name: r'seamlessFilteredTabPreviewsProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$seamlessFilteredTabPreviewsHash,
+          dependencies: SeamlessFilteredTabPreviewsFamily._dependencies,
+          allTransitiveDependencies:
+              SeamlessFilteredTabPreviewsFamily._allTransitiveDependencies,
+          searchPartition: searchPartition,
+          containerFilter: containerFilter,
+        );
+
+  SeamlessFilteredTabPreviewsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.searchPartition,
+    required this.containerFilter,
+  }) : super.internal();
+
+  final TabSearchPartition searchPartition;
+  final ContainerFilter containerFilter;
+
+  @override
+  Override overrideWith(
+    EquatableCollection<List<TabPreview>> Function(
+            SeamlessFilteredTabPreviewsRef provider)
+        create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: SeamlessFilteredTabPreviewsProvider._internal(
+        (ref) => create(ref as SeamlessFilteredTabPreviewsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        searchPartition: searchPartition,
+        containerFilter: containerFilter,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<EquatableCollection<List<TabPreview>>>
+      createElement() {
+    return _SeamlessFilteredTabPreviewsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SeamlessFilteredTabPreviewsProvider &&
+        other.searchPartition == searchPartition &&
+        other.containerFilter == containerFilter;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, searchPartition.hashCode);
+    hash = _SystemHash.combine(hash, containerFilter.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SeamlessFilteredTabPreviewsRef
+    on AutoDisposeProviderRef<EquatableCollection<List<TabPreview>>> {
+  /// The parameter `searchPartition` of this provider.
+  TabSearchPartition get searchPartition;
+
+  /// The parameter `containerFilter` of this provider.
+  ContainerFilter get containerFilter;
+}
+
+class _SeamlessFilteredTabPreviewsProviderElement
+    extends AutoDisposeProviderElement<EquatableCollection<List<TabPreview>>>
+    with SeamlessFilteredTabPreviewsRef {
+  _SeamlessFilteredTabPreviewsProviderElement(super.provider);
+
+  @override
+  TabSearchPartition get searchPartition =>
+      (origin as SeamlessFilteredTabPreviewsProvider).searchPartition;
+  @override
+  ContainerFilter get containerFilter =>
+      (origin as SeamlessFilteredTabPreviewsProvider).containerFilter;
 }
 
 String _$selectedBangTriggerHash() =>

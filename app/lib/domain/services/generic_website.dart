@@ -274,6 +274,18 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     );
   }
 
+  Future<BrowserIcon> getUrlIcon(Uri url) async {
+    final cachedIcon = await getCachedIcon(url);
+
+    if (cachedIcon != null) {
+      return cachedIcon;
+    }
+
+    return fetchPageInfo(url).then(
+      (result) => result.flatMap((pageInfo) => pageInfo.favicon!).value,
+    );
+  }
+
   // Future<Uri?> tryUpgradeToHttps(Uri httpUri) async {
   //   if (httpUri.isScheme('https')) {
   //     return httpUri;

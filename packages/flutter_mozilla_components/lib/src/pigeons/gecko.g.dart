@@ -1273,6 +1273,47 @@ class GeckoEngineSettings {
   }
 }
 
+class AutocompleteResult {
+  AutocompleteResult({
+    required this.input,
+    required this.text,
+    required this.url,
+    required this.source,
+    required this.totalItems,
+  });
+
+  String input;
+
+  String text;
+
+  String url;
+
+  String source;
+
+  int totalItems;
+
+  Object encode() {
+    return <Object?>[
+      input,
+      text,
+      url,
+      source,
+      totalItems,
+    ];
+  }
+
+  static AutocompleteResult decode(Object result) {
+    result as List<Object?>;
+    return AutocompleteResult(
+      input: result[0]! as String,
+      text: result[1]! as String,
+      url: result[2]! as String,
+      source: result[3]! as String,
+      totalItems: result[4]! as int,
+    );
+  }
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -1404,6 +1445,9 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
+    }    else if (value is AutocompleteResult) {
+      buffer.putUint8(170);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -1507,6 +1551,8 @@ class _PigeonCodec extends StandardMessageCodec {
         return TabContent.decode(readValue(buffer)!);
       case 169: 
         return GeckoEngineSettings.decode(readValue(buffer)!);
+      case 170: 
+        return AutocompleteResult.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -3501,8 +3547,30 @@ class GeckoSuggestionApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> onInputChanged(String text, List<GeckoSuggestionType> providers) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.onInputChanged$pigeonVar_messageChannelSuffix';
+  Future<AutocompleteResult?> getAutocompleteSuggestion(String query) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.getAutocompleteSuggestion$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_channel.send(<Object?>[query]) as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return (pigeonVar_replyList[0] as AutocompleteResult?);
+    }
+  }
+
+  Future<void> querySuggestions(String text, List<GeckoSuggestionType> providers) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.querySuggestions$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

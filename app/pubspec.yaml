@@ -63,6 +63,7 @@ dependencies:
   rxdart: ^0.28.0
   share_plus: ^10.1.4
   skeletonizer: ^1.4.3
+  sliver_tools: ^0.2.12
   speech_to_text_google_dialog: 
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git

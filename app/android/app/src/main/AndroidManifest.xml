@@ -97,7 +97,7 @@
         </activity>
 
         <activity
-            android:theme="@style/Theme.AppCompat.Light"
+            android:theme="@style/AddonsActivityTheme"
             android:name="eu.lensai.flutter_mozilla_components.addons.AddonsActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:exported="false"

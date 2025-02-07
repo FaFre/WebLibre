@@ -13,12 +13,13 @@ class BangSearch extends _$BangSearch {
 
   Future<void> search(String input) async {
     if (input.isNotEmpty) {
-      await ref
-          .read(bangDatabaseProvider)
-          .bangDao
-          .queryBangs(input)
-          .get()
-          .then(_streamController.add);
+      await ref.read(bangDatabaseProvider).bangDao.queryBangs(input).get().then(
+        (value) {
+          if (!_streamController.isClosed) {
+            _streamController.add(value);
+          }
+        },
+      );
     }
   }
 

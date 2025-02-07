@@ -16,7 +16,9 @@ class SearchSuggestionsRepository extends _$SearchSuggestionsRepository {
   SearchSuggestionsRepository() : _cache = LRUCache(100);
 
   void addQuery(String query) {
-    _queryStreamController.add(query);
+    if (!_queryStreamController.isClosed) {
+      _queryStreamController.add(query);
+    }
   }
 
   @override

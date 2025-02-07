@@ -74,7 +74,13 @@ class ChatArchiveSearchRepository extends _$ChatArchiveSearchRepository {
             ellipsis: ellipsis,
           )
           .get()
-          .then(_streamController.add);
+          .then(
+        (value) {
+          if (!_streamController.isClosed) {
+            _streamController.add(value);
+          }
+        },
+      );
     }
   }
 

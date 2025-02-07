@@ -48,6 +48,8 @@ class CreateTabStream extends _$CreateTabStream {
   }
 
   void createTab(CreateTabSheet parameter) {
-    _streamController.add(parameter);
+    if (!_streamController.isClosed) {
+      _streamController.add(parameter);
+    }
   }
 }
