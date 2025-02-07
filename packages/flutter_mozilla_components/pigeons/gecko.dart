@@ -604,7 +604,12 @@ class AutocompleteResult {
   final int totalItems;
 
   AutocompleteResult(
-      this.input, this.text, this.url, this.source, this.totalItems);
+    this.input,
+    this.text,
+    this.url,
+    this.source,
+    this.totalItems,
+  );
 }
 
 // /// Represents all the different supported types of data that can be found from long clicking

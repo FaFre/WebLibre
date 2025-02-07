@@ -8,8 +8,10 @@ class GeckoEngineSettingsService {
   GeckoEngineSettingsService({GeckoEngineSettingsApi? api})
       : _api = api ?? _apiInstance;
 
-  Future<void> setDefaultSettings(GeckoEngineSettings settings,
-      {bool updateRuntime = true}) {
+  Future<void> setDefaultSettings(
+    GeckoEngineSettings settings, {
+    bool updateRuntime = true,
+  }) {
     return updateRuntime
         ? _api.updateRuntimeSettings(settings)
         : _api.setDefaultSettings(settings);

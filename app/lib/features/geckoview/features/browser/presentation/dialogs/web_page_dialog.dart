@@ -254,8 +254,8 @@ class WebPageDialog extends HookConsumerWidget {
                               final updateResult = await ref
                                   .read(
                                     chatMetadataRepositoryProvider(
-                                            selectedTabId)
-                                        .notifier,
+                                      selectedTabId,
+                                    ).notifier,
                                   )
                                   .updateMetadata(
                                     ChatMetadata(mainDocumentId: selectedTabId),
@@ -264,9 +264,11 @@ class WebPageDialog extends HookConsumerWidget {
                               updateResult.onSuccess((_) {
                                 ref
                                     .read(
-                                        bottomSheetControllerProvider.notifier)
+                                      bottomSheetControllerProvider.notifier,
+                                    )
                                     .show(
-                                        TabQaChatSheet(chatId: selectedTabId));
+                                      TabQaChatSheet(chatId: selectedTabId),
+                                    );
                               });
                             }
 

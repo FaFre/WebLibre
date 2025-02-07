@@ -15,6 +15,7 @@ class BottomSheetController extends _$BottomSheetController {
     return ref.watch(createTabStreamProvider).valueOrNull;
   }
 
+  // ignore: use_setters_to_change_properties
   void show(Sheet sheet) {
     state = sheet;
   }

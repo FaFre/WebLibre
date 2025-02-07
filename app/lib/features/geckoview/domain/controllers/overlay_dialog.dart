@@ -10,6 +10,7 @@ class OverlayDialogController extends _$OverlayDialogController {
     return null;
   }
 
+  // ignore: use_setters_to_change_properties
   void show(Widget dialog) {
     state = dialog;
   }

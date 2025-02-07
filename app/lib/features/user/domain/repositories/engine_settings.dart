@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/user/data/database/database.dart';
 import 'package:lensai/features/user/data/models/engine_settings.dart';
 import 'package:lensai/features/user/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

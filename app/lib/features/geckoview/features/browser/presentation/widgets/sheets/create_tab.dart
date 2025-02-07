@@ -34,7 +34,7 @@ class CreateTabSheetWidget extends HookConsumerWidget {
       () =>
           parameter.preferredTool?.index ??
           switch (sharedContent) {
-            SharedText(text: final text) => KagiTool.search.index
+            SharedText(text: final _) => KagiTool.search.index
             // (showEarlyAccessFeatures && text.length > 25)
             //     ? KagiTool.assistant.index
             //     : KagiTool.search.index,

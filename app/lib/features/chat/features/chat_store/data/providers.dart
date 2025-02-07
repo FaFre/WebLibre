@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:lensai/data/database/functions/lexo_rank_functions.dart';
-import 'package:lensai/features/chat/features/chat_store/data/database/database.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:lensai/data/database/functions/lexo_rank_functions.dart';
+import 'package:lensai/features/chat/features/chat_store/data/database/database.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:riverpod/riverpod.dart';

@@ -827,8 +827,9 @@ class BrowserScreen extends HookConsumerWidget {
                                     draggableScrollableController,
                                 onClose: () {
                                   ref
-                                      .read(bottomSheetControllerProvider
-                                          .notifier)
+                                      .read(
+                                        bottomSheetControllerProvider.notifier,
+                                      )
                                       .dismiss();
                                 },
                               ),

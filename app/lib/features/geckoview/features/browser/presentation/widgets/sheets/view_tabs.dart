@@ -251,6 +251,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   final filteredTabIds = ref.watch(
                     seamlessFilteredTabIdsProvider(
                       TabSearchPartition.preview,
+                      // ignore: provider_parameters
                       ContainerFilterById(containerId: container),
                     ),
                   );

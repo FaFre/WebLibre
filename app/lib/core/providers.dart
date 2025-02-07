@@ -16,6 +16,7 @@ GoRouter router(Ref ref) {
 
 @Riverpod()
 class WillAcceptDrop extends _$WillAcceptDrop {
+  // ignore: use_setters_to_change_properties
   void setData(DropTargetData data) {
     state = data;
   }

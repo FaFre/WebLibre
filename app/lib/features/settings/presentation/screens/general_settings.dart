@@ -15,8 +15,6 @@ class GeneralSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
     final generalSettings = ref.watch(generalSettingsRepositoryProvider);
 
     return Scaffold(
@@ -61,8 +59,9 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                         selected: {generalSettings.themeMode},
                         onSelectionChanged: (value) async {
                           await ref
-                              .read(saveGeneralSettingsControllerProvider
-                                  .notifier)
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
                               .save(
                                 (currentSettings) => currentSettings.copyWith
                                     .themeMode(value.first),
