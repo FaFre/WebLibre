@@ -39,10 +39,7 @@ class SiteSearch extends HookConsumerWidget {
       },
     );
 
-    final selectedBang = ref.watch(
-      selectedBangDataProvider(domain: domain)
-          .select((value) => value.valueOrNull),
-    );
+    final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));
 
     final activeBang = selectedBang ?? availableBangs.firstOrNull;
 

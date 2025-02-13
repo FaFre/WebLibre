@@ -17,7 +17,7 @@ Stream<BangData?> bangData(Ref ref, String? trigger) {
 @Riverpod(keepAlive: true)
 Stream<BangData?> defaultSearchBangData(Ref ref) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  return repository.watchBang('kagi');
+  return repository.watchBang('lai');
 }
 
 @Riverpod()

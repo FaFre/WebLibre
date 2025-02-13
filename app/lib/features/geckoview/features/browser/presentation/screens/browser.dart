@@ -16,10 +16,10 @@ import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/services/create_tab.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/app_bar_title.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/browser_view.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:lensai/features/geckoview/features/browser/presentation/widgets/edit_url_dialog.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/sheets/create_tab.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
@@ -125,57 +125,74 @@ class BrowserScreen extends HookConsumerWidget {
                                         extra: tabState,
                                       );
                                     },
+                                    onDoubleTap: () async {
+                                      final newUrl = await showDialog<Uri?>(
+                                        context: context,
+                                        builder: (context) => EditUrlDialog(
+                                          initialUrl: tabState.url,
+                                        ),
+                                      );
+
+                                      if (newUrl != null) {
+                                        await ref
+                                            .read(
+                                              tabSessionProvider(tabId: null)
+                                                  .notifier,
+                                            )
+                                            .loadUrl(url: newUrl);
+                                      }
+                                    },
                                   )
                                 : const SizedBox.shrink();
                           },
                         )
                       : HookBuilder(
                           builder: (context) {
-                            final activeTool = useListenableSelector(
-                              activeKagiTool,
-                              () {
-                                if (displayedSheet is CreateTabSheetWidget) {
-                                  return null;
-                                }
+                            // final activeTool = useListenableSelector(
+                            //   activeKagiTool,
+                            //   () {
+                            //     if (displayedSheet is CreateTabSheetWidget) {
+                            //       return null;
+                            //     }
 
-                                return activeKagiTool.value;
-                              },
-                            );
+                            //     return activeKagiTool.value;
+                            //   },
+                            // );
 
                             return Row(
                               children: [
-                                IconButton(
-                                  color: (activeTool == KagiTool.search)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                                  onPressed: () async {
-                                    // ref
-                                    //     .read(createTabStreamProvider.notifier)
-                                    //     .createTab(
-                                    //       CreateTabSheet(
-                                    //         preferredTool: KagiTool.search,
-                                    //       ),
-                                    //     );
-                                    await context
-                                        .push(const SearchRoute().location);
-                                  },
-                                  icon: Icon(KagiTool.search.icon),
-                                ),
-                                IconButton(
-                                  color: (activeTool == KagiTool.summarizer)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                                  onPressed: () {
-                                    ref
-                                        .read(createTabStreamProvider.notifier)
-                                        .createTab(
-                                          CreateTabSheet(
-                                            preferredTool: KagiTool.summarizer,
-                                          ),
-                                        );
-                                  },
-                                  icon: Icon(KagiTool.summarizer.icon),
-                                ),
+                                // IconButton(
+                                //   color: (activeTool == KagiTool.search)
+                                //       ? Theme.of(context).colorScheme.primary
+                                //       : null,
+                                //   onPressed: () async {
+                                //     // ref
+                                //     //     .read(createTabStreamProvider.notifier)
+                                //     //     .createTab(
+                                //     //       CreateTabSheet(
+                                //     //         preferredTool: KagiTool.search,
+                                //     //       ),
+                                //     //     );
+                                //     await context
+                                //         .push(const SearchRoute().location);
+                                //   },
+                                //   icon: Icon(KagiTool.search.icon),
+                                // ),
+                                // IconButton(
+                                //   color: (activeTool == KagiTool.summarizer)
+                                //       ? Theme.of(context).colorScheme.primary
+                                //       : null,
+                                //   onPressed: () {
+                                //     ref
+                                //         .read(createTabStreamProvider.notifier)
+                                //         .createTab(
+                                //           CreateTabSheet(
+                                //             preferredTool: KagiTool.summarizer,
+                                //           ),
+                                //         );
+                                //   },
+                                //   icon: Icon(KagiTool.summarizer.icon),
+                                // ),
                                 // if (showEarlyAccessFeatures)
                                 //   IconButton(
                                 //     color: (activeTool == KagiTool.assistant)
@@ -199,7 +216,9 @@ class BrowserScreen extends HookConsumerWidget {
                           },
                         ),
                   actions: [
-                    if (selectedTabId != null) ReaderButton(),
+                    if (selectedTabId != null &&
+                        displayedSheet is! ViewTabsSheet)
+                      ReaderButton(),
                     // if (quickAction != null)
                     //   InkWell(
                     //     onTap: () async {
@@ -268,9 +287,7 @@ class BrowserScreen extends HookConsumerWidget {
                           ),
                         MenuItemButton(
                           onPressed: () async {
-                            await ref
-                                .read(tabRepositoryProvider.notifier)
-                                .addTab(url: Uri.https('kagi.com'));
+                            await context.push(const SearchRoute().location);
                           },
                           leadingIcon: const Icon(Icons.add),
                           child: const Text('Add Tab'),
@@ -585,14 +602,6 @@ class BrowserScreen extends HookConsumerWidget {
                           },
                           leadingIcon: const Icon(Icons.info),
                           child: const Text('Auth'),
-                        ),
-                        MenuItemButton(
-                          onPressed: () async {
-                            await context
-                                .push(WebEngineHardeningRoute().location);
-                          },
-                          leadingIcon: const Icon(Icons.info),
-                          child: const Text('Pref'),
                         ),
                       ],
                     ),

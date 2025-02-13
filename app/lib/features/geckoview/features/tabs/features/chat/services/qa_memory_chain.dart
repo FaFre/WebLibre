@@ -30,7 +30,7 @@ class QAMemoryChain extends _$QAMemoryChain {
       contextId: contextId,
     ).asRetriever(
       defaultOptions: const VectorStoreRetrieverOptions(
-        searchType: VectorStoreSimilaritySearch(k: 3),
+        searchType: VectorStoreSimilaritySearch(k: 6),
       ),
     );
 

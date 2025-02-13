@@ -5,6 +5,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/logger.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
+import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
@@ -49,6 +50,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   @override
   Widget build(BuildContext context) {
+    final hasTab =
+        ref.watch(selectedTabProvider.select((value) => value != null));
+
     ref.listen(
       selectedTabStateProvider.select(
         (state) => (tabId: state?.id, isLoading: state?.isLoading),
@@ -69,34 +73,42 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       },
     );
 
-    return GeckoView(
-      preInitializationStep: () async {
-        await ref
-            .read(generalSettingsRepositoryProvider.notifier)
-            .fetch()
-            .then((settings) {
-          ref
-              .read(deleteBrowserDataServiceProvider.notifier)
-              .deleteData(settings.deleteBrowsingDataOnQuit);
-        });
+    return Visibility(
+      visible: hasTab,
+      replacement: SizedBox.expand(
+        child: Container(
+          color: Colors.grey[800],
+        ),
+      ),
+      child: GeckoView(
+        preInitializationStep: () async {
+          await ref
+              .read(generalSettingsRepositoryProvider.notifier)
+              .fetch()
+              .then((settings) {
+            ref
+                .read(deleteBrowserDataServiceProvider.notifier)
+                .deleteData(settings.deleteBrowsingDataOnQuit);
+          });
 
-        await ref
-            .read(eventServiceProvider)
-            .viewReadyStateEvents
-            .firstWhere((state) => state == true)
-            .timeout(
-          const Duration(seconds: 3),
-          onTimeout: () {
-            logger.e(
-              'Browser fragement not reported ready, trying to intitialize anyways',
-            );
-            return true;
-          },
-        );
-      },
-      postInitializationStep: () async {
-        await widget.postInitializationStep?.call();
-      },
+          await ref
+              .read(eventServiceProvider)
+              .viewReadyStateEvents
+              .firstWhere((state) => state == true)
+              .timeout(
+            const Duration(seconds: 3),
+            onTimeout: () {
+              logger.e(
+                'Browser fragement not reported ready, trying to intitialize anyways',
+              );
+              return true;
+            },
+          );
+        },
+        postInitializationStep: () async {
+          await widget.postInitializationStep?.call();
+        },
+      ),
     );
   }
 

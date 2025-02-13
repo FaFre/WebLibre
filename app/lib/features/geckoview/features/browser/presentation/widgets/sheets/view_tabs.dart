@@ -4,8 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/providers.dart';
+import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/data/models/drag_data.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
@@ -428,10 +430,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              await ref.read(tabRepositoryProvider.notifier).addTab(
-                    url: Uri.https('setcookie.net'),
-                    // contextId: uuid.v4(),
-                  );
+              await context.push(const SearchRoute().location);
 
               onClose();
             },

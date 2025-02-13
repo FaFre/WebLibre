@@ -6,7 +6,7 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$selectedBangDataHash() => r'd43e679c40d35c4f4c692ee286dc21789d7287dd';
+String _$availableTabIdsHash() => r'd8b55b012b38111c8d5e069987a55645d1a71b89';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -28,137 +28,6 @@ class _SystemHash {
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
-
-/// See also [selectedBangData].
-@ProviderFor(selectedBangData)
-const selectedBangDataProvider = SelectedBangDataFamily();
-
-/// See also [selectedBangData].
-class SelectedBangDataFamily extends Family<AsyncValue<BangData?>> {
-  /// See also [selectedBangData].
-  const SelectedBangDataFamily();
-
-  /// See also [selectedBangData].
-  SelectedBangDataProvider call({
-    String? domain,
-  }) {
-    return SelectedBangDataProvider(
-      domain: domain,
-    );
-  }
-
-  @override
-  SelectedBangDataProvider getProviderOverride(
-    covariant SelectedBangDataProvider provider,
-  ) {
-    return call(
-      domain: provider.domain,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'selectedBangDataProvider';
-}
-
-/// See also [selectedBangData].
-class SelectedBangDataProvider extends AutoDisposeStreamProvider<BangData?> {
-  /// See also [selectedBangData].
-  SelectedBangDataProvider({
-    String? domain,
-  }) : this._internal(
-          (ref) => selectedBangData(
-            ref as SelectedBangDataRef,
-            domain: domain,
-          ),
-          from: selectedBangDataProvider,
-          name: r'selectedBangDataProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$selectedBangDataHash,
-          dependencies: SelectedBangDataFamily._dependencies,
-          allTransitiveDependencies:
-              SelectedBangDataFamily._allTransitiveDependencies,
-          domain: domain,
-        );
-
-  SelectedBangDataProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.domain,
-  }) : super.internal();
-
-  final String? domain;
-
-  @override
-  Override overrideWith(
-    Stream<BangData?> Function(SelectedBangDataRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SelectedBangDataProvider._internal(
-        (ref) => create(ref as SelectedBangDataRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        domain: domain,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeStreamProviderElement<BangData?> createElement() {
-    return _SelectedBangDataProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SelectedBangDataProvider && other.domain == domain;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, domain.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SelectedBangDataRef on AutoDisposeStreamProviderRef<BangData?> {
-  /// The parameter `domain` of this provider.
-  String? get domain;
-}
-
-class _SelectedBangDataProviderElement
-    extends AutoDisposeStreamProviderElement<BangData?>
-    with SelectedBangDataRef {
-  _SelectedBangDataProviderElement(super.provider);
-
-  @override
-  String? get domain => (origin as SelectedBangDataProvider).domain;
-}
-
-String _$availableTabIdsHash() => r'd8b55b012b38111c8d5e069987a55645d1a71b89';
 
 /// See also [availableTabIds].
 @ProviderFor(availableTabIds)
@@ -891,6 +760,152 @@ class _SelectedBangTriggerProviderElement
 
   @override
   String? get domain => (origin as SelectedBangTriggerProvider).domain;
+}
+
+String _$selectedBangDataHash() => r'28c394e5989e108870ca5733e916b80b3cf8972c';
+
+abstract class _$SelectedBangData
+    extends BuildlessAutoDisposeNotifier<BangData?> {
+  late final String? domain;
+
+  BangData? build({
+    String? domain,
+  });
+}
+
+/// See also [SelectedBangData].
+@ProviderFor(SelectedBangData)
+const selectedBangDataProvider = SelectedBangDataFamily();
+
+/// See also [SelectedBangData].
+class SelectedBangDataFamily extends Family<BangData?> {
+  /// See also [SelectedBangData].
+  const SelectedBangDataFamily();
+
+  /// See also [SelectedBangData].
+  SelectedBangDataProvider call({
+    String? domain,
+  }) {
+    return SelectedBangDataProvider(
+      domain: domain,
+    );
+  }
+
+  @override
+  SelectedBangDataProvider getProviderOverride(
+    covariant SelectedBangDataProvider provider,
+  ) {
+    return call(
+      domain: provider.domain,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'selectedBangDataProvider';
+}
+
+/// See also [SelectedBangData].
+class SelectedBangDataProvider
+    extends AutoDisposeNotifierProviderImpl<SelectedBangData, BangData?> {
+  /// See also [SelectedBangData].
+  SelectedBangDataProvider({
+    String? domain,
+  }) : this._internal(
+          () => SelectedBangData()..domain = domain,
+          from: selectedBangDataProvider,
+          name: r'selectedBangDataProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$selectedBangDataHash,
+          dependencies: SelectedBangDataFamily._dependencies,
+          allTransitiveDependencies:
+              SelectedBangDataFamily._allTransitiveDependencies,
+          domain: domain,
+        );
+
+  SelectedBangDataProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.domain,
+  }) : super.internal();
+
+  final String? domain;
+
+  @override
+  BangData? runNotifierBuild(
+    covariant SelectedBangData notifier,
+  ) {
+    return notifier.build(
+      domain: domain,
+    );
+  }
+
+  @override
+  Override overrideWith(SelectedBangData Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: SelectedBangDataProvider._internal(
+        () => create()..domain = domain,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        domain: domain,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeNotifierProviderElement<SelectedBangData, BangData?>
+      createElement() {
+    return _SelectedBangDataProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SelectedBangDataProvider && other.domain == domain;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, domain.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SelectedBangDataRef on AutoDisposeNotifierProviderRef<BangData?> {
+  /// The parameter `domain` of this provider.
+  String? get domain;
+}
+
+class _SelectedBangDataProviderElement
+    extends AutoDisposeNotifierProviderElement<SelectedBangData, BangData?>
+    with SelectedBangDataRef {
+  _SelectedBangDataProviderElement(super.provider);
+
+  @override
+  String? get domain => (origin as SelectedBangDataProvider).domain;
 }
 
 String _$lastUsedAssistantModeHash() =>

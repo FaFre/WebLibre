@@ -27,6 +27,7 @@ class AutoSuggestTextField extends HookWidget {
   final Color? suggestionHighlightColor;
   final bool? enableIMEPersonalizedLearning;
   final TapRegionCallback? onTapOutside;
+  final VoidCallback? onTap;
 
   const AutoSuggestTextField({
     super.key,
@@ -53,6 +54,7 @@ class AutoSuggestTextField extends HookWidget {
     this.suggestionHighlightColor,
     this.enableIMEPersonalizedLearning = true,
     this.onTapOutside,
+    this.onTap,
   });
 
   bool _suggestionHasMatch() =>
@@ -69,8 +71,12 @@ class AutoSuggestTextField extends HookWidget {
         if (suggestion != null)
           AbsorbPointer(
             child: TextField(
+              minLines: minLines,
+              maxLines: maxLines,
+              maxLength: maxLength,
               decoration: baseDecoration.copyWith(
                 floatingLabelBehavior: FloatingLabelBehavior.never,
+                border: InputBorder.none,
                 label: HookBuilder(
                   builder: (context) {
                     final text = useListenableSelector(
@@ -107,6 +113,7 @@ class AutoSuggestTextField extends HookWidget {
                     }
 
                     return RichText(
+                      maxLines: maxLines,
                       text: TextSpan(
                         text: text,
                         style: (style ?? Theme.of(context).textTheme.bodyLarge)
@@ -168,6 +175,7 @@ class AutoSuggestTextField extends HookWidget {
           cursorColor: cursorColor,
           enableIMEPersonalizedLearning: enableIMEPersonalizedLearning ?? true,
           onTapOutside: onTapOutside,
+          onTap: onTap,
         ),
       ],
     );

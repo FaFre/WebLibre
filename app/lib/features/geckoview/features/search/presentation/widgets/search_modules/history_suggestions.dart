@@ -81,8 +81,8 @@ class HistorySuggestions extends HookConsumerWidget {
                         subtitle: suggestion.description.mapNotNull(
                           (description) => Text(
                             description,
-                            softWrap: false,
-                            overflow: TextOverflow.fade,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         onTap: () async {

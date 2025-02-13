@@ -157,7 +157,7 @@ class _BangDataProviderElement
 }
 
 String _$defaultSearchBangDataHash() =>
-    r'b7547084b261ccb1dc02a6c7230fe57f6902dd58';
+    r'c93026fe7b1650fe8a39bb2a8850af3ee416c306';
 
 /// See also [defaultSearchBangData].
 @ProviderFor(defaultSearchBangData)

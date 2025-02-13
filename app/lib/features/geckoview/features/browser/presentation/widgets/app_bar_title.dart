@@ -8,8 +8,14 @@ class AppBarTitle extends StatelessWidget {
   final TabState tab;
 
   final void Function()? onTap;
+  final void Function()? onDoubleTap;
 
-  const AppBarTitle({required this.tab, this.onTap, super.key});
+  const AppBarTitle({
+    required this.tab,
+    this.onTap,
+    this.onDoubleTap,
+    super.key,
+  });
 
   Icon _securityStatusIcon(BuildContext context) {
     if (tab.url.isScheme('http')) {
@@ -42,6 +48,7 @@ class AppBarTitle extends StatelessWidget {
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
+      onDoubleTap: onDoubleTap,
       child: Row(
         children: [
           Skeletonizer(

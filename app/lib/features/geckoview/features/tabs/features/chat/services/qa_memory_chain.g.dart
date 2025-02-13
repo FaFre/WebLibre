@@ -6,7 +6,7 @@ part of 'qa_memory_chain.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$qAMemoryChainHash() => r'd5efc3fc01a6a88c67164d7eefc06412c9ab7c5c';
+String _$qAMemoryChainHash() => r'f05ff182416cd8ac8c35f046081652f8964684a8';
 
 /// Copied from Dart SDK
 class _SystemHash {

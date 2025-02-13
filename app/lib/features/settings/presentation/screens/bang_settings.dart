@@ -49,6 +49,11 @@ class BangSettingsScreen extends HookConsumerWidget {
                 title: 'Kagi Bangs',
                 subtitle: 'Automatically syncs every 7 days',
               ),
+              const BangGroupListTile(
+                group: BangGroup.custom,
+                title: 'Lensai Bangs',
+                subtitle: 'Automatically syncs every 7 days',
+              ),
             ],
           );
         },

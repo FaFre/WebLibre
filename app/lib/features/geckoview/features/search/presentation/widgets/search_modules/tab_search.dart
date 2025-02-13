@@ -118,20 +118,30 @@ class TabSearch extends HookConsumerWidget {
                   ),
                 ),
               ),
-              subtitle: MarkdownBody(
-                data: (bodyHasMatch && !urlHasMatch)
-                    ? result.content!
-                    : result.highlightedUrl ?? result.url.toString(),
-                styleSheet: MarkdownStyleSheet(
-                  p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+              subtitle: (bodyHasMatch || urlHasMatch)
+                  ? MarkdownBody(
+                      data: bodyHasMatch
+                          ? result.content!
+                          : result.highlightedUrl!,
+                      styleSheet: MarkdownStyleSheet(
+                        p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                        a: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              decoration: TextDecoration.none,
+                            ),
                       ),
-                  a: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        decoration: TextDecoration.none,
-                      ),
-                ),
-              ),
+                    )
+                  : Text(
+                      result.url.toString(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
               onTap: () async {
                 await ref
                     .read(tabRepositoryProvider.notifier)

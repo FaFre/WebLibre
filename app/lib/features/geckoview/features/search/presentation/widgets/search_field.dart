@@ -12,6 +12,7 @@ import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 class SearchField extends HookConsumerWidget {
   final TextEditingController textEditingController;
   final FocusNode? focusNode;
+  final Widget? label;
   final bool autofocus;
   final void Function(String)? onSubmitted;
   final bool showSuggestions;
@@ -25,6 +26,7 @@ class SearchField extends HookConsumerWidget {
     required this.onSubmitted,
     required this.activeBang,
     required this.showSuggestions,
+    this.label,
     this.focusNode,
     this.showBangIcon = true,
     this.autofocus = false,
@@ -70,7 +72,7 @@ class SearchField extends HookConsumerWidget {
                 child: UrlIcon(activeBang!.getUrl(''), iconSize: 24.0),
               )
             : null,
-        label: const Text('Search'),
+        label: label ?? const Text('Search'),
         // hintText: 'Ask anything...',
         floatingLabelBehavior: FloatingLabelBehavior.always,
         suffixIcon: hasText

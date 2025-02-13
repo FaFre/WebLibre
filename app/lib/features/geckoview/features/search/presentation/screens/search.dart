@@ -12,6 +12,7 @@ import 'package:lensai/features/geckoview/features/search/presentation/widgets/s
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
+import 'package:lensai/utils/uri_parser.dart' as uri_parser;
 
 class SearchScreen extends HookConsumerWidget {
   final String? initialSearchText;
@@ -37,13 +38,11 @@ class SearchScreen extends HookConsumerWidget {
     ref.listen(
       selectedBangDataProvider(),
       (previous, next) {
-        if (next.hasValue) {
-          if ((previous?.hasValue ?? false) && previous!.value != next.value) {
-            showBangIcon.value = true;
-          }
-
-          selectedBang.value = next.value;
+        if (previous != next) {
+          showBangIcon.value = true;
         }
+
+        selectedBang.value = next;
       },
     );
 
@@ -77,18 +76,31 @@ class SearchScreen extends HookConsumerWidget {
                 textEditingController: searchTextController,
                 focusNode: searchFocusNode,
                 autofocus: true,
-                onSubmitted: (text) async {
-                  if (Uri.tryParse(text) case final Uri url) {
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(url: url);
+                onSubmitted: (value) async {
+                  if (value.isNotEmpty) {
+                    var newUrl =
+                        uri_parser.tryParseUrl(value, eagerParsing: true);
 
-                    if (context.mounted) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .dismiss();
+                    if (newUrl == null) {
+                      final defaultSearchBang = ref
+                              .read(selectedBangDataProvider()) ??
+                          await ref.read(defaultSearchBangDataProvider.future);
 
-                      context.pop();
+                      newUrl = defaultSearchBang?.getUrl(value);
+                    }
+
+                    if (newUrl != null) {
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(url: newUrl);
+
+                      if (context.mounted) {
+                        ref
+                            .read(bottomSheetControllerProvider.notifier)
+                            .dismiss();
+
+                        context.pop();
+                      }
                     }
                   }
                 },

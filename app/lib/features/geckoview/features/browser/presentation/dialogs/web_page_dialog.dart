@@ -19,13 +19,17 @@ import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:lensai/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:lensai/features/kagi/data/entities/modes.dart';
 import 'package:lensai/features/kagi/utils/url_builder.dart' as uri_builder;
 import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
 import 'package:lensai/features/user/domain/providers.dart';
+import 'package:lensai/presentation/hooks/listenable_callback.dart';
+import 'package:lensai/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:lensai/presentation/widgets/website_title_tile.dart';
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
+import 'package:lensai/utils/uri_parser.dart' as uri_parser;
 import 'package:share_plus/share_plus.dart';
 
 class WebPageDialog extends HookConsumerWidget {
@@ -52,12 +56,8 @@ class WebPageDialog extends HookConsumerWidget {
         ),
       ),
     );
-    final availableBangCount = availableBangsAsync.valueOrNull?.length;
 
-    final formKey = useMemoized(() => GlobalKey<FormState>());
-    final addressTextController =
-        useTextEditingController(text: url.toString());
-    final addressTextFocusNode = useFocusNode();
+    final availableBangCount = availableBangsAsync.valueOrNull?.length;
 
     return MediaQuery.removeViewInsets(
       context: context,
@@ -77,42 +77,73 @@ class WebPageDialog extends HookConsumerWidget {
               width: double.maxFinite,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Form(
-                  key: formKey,
-                  child: TextFormField(
-                    controller: addressTextController,
-                    focusNode: addressTextFocusNode,
-                    enableIMEPersonalizedLearning: !incognitoEnabled,
-                    keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(
-                      labelText: 'Address',
-                    ),
-                    validator: (value) {
-                      if (value != null && Uri.tryParse(value) != null) {
-                        return null;
-                      }
+                child: HookConsumer(
+                  builder: (context, ref, child) {
+                    final addressTextController =
+                        useTextEditingController(text: url.toString());
+                    final addressTextFocusNode = useFocusNode();
 
-                      return 'Invalid Address';
-                    },
-                    onTap: () {
-                      if (!addressTextFocusNode.hasFocus) {
-                        // Select all text when the field is tapped
-                        addressTextController.selection = TextSelection(
-                          baseOffset: 0,
-                          extentOffset: addressTextController.text.length,
-                        );
-                      }
-                    },
-                    onFieldSubmitted: (value) async {
-                      await ref
-                          .read(tabSessionProvider(tabId: null).notifier)
-                          .loadUrl(url: Uri.tryParse(value)!);
+                    final suggestion = useState<String?>(null);
 
-                      if (context.mounted) {
-                        context.pop();
-                      }
-                    },
-                  ),
+                    useListenableCallback(
+                      addressTextController,
+                      () async {
+                        if (addressTextController.text.isNotEmpty) {
+                          final result = await ref
+                              .read(engineSuggestionsProvider.notifier)
+                              .getAutocompleteSuggestion(
+                                addressTextController.text,
+                              );
+
+                          suggestion.value = result;
+                        }
+                      },
+                    );
+
+                    return AutoSuggestTextField(
+                      controller: addressTextController,
+                      focusNode: addressTextFocusNode,
+                      suggestion: suggestion.value,
+                      enableIMEPersonalizedLearning: !incognitoEnabled,
+                      keyboardType: TextInputType.url,
+                      decoration: const InputDecoration(
+                        label: Text('Address'),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                      ),
+                      onTap: () {
+                        if (!addressTextFocusNode.hasFocus) {
+                          // Select all text when the field is tapped
+                          addressTextController.selection = TextSelection(
+                            baseOffset: 0,
+                            extentOffset: addressTextController.text.length,
+                          );
+                        }
+                      },
+                      onSubmitted: (value) async {
+                        if (value.isNotEmpty) {
+                          var newUrl =
+                              uri_parser.tryParseUrl(value, eagerParsing: true);
+
+                          if (newUrl == null) {
+                            final defaultSearchBang = await ref
+                                .read(defaultSearchBangDataProvider.future);
+
+                            newUrl = defaultSearchBang?.getUrl(value);
+                          }
+
+                          if (newUrl != null) {
+                            await ref
+                                .read(tabSessionProvider(tabId: null).notifier)
+                                .loadUrl(url: newUrl);
+
+                            if (context.mounted) {
+                              context.pop();
+                            }
+                          }
+                        }
+                      },
+                    );
+                  },
                 ),
               ),
             ),

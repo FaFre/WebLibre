@@ -36,11 +36,25 @@ class SelectedBangTrigger extends _$SelectedBangTrigger {
 }
 
 @Riverpod()
-Stream<BangData?> selectedBangData(Ref ref, {String? domain}) {
-  final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  final selectedBangTrigger =
-      ref.watch(selectedBangTriggerProvider(domain: domain));
-  return repository.watchBang(selectedBangTrigger);
+class SelectedBangData extends _$SelectedBangData {
+  @override
+  BangData? build({String? domain}) {
+    final repository = ref.watch(bangDataRepositoryProvider.notifier);
+    final selectedBangTrigger =
+        ref.watch(selectedBangTriggerProvider(domain: domain));
+
+    final subscription = repository.watchBang(selectedBangTrigger).listen(
+      (value) {
+        state = value;
+      },
+    );
+
+    ref.onDispose(() {
+      unawaited(subscription.cancel());
+    });
+
+    return null;
+  }
 }
 
 @Riverpod(keepAlive: true)
