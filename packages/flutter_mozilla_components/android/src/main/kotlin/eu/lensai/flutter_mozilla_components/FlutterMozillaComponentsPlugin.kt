@@ -55,6 +55,9 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   private lateinit var _flutterPluginBinding: FlutterPlugin.FlutterPluginBinding;
   private lateinit var _flutterEvents : GeckoStateEvents
 
+  private var isPlatformViewRegistered = false
+  private var pendingFragmentShow = false
+
   init {
     Log.addSink(AndroidLogSink())
   }
@@ -113,14 +116,16 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   }
 
   private fun showNativeFragment() {
-    if (activity == null) {
-      //result.error("ACTIVITY_NOT_ATTACHED", "Activity is not attached", null)
+    if (!isPlatformViewRegistered) {
+      pendingFragmentShow = true
       return
     }
 
-    // Replace this with your actual Fragment
-    val nativeFragment = BrowserFragment.create()
+    if (activity == null) {
+      return
+    }
 
+    val nativeFragment = BrowserFragment.create()
     val fm = (activity as FragmentActivity).supportFragmentManager
     fm.beginTransaction()
       .replace(FRAGMENT_CONTAINER_ID, nativeFragment)
@@ -141,6 +146,14 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
         _flutterEvents
       )
     )
+
+    isPlatformViewRegistered = true
+
+    // Process any pending fragment show request
+    if (pendingFragmentShow) {
+      pendingFragmentShow = false
+      showNativeFragment()
+    }
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
@@ -153,6 +166,8 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
 
   override fun onDetachedFromActivity() {
     this.activity = null
+    isPlatformViewRegistered = false
+    pendingFragmentShow = false
   }
 
   companion object {
