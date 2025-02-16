@@ -10,6 +10,7 @@ List<RouteBase> get $appRoutes => [
       $browserRoute,
       $settingsRoute,
       $chatArchiveListRoute,
+      $torProxyRoute,
     ];
 
 RouteBase get $browserRoute => GoRouteData.$route(
@@ -512,6 +513,29 @@ extension $ChatArchiveDetailRouteExtension on ChatArchiveDetailRoute {
 
   String get location => GoRouteData.$location(
         '/chat_archive/detail/${Uri.encodeComponent(fileName)}',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $torProxyRoute => GoRouteData.$route(
+      path: '/tor_proxy',
+      name: 'TorProxyRoute',
+      factory: $TorProxyRouteExtension._fromState,
+    );
+
+extension $TorProxyRouteExtension on TorProxyRoute {
+  static TorProxyRoute _fromState(GoRouterState state) => TorProxyRoute();
+
+  String get location => GoRouteData.$location(
+        '/tor_proxy',
       );
 
   void go(BuildContext context) => context.go(location);

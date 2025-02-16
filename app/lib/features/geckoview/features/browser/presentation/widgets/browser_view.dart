@@ -10,7 +10,8 @@ import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/delete_browser_data.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/services/engine_settings.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/services/proxy_settings_replucation.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/vector_store/domain/repositories/document.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';
@@ -144,6 +145,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     ref.listenManual(
       engineSettingsReplicationServiceProvider,
+      (previous, next) {},
+    );
+
+    ref.listenManual(
+      proxySettingsReplucationProvider,
       (previous, next) {},
     );
   }

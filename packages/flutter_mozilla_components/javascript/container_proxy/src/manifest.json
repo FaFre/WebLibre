@@ -1,0 +1,28 @@
+{
+  "manifest_version": 2,
+  "name": "Container proxy",
+  "version": "0.1.22",
+  "description": "Container Proxy",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "container-proxy@lensai.eu"
+    }
+  },
+  "permissions": [
+    "<all_urls>",
+    "geckoViewAddons",
+    "nativeMessaging",
+    "nativeMessagingFromContent",
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "contextualIdentities",
+    "cookies",
+    "proxy"
+  ],
+  "background": {
+    "scripts": [
+      "background/index.js"
+    ]
+  }
+}

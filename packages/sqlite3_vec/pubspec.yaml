@@ -10,12 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sqlite3: ^2.7.2
+  sqlite3: ^2.7.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lint: ^2.3.0
+  lint: ^2.4.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -90,6 +90,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata authSettings(ContainerAuthSettings authSettings);
 
+  ContainerMetadata useProxy(bool useProxy);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerMetadata(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -100,6 +102,7 @@ abstract class _$ContainerMetadataCWProxy {
     IconData? iconData,
     String? contextualIdentity,
     ContainerAuthSettings authSettings,
+    bool useProxy,
   });
 }
 
@@ -121,6 +124,9 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       this(authSettings: authSettings);
 
   @override
+  ContainerMetadata useProxy(bool useProxy) => this(useProxy: useProxy);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerMetadata(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -132,6 +138,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? iconData = const $CopyWithPlaceholder(),
     Object? contextualIdentity = const $CopyWithPlaceholder(),
     Object? authSettings = const $CopyWithPlaceholder(),
+    Object? useProxy = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
       iconData: iconData == const $CopyWithPlaceholder()
@@ -146,6 +153,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.authSettings
           // ignore: cast_nullable_to_non_nullable
           : authSettings as ContainerAuthSettings,
+      useProxy: useProxy == const $CopyWithPlaceholder()
+          ? _value.useProxy
+          // ignore: cast_nullable_to_non_nullable
+          : useProxy as bool,
     );
   }
 }
@@ -271,6 +282,7 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
           ? null
           : ContainerAuthSettings.fromJson(
               json['authSettings'] as Map<String, dynamic>),
+      useProxy: json['useProxy'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ContainerMetadataToJson(ContainerMetadata instance) =>
@@ -279,6 +291,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(ContainerMetadata instance) =>
           instance.iconData, const IconDataJsonConverter().toJson),
       'contextualIdentity': instance.contextualIdentity,
       'authSettings': instance.authSettings,
+      'useProxy': instance.useProxy,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

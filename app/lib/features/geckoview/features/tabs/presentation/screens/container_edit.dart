@@ -4,11 +4,11 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/uuid.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:lensai/features/user/domain/services/local_authentication.dart';
+import 'package:lensai/presentation/icons/tor_icons.dart';
 
 enum _DialogMode { create, edit }
 
@@ -66,6 +66,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     final contextualIdentity =
         useState(initialContainer.metadata.contextualIdentity);
     final authSettings = useState(initialContainer.metadata.authSettings);
+    final useProxy = useState(initialContainer.metadata.useProxy);
 
     final textController =
         useTextEditingController(text: initialContainer.name);
@@ -85,17 +86,11 @@ class ContainerEditScreen extends HookConsumerWidget {
               final container = initialContainer.copyWith(
                 name: name.isNotEmpty ? name : null,
                 color: selectedColor.value,
-                metadata: initialContainer.metadata.mapNotNull(
-                      (metadata) => metadata.copyWith(
-                        contextualIdentity: contextualIdentity.value,
-                        authSettings: authSettings.value,
-                      ),
-                    ) ??
-                    ContainerMetadata(
-                      iconData: null,
-                      contextualIdentity: contextualIdentity.value,
-                      authSettings: authSettings.value,
-                    ),
+                metadata: initialContainer.metadata.copyWith(
+                  contextualIdentity: contextualIdentity.value,
+                  authSettings: authSettings.value,
+                  useProxy: useProxy.value && contextualIdentity.value != null,
+                ),
               );
 
               //Check for permissions, when auth is set or getting set
@@ -187,8 +182,34 @@ class ContainerEditScreen extends HookConsumerWidget {
                                           .metadata.contextualIdentity ??
                                       uuid.v4()
                                   : null;
+
+                              if (!value && useProxy.value) {
+                                useProxy.value = false;
+                              }
                             }
                           : null,
+                    ),
+                    SwitchListTile.adaptive(
+                      value: useProxy.value,
+                      title: const Text('Use Tor Proxy'),
+                      secondary: const Icon(TorIcons.onionAlt),
+                      contentPadding: EdgeInsets.zero,
+                      onChanged: switch (_mode) {
+                        _DialogMode.create => (value) {
+                            if (value && contextualIdentity.value == null) {
+                              contextualIdentity.value = initialContainer
+                                      .metadata.contextualIdentity ??
+                                  uuid.v4();
+                            }
+
+                            useProxy.value = value;
+                          },
+                        _DialogMode.edit => (contextualIdentity.value != null)
+                            ? (value) {
+                                useProxy.value = value;
+                              }
+                            : null,
+                      },
                     ),
                     SwitchListTile.adaptive(
                       value: authSettings.value.authenticationRequired,

@@ -21,6 +21,7 @@ import 'package:lensai/features/settings/presentation/screens/settings.dart';
 import 'package:lensai/features/settings/presentation/screens/web_engine_hardening.dart';
 import 'package:lensai/features/settings/presentation/screens/web_engine_hardening_group.dart';
 import 'package:lensai/features/settings/presentation/screens/web_engine_settings.dart';
+import 'package:lensai/features/tor/presentation/screens/tor_proxy.dart';
 import 'package:lensai/features/user/presentation/screens/auth.dart';
 
 part 'routes.g.dart';
@@ -324,5 +325,16 @@ class ChatArchiveDetailRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return ChatArchiveDetailScreen(fileName);
+  }
+}
+
+@TypedGoRoute<TorProxyRoute>(
+  name: 'TorProxyRoute',
+  path: '/tor_proxy',
+)
+class TorProxyRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const TorProxyScreen();
   }
 }

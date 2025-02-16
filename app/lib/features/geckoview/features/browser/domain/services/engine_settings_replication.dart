@@ -4,7 +4,7 @@ import 'package:lensai/features/user/domain/repositories/engine_settings.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'engine_settings.g.dart';
+part 'engine_settings_replication.g.dart';
 
 @Riverpod(keepAlive: true)
 class EngineSettingsReplicationService

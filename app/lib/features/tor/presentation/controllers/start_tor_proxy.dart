@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
+import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
+import 'package:lensai/features/tor/presentation/widgets/tor_dialog.dart';
+import 'package:lensai/features/tor/presentation/widgets/tor_notification.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'start_tor_proxy.g.dart';
+
+@Riverpod()
+class StartProxyController extends _$StartProxyController {
+  // ignore: avoid_build_context_in_providers
+  Future<void> maybeStartProxy(BuildContext context) async {
+    final torProxyRunning = ref.read(torProxyServiceProvider);
+
+    if (torProxyRunning.valueOrNull == null) {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return TorDialog();
+        },
+      );
+
+      if (result == true) {
+        final connection = ref.read(torProxyServiceProvider.notifier).connect();
+
+        ref.read(overlayDialogControllerProvider.notifier).show(
+              Positioned(
+                top: 0,
+                left: 0,
+                child: TorNotification(),
+              ),
+            );
+
+        await connection;
+      }
+    }
+  }
+
+  @override
+  void build() {}
+}

@@ -2005,7 +2005,8 @@ class $ContainerTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (tabRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<ContainerData, Container,
+                            TabData>(
                         currentTable: table,
                         referencedTable: $ContainerReferences._tabRefsTable(db),
                         managerFromTypedResult: (p0) =>

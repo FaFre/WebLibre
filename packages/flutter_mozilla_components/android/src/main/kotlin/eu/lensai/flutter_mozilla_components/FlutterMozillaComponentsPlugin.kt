@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity
 import eu.lensai.flutter_mozilla_components.activities.NotificationActivity
 import eu.lensai.flutter_mozilla_components.api.GeckoAddonsApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoBrowserApiImpl
+import eu.lensai.flutter_mozilla_components.api.GeckoContainerProxyApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoCookieApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoDeleteBrowsingDataControllerImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
@@ -20,6 +21,7 @@ import eu.lensai.flutter_mozilla_components.feature.DefaultSelectionActionDelega
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonsApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoBrowserApi
+import eu.lensai.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoCookieApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
@@ -46,6 +48,12 @@ import mozilla.components.support.base.log.sink.AndroidLogSink
 
 /** FlutterMozillaComponentsPlugin */
 class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
+  companion object {
+    private const val FRAGMENT_CONTAINER_ID = 0xBEEF
+
+    private var isGeckoInitialized = false
+  }
+
   private val components by lazy {
     requireNotNull(GlobalComponents.components) { "Components not initialized" }
   }
@@ -58,11 +66,18 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   private var isPlatformViewRegistered = false
   private var pendingFragmentShow = false
 
-  init {
-    Log.addSink(AndroidLogSink())
+  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    synchronized(this) {
+      if(!isGeckoInitialized) {
+        Log.addSink(AndroidLogSink())
+
+        setupGeckoEngine(flutterPluginBinding)
+        isGeckoInitialized = true
+      }
+    }
   }
 
-  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+  private fun setupGeckoEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     _flutterPluginBinding = flutterPluginBinding
 
     _flutterEvents = GeckoStateEvents(_flutterPluginBinding.binaryMessenger)
@@ -99,6 +114,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     GeckoIconsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoIconsApiImpl())
     GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
     GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
+    GeckoContainerProxyApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoContainerProxyApiImpl())
     GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())
     GeckoSelectionActionController.setUp(_flutterPluginBinding.binaryMessenger, GeckoSelectionActionControllerImpl(
       selectionActionDelegate
@@ -168,9 +184,5 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     this.activity = null
     isPlatformViewRegistered = false
     pendingFragmentShow = false
-  }
-
-  companion object {
-    private const val FRAGMENT_CONTAINER_ID = 0xBEEF
   }
 }

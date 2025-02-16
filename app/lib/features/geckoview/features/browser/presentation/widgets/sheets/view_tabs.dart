@@ -21,6 +21,7 @@ import 'package:lensai/features/geckoview/features/tabs/domain/repositories/cont
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:lensai/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 
@@ -181,9 +182,16 @@ class _Tab extends HookConsumerWidget {
                     return ContainerChips(
                       selectedContainer: selectedContainer,
                       onSelected: (container) async {
-                        await ref
+                        final result = await ref
                             .read(selectedContainerProvider.notifier)
                             .setContainerId(container.id);
+
+                        if (context.mounted &&
+                            result == SetContainerResult.successHasProxy) {
+                          await ref
+                              .read(startProxyControllerProvider.notifier)
+                              .maybeStartProxy(context);
+                        }
                       },
                       onDeleted: (container) async {
                         ref

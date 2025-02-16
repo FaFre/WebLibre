@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:cross_cache/cross_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -23,7 +22,7 @@ class TabQaChat extends HookConsumerWidget {
     final chatBackend = ref.watch(chatBackendProvider(chatId).notifier);
     final chatController = ref.watch(chatControllerProvider(chatId));
 
-    final crossCache = useMemoized(() => CrossCache());
+    // final crossCache = useMemoized(() => CrossCache());
     final chatScrollController = scrollController ?? useScrollController();
 
     useOnInitialization(() async {
@@ -59,7 +58,7 @@ class TabQaChat extends HookConsumerWidget {
         ),
       ),
       chatController: chatController,
-      crossCache: crossCache,
+      // crossCache: crossCache,
       scrollController: chatScrollController,
       onMessageSend: (text) async {
         await chatBackend.processQAMessage(text);

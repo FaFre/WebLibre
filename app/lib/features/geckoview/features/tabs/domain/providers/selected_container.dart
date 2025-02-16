@@ -8,6 +8,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'selected_container.g.dart';
 
+enum SetContainerResult {
+  failed,
+  success,
+  successHasProxy,
+}
+
 @Riverpod(keepAlive: true)
 class SelectedContainer extends _$SelectedContainer {
   Future<ContainerData?> fetchData() async {
@@ -20,12 +26,13 @@ class SelectedContainer extends _$SelectedContainer {
     return null;
   }
 
-  Future<void> setContainerId(String id) async {
+  Future<SetContainerResult> setContainerId(String id) async {
     final container = await ref
         .read(containerRepositoryProvider.notifier)
         .getContainerData(id);
 
     if (container != null) {
+      var passAuth = false;
       if (container.metadata.authSettings.authenticationRequired) {
         final authResult = await ref
             .read(localAuthenticationServiceProvider.notifier)
@@ -38,20 +45,24 @@ class SelectedContainer extends _$SelectedContainer {
             );
 
         if (authResult) {
-          state = id;
+          passAuth = true;
         }
       } else {
+        passAuth = true;
+      }
+
+      if (passAuth) {
         state = id;
+
+        if (container.metadata.useProxy) {
+          return SetContainerResult.successHasProxy;
+        }
+
+        return SetContainerResult.success;
       }
     }
-  }
 
-  Future<void> toggleContainer(String id) async {
-    if (state == id) {
-      clearContainer();
-    } else {
-      await setContainerId(id);
-    }
+    return SetContainerResult.failed;
   }
 
   void clearContainer() {

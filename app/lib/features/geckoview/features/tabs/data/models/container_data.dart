@@ -53,20 +53,26 @@ class ContainerMetadata with FastEquatable {
   final String? contextualIdentity;
   final ContainerAuthSettings authSettings;
 
+  @JsonKey(defaultValue: false)
+  final bool useProxy;
+
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
     required this.authSettings,
+    required this.useProxy,
   });
 
   ContainerMetadata.withDefaults({
     IconData? iconData,
     String? contextualIdentity,
     ContainerAuthSettings? authSettings,
+    bool? useProxy,
   }) : this(
           iconData: iconData,
           contextualIdentity: contextualIdentity,
           authSettings: authSettings ?? ContainerAuthSettings.withDefaults(),
+          useProxy: useProxy ?? false,
         );
 
   factory ContainerMetadata.fromJson(Map<String, dynamic> json) =>
@@ -79,6 +85,7 @@ class ContainerMetadata with FastEquatable {
         iconData,
         contextualIdentity,
         authSettings,
+        useProxy,
       ];
 
   @override

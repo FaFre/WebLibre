@@ -13,7 +13,7 @@ class ColorJsonConverter implements JsonConverter<Color, int> {
 
   @override
   int toJson(Color value) {
-    return value.value;
+    return value.toARGB32();
   }
 }
 
@@ -27,6 +27,6 @@ class ColorConverter extends TypeConverter<Color, int> {
 
   @override
   int toSql(Color value) {
-    return value.value;
+    return value.toARGB32();
   }
 }

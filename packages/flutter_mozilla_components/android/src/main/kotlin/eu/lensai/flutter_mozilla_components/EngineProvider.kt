@@ -5,6 +5,7 @@
 package eu.lensai.flutter_mozilla_components
 
 import android.content.Context
+import eu.lensai.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.lensai.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.lensai.flutter_mozilla_components.feature.PrefManagerFeature
 import mozilla.components.browser.engine.gecko.GeckoEngine
@@ -50,6 +51,7 @@ object EngineProvider {
             WebCompatFeature.install(it)
             CookieManagerFeature.install(it)
             PrefManagerFeature.install(it)
+            ContainerProxyFeature.install(it)
         }
     }
 

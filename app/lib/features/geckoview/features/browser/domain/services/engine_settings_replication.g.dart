@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'engine_settings.dart';
+part of 'engine_settings_replication.dart';
 
 // **************************************************************************
 // RiverpodGenerator

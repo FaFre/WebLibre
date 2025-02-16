@@ -1553,7 +1553,8 @@ class $BangTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (bangFrequencyRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<Bang, BangTable,
+                            BangFrequencyData>(
                         currentTable: table,
                         referencedTable:
                             $BangTableReferences._bangFrequencyRefsTable(db),
@@ -1565,7 +1566,7 @@ class $BangTableTableManager extends RootTableManager<
                                 .where((e) => e.trigger == item.trigger),
                         typedResults: items),
                   if (bangHistoryRefs)
-                    await $_getPrefetchedData(
+                    await $_getPrefetchedData<Bang, BangTable, BangHistoryData>(
                         currentTable: table,
                         referencedTable:
                             $BangTableReferences._bangHistoryRefsTable(db),

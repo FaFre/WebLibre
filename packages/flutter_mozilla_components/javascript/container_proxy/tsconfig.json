@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "target": "es2019",
+    "sourceMap": true,
+    "allowJs": true,
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "plugins": [{ "name": "typescript-plugin-css-modules" }]
+  },
+  "include": [
+    "src/**/*",
+    "test/unit/**/*",
+    "declarations.d.ts"
+  ]
+}

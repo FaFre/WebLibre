@@ -10,6 +10,7 @@ import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
+import 'package:lensai/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
@@ -62,9 +63,23 @@ class ContainerListScreen extends HookConsumerWidget {
                           container,
                           isSelected: container.id == selectedContainer,
                           onTap: () async {
-                            await ref
-                                .read(selectedContainerProvider.notifier)
-                                .toggleContainer(container.id);
+                            if (container.id == selectedContainer) {
+                              ref
+                                  .read(selectedContainerProvider.notifier)
+                                  .clearContainer();
+                            } else {
+                              final result = await ref
+                                  .read(selectedContainerProvider.notifier)
+                                  .setContainerId(container.id);
+
+                              if (context.mounted &&
+                                  result ==
+                                      SetContainerResult.successHasProxy) {
+                                await ref
+                                    .read(startProxyControllerProvider.notifier)
+                                    .maybeStartProxy(context);
+                              }
+                            }
                           },
                         ),
                       );

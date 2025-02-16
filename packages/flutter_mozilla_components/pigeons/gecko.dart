@@ -890,6 +890,13 @@ abstract class GeckoPrefApi {
 }
 
 @HostApi()
+abstract class GeckoContainerProxyApi {
+  void setProxyPort(int port);
+  void addContainerProxy(String contextId);
+  void removeContainerProxy(String contextId);
+}
+
+@HostApi()
 abstract class GeckoCookieApi {
   @async
   Cookie getCookie(

@@ -33,6 +33,7 @@ import 'package:lensai/features/kagi/data/entities/modes.dart';
 import 'package:lensai/presentation/hooks/draggable_scrollable_controller.dart';
 import 'package:lensai/presentation/hooks/menu_controller.dart';
 import 'package:lensai/presentation/hooks/overlay_portal_controller.dart';
+import 'package:lensai/presentation/icons/tor_icons.dart';
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
 import 'package:share_plus/share_plus.dart';
 
@@ -417,6 +418,13 @@ class BrowserScreen extends HookConsumerWidget {
                               child: const Text('Addons'),
                             );
                           },
+                        ),
+                        MenuItemButton(
+                          onPressed: () async {
+                            await context.push(TorProxyRoute().location);
+                          },
+                          leadingIcon: const Icon(TorIcons.onionAlt),
+                          child: const Text('Tor'),
                         ),
                         const Divider(),
                         MenuItemButton(
