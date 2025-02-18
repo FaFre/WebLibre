@@ -16,7 +16,7 @@ dependencies:
   expandable_page_view: ^1.0.17
   fading_scroll: ^0.9.1
   fast_equatable: ^1.1.0
-  file_picker: ^8.3.7
+  file_picker: ^9.0.0
   flutter:
     sdk: flutter
   flutter_background_service: ^5.1.0
@@ -68,7 +68,7 @@ dependencies:
   speech_to_text_google_dialog: 
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git
-  sqlite3: ^2.7.3
+  sqlite3: ^2.7.4
   sqlite3_flutter_libs: ^0.5.30
   sqlite3_vec:
     path: ../packages/sqlite3_vec
@@ -104,7 +104,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.3
   go_router_builder: ^2.8.0
   json_serializable: ^6.9.0
-  lint: ^2.4.0
+  lint: ^2.6.1
   riverpod_generator: ^2.6.1
   riverpod_lint: ^2.6.1
 
