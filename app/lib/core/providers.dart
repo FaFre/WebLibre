@@ -8,10 +8,7 @@ part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
-  return GoRouter(
-    debugLogDiagnostics: true,
-    routes: $appRoutes,
-  );
+  return GoRouter(debugLogDiagnostics: true, routes: $appRoutes);
 }
 
 @Riverpod()

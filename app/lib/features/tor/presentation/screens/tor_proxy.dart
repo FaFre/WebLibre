@@ -12,9 +12,7 @@ class TorProxyScreen extends HookConsumerWidget {
     final torProxyPort = ref.watch(torProxyServiceProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tor Proxy'),
-      ),
+      appBar: AppBar(title: const Text('Tor Proxy')),
       body: ColoredBox(
         color: const Color(0xFF7D4698),
         child: Column(
@@ -23,36 +21,34 @@ class TorProxyScreen extends HookConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  SvgPicture.asset(
-                    'assets/images/tor_white.svg',
-                    width: 200,
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  SvgPicture.asset('assets/images/tor_white.svg', width: 200),
+                  const SizedBox(height: 16),
                   ListTileTheme(
                     iconColor: Colors.white,
                     textColor: Colors.white,
                     child: SwitchListTile.adaptive(
                       inactiveThumbColor: Colors.white,
                       activeColor: const Color(0xFF68B030),
-                      trackColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
+                      trackColor: WidgetStateProperty.resolveWith<Color?>((
+                        Set<WidgetState> states,
+                      ) {
                         if (states.isEmpty) {
                           return const Color(0xFF333A41);
                         }
                         return null; // Use the default color.
                       }),
                       trackOutlineColor:
-                          WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) {
-                        if (states.isEmpty) {
-                          return Colors.white;
-                        }
-                        return null; // Use the default color.
-                      }),
-                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-                          (Set<WidgetState> states) {
+                          WidgetStateProperty.resolveWith<Color?>((
+                            Set<WidgetState> states,
+                          ) {
+                            if (states.isEmpty) {
+                              return Colors.white;
+                            }
+                            return null; // Use the default color.
+                          }),
+                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                        Set<WidgetState> states,
+                      ) {
                         if (states.contains(WidgetState.selected)) {
                           return const Icon(MdiIcons.axisArrowLock);
                         }
@@ -61,19 +57,20 @@ class TorProxyScreen extends HookConsumerWidget {
                       value: torProxyPort.valueOrNull != null,
                       title: const Text('Tor Proxy'),
                       secondary: const Icon(MdiIcons.power),
-                      onChanged: torProxyPort.isLoading
-                          ? null
-                          : (value) async {
-                              if (value) {
-                                await ref
-                                    .read(torProxyServiceProvider.notifier)
-                                    .connect();
-                              } else {
-                                await ref
-                                    .read(torProxyServiceProvider.notifier)
-                                    .disconnect();
-                              }
-                            },
+                      onChanged:
+                          torProxyPort.isLoading
+                              ? null
+                              : (value) async {
+                                if (value) {
+                                  await ref
+                                      .read(torProxyServiceProvider.notifier)
+                                      .connect();
+                                } else {
+                                  await ref
+                                      .read(torProxyServiceProvider.notifier)
+                                      .disconnect();
+                                }
+                              },
                     ),
                   ),
                 ],
@@ -90,9 +87,7 @@ class TorProxyScreen extends HookConsumerWidget {
                           backgroundColor: Color(0xFF333A41),
                           color: Color(0xFF68B030),
                         ),
-                        SizedBox(
-                          height: 8,
-                        ),
+                        SizedBox(height: 8),
                         Text(
                           'Establishing connection...',
                           style: TextStyle(color: Colors.white),
@@ -113,9 +108,7 @@ class TorProxyScreen extends HookConsumerWidget {
                           const SizedBox(width: 12),
                           Text(
                             'Connected to the Tor Network',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
+                            style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(color: const Color(0xFF68B030)),
                           ),
                         ],

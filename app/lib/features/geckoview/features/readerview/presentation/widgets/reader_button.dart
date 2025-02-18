@@ -16,8 +16,9 @@ class ReaderButton extends HookConsumerWidget {
     final readerChanging = ref.watch(readerableScreenControllerProvider);
 
     final enableReadability = ref.watch(
-      generalSettingsRepositoryProvider
-          .select((value) => value.enableReadability),
+      generalSettingsRepositoryProvider.select(
+        (value) => value.enableReadability,
+      ),
     );
 
     final readerabilityState = ref.watch(
@@ -27,55 +28,56 @@ class ReaderButton extends HookConsumerWidget {
     );
 
     final icon = useMemoized(
-      () => readerabilityState.active
-          ? Icon(
-              MdiIcons.bookOpen,
-              color: Theme.of(context).colorScheme.primary,
-            )
-          : const Icon(
-              MdiIcons.bookOpenOutline,
-              color: Colors.white,
-            ),
+      () =>
+          readerabilityState.active
+              ? Icon(
+                MdiIcons.bookOpen,
+                color: Theme.of(context).colorScheme.primary,
+              )
+              : const Icon(MdiIcons.bookOpenOutline, color: Colors.white),
       [readerabilityState.active],
     );
 
     return Visibility(
-      visible: readerabilityState.readerable &&
+      visible:
+          readerabilityState.readerable &&
           (enableReadability || readerabilityState.active),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 15.0,
-          horizontal: 8.0,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 8.0),
         child: readerChanging.when(
-          data: (_) => Visibility(
-            visible: readerabilityState.readerable,
-            child: InkWell(
-              onTap: readerChanging.isLoading
-                  ? null
-                  : () async {
-                      await ref
-                          .read(readerableScreenControllerProvider.notifier)
-                          .toggleReaderView(!readerabilityState.active);
-                    },
-              child: icon,
-            ),
-          ),
+          data:
+              (_) => Visibility(
+                visible: readerabilityState.readerable,
+                child: InkWell(
+                  onTap:
+                      readerChanging.isLoading
+                          ? null
+                          : () async {
+                            await ref
+                                .read(
+                                  readerableScreenControllerProvider.notifier,
+                                )
+                                .toggleReaderView(!readerabilityState.active);
+                          },
+                  child: icon,
+                ),
+              ),
           error: (error, stackTrace) => SizedBox.shrink(),
-          loading: () => AnimateGradientShader(
-            duration: const Duration(milliseconds: 500),
-            primaryEnd: Alignment.bottomLeft,
-            secondaryEnd: Alignment.topRight,
-            primaryColors: [
-              colorScheme.primary,
-              colorScheme.primaryContainer,
-            ],
-            secondaryColors: [
-              colorScheme.secondary,
-              colorScheme.secondaryContainer,
-            ],
-            child: icon,
-          ),
+          loading:
+              () => AnimateGradientShader(
+                duration: const Duration(milliseconds: 500),
+                primaryEnd: Alignment.bottomLeft,
+                secondaryEnd: Alignment.topRight,
+                primaryColors: [
+                  colorScheme.primary,
+                  colorScheme.primaryContainer,
+                ],
+                secondaryColors: [
+                  colorScheme.secondary,
+                  colorScheme.secondaryContainer,
+                ],
+                child: icon,
+              ),
         ),
       ),
     );

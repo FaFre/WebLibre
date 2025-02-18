@@ -5,10 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/features/user/presentation/controllers/controllers.dart';
 
-enum _AuthType {
-  login,
-  signup,
-}
+enum _AuthType { login, signup }
 
 class UserAuthScreen extends HookConsumerWidget {
   const UserAuthScreen();
@@ -25,14 +22,14 @@ class UserAuthScreen extends HookConsumerWidget {
 
     final authState = ref.watch(authControllerProvider);
 
-    ref.listen(
-      authStateProvider.select((value) => value.valueOrNull),
-      (previous, next) {
-        if (next?.token.isNotEmpty ?? false) {
-          context.pop(true);
-        }
-      },
-    );
+    ref.listen(authStateProvider.select((value) => value.valueOrNull), (
+      previous,
+      next,
+    ) {
+      if (next?.token.isNotEmpty ?? false) {
+        context.pop(true);
+      }
+    });
 
     return Dialog(
       child: Padding(
@@ -57,9 +54,7 @@ class UserAuthScreen extends HookConsumerWidget {
                 },
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(
-                height: 8.0,
-              ),
+              const SizedBox(height: 8.0),
               HookBuilder(
                 builder: (context) {
                   final obscure = useState(true);
@@ -125,9 +120,7 @@ class UserAuthScreen extends HookConsumerWidget {
                   );
                 },
               ),
-              const SizedBox(
-                height: 16,
-              ),
+              const SizedBox(height: 16),
               if (authState.hasError && !authState.isLoading)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
@@ -141,58 +134,62 @@ class UserAuthScreen extends HookConsumerWidget {
               if (!authState.isLoading)
                 switch (authType.value) {
                   _AuthType.login => FilledButton(
-                      onPressed: () async {
-                        if (formKey.currentState?.validate() ?? false) {
-                          final controller =
-                              ref.read(authControllerProvider.notifier);
+                    onPressed: () async {
+                      if (formKey.currentState?.validate() ?? false) {
+                        final controller = ref.read(
+                          authControllerProvider.notifier,
+                        );
 
-                          await controller.authWithPassword(
-                            userTextController.text,
-                            passwordTextController.text,
-                          );
-                        }
-                      },
-                      child: const Text('Login'),
-                    ),
+                        await controller.authWithPassword(
+                          userTextController.text,
+                          passwordTextController.text,
+                        );
+                      }
+                    },
+                    child: const Text('Login'),
+                  ),
                   _AuthType.signup => FilledButton(
-                      onPressed: () async {
-                        if (formKey.currentState?.validate() ?? false) {
-                          final controller =
-                              ref.read(authControllerProvider.notifier);
+                    onPressed: () async {
+                      if (formKey.currentState?.validate() ?? false) {
+                        final controller = ref.read(
+                          authControllerProvider.notifier,
+                        );
 
-                          await controller.registerWithPassword(
-                            userTextController.text,
-                            passwordTextController.text,
-                          );
-                        }
-                      },
-                      child: const Text('Signup'),
-                    )
+                        await controller.registerWithPassword(
+                          userTextController.text,
+                          passwordTextController.text,
+                        );
+                      }
+                    },
+                    child: const Text('Signup'),
+                  ),
                 }
               else
                 const CircularProgressIndicator(),
               if (!authState.isLoading)
                 switch (authType.value) {
                   _AuthType.login => TextButton(
-                      onPressed: () {
-                        final controller =
-                            ref.read(authControllerProvider.notifier);
+                    onPressed: () {
+                      final controller = ref.read(
+                        authControllerProvider.notifier,
+                      );
 
-                        controller.clearState();
-                        authType.value = _AuthType.signup;
-                      },
-                      child: const Text('Signup'),
-                    ),
+                      controller.clearState();
+                      authType.value = _AuthType.signup;
+                    },
+                    child: const Text('Signup'),
+                  ),
                   _AuthType.signup => TextButton(
-                      onPressed: () {
-                        final controller =
-                            ref.read(authControllerProvider.notifier);
+                    onPressed: () {
+                      final controller = ref.read(
+                        authControllerProvider.notifier,
+                      );
 
-                        controller.clearState();
-                        authType.value = _AuthType.login;
-                      },
-                      child: const Text('Login'),
-                    ),
+                      controller.clearState();
+                      authType.value = _AuthType.login;
+                    },
+                    child: const Text('Login'),
+                  ),
                 },
             ],
           ),

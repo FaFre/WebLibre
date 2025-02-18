@@ -13,14 +13,15 @@ String _$saveGeneralSettingsControllerHash() =>
 @ProviderFor(SaveGeneralSettingsController)
 final saveGeneralSettingsControllerProvider =
     AsyncNotifierProvider<SaveGeneralSettingsController, void>.internal(
-  SaveGeneralSettingsController.new,
-  name: r'saveGeneralSettingsControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$saveGeneralSettingsControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      SaveGeneralSettingsController.new,
+      name: r'saveGeneralSettingsControllerProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$saveGeneralSettingsControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$SaveGeneralSettingsController = AsyncNotifier<void>;
 String _$saveEngineSettingsControllerHash() =>
@@ -30,14 +31,15 @@ String _$saveEngineSettingsControllerHash() =>
 @ProviderFor(SaveEngineSettingsController)
 final saveEngineSettingsControllerProvider =
     AsyncNotifierProvider<SaveEngineSettingsController, void>.internal(
-  SaveEngineSettingsController.new,
-  name: r'saveEngineSettingsControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$saveEngineSettingsControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      SaveEngineSettingsController.new,
+      name: r'saveEngineSettingsControllerProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$saveEngineSettingsControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$SaveEngineSettingsController = AsyncNotifier<void>;
 // ignore_for_file: type=lint

@@ -53,8 +53,9 @@ class BrowserScreen extends HookConsumerWidget {
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
     final displayedOverlayDialog = ref.watch(overlayDialogControllerProvider);
 
-    final selectedTabId =
-        ref.watch(selectedTabStateProvider.select((value) => value?.id));
+    final selectedTabId = ref.watch(
+      selectedTabStateProvider.select((value) => value?.id),
+    );
 
     final trippleDotMenuController = useMenuController();
     final tabMenuController = useMenuController();
@@ -65,16 +66,13 @@ class BrowserScreen extends HookConsumerWidget {
 
     final activeKagiTool = useValueNotifier<KagiTool?>(null, [displayedSheet]);
 
-    ref.listen(
-      overlayDialogControllerProvider,
-      (previous, next) {
-        if (next != null) {
-          overlayController.show();
-        } else {
-          overlayController.hide();
-        }
-      },
-    );
+    ref.listen(overlayDialogControllerProvider, (previous, next) {
+      if (next != null) {
+        overlayController.show();
+      } else {
+        overlayController.hide();
+      }
+    });
 
     // ref.listen(
     //   generalSettingsRepositoryProvider
@@ -96,8 +94,9 @@ class BrowserScreen extends HookConsumerWidget {
         bottomNavigationBar: Consumer(
           builder: (context, ref, child) {
             final tabInFullScreen = ref.watch(
-              selectedTabStateProvider
-                  .select((value) => value?.isFullScreen ?? false),
+              selectedTabStateProvider.select(
+                (value) => value?.isFullScreen ?? false,
+              ),
             );
 
             return Visibility(
@@ -108,15 +107,17 @@ class BrowserScreen extends HookConsumerWidget {
                 child: AppBar(
                   automaticallyImplyLeading: false,
                   titleSpacing: 8.0,
-                  title: (selectedTabId != null &&
-                          displayedSheet is! ViewTabsSheet)
-                      ? Consumer(
-                          builder: (context, ref, child) {
-                            final tabState =
-                                ref.watch(tabStateProvider(selectedTabId));
+                  title:
+                      (selectedTabId != null &&
+                              displayedSheet is! ViewTabsSheet)
+                          ? Consumer(
+                            builder: (context, ref, child) {
+                              final tabState = ref.watch(
+                                tabStateProvider(selectedTabId),
+                              );
 
-                            return (tabState != null)
-                                ? AppBarTitle(
+                              return (tabState != null)
+                                  ? AppBarTitle(
                                     tab: tabState,
                                     onTap: () async {
                                       await context.push(
@@ -129,93 +130,95 @@ class BrowserScreen extends HookConsumerWidget {
                                     onDoubleTap: () async {
                                       final newUrl = await showDialog<Uri?>(
                                         context: context,
-                                        builder: (context) => EditUrlDialog(
-                                          initialUrl: tabState.url,
-                                        ),
+                                        builder:
+                                            (context) => EditUrlDialog(
+                                              initialUrl: tabState.url,
+                                            ),
                                       );
 
                                       if (newUrl != null) {
                                         await ref
                                             .read(
-                                              tabSessionProvider(tabId: null)
-                                                  .notifier,
+                                              tabSessionProvider(
+                                                tabId: null,
+                                              ).notifier,
                                             )
                                             .loadUrl(url: newUrl);
                                       }
                                     },
                                   )
-                                : const SizedBox.shrink();
-                          },
-                        )
-                      : HookBuilder(
-                          builder: (context) {
-                            // final activeTool = useListenableSelector(
-                            //   activeKagiTool,
-                            //   () {
-                            //     if (displayedSheet is CreateTabSheetWidget) {
-                            //       return null;
-                            //     }
+                                  : const SizedBox.shrink();
+                            },
+                          )
+                          : HookBuilder(
+                            builder: (context) {
+                              // final activeTool = useListenableSelector(
+                              //   activeKagiTool,
+                              //   () {
+                              //     if (displayedSheet is CreateTabSheetWidget) {
+                              //       return null;
+                              //     }
 
-                            //     return activeKagiTool.value;
-                            //   },
-                            // );
+                              //     return activeKagiTool.value;
+                              //   },
+                              // );
 
-                            return Row(
-                              children: [
-                                // IconButton(
-                                //   color: (activeTool == KagiTool.search)
-                                //       ? Theme.of(context).colorScheme.primary
-                                //       : null,
-                                //   onPressed: () async {
-                                //     // ref
-                                //     //     .read(createTabStreamProvider.notifier)
-                                //     //     .createTab(
-                                //     //       CreateTabSheet(
-                                //     //         preferredTool: KagiTool.search,
-                                //     //       ),
-                                //     //     );
-                                //     await context
-                                //         .push(const SearchRoute().location);
-                                //   },
-                                //   icon: Icon(KagiTool.search.icon),
-                                // ),
-                                // IconButton(
-                                //   color: (activeTool == KagiTool.summarizer)
-                                //       ? Theme.of(context).colorScheme.primary
-                                //       : null,
-                                //   onPressed: () {
-                                //     ref
-                                //         .read(createTabStreamProvider.notifier)
-                                //         .createTab(
-                                //           CreateTabSheet(
-                                //             preferredTool: KagiTool.summarizer,
-                                //           ),
-                                //         );
-                                //   },
-                                //   icon: Icon(KagiTool.summarizer.icon),
-                                // ),
-                                // if (showEarlyAccessFeatures)
-                                //   IconButton(
-                                //     color: (activeTool == KagiTool.assistant)
-                                //         ? Theme.of(context).colorScheme.primary
-                                //         : null,
-                                //     onPressed: () {
-                                //       ref
-                                //           .read(
-                                //             createTabStreamProvider.notifier,
-                                //           )
-                                //           .createTab(
-                                //             CreateTabSheet(
-                                //               preferredTool: KagiTool.assistant,
-                                //             ),
-                                //           );
-                                //     },
-                                //     icon: Icon(KagiTool.assistant.icon),
-                                //   ),
-                              ],
-                            );
-                          },
-                        ),
+                              return Row(
+                                children: [
+                                  // IconButton(
+                                  //   color: (activeTool == KagiTool.search)
+                                  //       ? Theme.of(context).colorScheme.primary
+                                  //       : null,
+                                  //   onPressed: () async {
+                                  //     // ref
+                                  //     //     .read(createTabStreamProvider.notifier)
+                                  //     //     .createTab(
+                                  //     //       CreateTabSheet(
+                                  //     //         preferredTool: KagiTool.search,
+                                  //     //       ),
+                                  //     //     );
+                                  //     await context
+                                  //         .push(const SearchRoute().location);
+                                  //   },
+                                  //   icon: Icon(KagiTool.search.icon),
+                                  // ),
+                                  // IconButton(
+                                  //   color: (activeTool == KagiTool.summarizer)
+                                  //       ? Theme.of(context).colorScheme.primary
+                                  //       : null,
+                                  //   onPressed: () {
+                                  //     ref
+                                  //         .read(createTabStreamProvider.notifier)
+                                  //         .createTab(
+                                  //           CreateTabSheet(
+                                  //             preferredTool: KagiTool.summarizer,
+                                  //           ),
+                                  //         );
+                                  //   },
+                                  //   icon: Icon(KagiTool.summarizer.icon),
+                                  // ),
+                                  // if (showEarlyAccessFeatures)
+                                  //   IconButton(
+                                  //     color: (activeTool == KagiTool.assistant)
+                                  //         ? Theme.of(context).colorScheme.primary
+                                  //         : null,
+                                  //     onPressed: () {
+                                  //       ref
+                                  //           .read(
+                                  //             createTabStreamProvider.notifier,
+                                  //           )
+                                  //           .createTab(
+                                  //             CreateTabSheet(
+                                  //               preferredTool: KagiTool.assistant,
+                                  //             ),
+                                  //           );
+                                  //     },
+                                  //     icon: Icon(KagiTool.assistant.icon),
+                                  //   ),
+                                ],
+                              );
+                            },
+                          ),
                   actions: [
                     if (selectedTabId != null &&
                         displayedSheet is! ViewTabsSheet)
@@ -278,9 +281,7 @@ class BrowserScreen extends HookConsumerWidget {
                           MenuItemButton(
                             onPressed: () async {
                               await ref
-                                  .read(
-                                    tabRepositoryProvider.notifier,
-                                  )
+                                  .read(tabRepositoryProvider.notifier)
                                   .closeTab(selectedTabId);
                             },
                             leadingIcon: const Icon(Icons.close),
@@ -488,8 +489,9 @@ class BrowserScreen extends HookConsumerWidget {
                         if (selectedTabId != null)
                           MenuItemButton(
                             onPressed: () async {
-                              final tabState =
-                                  ref.read(tabStateProvider(selectedTabId));
+                              final tabState = ref.read(
+                                tabStateProvider(selectedTabId),
+                              );
 
                               if (tabState?.url case final Uri url) {
                                 await ui_helper.launchUrlFeedback(context, url);
@@ -501,8 +503,9 @@ class BrowserScreen extends HookConsumerWidget {
                         if (selectedTabId != null)
                           MenuItemButton(
                             onPressed: () async {
-                              final tabState =
-                                  ref.read(tabStateProvider(selectedTabId));
+                              final tabState = ref.read(
+                                tabStateProvider(selectedTabId),
+                              );
 
                               if (tabState?.url case final Uri url) {
                                 await Share.shareUri(url);
@@ -530,8 +533,9 @@ class BrowserScreen extends HookConsumerWidget {
                           MenuItemButton(
                             onPressed: () async {
                               final controller = ref.read(
-                                tabSessionProvider(tabId: selectedTabId)
-                                    .notifier,
+                                tabSessionProvider(
+                                  tabId: selectedTabId,
+                                ).notifier,
                               );
 
                               await controller.reload();
@@ -545,39 +549,45 @@ class BrowserScreen extends HookConsumerWidget {
                           Consumer(
                             builder: (context, ref, child) {
                               final history = ref.watch(
-                                tabStateProvider(selectedTabId)
-                                    .select((value) => value?.historyState),
+                                tabStateProvider(
+                                  selectedTabId,
+                                ).select((value) => value?.historyState),
                               );
 
                               return Row(
                                 children: [
                                   Expanded(
-                                    child: (history?.canGoBack == true)
-                                        ? IconButton(
-                                            onPressed: () async {
-                                              final controller = ref.read(
-                                                tabSessionProvider(
-                                                  tabId: selectedTabId,
-                                                ).notifier,
-                                              );
+                                    child:
+                                        (history?.canGoBack == true)
+                                            ? IconButton(
+                                              onPressed: () async {
+                                                final controller = ref.read(
+                                                  tabSessionProvider(
+                                                    tabId: selectedTabId,
+                                                  ).notifier,
+                                                );
 
-                                              await controller.goBack();
-                                              trippleDotMenuController.close();
-                                            },
-                                            icon: const Icon(Icons.arrow_back),
-                                          )
-                                        : IconButton(
-                                            onPressed: () async {
-                                              await ref
-                                                  .read(
-                                                    tabRepositoryProvider
-                                                        .notifier,
-                                                  )
-                                                  .closeTab(selectedTabId);
-                                              trippleDotMenuController.close();
-                                            },
-                                            icon: const Icon(Icons.close),
-                                          ),
+                                                await controller.goBack();
+                                                trippleDotMenuController
+                                                    .close();
+                                              },
+                                              icon: const Icon(
+                                                Icons.arrow_back,
+                                              ),
+                                            )
+                                            : IconButton(
+                                              onPressed: () async {
+                                                await ref
+                                                    .read(
+                                                      tabRepositoryProvider
+                                                          .notifier,
+                                                    )
+                                                    .closeTab(selectedTabId);
+                                                trippleDotMenuController
+                                                    .close();
+                                              },
+                                              icon: const Icon(Icons.close),
+                                            ),
                                   ),
                                   const SizedBox(
                                     height: 48,
@@ -585,18 +595,20 @@ class BrowserScreen extends HookConsumerWidget {
                                   ),
                                   Expanded(
                                     child: IconButton(
-                                      onPressed: (history?.canGoForward == true)
-                                          ? () async {
-                                              final controller = ref.read(
-                                                tabSessionProvider(
-                                                  tabId: selectedTabId,
-                                                ).notifier,
-                                              );
+                                      onPressed:
+                                          (history?.canGoForward == true)
+                                              ? () async {
+                                                final controller = ref.read(
+                                                  tabSessionProvider(
+                                                    tabId: selectedTabId,
+                                                  ).notifier,
+                                                );
 
-                                              await controller.goForward();
-                                              trippleDotMenuController.close();
-                                            }
-                                          : null,
+                                                await controller.goForward();
+                                                trippleDotMenuController
+                                                    .close();
+                                              }
+                                              : null,
                                       icon: const Icon(Icons.arrow_forward),
                                     ),
                                   ),
@@ -640,20 +652,22 @@ class BrowserScreen extends HookConsumerWidget {
                 return displayedOverlayDialog!;
               },
               child: Listener(
-                onPointerDown: (displayedSheet != null)
-                    ? (_) {
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .dismiss();
-                      }
-                    : null,
+                onPointerDown:
+                    (displayedSheet != null)
+                        ? (_) {
+                          ref
+                              .read(bottomSheetControllerProvider.notifier)
+                              .dismiss();
+                        }
+                        : null,
                 child: HookConsumer(
                   builder: (context, ref, child) {
                     return BackButtonListener(
                       onBackButtonPressed: () async {
-                        final tabState = (selectedTabId != null)
-                            ? ref.read(tabStateProvider(selectedTabId))
-                            : null;
+                        final tabState =
+                            (selectedTabId != null)
+                                ? ref.read(tabStateProvider(selectedTabId))
+                                : null;
 
                         final tabCount = ref.read(
                           tabListProvider.select((tabs) => tabs.length),
@@ -698,8 +712,9 @@ class BrowserScreen extends HookConsumerWidget {
                         }
 
                         if (lastBackButtonPress.value != null &&
-                            DateTime.now()
-                                    .difference(lastBackButtonPress.value!) <
+                            DateTime.now().difference(
+                                  lastBackButtonPress.value!,
+                                ) <
                                 const Duration(seconds: 2)) {
                           lastBackButtonPress.value = null;
 
@@ -718,13 +733,14 @@ class BrowserScreen extends HookConsumerWidget {
                             ..clearSnackBars()
                             ..showSnackBar(
                               SnackBar(
-                                content: (tabCount > 1)
-                                    ? const Text(
-                                        'Please click BACK again to close current tab',
-                                      )
-                                    : const Text(
-                                        'Please click BACK again to exit app',
-                                      ),
+                                content:
+                                    (tabCount > 1)
+                                        ? const Text(
+                                          'Please click BACK again to close current tab',
+                                        )
+                                        : const Text(
+                                          'Please click BACK again to exit app',
+                                        ),
                               ),
                             );
 
@@ -744,16 +760,16 @@ class BrowserScreen extends HookConsumerWidget {
                                   child: Consumer(
                                     builder: (context, ref, child) {
                                       final value = ref.watch(
-                                        selectedTabStateProvider.select(
-                                          (state) {
-                                            if (state?.isLoading == true) {
-                                              return state?.progress ?? 100;
-                                            }
+                                        selectedTabStateProvider.select((
+                                          state,
+                                        ) {
+                                          if (state?.isLoading == true) {
+                                            return state?.progress ?? 100;
+                                          }
 
-                                            //When not loading we assumed finished
-                                            return 100;
-                                          },
-                                        ),
+                                          //When not loading we assumed finished
+                                          return 100;
+                                        }),
                                       );
 
                                       return Visibility(
@@ -774,11 +790,13 @@ class BrowserScreen extends HookConsumerWidget {
                                       final value = ref.watch(
                                         selectedTabStateProvider.select(
                                           (state) => EdgeInsets.only(
-                                            bottom: (state?.isLoading == true &&
-                                                    state?.progress != null &&
-                                                    state!.progress < 100)
-                                                ? 4.0
-                                                : 0.0,
+                                            bottom:
+                                                (state?.isLoading == true &&
+                                                        state?.progress !=
+                                                            null &&
+                                                        state!.progress < 100)
+                                                    ? 4.0
+                                                    : 0.0,
                                           ),
                                         ),
                                       );
@@ -794,7 +812,7 @@ class BrowserScreen extends HookConsumerWidget {
                             ModalBarrier(
                               color:
                                   Theme.of(context).dialogTheme.barrierColor ??
-                                      Colors.black54,
+                                  Colors.black54,
                             ),
                         ],
                       ),
@@ -806,22 +824,25 @@ class BrowserScreen extends HookConsumerWidget {
           },
         ),
         floatingActionButton: ReaderAppearanceButton(),
-        bottomSheet: (displayedSheet != null)
-            ? NotificationListener<DraggableScrollableNotification>(
-                onNotification: (notification) {
-                  if (notification.extent <= 0.1) {
-                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
-                    return true;
-                  } else {
-                    ref
-                        .read(bottomSheetExtendProvider.notifier)
-                        .add(notification.extent);
-                  }
+        bottomSheet:
+            (displayedSheet != null)
+                ? NotificationListener<DraggableScrollableNotification>(
+                  onNotification: (notification) {
+                    if (notification.extent <= 0.1) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .dismiss();
+                      return true;
+                    } else {
+                      ref
+                          .read(bottomSheetExtendProvider.notifier)
+                          .add(notification.extent);
+                    }
 
-                  return false;
-                },
-                child: switch (displayedSheet) {
-                  ViewTabsSheet() => HookBuilder(
+                    return false;
+                  },
+                  child: switch (displayedSheet) {
+                    ViewTabsSheet() => HookBuilder(
                       builder: (localContext) {
                         final draggableScrollableController =
                             useDraggableScrollableController();
@@ -855,7 +876,7 @@ class BrowserScreen extends HookConsumerWidget {
                         );
                       },
                     ),
-                  final CreateTabSheet parameter => DraggableScrollableSheet(
+                    final CreateTabSheet parameter => DraggableScrollableSheet(
                       key: ValueKey(displayedSheet),
                       expand: false,
                       initialChildSize: 0.8,
@@ -883,7 +904,7 @@ class BrowserScreen extends HookConsumerWidget {
                         );
                       },
                     ),
-                  final TabQaChatSheet parameter => HookBuilder(
+                    final TabQaChatSheet parameter => HookBuilder(
                       builder: (localContext) {
                         final draggableScrollableController =
                             useDraggableScrollableController();
@@ -937,9 +958,9 @@ class BrowserScreen extends HookConsumerWidget {
                         );
                       },
                     ),
-                },
-              )
-            : null,
+                  },
+                )
+                : null,
       ),
     );
   }

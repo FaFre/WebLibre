@@ -12,9 +12,5 @@ class WebPageInfo {
   bool get isPageInfoComplete =>
       (title?.isNotEmpty ?? false) && favicon != null;
 
-  WebPageInfo({
-    required this.url,
-    this.title,
-    this.favicon,
-  });
+  WebPageInfo({required this.url, this.title, this.favicon});
 }

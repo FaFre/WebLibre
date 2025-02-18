@@ -8,9 +8,7 @@ import 'package:lensai/features/bangs/data/database/database.dart'
 part 'bang.g.dart';
 
 enum BangGroup {
-  general(
-    'https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json',
-  ),
+  general('https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json'),
   assistant(
     'https://raw.githubusercontent.com/FaFre/bangs/main/data/assistant_bangs.json',
   ),
@@ -90,16 +88,19 @@ class Bang with FastEquatable implements Insertable<Bang> {
   }
 
   Uri getUrl(String? query) {
-    final url = (query != null)
-        ? urlTemplate.replaceAll(_templateQueryPlaceholder, formatQuery(query))
-        : urlTemplate;
+    final url =
+        (query != null)
+            ? urlTemplate.replaceAll(
+              _templateQueryPlaceholder,
+              formatQuery(query),
+            )
+            : urlTemplate;
 
     var template = Uri.parse(url);
     if (!template.hasScheme || template.origin.isEmpty) {
-      template = Uri.https(domain).replace(
-        path: template.path,
-        query: template.query,
-      );
+      template = Uri.https(
+        domain,
+      ).replace(path: template.path, query: template.query);
     }
 
     return template;
@@ -133,15 +134,15 @@ class Bang with FastEquatable implements Insertable<Bang> {
 
   @override
   List<Object?> get hashParameters => [
-        group,
-        websiteName,
-        domain,
-        trigger,
-        urlTemplate,
-        category,
-        subCategory,
-        format,
-      ];
+    group,
+    websiteName,
+    domain,
+    trigger,
+    urlTemplate,
+    category,
+    subCategory,
+    format,
+  ];
 
   @override
   Map<String, Expression<Object>> toColumns(bool nullToAbsent) {

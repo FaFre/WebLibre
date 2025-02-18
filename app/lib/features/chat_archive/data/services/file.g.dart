@@ -12,12 +12,15 @@ String _$chatArchiveFileServiceHash() =>
 /// See also [ChatArchiveFileService].
 @ProviderFor(ChatArchiveFileService)
 final chatArchiveFileServiceProvider = AutoDisposeNotifierProvider<
-    ChatArchiveFileService, Raw<Stream<WatchEvent>>>.internal(
+  ChatArchiveFileService,
+  Raw<Stream<WatchEvent>>
+>.internal(
   ChatArchiveFileService.new,
   name: r'chatArchiveFileServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$chatArchiveFileServiceHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$chatArchiveFileServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

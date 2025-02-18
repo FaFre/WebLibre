@@ -59,44 +59,46 @@ class ChatMemory implements BaseMemory {
   Future<MemoryVariables> loadMemoryVariables([
     MemoryInputValues values = const {},
   ]) async {
-    final messages = _controller.messages
-        .whereNot(
-          (message) => message.metadata?['hideFromModelChatHistory'] == true,
-        )
-        .map(
-          (message) => switch (message) {
-            TextMessage(
-              authorId: final authorId,
-              text: final text,
-              metadata: final metadata,
-            ) =>
-              () {
-                if (authorId == MessageAuthor.system.user.id) {
-                  return SystemChatMessage(content: text);
-                }
-                if (authorId == MessageAuthor.human.user.id) {
-                  return HumanChatMessage(
-                    content: ChatMessageContent.text(text),
-                  );
-                }
-                if (authorId == MessageAuthor.ai.user.id) {
-                  final toolsRaw = metadata?['toolCalls'];
-                  if (toolsRaw is String) {
-                    return AIChatMessage(
-                      content: text,
-                      toolCalls: _deserializeToolCalls(toolsRaw),
-                    );
-                  }
-                  return AIChatMessage(content: text);
-                }
-                throw UnimplementedError();
-              }(),
-            ImageMessage() => throw UnimplementedError(),
-            CustomMessage() => throw UnimplementedError(),
-            UnsupportedMessage() => throw UnimplementedError()
-          },
-        )
-        .toList();
+    final messages =
+        _controller.messages
+            .whereNot(
+              (message) =>
+                  message.metadata?['hideFromModelChatHistory'] == true,
+            )
+            .map(
+              (message) => switch (message) {
+                TextMessage(
+                  authorId: final authorId,
+                  text: final text,
+                  metadata: final metadata,
+                ) =>
+                  () {
+                    if (authorId == MessageAuthor.system.user.id) {
+                      return SystemChatMessage(content: text);
+                    }
+                    if (authorId == MessageAuthor.human.user.id) {
+                      return HumanChatMessage(
+                        content: ChatMessageContent.text(text),
+                      );
+                    }
+                    if (authorId == MessageAuthor.ai.user.id) {
+                      final toolsRaw = metadata?['toolCalls'];
+                      if (toolsRaw is String) {
+                        return AIChatMessage(
+                          content: text,
+                          toolCalls: _deserializeToolCalls(toolsRaw),
+                        );
+                      }
+                      return AIChatMessage(content: text);
+                    }
+                    throw UnimplementedError();
+                  }(),
+                ImageMessage() => throw UnimplementedError(),
+                CustomMessage() => throw UnimplementedError(),
+                UnsupportedMessage() => throw UnimplementedError(),
+              },
+            )
+            .toList();
 
     int currentBufferLength = await llm.countTokens(PromptValue.chat(messages));
     // Prune buffer if it exceeds max token limit
@@ -124,16 +126,17 @@ class ChatMemory implements BaseMemory {
 
   List<AIChatMessageToolCall> _deserializeToolCalls(String toolsRaw) {
     final decoded = jsonDecode(toolsRaw) as List<dynamic>;
-    final tools = decoded
-        .map(
-          (tool) => AIChatMessageToolCall(
-            id: tool['id'] as String,
-            name: tool['name'] as String,
-            arguments: tool['arguments'] as Map<String, dynamic>,
-            argumentsRaw: tool['argumentsRaw'] as String,
-          ),
-        )
-        .toList();
+    final tools =
+        decoded
+            .map(
+              (tool) => AIChatMessageToolCall(
+                id: tool['id'] as String,
+                name: tool['name'] as String,
+                arguments: tool['arguments'] as Map<String, dynamic>,
+                argumentsRaw: tool['argumentsRaw'] as String,
+              ),
+            )
+            .toList();
     return tools;
   }
 

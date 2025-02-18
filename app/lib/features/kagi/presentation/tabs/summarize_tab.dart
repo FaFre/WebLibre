@@ -60,8 +60,9 @@ class SummarizeTab extends HookConsumerWidget {
 
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final selectedMode = useState(SummarizerMode.keyMoments);
-    final textController =
-        useTextEditingController(text: sharedContent?.toString());
+    final textController = useTextEditingController(
+      text: sharedContent?.toString(),
+    );
 
     return Form(
       key: formKey,
@@ -86,71 +87,63 @@ class SummarizeTab extends HookConsumerWidget {
               selectedMode.value = value.first;
             },
           ),
-          const SizedBox(
-            height: 12,
-          ),
+          const SizedBox(height: 12),
           ...switch (sharedContent) {
             SharedUrl() => [
-                _InputField(controller: textController),
-                HookBuilder(
-                  builder: (context) {
-                    final url =
-                        useState(uri_parser.tryParseUrl(textController.text));
-                    useEffect(
-                      () {
-                        Timer? timer;
-                        void debounce() {
-                          timer?.cancel();
-                          timer = Timer(const Duration(milliseconds: 250), () {
-                            url.value =
-                                uri_parser.tryParseUrl(textController.text);
-                          });
-                        }
+              _InputField(controller: textController),
+              HookBuilder(
+                builder: (context) {
+                  final url = useState(
+                    uri_parser.tryParseUrl(textController.text),
+                  );
+                  useEffect(() {
+                    Timer? timer;
+                    void debounce() {
+                      timer?.cancel();
+                      timer = Timer(const Duration(milliseconds: 250), () {
+                        url.value = uri_parser.tryParseUrl(textController.text);
+                      });
+                    }
 
-                        textController.addListener(debounce);
-                        return () => textController.removeListener(debounce);
-                      },
-                      [textController],
-                    );
+                    textController.addListener(debounce);
+                    return () => textController.removeListener(debounce);
+                  }, [textController]);
 
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (url.value != null) WebsiteTitleTile(url.value!),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-              ],
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (url.value != null) WebsiteTitleTile(url.value!),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
             SharedText() || null => [
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      final pickResult = await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['pdf'],
-                      );
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final pickResult = await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['pdf'],
+                    );
 
-                      if (pickResult?.files.first.path
-                          case final String filePath) {
-                        final content = await PDFDoc.fromPath(filePath)
-                            .then((doc) => doc.text);
-                        textController.text = content;
-                      }
-                    },
-                    icon: const Icon(MdiIcons.fileUpload),
-                    label: const Text('Read PDF document'),
-                  ),
+                    if (pickResult?.files.first.path
+                        case final String filePath) {
+                      final content = await PDFDoc.fromPath(
+                        filePath,
+                      ).then((doc) => doc.text);
+                      textController.text = content;
+                    }
+                  },
+                  icon: const Icon(MdiIcons.fileUpload),
+                  label: const Text('Read PDF document'),
                 ),
-                _InputField(controller: textController),
-                const SizedBox(
-                  height: 12,
-                ),
-              ],
+              ),
+              _InputField(controller: textController),
+              const SizedBox(height: 12),
+            ],
           },
           SizedBox(
             width: double.infinity,

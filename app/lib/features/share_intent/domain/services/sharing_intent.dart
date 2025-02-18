@@ -17,49 +17,53 @@ part 'sharing_intent.g.dart';
 
 final _sharingIntentTransformer =
     StreamTransformer<List<SharedFile>, ReceivedParameter>.fromHandlers(
-  handleData: (files, sink) async {
-    //For now only one file is supported to share with the app
-    final data = files.firstOrNull;
+      handleData: (files, sink) async {
+        //For now only one file is supported to share with the app
+        final data = files.firstOrNull;
 
-    if (data != null && data.value != null) {
-      switch (data.type) {
-        case SharedMediaType.TEXT:
-        case SharedMediaType.URL:
-          if (uri_to_file.isUriSupported(data.value!)) {
-            final file = await uri_to_file.toFile(data.value!);
-            final mimeType = mime.lookupMimeType(file.path);
-            switch (mimeType) {
-              case 'application/pdf':
-                final content =
-                    await PDFDoc.fromFile(file).then((doc) => doc.text);
-                sink.add(
-                  ReceivedParameter(content, KagiTool.summarizer.name),
-                );
-              default:
-                logger.w('Unhandled mime type: $mimeType');
-            }
-          } else {
-            sink.add(ReceivedParameter(data.value, null));
+        if (data != null && data.value != null) {
+          switch (data.type) {
+            case SharedMediaType.TEXT:
+            case SharedMediaType.URL:
+              if (uri_to_file.isUriSupported(data.value!)) {
+                final file = await uri_to_file.toFile(data.value!);
+                final mimeType = mime.lookupMimeType(file.path);
+                switch (mimeType) {
+                  case 'application/pdf':
+                    final content = await PDFDoc.fromFile(
+                      file,
+                    ).then((doc) => doc.text);
+                    sink.add(
+                      ReceivedParameter(content, KagiTool.summarizer.name),
+                    );
+                  default:
+                    logger.w('Unhandled mime type: $mimeType');
+                }
+              } else {
+                sink.add(ReceivedParameter(data.value, null));
+              }
+            default:
+              logger.w('Unhandled media type: $data');
           }
-        default:
-          logger.w('Unhandled media type: $data');
-      }
-    }
-  },
-);
+        }
+      },
+    );
 
 @Riverpod()
 Raw<Stream<ReceivedParameter>> sharingIntentStream(Ref ref) {
-  final initialStream = FlutterSharingIntent.instance
-      // ignore: discarded_futures
-      .getInitialSharing()
-      // ignore: discarded_futures
-      .then((event) {
-    FlutterSharingIntent.instance.reset();
-    return event;
-  }).asStream();
+  final initialStream =
+      FlutterSharingIntent.instance
+          // ignore: discarded_futures
+          .getInitialSharing()
+          // ignore: discarded_futures
+          .then((event) {
+            FlutterSharingIntent.instance.reset();
+            return event;
+          })
+          .asStream();
 
-  return ConcatStream(
-    [initialStream, FlutterSharingIntent.instance.getMediaStream()],
-  ).transform(_sharingIntentTransformer);
+  return ConcatStream([
+    initialStream,
+    FlutterSharingIntent.instance.getMediaStream(),
+  ]).transform(_sharingIntentTransformer);
 }

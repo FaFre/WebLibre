@@ -22,20 +22,17 @@ class KagiAutosuggestService extends _$KagiAutosuggestService
 
   @override
   Future<Result<List<String>>> getSuggestions(String query) async {
-    return Result.fromAsync(
-      () async {
-        final response = await _client
-            .get(_baseUrl.replace(queryParameters: {'q': query}))
-            .timeout(const Duration(seconds: 5));
+    return Result.fromAsync(() async {
+      final response = await _client
+          .get(_baseUrl.replace(queryParameters: {'q': query}))
+          .timeout(const Duration(seconds: 5));
 
-        final results = jsonDecode(utf8.decode(response.bodyBytes)) as List;
-        return switch (results.last) {
-          final String result => [result],
-          final List resultList => resultList.cast(),
-          _ => []
-        };
-      },
-      exceptionHandler: handleHttpError,
-    );
+      final results = jsonDecode(utf8.decode(response.bodyBytes)) as List;
+      return switch (results.last) {
+        final String result => [result],
+        final List resultList => resultList.cast(),
+        _ => [],
+      };
+    }, exceptionHandler: handleHttpError);
   }
 }

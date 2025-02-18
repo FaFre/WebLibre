@@ -10,9 +10,10 @@ class MetadataDao extends DatabaseAccessor<ChatDatabase>
   MetadataDao(super.db);
 
   SingleOrNullSelectable<ChatMetadata> chatMetadata(String chatId) {
-    final statement = db.chatData.selectOnly()
-      ..addColumns([db.chatData.metadata])
-      ..where(db.chatData.chatId.equals(chatId));
+    final statement =
+        db.chatData.selectOnly()
+          ..addColumns([db.chatData.metadata])
+          ..where(db.chatData.chatId.equals(chatId));
 
     return statement.map((row) => row.readWithConverter(db.chatData.metadata)!);
   }

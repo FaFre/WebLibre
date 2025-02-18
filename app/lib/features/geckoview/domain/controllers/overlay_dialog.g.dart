@@ -13,14 +13,15 @@ String _$overlayDialogControllerHash() =>
 @ProviderFor(OverlayDialogController)
 final overlayDialogControllerProvider =
     AutoDisposeNotifierProvider<OverlayDialogController, Widget?>.internal(
-  OverlayDialogController.new,
-  name: r'overlayDialogControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$overlayDialogControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      OverlayDialogController.new,
+      name: r'overlayDialogControllerProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$overlayDialogControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$OverlayDialogController = AutoDisposeNotifier<Widget?>;
 // ignore_for_file: type=lint

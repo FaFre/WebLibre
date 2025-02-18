@@ -35,9 +35,7 @@ class BangListScreen extends HookConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.medium(
-            title: Text('$category: $subCategory'),
-          ),
+          SliverAppBar.medium(title: Text('$category: $subCategory')),
           bangsAsync.when(
             data: (bangs) {
               return SliverList.builder(
@@ -53,10 +51,10 @@ class BangListScreen extends HookConsumerWidget {
 
                       if (ref.read(bottomSheetControllerProvider)
                           is! CreateTabSheet) {
-                        ref.read(bottomSheetControllerProvider.notifier).show(
-                              CreateTabSheet(
-                                preferredTool: KagiTool.search,
-                              ),
+                        ref
+                            .read(bottomSheetControllerProvider.notifier)
+                            .show(
+                              CreateTabSheet(preferredTool: KagiTool.search),
                             );
                       }
 
@@ -66,17 +64,19 @@ class BangListScreen extends HookConsumerWidget {
                 },
               );
             },
-            error: (error, stackTrace) => SliverToBoxAdapter(
-              child: Center(
-                child: FailureWidget(
-                  title: 'Failed to load Bangs',
-                  exception: error,
+            error:
+                (error, stackTrace) => SliverToBoxAdapter(
+                  child: Center(
+                    child: FailureWidget(
+                      title: 'Failed to load Bangs',
+                      exception: error,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            loading: () => const SliverToBoxAdapter(
-              child: Center(child: CircularProgressIndicator()),
-            ),
+            loading:
+                () => const SliverToBoxAdapter(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
           ),
         ],
       ),

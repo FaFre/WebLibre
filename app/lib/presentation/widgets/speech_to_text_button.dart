@@ -11,18 +11,15 @@ class SpeechToTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () async {
-        final isServiceAvailable =
-            await SpeechToTextGoogleDialog.getInstance().showGoogleDialog(
-          onTextReceived: onTextReceived,
-          // locale: "en-US",
-        );
+        final isServiceAvailable = await SpeechToTextGoogleDialog.getInstance()
+            .showGoogleDialog(
+              onTextReceived: onTextReceived,
+              // locale: "en-US",
+            );
 
         if (!isServiceAvailable) {
           if (context.mounted) {
-            ui_helper.showErrorMessage(
-              context,
-              'Service is not available',
-            );
+            ui_helper.showErrorMessage(context, 'Service is not available');
           }
         }
       },

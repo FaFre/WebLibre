@@ -25,8 +25,9 @@ Future<String?> _storedAuthData(Ref ref) {
 AsyncAuthStore authStore(Ref ref) {
   const secureStorage = FlutterSecureStorage();
 
-  final intial =
-      ref.watch(_storedAuthDataProvider.select((value) => value.valueOrNull));
+  final intial = ref.watch(
+    _storedAuthDataProvider.select((value) => value.valueOrNull),
+  );
 
   return AsyncAuthStore(
     initial: intial,
@@ -52,7 +53,8 @@ PocketBase pocketBase(Ref ref) {
 @Riverpod()
 bool incognitoModeEnabled(Ref ref) {
   return ref.watch(
-    generalSettingsRepositoryProvider
-        .select((value) => value.deleteBrowsingDataOnQuit != null),
+    generalSettingsRepositoryProvider.select(
+      (value) => value.deleteBrowsingDataOnQuit != null,
+    ),
   );
 }

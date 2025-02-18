@@ -42,17 +42,18 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         .read(selectedTabSessionNotifierProvider)
         .requestScreenshot(requireImageResult: false)
         .onError((error, stackTrace) {
-      logger.e(error, stackTrace: stackTrace);
-      timer.cancel();
+          logger.e(error, stackTrace: stackTrace);
+          timer.cancel();
 
-      return null;
-    });
+          return null;
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasTab =
-        ref.watch(selectedTabProvider.select((value) => value != null));
+    final hasTab = ref.watch(
+      selectedTabProvider.select((value) => value != null),
+    );
 
     ref.listen(
       selectedTabStateProvider.select(
@@ -68,43 +69,41 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         if (next.isLoading == false &&
             (_periodicScreenshotUpdate?.isActive ?? false) == false) {
           _timerPaused = false;
-          _periodicScreenshotUpdate =
-              Timer.periodic(widget.screenshotPeriod, _timerTick);
+          _periodicScreenshotUpdate = Timer.periodic(
+            widget.screenshotPeriod,
+            _timerTick,
+          );
         }
       },
     );
 
     return Visibility(
       visible: hasTab,
-      replacement: SizedBox.expand(
-        child: Container(
-          color: Colors.grey[800],
-        ),
-      ),
+      replacement: SizedBox.expand(child: Container(color: Colors.grey[800])),
       child: GeckoView(
         preInitializationStep: () async {
           await ref
               .read(generalSettingsRepositoryProvider.notifier)
               .fetch()
               .then((settings) {
-            ref
-                .read(deleteBrowserDataServiceProvider.notifier)
-                .deleteData(settings.deleteBrowsingDataOnQuit);
-          });
+                ref
+                    .read(deleteBrowserDataServiceProvider.notifier)
+                    .deleteData(settings.deleteBrowsingDataOnQuit);
+              });
 
           await ref
               .read(eventServiceProvider)
               .viewReadyStateEvents
               .firstWhere((state) => state == true)
               .timeout(
-            const Duration(seconds: 3),
-            onTimeout: () {
-              logger.e(
-                'Browser fragement not reported ready, trying to intitialize anyways',
+                const Duration(seconds: 3),
+                onTimeout: () {
+                  logger.e(
+                    'Browser fragement not reported ready, trying to intitialize anyways',
+                  );
+                  return true;
+                },
               );
-              return true;
-            },
-          );
         },
         postInitializationStep: () async {
           await widget.postInitializationStep?.call();
@@ -123,10 +122,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     ref.listenManual(tabRepositoryProvider, (previous, next) {});
     ref.listenManual(documentRepositoryProvider, (previous, next) {});
 
-    ref.listenManual(
-      selectionActionServiceProvider,
-      (previous, next) {},
-    );
+    ref.listenManual(selectionActionServiceProvider, (previous, next) {});
 
     ref.listenManual(
       webExtensionsStateProvider(WebExtensionActionType.browser),
@@ -138,20 +134,14 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       (previous, next) {},
     );
 
-    ref.listenManual(
-      cacheRepositoryProvider,
-      (previous, next) {},
-    );
+    ref.listenManual(cacheRepositoryProvider, (previous, next) {});
 
     ref.listenManual(
       engineSettingsReplicationServiceProvider,
       (previous, next) {},
     );
 
-    ref.listenManual(
-      proxySettingsReplucationProvider,
-      (previous, next) {},
-    );
+    ref.listenManual(proxySettingsReplucationProvider, (previous, next) {});
   }
 
   @override
@@ -173,8 +163,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             .evictCacheOnBackground();
       case AppLifecycleState.resumed:
         if (_timerPaused) {
-          _periodicScreenshotUpdate =
-              Timer.periodic(widget.screenshotPeriod, _timerTick);
+          _periodicScreenshotUpdate = Timer.periodic(
+            widget.screenshotPeriod,
+            _timerTick,
+          );
           _timerPaused = false;
         }
     }

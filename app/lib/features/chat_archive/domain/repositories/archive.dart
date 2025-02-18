@@ -21,8 +21,9 @@ class ChatArchiveRepository extends _$ChatArchiveRepository {
   }
 
   Future<Result<void>> archiveChat(String fileName, Uri url) async {
-    final contentsResult =
-        await ref.read(kagiChatServiceProvider.notifier).downloadChat(url);
+    final contentsResult = await ref
+        .read(kagiChatServiceProvider.notifier)
+        .downloadChat(url);
 
     return contentsResult.flatMapAsync(
       (contents) => ref
@@ -37,14 +38,15 @@ class ChatArchiveRepository extends _$ChatArchiveRepository {
     );
 
     return contentsResult.fold(
-      (value) => (value == null)
-          ? Result.failure(
-              ErrorMessage(
-                source: 'Chat Archive',
-                message: 'Chat $fileName not found',
-              ),
-            )
-          : Result.success(value),
+      (value) =>
+          (value == null)
+              ? Result.failure(
+                ErrorMessage(
+                  source: 'Chat Archive',
+                  message: 'Chat $fileName not found',
+                ),
+              )
+              : Result.success(value),
       onFailure: Result.failure,
     );
   }
@@ -55,17 +57,16 @@ class ChatArchiveRepository extends _$ChatArchiveRepository {
 
     yield* ConcatStream([
       listArchivedChats().asStream(),
-      fileRepository.asyncMap(
-        (_) => listArchivedChats(),
-      ),
+      fileRepository.asyncMap((_) => listArchivedChats()),
     ]);
   }
 }
 
 @Riverpod()
 Future<String> readArchivedChat(Ref ref, String fileName) async {
-  final result =
-      await ref.read(chatArchiveRepositoryProvider.notifier).readChat(fileName);
+  final result = await ref
+      .read(chatArchiveRepositoryProvider.notifier)
+      .readChat(fileName);
 
   return result.value;
 }

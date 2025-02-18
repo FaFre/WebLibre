@@ -15,47 +15,47 @@ class BaseSelectionAction extends CustomSelectionAction {
 
 class CallAction extends BaseSelectionAction {
   CallAction(PerformAction action)
-      : super(
-          id: 'CUSTOM_CONTEXT_MENU_CALL',
-          title: 'Call',
-          pattern: SelectionPattern.phone,
-          performAction: action,
-        );
+    : super(
+        id: 'CUSTOM_CONTEXT_MENU_CALL',
+        title: 'Call',
+        pattern: SelectionPattern.phone,
+        performAction: action,
+      );
 }
 
 class EmailAction extends BaseSelectionAction {
   EmailAction(PerformAction action)
-      : super(
-          id: 'CUSTOM_CONTEXT_MENU_EMAIL',
-          title: 'Email',
-          pattern: SelectionPattern.email,
-          performAction: action,
-        );
+    : super(
+        id: 'CUSTOM_CONTEXT_MENU_EMAIL',
+        title: 'Email',
+        pattern: SelectionPattern.email,
+        performAction: action,
+      );
 }
 
 class SearchAction extends BaseSelectionAction {
   SearchAction(PerformAction action)
-      : super(
-          id: 'CUSTOM_CONTEXT_MENU_SEARCH',
-          title: 'Search',
-          performAction: action,
-        );
+    : super(
+        id: 'CUSTOM_CONTEXT_MENU_SEARCH',
+        title: 'Search',
+        performAction: action,
+      );
 }
 
 class PrivateSearchAction extends BaseSelectionAction {
   PrivateSearchAction(PerformAction action)
-      : super(
-          id: 'CUSTOM_CONTEXT_MENU_SEARCH_PRIVATELY',
-          title: 'Private Search',
-          performAction: action,
-        );
+    : super(
+        id: 'CUSTOM_CONTEXT_MENU_SEARCH_PRIVATELY',
+        title: 'Private Search',
+        performAction: action,
+      );
 }
 
 class ShareAction extends BaseSelectionAction {
   ShareAction(PerformAction action)
-      : super(
-          id: 'CUSTOM_CONTEXT_MENU_SHARE',
-          title: 'Share',
-          performAction: action,
-        );
+    : super(
+        id: 'CUSTOM_CONTEXT_MENU_SHARE',
+        title: 'Share',
+        performAction: action,
+      );
 }

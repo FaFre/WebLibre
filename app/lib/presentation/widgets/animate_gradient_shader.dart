@@ -19,8 +19,8 @@ class AnimateGradientShader extends StatefulWidget {
     this.duration = const Duration(seconds: 4),
     this.animateAlignments = true,
     this.reverse = true,
-  })  : assert(primaryColors.length >= 2),
-        assert(primaryColors.length == secondaryColors.length);
+  }) : assert(primaryColors.length >= 2),
+       assert(primaryColors.length == secondaryColors.length);
 
   /// [controller]: pass this to have a fine control over the [Animation]
   final AnimationController? controller;
@@ -131,19 +131,22 @@ class _AnimateGradientShaderState extends State<AnimateGradientShader>
       animation: _animation!,
       builder: (BuildContext context, Widget? child) {
         final gradient = LinearGradient(
-          begin: widget.animateAlignments
-              ? begin.evaluate(_animation!)
-              : widget.primaryBegin,
-          end: widget.animateAlignments
-              ? end.evaluate(_animation!)
-              : widget.primaryEnd,
+          begin:
+              widget.animateAlignments
+                  ? begin.evaluate(_animation!)
+                  : widget.primaryBegin,
+          end:
+              widget.animateAlignments
+                  ? end.evaluate(_animation!)
+                  : widget.primaryEnd,
           colors: _evaluateColors(_animation!),
         );
 
         return ShaderMask(
           shaderCallback: (Rect bounds) {
-            return gradient
-                .createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height));
+            return gradient.createShader(
+              Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+            );
           },
           child: widget.child,
         );
@@ -160,10 +163,7 @@ class _AnimateGradientShaderState extends State<AnimateGradientShader>
 
     for (int i = 0; i < primaryColors.length; i++) {
       colorTweens.add(
-        ColorTween(
-          begin: primaryColors[i],
-          end: secondaryColors[i],
-        ),
+        ColorTween(begin: primaryColors[i], end: secondaryColors[i]),
       );
     }
 
@@ -204,17 +204,12 @@ class _AnimateGradientShaderState extends State<AnimateGradientShader>
 
   void _setAnimations() {
     _controller?.dispose();
-    _controller = (widget.controller ??
-        AnimationController(
-          vsync: this,
-          duration: widget.duration,
-        ))
-      ..repeat(reverse: widget.reverse);
+    _controller =
+        (widget.controller ??
+              AnimationController(vsync: this, duration: widget.duration))
+          ..repeat(reverse: widget.reverse);
 
-    _animation = CurvedAnimation(
-      parent: _controller!,
-      curve: Curves.easeInOut,
-    );
+    _animation = CurvedAnimation(parent: _controller!, curve: Curves.easeInOut);
   }
 
   @override

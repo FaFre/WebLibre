@@ -29,16 +29,14 @@ class BangSyncRepository extends _$BangSyncRepository {
     }
 
     final result = await sourceService.getBangs(url, group);
-    return result.flatMapAsync(
-      (remoteBangs) async {
-        await db.syncDao.syncBangs(
-          group: group,
-          remoteBangs: remoteBangs,
-          syncTime: DateTime.now(),
-        );
-        await db.optimizeFtsIndex();
-      },
-    );
+    return result.flatMapAsync((remoteBangs) async {
+      await db.syncDao.syncBangs(
+        group: group,
+        remoteBangs: remoteBangs,
+        syncTime: DateTime.now(),
+      );
+      await db.optimizeFtsIndex();
+    });
   }
 
   Future<Result<void>> syncBangGroup(
@@ -47,7 +45,9 @@ class BangSyncRepository extends _$BangSyncRepository {
   ) async {
     try {
       return Result.success(
-        await ref.read(bangDatabaseProvider).computeWithDatabase(
+        await ref
+            .read(bangDatabaseProvider)
+            .computeWithDatabase(
               connect: BangDatabase.new,
               computation: (db) async {
                 final ref = ProviderContainer();
@@ -92,8 +92,10 @@ class BangSyncRepository extends _$BangSyncRepository {
 
     //Run isolated operations
     final futures = groups.map(
-      (source) => syncBangGroup(source, syncInterval)
-          .then((result) => MapEntry(source, result)),
+      (source) => syncBangGroup(
+        source,
+        syncInterval,
+      ).then((result) => MapEntry(source, result)),
     );
 
     return Map.fromEntries(await Future.wait(futures));

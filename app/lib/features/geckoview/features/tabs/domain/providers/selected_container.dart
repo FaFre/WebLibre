@@ -8,11 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'selected_container.g.dart';
 
-enum SetContainerResult {
-  failed,
-  success,
-  successHasProxy,
-}
+enum SetContainerResult { failed, success, successHasProxy }
 
 @Riverpod(keepAlive: true)
 class SelectedContainer extends _$SelectedContainer {
@@ -71,16 +67,13 @@ class SelectedContainer extends _$SelectedContainer {
 
   @override
   String? build() {
-    ref.listen(
-      containersWithCountProvider,
-      (previous, next) {
-        if (state != null && next.valueOrNull != null) {
-          if (!next.value!.any((container) => container.id == state)) {
-            clearContainer();
-          }
+    ref.listen(containersWithCountProvider, (previous, next) {
+      if (state != null && next.valueOrNull != null) {
+        if (!next.value!.any((container) => container.id == state)) {
+          clearContainer();
         }
-      },
-    );
+      }
+    });
 
     return null;
   }

@@ -106,7 +106,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
       this(findResultState: findResultState);
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TabState(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -130,58 +129,71 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   }) {
     return TabState(
       id: _value.id,
-      contextId: contextId == const $CopyWithPlaceholder()
-          ? _value.contextId
-          // ignore: cast_nullable_to_non_nullable
-          : contextId as String?,
-      url: url == const $CopyWithPlaceholder()
-          ? _value.url
-          // ignore: cast_nullable_to_non_nullable
-          : url as Uri,
-      title: title == const $CopyWithPlaceholder()
-          ? _value.title
-          // ignore: cast_nullable_to_non_nullable
-          : title as String,
-      icon: icon == const $CopyWithPlaceholder()
-          ? _value.icon
-          // ignore: cast_nullable_to_non_nullable
-          : icon as EquatableImage?,
-      thumbnail: thumbnail == const $CopyWithPlaceholder()
-          ? _value.thumbnail
-          // ignore: cast_nullable_to_non_nullable
-          : thumbnail as EquatableImage?,
-      progress: progress == const $CopyWithPlaceholder()
-          ? _value.progress
-          // ignore: cast_nullable_to_non_nullable
-          : progress as int,
-      isPrivate: isPrivate == const $CopyWithPlaceholder()
-          ? _value.isPrivate
-          // ignore: cast_nullable_to_non_nullable
-          : isPrivate as bool,
-      isFullScreen: isFullScreen == const $CopyWithPlaceholder()
-          ? _value.isFullScreen
-          // ignore: cast_nullable_to_non_nullable
-          : isFullScreen as bool,
-      isLoading: isLoading == const $CopyWithPlaceholder()
-          ? _value.isLoading
-          // ignore: cast_nullable_to_non_nullable
-          : isLoading as bool,
-      securityInfoState: securityInfoState == const $CopyWithPlaceholder()
-          ? _value.securityInfoState
-          // ignore: cast_nullable_to_non_nullable
-          : securityInfoState as SecurityState,
-      historyState: historyState == const $CopyWithPlaceholder()
-          ? _value.historyState
-          // ignore: cast_nullable_to_non_nullable
-          : historyState as HistoryState,
-      readerableState: readerableState == const $CopyWithPlaceholder()
-          ? _value.readerableState
-          // ignore: cast_nullable_to_non_nullable
-          : readerableState as ReaderableState,
-      findResultState: findResultState == const $CopyWithPlaceholder()
-          ? _value.findResultState
-          // ignore: cast_nullable_to_non_nullable
-          : findResultState as FindResultState,
+      contextId:
+          contextId == const $CopyWithPlaceholder()
+              ? _value.contextId
+              // ignore: cast_nullable_to_non_nullable
+              : contextId as String?,
+      url:
+          url == const $CopyWithPlaceholder()
+              ? _value.url
+              // ignore: cast_nullable_to_non_nullable
+              : url as Uri,
+      title:
+          title == const $CopyWithPlaceholder()
+              ? _value.title
+              // ignore: cast_nullable_to_non_nullable
+              : title as String,
+      icon:
+          icon == const $CopyWithPlaceholder()
+              ? _value.icon
+              // ignore: cast_nullable_to_non_nullable
+              : icon as EquatableImage?,
+      thumbnail:
+          thumbnail == const $CopyWithPlaceholder()
+              ? _value.thumbnail
+              // ignore: cast_nullable_to_non_nullable
+              : thumbnail as EquatableImage?,
+      progress:
+          progress == const $CopyWithPlaceholder()
+              ? _value.progress
+              // ignore: cast_nullable_to_non_nullable
+              : progress as int,
+      isPrivate:
+          isPrivate == const $CopyWithPlaceholder()
+              ? _value.isPrivate
+              // ignore: cast_nullable_to_non_nullable
+              : isPrivate as bool,
+      isFullScreen:
+          isFullScreen == const $CopyWithPlaceholder()
+              ? _value.isFullScreen
+              // ignore: cast_nullable_to_non_nullable
+              : isFullScreen as bool,
+      isLoading:
+          isLoading == const $CopyWithPlaceholder()
+              ? _value.isLoading
+              // ignore: cast_nullable_to_non_nullable
+              : isLoading as bool,
+      securityInfoState:
+          securityInfoState == const $CopyWithPlaceholder()
+              ? _value.securityInfoState
+              // ignore: cast_nullable_to_non_nullable
+              : securityInfoState as SecurityState,
+      historyState:
+          historyState == const $CopyWithPlaceholder()
+              ? _value.historyState
+              // ignore: cast_nullable_to_non_nullable
+              : historyState as HistoryState,
+      readerableState:
+          readerableState == const $CopyWithPlaceholder()
+              ? _value.readerableState
+              // ignore: cast_nullable_to_non_nullable
+              : readerableState as ReaderableState,
+      findResultState:
+          findResultState == const $CopyWithPlaceholder()
+              ? _value.findResultState
+              // ignore: cast_nullable_to_non_nullable
+              : findResultState as FindResultState,
     );
   }
 }

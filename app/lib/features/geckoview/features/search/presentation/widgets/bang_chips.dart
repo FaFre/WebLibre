@@ -31,24 +31,21 @@ class BangChips extends HookConsumerWidget {
   ) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Reset usage frequency of $triggerName?',
-        ),
-        content: const Text(
-          'This will remove the Bang from quick select.',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Reset usage frequency of $triggerName?'),
+            content: const Text('This will remove the Bang from quick select.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Reset'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -56,14 +53,11 @@ class BangChips extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final availableBangs = ref.watch(seamlessBangProviderProvider);
 
-    useListenableCallback(
-      searchTextController,
-      () {
-        ref
-            .read(seamlessBangProviderProvider.notifier)
-            .search(searchTextController!.text);
-      },
-    );
+    useListenableCallback(searchTextController, () {
+      ref
+          .read(seamlessBangProviderProvider.notifier)
+          .search(searchTextController!.text);
+    });
 
     return availableBangs.when(
       data: (availableBangs) {
@@ -75,8 +69,8 @@ class BangChips extends HookConsumerWidget {
                 Expanded(
                   child: SelectableChips(
                     itemId: (bang) => bang.trigger,
-                    itemAvatar: (bang) =>
-                        UrlIcon(bang.getUrl(''), iconSize: 20),
+                    itemAvatar:
+                        (bang) => UrlIcon(bang.getUrl(''), iconSize: 20),
                     itemLabel: (bang) => Text(bang.websiteName),
                     availableItems: availableBangs,
                     selectedItem: activeBang,
@@ -104,9 +98,10 @@ class BangChips extends HookConsumerWidget {
 
                     await context.push(
                       BangSearchRoute(
-                        searchText: (searchText?.isEmpty ?? true)
-                            ? BangSearchRoute.emptySearchText
-                            : searchText!,
+                        searchText:
+                            (searchText?.isEmpty ?? true)
+                                ? BangSearchRoute.emptySearchText
+                                : searchText!,
                       ).location,
                     );
                   },
@@ -117,10 +112,7 @@ class BangChips extends HookConsumerWidget {
         );
       },
       error: (error, stackTrace) => const SizedBox.shrink(),
-      loading: () => const SizedBox(
-        height: 48,
-        width: double.infinity,
-      ),
+      loading: () => const SizedBox(height: 48, width: double.infinity),
     );
   }
 }

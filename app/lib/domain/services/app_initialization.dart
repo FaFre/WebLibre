@@ -18,25 +18,21 @@ class AppInitializationService extends _$AppInitializationService {
 
   Future<void> _initPackageInfo() {
     //Ensure Package info is loaded
-    state = Result.success(
-      (
-        initialized: false,
-        stage: 'Loading Package Info...',
-        errors: List.empty(),
-      ),
-    );
+    state = Result.success((
+      initialized: false,
+      stage: 'Loading Package Info...',
+      errors: List.empty(),
+    ));
 
     return ref.read(packageInfoProvider.future);
   }
 
   Future<Map<BangGroup, Result<void>>> _initBangs() {
-    state = Result.success(
-      (
-        initialized: false,
-        stage: 'Synchronizing Bangs...',
-        errors: List.empty(),
-      ),
-    );
+    state = Result.success((
+      initialized: false,
+      stage: 'Synchronizing Bangs...',
+      errors: List.empty(),
+    ));
 
     return ref
         .read(bangSyncRepositoryProvider.notifier)
@@ -60,9 +56,11 @@ class AppInitializationService extends _$AppInitializationService {
 
   @override
   Result<({bool initialized, String? stage, List<ErrorMessage> errors})>
-      build() {
-    return Result.success(
-      (initialized: false, stage: null, errors: List.empty()),
-    );
+  build() {
+    return Result.success((
+      initialized: false,
+      stage: null,
+      errors: List.empty(),
+    ));
   }
 }

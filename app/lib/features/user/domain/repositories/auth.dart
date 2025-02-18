@@ -33,13 +33,15 @@ class AuthRepository extends _$AuthRepository {
     String password,
   ) async {
     try {
-      return await _pb.collection('users').create(
-        body: {
-          "email": email,
-          "password": password,
-          "passwordConfirm": password,
-        },
-      );
+      return await _pb
+          .collection('users')
+          .create(
+            body: {
+              "email": email,
+              "password": password,
+              "passwordConfirm": password,
+            },
+          );
     } on ClientException catch (e) {
       throw AuthException(e.errorMessage);
     }

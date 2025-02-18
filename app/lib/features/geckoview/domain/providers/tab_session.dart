@@ -43,8 +43,9 @@ class TabSession extends _$TabSession {
 
   @override
   void build({required String? tabId}) {
-    _sessionService = (tabId != null)
-        ? GeckoSessionService(tabId: tabId)
-        : GeckoSessionService.forActiveTab();
+    _sessionService =
+        (tabId != null)
+            ? GeckoSessionService(tabId: tabId)
+            : GeckoSessionService.forActiveTab();
   }
 }

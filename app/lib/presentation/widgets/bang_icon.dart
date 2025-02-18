@@ -23,19 +23,17 @@ class UrlIcon extends HookConsumerWidget {
       enabled: !icon.hasData,
       child: SizedBox.square(
         dimension: iconSize,
-        child: (icon.data != null)
-            ? RepaintBoundary(
-                child: RawImage(
-                  image: icon.data?.image.value,
-                  height: iconSize,
-                  width: iconSize,
-                  fit: BoxFit.fill,
-                ),
-              )
-            : Icon(
-                MdiIcons.web,
-                size: iconSize,
-              ),
+        child:
+            (icon.data != null)
+                ? RepaintBoundary(
+                  child: RawImage(
+                    image: icon.data?.image.value,
+                    height: iconSize,
+                    width: iconSize,
+                    fit: BoxFit.fill,
+                  ),
+                )
+                : Icon(MdiIcons.web, size: iconSize),
       ),
     );
   }

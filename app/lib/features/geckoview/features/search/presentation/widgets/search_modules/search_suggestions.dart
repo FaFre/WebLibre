@@ -40,14 +40,11 @@ class SearchTermSuggestions extends HookConsumerWidget {
 
     final searchHistory = ref.watch(searchHistoryProvider);
 
-    useListenableCallback(
-      searchTextController,
-      () async {
-        ref
-            .read(searchSuggestionsProvider().notifier)
-            .addQuery(searchTextController.text);
-      },
-    );
+    useListenableCallback(searchTextController, () async {
+      ref
+          .read(searchSuggestionsProvider().notifier)
+          .addQuery(searchTextController.text);
+    });
 
     final Widget listSliver;
 
@@ -135,9 +132,7 @@ class SearchTermSuggestions extends HookConsumerWidget {
                       if (ref.read(selectedBangTriggerProvider()) ==
                           bang.trigger) {
                         ref
-                            .read(
-                              selectedBangTriggerProvider().notifier,
-                            )
+                            .read(selectedBangTriggerProvider().notifier)
                             .clearTrigger();
                       } else {
                         final dialogResult = await BangChips.resetBangDialog(
@@ -167,9 +162,7 @@ class SearchTermSuggestions extends HookConsumerWidget {
                 return CustomScrollView(
                   shrinkWrap: true,
                   controller: controller,
-                  slivers: [
-                    listSliver,
-                  ],
+                  slivers: [listSliver],
                 );
               },
             ),

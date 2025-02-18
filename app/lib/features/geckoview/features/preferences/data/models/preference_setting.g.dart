@@ -39,7 +39,6 @@ class _$PreferenceSettingGroupCWProxyImpl
       this(settings: settings);
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PreferenceSettingGroup(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -51,14 +50,16 @@ class _$PreferenceSettingGroupCWProxyImpl
     Object? settings = const $CopyWithPlaceholder(),
   }) {
     return PreferenceSettingGroup(
-      description: description == const $CopyWithPlaceholder()
-          ? _value.description
-          // ignore: cast_nullable_to_non_nullable
-          : description as String?,
-      settings: settings == const $CopyWithPlaceholder()
-          ? _value.settings
-          // ignore: cast_nullable_to_non_nullable
-          : settings as Map<String, PreferenceSetting>,
+      description:
+          description == const $CopyWithPlaceholder()
+              ? _value.description
+              // ignore: cast_nullable_to_non_nullable
+              : description as String?,
+      settings:
+          settings == const $CopyWithPlaceholder()
+              ? _value.settings
+              // ignore: cast_nullable_to_non_nullable
+              : settings as Map<String, PreferenceSetting>,
     );
   }
 }
@@ -128,7 +129,6 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
       this(shouldBeDefault: shouldBeDefault);
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PreferenceSetting(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -144,30 +144,36 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
     Object? shouldBeDefault = const $CopyWithPlaceholder(),
   }) {
     return PreferenceSetting(
-      value: value == const $CopyWithPlaceholder()
-          ? _value.value
-          // ignore: cast_nullable_to_non_nullable
-          : value as Object,
-      title: title == const $CopyWithPlaceholder()
-          ? _value.title
-          // ignore: cast_nullable_to_non_nullable
-          : title as String?,
-      description: description == const $CopyWithPlaceholder()
-          ? _value.description
-          // ignore: cast_nullable_to_non_nullable
-          : description as String?,
-      actualValue: actualValue == const $CopyWithPlaceholder()
-          ? _value.actualValue
-          // ignore: cast_nullable_to_non_nullable
-          : actualValue as Object?,
-      requireUserOptIn: requireUserOptIn == const $CopyWithPlaceholder()
-          ? _value.requireUserOptIn
-          // ignore: cast_nullable_to_non_nullable
-          : requireUserOptIn as bool,
-      shouldBeDefault: shouldBeDefault == const $CopyWithPlaceholder()
-          ? _value.shouldBeDefault
-          // ignore: cast_nullable_to_non_nullable
-          : shouldBeDefault as bool,
+      value:
+          value == const $CopyWithPlaceholder()
+              ? _value.value
+              // ignore: cast_nullable_to_non_nullable
+              : value as Object,
+      title:
+          title == const $CopyWithPlaceholder()
+              ? _value.title
+              // ignore: cast_nullable_to_non_nullable
+              : title as String?,
+      description:
+          description == const $CopyWithPlaceholder()
+              ? _value.description
+              // ignore: cast_nullable_to_non_nullable
+              : description as String?,
+      actualValue:
+          actualValue == const $CopyWithPlaceholder()
+              ? _value.actualValue
+              // ignore: cast_nullable_to_non_nullable
+              : actualValue as Object?,
+      requireUserOptIn:
+          requireUserOptIn == const $CopyWithPlaceholder()
+              ? _value.requireUserOptIn
+              // ignore: cast_nullable_to_non_nullable
+              : requireUserOptIn as bool,
+      shouldBeDefault:
+          shouldBeDefault == const $CopyWithPlaceholder()
+              ? _value.shouldBeDefault
+              // ignore: cast_nullable_to_non_nullable
+              : shouldBeDefault as bool,
     );
   }
 }

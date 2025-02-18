@@ -3,11 +3,7 @@ import 'package:rxdart/rxdart.dart';
 final _lastEventTimes = <Subject, Map<dynamic, int>>{};
 
 extension SubjectAddRecent<T> on Subject<T> {
-  void addWhenMoreRecent(
-    int timestamp,
-    dynamic identifier,
-    T value,
-  ) {
+  void addWhenMoreRecent(int timestamp, dynamic identifier, T value) {
     _lastEventTimes[this] ??= {};
 
     if ((_lastEventTimes[this]?[identifier] ?? 0) < timestamp) {

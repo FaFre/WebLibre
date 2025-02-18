@@ -28,13 +28,11 @@ void main() async {
             ),
           );
 
-          useOnInitialization(
-            () async {
-              await ref
-                  .read(appInitializationServiceProvider.notifier)
-                  .initialize();
-            },
-          );
+          useOnInitialization(() async {
+            await ref
+                .read(appInitializationServiceProvider.notifier)
+                .initialize();
+          });
 
           return DynamicColorBuilder(
             builder: (lightDynamic, darkDynamic) {

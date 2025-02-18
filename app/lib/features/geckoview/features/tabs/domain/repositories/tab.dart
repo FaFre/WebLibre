@@ -10,25 +10,26 @@ class TabDataRepository extends _$TabDataRepository {
   void build() {}
 
   Future<void> assignContainer(String tabId, String? containerId) {
-    return ref.read(tabDatabaseProvider).tabDao.assignContainer(
-          tabId,
-          containerId: containerId,
-        );
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .assignContainer(tabId, containerId: containerId);
   }
 
   Future<void> assignOrderKey(String tabId, String orderKey) {
-    return ref.read(tabDatabaseProvider).tabDao.assignOrderKey(
-          tabId,
-          orderKey: orderKey,
-        );
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .assignOrderKey(tabId, orderKey: orderKey);
   }
 
   Future<void> closeAllTabs(String? containerId) async {
-    final tabIds = await ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .containerTabIds(containerId)
-        .get();
+    final tabIds =
+        await ref
+            .read(tabDatabaseProvider)
+            .tabDao
+            .containerTabIds(containerId)
+            .get();
 
     if (tabIds.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);

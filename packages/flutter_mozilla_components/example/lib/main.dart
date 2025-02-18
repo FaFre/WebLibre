@@ -21,32 +21,31 @@ class MyAppState extends State<MyApp> {
           title: const Text('Native Fragment Example'),
           actions: [
             MenuAnchor(
-                builder: (context, controller, child) => IconButton(
+              builder:
+                  (context, controller, child) => IconButton(
                     onPressed: () {
                       controller.open();
                     },
-                    icon: const Icon(Icons.menu)),
-                menuChildren: [
-                  MenuItemButton(
-                    onPressed: () async {
-                      await GeckoSessionService.forActiveTab().reload();
-                    },
-                    child: const Text('Reload'),
+                    icon: const Icon(Icons.menu),
                   ),
-                  MenuItemButton(
-                    onPressed: () async {
-                      await GeckoSessionService.forActiveTab().goBack();
-                    },
-                    child: const Text('Back'),
-                  )
-                ])
+              menuChildren: [
+                MenuItemButton(
+                  onPressed: () async {
+                    await GeckoSessionService.forActiveTab().reload();
+                  },
+                  child: const Text('Reload'),
+                ),
+                MenuItemButton(
+                  onPressed: () async {
+                    await GeckoSessionService.forActiveTab().goBack();
+                  },
+                  child: const Text('Back'),
+                ),
+              ],
+            ),
           ],
         ),
-        body: const SafeArea(
-          child: Center(
-            child: GeckoView(),
-          ),
-        ),
+        body: const SafeArea(child: Center(child: GeckoView())),
       ),
     );
   }

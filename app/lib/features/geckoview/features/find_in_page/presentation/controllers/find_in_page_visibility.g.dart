@@ -13,14 +13,15 @@ String _$findInPageVisibilityControllerHash() =>
 @ProviderFor(FindInPageVisibilityController)
 final findInPageVisibilityControllerProvider =
     AutoDisposeNotifierProvider<FindInPageVisibilityController, bool>.internal(
-  FindInPageVisibilityController.new,
-  name: r'findInPageVisibilityControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$findInPageVisibilityControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      FindInPageVisibilityController.new,
+      name: r'findInPageVisibilityControllerProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$findInPageVisibilityControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$FindInPageVisibilityController = AutoDisposeNotifier<bool>;
 // ignore_for_file: type=lint

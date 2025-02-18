@@ -13,18 +13,19 @@ part 'create_tab.g.dart';
 
 final _parameterToCreateTabSheetTransformer =
     StreamTransformer<ReceivedParameter, CreateTabSheet>.fromHandlers(
-  handleData: (parameter, sink) {
-    final createTab = CreateTabSheet(
-      preferredTool: KagiTool.values
-          .firstWhereOrNull((tool) => tool.name == parameter.tool),
-      content: parameter.content,
-    );
+      handleData: (parameter, sink) {
+        final createTab = CreateTabSheet(
+          preferredTool: KagiTool.values.firstWhereOrNull(
+            (tool) => tool.name == parameter.tool,
+          ),
+          content: parameter.content,
+        );
 
-    if (createTab.hasParameters) {
-      sink.add(createTab);
-    }
-  },
-);
+        if (createTab.hasParameters) {
+          sink.add(createTab);
+        }
+      },
+    );
 
 @Riverpod()
 class CreateTabStream extends _$CreateTabStream {

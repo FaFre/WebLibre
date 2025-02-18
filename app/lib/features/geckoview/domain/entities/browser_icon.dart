@@ -18,8 +18,9 @@ class BrowserIcon with FastEquatable {
     required Color? dominantColor,
     required IconSource source,
   }) async {
-    final image =
-        await tryDecodeImage(bytes).then((image) => image!.toEquatable());
+    final image = await tryDecodeImage(
+      bytes,
+    ).then((image) => image!.toEquatable());
 
     return BrowserIcon(
       image: image,
@@ -38,9 +39,5 @@ class BrowserIcon with FastEquatable {
   bool get cacheHash => true;
 
   @override
-  List<Object?> get hashParameters => [
-        image,
-        dominantColor,
-        source,
-      ];
+  List<Object?> get hashParameters => [image, dominantColor, source];
 }

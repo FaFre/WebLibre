@@ -39,7 +39,7 @@ List<String> _headerValueList(dynamic value) {
   return switch (value) {
     String _ => [value],
     List<String> _ => value,
-    _ => throw Exception('Unsupported type')
+    _ => throw Exception('Unsupported type'),
   };
 }
 
@@ -59,8 +59,9 @@ DocumentParts? splitMarkdownDocument(
     chunkOverlap: chunkOverlap,
   );
 
-  final headerChunks =
-      markdownHeaderSplitter.splitText(originalDoc.pageContent);
+  final headerChunks = markdownHeaderSplitter.splitText(
+    originalDoc.pageContent,
+  );
   final docChunks = markdownTextSplitter.splitDocuments(headerChunks);
 
   if (docChunks.length == 1) {
@@ -85,10 +86,11 @@ DocumentParts? splitMarkdownDocument(
           ...a.metadata,
           ...b.metadata,
           for (final header in intersectingHeaders)
-            header: {
-              ..._headerValueList(a.metadata[header]),
-              ..._headerValueList(b.metadata[header]),
-            }.toList(),
+            header:
+                {
+                  ..._headerValueList(a.metadata[header]),
+                  ..._headerValueList(b.metadata[header]),
+                }.toList(),
         },
       );
     },
@@ -99,14 +101,15 @@ DocumentParts? splitMarkdownDocument(
 
   return (
     mainDocumentId: mainDocumentId,
-    parts: mergedDocChunks
-        .mapIndexed(
-          (i, doc) => Document(
-            id: documentIdFactory.getDocumentPartUuid(i),
-            pageContent: doc.pageContent,
-            metadata: mergeMaps(originalDoc.metadata, doc.metadata),
-          ),
-        )
-        .toList()
+    parts:
+        mergedDocChunks
+            .mapIndexed(
+              (i, doc) => Document(
+                id: documentIdFactory.getDocumentPartUuid(i),
+                pageContent: doc.pageContent,
+                metadata: mergeMaps(originalDoc.metadata, doc.metadata),
+              ),
+            )
+            .toList(),
   );
 }

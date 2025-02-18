@@ -32,29 +32,29 @@ class SearchSuggestionsRepository extends _$SearchSuggestionsRepository {
 
     return _queryStreamController.stream
         .sampleTime(const Duration(milliseconds: 100))
-        .switchMap<List<String>>(
-      (query) {
-        if (query.isEmpty) {
-          return Stream.value([]);
-        }
+        .switchMap<List<String>>((query) {
+          if (query.isEmpty) {
+            return Stream.value([]);
+          }
 
-        final cached = _cache.get(query);
-        if (cached != null) {
-          return Stream.value(cached);
-        }
+          final cached = _cache.get(query);
+          if (cached != null) {
+            return Stream.value(cached);
+          }
 
-        return suggestionsProvider
-            // ignore: discarded_futures
-            .getSuggestions(query)
-            // ignore: discarded_futures
-            .then((result) {
-          result.onSuccess((result) {
-            _cache.set(query, result);
-          });
+          return suggestionsProvider
+              // ignore: discarded_futures
+              .getSuggestions(query)
+              // ignore: discarded_futures
+              .then((result) {
+                result.onSuccess((result) {
+                  _cache.set(query, result);
+                });
 
-          return result.value;
-        }).asStream();
-      },
-    ).asBroadcastStream();
+                return result.value;
+              })
+              .asStream();
+        })
+        .asBroadcastStream();
   }
 }

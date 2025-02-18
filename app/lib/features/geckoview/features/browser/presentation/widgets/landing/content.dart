@@ -33,8 +33,9 @@ class LandingContent extends HookConsumerWidget {
             children: [
               Text(
                 'Lensai',
-                style:
-                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               Padding(
@@ -52,16 +53,17 @@ class LandingContent extends HookConsumerWidget {
               const LandingAction(),
               Consumer(
                 builder: (context, ref, child) {
-                  final errors = ref
-                      .watch(
-                        appInitializationServiceProvider.select(
-                          (result) => EquatableCollection(
-                            result.valueOrNull?.errors,
-                            immutable: false,
-                          ),
-                        ),
-                      )
-                      .collection;
+                  final errors =
+                      ref
+                          .watch(
+                            appInitializationServiceProvider.select(
+                              (result) => EquatableCollection(
+                                result.valueOrNull?.errors,
+                                immutable: false,
+                              ),
+                            ),
+                          )
+                          .collection;
 
                   if (errors == null || errors.isEmpty) {
                     return const SizedBox.shrink();
@@ -70,35 +72,31 @@ class LandingContent extends HookConsumerWidget {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ...errors.map(
-                        (error) {
-                          final theme = Theme.of(context);
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: ErrorContainer(
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Error during App Initialization!',
-                                    style: theme.textTheme.titleMedium,
-                                  ),
-                                  Text(
-                                    error.message,
-                                    style: theme.textTheme.titleSmall,
-                                  ),
-                                  if (error.details != null)
-                                    Text(error.details.toString()),
-                                ],
-                              ),
+                      ...errors.map((error) {
+                        final theme = Theme.of(context);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: ErrorContainer(
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Error during App Initialization!',
+                                  style: theme.textTheme.titleMedium,
+                                ),
+                                Text(
+                                  error.message,
+                                  style: theme.textTheme.titleSmall,
+                                ),
+                                if (error.details != null)
+                                  Text(error.details.toString()),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: SizedBox(
@@ -138,14 +136,12 @@ class LandingContent extends HookConsumerWidget {
               ),
               Text(
                 'Changelog',
-                style:
-                    textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
-              MarkdownBody(
-                data: changelogAsset.data ?? '',
-                selectable: true,
-              ),
+              MarkdownBody(data: changelogAsset.data ?? '', selectable: true),
             ],
           ),
         );

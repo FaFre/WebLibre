@@ -8,14 +8,11 @@ import 'package:lensai/presentation/widgets/animate_gradient_shader.dart';
 class TorNotification extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(
-      torProxyServiceProvider,
-      (previous, next) {
-        if (!next.isLoading) {
-          ref.read(overlayDialogControllerProvider.notifier).dismiss();
-        }
-      },
-    );
+    ref.listen(torProxyServiceProvider, (previous, next) {
+      if (!next.isLoading) {
+        ref.read(overlayDialogControllerProvider.notifier).dismiss();
+      }
+    });
 
     return SafeArea(
       child: ColoredBox(
@@ -41,10 +38,9 @@ class TorNotification extends HookConsumerWidget {
                 Expanded(
                   child: Text(
                     'Tor Proxy is connecting...',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: Colors.white),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.white),
                   ),
                 ),
                 IconButton(
@@ -53,10 +49,7 @@ class TorNotification extends HookConsumerWidget {
                         .read(overlayDialogControllerProvider.notifier)
                         .dismiss();
                   },
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.close, color: Colors.white),
                 ),
               ],
             ),

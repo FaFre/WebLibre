@@ -14,40 +14,42 @@ class ChatTextMessage extends StatelessWidget {
     super.key,
     required this.message,
     required this.index,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: 16,
-      vertical: 10,
-    ),
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     this.borderRadius = const BorderRadius.all(Radius.circular(12)),
     this.onlyEmojiFontSize = 48,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textMessageTheme =
-        context.select((ChatTheme theme) => theme.textMessageTheme);
+    final textMessageTheme = context.select(
+      (ChatTheme theme) => theme.textMessageTheme,
+    );
     final isSentByMe = context.watch<String>() == message.authorId;
-    final paragraphStyle = isSentByMe
-        ? textMessageTheme.sentTextStyle
-        : textMessageTheme.receivedTextStyle;
+    final paragraphStyle =
+        isSentByMe
+            ? textMessageTheme.sentTextStyle
+            : textMessageTheme.receivedTextStyle;
 
     return Container(
       padding: padding,
-      decoration: message.isOnlyEmoji == true
-          ? null
-          : BoxDecoration(
-              color: isSentByMe
-                  ? textMessageTheme.sentBackgroundColor
-                  : textMessageTheme.receivedBackgroundColor,
-              borderRadius: borderRadius,
-            ),
+      decoration:
+          message.isOnlyEmoji == true
+              ? null
+              : BoxDecoration(
+                color:
+                    isSentByMe
+                        ? textMessageTheme.sentBackgroundColor
+                        : textMessageTheme.receivedBackgroundColor,
+                borderRadius: borderRadius,
+              ),
       child: MarkdownBody(
         data: message.text,
         selectable: true,
         styleSheet: MarkdownStyleSheet(
-          p: message.isOnlyEmoji == true
-              ? paragraphStyle?.copyWith(fontSize: onlyEmojiFontSize)
-              : paragraphStyle,
+          p:
+              message.isOnlyEmoji == true
+                  ? paragraphStyle?.copyWith(fontSize: onlyEmojiFontSize)
+                  : paragraphStyle,
         ),
       ),
     );

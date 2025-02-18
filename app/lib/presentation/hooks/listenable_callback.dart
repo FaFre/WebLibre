@@ -6,11 +6,8 @@ void useListenableCallback(
   void Function() callback, [
   List<Object?>? keys,
 ]) {
-  useEffect(
-    () {
-      listenable?.addListener(callback);
-      return () => listenable?.removeListener(callback);
-    },
-    keys ?? [listenable],
-  );
+  useEffect(() {
+    listenable?.addListener(callback);
+    return () => listenable?.removeListener(callback);
+  }, keys ?? [listenable]);
 }

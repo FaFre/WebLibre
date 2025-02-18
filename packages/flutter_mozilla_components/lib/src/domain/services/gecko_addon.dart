@@ -47,17 +47,15 @@ class GeckoAddonService extends GeckoAddonEvents {
   ) {
     switch (actionType) {
       case WebExtensionActionType.browser:
-        _browserExtensionSubject.addWhenMoreRecent(
-          timestamp,
-          extensionId,
-          (extensionId: extensionId, data: null),
-        );
+        _browserExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+          extensionId: extensionId,
+          data: null,
+        ));
       case WebExtensionActionType.page:
-        _pageExtensionSubject.addWhenMoreRecent(
-          timestamp,
-          extensionId,
-          (extensionId: extensionId, data: null),
-        );
+        _pageExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+          extensionId: extensionId,
+          data: null,
+        ));
     }
   }
 
@@ -70,17 +68,15 @@ class GeckoAddonService extends GeckoAddonEvents {
   ) {
     switch (actionType) {
       case WebExtensionActionType.browser:
-        _browserIconSubject.addWhenMoreRecent(
-          timestamp,
-          extensionId,
-          (extensionId: extensionId, bytes: icon),
-        );
+        _browserIconSubject.addWhenMoreRecent(timestamp, extensionId, (
+          extensionId: extensionId,
+          bytes: icon,
+        ));
       case WebExtensionActionType.page:
-        _pageIconSubject.addWhenMoreRecent(
-          timestamp,
-          extensionId,
-          (extensionId: extensionId, bytes: icon),
-        );
+        _pageIconSubject.addWhenMoreRecent(timestamp, extensionId, (
+          extensionId: extensionId,
+          bytes: icon,
+        ));
     }
   }
 
@@ -93,17 +89,15 @@ class GeckoAddonService extends GeckoAddonEvents {
   ) {
     switch (actionType) {
       case WebExtensionActionType.browser:
-        _browserExtensionSubject.addWhenMoreRecent(
-          timestamp,
-          extensionId,
-          (extensionId: extensionId, data: extensionData),
-        );
+        _browserExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+          extensionId: extensionId,
+          data: extensionData,
+        ));
       case WebExtensionActionType.page:
-        _pageExtensionSubject.addWhenMoreRecent(
-          timestamp,
-          extensionId,
-          (extensionId: extensionId, data: extensionData),
-        );
+        _pageExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+          extensionId: extensionId,
+          data: extensionData,
+        ));
     }
   }
 

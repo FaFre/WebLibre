@@ -6,10 +6,7 @@ class EquatableImage {
   final Image value;
   final int? _imageHash;
 
-  EquatableImage(
-    this.value, {
-    required int? hash,
-  }) : _imageHash = hash;
+  EquatableImage(this.value, {required int? hash}) : _imageHash = hash;
 
   static Future<EquatableImage> calculate(Image image) async {
     final imageHash = await image.calculateHash();

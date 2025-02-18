@@ -34,7 +34,8 @@ Stream<List<BangData>> bangDataList(
     String? domain,
     ({String category, String? subCategory})? categoryFilter,
     bool? orderMostFrequentFirst,
-  })? filter,
+  })?
+  filter,
 }) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchBangs(
@@ -58,19 +59,13 @@ Stream<List<SearchHistoryEntry>> searchHistory(Ref ref) {
 }
 
 @Riverpod()
-Stream<DateTime?> lastSyncOfGroup(
-  Ref ref,
-  BangGroup group,
-) {
+Stream<DateTime?> lastSyncOfGroup(Ref ref, BangGroup group) {
   final repository = ref.watch(bangSyncRepositoryProvider.notifier);
   return repository.watchLastSyncOfGroup(group);
 }
 
 @Riverpod()
-Stream<int> bangCountOfGroup(
-  Ref ref,
-  BangGroup group,
-) {
+Stream<int> bangCountOfGroup(Ref ref, BangGroup group) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchBangCount(group);
 }

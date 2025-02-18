@@ -13,30 +13,34 @@ String _$engineHistorySuggestionsHash() =>
 @ProviderFor(engineHistorySuggestions)
 final engineHistorySuggestionsProvider =
     AutoDisposeProvider<AsyncValue<List<GeckoSuggestion>>>.internal(
-  engineHistorySuggestions,
-  name: r'engineHistorySuggestionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$engineHistorySuggestionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      engineHistorySuggestions,
+      name: r'engineHistorySuggestionsProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$engineHistorySuggestionsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef EngineHistorySuggestionsRef
-    = AutoDisposeProviderRef<AsyncValue<List<GeckoSuggestion>>>;
+typedef EngineHistorySuggestionsRef =
+    AutoDisposeProviderRef<AsyncValue<List<GeckoSuggestion>>>;
 String _$engineSuggestionsHash() => r'ba2c2d7f0a5e99fd9e639acd020b8cf3016c6126';
 
 /// See also [EngineSuggestions].
 @ProviderFor(EngineSuggestions)
 final engineSuggestionsProvider = AutoDisposeStreamNotifierProvider<
-    EngineSuggestions, List<GeckoSuggestion>>.internal(
+  EngineSuggestions,
+  List<GeckoSuggestion>
+>.internal(
   EngineSuggestions.new,
   name: r'engineSuggestionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$engineSuggestionsHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$engineSuggestionsHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

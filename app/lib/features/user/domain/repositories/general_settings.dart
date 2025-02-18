@@ -9,9 +9,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'general_settings.g.dart';
 
-typedef UpdateGeneralSettingsFunc = GeneralSettings Function(
-  GeneralSettings currentSettings,
-);
+typedef UpdateGeneralSettingsFunc =
+    GeneralSettings Function(GeneralSettings currentSettings);
 
 @Riverpod(keepAlive: true)
 class GeneralSettingsRepository extends _$GeneralSettingsRepository {
@@ -25,10 +24,14 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
     final db = ref.read(userDatabaseProvider);
 
     return GeneralSettings.fromJson({
-      'themeMode':
-          settings['themeMode']?.readAs(DriftSqlType.string, db.typeMapping),
-      'enableReadability': settings['enableReadability']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'themeMode': settings['themeMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'enableReadability': settings['enableReadability']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
       'deleteBrowsingDataOnQuit': settings['deleteBrowsingDataOnQuit']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
@@ -64,12 +67,12 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   GeneralSettings build() {
     final db = ref.watch(userDatabaseProvider);
 
-    final watchSub =
-        db.settingDao.allSettingsOfPartitionKey(_partitionKey).watch().listen(
-      (event) {
-        state = _deserializeSettings(event);
-      },
-    );
+    final watchSub = db.settingDao
+        .allSettingsOfPartitionKey(_partitionKey)
+        .watch()
+        .listen((event) {
+          state = _deserializeSettings(event);
+        });
 
     ref.onDispose(() {
       unawaited(watchSub.cancel());

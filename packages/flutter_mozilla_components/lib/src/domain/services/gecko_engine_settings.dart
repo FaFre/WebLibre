@@ -6,7 +6,7 @@ class GeckoEngineSettingsService {
   final GeckoEngineSettingsApi _api;
 
   GeckoEngineSettingsService({GeckoEngineSettingsApi? api})
-      : _api = api ?? _apiInstance;
+    : _api = api ?? _apiInstance;
 
   Future<void> setDefaultSettings(
     GeckoEngineSettings settings, {
@@ -30,8 +30,9 @@ class GeckoEngineSettingsService {
   }
 
   Future<void> httpsOnlyMode(HttpsOnlyMode state) {
-    return _api
-        .updateRuntimeSettings(GeckoEngineSettings(httpsOnlyMode: state));
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(httpsOnlyMode: state),
+    );
   }
 
   Future<void> globalPrivacyControlEnabled(bool state) {

@@ -62,9 +62,7 @@ class ChatArchiveDetailScreen extends HookConsumerWidget {
                 onPressed: () async {
                   if (chatAsync.valueOrNull != null) {
                     await Clipboard.setData(
-                      ClipboardData(
-                        text: chatAsync.valueOrNull!,
-                      ),
+                      ClipboardData(text: chatAsync.valueOrNull!),
                     );
                   }
                 },
@@ -94,23 +92,24 @@ class ChatArchiveDetailScreen extends HookConsumerWidget {
         enabled: chatAsync.isLoading,
         justifyMultiLineText: false,
         child: chatAsync.when(
-          data: (data) => Markdown(
-            data: data,
-            selectable: true,
-            onTapLink: (text, href, title) async {
-              if (href != null) {
-                if (Uri.parse(href) case final Uri url) {
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(url: url);
+          data:
+              (data) => Markdown(
+                data: data,
+                selectable: true,
+                onTapLink: (text, href, title) async {
+                  if (href != null) {
+                    if (Uri.parse(href) case final Uri url) {
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(url: url);
 
-                  if (context.mounted) {
-                    context.go(BrowserRoute().location);
+                      if (context.mounted) {
+                        context.go(BrowserRoute().location);
+                      }
+                    }
                   }
-                }
-              }
-            },
-          ),
+                },
+              ),
           error: (error, stackTrace) {
             return FailureWidget(
               title: 'Could not load chat',
@@ -118,9 +117,7 @@ class ChatArchiveDetailScreen extends HookConsumerWidget {
               onRetry: () => ref.refresh(readArchivedChatProvider(fileName)),
             );
           },
-          loading: () => const Bone.multiText(
-            lines: 15,
-          ),
+          loading: () => const Bone.multiText(lines: 15),
         ),
       ),
     );

@@ -13,14 +13,15 @@ String _$engineSettingsRepositoryHash() =>
 @ProviderFor(EngineSettingsRepository)
 final engineSettingsRepositoryProvider =
     NotifierProvider<EngineSettingsRepository, EngineSettings>.internal(
-  EngineSettingsRepository.new,
-  name: r'engineSettingsRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$engineSettingsRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      EngineSettingsRepository.new,
+      name: r'engineSettingsRepositoryProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$engineSettingsRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$EngineSettingsRepository = Notifier<EngineSettings>;
 // ignore_for_file: type=lint

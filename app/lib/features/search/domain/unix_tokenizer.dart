@@ -33,16 +33,17 @@ sealed class UnixTokenizer {
   }) {
     final matches = _tokenizePattern.allMatches(input);
 
-    final barewords = matches
-        .map((match) {
-          if (match.group(1) != null) {
-            return EnclosedBareword(match.group(1)!);
-          } else {
-            return SimpleBareword(match.group(2)!);
-          }
-        })
-        .where((token) => token.word.isNotEmpty)
-        .toList();
+    final barewords =
+        matches
+            .map((match) {
+              if (match.group(1) != null) {
+                return EnclosedBareword(match.group(1)!);
+              } else {
+                return SimpleBareword(match.group(2)!);
+              }
+            })
+            .where((token) => token.word.isNotEmpty)
+            .toList();
 
     //Merge short tokens
     _mergeShortBarewords(barewords, minTokenLength);

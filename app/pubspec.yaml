@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 0.7.0+15
 
 environment:
-  sdk: '>=3.4.1 <4.0.0'
+  sdk: '>=3.7.0 <4.0.0'
 
 dependencies:
   collection: ^1.19.1

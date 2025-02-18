@@ -9,20 +9,29 @@ class Setting extends Table with TableInfo<Setting, SettingData> {
   final String? _alias;
   Setting(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> key = GeneratedColumn<String>(
-      'key', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumn<String> partitionKey = GeneratedColumn<String>(
-      'partition_key', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'partition_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<DriftAny> value = GeneratedColumn<DriftAny>(
-      'value', aliasedName, true,
-      type: DriftSqlType.any,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'value',
+    aliasedName,
+    true,
+    type: DriftSqlType.any,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   @override
   List<GeneratedColumn> get $columns => [key, partitionKey, value];
   @override
@@ -36,12 +45,19 @@ class Setting extends Table with TableInfo<Setting, SettingData> {
   SettingData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SettingData(
-      key: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}key'])!,
-      partitionKey: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}partition_key']),
-      value: attachedDatabase.typeMapping
-          .read(DriftSqlType.any, data['${effectivePrefix}value']),
+      key:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}key'],
+          )!,
+      partitionKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}partition_key'],
+      ),
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.any,
+        data['${effectivePrefix}value'],
+      ),
     );
   }
 
@@ -74,8 +90,10 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     return map;
   }
 
-  factory SettingData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory SettingData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SettingData(
       key: serializer.fromJson<String>(json['key']),
@@ -93,22 +111,22 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     };
   }
 
-  SettingData copyWith(
-          {String? key,
-          Value<String?> partitionKey = const Value.absent(),
-          Value<DriftAny?> value = const Value.absent()}) =>
-      SettingData(
-        key: key ?? this.key,
-        partitionKey:
-            partitionKey.present ? partitionKey.value : this.partitionKey,
-        value: value.present ? value.value : this.value,
-      );
+  SettingData copyWith({
+    String? key,
+    Value<String?> partitionKey = const Value.absent(),
+    Value<DriftAny?> value = const Value.absent(),
+  }) => SettingData(
+    key: key ?? this.key,
+    partitionKey: partitionKey.present ? partitionKey.value : this.partitionKey,
+    value: value.present ? value.value : this.value,
+  );
   SettingData copyWithCompanion(SettingCompanion data) {
     return SettingData(
       key: data.key.present ? data.key.value : this.key,
-      partitionKey: data.partitionKey.present
-          ? data.partitionKey.value
-          : this.partitionKey,
+      partitionKey:
+          data.partitionKey.present
+              ? data.partitionKey.value
+              : this.partitionKey,
       value: data.value.present ? data.value.value : this.value,
     );
   }
@@ -165,11 +183,12 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
     });
   }
 
-  SettingCompanion copyWith(
-      {Value<String>? key,
-      Value<String?>? partitionKey,
-      Value<DriftAny?>? value,
-      Value<int>? rowid}) {
+  SettingCompanion copyWith({
+    Value<String>? key,
+    Value<String?>? partitionKey,
+    Value<DriftAny?>? value,
+    Value<int>? rowid,
+  }) {
     return SettingCompanion(
       key: key ?? this.key,
       partitionKey: partitionKey ?? this.partitionKey,
@@ -214,20 +233,29 @@ class IconCache extends Table with TableInfo<IconCache, IconCacheData> {
   final String? _alias;
   IconCache(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> origin = GeneratedColumn<String>(
-      'origin', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'origin',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumn<Uint8List> iconData = GeneratedColumn<Uint8List>(
-      'icon_data', aliasedName, false,
-      type: DriftSqlType.blob,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'icon_data',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<DateTime> fetchDate = GeneratedColumn<DateTime>(
-      'fetch_date', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'fetch_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [origin, iconData, fetchDate];
   @override
@@ -241,12 +269,21 @@ class IconCache extends Table with TableInfo<IconCache, IconCacheData> {
   IconCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return IconCacheData(
-      origin: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}origin'])!,
-      iconData: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}icon_data'])!,
-      fetchDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}fetch_date'])!,
+      origin:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}origin'],
+          )!,
+      iconData:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.blob,
+            data['${effectivePrefix}icon_data'],
+          )!,
+      fetchDate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}fetch_date'],
+          )!,
     );
   }
 
@@ -263,8 +300,11 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
   final String origin;
   final Uint8List iconData;
   final DateTime fetchDate;
-  const IconCacheData(
-      {required this.origin, required this.iconData, required this.fetchDate});
+  const IconCacheData({
+    required this.origin,
+    required this.iconData,
+    required this.fetchDate,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -274,8 +314,10 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
     return map;
   }
 
-  factory IconCacheData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory IconCacheData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return IconCacheData(
       origin: serializer.fromJson<String>(json['origin']),
@@ -293,13 +335,15 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
     };
   }
 
-  IconCacheData copyWith(
-          {String? origin, Uint8List? iconData, DateTime? fetchDate}) =>
-      IconCacheData(
-        origin: origin ?? this.origin,
-        iconData: iconData ?? this.iconData,
-        fetchDate: fetchDate ?? this.fetchDate,
-      );
+  IconCacheData copyWith({
+    String? origin,
+    Uint8List? iconData,
+    DateTime? fetchDate,
+  }) => IconCacheData(
+    origin: origin ?? this.origin,
+    iconData: iconData ?? this.iconData,
+    fetchDate: fetchDate ?? this.fetchDate,
+  );
   IconCacheData copyWithCompanion(IconCacheCompanion data) {
     return IconCacheData(
       origin: data.origin.present ? data.origin.value : this.origin,
@@ -346,9 +390,9 @@ class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
     required Uint8List iconData,
     required DateTime fetchDate,
     this.rowid = const Value.absent(),
-  })  : origin = Value(origin),
-        iconData = Value(iconData),
-        fetchDate = Value(fetchDate);
+  }) : origin = Value(origin),
+       iconData = Value(iconData),
+       fetchDate = Value(fetchDate);
   static Insertable<IconCacheData> custom({
     Expression<String>? origin,
     Expression<Uint8List>? iconData,
@@ -363,11 +407,12 @@ class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
     });
   }
 
-  IconCacheCompanion copyWith(
-      {Value<String>? origin,
-      Value<Uint8List>? iconData,
-      Value<DateTime>? fetchDate,
-      Value<int>? rowid}) {
+  IconCacheCompanion copyWith({
+    Value<String>? origin,
+    Value<Uint8List>? iconData,
+    Value<DateTime>? fetchDate,
+    Value<int>? rowid,
+  }) {
     return IconCacheCompanion(
       origin: origin ?? this.origin,
       iconData: iconData ?? this.iconData,
@@ -429,18 +474,20 @@ abstract class _$UserDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [setting, iconCache];
 }
 
-typedef $SettingCreateCompanionBuilder = SettingCompanion Function({
-  required String key,
-  Value<String?> partitionKey,
-  Value<DriftAny?> value,
-  Value<int> rowid,
-});
-typedef $SettingUpdateCompanionBuilder = SettingCompanion Function({
-  Value<String> key,
-  Value<String?> partitionKey,
-  Value<DriftAny?> value,
-  Value<int> rowid,
-});
+typedef $SettingCreateCompanionBuilder =
+    SettingCompanion Function({
+      required String key,
+      Value<String?> partitionKey,
+      Value<DriftAny?> value,
+      Value<int> rowid,
+    });
+typedef $SettingUpdateCompanionBuilder =
+    SettingCompanion Function({
+      Value<String> key,
+      Value<String?> partitionKey,
+      Value<DriftAny?> value,
+      Value<int> rowid,
+    });
 
 class $SettingFilterComposer extends Composer<_$UserDatabase, Setting> {
   $SettingFilterComposer({
@@ -451,13 +498,19 @@ class $SettingFilterComposer extends Composer<_$UserDatabase, Setting> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get key => $composableBuilder(
-      column: $table.key, builder: (column) => ColumnFilters(column));
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get partitionKey => $composableBuilder(
-      column: $table.partitionKey, builder: (column) => ColumnFilters(column));
+    column: $table.partitionKey,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DriftAny> get value => $composableBuilder(
-      column: $table.value, builder: (column) => ColumnFilters(column));
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $SettingOrderingComposer extends Composer<_$UserDatabase, Setting> {
@@ -469,14 +522,19 @@ class $SettingOrderingComposer extends Composer<_$UserDatabase, Setting> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get key => $composableBuilder(
-      column: $table.key, builder: (column) => ColumnOrderings(column));
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get partitionKey => $composableBuilder(
-      column: $table.partitionKey,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.partitionKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DriftAny> get value => $composableBuilder(
-      column: $table.value, builder: (column) => ColumnOrderings(column));
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $SettingAnnotationComposer extends Composer<_$UserDatabase, Setting> {
@@ -491,89 +549,107 @@ class $SettingAnnotationComposer extends Composer<_$UserDatabase, Setting> {
       $composableBuilder(column: $table.key, builder: (column) => column);
 
   GeneratedColumn<String> get partitionKey => $composableBuilder(
-      column: $table.partitionKey, builder: (column) => column);
+    column: $table.partitionKey,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DriftAny> get value =>
       $composableBuilder(column: $table.value, builder: (column) => column);
 }
 
-class $SettingTableManager extends RootTableManager<
-    _$UserDatabase,
-    Setting,
-    SettingData,
-    $SettingFilterComposer,
-    $SettingOrderingComposer,
-    $SettingAnnotationComposer,
-    $SettingCreateCompanionBuilder,
-    $SettingUpdateCompanionBuilder,
-    (SettingData, BaseReferences<_$UserDatabase, Setting, SettingData>),
-    SettingData,
-    PrefetchHooks Function()> {
+class $SettingTableManager
+    extends
+        RootTableManager<
+          _$UserDatabase,
+          Setting,
+          SettingData,
+          $SettingFilterComposer,
+          $SettingOrderingComposer,
+          $SettingAnnotationComposer,
+          $SettingCreateCompanionBuilder,
+          $SettingUpdateCompanionBuilder,
+          (SettingData, BaseReferences<_$UserDatabase, Setting, SettingData>),
+          SettingData,
+          PrefetchHooks Function()
+        > {
   $SettingTableManager(_$UserDatabase db, Setting table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $SettingFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $SettingOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $SettingAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> key = const Value.absent(),
-            Value<String?> partitionKey = const Value.absent(),
-            Value<DriftAny?> value = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              SettingCompanion(
-            key: key,
-            partitionKey: partitionKey,
-            value: value,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String key,
-            Value<String?> partitionKey = const Value.absent(),
-            Value<DriftAny?> value = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              SettingCompanion.insert(
-            key: key,
-            partitionKey: partitionKey,
-            value: value,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $SettingFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $SettingOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $SettingAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String?> partitionKey = const Value.absent(),
+                Value<DriftAny?> value = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SettingCompanion(
+                key: key,
+                partitionKey: partitionKey,
+                value: value,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String key,
+                Value<String?> partitionKey = const Value.absent(),
+                Value<DriftAny?> value = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SettingCompanion.insert(
+                key: key,
+                partitionKey: partitionKey,
+                value: value,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $SettingProcessedTableManager = ProcessedTableManager<
-    _$UserDatabase,
-    Setting,
-    SettingData,
-    $SettingFilterComposer,
-    $SettingOrderingComposer,
-    $SettingAnnotationComposer,
-    $SettingCreateCompanionBuilder,
-    $SettingUpdateCompanionBuilder,
-    (SettingData, BaseReferences<_$UserDatabase, Setting, SettingData>),
-    SettingData,
-    PrefetchHooks Function()>;
-typedef $IconCacheCreateCompanionBuilder = IconCacheCompanion Function({
-  required String origin,
-  required Uint8List iconData,
-  required DateTime fetchDate,
-  Value<int> rowid,
-});
-typedef $IconCacheUpdateCompanionBuilder = IconCacheCompanion Function({
-  Value<String> origin,
-  Value<Uint8List> iconData,
-  Value<DateTime> fetchDate,
-  Value<int> rowid,
-});
+typedef $SettingProcessedTableManager =
+    ProcessedTableManager<
+      _$UserDatabase,
+      Setting,
+      SettingData,
+      $SettingFilterComposer,
+      $SettingOrderingComposer,
+      $SettingAnnotationComposer,
+      $SettingCreateCompanionBuilder,
+      $SettingUpdateCompanionBuilder,
+      (SettingData, BaseReferences<_$UserDatabase, Setting, SettingData>),
+      SettingData,
+      PrefetchHooks Function()
+    >;
+typedef $IconCacheCreateCompanionBuilder =
+    IconCacheCompanion Function({
+      required String origin,
+      required Uint8List iconData,
+      required DateTime fetchDate,
+      Value<int> rowid,
+    });
+typedef $IconCacheUpdateCompanionBuilder =
+    IconCacheCompanion Function({
+      Value<String> origin,
+      Value<Uint8List> iconData,
+      Value<DateTime> fetchDate,
+      Value<int> rowid,
+    });
 
 class $IconCacheFilterComposer extends Composer<_$UserDatabase, IconCache> {
   $IconCacheFilterComposer({
@@ -584,13 +660,19 @@ class $IconCacheFilterComposer extends Composer<_$UserDatabase, IconCache> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get origin => $composableBuilder(
-      column: $table.origin, builder: (column) => ColumnFilters(column));
+    column: $table.origin,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<Uint8List> get iconData => $composableBuilder(
-      column: $table.iconData, builder: (column) => ColumnFilters(column));
+    column: $table.iconData,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get fetchDate => $composableBuilder(
-      column: $table.fetchDate, builder: (column) => ColumnFilters(column));
+    column: $table.fetchDate,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $IconCacheOrderingComposer extends Composer<_$UserDatabase, IconCache> {
@@ -602,13 +684,19 @@ class $IconCacheOrderingComposer extends Composer<_$UserDatabase, IconCache> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get origin => $composableBuilder(
-      column: $table.origin, builder: (column) => ColumnOrderings(column));
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<Uint8List> get iconData => $composableBuilder(
-      column: $table.iconData, builder: (column) => ColumnOrderings(column));
+    column: $table.iconData,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get fetchDate => $composableBuilder(
-      column: $table.fetchDate, builder: (column) => ColumnOrderings(column));
+    column: $table.fetchDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $IconCacheAnnotationComposer extends Composer<_$UserDatabase, IconCache> {
@@ -629,71 +717,88 @@ class $IconCacheAnnotationComposer extends Composer<_$UserDatabase, IconCache> {
       $composableBuilder(column: $table.fetchDate, builder: (column) => column);
 }
 
-class $IconCacheTableManager extends RootTableManager<
-    _$UserDatabase,
-    IconCache,
-    IconCacheData,
-    $IconCacheFilterComposer,
-    $IconCacheOrderingComposer,
-    $IconCacheAnnotationComposer,
-    $IconCacheCreateCompanionBuilder,
-    $IconCacheUpdateCompanionBuilder,
-    (IconCacheData, BaseReferences<_$UserDatabase, IconCache, IconCacheData>),
-    IconCacheData,
-    PrefetchHooks Function()> {
+class $IconCacheTableManager
+    extends
+        RootTableManager<
+          _$UserDatabase,
+          IconCache,
+          IconCacheData,
+          $IconCacheFilterComposer,
+          $IconCacheOrderingComposer,
+          $IconCacheAnnotationComposer,
+          $IconCacheCreateCompanionBuilder,
+          $IconCacheUpdateCompanionBuilder,
+          (
+            IconCacheData,
+            BaseReferences<_$UserDatabase, IconCache, IconCacheData>,
+          ),
+          IconCacheData,
+          PrefetchHooks Function()
+        > {
   $IconCacheTableManager(_$UserDatabase db, IconCache table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $IconCacheFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $IconCacheOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $IconCacheAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> origin = const Value.absent(),
-            Value<Uint8List> iconData = const Value.absent(),
-            Value<DateTime> fetchDate = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              IconCacheCompanion(
-            origin: origin,
-            iconData: iconData,
-            fetchDate: fetchDate,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String origin,
-            required Uint8List iconData,
-            required DateTime fetchDate,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              IconCacheCompanion.insert(
-            origin: origin,
-            iconData: iconData,
-            fetchDate: fetchDate,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $IconCacheFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $IconCacheOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $IconCacheAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> origin = const Value.absent(),
+                Value<Uint8List> iconData = const Value.absent(),
+                Value<DateTime> fetchDate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IconCacheCompanion(
+                origin: origin,
+                iconData: iconData,
+                fetchDate: fetchDate,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String origin,
+                required Uint8List iconData,
+                required DateTime fetchDate,
+                Value<int> rowid = const Value.absent(),
+              }) => IconCacheCompanion.insert(
+                origin: origin,
+                iconData: iconData,
+                fetchDate: fetchDate,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $IconCacheProcessedTableManager = ProcessedTableManager<
-    _$UserDatabase,
-    IconCache,
-    IconCacheData,
-    $IconCacheFilterComposer,
-    $IconCacheOrderingComposer,
-    $IconCacheAnnotationComposer,
-    $IconCacheCreateCompanionBuilder,
-    $IconCacheUpdateCompanionBuilder,
-    (IconCacheData, BaseReferences<_$UserDatabase, IconCache, IconCacheData>),
-    IconCacheData,
-    PrefetchHooks Function()>;
+typedef $IconCacheProcessedTableManager =
+    ProcessedTableManager<
+      _$UserDatabase,
+      IconCache,
+      IconCacheData,
+      $IconCacheFilterComposer,
+      $IconCacheOrderingComposer,
+      $IconCacheAnnotationComposer,
+      $IconCacheCreateCompanionBuilder,
+      $IconCacheUpdateCompanionBuilder,
+      (IconCacheData, BaseReferences<_$UserDatabase, IconCache, IconCacheData>),
+      IconCacheData,
+      PrefetchHooks Function()
+    >;
 
 class $UserDatabaseManager {
   final _$UserDatabase _db;

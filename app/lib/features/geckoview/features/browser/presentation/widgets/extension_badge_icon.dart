@@ -15,11 +15,7 @@ class ExtensionBadgeIcon extends StatelessWidget {
       label: hasBadge ? Text(state.badgeText!) : null,
       textColor: state.badgeTextColor,
       backgroundColor: state.badgeBackgroundColor,
-      child: RawImage(
-        image: state.icon?.value,
-        width: 24,
-        height: 24,
-      ),
+      child: RawImage(image: state.icon?.value, width: 24, height: 24),
     );
   }
 }

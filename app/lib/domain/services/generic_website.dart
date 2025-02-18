@@ -65,8 +65,8 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   final LRUCache<String, BrowserIcon> _browserIconCache;
 
   GenericWebsiteService()
-      : _iconsService = GeckoIconService(),
-        _browserIconCache = LRUCache(50);
+    : _iconsService = GeckoIconService(),
+      _browserIconCache = LRUCache(50);
 
   @override
   void build() {
@@ -89,9 +89,10 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       url: resource['url'] as String,
       type: resource['type'] as IconType,
       mimeType: resource['mimeType'] as String?,
-      sizes: (resource['sizes'] as List<List<int>>)
-          .map((s) => ResourceSize(height: s[0], width: s[1]))
-          .toList(),
+      sizes:
+          (resource['sizes'] as List<List<int>>)
+              .map((s) => ResourceSize(height: s[0], width: s[1]))
+              .toList(),
       maskable: resource['maskable'] as bool,
     );
   }
@@ -187,45 +188,39 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   }
 
   Future<Result<WebPageInfo>> fetchPageInfo(Uri url) async {
-    return Result.fromAsync(
-      () async {
-        final response =
-            await _client.get(url).timeout(const Duration(seconds: 10));
+    return Result.fromAsync(() async {
+      final response = await _client
+          .get(url)
+          .timeout(const Duration(seconds: 10));
 
-        final result = await compute(
-          (args) async {
-            final document = html_parser.parse(args[0]);
-            final baseUri = Uri.parse(args[1]);
+      final result = await compute((args) async {
+        final document = html_parser.parse(args[0]);
+        final baseUri = Uri.parse(args[1]);
 
-            final title = document.querySelector('title')?.text;
-            final resources = _extractIcons(baseUri, document);
+        final title = document.querySelector('title')?.text;
+        final resources = _extractIcons(baseUri, document);
 
-            return {
-              'title': title,
-              'resources': resources.map(_serializeResource).toList(),
-            };
-          },
-          [response.body, url.toString()],
-        );
+        return {
+          'title': title,
+          'resources': resources.map(_serializeResource).toList(),
+        };
+      }, [response.body, url.toString()]);
 
-        final resources = (result['resources']! as List<Map<String, dynamic>>)
-            .map(_deserializeResource)
-            .toList();
+      final resources =
+          (result['resources']! as List<Map<String, dynamic>>)
+              .map(_deserializeResource)
+              .toList();
 
-        final favicon = await getCachedIcon(url) ??
-            await loadIcon(
-              url: url,
-              resources: resources,
-            );
+      final favicon =
+          await getCachedIcon(url) ??
+          await loadIcon(url: url, resources: resources);
 
-        return WebPageInfo(
-          url: url,
-          title: result['title'] as String?,
-          favicon: favicon,
-        );
-      },
-      exceptionHandler: handleHttpError,
-    );
+      return WebPageInfo(
+        url: url,
+        title: result['title'] as String?,
+        favicon: favicon,
+      );
+    }, exceptionHandler: handleHttpError);
   }
 
   Future<BrowserIcon?> getCachedIcon(Uri url) async {
@@ -281,9 +276,9 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       return cachedIcon;
     }
 
-    return fetchPageInfo(url).then(
-      (result) => result.flatMap((pageInfo) => pageInfo.favicon!).value,
-    );
+    return fetchPageInfo(
+      url,
+    ).then((result) => result.flatMap((pageInfo) => pageInfo.favicon!).value);
   }
 
   // Future<Uri?> tryUpgradeToHttps(Uri httpUri) async {

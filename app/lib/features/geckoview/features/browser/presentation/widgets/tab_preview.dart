@@ -51,8 +51,10 @@ class TabPreview extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    visualDensity:
-                        const VisualDensity(horizontal: -4.0, vertical: -4.0),
+                    visualDensity: const VisualDensity(
+                      horizontal: -4.0,
+                      vertical: -4.0,
+                    ),
                     onPressed: onDelete,
                     icon: const Icon(Icons.close),
                   ),
@@ -60,17 +62,9 @@ class TabPreview extends StatelessWidget {
               ),
               Row(
                 children: [
-                  const SizedBox(
-                    width: 6.0,
-                  ),
-                  RawImage(
-                    image: tab.icon?.value,
-                    height: 16,
-                    width: 16,
-                  ),
-                  const SizedBox(
-                    width: 6.0,
-                  ),
+                  const SizedBox(width: 6.0),
+                  RawImage(image: tab.icon?.value, height: 16, width: 16),
+                  const SizedBox(width: 6.0),
                   Expanded(
                     child: Text(
                       tab.url.authority,
@@ -79,9 +73,7 @@ class TabPreview extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 6,
-              ),
+              const SizedBox(height: 6),
               if (tab.thumbnail != null)
                 Expanded(
                   child: ClipRRect(

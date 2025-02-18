@@ -12,17 +12,17 @@ class FindResultState with FastEquatable {
   });
 
   factory FindResultState.$default() => FindResultState(
-        activeMatchOrdinal: -1,
-        numberOfMatches: 0,
-        isDoneCounting: false,
-      );
+    activeMatchOrdinal: -1,
+    numberOfMatches: 0,
+    isDoneCounting: false,
+  );
 
   @override
   List<Object?> get hashParameters => [
-        activeMatchOrdinal,
-        numberOfMatches,
-        isDoneCounting,
-      ];
+    activeMatchOrdinal,
+    numberOfMatches,
+    isDoneCounting,
+  ];
 
   @override
   bool get cacheHash => true;

@@ -74,13 +74,11 @@ class ChatArchiveSearchRepository extends _$ChatArchiveSearchRepository {
             ellipsis: ellipsis,
           )
           .get()
-          .then(
-        (value) {
-          if (!_streamController.isClosed) {
-            _streamController.add(value);
-          }
-        },
-      );
+          .then((value) {
+            if (!_streamController.isClosed) {
+              _streamController.add(value);
+            }
+          });
     }
   }
 
@@ -96,23 +94,24 @@ class ChatArchiveSearchRepository extends _$ChatArchiveSearchRepository {
     await searchDatabase.searchDao.indexChats(await _availableChats());
     _populatedCompleter.complete();
 
-    final changeStreamSubscription =
-        ref.watch(chatArchiveFileServiceProvider).listen((event) async {
-      final chat = ChatEntity.fromFileName(path.basename(event.path));
+    final changeStreamSubscription = ref
+        .watch(chatArchiveFileServiceProvider)
+        .listen((event) async {
+          final chat = ChatEntity.fromFileName(path.basename(event.path));
 
-      switch (event.type) {
-        case ChangeType.ADD:
-        case ChangeType.MODIFY:
-          if (chat.name != null) {
-            final companion = await _readChat(chat);
-            if (companion != null) {
-              await searchDatabase.searchDao.upsertChat(companion);
-            }
+          switch (event.type) {
+            case ChangeType.ADD:
+            case ChangeType.MODIFY:
+              if (chat.name != null) {
+                final companion = await _readChat(chat);
+                if (companion != null) {
+                  await searchDatabase.searchDao.upsertChat(companion);
+                }
+              }
+            case ChangeType.REMOVE:
+              await searchDatabase.searchDao.deleteChat(chat.fileName);
           }
-        case ChangeType.REMOVE:
-          await searchDatabase.searchDao.deleteChat(chat.fileName);
-      }
-    });
+        });
 
     ref.onDispose(() async {
       await changeStreamSubscription.cancel();

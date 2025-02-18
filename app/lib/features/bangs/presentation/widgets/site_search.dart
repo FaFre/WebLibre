@@ -30,14 +30,11 @@ class SiteSearch extends HookConsumerWidget {
 
     final searchTextController = useTextEditingController();
 
-    useListenableCallback(
-      searchTextController,
-      () async {
-        ref
-            .read(searchSuggestionsProvider().notifier)
-            .addQuery(searchTextController.text);
-      },
-    );
+    useListenableCallback(searchTextController, () async {
+      ref
+          .read(searchSuggestionsProvider().notifier)
+          .addQuery(searchTextController.text);
+    });
 
     final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));
 
@@ -73,15 +70,11 @@ class SiteSearch extends HookConsumerWidget {
               selectedItem: selectedBang,
               onSelected: (bang) {
                 ref
-                    .read(
-                      selectedBangTriggerProvider(domain: domain).notifier,
-                    )
+                    .read(selectedBangTriggerProvider(domain: domain).notifier)
                     .setTrigger(bang.trigger);
               },
               onDeleted: (bang) {
-                if (ref.read(
-                      selectedBangTriggerProvider(domain: domain),
-                    ) ==
+                if (ref.read(selectedBangTriggerProvider(domain: domain)) ==
                     bang.trigger) {
                   ref
                       .read(

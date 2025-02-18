@@ -13,8 +13,9 @@ class SettingDao extends DatabaseAccessor<UserDatabase> with _$SettingDaoMixin {
   Future<int> updateSetting(String key, String? partitionKey, Object? value) {
     final normalizedValue = (value is Iterable) ? jsonEncode(value) : value;
 
-    final driftvalue = normalizedValue
-        .mapNotNull((normalizedValue) => DriftAny(normalizedValue));
+    final driftvalue = normalizedValue.mapNotNull(
+      (normalizedValue) => DriftAny(normalizedValue),
+    );
 
     return db.setting.insertOne(
       SettingCompanion.insert(
@@ -31,8 +32,9 @@ class SettingDao extends DatabaseAccessor<UserDatabase> with _$SettingDaoMixin {
   Selectable<MapEntry<String, DriftAny?>> allSettingsOfPartitionKey(
     String? partitionKey,
   ) {
-    final query = db.setting.select()
-      ..where((r) => r.partitionKey.equalsNullable(partitionKey));
+    final query =
+        db.setting.select()
+          ..where((r) => r.partitionKey.equalsNullable(partitionKey));
 
     return query.map((row) => MapEntry(row.key, row.value));
   }

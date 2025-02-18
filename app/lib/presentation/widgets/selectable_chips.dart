@@ -9,12 +9,7 @@ class _BadgeWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return count != null
-        ? Badge.count(
-            count: count!,
-            child: child,
-          )
-        : child;
+    return count != null ? Badge.count(count: count!, child: child) : child;
   }
 }
 
@@ -57,15 +52,9 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
         (item) => itemId(item) == itemId(selectedItem),
       );
       if (selectedIndex < 0) {
-        items = [
-          selectedItem,
-          ...items,
-        ];
+        items = [selectedItem, ...items];
       } else {
-        items = [
-          items.removeAt(selectedIndex),
-          ...items,
-        ];
+        items = [items.removeAt(selectedIndex), ...items];
       }
     }
 
@@ -84,7 +73,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
               child: _BadgeWrapper(
                 count: itemBadgeCount?.call(item),
                 child: FilterChip(
-                  selected: selectedItem != null &&
+                  selected:
+                      selectedItem != null &&
                       itemId(item) == itemId(selectedItem as S),
                   showCheckmark: false,
                   onSelected: (value) {
@@ -94,11 +84,12 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                       onDeleted?.call(item);
                     }
                   },
-                  onDeleted: deleteIcon
-                      ? () {
-                          onDeleted?.call(item);
-                        }
-                      : null,
+                  onDeleted:
+                      deleteIcon
+                          ? () {
+                            onDeleted?.call(item);
+                          }
+                          : null,
                   label: itemLabel.call(item),
                   avatar: itemAvatar?.call(item),
                 ),

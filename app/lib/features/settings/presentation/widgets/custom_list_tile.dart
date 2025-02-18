@@ -23,8 +23,9 @@ class CustomListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final subtitleTextTheme = theme.textTheme.bodyMedium!
-        .copyWith(color: theme.colorScheme.onSurfaceVariant);
+    final subtitleTextTheme = theme.textTheme.bodyMedium!.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -38,17 +39,21 @@ class CustomListTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: enabled
-                      ? theme.textTheme.bodyLarge
-                      : theme.textTheme.bodyLarge
-                          ?.copyWith(color: theme.disabledColor),
+                  style:
+                      enabled
+                          ? theme.textTheme.bodyLarge
+                          : theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.disabledColor,
+                          ),
                 ),
                 Text(
                   subtitle,
-                  style: enabled
-                      ? subtitleTextTheme
-                      : theme.textTheme.bodyMedium
-                          ?.copyWith(color: theme.disabledColor),
+                  style:
+                      enabled
+                          ? subtitleTextTheme
+                          : theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.disabledColor,
+                          ),
                 ),
                 if (content != null) content!,
               ],

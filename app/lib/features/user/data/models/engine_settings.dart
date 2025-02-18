@@ -60,24 +60,25 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bool? cookieBannerHandlingGlobalRulesSubFrames,
     WebContentIsolationStrategy? webContentIsolationStrategy,
   }) : super(
-          javascriptEnabled: javascriptEnabled ?? true,
-          trackingProtectionPolicy:
-              trackingProtectionPolicy ?? TrackingProtectionPolicy.strict,
-          httpsOnlyMode: httpsOnlyMode ?? HttpsOnlyMode.enabled,
-          globalPrivacyControlEnabled: globalPrivacyControlEnabled ?? true,
-          preferredColorScheme: preferredColorScheme ?? ColorScheme.system,
-          cookieBannerHandlingMode:
-              cookieBannerHandlingMode ?? CookieBannerHandlingMode.rejectAll,
-          cookieBannerHandlingModePrivateBrowsing:
-              cookieBannerHandlingModePrivateBrowsing ??
-                  CookieBannerHandlingMode.rejectAll,
-          cookieBannerHandlingGlobalRules:
-              cookieBannerHandlingGlobalRules ?? true,
-          cookieBannerHandlingGlobalRulesSubFrames:
-              cookieBannerHandlingGlobalRulesSubFrames ?? true,
-          webContentIsolationStrategy: webContentIsolationStrategy ??
-              WebContentIsolationStrategy.isolateHighValue,
-        );
+         javascriptEnabled: javascriptEnabled ?? true,
+         trackingProtectionPolicy:
+             trackingProtectionPolicy ?? TrackingProtectionPolicy.strict,
+         httpsOnlyMode: httpsOnlyMode ?? HttpsOnlyMode.enabled,
+         globalPrivacyControlEnabled: globalPrivacyControlEnabled ?? true,
+         preferredColorScheme: preferredColorScheme ?? ColorScheme.system,
+         cookieBannerHandlingMode:
+             cookieBannerHandlingMode ?? CookieBannerHandlingMode.rejectAll,
+         cookieBannerHandlingModePrivateBrowsing:
+             cookieBannerHandlingModePrivateBrowsing ??
+             CookieBannerHandlingMode.rejectAll,
+         cookieBannerHandlingGlobalRules:
+             cookieBannerHandlingGlobalRules ?? true,
+         cookieBannerHandlingGlobalRulesSubFrames:
+             cookieBannerHandlingGlobalRulesSubFrames ?? true,
+         webContentIsolationStrategy:
+             webContentIsolationStrategy ??
+             WebContentIsolationStrategy.isolateHighValue,
+       );
 
   factory EngineSettings.fromJson(Map<String, dynamic> json) =>
       _$EngineSettingsFromJson(json);
@@ -89,15 +90,15 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-        super.javascriptEnabled,
-        super.trackingProtectionPolicy,
-        super.httpsOnlyMode,
-        super.globalPrivacyControlEnabled,
-        super.preferredColorScheme,
-        super.cookieBannerHandlingMode,
-        super.cookieBannerHandlingModePrivateBrowsing,
-        super.cookieBannerHandlingGlobalRules,
-        super.cookieBannerHandlingGlobalRulesSubFrames,
-        super.webContentIsolationStrategy,
-      ];
+    super.javascriptEnabled,
+    super.trackingProtectionPolicy,
+    super.httpsOnlyMode,
+    super.globalPrivacyControlEnabled,
+    super.preferredColorScheme,
+    super.cookieBannerHandlingMode,
+    super.cookieBannerHandlingModePrivateBrowsing,
+    super.cookieBannerHandlingGlobalRules,
+    super.cookieBannerHandlingGlobalRulesSubFrames,
+    super.webContentIsolationStrategy,
+  ];
 }

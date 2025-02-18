@@ -13,14 +13,15 @@ String _$chatSearchDatabaseHash() =>
 @ProviderFor(chatSearchDatabase)
 final chatSearchDatabaseProvider =
     AutoDisposeProvider<ChatSearchDatabase>.internal(
-  chatSearchDatabase,
-  name: r'chatSearchDatabaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$chatSearchDatabaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      chatSearchDatabase,
+      name: r'chatSearchDatabaseProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$chatSearchDatabaseHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

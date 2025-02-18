@@ -13,8 +13,9 @@ class FindInPageWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showFindInPage = ref.watch(findInPageVisibilityControllerProvider);
-    final findInteractionController =
-        ref.watch(findInPageRepositoryProvider(null).notifier);
+    final findInteractionController = ref.watch(
+      findInPageRepositoryProvider(null).notifier,
+    );
 
     final textController = useTextEditingController();
 
@@ -47,8 +48,9 @@ class FindInPageWidget extends HookConsumerWidget {
               HookConsumer(
                 builder: (context, ref, child) {
                   final searchResult = ref.watch(
-                    selectedTabStateProvider
-                        .select((state) => state?.findResultState),
+                    selectedTabStateProvider.select(
+                      (state) => state?.findResultState,
+                    ),
                   );
 
                   if (searchResult != null) {

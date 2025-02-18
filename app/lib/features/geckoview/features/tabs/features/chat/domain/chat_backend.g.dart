@@ -32,9 +32,7 @@ class _SystemHash {
 abstract class _$ChatBackend extends BuildlessAutoDisposeNotifier<void> {
   late final String chatId;
 
-  void build(
-    String chatId,
-  );
+  void build(String chatId);
 }
 
 /// See also [ChatBackend].
@@ -47,21 +45,15 @@ class ChatBackendFamily extends Family<void> {
   const ChatBackendFamily();
 
   /// See also [ChatBackend].
-  ChatBackendProvider call(
-    String chatId,
-  ) {
-    return ChatBackendProvider(
-      chatId,
-    );
+  ChatBackendProvider call(String chatId) {
+    return ChatBackendProvider(chatId);
   }
 
   @override
   ChatBackendProvider getProviderOverride(
     covariant ChatBackendProvider provider,
   ) {
-    return call(
-      provider.chatId,
-    );
+    return call(provider.chatId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -83,21 +75,19 @@ class ChatBackendFamily extends Family<void> {
 class ChatBackendProvider
     extends AutoDisposeNotifierProviderImpl<ChatBackend, void> {
   /// See also [ChatBackend].
-  ChatBackendProvider(
-    String chatId,
-  ) : this._internal(
-          () => ChatBackend()..chatId = chatId,
-          from: chatBackendProvider,
-          name: r'chatBackendProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$chatBackendHash,
-          dependencies: ChatBackendFamily._dependencies,
-          allTransitiveDependencies:
-              ChatBackendFamily._allTransitiveDependencies,
-          chatId: chatId,
-        );
+  ChatBackendProvider(String chatId)
+    : this._internal(
+        () => ChatBackend()..chatId = chatId,
+        from: chatBackendProvider,
+        name: r'chatBackendProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$chatBackendHash,
+        dependencies: ChatBackendFamily._dependencies,
+        allTransitiveDependencies: ChatBackendFamily._allTransitiveDependencies,
+        chatId: chatId,
+      );
 
   ChatBackendProvider._internal(
     super._createNotifier, {
@@ -112,12 +102,8 @@ class ChatBackendProvider
   final String chatId;
 
   @override
-  void runNotifierBuild(
-    covariant ChatBackend notifier,
-  ) {
-    return notifier.build(
-      chatId,
-    );
+  void runNotifierBuild(covariant ChatBackend notifier) {
+    return notifier.build(chatId);
   }
 
   @override
@@ -170,5 +156,6 @@ class _ChatBackendProviderElement
   @override
   String get chatId => (origin as ChatBackendProvider).chatId;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

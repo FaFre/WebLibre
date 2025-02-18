@@ -31,9 +31,7 @@ class ChatMessageRepository extends _$ChatMessageRepository {
           id: uuid.v4(),
           authorId: author.user.id,
           createdAt: DateTime.now().toUtc(),
-          metadata: {
-            'type': 'typing',
-          },
+          metadata: {'type': 'typing'},
         ),
       );
 
@@ -65,12 +63,13 @@ class ChatMessageRepository extends _$ChatMessageRepository {
       createdAt: DateTime.now().toUtc(),
       text: content,
       isOnlyEmoji: isOnlyEmoji(content),
-      metadata: (hideFromModelChatHistory || (toolCalls?.isNotEmpty ?? false))
-          ? {
-              'toolCalls': toolCalls?.map((tool) => tool.toMap()).toList(),
-              if (hideFromModelChatHistory) 'hideFromModelChatHistory': true,
-            }
-          : null,
+      metadata:
+          (hideFromModelChatHistory || (toolCalls?.isNotEmpty ?? false))
+              ? {
+                'toolCalls': toolCalls?.map((tool) => tool.toMap()).toList(),
+                if (hideFromModelChatHistory) 'hideFromModelChatHistory': true,
+              }
+              : null,
     );
 
     return Result.fromAsync(() async {

@@ -17,9 +17,10 @@ class CacheDao extends DatabaseAccessor<UserDatabase> with _$CacheDaoMixin {
   }
 
   SingleOrNullSelectable<Uint8List?> getCachedIcon(String origin) {
-    final query = selectOnly(db.iconCache)
-      ..addColumns([db.iconCache.iconData])
-      ..where(db.iconCache.origin.equals(origin));
+    final query =
+        selectOnly(db.iconCache)
+          ..addColumns([db.iconCache.iconData])
+          ..where(db.iconCache.origin.equals(origin));
 
     return query.map((row) => row.read(db.iconCache.iconData));
   }

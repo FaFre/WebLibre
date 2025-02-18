@@ -39,21 +39,15 @@ class AvailableTabIdsFamily extends Family<EquatableCollection<List<String>>> {
   const AvailableTabIdsFamily();
 
   /// See also [availableTabIds].
-  AvailableTabIdsProvider call(
-    ContainerFilter containerFilter,
-  ) {
-    return AvailableTabIdsProvider(
-      containerFilter,
-    );
+  AvailableTabIdsProvider call(ContainerFilter containerFilter) {
+    return AvailableTabIdsProvider(containerFilter);
   }
 
   @override
   AvailableTabIdsProvider getProviderOverride(
     covariant AvailableTabIdsProvider provider,
   ) {
-    return call(
-      provider.containerFilter,
-    );
+    return call(provider.containerFilter);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -75,24 +69,20 @@ class AvailableTabIdsFamily extends Family<EquatableCollection<List<String>>> {
 class AvailableTabIdsProvider
     extends AutoDisposeProvider<EquatableCollection<List<String>>> {
   /// See also [availableTabIds].
-  AvailableTabIdsProvider(
-    ContainerFilter containerFilter,
-  ) : this._internal(
-          (ref) => availableTabIds(
-            ref as AvailableTabIdsRef,
-            containerFilter,
-          ),
-          from: availableTabIdsProvider,
-          name: r'availableTabIdsProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$availableTabIdsHash,
-          dependencies: AvailableTabIdsFamily._dependencies,
-          allTransitiveDependencies:
-              AvailableTabIdsFamily._allTransitiveDependencies,
-          containerFilter: containerFilter,
-        );
+  AvailableTabIdsProvider(ContainerFilter containerFilter)
+    : this._internal(
+        (ref) => availableTabIds(ref as AvailableTabIdsRef, containerFilter),
+        from: availableTabIdsProvider,
+        name: r'availableTabIdsProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$availableTabIdsHash,
+        dependencies: AvailableTabIdsFamily._dependencies,
+        allTransitiveDependencies:
+            AvailableTabIdsFamily._allTransitiveDependencies,
+        containerFilter: containerFilter,
+      );
 
   AvailableTabIdsProvider._internal(
     super._createNotifier, {
@@ -109,7 +99,7 @@ class AvailableTabIdsProvider
   @override
   Override overrideWith(
     EquatableCollection<List<String>> Function(AvailableTabIdsRef provider)
-        create,
+    create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -127,7 +117,7 @@ class AvailableTabIdsProvider
 
   @override
   AutoDisposeProviderElement<EquatableCollection<List<String>>>
-      createElement() {
+  createElement() {
     return _AvailableTabIdsProviderElement(this);
   }
 
@@ -178,21 +168,15 @@ class AvailableTabStatesFamily
   const AvailableTabStatesFamily();
 
   /// See also [availableTabStates].
-  AvailableTabStatesProvider call(
-    ContainerFilter containerFilter,
-  ) {
-    return AvailableTabStatesProvider(
-      containerFilter,
-    );
+  AvailableTabStatesProvider call(ContainerFilter containerFilter) {
+    return AvailableTabStatesProvider(containerFilter);
   }
 
   @override
   AvailableTabStatesProvider getProviderOverride(
     covariant AvailableTabStatesProvider provider,
   ) {
-    return call(
-      provider.containerFilter,
-    );
+    return call(provider.containerFilter);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -214,24 +198,21 @@ class AvailableTabStatesFamily
 class AvailableTabStatesProvider
     extends AutoDisposeProvider<EquatableCollection<Map<String, TabState>>> {
   /// See also [availableTabStates].
-  AvailableTabStatesProvider(
-    ContainerFilter containerFilter,
-  ) : this._internal(
-          (ref) => availableTabStates(
-            ref as AvailableTabStatesRef,
-            containerFilter,
-          ),
-          from: availableTabStatesProvider,
-          name: r'availableTabStatesProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$availableTabStatesHash,
-          dependencies: AvailableTabStatesFamily._dependencies,
-          allTransitiveDependencies:
-              AvailableTabStatesFamily._allTransitiveDependencies,
-          containerFilter: containerFilter,
-        );
+  AvailableTabStatesProvider(ContainerFilter containerFilter)
+    : this._internal(
+        (ref) =>
+            availableTabStates(ref as AvailableTabStatesRef, containerFilter),
+        from: availableTabStatesProvider,
+        name: r'availableTabStatesProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$availableTabStatesHash,
+        dependencies: AvailableTabStatesFamily._dependencies,
+        allTransitiveDependencies:
+            AvailableTabStatesFamily._allTransitiveDependencies,
+        containerFilter: containerFilter,
+      );
 
   AvailableTabStatesProvider._internal(
     super._createNotifier, {
@@ -248,8 +229,9 @@ class AvailableTabStatesProvider
   @override
   Override overrideWith(
     EquatableCollection<Map<String, TabState>> Function(
-            AvailableTabStatesRef provider)
-        create,
+      AvailableTabStatesRef provider,
+    )
+    create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -267,7 +249,7 @@ class AvailableTabStatesProvider
 
   @override
   AutoDisposeProviderElement<EquatableCollection<Map<String, TabState>>>
-      createElement() {
+  createElement() {
     return _AvailableTabStatesProviderElement(this);
   }
 
@@ -294,8 +276,10 @@ mixin AvailableTabStatesRef
   ContainerFilter get containerFilter;
 }
 
-class _AvailableTabStatesProviderElement extends AutoDisposeProviderElement<
-    EquatableCollection<Map<String, TabState>>> with AvailableTabStatesRef {
+class _AvailableTabStatesProviderElement
+    extends
+        AutoDisposeProviderElement<EquatableCollection<Map<String, TabState>>>
+    with AvailableTabStatesRef {
   _AvailableTabStatesProviderElement(super.provider);
 
   @override
@@ -321,20 +305,14 @@ class SeamlessFilteredTabIdsFamily
     TabSearchPartition searchPartition,
     ContainerFilter containerFilter,
   ) {
-    return SeamlessFilteredTabIdsProvider(
-      searchPartition,
-      containerFilter,
-    );
+    return SeamlessFilteredTabIdsProvider(searchPartition, containerFilter);
   }
 
   @override
   SeamlessFilteredTabIdsProvider getProviderOverride(
     covariant SeamlessFilteredTabIdsProvider provider,
   ) {
-    return call(
-      provider.searchPartition,
-      provider.containerFilter,
-    );
+    return call(provider.searchPartition, provider.containerFilter);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -360,23 +338,23 @@ class SeamlessFilteredTabIdsProvider
     TabSearchPartition searchPartition,
     ContainerFilter containerFilter,
   ) : this._internal(
-          (ref) => seamlessFilteredTabIds(
-            ref as SeamlessFilteredTabIdsRef,
-            searchPartition,
-            containerFilter,
-          ),
-          from: seamlessFilteredTabIdsProvider,
-          name: r'seamlessFilteredTabIdsProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$seamlessFilteredTabIdsHash,
-          dependencies: SeamlessFilteredTabIdsFamily._dependencies,
-          allTransitiveDependencies:
-              SeamlessFilteredTabIdsFamily._allTransitiveDependencies,
-          searchPartition: searchPartition,
-          containerFilter: containerFilter,
-        );
+        (ref) => seamlessFilteredTabIds(
+          ref as SeamlessFilteredTabIdsRef,
+          searchPartition,
+          containerFilter,
+        ),
+        from: seamlessFilteredTabIdsProvider,
+        name: r'seamlessFilteredTabIdsProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$seamlessFilteredTabIdsHash,
+        dependencies: SeamlessFilteredTabIdsFamily._dependencies,
+        allTransitiveDependencies:
+            SeamlessFilteredTabIdsFamily._allTransitiveDependencies,
+        searchPartition: searchPartition,
+        containerFilter: containerFilter,
+      );
 
   SeamlessFilteredTabIdsProvider._internal(
     super._createNotifier, {
@@ -395,8 +373,9 @@ class SeamlessFilteredTabIdsProvider
   @override
   Override overrideWith(
     EquatableCollection<List<String>> Function(
-            SeamlessFilteredTabIdsRef provider)
-        create,
+      SeamlessFilteredTabIdsRef provider,
+    )
+    create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -415,7 +394,7 @@ class SeamlessFilteredTabIdsProvider
 
   @override
   AutoDisposeProviderElement<EquatableCollection<List<String>>>
-      createElement() {
+  createElement() {
     return _SeamlessFilteredTabIdsProviderElement(this);
   }
 
@@ -488,10 +467,7 @@ class SeamlessFilteredTabPreviewsFamily
   SeamlessFilteredTabPreviewsProvider getProviderOverride(
     covariant SeamlessFilteredTabPreviewsProvider provider,
   ) {
-    return call(
-      provider.searchPartition,
-      provider.containerFilter,
-    );
+    return call(provider.searchPartition, provider.containerFilter);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -517,23 +493,23 @@ class SeamlessFilteredTabPreviewsProvider
     TabSearchPartition searchPartition,
     ContainerFilter containerFilter,
   ) : this._internal(
-          (ref) => seamlessFilteredTabPreviews(
-            ref as SeamlessFilteredTabPreviewsRef,
-            searchPartition,
-            containerFilter,
-          ),
-          from: seamlessFilteredTabPreviewsProvider,
-          name: r'seamlessFilteredTabPreviewsProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$seamlessFilteredTabPreviewsHash,
-          dependencies: SeamlessFilteredTabPreviewsFamily._dependencies,
-          allTransitiveDependencies:
-              SeamlessFilteredTabPreviewsFamily._allTransitiveDependencies,
-          searchPartition: searchPartition,
-          containerFilter: containerFilter,
-        );
+        (ref) => seamlessFilteredTabPreviews(
+          ref as SeamlessFilteredTabPreviewsRef,
+          searchPartition,
+          containerFilter,
+        ),
+        from: seamlessFilteredTabPreviewsProvider,
+        name: r'seamlessFilteredTabPreviewsProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$seamlessFilteredTabPreviewsHash,
+        dependencies: SeamlessFilteredTabPreviewsFamily._dependencies,
+        allTransitiveDependencies:
+            SeamlessFilteredTabPreviewsFamily._allTransitiveDependencies,
+        searchPartition: searchPartition,
+        containerFilter: containerFilter,
+      );
 
   SeamlessFilteredTabPreviewsProvider._internal(
     super._createNotifier, {
@@ -552,8 +528,9 @@ class SeamlessFilteredTabPreviewsProvider
   @override
   Override overrideWith(
     EquatableCollection<List<TabPreview>> Function(
-            SeamlessFilteredTabPreviewsRef provider)
-        create,
+      SeamlessFilteredTabPreviewsRef provider,
+    )
+    create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -572,7 +549,7 @@ class SeamlessFilteredTabPreviewsProvider
 
   @override
   AutoDisposeProviderElement<EquatableCollection<List<TabPreview>>>
-      createElement() {
+  createElement() {
     return _SeamlessFilteredTabPreviewsProviderElement(this);
   }
 
@@ -623,9 +600,7 @@ String _$selectedBangTriggerHash() =>
 abstract class _$SelectedBangTrigger extends BuildlessNotifier<String?> {
   late final String? domain;
 
-  String? build({
-    String? domain,
-  });
+  String? build({String? domain});
 }
 
 /// See also [SelectedBangTrigger].
@@ -638,21 +613,15 @@ class SelectedBangTriggerFamily extends Family<String?> {
   const SelectedBangTriggerFamily();
 
   /// See also [SelectedBangTrigger].
-  SelectedBangTriggerProvider call({
-    String? domain,
-  }) {
-    return SelectedBangTriggerProvider(
-      domain: domain,
-    );
+  SelectedBangTriggerProvider call({String? domain}) {
+    return SelectedBangTriggerProvider(domain: domain);
   }
 
   @override
   SelectedBangTriggerProvider getProviderOverride(
     covariant SelectedBangTriggerProvider provider,
   ) {
-    return call(
-      domain: provider.domain,
-    );
+    return call(domain: provider.domain);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -674,21 +643,20 @@ class SelectedBangTriggerFamily extends Family<String?> {
 class SelectedBangTriggerProvider
     extends NotifierProviderImpl<SelectedBangTrigger, String?> {
   /// See also [SelectedBangTrigger].
-  SelectedBangTriggerProvider({
-    String? domain,
-  }) : this._internal(
-          () => SelectedBangTrigger()..domain = domain,
-          from: selectedBangTriggerProvider,
-          name: r'selectedBangTriggerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$selectedBangTriggerHash,
-          dependencies: SelectedBangTriggerFamily._dependencies,
-          allTransitiveDependencies:
-              SelectedBangTriggerFamily._allTransitiveDependencies,
-          domain: domain,
-        );
+  SelectedBangTriggerProvider({String? domain})
+    : this._internal(
+        () => SelectedBangTrigger()..domain = domain,
+        from: selectedBangTriggerProvider,
+        name: r'selectedBangTriggerProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$selectedBangTriggerHash,
+        dependencies: SelectedBangTriggerFamily._dependencies,
+        allTransitiveDependencies:
+            SelectedBangTriggerFamily._allTransitiveDependencies,
+        domain: domain,
+      );
 
   SelectedBangTriggerProvider._internal(
     super._createNotifier, {
@@ -703,12 +671,8 @@ class SelectedBangTriggerProvider
   final String? domain;
 
   @override
-  String? runNotifierBuild(
-    covariant SelectedBangTrigger notifier,
-  ) {
-    return notifier.build(
-      domain: domain,
-    );
+  String? runNotifierBuild(covariant SelectedBangTrigger notifier) {
+    return notifier.build(domain: domain);
   }
 
   @override
@@ -768,9 +732,7 @@ abstract class _$SelectedBangData
     extends BuildlessAutoDisposeNotifier<BangData?> {
   late final String? domain;
 
-  BangData? build({
-    String? domain,
-  });
+  BangData? build({String? domain});
 }
 
 /// See also [SelectedBangData].
@@ -783,21 +745,15 @@ class SelectedBangDataFamily extends Family<BangData?> {
   const SelectedBangDataFamily();
 
   /// See also [SelectedBangData].
-  SelectedBangDataProvider call({
-    String? domain,
-  }) {
-    return SelectedBangDataProvider(
-      domain: domain,
-    );
+  SelectedBangDataProvider call({String? domain}) {
+    return SelectedBangDataProvider(domain: domain);
   }
 
   @override
   SelectedBangDataProvider getProviderOverride(
     covariant SelectedBangDataProvider provider,
   ) {
-    return call(
-      domain: provider.domain,
-    );
+    return call(domain: provider.domain);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -819,21 +775,20 @@ class SelectedBangDataFamily extends Family<BangData?> {
 class SelectedBangDataProvider
     extends AutoDisposeNotifierProviderImpl<SelectedBangData, BangData?> {
   /// See also [SelectedBangData].
-  SelectedBangDataProvider({
-    String? domain,
-  }) : this._internal(
-          () => SelectedBangData()..domain = domain,
-          from: selectedBangDataProvider,
-          name: r'selectedBangDataProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$selectedBangDataHash,
-          dependencies: SelectedBangDataFamily._dependencies,
-          allTransitiveDependencies:
-              SelectedBangDataFamily._allTransitiveDependencies,
-          domain: domain,
-        );
+  SelectedBangDataProvider({String? domain})
+    : this._internal(
+        () => SelectedBangData()..domain = domain,
+        from: selectedBangDataProvider,
+        name: r'selectedBangDataProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$selectedBangDataHash,
+        dependencies: SelectedBangDataFamily._dependencies,
+        allTransitiveDependencies:
+            SelectedBangDataFamily._allTransitiveDependencies,
+        domain: domain,
+      );
 
   SelectedBangDataProvider._internal(
     super._createNotifier, {
@@ -848,12 +803,8 @@ class SelectedBangDataProvider
   final String? domain;
 
   @override
-  BangData? runNotifierBuild(
-    covariant SelectedBangData notifier,
-  ) {
-    return notifier.build(
-      domain: domain,
-    );
+  BangData? runNotifierBuild(covariant SelectedBangData notifier) {
+    return notifier.build(domain: domain);
   }
 
   @override
@@ -874,7 +825,7 @@ class SelectedBangDataProvider
 
   @override
   AutoDisposeNotifierProviderElement<SelectedBangData, BangData?>
-      createElement() {
+  createElement() {
     return _SelectedBangDataProviderElement(this);
   }
 
@@ -915,14 +866,15 @@ String _$lastUsedAssistantModeHash() =>
 @ProviderFor(LastUsedAssistantMode)
 final lastUsedAssistantModeProvider =
     NotifierProvider<LastUsedAssistantMode, AssistantMode>.internal(
-  LastUsedAssistantMode.new,
-  name: r'lastUsedAssistantModeProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$lastUsedAssistantModeHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      LastUsedAssistantMode.new,
+      name: r'lastUsedAssistantModeProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$lastUsedAssistantModeHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$LastUsedAssistantMode = Notifier<AssistantMode>;
 String _$activeResearchVariantHash() =>
@@ -932,14 +884,15 @@ String _$activeResearchVariantHash() =>
 @ProviderFor(ActiveResearchVariant)
 final activeResearchVariantProvider =
     NotifierProvider<ActiveResearchVariant, ResearchVariant>.internal(
-  ActiveResearchVariant.new,
-  name: r'activeResearchVariantProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$activeResearchVariantHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ActiveResearchVariant.new,
+      name: r'activeResearchVariantProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$activeResearchVariantHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ActiveResearchVariant = Notifier<ResearchVariant>;
 String _$activeChatModelHash() => r'675f406af8b4aa92699d59e37b5805a81d03a799';
@@ -948,14 +901,15 @@ String _$activeChatModelHash() => r'675f406af8b4aa92699d59e37b5805a81d03a799';
 @ProviderFor(ActiveChatModel)
 final activeChatModelProvider =
     NotifierProvider<ActiveChatModel, ChatModel>.internal(
-  ActiveChatModel.new,
-  name: r'activeChatModelProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$activeChatModelHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ActiveChatModel.new,
+      name: r'activeChatModelProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$activeChatModelHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ActiveChatModel = Notifier<ChatModel>;
 String _$showFindInPageHash() => r'7ee5703f7d0c7e8a8dd6b0849d7b1e0a41fe24d9';
@@ -965,9 +919,10 @@ String _$showFindInPageHash() => r'7ee5703f7d0c7e8a8dd6b0849d7b1e0a41fe24d9';
 final showFindInPageProvider = NotifierProvider<ShowFindInPage, bool>.internal(
   ShowFindInPage.new,
   name: r'showFindInPageProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$showFindInPageHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$showFindInPageHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

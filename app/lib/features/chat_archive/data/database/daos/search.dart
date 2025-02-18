@@ -24,9 +24,7 @@ class SearchDao extends DatabaseAccessor<ChatSearchDatabase>
     return db.chat.insertOne(
       chat,
       onConflict: DoUpdate(
-        (old) => ChatCompanion.custom(
-          content: Variable(chat.content.value),
-        ),
+        (old) => ChatCompanion.custom(content: Variable(chat.content.value)),
       ),
     );
   }

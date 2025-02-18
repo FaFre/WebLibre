@@ -35,9 +35,7 @@ class SettingsScreen extends HookConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(
-                height: 8,
-              ),
+              const SizedBox(height: 8),
               Card(
                 color: Theme.of(context).highlightColor,
                 clipBehavior: Clip.antiAlias,
@@ -54,9 +52,7 @@ class SettingsScreen extends HookConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(
-                height: 8,
-              ),
+              const SizedBox(height: 8),
               Card(
                 color: Theme.of(context).highlightColor,
                 clipBehavior: Clip.antiAlias,

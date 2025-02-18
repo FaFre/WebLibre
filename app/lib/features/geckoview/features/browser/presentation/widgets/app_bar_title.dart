@@ -31,15 +31,9 @@ class AppBarTitle extends StatelessWidget {
         size: 14,
       );
     } else if (!tab.isLoading) {
-      return const Icon(
-        MdiIcons.lock,
-        size: 14,
-      );
+      return const Icon(MdiIcons.lock, size: 14);
     } else {
-      return const Icon(
-        MdiIcons.timerSand,
-        size: 14,
-      );
+      return const Icon(MdiIcons.timerSand, size: 14);
     }
   }
 
@@ -54,19 +48,11 @@ class AppBarTitle extends StatelessWidget {
           Skeletonizer(
             enabled: tab.icon == null,
             child: Skeleton.replace(
-              replacement: const Bone.icon(
-                size: 16,
-              ),
-              child: RawImage(
-                image: tab.icon?.value,
-                height: 16,
-                width: 16,
-              ),
+              replacement: const Bone.icon(size: 16),
+              child: RawImage(image: tab.icon?.value, height: 16, width: 16),
             ),
           ),
-          const SizedBox(
-            width: 8,
-          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,8 +68,9 @@ class AppBarTitle extends StatelessWidget {
                     child: TextScroll(
                       key: ValueKey(tab.title),
                       tab.title,
-                      style: theme.textTheme.bodyLarge
-                          ?.copyWith(color: theme.colorScheme.onSurface),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                       // mode: TextScrollMode.bouncing,
                       velocity: const Velocity(pixelsPerSecond: Offset(75, 0)),
                       delayBefore: const Duration(milliseconds: 500),
@@ -99,14 +86,13 @@ class AppBarTitle extends StatelessWidget {
                 Row(
                   children: [
                     _securityStatusIcon(context),
-                    const SizedBox(
-                      width: 4,
-                    ),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         tab.url.authority,
-                        style: theme.textTheme.bodyMedium
-                            ?.copyWith(color: theme.colorScheme.onSurface),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ],

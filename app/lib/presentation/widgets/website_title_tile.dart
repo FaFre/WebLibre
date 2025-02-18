@@ -13,9 +13,10 @@ class WebsiteTitleTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pageInfoAsync = (precachedInfo?.isPageInfoComplete ?? false)
-        ? AsyncValue.data(precachedInfo!)
-        : ref.watch(pageInfoProvider(url));
+    final pageInfoAsync =
+        (precachedInfo?.isPageInfoComplete ?? false)
+            ? AsyncValue.data(precachedInfo!)
+            : ref.watch(pageInfoProvider(url));
 
     return Skeletonizer(
       enabled: pageInfoAsync.isLoading && precachedInfo == null,
@@ -38,22 +39,24 @@ class WebsiteTitleTile extends HookConsumerWidget {
             onRetry: () => ref.refresh(pageInfoProvider(url)),
           );
         },
-        loading: () => (precachedInfo != null)
-            ? ListTile(
-                leading: RawImage(
-                  image: precachedInfo!.favicon?.image.value,
-                  height: 24,
-                  width: 24,
-                ),
-                contentPadding: EdgeInsets.zero,
-                title: Text(precachedInfo!.title ?? 'Unknown Title'),
-                subtitle: Text(url.authority),
-              )
-            : const ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Bone.text(),
-                subtitle: Bone.text(),
-              ),
+        loading:
+            () =>
+                (precachedInfo != null)
+                    ? ListTile(
+                      leading: RawImage(
+                        image: precachedInfo!.favicon?.image.value,
+                        height: 24,
+                        width: 24,
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(precachedInfo!.title ?? 'Unknown Title'),
+                      subtitle: Text(url.authority),
+                    )
+                    : const ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Bone.text(),
+                      subtitle: Bone.text(),
+                    ),
       ),
     );
   }

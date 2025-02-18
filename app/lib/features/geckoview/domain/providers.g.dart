@@ -13,14 +13,15 @@ String _$selectionActionServiceHash() =>
 @ProviderFor(selectionActionService)
 final selectionActionServiceProvider =
     Provider<GeckoSelectionActionService>.internal(
-  selectionActionService,
-  name: r'selectionActionServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectionActionServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      selectionActionService,
+      name: r'selectionActionServiceProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$selectionActionServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -64,9 +65,10 @@ String _$tabContentServiceHash() => r'd9a991add907ecc138c62790883e59d8e9aa9266';
 final tabContentServiceProvider = Provider<GeckoTabContentService>.internal(
   tabContentService,
   name: r'tabContentServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tabContentServiceHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$tabContentServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -81,14 +83,15 @@ String _$engineSuggestionsServiceHash() =>
 @ProviderFor(engineSuggestionsService)
 final engineSuggestionsServiceProvider =
     Provider<GeckoSuggestionsService>.internal(
-  engineSuggestionsService,
-  name: r'engineSuggestionsServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$engineSuggestionsServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      engineSuggestionsService,
+      name: r'engineSuggestionsServiceProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$engineSuggestionsServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -100,14 +103,15 @@ String _$selectedTabSessionNotifierHash() =>
 @ProviderFor(selectedTabSessionNotifier)
 final selectedTabSessionNotifierProvider =
     AutoDisposeProvider<Raw<TabSession>>.internal(
-  selectedTabSessionNotifier,
-  name: r'selectedTabSessionNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedTabSessionNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      selectedTabSessionNotifier,
+      name: r'selectedTabSessionNotifierProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$selectedTabSessionNotifierHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -118,14 +122,15 @@ String _$engineReadyStateHash() => r'c682333e2e07cf0635aa7ae793a2088ca648c950';
 @ProviderFor(EngineReadyState)
 final engineReadyStateProvider =
     NotifierProvider<EngineReadyState, bool>.internal(
-  EngineReadyState.new,
-  name: r'engineReadyStateProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$engineReadyStateHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      EngineReadyState.new,
+      name: r'engineReadyStateProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$engineReadyStateHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$EngineReadyState = Notifier<bool>;
 // ignore_for_file: type=lint

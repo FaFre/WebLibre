@@ -28,7 +28,8 @@ class LandingAction extends HookConsumerWidget {
               await context.push(SettingsRoute().location);
             }
           },
-          data: '## No Kagi Session Provided\n'
+          data:
+              '## No Kagi Session Provided\n'
               'Please navigate to [Settings](settings) and enter your Kagi Session Token.\n'
               "You must provide a valid session in order to use Kagi's features.",
         ),

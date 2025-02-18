@@ -6,7 +6,7 @@ class GeckoDeleteBrowserDataService {
   final GeckoDeleteBrowsingDataController _api;
 
   GeckoDeleteBrowserDataService({GeckoDeleteBrowsingDataController? api})
-      : _api = api ?? _apiInstance;
+    : _api = api ?? _apiInstance;
 
   Future<void> deleteTabs() {
     return _api.deleteTabs();

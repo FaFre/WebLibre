@@ -36,8 +36,8 @@ class GeneralSettings with FastEquatable {
     ThemeMode? themeMode,
     bool? enableReadability,
     this.deleteBrowsingDataOnQuit,
-  })  : themeMode = themeMode ?? ThemeMode.dark,
-        enableReadability = enableReadability ?? true;
+  }) : themeMode = themeMode ?? ThemeMode.dark,
+       enableReadability = enableReadability ?? true;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -49,8 +49,8 @@ class GeneralSettings with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-        themeMode,
-        enableReadability,
-        deleteBrowsingDataOnQuit,
-      ];
+    themeMode,
+    enableReadability,
+    deleteBrowsingDataOnQuit,
+  ];
 }

@@ -38,14 +38,15 @@ class SqliteVectorStore extends VectorStore {
     required List<double> embedding,
     VectorStoreSimilaritySearch config = const VectorStoreSimilaritySearch(),
   }) async {
-    Iterable<VectorResult> results = await _dao
-        .vectorSearch(
-          config: config,
-          searchVectors: embedding,
-          contextId: contextId,
-          mainDocumentId: mainDocumentId,
-        )
-        .get();
+    Iterable<VectorResult> results =
+        await _dao
+            .vectorSearch(
+              config: config,
+              searchVectors: embedding,
+              contextId: contextId,
+              mainDocumentId: mainDocumentId,
+            )
+            .get();
 
     if (config.scoreThreshold != null) {
       results = results.where(

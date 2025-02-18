@@ -24,9 +24,7 @@ class _TorService {
 
   Future<void> initializeService() async {
     await service.configure(
-      iosConfiguration: IosConfiguration(
-        autoStart: false,
-      ),
+      iosConfiguration: IosConfiguration(autoStart: false),
       androidConfiguration: AndroidConfiguration(
         autoStart: false,
         onStart: onStart,
@@ -67,11 +65,9 @@ class TorProxyService extends _$TorProxyService {
 
   @override
   Future<int?> build() async {
-    final portSub = _tor.portStream.distinct().listen(
-      (port) {
-        state = AsyncData(port);
-      },
-    );
+    final portSub = _tor.portStream.distinct().listen((port) {
+      state = AsyncData(port);
+    });
 
     await _tor.initializeService();
 

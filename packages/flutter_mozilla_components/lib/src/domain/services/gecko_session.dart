@@ -10,11 +10,11 @@ class GeckoSessionService {
   final GeckoSessionApi _api;
 
   GeckoSessionService({required String this.tabId, GeckoSessionApi? api})
-      : _api = api ?? _apiInstance;
+    : _api = api ?? _apiInstance;
 
   GeckoSessionService.forActiveTab({GeckoSessionApi? api})
-      : _api = api ?? _apiInstance,
-        tabId = null;
+    : _api = api ?? _apiInstance,
+      tabId = null;
 
   Future<void> loadUrl({
     required Uri url,
@@ -43,10 +43,7 @@ class GeckoSessionService {
   }
 
   Future<void> reload({LoadUrlFlags flags = LoadUrlFlags.NONE}) {
-    return _api.reload(
-      tabId: tabId,
-      flags: flags.toValue(),
-    );
+    return _api.reload(tabId: tabId, flags: flags.toValue());
   }
 
   Future<void> stopLoading() {
@@ -54,31 +51,19 @@ class GeckoSessionService {
   }
 
   Future<void> goBack({bool userInteraction = true}) {
-    return _api.goBack(
-      tabId: tabId,
-      userInteraction: userInteraction,
-    );
+    return _api.goBack(tabId: tabId, userInteraction: userInteraction);
   }
 
   Future<void> goForward({bool userInteraction = true}) {
-    return _api.goForward(
-      tabId: tabId,
-      userInteraction: userInteraction,
-    );
+    return _api.goForward(tabId: tabId, userInteraction: userInteraction);
   }
 
   Future<void> goToHistoryIndex({required int index}) {
-    return _api.goToHistoryIndex(
-      index: index,
-      tabId: tabId,
-    );
+    return _api.goToHistoryIndex(index: index, tabId: tabId);
   }
 
   Future<void> requestDesktopSite({required bool enable}) {
-    return _api.requestDesktopSite(
-      enable: enable,
-      tabId: tabId,
-    );
+    return _api.requestDesktopSite(enable: enable, tabId: tabId);
   }
 
   Future<void> exitFullscreen() {
@@ -110,9 +95,7 @@ class GeckoSessionService {
     return _api.translateRestore(tabId: tabId);
   }
 
-  Future<void> crashRecovery({
-    List<String>? tabIds,
-  }) {
+  Future<void> crashRecovery({List<String>? tabIds}) {
     return _api.crashRecovery(tabIds: tabIds);
   }
 

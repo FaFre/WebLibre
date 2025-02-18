@@ -10,10 +10,10 @@ class LRUCache<K, V> {
     int Function(K)? hashCode,
     bool Function(dynamic)? isValidKey,
   }) : _cache = LinkedHashMap<K, V>(
-          equals: equals,
-          hashCode: hashCode,
-          isValidKey: isValidKey,
-        );
+         equals: equals,
+         hashCode: hashCode,
+         isValidKey: isValidKey,
+       );
 
   void resize(int capacity) {
     if (_capacity > capacity) {

@@ -29,11 +29,12 @@ class GeckoReaderableService extends ReaderViewController {
     ReaderViewEvents? readerEvents,
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
-  }) : _events = readerEvents ??
-            ReaderViewEvents(
-              binaryMessenger: binaryMessenger,
-              messageChannelSuffix: messageChannelSuffix,
-            ) {
+  }) : _events =
+           readerEvents ??
+           ReaderViewEvents(
+             binaryMessenger: binaryMessenger,
+             messageChannelSuffix: messageChannelSuffix,
+           ) {
     ReaderViewController.setUp(
       this,
       binaryMessenger: binaryMessenger,

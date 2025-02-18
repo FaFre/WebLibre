@@ -23,8 +23,9 @@ class SearchScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
-    final searchTextController =
-        useTextEditingController(text: initialSearchText);
+    final searchTextController = useTextEditingController(
+      text: initialSearchText,
+    );
     final searchFocusNode = useFocusNode();
 
     final defaultSearchBang = ref.watch(
@@ -35,16 +36,13 @@ class SearchScreen extends HookConsumerWidget {
     final activeBang = selectedBang.value ?? defaultSearchBang;
     final showBangIcon = useState(false);
 
-    ref.listen(
-      selectedBangDataProvider(),
-      (previous, next) {
-        if (previous != next) {
-          showBangIcon.value = true;
-        }
+    ref.listen(selectedBangDataProvider(), (previous, next) {
+      if (previous != next) {
+        showBangIcon.value = true;
+      }
 
-        selectedBang.value = next;
-      },
-    );
+      selectedBang.value = next;
+    });
 
     Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
@@ -78,12 +76,14 @@ class SearchScreen extends HookConsumerWidget {
                 autofocus: true,
                 onSubmitted: (value) async {
                   if (value.isNotEmpty) {
-                    var newUrl =
-                        uri_parser.tryParseUrl(value, eagerParsing: true);
+                    var newUrl = uri_parser.tryParseUrl(
+                      value,
+                      eagerParsing: true,
+                    );
 
                     if (newUrl == null) {
-                      final defaultSearchBang = ref
-                              .read(selectedBangDataProvider()) ??
+                      final defaultSearchBang =
+                          ref.read(selectedBangDataProvider()) ??
                           await ref.read(defaultSearchBangDataProvider.future);
 
                       newUrl = defaultSearchBang?.getUrl(value);
@@ -108,23 +108,15 @@ class SearchScreen extends HookConsumerWidget {
                 showSuggestions: true,
               ),
             ),
-            const SliverToBoxAdapter(
-              child: Divider(),
-            ),
+            const SliverToBoxAdapter(child: Divider()),
             SearchTermSuggestions(
               searchTextController: searchTextController,
               activeBang: activeBang,
               submitSearch: submitSearch,
             ),
-            const SliverToBoxAdapter(
-              child: Divider(),
-            ),
-            TabSearch(
-              searchTextController: searchTextController,
-            ),
-            HistorySuggestions(
-              searchTextController: searchTextController,
-            ),
+            const SliverToBoxAdapter(child: Divider()),
+            TabSearch(searchTextController: searchTextController),
+            HistorySuggestions(searchTextController: searchTextController),
           ],
         ),
       ),

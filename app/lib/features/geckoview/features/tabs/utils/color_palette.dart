@@ -17,11 +17,12 @@ bool useWhiteForeground(Color backgroundColor, {double bias = 0.0}) {
   // return 1.05 / (color.computeLuminance() + 0.05) > 4.5;
 
   // New:
-  final v = sqrt(
-    pow(backgroundColor.r, 2) * 0.299 +
-        pow(backgroundColor.g, 2) * 0.587 +
-        pow(backgroundColor.b, 2) * 0.114,
-  ).round();
+  final v =
+      sqrt(
+        pow(backgroundColor.r, 2) * 0.299 +
+            pow(backgroundColor.g, 2) * 0.587 +
+            pow(backgroundColor.b, 2) * 0.114,
+      ).round();
   return v < (130 + bias);
 }
 
@@ -54,9 +55,20 @@ List<Map<Color, String>> shadingTypes(List<Color> colors) {
   for (final Color colorType in colors) {
     if (colorType == Colors.grey) {
       result.addAll(
-        [50, 100, 200, 300, 350, 400, 500, 600, 700, 800, 850, 900]
-            .map((int shade) => {Colors.grey[shade]!: shade.toString()})
-            .toList(),
+        [
+          50,
+          100,
+          200,
+          300,
+          350,
+          400,
+          500,
+          600,
+          700,
+          800,
+          850,
+          900,
+        ].map((int shade) => {Colors.grey[shade]!: shade.toString()}).toList(),
       );
     } else if (colorType == Colors.black || colorType == Colors.white) {
       result.addAll([
@@ -65,15 +77,27 @@ List<Map<Color, String>> shadingTypes(List<Color> colors) {
       ]);
     } else if (colorType is MaterialAccentColor) {
       result.addAll(
-        [100, 200, 400, 700]
-            .map((int shade) => {colorType[shade]!: 'A$shade'})
-            .toList(),
+        [
+          100,
+          200,
+          400,
+          700,
+        ].map((int shade) => {colorType[shade]!: 'A$shade'}).toList(),
       );
     } else if (colorType is MaterialColor) {
       result.addAll(
-        [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]
-            .map((int shade) => {colorType[shade]!: shade.toString()})
-            .toList(),
+        [
+          50,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900,
+        ].map((int shade) => {colorType[shade]!: shade.toString()}).toList(),
       );
     } else {
       result.add({const Color(0x00000000): ''});

@@ -30,23 +30,23 @@ class TabDatabase extends _$TabDatabase with TrigramQueryBuilderMixin {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          final migrator =
-              VectorDatabaseMigrator(dimensions: embeddingDimensions);
+    onCreate: (m) async {
+      final migrator = VectorDatabaseMigrator(dimensions: embeddingDimensions);
 
-          await m.database.customStatement(migrator.vectorTableDefinition);
+      await m.database.customStatement(migrator.vectorTableDefinition);
 
-          //instead of m.createAll(); we igoner vec0 table
-          for (final entity
-              in allSchemaEntities.where((entity) => entity is! DocumentVec)) {
-            await m.create(entity);
-          }
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON;');
-          await optimizeFtsIndex();
-        },
-      );
+      //instead of m.createAll(); we igoner vec0 table
+      for (final entity in allSchemaEntities.where(
+        (entity) => entity is! DocumentVec,
+      )) {
+        await m.create(entity);
+      }
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON;');
+      await optimizeFtsIndex();
+    },
+  );
 
   TabDatabase(super.e, {required this.embeddingDimensions});
 }

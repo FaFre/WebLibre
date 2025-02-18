@@ -27,11 +27,9 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<Map<String, List<String>>> watchCategories() {
-    return ref
-        .read(bangDatabaseProvider)
-        .categoriesJson()
-        .watchSingle()
-        .map((json) {
+    return ref.read(bangDatabaseProvider).categoriesJson().watchSingle().map((
+      json,
+    ) {
       final decoded = jsonDecode(json) as Map<String, dynamic>;
       return decoded.map(
         (key, value) => MapEntry(key, (value as List<dynamic>).cast()),
@@ -43,7 +41,8 @@ class BangDataRepository extends _$BangDataRepository {
     return ref
         .read(bangDatabaseProvider)
         .bangDao
-        .getBangCount(groups: [group]).watchSingle();
+        .getBangCount(groups: [group])
+        .watchSingle();
   }
 
   Stream<List<BangData>> watchBangs({
@@ -94,12 +93,10 @@ class BangDataRepository extends _$BangDataRepository {
   }) {
     final db = ref.read(bangDatabaseProvider);
     //Pack in a transaction to bundle rebuilds of watch() queries
-    return db.transaction(
-      () async {
-        await db.bangDao.addSearchEntry(trigger, searchQuery);
-        await db.evictHistoryEntries(limit: maxEntryCount);
-      },
-    );
+    return db.transaction(() async {
+      await db.bangDao.addSearchEntry(trigger, searchQuery);
+      await db.evictHistoryEntries(limit: maxEntryCount);
+    });
   }
 
   Future<void> removeSearchEntry(String searchQuery) {

@@ -82,11 +82,10 @@ class GeckoEventService extends GeckoStateEvents {
 
   @override
   void onHistoryStateChange(int timestamp, String id, HistoryState state) {
-    _historySubject.addWhenMoreRecent(
-      timestamp,
-      id,
-      (tabId: id, history: state),
-    );
+    _historySubject.addWhenMoreRecent(timestamp, id, (
+      tabId: id,
+      history: state,
+    ));
   }
 
   @override
@@ -95,11 +94,10 @@ class GeckoEventService extends GeckoStateEvents {
     String id,
     ReaderableState state,
   ) {
-    _readerableSubject.addWhenMoreRecent(
-      timestamp,
-      id,
-      (tabId: id, readerable: state),
-    );
+    _readerableSubject.addWhenMoreRecent(timestamp, id, (
+      tabId: id,
+      readerable: state,
+    ));
   }
 
   @override
@@ -108,50 +106,47 @@ class GeckoEventService extends GeckoStateEvents {
     String id,
     SecurityInfoState state,
   ) {
-    _securityInfoSubject.addWhenMoreRecent(
-      timestamp,
-      id,
-      (tabId: id, securityInfo: state),
-    );
+    _securityInfoSubject.addWhenMoreRecent(timestamp, id, (
+      tabId: id,
+      securityInfo: state,
+    ));
   }
 
   @override
   void onIconChange(int timestamp, String id, Uint8List? bytes) {
-    _iconChangeSubject
-        .addWhenMoreRecent(timestamp, id, (tabId: id, bytes: bytes));
+    _iconChangeSubject.addWhenMoreRecent(timestamp, id, (
+      tabId: id,
+      bytes: bytes,
+    ));
   }
 
   @override
   void onIconUpdate(int timestamp, String url, Uint8List bytes) {
-    _iconUpdateSubject
-        .addWhenMoreRecent(timestamp, url, (url: url, bytes: bytes));
+    _iconUpdateSubject.addWhenMoreRecent(timestamp, url, (
+      url: url,
+      bytes: bytes,
+    ));
   }
 
   @override
   void onThumbnailChange(int timestamp, String id, Uint8List? bytes) {
-    _thumbnailSubject.addWhenMoreRecent(
-      timestamp,
-      id,
-      (tabId: id, bytes: bytes),
-    );
+    _thumbnailSubject.addWhenMoreRecent(timestamp, id, (
+      tabId: id,
+      bytes: bytes,
+    ));
   }
 
   @override
   void onFindResults(int timestamp, String id, List<FindResultState?> results) {
-    _findResultsSubject.addWhenMoreRecent(
-      timestamp,
-      id,
-      (tabId: id, results: results.nonNulls.toList()),
-    );
+    _findResultsSubject.addWhenMoreRecent(timestamp, id, (
+      tabId: id,
+      results: results.nonNulls.toList(),
+    ));
   }
 
   @override
   void onTabAdded(int timestamp, String tabId) {
-    _tabAddedSubject.addWhenMoreRecent(
-      timestamp,
-      null,
-      tabId,
-    );
+    _tabAddedSubject.addWhenMoreRecent(timestamp, null, tabId);
   }
 
   GeckoEventService.setUp({

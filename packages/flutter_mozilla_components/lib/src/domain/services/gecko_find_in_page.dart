@@ -7,11 +7,11 @@ class GeckoFindInPageService {
   final String? tabId;
 
   GeckoFindInPageService({required this.tabId, GeckoFindApi? api})
-      : _api = api ?? _apiInstance;
+    : _api = api ?? _apiInstance;
 
   GeckoFindInPageService.forActiveTab({GeckoFindApi? api})
-      : _api = api ?? _apiInstance,
-        tabId = null;
+    : _api = api ?? _apiInstance,
+      tabId = null;
 
   Future<void> findAll(String text) {
     return _api.findAll(tabId, text);

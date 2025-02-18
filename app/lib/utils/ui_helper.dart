@@ -5,9 +5,7 @@ void showErrorMessage(BuildContext context, String message) {
   final snackBar = SnackBar(
     content: Text(
       message,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.error,
-      ),
+      style: TextStyle(color: Theme.of(context).colorScheme.error),
     ),
     backgroundColor: Theme.of(context).colorScheme.onError,
   );
@@ -19,15 +17,9 @@ Future<void> launchUrlFeedback(
   Uri url, {
   LaunchMode mode = LaunchMode.externalApplication,
 }) async {
-  if (!await launchUrl(
-    url,
-    mode: mode,
-  )) {
+  if (!await launchUrl(url, mode: mode)) {
     if (context.mounted) {
-      showErrorMessage(
-        context,
-        'Could not launch URL ($url)',
-      );
+      showErrorMessage(context, 'Could not launch URL ($url)');
     }
   }
 }

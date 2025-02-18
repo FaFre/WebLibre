@@ -2,10 +2,7 @@ import 'dart:typed_data';
 
 import 'package:langchain/langchain.dart';
 
-String combineDocuments(
-  List<Document> documents, {
-  String separator = '\n\n',
-}) {
+String combineDocuments(List<Document> documents, {String separator = '\n\n'}) {
   return documents.map((d) => d.pageContent).join(separator);
 }
 

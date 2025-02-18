@@ -12,21 +12,18 @@ class SelectedTab extends _$SelectedTab {
   String? build() {
     final eventSerivce = ref.watch(eventServiceProvider);
 
-    ref.listen(
-      fireImmediately: true,
-      engineReadyStateProvider,
-      (previous, next) async {
-        if (next) {
-          await GeckoTabService().syncEvents(onSelectedTabChange: true);
-        }
-      },
-    );
+    ref.listen(fireImmediately: true, engineReadyStateProvider, (
+      previous,
+      next,
+    ) async {
+      if (next) {
+        await GeckoTabService().syncEvents(onSelectedTabChange: true);
+      }
+    });
 
-    final selectedTabSub = eventSerivce.selectedTabEvents.listen(
-      (tabId) async {
-        state = tabId;
-      },
-    );
+    final selectedTabSub = eventSerivce.selectedTabEvents.listen((tabId) async {
+      state = tabId;
+    });
 
     ref.onDispose(() {
       unawaited(selectedTabSub.cancel());

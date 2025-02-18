@@ -13,14 +13,15 @@ String _$deleteBrowserDataServiceHash() =>
 @ProviderFor(DeleteBrowserDataService)
 final deleteBrowserDataServiceProvider =
     AutoDisposeNotifierProvider<DeleteBrowserDataService, void>.internal(
-  DeleteBrowserDataService.new,
-  name: r'deleteBrowserDataServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$deleteBrowserDataServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      DeleteBrowserDataService.new,
+      name: r'deleteBrowserDataServiceProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$deleteBrowserDataServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$DeleteBrowserDataService = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint

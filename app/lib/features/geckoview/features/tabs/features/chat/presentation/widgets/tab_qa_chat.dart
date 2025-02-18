@@ -40,22 +40,19 @@ class TabQaChat extends HookConsumerWidget {
         backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       builders: Builders(
-        textMessageBuilder: (context, message, index) =>
-            ChatTextMessage(message: message, index: index),
-        customMessageBuilder: (context, message, index) => Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 10,
-          ),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF0F0F0),
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          child: const IsTypingIndicator(),
-        ),
-        inputBuilder: (context) => const QaChatInput(
-          attachmentIcon: null,
-        ),
+        textMessageBuilder:
+            (context, message, index) =>
+                ChatTextMessage(message: message, index: index),
+        customMessageBuilder:
+            (context, message, index) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF0F0F0),
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              child: const IsTypingIndicator(),
+            ),
+        inputBuilder: (context) => const QaChatInput(attachmentIcon: null),
       ),
       chatController: chatController,
       // crossCache: crossCache,
@@ -64,11 +61,12 @@ class TabQaChat extends HookConsumerWidget {
         await chatBackend.processQAMessage(text);
       },
       currentUserId: MessageAuthor.human.user.id,
-      resolveUser: (id) => Future.value(
-        MessageAuthor.values
-            .firstWhereOrNull((user) => user.user.id == id)
-            ?.user,
-      ),
+      resolveUser:
+          (id) => Future.value(
+            MessageAuthor.values
+                .firstWhereOrNull((user) => user.user.id == id)
+                ?.user,
+          ),
     );
   }
 }

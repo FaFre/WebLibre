@@ -30,22 +30,10 @@ part 'routes.g.dart';
   name: 'BrowserRoute',
   path: '/',
   routes: [
-    TypedGoRoute<WebPageRoute>(
-      name: 'WebPageRoute',
-      path: 'page/:url',
-    ),
-    TypedGoRoute<AboutRoute>(
-      name: 'AboutRoute',
-      path: 'about',
-    ),
-    TypedGoRoute<UserAuthRoute>(
-      name: 'UserAuthRoute',
-      path: 'userAuth',
-    ),
-    TypedGoRoute<SearchRoute>(
-      name: 'SearchRoute',
-      path: 'search/:searchText',
-    ),
+    TypedGoRoute<WebPageRoute>(name: 'WebPageRoute', path: 'page/:url'),
+    TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: 'about'),
+    TypedGoRoute<UserAuthRoute>(name: 'UserAuthRoute', path: 'userAuth'),
+    TypedGoRoute<SearchRoute>(name: 'SearchRoute', path: 'search/:searchText'),
     TypedGoRoute<BangCategoriesRoute>(
       name: 'BangRoute',
       path: 'bangs',
@@ -97,10 +85,11 @@ class WebPageRoute extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(
-      builder: (_) => WebPageDialog(
-        url: Uri.parse(url),
-        precachedInfo: state.extra as WebPageInfo?,
-      ),
+      builder:
+          (_) => WebPageDialog(
+            url: Uri.parse(url),
+            precachedInfo: state.extra as WebPageInfo?,
+          ),
     );
   }
 }
@@ -130,9 +119,10 @@ class SearchRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return SearchScreen(
-      initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
-          ? null
-          : searchText,
+      initialSearchText:
+          (searchText.isEmpty || searchText == emptySearchText)
+              ? null
+              : searchText,
     );
   }
 }
@@ -181,9 +171,10 @@ class BangSearchRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return BangSearchScreen(
-      initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
-          ? null
-          : searchText,
+      initialSearchText:
+          (searchText.isEmpty || searchText == emptySearchText)
+              ? null
+              : searchText,
     );
   }
 }
@@ -221,10 +212,7 @@ class ContainerCreateRoute extends GoRouteData {
       name: 'GeneralSettingsRoute',
       path: 'general',
     ),
-    TypedGoRoute<BangSettingsRoute>(
-      name: 'BangSettingsRoute',
-      path: 'bang',
-    ),
+    TypedGoRoute<BangSettingsRoute>(name: 'BangSettingsRoute', path: 'bang'),
     TypedGoRoute<WebEngineSettingsRoute>(
       name: 'WebEngineSettingsRoute',
       path: 'web_engine',
@@ -328,10 +316,7 @@ class ChatArchiveDetailRoute extends GoRouteData {
   }
 }
 
-@TypedGoRoute<TorProxyRoute>(
-  name: 'TorProxyRoute',
-  path: '/tor_proxy',
-)
+@TypedGoRoute<TorProxyRoute>(name: 'TorProxyRoute', path: '/tor_proxy')
 class TorProxyRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {

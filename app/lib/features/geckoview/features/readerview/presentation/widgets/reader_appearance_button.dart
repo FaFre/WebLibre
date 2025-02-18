@@ -9,8 +9,9 @@ class ReaderAppearanceButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final buttonVisible = ref.watch(
-      appearanceButtonVisibilityProvider
-          .select((value) => value.valueOrNull ?? false),
+      appearanceButtonVisibilityProvider.select(
+        (value) => value.valueOrNull ?? false,
+      ),
     );
 
     final readerabilityState = ref.watch(

@@ -6,9 +6,6 @@ AsyncSnapshot<T> useCachedFuture<T>(
   List<Object?> keys = const <Object>[],
 ]) {
   // ignore: discarded_futures
-  final cachedFuture = useMemoized(
-    valueBuilder,
-    keys,
-  );
+  final cachedFuture = useMemoized(valueBuilder, keys);
   return useFuture(cachedFuture);
 }

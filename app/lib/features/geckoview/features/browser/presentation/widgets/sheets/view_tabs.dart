@@ -91,26 +91,19 @@ class _Tab extends HookConsumerWidget {
       () => searchTextController.text.isNotEmpty,
     );
 
-    useListenableCallback(
-      searchTextController,
-      () async {
-        await ref
-            .read(
-              tabSearchRepositoryProvider(TabSearchPartition.preview).notifier,
-            )
-            .addQuery(searchTextController.text);
-      },
-    );
+    useListenableCallback(searchTextController, () async {
+      await ref
+          .read(
+            tabSearchRepositoryProvider(TabSearchPartition.preview).notifier,
+          )
+          .addQuery(searchTextController.text);
+    });
 
     return Material(
       //Fix layout issue https://github.com/flutter/flutter/issues/78748#issuecomment-1194680555
       child: Align(
         child: Padding(
-          padding: const EdgeInsets.only(
-            right: 8.0,
-            left: 8.0,
-            top: 8.0,
-          ),
+          padding: const EdgeInsets.only(right: 8.0, left: 8.0, top: 8.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -175,8 +168,9 @@ class _Tab extends HookConsumerWidget {
                 child: Consumer(
                   builder: (context, ref, child) {
                     final selectedContainer = ref.watch(
-                      selectedContainerDataProvider
-                          .select((value) => value.valueOrNull),
+                      selectedContainerDataProvider.select(
+                        (value) => value.valueOrNull,
+                      ),
                     );
 
                     return ContainerChips(
@@ -280,89 +274,79 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                     [MediaQuery.of(context).size.width],
                   );
 
-                  useEffect(
-                    () {
-                      final index = filteredTabIds.collection
-                          .indexWhere((webView) => webView == activeTab);
+                  useEffect(() {
+                    final index = filteredTabIds.collection.indexWhere(
+                      (webView) => webView == activeTab,
+                    );
 
-                      if (index > -1) {
-                        final offset = (index ~/ 2) * itemHeight;
+                    if (index > -1) {
+                      final offset = (index ~/ 2) * itemHeight;
 
-                        if (offset != sheetScrollController.offset) {
-                          unawaited(
-                            sheetScrollController.animateTo(
-                              offset,
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                            ),
-                          );
-                        }
+                      if (offset != sheetScrollController.offset) {
+                        unawaited(
+                          sheetScrollController.animateTo(
+                            offset,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                          ),
+                        );
                       }
+                    }
 
-                      return null;
-                    },
-                    [filteredTabIds, activeTab],
-                  );
+                    return null;
+                  }, [filteredTabIds, activeTab]);
 
-                  final tabs = useMemoized(
-                    () {
-                      return filteredTabIds.collection
-                          .mapIndexed(
-                            (index, tabId) => CustomDraggable(
-                              key: Key(tabId),
-                              data: TabDragData(tabId),
-                              child: Consumer(
-                                child: _TabDraggable(
-                                  tabId: tabId,
-                                  activeTabId: activeTab,
-                                  onClose: onClose,
-                                ),
-                                builder: (context, ref, child) {
-                                  final dragData = ref.watch(
-                                    willAcceptDropProvider.select((value) {
-                                      final dragTabId = switch (value) {
-                                        ContainerDropData() => value.tabId,
-                                        DeleteDropData() => value.tabId,
-                                        null => null,
-                                      };
-
-                                      return (dragTabId == tabId)
-                                          ? value
-                                          : null;
-                                    }),
-                                  );
-
-                                  return switch (dragData) {
-                                    ContainerDropData() => Opacity(
-                                        opacity: 0.3,
-                                        child: Transform.scale(
-                                          scale: 0.9,
-                                          child: child,
-                                        ),
-                                      ),
-                                    DeleteDropData() => Opacity(
-                                        opacity: 0.3,
-                                        child: ColorFiltered(
-                                          colorFilter: const ColorFilter.mode(
-                                            Colors.red,
-                                            BlendMode.modulate,
-                                          ),
-                                          child: child,
-                                        ),
-                                      ),
-                                    null => child!,
-                                  };
-                                },
+                  final tabs = useMemoized(() {
+                    return filteredTabIds.collection
+                        .mapIndexed(
+                          (index, tabId) => CustomDraggable(
+                            key: Key(tabId),
+                            data: TabDragData(tabId),
+                            child: Consumer(
+                              child: _TabDraggable(
+                                tabId: tabId,
+                                activeTabId: activeTab,
+                                onClose: onClose,
                               ),
+                              builder: (context, ref, child) {
+                                final dragData = ref.watch(
+                                  willAcceptDropProvider.select((value) {
+                                    final dragTabId = switch (value) {
+                                      ContainerDropData() => value.tabId,
+                                      DeleteDropData() => value.tabId,
+                                      null => null,
+                                    };
+
+                                    return (dragTabId == tabId) ? value : null;
+                                  }),
+                                );
+
+                                return switch (dragData) {
+                                  ContainerDropData() => Opacity(
+                                    opacity: 0.3,
+                                    child: Transform.scale(
+                                      scale: 0.9,
+                                      child: child,
+                                    ),
+                                  ),
+                                  DeleteDropData() => Opacity(
+                                    opacity: 0.3,
+                                    child: ColorFiltered(
+                                      colorFilter: const ColorFilter.mode(
+                                        Colors.red,
+                                        BlendMode.modulate,
+                                      ),
+                                      child: child,
+                                    ),
+                                  ),
+                                  null => child!,
+                                };
+                              },
                             ),
-                          )
-                          .toList();
-                    },
-                    [
-                      filteredTabIds,
-                      activeTab,
-                    ],
-                  );
+                          ),
+                        )
+                        .toList();
+                  }, [filteredTabIds, activeTab]);
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -381,8 +365,9 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                         final oldIndex = positions.first.oldIndex;
                         final newIndex = positions.first.newIndex;
 
-                        final containerRepository =
-                            ref.read(containerRepositoryProvider.notifier);
+                        final containerRepository = ref.read(
+                          containerRepositoryProvider.notifier,
+                        );
 
                         final tabId = filteredTabIds.collection[oldIndex];
                         final containerId = await ref
@@ -391,12 +376,14 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                         final String key;
                         if (newIndex <= 0) {
-                          key = await containerRepository
-                              .getLeadingOrderKey(containerId);
+                          key = await containerRepository.getLeadingOrderKey(
+                            containerId,
+                          );
                         } else if (newIndex >=
                             filteredTabIds.collection.length - 1) {
-                          key = await containerRepository
-                              .getTrailingOrderKey(containerId);
+                          key = await containerRepository.getTrailingOrderKey(
+                            containerId,
+                          );
                         } else {
                           final orderAfterIndex = newIndex;
                           key = await containerRepository.getOrderKeyAfterTab(
@@ -414,12 +401,12 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           controller: sheetScrollController,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            //Sync values for itemHeight calculation _calculateItemHeight
-                            childAspectRatio: 0.75,
-                            mainAxisSpacing: 8.0,
-                            crossAxisSpacing: 8.0,
-                            crossAxisCount: 2,
-                          ),
+                                //Sync values for itemHeight calculation _calculateItemHeight
+                                childAspectRatio: 0.75,
+                                mainAxisSpacing: 8.0,
+                                crossAxisSpacing: 8.0,
+                                crossAxisCount: 2,
+                              ),
                           itemCount: children.length,
                           itemBuilder: (context, index) => children[index],
                         );
@@ -432,10 +419,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: _Tab.headerSize + 4,
-            right: 4,
-          ),
+          padding: const EdgeInsets.only(top: _Tab.headerSize + 4, right: 4),
           child: FloatingActionButton.small(
             onPressed: () async {
               await context.push(const SearchRoute().location);

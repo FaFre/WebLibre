@@ -9,27 +9,39 @@ class Container extends Table with TableInfo<Container, ContainerData> {
   final String? _alias;
   Container(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumnWithTypeConverter<Color, int> color =
-      GeneratedColumn<int>('color', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<Color>(Container.$convertercolor);
+      GeneratedColumn<int>(
+        'color',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<Color>(Container.$convertercolor);
   late final GeneratedColumnWithTypeConverter<ContainerMetadata?, String>
-      metadata = GeneratedColumn<String>('metadata', aliasedName, true,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<ContainerMetadata?>(Container.$convertermetadatan);
+  metadata = GeneratedColumn<String>(
+    'metadata',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  ).withConverter<ContainerMetadata?>(Container.$convertermetadatan);
   @override
   List<GeneratedColumn> get $columns => [id, name, color, metadata];
   @override
@@ -43,15 +55,27 @@ class Container extends Table with TableInfo<Container, ContainerData> {
   ContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ContainerData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name']),
-      color: Container.$convertercolor.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}color'])!),
-      metadata: Container.$convertermetadatan.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}metadata'])),
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      color: Container.$convertercolor.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}color'],
+        )!,
+      ),
+      metadata: Container.$convertermetadatan.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}metadata'],
+        ),
+      ),
     );
   }
 
@@ -88,8 +112,8 @@ class ContainerCompanion extends UpdateCompanion<ContainerData> {
     required Color color,
     this.metadata = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        color = Value(color);
+  }) : id = Value(id),
+       color = Value(color);
   static Insertable<ContainerData> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -106,12 +130,13 @@ class ContainerCompanion extends UpdateCompanion<ContainerData> {
     });
   }
 
-  ContainerCompanion copyWith(
-      {Value<String>? id,
-      Value<String?>? name,
-      Value<Color>? color,
-      Value<ContainerMetadata?>? metadata,
-      Value<int>? rowid}) {
+  ContainerCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? name,
+    Value<Color>? color,
+    Value<ContainerMetadata?>? metadata,
+    Value<int>? rowid,
+  }) {
     return ContainerCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -131,12 +156,14 @@ class ContainerCompanion extends UpdateCompanion<ContainerData> {
       map['name'] = Variable<String>(name.value);
     }
     if (color.present) {
-      map['color'] =
-          Variable<int>(Container.$convertercolor.toSql(color.value));
+      map['color'] = Variable<int>(
+        Container.$convertercolor.toSql(color.value),
+      );
     }
     if (metadata.present) {
-      map['metadata'] =
-          Variable<String>(Container.$convertermetadatan.toSql(metadata.value));
+      map['metadata'] = Variable<String>(
+        Container.$convertermetadatan.toSql(metadata.value),
+      );
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -163,74 +190,110 @@ class Tab extends Table with TableInfo<Tab, TabData> {
   final String? _alias;
   Tab(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumn<String> containerId = GeneratedColumn<String>(
-      'container_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: 'REFERENCES container(id)ON DELETE CASCADE');
+    'container_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'REFERENCES container(id)ON DELETE CASCADE',
+  );
   late final GeneratedColumn<String> orderKey = GeneratedColumn<String>(
-      'order_key', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'order_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> url = GeneratedColumn<String>(
-      'url', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<bool> isProbablyReaderable = GeneratedColumn<bool>(
-      'is_probably_readerable', aliasedName, true,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'is_probably_readerable',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> extractedContentMarkdown =
-      GeneratedColumn<String>('extracted_content_markdown', aliasedName, true,
-          type: DriftSqlType.string,
-          requiredDuringInsert: false,
-          $customConstraints: '');
+      GeneratedColumn<String>(
+        'extracted_content_markdown',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
   late final GeneratedColumn<String> extractedContentPlain =
-      GeneratedColumn<String>('extracted_content_plain', aliasedName, true,
-          type: DriftSqlType.string,
-          requiredDuringInsert: false,
-          $customConstraints: '');
+      GeneratedColumn<String>(
+        'extracted_content_plain',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
   late final GeneratedColumn<String> fullContentMarkdown =
-      GeneratedColumn<String>('full_content_markdown', aliasedName, true,
-          type: DriftSqlType.string,
-          requiredDuringInsert: false,
-          $customConstraints: '');
+      GeneratedColumn<String>(
+        'full_content_markdown',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
   late final GeneratedColumn<String> fullContentPlain = GeneratedColumn<String>(
-      'full_content_plain', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'full_content_plain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
-      'timestamp', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        containerId,
-        orderKey,
-        url,
-        title,
-        isProbablyReaderable,
-        extractedContentMarkdown,
-        extractedContentPlain,
-        fullContentMarkdown,
-        fullContentPlain,
-        timestamp
-      ];
+    id,
+    containerId,
+    orderKey,
+    url,
+    title,
+    isProbablyReaderable,
+    extractedContentMarkdown,
+    extractedContentPlain,
+    fullContentMarkdown,
+    fullContentPlain,
+    timestamp,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -242,30 +305,53 @@ class Tab extends Table with TableInfo<Tab, TabData> {
   TabData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TabData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      containerId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}container_id']),
-      orderKey: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}order_key'])!,
-      url: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}url']),
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title']),
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      containerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}container_id'],
+      ),
+      orderKey:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}order_key'],
+          )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
       isProbablyReaderable: attachedDatabase.typeMapping.read(
-          DriftSqlType.bool, data['${effectivePrefix}is_probably_readerable']),
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_probably_readerable'],
+      ),
       extractedContentMarkdown: attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}extracted_content_markdown']),
+        DriftSqlType.string,
+        data['${effectivePrefix}extracted_content_markdown'],
+      ),
       extractedContentPlain: attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}extracted_content_plain']),
+        DriftSqlType.string,
+        data['${effectivePrefix}extracted_content_plain'],
+      ),
       fullContentMarkdown: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}full_content_markdown']),
+        DriftSqlType.string,
+        data['${effectivePrefix}full_content_markdown'],
+      ),
       fullContentPlain: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}full_content_plain']),
-      timestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}full_content_plain'],
+      ),
+      timestamp:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}timestamp'],
+          )!,
     );
   }
 
@@ -290,18 +376,19 @@ class TabData extends DataClass implements Insertable<TabData> {
   final String? fullContentMarkdown;
   final String? fullContentPlain;
   final DateTime timestamp;
-  const TabData(
-      {required this.id,
-      this.containerId,
-      required this.orderKey,
-      this.url,
-      this.title,
-      this.isProbablyReaderable,
-      this.extractedContentMarkdown,
-      this.extractedContentPlain,
-      this.fullContentMarkdown,
-      this.fullContentPlain,
-      required this.timestamp});
+  const TabData({
+    required this.id,
+    this.containerId,
+    required this.orderKey,
+    this.url,
+    this.title,
+    this.isProbablyReaderable,
+    this.extractedContentMarkdown,
+    this.extractedContentPlain,
+    this.fullContentMarkdown,
+    this.fullContentPlain,
+    required this.timestamp,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -320,8 +407,9 @@ class TabData extends DataClass implements Insertable<TabData> {
       map['is_probably_readerable'] = Variable<bool>(isProbablyReaderable);
     }
     if (!nullToAbsent || extractedContentMarkdown != null) {
-      map['extracted_content_markdown'] =
-          Variable<String>(extractedContentMarkdown);
+      map['extracted_content_markdown'] = Variable<String>(
+        extractedContentMarkdown,
+      );
     }
     if (!nullToAbsent || extractedContentPlain != null) {
       map['extracted_content_plain'] = Variable<String>(extractedContentPlain);
@@ -336,8 +424,10 @@ class TabData extends DataClass implements Insertable<TabData> {
     return map;
   }
 
-  factory TabData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory TabData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TabData(
       id: serializer.fromJson<String>(json['id']),
@@ -345,16 +435,21 @@ class TabData extends DataClass implements Insertable<TabData> {
       orderKey: serializer.fromJson<String>(json['order_key']),
       url: serializer.fromJson<String?>(json['url']),
       title: serializer.fromJson<String?>(json['title']),
-      isProbablyReaderable:
-          serializer.fromJson<bool?>(json['is_probably_readerable']),
-      extractedContentMarkdown:
-          serializer.fromJson<String?>(json['extracted_content_markdown']),
-      extractedContentPlain:
-          serializer.fromJson<String?>(json['extracted_content_plain']),
-      fullContentMarkdown:
-          serializer.fromJson<String?>(json['full_content_markdown']),
-      fullContentPlain:
-          serializer.fromJson<String?>(json['full_content_plain']),
+      isProbablyReaderable: serializer.fromJson<bool?>(
+        json['is_probably_readerable'],
+      ),
+      extractedContentMarkdown: serializer.fromJson<String?>(
+        json['extracted_content_markdown'],
+      ),
+      extractedContentPlain: serializer.fromJson<String?>(
+        json['extracted_content_plain'],
+      ),
+      fullContentMarkdown: serializer.fromJson<String?>(
+        json['full_content_markdown'],
+      ),
+      fullContentPlain: serializer.fromJson<String?>(
+        json['full_content_plain'],
+      ),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
     );
   }
@@ -368,51 +463,58 @@ class TabData extends DataClass implements Insertable<TabData> {
       'url': serializer.toJson<String?>(url),
       'title': serializer.toJson<String?>(title),
       'is_probably_readerable': serializer.toJson<bool?>(isProbablyReaderable),
-      'extracted_content_markdown':
-          serializer.toJson<String?>(extractedContentMarkdown),
-      'extracted_content_plain':
-          serializer.toJson<String?>(extractedContentPlain),
+      'extracted_content_markdown': serializer.toJson<String?>(
+        extractedContentMarkdown,
+      ),
+      'extracted_content_plain': serializer.toJson<String?>(
+        extractedContentPlain,
+      ),
       'full_content_markdown': serializer.toJson<String?>(fullContentMarkdown),
       'full_content_plain': serializer.toJson<String?>(fullContentPlain),
       'timestamp': serializer.toJson<DateTime>(timestamp),
     };
   }
 
-  TabData copyWith(
-          {String? id,
-          Value<String?> containerId = const Value.absent(),
-          String? orderKey,
-          Value<String?> url = const Value.absent(),
-          Value<String?> title = const Value.absent(),
-          Value<bool?> isProbablyReaderable = const Value.absent(),
-          Value<String?> extractedContentMarkdown = const Value.absent(),
-          Value<String?> extractedContentPlain = const Value.absent(),
-          Value<String?> fullContentMarkdown = const Value.absent(),
-          Value<String?> fullContentPlain = const Value.absent(),
-          DateTime? timestamp}) =>
-      TabData(
-        id: id ?? this.id,
-        containerId: containerId.present ? containerId.value : this.containerId,
-        orderKey: orderKey ?? this.orderKey,
-        url: url.present ? url.value : this.url,
-        title: title.present ? title.value : this.title,
-        isProbablyReaderable: isProbablyReaderable.present
+  TabData copyWith({
+    String? id,
+    Value<String?> containerId = const Value.absent(),
+    String? orderKey,
+    Value<String?> url = const Value.absent(),
+    Value<String?> title = const Value.absent(),
+    Value<bool?> isProbablyReaderable = const Value.absent(),
+    Value<String?> extractedContentMarkdown = const Value.absent(),
+    Value<String?> extractedContentPlain = const Value.absent(),
+    Value<String?> fullContentMarkdown = const Value.absent(),
+    Value<String?> fullContentPlain = const Value.absent(),
+    DateTime? timestamp,
+  }) => TabData(
+    id: id ?? this.id,
+    containerId: containerId.present ? containerId.value : this.containerId,
+    orderKey: orderKey ?? this.orderKey,
+    url: url.present ? url.value : this.url,
+    title: title.present ? title.value : this.title,
+    isProbablyReaderable:
+        isProbablyReaderable.present
             ? isProbablyReaderable.value
             : this.isProbablyReaderable,
-        extractedContentMarkdown: extractedContentMarkdown.present
+    extractedContentMarkdown:
+        extractedContentMarkdown.present
             ? extractedContentMarkdown.value
             : this.extractedContentMarkdown,
-        extractedContentPlain: extractedContentPlain.present
+    extractedContentPlain:
+        extractedContentPlain.present
             ? extractedContentPlain.value
             : this.extractedContentPlain,
-        fullContentMarkdown: fullContentMarkdown.present
+    fullContentMarkdown:
+        fullContentMarkdown.present
             ? fullContentMarkdown.value
             : this.fullContentMarkdown,
-        fullContentPlain: fullContentPlain.present
+    fullContentPlain:
+        fullContentPlain.present
             ? fullContentPlain.value
             : this.fullContentPlain,
-        timestamp: timestamp ?? this.timestamp,
-      );
+    timestamp: timestamp ?? this.timestamp,
+  );
   TabData copyWithCompanion(TabCompanion data) {
     return TabData(
       id: data.id.present ? data.id.value : this.id,
@@ -421,21 +523,26 @@ class TabData extends DataClass implements Insertable<TabData> {
       orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
       url: data.url.present ? data.url.value : this.url,
       title: data.title.present ? data.title.value : this.title,
-      isProbablyReaderable: data.isProbablyReaderable.present
-          ? data.isProbablyReaderable.value
-          : this.isProbablyReaderable,
-      extractedContentMarkdown: data.extractedContentMarkdown.present
-          ? data.extractedContentMarkdown.value
-          : this.extractedContentMarkdown,
-      extractedContentPlain: data.extractedContentPlain.present
-          ? data.extractedContentPlain.value
-          : this.extractedContentPlain,
-      fullContentMarkdown: data.fullContentMarkdown.present
-          ? data.fullContentMarkdown.value
-          : this.fullContentMarkdown,
-      fullContentPlain: data.fullContentPlain.present
-          ? data.fullContentPlain.value
-          : this.fullContentPlain,
+      isProbablyReaderable:
+          data.isProbablyReaderable.present
+              ? data.isProbablyReaderable.value
+              : this.isProbablyReaderable,
+      extractedContentMarkdown:
+          data.extractedContentMarkdown.present
+              ? data.extractedContentMarkdown.value
+              : this.extractedContentMarkdown,
+      extractedContentPlain:
+          data.extractedContentPlain.present
+              ? data.extractedContentPlain.value
+              : this.extractedContentPlain,
+      fullContentMarkdown:
+          data.fullContentMarkdown.present
+              ? data.fullContentMarkdown.value
+              : this.fullContentMarkdown,
+      fullContentPlain:
+          data.fullContentPlain.present
+              ? data.fullContentPlain.value
+              : this.fullContentPlain,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
     );
   }
@@ -460,17 +567,18 @@ class TabData extends DataClass implements Insertable<TabData> {
 
   @override
   int get hashCode => Object.hash(
-      id,
-      containerId,
-      orderKey,
-      url,
-      title,
-      isProbablyReaderable,
-      extractedContentMarkdown,
-      extractedContentPlain,
-      fullContentMarkdown,
-      fullContentPlain,
-      timestamp);
+    id,
+    containerId,
+    orderKey,
+    url,
+    title,
+    isProbablyReaderable,
+    extractedContentMarkdown,
+    extractedContentPlain,
+    fullContentMarkdown,
+    fullContentPlain,
+    timestamp,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -528,9 +636,9 @@ class TabCompanion extends UpdateCompanion<TabData> {
     this.fullContentPlain = const Value.absent(),
     required DateTime timestamp,
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        orderKey = Value(orderKey),
-        timestamp = Value(timestamp);
+  }) : id = Value(id),
+       orderKey = Value(orderKey),
+       timestamp = Value(timestamp);
   static Insertable<TabData> custom({
     Expression<String>? id,
     Expression<String>? containerId,
@@ -565,19 +673,20 @@ class TabCompanion extends UpdateCompanion<TabData> {
     });
   }
 
-  TabCompanion copyWith(
-      {Value<String>? id,
-      Value<String?>? containerId,
-      Value<String>? orderKey,
-      Value<String?>? url,
-      Value<String?>? title,
-      Value<bool?>? isProbablyReaderable,
-      Value<String?>? extractedContentMarkdown,
-      Value<String?>? extractedContentPlain,
-      Value<String?>? fullContentMarkdown,
-      Value<String?>? fullContentPlain,
-      Value<DateTime>? timestamp,
-      Value<int>? rowid}) {
+  TabCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? containerId,
+    Value<String>? orderKey,
+    Value<String?>? url,
+    Value<String?>? title,
+    Value<bool?>? isProbablyReaderable,
+    Value<String?>? extractedContentMarkdown,
+    Value<String?>? extractedContentPlain,
+    Value<String?>? fullContentMarkdown,
+    Value<String?>? fullContentPlain,
+    Value<DateTime>? timestamp,
+    Value<int>? rowid,
+  }) {
     return TabCompanion(
       id: id ?? this.id,
       containerId: containerId ?? this.containerId,
@@ -615,20 +724,24 @@ class TabCompanion extends UpdateCompanion<TabData> {
       map['title'] = Variable<String>(title.value);
     }
     if (isProbablyReaderable.present) {
-      map['is_probably_readerable'] =
-          Variable<bool>(isProbablyReaderable.value);
+      map['is_probably_readerable'] = Variable<bool>(
+        isProbablyReaderable.value,
+      );
     }
     if (extractedContentMarkdown.present) {
-      map['extracted_content_markdown'] =
-          Variable<String>(extractedContentMarkdown.value);
+      map['extracted_content_markdown'] = Variable<String>(
+        extractedContentMarkdown.value,
+      );
     }
     if (extractedContentPlain.present) {
-      map['extracted_content_plain'] =
-          Variable<String>(extractedContentPlain.value);
+      map['extracted_content_plain'] = Variable<String>(
+        extractedContentPlain.value,
+      );
     }
     if (fullContentMarkdown.present) {
-      map['full_content_markdown'] =
-          Variable<String>(fullContentMarkdown.value);
+      map['full_content_markdown'] = Variable<String>(
+        fullContentMarkdown.value,
+      );
     }
     if (fullContentPlain.present) {
       map['full_content_plain'] = Variable<String>(fullContentPlain.value);
@@ -668,38 +781,62 @@ class Document extends Table with TableInfo<Document, DocumentData> {
   final String? _alias;
   Document(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> documentId = GeneratedColumn<String>(
-      'document_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL PRIMARY KEY');
+    'document_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
   late final GeneratedColumn<String> mainDocumentId = GeneratedColumn<String>(
-      'main_document_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'main_document_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> contextId = GeneratedColumn<String>(
-      'context_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'context_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
-      'content', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> contentHash = GeneratedColumn<String>(
-      'content_hash', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'content_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
-      'metadata', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'metadata',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [documentId, mainDocumentId, contextId, content, contentHash, metadata];
+  List<GeneratedColumn> get $columns => [
+    documentId,
+    mainDocumentId,
+    contextId,
+    content,
+    contentHash,
+    metadata,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -711,18 +848,33 @@ class Document extends Table with TableInfo<Document, DocumentData> {
   DocumentData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DocumentData(
-      documentId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}document_id'])!,
+      documentId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}document_id'],
+          )!,
       mainDocumentId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}main_document_id']),
-      contextId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}context_id']),
-      content: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
-      contentHash: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}content_hash'])!,
-      metadata: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}metadata']),
+        DriftSqlType.string,
+        data['${effectivePrefix}main_document_id'],
+      ),
+      contextId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}context_id'],
+      ),
+      content:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}content'],
+          )!,
+      contentHash:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}content_hash'],
+          )!,
+      metadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata'],
+      ),
     );
   }
 
@@ -742,13 +894,14 @@ class DocumentData extends DataClass implements Insertable<DocumentData> {
   final String content;
   final String contentHash;
   final String? metadata;
-  const DocumentData(
-      {required this.documentId,
-      this.mainDocumentId,
-      this.contextId,
-      required this.content,
-      required this.contentHash,
-      this.metadata});
+  const DocumentData({
+    required this.documentId,
+    this.mainDocumentId,
+    this.contextId,
+    required this.content,
+    required this.contentHash,
+    this.metadata,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -767,8 +920,10 @@ class DocumentData extends DataClass implements Insertable<DocumentData> {
     return map;
   }
 
-  factory DocumentData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory DocumentData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DocumentData(
       documentId: serializer.fromJson<String>(json['document_id']),
@@ -792,29 +947,30 @@ class DocumentData extends DataClass implements Insertable<DocumentData> {
     };
   }
 
-  DocumentData copyWith(
-          {String? documentId,
-          Value<String?> mainDocumentId = const Value.absent(),
-          Value<String?> contextId = const Value.absent(),
-          String? content,
-          String? contentHash,
-          Value<String?> metadata = const Value.absent()}) =>
-      DocumentData(
-        documentId: documentId ?? this.documentId,
-        mainDocumentId:
-            mainDocumentId.present ? mainDocumentId.value : this.mainDocumentId,
-        contextId: contextId.present ? contextId.value : this.contextId,
-        content: content ?? this.content,
-        contentHash: contentHash ?? this.contentHash,
-        metadata: metadata.present ? metadata.value : this.metadata,
-      );
+  DocumentData copyWith({
+    String? documentId,
+    Value<String?> mainDocumentId = const Value.absent(),
+    Value<String?> contextId = const Value.absent(),
+    String? content,
+    String? contentHash,
+    Value<String?> metadata = const Value.absent(),
+  }) => DocumentData(
+    documentId: documentId ?? this.documentId,
+    mainDocumentId:
+        mainDocumentId.present ? mainDocumentId.value : this.mainDocumentId,
+    contextId: contextId.present ? contextId.value : this.contextId,
+    content: content ?? this.content,
+    contentHash: contentHash ?? this.contentHash,
+    metadata: metadata.present ? metadata.value : this.metadata,
+  );
   DocumentData copyWithCompanion(DocumentCompanion data) {
     return DocumentData(
       documentId:
           data.documentId.present ? data.documentId.value : this.documentId,
-      mainDocumentId: data.mainDocumentId.present
-          ? data.mainDocumentId.value
-          : this.mainDocumentId,
+      mainDocumentId:
+          data.mainDocumentId.present
+              ? data.mainDocumentId.value
+              : this.mainDocumentId,
       contextId: data.contextId.present ? data.contextId.value : this.contextId,
       content: data.content.present ? data.content.value : this.content,
       contentHash:
@@ -838,7 +994,13 @@ class DocumentData extends DataClass implements Insertable<DocumentData> {
 
   @override
   int get hashCode => Object.hash(
-      documentId, mainDocumentId, contextId, content, contentHash, metadata);
+    documentId,
+    mainDocumentId,
+    contextId,
+    content,
+    contentHash,
+    metadata,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -876,9 +1038,9 @@ class DocumentCompanion extends UpdateCompanion<DocumentData> {
     required String contentHash,
     this.metadata = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : documentId = Value(documentId),
-        content = Value(content),
-        contentHash = Value(contentHash);
+  }) : documentId = Value(documentId),
+       content = Value(content),
+       contentHash = Value(contentHash);
   static Insertable<DocumentData> custom({
     Expression<String>? documentId,
     Expression<String>? mainDocumentId,
@@ -899,14 +1061,15 @@ class DocumentCompanion extends UpdateCompanion<DocumentData> {
     });
   }
 
-  DocumentCompanion copyWith(
-      {Value<String>? documentId,
-      Value<String?>? mainDocumentId,
-      Value<String?>? contextId,
-      Value<String>? content,
-      Value<String>? contentHash,
-      Value<String?>? metadata,
-      Value<int>? rowid}) {
+  DocumentCompanion copyWith({
+    Value<String>? documentId,
+    Value<String?>? mainDocumentId,
+    Value<String?>? contextId,
+    Value<String>? content,
+    Value<String>? contentHash,
+    Value<String?>? metadata,
+    Value<int>? rowid,
+  }) {
     return DocumentCompanion(
       documentId: documentId ?? this.documentId,
       mainDocumentId: mainDocumentId ?? this.mainDocumentId,
@@ -967,28 +1130,45 @@ class TabFts extends Table
   final String? _alias;
   TabFts(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> url = GeneratedColumn<String>(
-      'url', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> extractedContentPlain =
-      GeneratedColumn<String>('extracted_content_plain', aliasedName, false,
-          type: DriftSqlType.string,
-          requiredDuringInsert: true,
-          $customConstraints: '');
+      GeneratedColumn<String>(
+        'extracted_content_plain',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: '',
+      );
   late final GeneratedColumn<String> fullContentPlain = GeneratedColumn<String>(
-      'full_content_plain', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
+    'full_content_plain',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [title, url, extractedContentPlain, fullContentPlain];
+  List<GeneratedColumn> get $columns => [
+    title,
+    url,
+    extractedContentPlain,
+    fullContentPlain,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1000,15 +1180,26 @@ class TabFts extends Table
   TabFt map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TabFt(
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      url: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}url'])!,
-      extractedContentPlain: attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}extracted_content_plain'])!,
-      fullContentPlain: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}full_content_plain'])!,
+      title:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}title'],
+          )!,
+      url:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}url'],
+          )!,
+      extractedContentPlain:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}extracted_content_plain'],
+          )!,
+      fullContentPlain:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}full_content_plain'],
+          )!,
     );
   }
 
@@ -1029,11 +1220,12 @@ class TabFt extends DataClass implements Insertable<TabFt> {
   final String url;
   final String extractedContentPlain;
   final String fullContentPlain;
-  const TabFt(
-      {required this.title,
-      required this.url,
-      required this.extractedContentPlain,
-      required this.fullContentPlain});
+  const TabFt({
+    required this.title,
+    required this.url,
+    required this.extractedContentPlain,
+    required this.fullContentPlain,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1044,14 +1236,17 @@ class TabFt extends DataClass implements Insertable<TabFt> {
     return map;
   }
 
-  factory TabFt.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory TabFt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TabFt(
       title: serializer.fromJson<String>(json['title']),
       url: serializer.fromJson<String>(json['url']),
-      extractedContentPlain:
-          serializer.fromJson<String>(json['extracted_content_plain']),
+      extractedContentPlain: serializer.fromJson<String>(
+        json['extracted_content_plain'],
+      ),
       fullContentPlain: serializer.fromJson<String>(json['full_content_plain']),
     );
   }
@@ -1061,34 +1256,36 @@ class TabFt extends DataClass implements Insertable<TabFt> {
     return <String, dynamic>{
       'title': serializer.toJson<String>(title),
       'url': serializer.toJson<String>(url),
-      'extracted_content_plain':
-          serializer.toJson<String>(extractedContentPlain),
+      'extracted_content_plain': serializer.toJson<String>(
+        extractedContentPlain,
+      ),
       'full_content_plain': serializer.toJson<String>(fullContentPlain),
     };
   }
 
-  TabFt copyWith(
-          {String? title,
-          String? url,
-          String? extractedContentPlain,
-          String? fullContentPlain}) =>
-      TabFt(
-        title: title ?? this.title,
-        url: url ?? this.url,
-        extractedContentPlain:
-            extractedContentPlain ?? this.extractedContentPlain,
-        fullContentPlain: fullContentPlain ?? this.fullContentPlain,
-      );
+  TabFt copyWith({
+    String? title,
+    String? url,
+    String? extractedContentPlain,
+    String? fullContentPlain,
+  }) => TabFt(
+    title: title ?? this.title,
+    url: url ?? this.url,
+    extractedContentPlain: extractedContentPlain ?? this.extractedContentPlain,
+    fullContentPlain: fullContentPlain ?? this.fullContentPlain,
+  );
   TabFt copyWithCompanion(TabFtsCompanion data) {
     return TabFt(
       title: data.title.present ? data.title.value : this.title,
       url: data.url.present ? data.url.value : this.url,
-      extractedContentPlain: data.extractedContentPlain.present
-          ? data.extractedContentPlain.value
-          : this.extractedContentPlain,
-      fullContentPlain: data.fullContentPlain.present
-          ? data.fullContentPlain.value
-          : this.fullContentPlain,
+      extractedContentPlain:
+          data.extractedContentPlain.present
+              ? data.extractedContentPlain.value
+              : this.extractedContentPlain,
+      fullContentPlain:
+          data.fullContentPlain.present
+              ? data.fullContentPlain.value
+              : this.fullContentPlain,
     );
   }
 
@@ -1135,10 +1332,10 @@ class TabFtsCompanion extends UpdateCompanion<TabFt> {
     required String extractedContentPlain,
     required String fullContentPlain,
     this.rowid = const Value.absent(),
-  })  : title = Value(title),
-        url = Value(url),
-        extractedContentPlain = Value(extractedContentPlain),
-        fullContentPlain = Value(fullContentPlain);
+  }) : title = Value(title),
+       url = Value(url),
+       extractedContentPlain = Value(extractedContentPlain),
+       fullContentPlain = Value(fullContentPlain);
   static Insertable<TabFt> custom({
     Expression<String>? title,
     Expression<String>? url,
@@ -1156,12 +1353,13 @@ class TabFtsCompanion extends UpdateCompanion<TabFt> {
     });
   }
 
-  TabFtsCompanion copyWith(
-      {Value<String>? title,
-      Value<String>? url,
-      Value<String>? extractedContentPlain,
-      Value<String>? fullContentPlain,
-      Value<int>? rowid}) {
+  TabFtsCompanion copyWith({
+    Value<String>? title,
+    Value<String>? url,
+    Value<String>? extractedContentPlain,
+    Value<String>? fullContentPlain,
+    Value<int>? rowid,
+  }) {
     return TabFtsCompanion(
       title: title ?? this.title,
       url: url ?? this.url,
@@ -1182,8 +1380,9 @@ class TabFtsCompanion extends UpdateCompanion<TabFt> {
       map['url'] = Variable<String>(url.value);
     }
     if (extractedContentPlain.present) {
-      map['extracted_content_plain'] =
-          Variable<String>(extractedContentPlain.value);
+      map['extracted_content_plain'] = Variable<String>(
+        extractedContentPlain.value,
+      );
     }
     if (fullContentPlain.present) {
       map['full_content_plain'] = Variable<String>(fullContentPlain.value);
@@ -1213,43 +1412,71 @@ class DocumentVec extends Table with TableInfo<DocumentVec, DocumentVecData> {
   final String? _alias;
   DocumentVec(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL PRIMARY KEY');
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
   late final GeneratedColumn<String> mainDocumentId = GeneratedColumn<String>(
-      'main_document_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'main_document_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> contextId = GeneratedColumn<String>(
-      'context_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'context_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<Uint8List> embedding = GeneratedColumn<Uint8List>(
-      'embedding', aliasedName, false,
-      type: DriftSqlType.blob,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'embedding',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> contentHash = GeneratedColumn<String>(
-      'content_hash', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'content_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<double> distance = GeneratedColumn<double>(
-      'distance', aliasedName, true,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'distance',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<int> k = GeneratedColumn<int>(
-      'k', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'k',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, mainDocumentId, contextId, embedding, contentHash, distance, k];
+  List<GeneratedColumn> get $columns => [
+    id,
+    mainDocumentId,
+    contextId,
+    embedding,
+    contentHash,
+    distance,
+    k,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1261,20 +1488,37 @@ class DocumentVec extends Table with TableInfo<DocumentVec, DocumentVecData> {
   DocumentVecData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DocumentVecData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
       mainDocumentId: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}main_document_id']),
-      contextId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}context_id']),
-      embedding: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}embedding'])!,
-      contentHash: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}content_hash'])!,
-      distance: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}distance']),
-      k: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}k']),
+        DriftSqlType.string,
+        data['${effectivePrefix}main_document_id'],
+      ),
+      contextId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}context_id'],
+      ),
+      embedding:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.blob,
+            data['${effectivePrefix}embedding'],
+          )!,
+      contentHash:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}content_hash'],
+          )!,
+      distance: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}distance'],
+      ),
+      k: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}k'],
+      ),
     );
   }
 
@@ -1297,14 +1541,15 @@ class DocumentVecData extends DataClass implements Insertable<DocumentVecData> {
   final String contentHash;
   final double? distance;
   final int? k;
-  const DocumentVecData(
-      {required this.id,
-      this.mainDocumentId,
-      this.contextId,
-      required this.embedding,
-      required this.contentHash,
-      this.distance,
-      this.k});
+  const DocumentVecData({
+    required this.id,
+    this.mainDocumentId,
+    this.contextId,
+    required this.embedding,
+    required this.contentHash,
+    this.distance,
+    this.k,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1326,8 +1571,10 @@ class DocumentVecData extends DataClass implements Insertable<DocumentVecData> {
     return map;
   }
 
-  factory DocumentVecData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory DocumentVecData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DocumentVecData(
       id: serializer.fromJson<String>(json['id']),
@@ -1353,30 +1600,31 @@ class DocumentVecData extends DataClass implements Insertable<DocumentVecData> {
     };
   }
 
-  DocumentVecData copyWith(
-          {String? id,
-          Value<String?> mainDocumentId = const Value.absent(),
-          Value<String?> contextId = const Value.absent(),
-          Uint8List? embedding,
-          String? contentHash,
-          Value<double?> distance = const Value.absent(),
-          Value<int?> k = const Value.absent()}) =>
-      DocumentVecData(
-        id: id ?? this.id,
-        mainDocumentId:
-            mainDocumentId.present ? mainDocumentId.value : this.mainDocumentId,
-        contextId: contextId.present ? contextId.value : this.contextId,
-        embedding: embedding ?? this.embedding,
-        contentHash: contentHash ?? this.contentHash,
-        distance: distance.present ? distance.value : this.distance,
-        k: k.present ? k.value : this.k,
-      );
+  DocumentVecData copyWith({
+    String? id,
+    Value<String?> mainDocumentId = const Value.absent(),
+    Value<String?> contextId = const Value.absent(),
+    Uint8List? embedding,
+    String? contentHash,
+    Value<double?> distance = const Value.absent(),
+    Value<int?> k = const Value.absent(),
+  }) => DocumentVecData(
+    id: id ?? this.id,
+    mainDocumentId:
+        mainDocumentId.present ? mainDocumentId.value : this.mainDocumentId,
+    contextId: contextId.present ? contextId.value : this.contextId,
+    embedding: embedding ?? this.embedding,
+    contentHash: contentHash ?? this.contentHash,
+    distance: distance.present ? distance.value : this.distance,
+    k: k.present ? k.value : this.k,
+  );
   DocumentVecData copyWithCompanion(DocumentVecCompanion data) {
     return DocumentVecData(
       id: data.id.present ? data.id.value : this.id,
-      mainDocumentId: data.mainDocumentId.present
-          ? data.mainDocumentId.value
-          : this.mainDocumentId,
+      mainDocumentId:
+          data.mainDocumentId.present
+              ? data.mainDocumentId.value
+              : this.mainDocumentId,
       contextId: data.contextId.present ? data.contextId.value : this.contextId,
       embedding: data.embedding.present ? data.embedding.value : this.embedding,
       contentHash:
@@ -1401,8 +1649,15 @@ class DocumentVecData extends DataClass implements Insertable<DocumentVecData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, mainDocumentId, contextId,
-      $driftBlobEquality.hash(embedding), contentHash, distance, k);
+  int get hashCode => Object.hash(
+    id,
+    mainDocumentId,
+    contextId,
+    $driftBlobEquality.hash(embedding),
+    contentHash,
+    distance,
+    k,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1444,9 +1699,9 @@ class DocumentVecCompanion extends UpdateCompanion<DocumentVecData> {
     this.distance = const Value.absent(),
     this.k = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        embedding = Value(embedding),
-        contentHash = Value(contentHash);
+  }) : id = Value(id),
+       embedding = Value(embedding),
+       contentHash = Value(contentHash);
   static Insertable<DocumentVecData> custom({
     Expression<String>? id,
     Expression<String>? mainDocumentId,
@@ -1469,15 +1724,16 @@ class DocumentVecCompanion extends UpdateCompanion<DocumentVecData> {
     });
   }
 
-  DocumentVecCompanion copyWith(
-      {Value<String>? id,
-      Value<String?>? mainDocumentId,
-      Value<String?>? contextId,
-      Value<Uint8List>? embedding,
-      Value<String>? contentHash,
-      Value<double?>? distance,
-      Value<int?>? k,
-      Value<int>? rowid}) {
+  DocumentVecCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? mainDocumentId,
+    Value<String?>? contextId,
+    Value<Uint8List>? embedding,
+    Value<String>? contentHash,
+    Value<double?>? distance,
+    Value<int?>? k,
+    Value<int>? rowid,
+  }) {
     return DocumentVecCompanion(
       id: id ?? this.id,
       mainDocumentId: mainDocumentId ?? this.mainDocumentId,
@@ -1543,29 +1799,39 @@ abstract class _$TabDatabase extends GeneratedDatabase {
   late final Tab tab = Tab(this);
   late final Document document = Document(this);
   late final Trigger tabDocumentDelete = Trigger(
-      'CREATE TRIGGER tab_document_delete AFTER DELETE ON tab BEGIN DELETE FROM document WHERE main_document_id = old.id;END',
-      'tab_document_delete');
+    'CREATE TRIGGER tab_document_delete AFTER DELETE ON tab BEGIN DELETE FROM document WHERE main_document_id = old.id;END',
+    'tab_document_delete',
+  );
   late final TabFts tabFts = TabFts(this);
   late final Trigger tabAfterInsert = Trigger(
-      'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
-      'tab_after_insert');
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
   late final Trigger tabAfterDelete = Trigger(
-      'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
-      'tab_after_delete');
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
   late final Trigger tabAfterUpdate = Trigger(
-      'CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
-      'tab_after_update');
-  late final Index documentMainDocumentId = Index('document_main_document_id',
-      'CREATE INDEX document_main_document_id ON document (main_document_id)');
-  late final Index documentContextId = Index('document_context_id',
-      'CREATE INDEX document_context_id ON document (context_id)');
+    'CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+  late final Index documentMainDocumentId = Index(
+    'document_main_document_id',
+    'CREATE INDEX document_main_document_id ON document (main_document_id)',
+  );
+  late final Index documentContextId = Index(
+    'document_context_id',
+    'CREATE INDEX document_context_id ON document (context_id)',
+  );
   late final DocumentVec documentVec = DocumentVec(this);
   late final Trigger documentDelete = Trigger(
-      'CREATE TRIGGER document_delete AFTER DELETE ON document BEGIN DELETE FROM document_vec WHERE id = old.document_id;END',
-      'document_delete');
+    'CREATE TRIGGER document_delete AFTER DELETE ON document BEGIN DELETE FROM document_vec WHERE id = old.document_id;END',
+    'document_delete',
+  );
   late final Trigger documentUpdateDelete = Trigger(
-      'CREATE TRIGGER document_update_delete AFTER UPDATE ON document BEGIN DELETE FROM document_vec WHERE id = new.document_id AND content_hash != new.content_hash;END',
-      'document_update_delete');
+    'CREATE TRIGGER document_update_delete AFTER UPDATE ON document BEGIN DELETE FROM document_vec WHERE id = new.document_id AND content_hash != new.content_hash;END',
+    'document_update_delete',
+  );
   late final ContainerDao containerDao = ContainerDao(this as TabDatabase);
   late final TabDao tabDao = TabDao(this as TabDatabase);
   late final VectorDao vectorDao = VectorDao(this as TabDatabase);
@@ -1579,151 +1845,149 @@ abstract class _$TabDatabase extends GeneratedDatabase {
 
   Selectable<ContainerDataWithCount> containersWithCount() {
     return customSelect(
-        'SELECT container.*, tab_agg.tab_count FROM container LEFT JOIN (SELECT container_id, COUNT(*) AS tab_count, MAX(timestamp) AS last_updated FROM tab GROUP BY container_id) AS tab_agg ON container.id = tab_agg.container_id ORDER BY tab_agg.last_updated DESC NULLS LAST',
-        variables: [],
-        readsFrom: {
-          container,
-          tab,
-        }).map((QueryRow row) => ContainerDataWithCount(
-          id: row.read<String>('id'),
-          name: row.readNullable<String>('name'),
-          color: Container.$convertercolor.fromSql(row.read<int>('color')),
-          metadata: NullAwareTypeConverter.wrapFromSql(
-              Container.$convertermetadata,
-              row.readNullable<String>('metadata')),
-          tabCount: row.readNullable<int>('tab_count'),
-        ));
+      'SELECT container.*, tab_agg.tab_count FROM container LEFT JOIN (SELECT container_id, COUNT(*) AS tab_count, MAX(timestamp) AS last_updated FROM tab GROUP BY container_id) AS tab_agg ON container.id = tab_agg.container_id ORDER BY tab_agg.last_updated DESC NULLS LAST',
+      variables: [],
+      readsFrom: {container, tab},
+    ).map(
+      (QueryRow row) => ContainerDataWithCount(
+        id: row.read<String>('id'),
+        name: row.readNullable<String>('name'),
+        color: Container.$convertercolor.fromSql(row.read<int>('color')),
+        metadata: NullAwareTypeConverter.wrapFromSql(
+          Container.$convertermetadata,
+          row.readNullable<String>('metadata'),
+        ),
+        tabCount: row.readNullable<int>('tab_count'),
+      ),
+    );
   }
 
-  Selectable<String> leadingOrderKey(
-      {required int bucket, String? containerId}) {
+  Selectable<String> leadingOrderKey({
+    required int bucket,
+    String? containerId,
+  }) {
     return customSelect(
-        'SELECT lexo_rank_previous(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key LIMIT 1)) AS _c0',
-        variables: [
-          Variable<int>(bucket),
-          Variable<String>(containerId)
-        ],
-        readsFrom: {
-          tab,
-        }).map((QueryRow row) => row.read<String>('_c0'));
+      'SELECT lexo_rank_previous(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key LIMIT 1)) AS _c0',
+      variables: [Variable<int>(bucket), Variable<String>(containerId)],
+      readsFrom: {tab},
+    ).map((QueryRow row) => row.read<String>('_c0'));
   }
 
-  Selectable<String> trailingOrderKey(
-      {required int bucket, String? containerId}) {
+  Selectable<String> trailingOrderKey({
+    required int bucket,
+    String? containerId,
+  }) {
     return customSelect(
-        'SELECT lexo_rank_next(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
-        variables: [
-          Variable<int>(bucket),
-          Variable<String>(containerId)
-        ],
-        readsFrom: {
-          tab,
-        }).map((QueryRow row) => row.read<String>('_c0'));
+      'SELECT lexo_rank_next(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
+      variables: [Variable<int>(bucket), Variable<String>(containerId)],
+      readsFrom: {tab},
+    ).map((QueryRow row) => row.read<String>('_c0'));
   }
 
-  Selectable<String> orderKeyAfterTab(
-      {String? containerId, required String tabId}) {
+  Selectable<String> orderKeyAfterTab({
+    String? containerId,
+    required String tabId,
+  }) {
     return customSelect(
-        'WITH ordered_table AS (SELECT id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM tab WHERE container_id IS ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE id = ?2',
-        variables: [
-          Variable<String>(containerId),
-          Variable<String>(tabId)
-        ],
-        readsFrom: {
-          tab,
-        }).map((QueryRow row) => row.read<String>('_c0'));
+      'WITH ordered_table AS (SELECT id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM tab WHERE container_id IS ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE id = ?2',
+      variables: [Variable<String>(containerId), Variable<String>(tabId)],
+      readsFrom: {tab},
+    ).map((QueryRow row) => row.read<String>('_c0'));
   }
 
-  Selectable<TabQueryResult> queryTabsBasic(
-      {required String beforeMatch,
-      required String afterMatch,
-      required String query}) {
+  Selectable<TabQueryResult> queryTabsBasic({
+    required String beforeMatch,
+    required String afterMatch,
+    required String query,
+  }) {
     return customSelect(
-        'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank, t.url AS clean_url FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?3 OR fts.url LIKE ?3 ORDER BY weighted_rank ASC, t.timestamp DESC',
-        variables: [
-          Variable<String>(beforeMatch),
-          Variable<String>(afterMatch),
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          tab,
-          tabFts,
-        }).map((QueryRow row) => TabQueryResult(
-          id: row.read<String>('id'),
-          title: row.readNullable<String>('title'),
-          url: row.readNullable<String>('url'),
-          cleanUrl: row.readNullable<String>('clean_url'),
-          weightedRank: row.read<double>('weighted_rank'),
-        ));
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank, t.url AS clean_url FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?3 OR fts.url LIKE ?3 ORDER BY weighted_rank ASC, t.timestamp DESC',
+      variables: [
+        Variable<String>(beforeMatch),
+        Variable<String>(afterMatch),
+        Variable<String>(query),
+      ],
+      readsFrom: {tab, tabFts},
+    ).map(
+      (QueryRow row) => TabQueryResult(
+        id: row.read<String>('id'),
+        title: row.readNullable<String>('title'),
+        url: row.readNullable<String>('url'),
+        cleanUrl: row.readNullable<String>('clean_url'),
+        weightedRank: row.read<double>('weighted_rank'),
+      ),
+    );
   }
 
-  Selectable<TabQueryResult> queryTabsFullContent(
-      {required String beforeMatch,
-      required String afterMatch,
-      required String ellipsis,
-      required int snippetLength,
-      required String query}) {
+  Selectable<TabQueryResult> queryTabsFullContent({
+    required String beforeMatch,
+    required String afterMatch,
+    required String ellipsis,
+    required int snippetLength,
+    required String query,
+  }) {
     return customSelect(
-        'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank, t.url AS clean_url FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC',
-        variables: [
-          Variable<String>(beforeMatch),
-          Variable<String>(afterMatch),
-          Variable<String>(ellipsis),
-          Variable<int>(snippetLength),
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          tab,
-          tabFts,
-        }).map((QueryRow row) => TabQueryResult(
-          id: row.read<String>('id'),
-          title: row.readNullable<String>('title'),
-          url: row.readNullable<String>('url'),
-          cleanUrl: row.readNullable<String>('clean_url'),
-          extractedContent: row.readNullable<String>('extracted_content'),
-          fullContent: row.readNullable<String>('full_content'),
-          weightedRank: row.read<double>('weighted_rank'),
-        ));
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank, t.url AS clean_url FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC',
+      variables: [
+        Variable<String>(beforeMatch),
+        Variable<String>(afterMatch),
+        Variable<String>(ellipsis),
+        Variable<int>(snippetLength),
+        Variable<String>(query),
+      ],
+      readsFrom: {tab, tabFts},
+    ).map(
+      (QueryRow row) => TabQueryResult(
+        id: row.read<String>('id'),
+        title: row.readNullable<String>('title'),
+        url: row.readNullable<String>('url'),
+        cleanUrl: row.readNullable<String>('clean_url'),
+        extractedContent: row.readNullable<String>('extracted_content'),
+        fullContent: row.readNullable<String>('full_content'),
+        weightedRank: row.read<double>('weighted_rank'),
+      ),
+    );
   }
 
-  Selectable<DocumentData> missingDocumentEmbeddings(
-      {String? mainDocumentId, String? contextId}) {
+  Selectable<DocumentData> missingDocumentEmbeddings({
+    String? mainDocumentId,
+    String? contextId,
+  }) {
     return customSelect(
-        'SELECT doc.* FROM document AS doc WHERE doc.main_document_id IS COALESCE(?1, doc.main_document_id) AND doc.context_id IS COALESCE(?2, doc.context_id) AND NOT EXISTS (SELECT 1 AS _c0 FROM document_vec AS vec WHERE vec.id = doc.document_id)',
-        variables: [
-          Variable<String>(mainDocumentId),
-          Variable<String>(contextId)
-        ],
-        readsFrom: {
-          document,
-          documentVec,
-        }).asyncMap(document.mapFromRow);
+      'SELECT doc.* FROM document AS doc WHERE doc.main_document_id IS COALESCE(?1, doc.main_document_id) AND doc.context_id IS COALESCE(?2, doc.context_id) AND NOT EXISTS (SELECT 1 AS _c0 FROM document_vec AS vec WHERE vec.id = doc.document_id)',
+      variables: [
+        Variable<String>(mainDocumentId),
+        Variable<String>(contextId),
+      ],
+      readsFrom: {document, documentVec},
+    ).asyncMap(document.mapFromRow);
   }
 
-  Selectable<VectorResult> queryVectors(
-      {required Uint8List searchVectors,
-      int? k,
-      String? mainDocumentId,
-      String? contextId}) {
+  Selectable<VectorResult> queryVectors({
+    required Uint8List searchVectors,
+    int? k,
+    String? mainDocumentId,
+    String? contextId,
+  }) {
     return customSelect(
-        'SELECT vec.id, doc.main_document_id, doc.context_id, doc.content, doc.metadata, vec.distance FROM document_vec AS vec INNER JOIN document AS doc ON doc.document_id = vec.id WHERE vec.embedding MATCH ?1 AND vec.k = ?2 AND vec.main_document_id IS COALESCE(?3, vec.main_document_id) AND vec.context_id IS COALESCE(?4, vec.context_id) ORDER BY vec.distance',
-        variables: [
-          Variable<Uint8List>(searchVectors),
-          Variable<int>(k),
-          Variable<String>(mainDocumentId),
-          Variable<String>(contextId)
-        ],
-        readsFrom: {
-          documentVec,
-          document,
-        }).map((QueryRow row) => VectorResult(
-          id: row.read<String>('id'),
-          mainDocumentId: row.readNullable<String>('main_document_id'),
-          contextId: row.readNullable<String>('context_id'),
-          content: row.read<String>('content'),
-          metadata: row.readNullable<String>('metadata'),
-          distance: row.readNullable<double>('distance'),
-        ));
+      'SELECT vec.id, doc.main_document_id, doc.context_id, doc.content, doc.metadata, vec.distance FROM document_vec AS vec INNER JOIN document AS doc ON doc.document_id = vec.id WHERE vec.embedding MATCH ?1 AND vec.k = ?2 AND vec.main_document_id IS COALESCE(?3, vec.main_document_id) AND vec.context_id IS COALESCE(?4, vec.context_id) ORDER BY vec.distance',
+      variables: [
+        Variable<Uint8List>(searchVectors),
+        Variable<int>(k),
+        Variable<String>(mainDocumentId),
+        Variable<String>(contextId),
+      ],
+      readsFrom: {documentVec, document},
+    ).map(
+      (QueryRow row) => VectorResult(
+        id: row.read<String>('id'),
+        mainDocumentId: row.readNullable<String>('main_document_id'),
+        contextId: row.readNullable<String>('context_id'),
+        content: row.read<String>('content'),
+        metadata: row.readNullable<String>('metadata'),
+        distance: row.readNullable<double>('distance'),
+      ),
+    );
   }
 
   @override
@@ -1731,107 +1995,112 @@ abstract class _$TabDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        container,
-        tab,
-        document,
-        tabDocumentDelete,
-        tabFts,
-        tabAfterInsert,
-        tabAfterDelete,
-        tabAfterUpdate,
-        documentMainDocumentId,
-        documentContextId,
-        documentVec,
-        documentDelete,
-        documentUpdateDelete
-      ];
+    container,
+    tab,
+    document,
+    tabDocumentDelete,
+    tabFts,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+    documentMainDocumentId,
+    documentContextId,
+    documentVec,
+    documentDelete,
+    documentUpdateDelete,
+  ];
   @override
-  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
-        [
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('container',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('tab', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('tab',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('document', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('tab',
-                limitUpdateKind: UpdateKind.insert),
-            result: [
-              TableUpdate('tab_fts', kind: UpdateKind.insert),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('tab',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('tab_fts', kind: UpdateKind.insert),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('tab',
-                limitUpdateKind: UpdateKind.update),
-            result: [
-              TableUpdate('tab_fts', kind: UpdateKind.insert),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('document',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('document_vec', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('document',
-                limitUpdateKind: UpdateKind.update),
-            result: [
-              TableUpdate('document_vec', kind: UpdateKind.delete),
-            ],
-          ),
-        ],
-      );
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'container',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('tab', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('document', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('tab_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('tab_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [TableUpdate('tab_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'document',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('document_vec', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'document',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [TableUpdate('document_vec', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
-typedef $ContainerCreateCompanionBuilder = ContainerCompanion Function({
-  required String id,
-  Value<String?> name,
-  required Color color,
-  Value<ContainerMetadata?> metadata,
-  Value<int> rowid,
-});
-typedef $ContainerUpdateCompanionBuilder = ContainerCompanion Function({
-  Value<String> id,
-  Value<String?> name,
-  Value<Color> color,
-  Value<ContainerMetadata?> metadata,
-  Value<int> rowid,
-});
+typedef $ContainerCreateCompanionBuilder =
+    ContainerCompanion Function({
+      required String id,
+      Value<String?> name,
+      required Color color,
+      Value<ContainerMetadata?> metadata,
+      Value<int> rowid,
+    });
+typedef $ContainerUpdateCompanionBuilder =
+    ContainerCompanion Function({
+      Value<String> id,
+      Value<String?> name,
+      Value<Color> color,
+      Value<ContainerMetadata?> metadata,
+      Value<int> rowid,
+    });
 
 final class $ContainerReferences
     extends BaseReferences<_$TabDatabase, Container, ContainerData> {
   $ContainerReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static MultiTypedResultKey<Tab, List<TabData>> _tabRefsTable(
-          _$TabDatabase db) =>
-      MultiTypedResultKey.fromTable(db.tab,
-          aliasName: $_aliasNameGenerator(db.container.id, db.tab.containerId));
+    _$TabDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.tab,
+    aliasName: $_aliasNameGenerator(db.container.id, db.tab.containerId),
+  );
 
   $TabProcessedTableManager get tabRefs {
-    final manager = $TabTableManager($_db, $_db.tab)
-        .filter((f) => f.containerId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $TabTableManager(
+      $_db,
+      $_db.tab,
+    ).filter((f) => f.containerId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_tabRefsTable($_db));
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -1844,38 +2113,47 @@ class $ContainerFilterComposer extends Composer<_$TabDatabase, Container> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<Color, Color, int> get color =>
       $composableBuilder(
-          column: $table.color,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+        column: $table.color,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnWithTypeConverterFilters<ContainerMetadata?, ContainerMetadata, String>
-      get metadata => $composableBuilder(
-          column: $table.metadata,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  get metadata => $composableBuilder(
+    column: $table.metadata,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   Expression<bool> tabRefs(Expression<bool> Function($TabFilterComposer f) f) {
     final $TabFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.tab,
-        getReferencedColumn: (t) => t.containerId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $TabFilterComposer(
-              $db: $db,
-              $table: $db.tab,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.tab,
+      getReferencedColumn: (t) => t.containerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $TabFilterComposer(
+            $db: $db,
+            $table: $db.tab,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -1889,16 +2167,24 @@ class $ContainerOrderingComposer extends Composer<_$TabDatabase, Container> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get color => $composableBuilder(
-      column: $table.color, builder: (column) => ColumnOrderings(column));
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get metadata => $composableBuilder(
-      column: $table.metadata, builder: (column) => ColumnOrderings(column));
+    column: $table.metadata,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $ContainerAnnotationComposer extends Composer<_$TabDatabase, Container> {
@@ -1922,81 +2208,95 @@ class $ContainerAnnotationComposer extends Composer<_$TabDatabase, Container> {
       $composableBuilder(column: $table.metadata, builder: (column) => column);
 
   Expression<T> tabRefs<T extends Object>(
-      Expression<T> Function($TabAnnotationComposer a) f) {
+    Expression<T> Function($TabAnnotationComposer a) f,
+  ) {
     final $TabAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $db.tab,
-        getReferencedColumn: (t) => t.containerId,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $TabAnnotationComposer(
-              $db: $db,
-              $table: $db.tab,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.tab,
+      getReferencedColumn: (t) => t.containerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $TabAnnotationComposer(
+            $db: $db,
+            $table: $db.tab,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
 
-class $ContainerTableManager extends RootTableManager<
-    _$TabDatabase,
-    Container,
-    ContainerData,
-    $ContainerFilterComposer,
-    $ContainerOrderingComposer,
-    $ContainerAnnotationComposer,
-    $ContainerCreateCompanionBuilder,
-    $ContainerUpdateCompanionBuilder,
-    (ContainerData, $ContainerReferences),
-    ContainerData,
-    PrefetchHooks Function({bool tabRefs})> {
+class $ContainerTableManager
+    extends
+        RootTableManager<
+          _$TabDatabase,
+          Container,
+          ContainerData,
+          $ContainerFilterComposer,
+          $ContainerOrderingComposer,
+          $ContainerAnnotationComposer,
+          $ContainerCreateCompanionBuilder,
+          $ContainerUpdateCompanionBuilder,
+          (ContainerData, $ContainerReferences),
+          ContainerData,
+          PrefetchHooks Function({bool tabRefs})
+        > {
   $ContainerTableManager(_$TabDatabase db, Container table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $ContainerFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $ContainerOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $ContainerAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            Value<String?> name = const Value.absent(),
-            Value<Color> color = const Value.absent(),
-            Value<ContainerMetadata?> metadata = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ContainerCompanion(
-            id: id,
-            name: name,
-            color: color,
-            metadata: metadata,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String id,
-            Value<String?> name = const Value.absent(),
-            required Color color,
-            Value<ContainerMetadata?> metadata = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ContainerCompanion.insert(
-            id: id,
-            name: name,
-            color: color,
-            metadata: metadata,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $ContainerReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $ContainerFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $ContainerOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $ContainerAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<Color> color = const Value.absent(),
+                Value<ContainerMetadata?> metadata = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContainerCompanion(
+                id: id,
+                name: name,
+                color: color,
+                metadata: metadata,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> name = const Value.absent(),
+                required Color color,
+                Value<ContainerMetadata?> metadata = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContainerCompanion.insert(
+                id: id,
+                name: name,
+                color: color,
+                metadata: metadata,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $ContainerReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: ({tabRefs = false}) {
             return PrefetchHooks(
               db: db,
@@ -2005,63 +2305,73 @@ class $ContainerTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (tabRefs)
-                    await $_getPrefetchedData<ContainerData, Container,
-                            TabData>(
-                        currentTable: table,
-                        referencedTable: $ContainerReferences._tabRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $ContainerReferences(db, table, p0).tabRefs,
-                        referencedItemsForCurrentItem:
-                            (item, referencedItems) => referencedItems
-                                .where((e) => e.containerId == item.id),
-                        typedResults: items)
+                    await $_getPrefetchedData<
+                      ContainerData,
+                      Container,
+                      TabData
+                    >(
+                      currentTable: table,
+                      referencedTable: $ContainerReferences._tabRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) => $ContainerReferences(db, table, p0).tabRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.containerId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $ContainerProcessedTableManager = ProcessedTableManager<
-    _$TabDatabase,
-    Container,
-    ContainerData,
-    $ContainerFilterComposer,
-    $ContainerOrderingComposer,
-    $ContainerAnnotationComposer,
-    $ContainerCreateCompanionBuilder,
-    $ContainerUpdateCompanionBuilder,
-    (ContainerData, $ContainerReferences),
-    ContainerData,
-    PrefetchHooks Function({bool tabRefs})>;
-typedef $TabCreateCompanionBuilder = TabCompanion Function({
-  required String id,
-  Value<String?> containerId,
-  required String orderKey,
-  Value<String?> url,
-  Value<String?> title,
-  Value<bool?> isProbablyReaderable,
-  Value<String?> extractedContentMarkdown,
-  Value<String?> extractedContentPlain,
-  Value<String?> fullContentMarkdown,
-  Value<String?> fullContentPlain,
-  required DateTime timestamp,
-  Value<int> rowid,
-});
-typedef $TabUpdateCompanionBuilder = TabCompanion Function({
-  Value<String> id,
-  Value<String?> containerId,
-  Value<String> orderKey,
-  Value<String?> url,
-  Value<String?> title,
-  Value<bool?> isProbablyReaderable,
-  Value<String?> extractedContentMarkdown,
-  Value<String?> extractedContentPlain,
-  Value<String?> fullContentMarkdown,
-  Value<String?> fullContentPlain,
-  Value<DateTime> timestamp,
-  Value<int> rowid,
-});
+typedef $ContainerProcessedTableManager =
+    ProcessedTableManager<
+      _$TabDatabase,
+      Container,
+      ContainerData,
+      $ContainerFilterComposer,
+      $ContainerOrderingComposer,
+      $ContainerAnnotationComposer,
+      $ContainerCreateCompanionBuilder,
+      $ContainerUpdateCompanionBuilder,
+      (ContainerData, $ContainerReferences),
+      ContainerData,
+      PrefetchHooks Function({bool tabRefs})
+    >;
+typedef $TabCreateCompanionBuilder =
+    TabCompanion Function({
+      required String id,
+      Value<String?> containerId,
+      required String orderKey,
+      Value<String?> url,
+      Value<String?> title,
+      Value<bool?> isProbablyReaderable,
+      Value<String?> extractedContentMarkdown,
+      Value<String?> extractedContentPlain,
+      Value<String?> fullContentMarkdown,
+      Value<String?> fullContentPlain,
+      required DateTime timestamp,
+      Value<int> rowid,
+    });
+typedef $TabUpdateCompanionBuilder =
+    TabCompanion Function({
+      Value<String> id,
+      Value<String?> containerId,
+      Value<String> orderKey,
+      Value<String?> url,
+      Value<String?> title,
+      Value<bool?> isProbablyReaderable,
+      Value<String?> extractedContentMarkdown,
+      Value<String?> extractedContentPlain,
+      Value<String?> fullContentMarkdown,
+      Value<String?> fullContentPlain,
+      Value<DateTime> timestamp,
+      Value<int> rowid,
+    });
 
 final class $TabReferences extends BaseReferences<_$TabDatabase, Tab, TabData> {
   $TabReferences(super.$_db, super.$_table, super.$_typedResult);
@@ -2072,12 +2382,15 @@ final class $TabReferences extends BaseReferences<_$TabDatabase, Tab, TabData> {
   $ContainerProcessedTableManager? get containerId {
     final $_column = $_itemColumn<String>('container_id');
     if ($_column == null) return null;
-    final manager = $ContainerTableManager($_db, $_db.container)
-        .filter((f) => f.id.sqlEquals($_column));
+    final manager = $ContainerTableManager(
+      $_db,
+      $_db.container,
+    ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_containerIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -2090,57 +2403,75 @@ class $TabFilterComposer extends Composer<_$TabDatabase, Tab> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get orderKey => $composableBuilder(
-      column: $table.orderKey, builder: (column) => ColumnFilters(column));
+    column: $table.orderKey,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get url => $composableBuilder(
-      column: $table.url, builder: (column) => ColumnFilters(column));
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnFilters(column));
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<bool> get isProbablyReaderable => $composableBuilder(
-      column: $table.isProbablyReaderable,
-      builder: (column) => ColumnFilters(column));
+    column: $table.isProbablyReaderable,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get extractedContentMarkdown => $composableBuilder(
-      column: $table.extractedContentMarkdown,
-      builder: (column) => ColumnFilters(column));
+    column: $table.extractedContentMarkdown,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get extractedContentPlain => $composableBuilder(
-      column: $table.extractedContentPlain,
-      builder: (column) => ColumnFilters(column));
+    column: $table.extractedContentPlain,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get fullContentMarkdown => $composableBuilder(
-      column: $table.fullContentMarkdown,
-      builder: (column) => ColumnFilters(column));
+    column: $table.fullContentMarkdown,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get fullContentPlain => $composableBuilder(
-      column: $table.fullContentPlain,
-      builder: (column) => ColumnFilters(column));
+    column: $table.fullContentPlain,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $ContainerFilterComposer get containerId {
     final $ContainerFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.containerId,
-        referencedTable: $db.container,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $ContainerFilterComposer(
-              $db: $db,
-              $table: $db.container,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.containerId,
+      referencedTable: $db.container,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $ContainerFilterComposer(
+            $db: $db,
+            $table: $db.container,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -2154,57 +2485,75 @@ class $TabOrderingComposer extends Composer<_$TabDatabase, Tab> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get orderKey => $composableBuilder(
-      column: $table.orderKey, builder: (column) => ColumnOrderings(column));
+    column: $table.orderKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get url => $composableBuilder(
-      column: $table.url, builder: (column) => ColumnOrderings(column));
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnOrderings(column));
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<bool> get isProbablyReaderable => $composableBuilder(
-      column: $table.isProbablyReaderable,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.isProbablyReaderable,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get extractedContentMarkdown => $composableBuilder(
-      column: $table.extractedContentMarkdown,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.extractedContentMarkdown,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get extractedContentPlain => $composableBuilder(
-      column: $table.extractedContentPlain,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.extractedContentPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get fullContentMarkdown => $composableBuilder(
-      column: $table.fullContentMarkdown,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.fullContentMarkdown,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get fullContentPlain => $composableBuilder(
-      column: $table.fullContentPlain,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.fullContentPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $ContainerOrderingComposer get containerId {
     final $ContainerOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.containerId,
-        referencedTable: $db.container,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $ContainerOrderingComposer(
-              $db: $db,
-              $table: $db.container,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.containerId,
+      referencedTable: $db.container,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $ContainerOrderingComposer(
+            $db: $db,
+            $table: $db.container,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -2230,149 +2579,180 @@ class $TabAnnotationComposer extends Composer<_$TabDatabase, Tab> {
       $composableBuilder(column: $table.title, builder: (column) => column);
 
   GeneratedColumn<bool> get isProbablyReaderable => $composableBuilder(
-      column: $table.isProbablyReaderable, builder: (column) => column);
+    column: $table.isProbablyReaderable,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get extractedContentMarkdown => $composableBuilder(
-      column: $table.extractedContentMarkdown, builder: (column) => column);
+    column: $table.extractedContentMarkdown,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get extractedContentPlain => $composableBuilder(
-      column: $table.extractedContentPlain, builder: (column) => column);
+    column: $table.extractedContentPlain,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get fullContentMarkdown => $composableBuilder(
-      column: $table.fullContentMarkdown, builder: (column) => column);
+    column: $table.fullContentMarkdown,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get fullContentPlain => $composableBuilder(
-      column: $table.fullContentPlain, builder: (column) => column);
+    column: $table.fullContentPlain,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
 
   $ContainerAnnotationComposer get containerId {
     final $ContainerAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.containerId,
-        referencedTable: $db.container,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $ContainerAnnotationComposer(
-              $db: $db,
-              $table: $db.container,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.containerId,
+      referencedTable: $db.container,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $ContainerAnnotationComposer(
+            $db: $db,
+            $table: $db.container,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
 
-class $TabTableManager extends RootTableManager<
-    _$TabDatabase,
-    Tab,
-    TabData,
-    $TabFilterComposer,
-    $TabOrderingComposer,
-    $TabAnnotationComposer,
-    $TabCreateCompanionBuilder,
-    $TabUpdateCompanionBuilder,
-    (TabData, $TabReferences),
-    TabData,
-    PrefetchHooks Function({bool containerId})> {
+class $TabTableManager
+    extends
+        RootTableManager<
+          _$TabDatabase,
+          Tab,
+          TabData,
+          $TabFilterComposer,
+          $TabOrderingComposer,
+          $TabAnnotationComposer,
+          $TabCreateCompanionBuilder,
+          $TabUpdateCompanionBuilder,
+          (TabData, $TabReferences),
+          TabData,
+          PrefetchHooks Function({bool containerId})
+        > {
   $TabTableManager(_$TabDatabase db, Tab table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $TabFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $TabOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $TabAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            Value<String?> containerId = const Value.absent(),
-            Value<String> orderKey = const Value.absent(),
-            Value<String?> url = const Value.absent(),
-            Value<String?> title = const Value.absent(),
-            Value<bool?> isProbablyReaderable = const Value.absent(),
-            Value<String?> extractedContentMarkdown = const Value.absent(),
-            Value<String?> extractedContentPlain = const Value.absent(),
-            Value<String?> fullContentMarkdown = const Value.absent(),
-            Value<String?> fullContentPlain = const Value.absent(),
-            Value<DateTime> timestamp = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              TabCompanion(
-            id: id,
-            containerId: containerId,
-            orderKey: orderKey,
-            url: url,
-            title: title,
-            isProbablyReaderable: isProbablyReaderable,
-            extractedContentMarkdown: extractedContentMarkdown,
-            extractedContentPlain: extractedContentPlain,
-            fullContentMarkdown: fullContentMarkdown,
-            fullContentPlain: fullContentPlain,
-            timestamp: timestamp,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String id,
-            Value<String?> containerId = const Value.absent(),
-            required String orderKey,
-            Value<String?> url = const Value.absent(),
-            Value<String?> title = const Value.absent(),
-            Value<bool?> isProbablyReaderable = const Value.absent(),
-            Value<String?> extractedContentMarkdown = const Value.absent(),
-            Value<String?> extractedContentPlain = const Value.absent(),
-            Value<String?> fullContentMarkdown = const Value.absent(),
-            Value<String?> fullContentPlain = const Value.absent(),
-            required DateTime timestamp,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              TabCompanion.insert(
-            id: id,
-            containerId: containerId,
-            orderKey: orderKey,
-            url: url,
-            title: title,
-            isProbablyReaderable: isProbablyReaderable,
-            extractedContentMarkdown: extractedContentMarkdown,
-            extractedContentPlain: extractedContentPlain,
-            fullContentMarkdown: fullContentMarkdown,
-            fullContentPlain: fullContentPlain,
-            timestamp: timestamp,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), $TabReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $TabFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $TabOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $TabAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> containerId = const Value.absent(),
+                Value<String> orderKey = const Value.absent(),
+                Value<String?> url = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<bool?> isProbablyReaderable = const Value.absent(),
+                Value<String?> extractedContentMarkdown = const Value.absent(),
+                Value<String?> extractedContentPlain = const Value.absent(),
+                Value<String?> fullContentMarkdown = const Value.absent(),
+                Value<String?> fullContentPlain = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TabCompanion(
+                id: id,
+                containerId: containerId,
+                orderKey: orderKey,
+                url: url,
+                title: title,
+                isProbablyReaderable: isProbablyReaderable,
+                extractedContentMarkdown: extractedContentMarkdown,
+                extractedContentPlain: extractedContentPlain,
+                fullContentMarkdown: fullContentMarkdown,
+                fullContentPlain: fullContentPlain,
+                timestamp: timestamp,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> containerId = const Value.absent(),
+                required String orderKey,
+                Value<String?> url = const Value.absent(),
+                Value<String?> title = const Value.absent(),
+                Value<bool?> isProbablyReaderable = const Value.absent(),
+                Value<String?> extractedContentMarkdown = const Value.absent(),
+                Value<String?> extractedContentPlain = const Value.absent(),
+                Value<String?> fullContentMarkdown = const Value.absent(),
+                Value<String?> fullContentPlain = const Value.absent(),
+                required DateTime timestamp,
+                Value<int> rowid = const Value.absent(),
+              }) => TabCompanion.insert(
+                id: id,
+                containerId: containerId,
+                orderKey: orderKey,
+                url: url,
+                title: title,
+                isProbablyReaderable: isProbablyReaderable,
+                extractedContentMarkdown: extractedContentMarkdown,
+                extractedContentPlain: extractedContentPlain,
+                fullContentMarkdown: fullContentMarkdown,
+                fullContentPlain: fullContentPlain,
+                timestamp: timestamp,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $TabReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: ({containerId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
               addJoins: <
-                  T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic>>(state) {
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
                 if (containerId) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.containerId,
-                    referencedTable: $TabReferences._containerIdTable(db),
-                    referencedColumn: $TabReferences._containerIdTable(db).id,
-                  ) as T;
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.containerId,
+                            referencedTable: $TabReferences._containerIdTable(
+                              db,
+                            ),
+                            referencedColumn:
+                                $TabReferences._containerIdTable(db).id,
+                          )
+                          as T;
                 }
 
                 return state;
@@ -2382,39 +2762,44 @@ class $TabTableManager extends RootTableManager<
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $TabProcessedTableManager = ProcessedTableManager<
-    _$TabDatabase,
-    Tab,
-    TabData,
-    $TabFilterComposer,
-    $TabOrderingComposer,
-    $TabAnnotationComposer,
-    $TabCreateCompanionBuilder,
-    $TabUpdateCompanionBuilder,
-    (TabData, $TabReferences),
-    TabData,
-    PrefetchHooks Function({bool containerId})>;
-typedef $DocumentCreateCompanionBuilder = DocumentCompanion Function({
-  required String documentId,
-  Value<String?> mainDocumentId,
-  Value<String?> contextId,
-  required String content,
-  required String contentHash,
-  Value<String?> metadata,
-  Value<int> rowid,
-});
-typedef $DocumentUpdateCompanionBuilder = DocumentCompanion Function({
-  Value<String> documentId,
-  Value<String?> mainDocumentId,
-  Value<String?> contextId,
-  Value<String> content,
-  Value<String> contentHash,
-  Value<String?> metadata,
-  Value<int> rowid,
-});
+typedef $TabProcessedTableManager =
+    ProcessedTableManager<
+      _$TabDatabase,
+      Tab,
+      TabData,
+      $TabFilterComposer,
+      $TabOrderingComposer,
+      $TabAnnotationComposer,
+      $TabCreateCompanionBuilder,
+      $TabUpdateCompanionBuilder,
+      (TabData, $TabReferences),
+      TabData,
+      PrefetchHooks Function({bool containerId})
+    >;
+typedef $DocumentCreateCompanionBuilder =
+    DocumentCompanion Function({
+      required String documentId,
+      Value<String?> mainDocumentId,
+      Value<String?> contextId,
+      required String content,
+      required String contentHash,
+      Value<String?> metadata,
+      Value<int> rowid,
+    });
+typedef $DocumentUpdateCompanionBuilder =
+    DocumentCompanion Function({
+      Value<String> documentId,
+      Value<String?> mainDocumentId,
+      Value<String?> contextId,
+      Value<String> content,
+      Value<String> contentHash,
+      Value<String?> metadata,
+      Value<int> rowid,
+    });
 
 class $DocumentFilterComposer extends Composer<_$TabDatabase, Document> {
   $DocumentFilterComposer({
@@ -2425,23 +2810,34 @@ class $DocumentFilterComposer extends Composer<_$TabDatabase, Document> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get documentId => $composableBuilder(
-      column: $table.documentId, builder: (column) => ColumnFilters(column));
+    column: $table.documentId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get mainDocumentId => $composableBuilder(
-      column: $table.mainDocumentId,
-      builder: (column) => ColumnFilters(column));
+    column: $table.mainDocumentId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get contextId => $composableBuilder(
-      column: $table.contextId, builder: (column) => ColumnFilters(column));
+    column: $table.contextId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnFilters(column));
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get contentHash => $composableBuilder(
-      column: $table.contentHash, builder: (column) => ColumnFilters(column));
+    column: $table.contentHash,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get metadata => $composableBuilder(
-      column: $table.metadata, builder: (column) => ColumnFilters(column));
+    column: $table.metadata,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $DocumentOrderingComposer extends Composer<_$TabDatabase, Document> {
@@ -2453,23 +2849,34 @@ class $DocumentOrderingComposer extends Composer<_$TabDatabase, Document> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get documentId => $composableBuilder(
-      column: $table.documentId, builder: (column) => ColumnOrderings(column));
+    column: $table.documentId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get mainDocumentId => $composableBuilder(
-      column: $table.mainDocumentId,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.mainDocumentId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get contextId => $composableBuilder(
-      column: $table.contextId, builder: (column) => ColumnOrderings(column));
+    column: $table.contextId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnOrderings(column));
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get contentHash => $composableBuilder(
-      column: $table.contentHash, builder: (column) => ColumnOrderings(column));
+    column: $table.contentHash,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get metadata => $composableBuilder(
-      column: $table.metadata, builder: (column) => ColumnOrderings(column));
+    column: $table.metadata,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $DocumentAnnotationComposer extends Composer<_$TabDatabase, Document> {
@@ -2481,10 +2888,14 @@ class $DocumentAnnotationComposer extends Composer<_$TabDatabase, Document> {
     super.$removeJoinBuilderFromRootComposer,
   });
   GeneratedColumn<String> get documentId => $composableBuilder(
-      column: $table.documentId, builder: (column) => column);
+    column: $table.documentId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get mainDocumentId => $composableBuilder(
-      column: $table.mainDocumentId, builder: (column) => column);
+    column: $table.mainDocumentId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get contextId =>
       $composableBuilder(column: $table.contextId, builder: (column) => column);
@@ -2493,103 +2904,121 @@ class $DocumentAnnotationComposer extends Composer<_$TabDatabase, Document> {
       $composableBuilder(column: $table.content, builder: (column) => column);
 
   GeneratedColumn<String> get contentHash => $composableBuilder(
-      column: $table.contentHash, builder: (column) => column);
+    column: $table.contentHash,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get metadata =>
       $composableBuilder(column: $table.metadata, builder: (column) => column);
 }
 
-class $DocumentTableManager extends RootTableManager<
-    _$TabDatabase,
-    Document,
-    DocumentData,
-    $DocumentFilterComposer,
-    $DocumentOrderingComposer,
-    $DocumentAnnotationComposer,
-    $DocumentCreateCompanionBuilder,
-    $DocumentUpdateCompanionBuilder,
-    (DocumentData, BaseReferences<_$TabDatabase, Document, DocumentData>),
-    DocumentData,
-    PrefetchHooks Function()> {
+class $DocumentTableManager
+    extends
+        RootTableManager<
+          _$TabDatabase,
+          Document,
+          DocumentData,
+          $DocumentFilterComposer,
+          $DocumentOrderingComposer,
+          $DocumentAnnotationComposer,
+          $DocumentCreateCompanionBuilder,
+          $DocumentUpdateCompanionBuilder,
+          (DocumentData, BaseReferences<_$TabDatabase, Document, DocumentData>),
+          DocumentData,
+          PrefetchHooks Function()
+        > {
   $DocumentTableManager(_$TabDatabase db, Document table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $DocumentFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $DocumentOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $DocumentAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> documentId = const Value.absent(),
-            Value<String?> mainDocumentId = const Value.absent(),
-            Value<String?> contextId = const Value.absent(),
-            Value<String> content = const Value.absent(),
-            Value<String> contentHash = const Value.absent(),
-            Value<String?> metadata = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DocumentCompanion(
-            documentId: documentId,
-            mainDocumentId: mainDocumentId,
-            contextId: contextId,
-            content: content,
-            contentHash: contentHash,
-            metadata: metadata,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String documentId,
-            Value<String?> mainDocumentId = const Value.absent(),
-            Value<String?> contextId = const Value.absent(),
-            required String content,
-            required String contentHash,
-            Value<String?> metadata = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DocumentCompanion.insert(
-            documentId: documentId,
-            mainDocumentId: mainDocumentId,
-            contextId: contextId,
-            content: content,
-            contentHash: contentHash,
-            metadata: metadata,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $DocumentFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $DocumentOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $DocumentAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> documentId = const Value.absent(),
+                Value<String?> mainDocumentId = const Value.absent(),
+                Value<String?> contextId = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<String> contentHash = const Value.absent(),
+                Value<String?> metadata = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DocumentCompanion(
+                documentId: documentId,
+                mainDocumentId: mainDocumentId,
+                contextId: contextId,
+                content: content,
+                contentHash: contentHash,
+                metadata: metadata,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String documentId,
+                Value<String?> mainDocumentId = const Value.absent(),
+                Value<String?> contextId = const Value.absent(),
+                required String content,
+                required String contentHash,
+                Value<String?> metadata = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DocumentCompanion.insert(
+                documentId: documentId,
+                mainDocumentId: mainDocumentId,
+                contextId: contextId,
+                content: content,
+                contentHash: contentHash,
+                metadata: metadata,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $DocumentProcessedTableManager = ProcessedTableManager<
-    _$TabDatabase,
-    Document,
-    DocumentData,
-    $DocumentFilterComposer,
-    $DocumentOrderingComposer,
-    $DocumentAnnotationComposer,
-    $DocumentCreateCompanionBuilder,
-    $DocumentUpdateCompanionBuilder,
-    (DocumentData, BaseReferences<_$TabDatabase, Document, DocumentData>),
-    DocumentData,
-    PrefetchHooks Function()>;
-typedef $TabFtsCreateCompanionBuilder = TabFtsCompanion Function({
-  required String title,
-  required String url,
-  required String extractedContentPlain,
-  required String fullContentPlain,
-  Value<int> rowid,
-});
-typedef $TabFtsUpdateCompanionBuilder = TabFtsCompanion Function({
-  Value<String> title,
-  Value<String> url,
-  Value<String> extractedContentPlain,
-  Value<String> fullContentPlain,
-  Value<int> rowid,
-});
+typedef $DocumentProcessedTableManager =
+    ProcessedTableManager<
+      _$TabDatabase,
+      Document,
+      DocumentData,
+      $DocumentFilterComposer,
+      $DocumentOrderingComposer,
+      $DocumentAnnotationComposer,
+      $DocumentCreateCompanionBuilder,
+      $DocumentUpdateCompanionBuilder,
+      (DocumentData, BaseReferences<_$TabDatabase, Document, DocumentData>),
+      DocumentData,
+      PrefetchHooks Function()
+    >;
+typedef $TabFtsCreateCompanionBuilder =
+    TabFtsCompanion Function({
+      required String title,
+      required String url,
+      required String extractedContentPlain,
+      required String fullContentPlain,
+      Value<int> rowid,
+    });
+typedef $TabFtsUpdateCompanionBuilder =
+    TabFtsCompanion Function({
+      Value<String> title,
+      Value<String> url,
+      Value<String> extractedContentPlain,
+      Value<String> fullContentPlain,
+      Value<int> rowid,
+    });
 
 class $TabFtsFilterComposer extends Composer<_$TabDatabase, TabFts> {
   $TabFtsFilterComposer({
@@ -2600,18 +3029,24 @@ class $TabFtsFilterComposer extends Composer<_$TabDatabase, TabFts> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnFilters(column));
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get url => $composableBuilder(
-      column: $table.url, builder: (column) => ColumnFilters(column));
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get extractedContentPlain => $composableBuilder(
-      column: $table.extractedContentPlain,
-      builder: (column) => ColumnFilters(column));
+    column: $table.extractedContentPlain,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get fullContentPlain => $composableBuilder(
-      column: $table.fullContentPlain,
-      builder: (column) => ColumnFilters(column));
+    column: $table.fullContentPlain,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $TabFtsOrderingComposer extends Composer<_$TabDatabase, TabFts> {
@@ -2623,18 +3058,24 @@ class $TabFtsOrderingComposer extends Composer<_$TabDatabase, TabFts> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnOrderings(column));
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get url => $composableBuilder(
-      column: $table.url, builder: (column) => ColumnOrderings(column));
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get extractedContentPlain => $composableBuilder(
-      column: $table.extractedContentPlain,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.extractedContentPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get fullContentPlain => $composableBuilder(
-      column: $table.fullContentPlain,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.fullContentPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $TabFtsAnnotationComposer extends Composer<_$TabDatabase, TabFts> {
@@ -2652,101 +3093,121 @@ class $TabFtsAnnotationComposer extends Composer<_$TabDatabase, TabFts> {
       $composableBuilder(column: $table.url, builder: (column) => column);
 
   GeneratedColumn<String> get extractedContentPlain => $composableBuilder(
-      column: $table.extractedContentPlain, builder: (column) => column);
+    column: $table.extractedContentPlain,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get fullContentPlain => $composableBuilder(
-      column: $table.fullContentPlain, builder: (column) => column);
+    column: $table.fullContentPlain,
+    builder: (column) => column,
+  );
 }
 
-class $TabFtsTableManager extends RootTableManager<
-    _$TabDatabase,
-    TabFts,
-    TabFt,
-    $TabFtsFilterComposer,
-    $TabFtsOrderingComposer,
-    $TabFtsAnnotationComposer,
-    $TabFtsCreateCompanionBuilder,
-    $TabFtsUpdateCompanionBuilder,
-    (TabFt, BaseReferences<_$TabDatabase, TabFts, TabFt>),
-    TabFt,
-    PrefetchHooks Function()> {
+class $TabFtsTableManager
+    extends
+        RootTableManager<
+          _$TabDatabase,
+          TabFts,
+          TabFt,
+          $TabFtsFilterComposer,
+          $TabFtsOrderingComposer,
+          $TabFtsAnnotationComposer,
+          $TabFtsCreateCompanionBuilder,
+          $TabFtsUpdateCompanionBuilder,
+          (TabFt, BaseReferences<_$TabDatabase, TabFts, TabFt>),
+          TabFt,
+          PrefetchHooks Function()
+        > {
   $TabFtsTableManager(_$TabDatabase db, TabFts table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $TabFtsFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $TabFtsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $TabFtsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> title = const Value.absent(),
-            Value<String> url = const Value.absent(),
-            Value<String> extractedContentPlain = const Value.absent(),
-            Value<String> fullContentPlain = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              TabFtsCompanion(
-            title: title,
-            url: url,
-            extractedContentPlain: extractedContentPlain,
-            fullContentPlain: fullContentPlain,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String title,
-            required String url,
-            required String extractedContentPlain,
-            required String fullContentPlain,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              TabFtsCompanion.insert(
-            title: title,
-            url: url,
-            extractedContentPlain: extractedContentPlain,
-            fullContentPlain: fullContentPlain,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $TabFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $TabFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $TabFtsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> title = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<String> extractedContentPlain = const Value.absent(),
+                Value<String> fullContentPlain = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TabFtsCompanion(
+                title: title,
+                url: url,
+                extractedContentPlain: extractedContentPlain,
+                fullContentPlain: fullContentPlain,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String title,
+                required String url,
+                required String extractedContentPlain,
+                required String fullContentPlain,
+                Value<int> rowid = const Value.absent(),
+              }) => TabFtsCompanion.insert(
+                title: title,
+                url: url,
+                extractedContentPlain: extractedContentPlain,
+                fullContentPlain: fullContentPlain,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $TabFtsProcessedTableManager = ProcessedTableManager<
-    _$TabDatabase,
-    TabFts,
-    TabFt,
-    $TabFtsFilterComposer,
-    $TabFtsOrderingComposer,
-    $TabFtsAnnotationComposer,
-    $TabFtsCreateCompanionBuilder,
-    $TabFtsUpdateCompanionBuilder,
-    (TabFt, BaseReferences<_$TabDatabase, TabFts, TabFt>),
-    TabFt,
-    PrefetchHooks Function()>;
-typedef $DocumentVecCreateCompanionBuilder = DocumentVecCompanion Function({
-  required String id,
-  Value<String?> mainDocumentId,
-  Value<String?> contextId,
-  required Uint8List embedding,
-  required String contentHash,
-  Value<double?> distance,
-  Value<int?> k,
-  Value<int> rowid,
-});
-typedef $DocumentVecUpdateCompanionBuilder = DocumentVecCompanion Function({
-  Value<String> id,
-  Value<String?> mainDocumentId,
-  Value<String?> contextId,
-  Value<Uint8List> embedding,
-  Value<String> contentHash,
-  Value<double?> distance,
-  Value<int?> k,
-  Value<int> rowid,
-});
+typedef $TabFtsProcessedTableManager =
+    ProcessedTableManager<
+      _$TabDatabase,
+      TabFts,
+      TabFt,
+      $TabFtsFilterComposer,
+      $TabFtsOrderingComposer,
+      $TabFtsAnnotationComposer,
+      $TabFtsCreateCompanionBuilder,
+      $TabFtsUpdateCompanionBuilder,
+      (TabFt, BaseReferences<_$TabDatabase, TabFts, TabFt>),
+      TabFt,
+      PrefetchHooks Function()
+    >;
+typedef $DocumentVecCreateCompanionBuilder =
+    DocumentVecCompanion Function({
+      required String id,
+      Value<String?> mainDocumentId,
+      Value<String?> contextId,
+      required Uint8List embedding,
+      required String contentHash,
+      Value<double?> distance,
+      Value<int?> k,
+      Value<int> rowid,
+    });
+typedef $DocumentVecUpdateCompanionBuilder =
+    DocumentVecCompanion Function({
+      Value<String> id,
+      Value<String?> mainDocumentId,
+      Value<String?> contextId,
+      Value<Uint8List> embedding,
+      Value<String> contentHash,
+      Value<double?> distance,
+      Value<int?> k,
+      Value<int> rowid,
+    });
 
 class $DocumentVecFilterComposer extends Composer<_$TabDatabase, DocumentVec> {
   $DocumentVecFilterComposer({
@@ -2757,26 +3218,39 @@ class $DocumentVecFilterComposer extends Composer<_$TabDatabase, DocumentVec> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get mainDocumentId => $composableBuilder(
-      column: $table.mainDocumentId,
-      builder: (column) => ColumnFilters(column));
+    column: $table.mainDocumentId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get contextId => $composableBuilder(
-      column: $table.contextId, builder: (column) => ColumnFilters(column));
+    column: $table.contextId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<Uint8List> get embedding => $composableBuilder(
-      column: $table.embedding, builder: (column) => ColumnFilters(column));
+    column: $table.embedding,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get contentHash => $composableBuilder(
-      column: $table.contentHash, builder: (column) => ColumnFilters(column));
+    column: $table.contentHash,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get distance => $composableBuilder(
-      column: $table.distance, builder: (column) => ColumnFilters(column));
+    column: $table.distance,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get k => $composableBuilder(
-      column: $table.k, builder: (column) => ColumnFilters(column));
+    column: $table.k,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $DocumentVecOrderingComposer
@@ -2789,26 +3263,39 @@ class $DocumentVecOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get mainDocumentId => $composableBuilder(
-      column: $table.mainDocumentId,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.mainDocumentId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get contextId => $composableBuilder(
-      column: $table.contextId, builder: (column) => ColumnOrderings(column));
+    column: $table.contextId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<Uint8List> get embedding => $composableBuilder(
-      column: $table.embedding, builder: (column) => ColumnOrderings(column));
+    column: $table.embedding,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get contentHash => $composableBuilder(
-      column: $table.contentHash, builder: (column) => ColumnOrderings(column));
+    column: $table.contentHash,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get distance => $composableBuilder(
-      column: $table.distance, builder: (column) => ColumnOrderings(column));
+    column: $table.distance,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get k => $composableBuilder(
-      column: $table.k, builder: (column) => ColumnOrderings(column));
+    column: $table.k,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $DocumentVecAnnotationComposer
@@ -2824,7 +3311,9 @@ class $DocumentVecAnnotationComposer
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get mainDocumentId => $composableBuilder(
-      column: $table.mainDocumentId, builder: (column) => column);
+    column: $table.mainDocumentId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get contextId =>
       $composableBuilder(column: $table.contextId, builder: (column) => column);
@@ -2833,7 +3322,9 @@ class $DocumentVecAnnotationComposer
       $composableBuilder(column: $table.embedding, builder: (column) => column);
 
   GeneratedColumn<String> get contentHash => $composableBuilder(
-      column: $table.contentHash, builder: (column) => column);
+    column: $table.contentHash,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get distance =>
       $composableBuilder(column: $table.distance, builder: (column) => column);
@@ -2842,93 +3333,107 @@ class $DocumentVecAnnotationComposer
       $composableBuilder(column: $table.k, builder: (column) => column);
 }
 
-class $DocumentVecTableManager extends RootTableManager<
-    _$TabDatabase,
-    DocumentVec,
-    DocumentVecData,
-    $DocumentVecFilterComposer,
-    $DocumentVecOrderingComposer,
-    $DocumentVecAnnotationComposer,
-    $DocumentVecCreateCompanionBuilder,
-    $DocumentVecUpdateCompanionBuilder,
-    (
-      DocumentVecData,
-      BaseReferences<_$TabDatabase, DocumentVec, DocumentVecData>
-    ),
-    DocumentVecData,
-    PrefetchHooks Function()> {
+class $DocumentVecTableManager
+    extends
+        RootTableManager<
+          _$TabDatabase,
+          DocumentVec,
+          DocumentVecData,
+          $DocumentVecFilterComposer,
+          $DocumentVecOrderingComposer,
+          $DocumentVecAnnotationComposer,
+          $DocumentVecCreateCompanionBuilder,
+          $DocumentVecUpdateCompanionBuilder,
+          (
+            DocumentVecData,
+            BaseReferences<_$TabDatabase, DocumentVec, DocumentVecData>,
+          ),
+          DocumentVecData,
+          PrefetchHooks Function()
+        > {
   $DocumentVecTableManager(_$TabDatabase db, DocumentVec table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $DocumentVecFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $DocumentVecOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $DocumentVecAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            Value<String?> mainDocumentId = const Value.absent(),
-            Value<String?> contextId = const Value.absent(),
-            Value<Uint8List> embedding = const Value.absent(),
-            Value<String> contentHash = const Value.absent(),
-            Value<double?> distance = const Value.absent(),
-            Value<int?> k = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DocumentVecCompanion(
-            id: id,
-            mainDocumentId: mainDocumentId,
-            contextId: contextId,
-            embedding: embedding,
-            contentHash: contentHash,
-            distance: distance,
-            k: k,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String id,
-            Value<String?> mainDocumentId = const Value.absent(),
-            Value<String?> contextId = const Value.absent(),
-            required Uint8List embedding,
-            required String contentHash,
-            Value<double?> distance = const Value.absent(),
-            Value<int?> k = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DocumentVecCompanion.insert(
-            id: id,
-            mainDocumentId: mainDocumentId,
-            contextId: contextId,
-            embedding: embedding,
-            contentHash: contentHash,
-            distance: distance,
-            k: k,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $DocumentVecFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $DocumentVecOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $DocumentVecAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> mainDocumentId = const Value.absent(),
+                Value<String?> contextId = const Value.absent(),
+                Value<Uint8List> embedding = const Value.absent(),
+                Value<String> contentHash = const Value.absent(),
+                Value<double?> distance = const Value.absent(),
+                Value<int?> k = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DocumentVecCompanion(
+                id: id,
+                mainDocumentId: mainDocumentId,
+                contextId: contextId,
+                embedding: embedding,
+                contentHash: contentHash,
+                distance: distance,
+                k: k,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> mainDocumentId = const Value.absent(),
+                Value<String?> contextId = const Value.absent(),
+                required Uint8List embedding,
+                required String contentHash,
+                Value<double?> distance = const Value.absent(),
+                Value<int?> k = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DocumentVecCompanion.insert(
+                id: id,
+                mainDocumentId: mainDocumentId,
+                contextId: contextId,
+                embedding: embedding,
+                contentHash: contentHash,
+                distance: distance,
+                k: k,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $DocumentVecProcessedTableManager = ProcessedTableManager<
-    _$TabDatabase,
-    DocumentVec,
-    DocumentVecData,
-    $DocumentVecFilterComposer,
-    $DocumentVecOrderingComposer,
-    $DocumentVecAnnotationComposer,
-    $DocumentVecCreateCompanionBuilder,
-    $DocumentVecUpdateCompanionBuilder,
-    (
+typedef $DocumentVecProcessedTableManager =
+    ProcessedTableManager<
+      _$TabDatabase,
+      DocumentVec,
       DocumentVecData,
-      BaseReferences<_$TabDatabase, DocumentVec, DocumentVecData>
-    ),
-    DocumentVecData,
-    PrefetchHooks Function()>;
+      $DocumentVecFilterComposer,
+      $DocumentVecOrderingComposer,
+      $DocumentVecAnnotationComposer,
+      $DocumentVecCreateCompanionBuilder,
+      $DocumentVecUpdateCompanionBuilder,
+      (
+        DocumentVecData,
+        BaseReferences<_$TabDatabase, DocumentVec, DocumentVecData>,
+      ),
+      DocumentVecData,
+      PrefetchHooks Function()
+    >;
 
 class $TabDatabaseManager {
   final _$TabDatabase _db;

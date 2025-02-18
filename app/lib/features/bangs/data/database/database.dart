@@ -9,10 +9,7 @@ import 'package:lensai/features/search/domain/fts_tokenizer.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(
-  include: {'database.drift'},
-  daos: [BangDao, SyncDao],
-)
+@DriftDatabase(include: {'database.drift'}, daos: [BangDao, SyncDao])
 class BangDatabase extends _$BangDatabase with PrefixQueryBuilderMixin {
   @override
   final int schemaVersion = 1;
@@ -24,10 +21,10 @@ class BangDatabase extends _$BangDatabase with PrefixQueryBuilderMixin {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON;');
-        },
-      );
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON;');
+    },
+  );
 
   BangDatabase(super.e);
 }

@@ -13,14 +13,15 @@ String _$containerRepositoryHash() =>
 @ProviderFor(ContainerRepository)
 final containerRepositoryProvider =
     NotifierProvider<ContainerRepository, void>.internal(
-  ContainerRepository.new,
-  name: r'containerRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$containerRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ContainerRepository.new,
+      name: r'containerRepositoryProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$containerRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ContainerRepository = Notifier<void>;
 // ignore_for_file: type=lint

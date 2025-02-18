@@ -13,14 +13,15 @@ String _$bangDataRepositoryHash() =>
 @ProviderFor(BangDataRepository)
 final bangDataRepositoryProvider =
     NotifierProvider<BangDataRepository, void>.internal(
-  BangDataRepository.new,
-  name: r'bangDataRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$bangDataRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      BangDataRepository.new,
+      name: r'bangDataRepositoryProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$bangDataRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$BangDataRepository = Notifier<void>;
 // ignore_for_file: type=lint

@@ -5,17 +5,14 @@ class EquatableCollection<T> with FastEquatable {
   final bool immutable;
 
   EquatableCollection(this.collection, {required this.immutable})
-      : assert(
-          collection is Map || collection is Iterable || collection == null,
-          'Collection type not supported',
-        );
+    : assert(
+        collection is Map || collection is Iterable || collection == null,
+        'Collection type not supported',
+      );
 
   @override
   bool get cacheHash => immutable;
 
   @override
-  List<Object?> get hashParameters => [
-        collection,
-        immutable,
-      ];
+  List<Object?> get hashParameters => [collection, immutable];
 }

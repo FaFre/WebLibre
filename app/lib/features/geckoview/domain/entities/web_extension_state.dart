@@ -33,12 +33,12 @@ class WebExtensionState with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-        extensionId,
-        title,
-        enabled,
-        badgeText,
-        badgeTextColor,
-        badgeBackgroundColor,
-        icon,
-      ];
+    extensionId,
+    title,
+    enabled,
+    badgeText,
+    badgeTextColor,
+    badgeBackgroundColor,
+    icon,
+  ];
 }

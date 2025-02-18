@@ -25,9 +25,7 @@ class ErrorContainer extends StatelessWidget {
               color: theme.colorScheme.onErrorContainer,
             ),
           ),
-          Expanded(
-            child: content,
-          ),
+          Expanded(child: content),
         ],
       ),
     );

@@ -32,9 +32,7 @@ class _SystemHash {
 abstract class _$TabSession extends BuildlessAutoDisposeNotifier<void> {
   late final String? tabId;
 
-  void build({
-    required String? tabId,
-  });
+  void build({required String? tabId});
 }
 
 /// See also [TabSession].
@@ -47,21 +45,15 @@ class TabSessionFamily extends Family<void> {
   const TabSessionFamily();
 
   /// See also [TabSession].
-  TabSessionProvider call({
-    required String? tabId,
-  }) {
-    return TabSessionProvider(
-      tabId: tabId,
-    );
+  TabSessionProvider call({required String? tabId}) {
+    return TabSessionProvider(tabId: tabId);
   }
 
   @override
   TabSessionProvider getProviderOverride(
     covariant TabSessionProvider provider,
   ) {
-    return call(
-      tabId: provider.tabId,
-    );
+    return call(tabId: provider.tabId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -83,21 +75,19 @@ class TabSessionFamily extends Family<void> {
 class TabSessionProvider
     extends AutoDisposeNotifierProviderImpl<TabSession, void> {
   /// See also [TabSession].
-  TabSessionProvider({
-    required String? tabId,
-  }) : this._internal(
-          () => TabSession()..tabId = tabId,
-          from: tabSessionProvider,
-          name: r'tabSessionProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$tabSessionHash,
-          dependencies: TabSessionFamily._dependencies,
-          allTransitiveDependencies:
-              TabSessionFamily._allTransitiveDependencies,
-          tabId: tabId,
-        );
+  TabSessionProvider({required String? tabId})
+    : this._internal(
+        () => TabSession()..tabId = tabId,
+        from: tabSessionProvider,
+        name: r'tabSessionProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$tabSessionHash,
+        dependencies: TabSessionFamily._dependencies,
+        allTransitiveDependencies: TabSessionFamily._allTransitiveDependencies,
+        tabId: tabId,
+      );
 
   TabSessionProvider._internal(
     super._createNotifier, {
@@ -112,12 +102,8 @@ class TabSessionProvider
   final String? tabId;
 
   @override
-  void runNotifierBuild(
-    covariant TabSession notifier,
-  ) {
-    return notifier.build(
-      tabId: tabId,
-    );
+  void runNotifierBuild(covariant TabSession notifier) {
+    return notifier.build(tabId: tabId);
   }
 
   @override
@@ -170,5 +156,6 @@ class _TabSessionProviderElement
   @override
   String? get tabId => (origin as TabSessionProvider).tabId;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -17,30 +17,26 @@ class DriftChatController implements ChatController {
   late final BehaviorSubject<Map<String, Message>> _intermediateMessages;
 
   DriftChatController(this._dao, {required this.chatId}) {
-    final chatMessagesStream = _dao
-        .chatMessages(chatId: chatId)
-        .map(
-          (data) => Message.fromJson(
-            jsonDecode(data.messageJson) as Map<String, dynamic>,
-          ),
-        )
-        .watch();
+    final chatMessagesStream =
+        _dao
+            .chatMessages(chatId: chatId)
+            .map(
+              (data) => Message.fromJson(
+                jsonDecode(data.messageJson) as Map<String, dynamic>,
+              ),
+            )
+            .watch();
 
     _intermediateMessages = BehaviorSubject.seeded({});
 
-    _mergedMessagesStream = Rx.combineLatest2(
-      chatMessagesStream,
-      _intermediateMessages,
-      (a, b) {
-        if (a.isNotEmpty && b.isNotEmpty) {
-          return [
-            for (final message in a) b[message.id] ?? message,
-          ];
-        }
+    _mergedMessagesStream =
+        Rx.combineLatest2(chatMessagesStream, _intermediateMessages, (a, b) {
+          if (a.isNotEmpty && b.isNotEmpty) {
+            return [for (final message in a) b[message.id] ?? message];
+          }
 
-        return a;
-      },
-    ).shareValue();
+          return a;
+        }).shareValue();
 
     //Set initial messages
     unawaited(
@@ -80,9 +76,10 @@ class DriftChatController implements ChatController {
 
   @override
   Future<void> remove(Message message) async {
-    final index = await _dao
-        .messageIndex(chatId: chatId, messageId: message.id)
-        .getSingleOrNull();
+    final index =
+        await _dao
+            .messageIndex(chatId: chatId, messageId: message.id)
+            .getSingleOrNull();
 
     if (index != null) {
       await _dao.removeMessage(messageId: message.id);

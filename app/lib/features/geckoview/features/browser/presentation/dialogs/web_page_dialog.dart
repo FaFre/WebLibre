@@ -36,11 +36,7 @@ class WebPageDialog extends HookConsumerWidget {
   final Uri url;
   final WebPageInfo? precachedInfo;
 
-  const WebPageDialog({
-    required this.url,
-    this.precachedInfo,
-    super.key,
-  });
+  const WebPageDialog({required this.url, this.precachedInfo, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,8 +59,10 @@ class WebPageDialog extends HookConsumerWidget {
       context: context,
       removeBottom: true,
       child: Dialog(
-        insetPadding:
-            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 64.0),
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: 16.0,
+          vertical: 64.0,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -79,26 +77,24 @@ class WebPageDialog extends HookConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: HookConsumer(
                   builder: (context, ref, child) {
-                    final addressTextController =
-                        useTextEditingController(text: url.toString());
+                    final addressTextController = useTextEditingController(
+                      text: url.toString(),
+                    );
                     final addressTextFocusNode = useFocusNode();
 
                     final suggestion = useState<String?>(null);
 
-                    useListenableCallback(
-                      addressTextController,
-                      () async {
-                        if (addressTextController.text.isNotEmpty) {
-                          final result = await ref
-                              .read(engineSuggestionsProvider.notifier)
-                              .getAutocompleteSuggestion(
-                                addressTextController.text,
-                              );
+                    useListenableCallback(addressTextController, () async {
+                      if (addressTextController.text.isNotEmpty) {
+                        final result = await ref
+                            .read(engineSuggestionsProvider.notifier)
+                            .getAutocompleteSuggestion(
+                              addressTextController.text,
+                            );
 
-                          suggestion.value = result;
-                        }
-                      },
-                    );
+                        suggestion.value = result;
+                      }
+                    });
 
                     return AutoSuggestTextField(
                       controller: addressTextController,
@@ -121,12 +117,15 @@ class WebPageDialog extends HookConsumerWidget {
                       },
                       onSubmitted: (value) async {
                         if (value.isNotEmpty) {
-                          var newUrl =
-                              uri_parser.tryParseUrl(value, eagerParsing: true);
+                          var newUrl = uri_parser.tryParseUrl(
+                            value,
+                            eagerParsing: true,
+                          );
 
                           if (newUrl == null) {
-                            final defaultSearchBang = await ref
-                                .read(defaultSearchBangDataProvider.future);
+                            final defaultSearchBang = await ref.read(
+                              defaultSearchBangDataProvider.future,
+                            );
 
                             newUrl = defaultSearchBang?.getUrl(value);
                           }
@@ -147,9 +146,7 @@ class WebPageDialog extends HookConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 4,
-            ),
+            const SizedBox(height: 4),
             const Divider(),
             Flexible(
               child: FadingScroll(
@@ -173,21 +170,23 @@ class WebPageDialog extends HookConsumerWidget {
                                 availableBangs: availableBangs,
                               );
                             },
-                            error: (error, stackTrace) => FailureWidget(
-                              title: 'Could not load bangs',
-                              exception: error,
-                            ),
-                            loading: () => SiteSearch(
-                              domain: url.host,
-                              availableBangs: [
-                                BangData(
-                                  websiteName: 'websiteName',
-                                  domain: 'domain',
-                                  trigger: 'trigger',
-                                  urlTemplate: 'urlTemplate',
+                            error:
+                                (error, stackTrace) => FailureWidget(
+                                  title: 'Could not load bangs',
+                                  exception: error,
                                 ),
-                              ],
-                            ),
+                            loading:
+                                () => SiteSearch(
+                                  domain: url.host,
+                                  availableBangs: [
+                                    BangData(
+                                      websiteName: 'websiteName',
+                                      domain: 'domain',
+                                      trigger: 'trigger',
+                                      urlTemplate: 'urlTemplate',
+                                    ),
+                                  ],
+                                ),
                           ),
                         ),
                         if (availableBangsAsync.isLoading ||
@@ -241,31 +240,30 @@ class WebPageDialog extends HookConsumerWidget {
                           leading: const Icon(Icons.mobile_screen_share),
                           title: const Text('Share screenshot'),
                           onTap: () async {
-                            final screenshot = await ref
-                                .read(selectedTabSessionNotifierProvider)
-                                .requestScreenshot();
+                            final screenshot =
+                                await ref
+                                    .read(selectedTabSessionNotifierProvider)
+                                    .requestScreenshot();
 
                             if (screenshot != null) {
-                              ui.decodeImageFromList(
-                                screenshot,
-                                (result) async {
-                                  final png = await result.toByteData(
-                                    format: ui.ImageByteFormat.png,
+                              ui.decodeImageFromList(screenshot, (
+                                result,
+                              ) async {
+                                final png = await result.toByteData(
+                                  format: ui.ImageByteFormat.png,
+                                );
+
+                                if (png != null) {
+                                  final file = XFile.fromData(
+                                    png.buffer.asUint8List(),
+                                    mimeType: 'image/png',
                                   );
 
-                                  if (png != null) {
-                                    final file = XFile.fromData(
-                                      png.buffer.asUint8List(),
-                                      mimeType: 'image/png',
-                                    );
-
-                                    await Share.shareXFiles(
-                                      [file],
-                                      subject: precachedInfo?.title,
-                                    );
-                                  }
-                                },
-                              );
+                                  await Share.shareXFiles([
+                                    file,
+                                  ], subject: precachedInfo?.title);
+                                }
+                              });
                             }
 
                             if (context.mounted) {

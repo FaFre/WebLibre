@@ -16,8 +16,9 @@ class EngineSettingsReplicationService
     var initialSettingsSent = false;
 
     ref.listen(
-      generalSettingsRepositoryProvider
-          .select((settings) => settings.themeMode),
+      generalSettingsRepositoryProvider.select(
+        (settings) => settings.themeMode,
+      ),
       (previous, next) async {
         final theme = switch (next) {
           ThemeMode.system => ColorScheme.system,
@@ -29,62 +30,63 @@ class EngineSettingsReplicationService
       },
     );
 
-    ref.listen(
-      engineSettingsRepositoryProvider,
-      (previous, next) async {
-        if (initialSettingsSent && previous != null) {
-          if (previous.javascriptEnabled != next.javascriptEnabled) {
-            await _service.javascriptEnabled(next.javascriptEnabled);
-          }
-          if (previous.trackingProtectionPolicy !=
-              next.trackingProtectionPolicy) {
-            await _service
-                .trackingProtectionPolicy(next.trackingProtectionPolicy);
-          }
-          if (previous.httpsOnlyMode != next.httpsOnlyMode) {
-            await _service.httpsOnlyMode(next.httpsOnlyMode);
-          }
-          if (previous.globalPrivacyControlEnabled !=
-              next.globalPrivacyControlEnabled) {
-            await _service
-                .globalPrivacyControlEnabled(next.globalPrivacyControlEnabled);
-          }
-          if (previous.preferredColorScheme != next.preferredColorScheme) {
-            await _service.preferredColorScheme(next.preferredColorScheme);
-          }
-          if (previous.cookieBannerHandlingMode !=
-              next.cookieBannerHandlingMode) {
-            await _service
-                .cookieBannerHandlingMode(next.cookieBannerHandlingMode);
-          }
-          if (previous.cookieBannerHandlingModePrivateBrowsing !=
-              next.cookieBannerHandlingModePrivateBrowsing) {
-            await _service.cookieBannerHandlingModePrivateBrowsing(
-              next.cookieBannerHandlingModePrivateBrowsing,
-            );
-          }
-          if (previous.cookieBannerHandlingGlobalRules !=
-              next.cookieBannerHandlingGlobalRules) {
-            await _service.cookieBannerHandlingGlobalRules(
-              next.cookieBannerHandlingGlobalRules,
-            );
-          }
-          if (previous.cookieBannerHandlingGlobalRulesSubFrames !=
-              next.cookieBannerHandlingGlobalRulesSubFrames) {
-            await _service.cookieBannerHandlingGlobalRulesSubFrames(
-              next.cookieBannerHandlingGlobalRulesSubFrames,
-            );
-          }
-          if (previous.webContentIsolationStrategy !=
-              next.webContentIsolationStrategy) {
-            await _service
-                .webContentIsolationStrategy(next.webContentIsolationStrategy);
-          }
-        } else {
-          await _service.setDefaultSettings(next);
-          initialSettingsSent = true;
+    ref.listen(engineSettingsRepositoryProvider, (previous, next) async {
+      if (initialSettingsSent && previous != null) {
+        if (previous.javascriptEnabled != next.javascriptEnabled) {
+          await _service.javascriptEnabled(next.javascriptEnabled);
         }
-      },
-    );
+        if (previous.trackingProtectionPolicy !=
+            next.trackingProtectionPolicy) {
+          await _service.trackingProtectionPolicy(
+            next.trackingProtectionPolicy,
+          );
+        }
+        if (previous.httpsOnlyMode != next.httpsOnlyMode) {
+          await _service.httpsOnlyMode(next.httpsOnlyMode);
+        }
+        if (previous.globalPrivacyControlEnabled !=
+            next.globalPrivacyControlEnabled) {
+          await _service.globalPrivacyControlEnabled(
+            next.globalPrivacyControlEnabled,
+          );
+        }
+        if (previous.preferredColorScheme != next.preferredColorScheme) {
+          await _service.preferredColorScheme(next.preferredColorScheme);
+        }
+        if (previous.cookieBannerHandlingMode !=
+            next.cookieBannerHandlingMode) {
+          await _service.cookieBannerHandlingMode(
+            next.cookieBannerHandlingMode,
+          );
+        }
+        if (previous.cookieBannerHandlingModePrivateBrowsing !=
+            next.cookieBannerHandlingModePrivateBrowsing) {
+          await _service.cookieBannerHandlingModePrivateBrowsing(
+            next.cookieBannerHandlingModePrivateBrowsing,
+          );
+        }
+        if (previous.cookieBannerHandlingGlobalRules !=
+            next.cookieBannerHandlingGlobalRules) {
+          await _service.cookieBannerHandlingGlobalRules(
+            next.cookieBannerHandlingGlobalRules,
+          );
+        }
+        if (previous.cookieBannerHandlingGlobalRulesSubFrames !=
+            next.cookieBannerHandlingGlobalRulesSubFrames) {
+          await _service.cookieBannerHandlingGlobalRulesSubFrames(
+            next.cookieBannerHandlingGlobalRulesSubFrames,
+          );
+        }
+        if (previous.webContentIsolationStrategy !=
+            next.webContentIsolationStrategy) {
+          await _service.webContentIsolationStrategy(
+            next.webContentIsolationStrategy,
+          );
+        }
+      } else {
+        await _service.setDefaultSettings(next);
+        initialSettingsSent = true;
+      }
+    });
   }
 }

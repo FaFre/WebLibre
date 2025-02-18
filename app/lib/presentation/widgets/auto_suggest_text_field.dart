@@ -123,14 +123,15 @@ class AutoSuggestTextField extends HookWidget {
                             text: suggestion!.substring(text.length),
                             style: TextStyle(
                               height: 1.2,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              backgroundColor: suggestionHighlightColor ??
-                                  Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withValues(alpha: 0.40),
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                              backgroundColor:
+                                  suggestionHighlightColor ??
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withValues(alpha: 0.40),
                             ),
                           ),
                         ],
@@ -147,7 +148,8 @@ class AutoSuggestTextField extends HookWidget {
           focusNode: focusNode,
           decoration: baseDecoration.copyWith(
             label: baseDecoration.label ?? const Text(''),
-            floatingLabelBehavior: baseDecoration.floatingLabelBehavior ??
+            floatingLabelBehavior:
+                baseDecoration.floatingLabelBehavior ??
                 FloatingLabelBehavior.never,
           ),
           style: style,

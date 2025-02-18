@@ -22,14 +22,11 @@ class HistorySuggestions extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final historySuggestions = ref.watch(engineHistorySuggestionsProvider);
 
-    useListenableCallback(
-      searchTextController,
-      () async {
-        await ref
-            .watch(engineSuggestionsProvider.notifier)
-            .addQuery(searchTextController.text);
-      },
-    );
+    useListenableCallback(searchTextController, () async {
+      await ref
+          .watch(engineSuggestionsProvider.notifier)
+          .addQuery(searchTextController.text);
+    });
 
     if (historySuggestions.hasValue &&
         (historySuggestions.valueOrNull?.isEmpty ?? true)) {
@@ -38,9 +35,7 @@ class HistorySuggestions extends HookConsumerWidget {
 
     return MultiSliver(
       children: [
-        const SliverToBoxAdapter(
-          child: Divider(),
-        ),
+        const SliverToBoxAdapter(child: Divider()),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(left: 16.0),
@@ -76,8 +71,9 @@ class HistorySuggestions extends HookConsumerWidget {
                             width: 24,
                           ),
                         ),
-                        title:
-                            suggestion.title.mapNotNull((title) => Text(title)),
+                        title: suggestion.title.mapNotNull(
+                          (title) => Text(title),
+                        ),
                         subtitle: suggestion.description.mapNotNull(
                           (description) => Text(
                             description,
@@ -117,14 +113,13 @@ class HistorySuggestions extends HookConsumerWidget {
                 exception: error,
               );
             },
-            loading: () => SliverList.builder(
-              itemCount: historySuggestions.valueOrNull?.length ?? 3,
-              itemBuilder: (context, index) {
-                return const ListTile(
-                  title: Bone.text(),
-                );
-              },
-            ),
+            loading:
+                () => SliverList.builder(
+                  itemCount: historySuggestions.valueOrNull?.length ?? 3,
+                  itemBuilder: (context, index) {
+                    return const ListTile(title: Bone.text());
+                  },
+                ),
           ),
         ),
       ],

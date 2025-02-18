@@ -15,8 +15,9 @@ part 'preference_settings.g.dart';
 @Riverpod(keepAlive: true)
 Future<Map<String, dynamic>> _preferenceSettingContent(Ref ref) async {
   return await rootBundle
-      .loadString('assets/preferences/settings.json')
-      .then(jsonDecode) as Map<String, dynamic>;
+          .loadString('assets/preferences/settings.json')
+          .then(jsonDecode)
+      as Map<String, dynamic>;
 }
 
 @Riverpod(keepAlive: true)
@@ -85,8 +86,9 @@ class UnifiedPreferenceSettingsRepository
   Map<String, PreferenceSettingGroup>? _statelessGroups;
 
   Future<void> apply() async {
-    _statelessGroups =
-        await ref.read(_preferenceSettingGroupsProvider(partition).future);
+    _statelessGroups = await ref.read(
+      _preferenceSettingGroupsProvider(partition).future,
+    );
 
     final prefs = {
       for (final group in _statelessGroups!.values)
@@ -101,13 +103,15 @@ class UnifiedPreferenceSettingsRepository
   }
 
   Future<void> reset() async {
-    _statelessGroups =
-        await ref.read(_preferenceSettingGroupsProvider(partition).future);
+    _statelessGroups = await ref.read(
+      _preferenceSettingGroupsProvider(partition).future,
+    );
 
-    final prefs = _statelessGroups!.values
-        .map((group) => group.settings.keys)
-        .flattened
-        .toList();
+    final prefs =
+        _statelessGroups!.values
+            .map((group) => group.settings.keys)
+            .flattened
+            .toList();
 
     await ref.read(_preferenceRepositoryProvider.notifier).resetPrefs(prefs);
   }
@@ -116,8 +120,9 @@ class UnifiedPreferenceSettingsRepository
   Stream<Map<String, PreferenceSettingGroup>> build(
     PreferencePartition partition,
   ) async* {
-    _statelessGroups =
-        await ref.watch(_preferenceSettingGroupsProvider(partition).future);
+    _statelessGroups = await ref.watch(
+      _preferenceSettingGroupsProvider(partition).future,
+    );
 
     final prefStream = ref.watch(_preferenceRepositoryProvider);
 
@@ -145,8 +150,9 @@ class PreferenceSettingsGroupRepository
   PreferenceSettingGroup? _statelessSettingGroup;
 
   Future<void> apply({List<String>? filter}) async {
-    _statelessSettingGroup ??= await ref
-        .read(_preferenceSettingGroupProvider(partition, groupName).future);
+    _statelessSettingGroup ??= await ref.read(
+      _preferenceSettingGroupProvider(partition, groupName).future,
+    );
 
     final prefs = Map.fromEntries(
       filter?.map(
@@ -165,8 +171,9 @@ class PreferenceSettingsGroupRepository
   }
 
   Future<void> reset({List<String>? filter}) async {
-    _statelessSettingGroup ??= await ref
-        .read(_preferenceSettingGroupProvider(partition, groupName).future);
+    _statelessSettingGroup ??= await ref.read(
+      _preferenceSettingGroupProvider(partition, groupName).future,
+    );
 
     if (filter != null &&
         filter.any(
@@ -185,8 +192,9 @@ class PreferenceSettingsGroupRepository
     PreferencePartition partition,
     String groupName,
   ) async* {
-    _statelessSettingGroup = await ref
-        .watch(_preferenceSettingGroupProvider(partition, groupName).future);
+    _statelessSettingGroup = await ref.watch(
+      _preferenceSettingGroupProvider(partition, groupName).future,
+    );
 
     final prefStream = ref.watch(_preferenceRepositoryProvider);
 

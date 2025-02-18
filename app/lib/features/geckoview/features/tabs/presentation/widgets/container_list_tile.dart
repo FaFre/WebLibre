@@ -28,10 +28,7 @@ class ContainerListTile extends HookWidget {
         title: Text(container.name ?? 'New Container'),
         trailing: IconButton(
           onPressed: () async {
-            await context.push(
-              ContainerEditRoute().location,
-              extra: container,
-            );
+            await context.push(ContainerEditRoute().location, extra: container);
           },
           icon: const Icon(Icons.chevron_right),
         ),

@@ -29,9 +29,9 @@ class BangData extends Bang {
 
   @override
   List<Object?> get hashParameters => [
-        ...super.hashParameters,
-        frequency,
-        lastUsed,
-        icon,
-      ];
+    ...super.hashParameters,
+    frequency,
+    lastUsed,
+    icon,
+  ];
 }

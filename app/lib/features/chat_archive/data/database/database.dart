@@ -4,10 +4,7 @@ import 'package:lensai/features/search/domain/fts_tokenizer.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(
-  include: {'database.drift'},
-  daos: [SearchDao],
-)
+@DriftDatabase(include: {'database.drift'}, daos: [SearchDao])
 class ChatSearchDatabase extends _$ChatSearchDatabase
     with TrigramQueryBuilderMixin {
   @override

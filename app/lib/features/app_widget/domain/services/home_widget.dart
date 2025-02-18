@@ -12,13 +12,12 @@ FutureOr<bool> widgetPinnable(Ref ref) async {
 }
 
 @Riverpod()
-Raw<Stream<ReceivedParameter>> appWidgetLaunchStream(
-  Ref ref,
-) {
+Raw<Stream<ReceivedParameter>> appWidgetLaunchStream(Ref ref) {
   // ignore: discarded_futures
   final initialStream = HomeWidget.initiallyLaunchedFromHomeWidget().asStream();
 
-  return ConcatStream([initialStream, HomeWidget.widgetClicked])
-      .whereNotNull()
-      .map((uri) => ReceivedParameter(null, uri.host));
+  return ConcatStream([
+    initialStream,
+    HomeWidget.widgetClicked,
+  ]).whereNotNull().map((uri) => ReceivedParameter(null, uri.host));
 }

@@ -45,16 +45,14 @@ class DocumentRepository extends _$DocumentRepository {
         final splittedWithSource = splitted.mapNotNull(
           (splitted) => (
             mainDocumentId: splitted.mainDocumentId,
-            parts: splitted.parts
-                .map(
-                  (part) => part.copyWith(
-                    metadata: {
-                      ...part.metadata,
-                      'source': part.id,
-                    },
-                  ),
-                )
-                .toList()
+            parts:
+                splitted.parts
+                    .map(
+                      (part) => part.copyWith(
+                        metadata: {...part.metadata, 'source': part.id},
+                      ),
+                    )
+                    .toList(),
           ),
         );
 
@@ -66,17 +64,15 @@ class DocumentRepository extends _$DocumentRepository {
     });
   }
 
-  Future<Result> updateEmbeddings({
-    String? mainDocumentId,
-    String? contextId,
-  }) {
+  Future<Result> updateEmbeddings({String? mainDocumentId, String? contextId}) {
     return Result.fromAsync(() async {
-      final missing = await _vectorDao
-          .getDocumentsWithMissingEmbeddings(
-            mainDocumentId: mainDocumentId,
-            contextId: contextId,
-          )
-          .get();
+      final missing =
+          await _vectorDao
+              .getDocumentsWithMissingEmbeddings(
+                mainDocumentId: mainDocumentId,
+                contextId: contextId,
+              )
+              .get();
 
       final documentEmbeddings = await _embeddings.embedDocuments(
         missing
@@ -97,16 +93,18 @@ class DocumentRepository extends _$DocumentRepository {
 
     final tabContentService = ref.watch(tabContentServiceProvider);
 
-    final tabContentSub =
-        tabContentService.tabContentStream.listen((content) async {
-      final bestContent = content.isProbablyReaderable
-          ? content.extractedContentMarkdown
-          : content.fullContentMarkdown;
+    final tabContentSub = tabContentService.tabContentStream.listen((
+      content,
+    ) async {
+      final bestContent =
+          content.isProbablyReaderable
+              ? content.extractedContentMarkdown
+              : content.fullContentMarkdown;
 
       if (bestContent != null) {
-        await _insertMarkdownDocumentsSplitted(
-          [Document(id: content.tabId, pageContent: bestContent)],
-        );
+        await _insertMarkdownDocumentsSplitted([
+          Document(id: content.tabId, pageContent: bestContent),
+        ]);
       }
     });
 

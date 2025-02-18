@@ -24,13 +24,9 @@ class StartProxyController extends _$StartProxyController {
       if (result == true) {
         final connection = ref.read(torProxyServiceProvider.notifier).connect();
 
-        ref.read(overlayDialogControllerProvider.notifier).show(
-              Positioned(
-                top: 0,
-                left: 0,
-                child: TorNotification(),
-              ),
-            );
+        ref
+            .read(overlayDialogControllerProvider.notifier)
+            .show(Positioned(top: 0, left: 0, child: TorNotification()));
 
         await connection;
       }

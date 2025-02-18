@@ -20,9 +20,7 @@ class EditUrlDialog extends HookWidget {
           controller: urlController,
           maxLines: null,
           keyboardType: TextInputType.url,
-          decoration: const InputDecoration(
-            hintText: 'Enter URL',
-          ),
+          decoration: const InputDecoration(hintText: 'Enter URL'),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter a URL';

@@ -21,30 +21,33 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
       db.tab.select()..where((t) => t.id.equals(id));
 
   Selectable<String> containerTabIds(String? containerId) {
-    final query = selectOnly(db.tab)
-      ..addColumns([db.tab.id])
-      ..where(
-        (containerId != null)
-            ? db.tab.containerId.equals(containerId)
-            : db.tab.containerId.isNull(),
-      )
-      ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
+    final query =
+        selectOnly(db.tab)
+          ..addColumns([db.tab.id])
+          ..where(
+            (containerId != null)
+                ? db.tab.containerId.equals(containerId)
+                : db.tab.containerId.isNull(),
+          )
+          ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
 
     return query.map((row) => row.read(db.tab.id)!);
   }
 
   Selectable<String> allTabIds() {
-    final query = selectOnly(db.tab)
-      ..addColumns([db.tab.id])
-      ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
+    final query =
+        selectOnly(db.tab)
+          ..addColumns([db.tab.id])
+          ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
 
     return query.map((row) => row.read(db.tab.id)!);
   }
 
   SingleOrNullSelectable<String?> tabContainerId(String tabId) {
-    final query = selectOnly(db.tab)
-      ..addColumns([db.tab.containerId])
-      ..where(db.tab.id.equals(tabId));
+    final query =
+        selectOnly(db.tab)
+          ..addColumns([db.tab.containerId])
+          ..where(db.tab.id.equals(tabId));
 
     return query.map((row) => row.read(db.tab.containerId));
   }
@@ -57,7 +60,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return db.transaction(() async {
       final tabId = await createTab();
 
-      final currentOrderKey = orderKey.value ??
+      final currentOrderKey =
+          orderKey.value ??
           await db.containerDao
               .generateLeadingOrderKey(containerId.value)
               .getSingle();
@@ -89,7 +93,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     Value<String?> orderKey = const Value.absent(),
   }) {
     return db.transaction(() async {
-      final currentOrderKey = orderKey.value ??
+      final currentOrderKey =
+          orderKey.value ??
           await db.containerDao
               .generateLeadingOrderKey(containerId.value)
               .getSingle();
@@ -115,34 +120,19 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     });
   }
 
-  Future<void> assignContainer(
-    String id, {
-    required String? containerId,
-  }) {
+  Future<void> assignContainer(String id, {required String? containerId}) {
     final statement = _updateByIdStatement(id);
-    return statement.write(
-      TabCompanion(containerId: Value(containerId)),
-    );
+    return statement.write(TabCompanion(containerId: Value(containerId)));
   }
 
-  Future<void> assignOrderKey(
-    String id, {
-    required String orderKey,
-  }) {
+  Future<void> assignOrderKey(String id, {required String orderKey}) {
     final statement = _updateByIdStatement(id);
-    return statement.write(
-      TabCompanion(orderKey: Value(orderKey)),
-    );
+    return statement.write(TabCompanion(orderKey: Value(orderKey)));
   }
 
-  Future<void> touchTab(
-    String id, {
-    required DateTime timestamp,
-  }) {
+  Future<void> touchTab(String id, {required DateTime timestamp}) {
     final statement = _updateByIdStatement(id);
-    return statement.write(
-      TabCompanion(timestamp: Value(timestamp)),
-    );
+    return statement.write(TabCompanion(timestamp: Value(timestamp)));
   }
 
   Future<void> updateTabContent(
@@ -180,12 +170,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
           batch.update(
             db.tab,
             TabCompanion(
-              url: (previousState?.url != state.url)
-                  ? Value(state.url.toString())
-                  : const Value.absent(),
-              title: (previousState?.title != state.title)
-                  ? Value(state.title)
-                  : const Value.absent(),
+              url:
+                  (previousState?.url != state.url)
+                      ? Value(state.url.toString())
+                      : const Value.absent(),
+              title:
+                  (previousState?.title != state.title)
+                      ? Value(state.title)
+                      : const Value.absent(),
             ),
             where: (t) => t.id.equals(state.id),
           );
@@ -202,19 +194,17 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
           await db.containerDao.generateLeadingOrderKey(null).getSingle();
 
       await db.tab.insertAll(
-        retainTabIds.map(
-          (id) {
-            final insertable = TabCompanion.insert(
-              id: id,
-              orderKey: currentOrderKey,
-              timestamp: DateTime.now(),
-            );
+        retainTabIds.map((id) {
+          final insertable = TabCompanion.insert(
+            id: id,
+            orderKey: currentOrderKey,
+            timestamp: DateTime.now(),
+          );
 
-            currentOrderKey = LexoRank.parse(currentOrderKey).genPrev().value;
+          currentOrderKey = LexoRank.parse(currentOrderKey).genPrev().value;
 
-            return insertable;
-          },
-        ),
+          return insertable;
+        }),
         mode: InsertMode.insertOrIgnore,
       );
     });

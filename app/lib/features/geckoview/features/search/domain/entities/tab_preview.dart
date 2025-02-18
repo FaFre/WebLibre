@@ -23,13 +23,13 @@ class TabPreview with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-        id,
-        title,
-        icon,
-        url,
-        highlightedUrl,
-        content,
-      ];
+    id,
+    title,
+    icon,
+    url,
+    highlightedUrl,
+    content,
+  ];
 
   @override
   bool get cacheHash => true;

@@ -72,7 +72,6 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
   Bang format(Set<BangFormat>? format) => this(format: format);
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Bang(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -90,38 +89,46 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
     Object? format = const $CopyWithPlaceholder(),
   }) {
     return Bang(
-      websiteName: websiteName == const $CopyWithPlaceholder()
-          ? _value.websiteName
-          // ignore: cast_nullable_to_non_nullable
-          : websiteName as String,
-      domain: domain == const $CopyWithPlaceholder()
-          ? _value.domain
-          // ignore: cast_nullable_to_non_nullable
-          : domain as String,
-      trigger: trigger == const $CopyWithPlaceholder()
-          ? _value.trigger
-          // ignore: cast_nullable_to_non_nullable
-          : trigger as String,
-      urlTemplate: urlTemplate == const $CopyWithPlaceholder()
-          ? _value.urlTemplate
-          // ignore: cast_nullable_to_non_nullable
-          : urlTemplate as String,
-      group: group == const $CopyWithPlaceholder()
-          ? _value.group
-          // ignore: cast_nullable_to_non_nullable
-          : group as BangGroup?,
-      category: category == const $CopyWithPlaceholder()
-          ? _value.category
-          // ignore: cast_nullable_to_non_nullable
-          : category as String?,
-      subCategory: subCategory == const $CopyWithPlaceholder()
-          ? _value.subCategory
-          // ignore: cast_nullable_to_non_nullable
-          : subCategory as String?,
-      format: format == const $CopyWithPlaceholder()
-          ? _value.format
-          // ignore: cast_nullable_to_non_nullable
-          : format as Set<BangFormat>?,
+      websiteName:
+          websiteName == const $CopyWithPlaceholder()
+              ? _value.websiteName
+              // ignore: cast_nullable_to_non_nullable
+              : websiteName as String,
+      domain:
+          domain == const $CopyWithPlaceholder()
+              ? _value.domain
+              // ignore: cast_nullable_to_non_nullable
+              : domain as String,
+      trigger:
+          trigger == const $CopyWithPlaceholder()
+              ? _value.trigger
+              // ignore: cast_nullable_to_non_nullable
+              : trigger as String,
+      urlTemplate:
+          urlTemplate == const $CopyWithPlaceholder()
+              ? _value.urlTemplate
+              // ignore: cast_nullable_to_non_nullable
+              : urlTemplate as String,
+      group:
+          group == const $CopyWithPlaceholder()
+              ? _value.group
+              // ignore: cast_nullable_to_non_nullable
+              : group as BangGroup?,
+      category:
+          category == const $CopyWithPlaceholder()
+              ? _value.category
+              // ignore: cast_nullable_to_non_nullable
+              : category as String?,
+      subCategory:
+          subCategory == const $CopyWithPlaceholder()
+              ? _value.subCategory
+              // ignore: cast_nullable_to_non_nullable
+              : subCategory as String?,
+      format:
+          format == const $CopyWithPlaceholder()
+              ? _value.format
+              // ignore: cast_nullable_to_non_nullable
+              : format as Set<BangFormat>?,
     );
   }
 }
@@ -137,26 +144,27 @@ extension $BangCopyWith on Bang {
 // **************************************************************************
 
 Bang _$BangFromJson(Map<String, dynamic> json) => Bang(
-      websiteName: json['s'] as String,
-      domain: json['d'] as String,
-      trigger: json['t'] as String,
-      urlTemplate: json['u'] as String,
-      category: json['c'] as String?,
-      subCategory: json['sc'] as String?,
-      format: (json['fmt'] as List<dynamic>?)
+  websiteName: json['s'] as String,
+  domain: json['d'] as String,
+  trigger: json['t'] as String,
+  urlTemplate: json['u'] as String,
+  category: json['c'] as String?,
+  subCategory: json['sc'] as String?,
+  format:
+      (json['fmt'] as List<dynamic>?)
           ?.map((e) => $enumDecode(_$BangFormatEnumMap, e))
           .toSet(),
-    );
+);
 
 Map<String, dynamic> _$BangToJson(Bang instance) => <String, dynamic>{
-      's': instance.websiteName,
-      'd': instance.domain,
-      't': instance.trigger,
-      'u': instance.urlTemplate,
-      'c': instance.category,
-      'sc': instance.subCategory,
-      'fmt': instance.format?.map((e) => _$BangFormatEnumMap[e]!).toList(),
-    };
+  's': instance.websiteName,
+  'd': instance.domain,
+  't': instance.trigger,
+  'u': instance.urlTemplate,
+  'c': instance.category,
+  'sc': instance.subCategory,
+  'fmt': instance.format?.map((e) => _$BangFormatEnumMap[e]!).toList(),
+};
 
 const _$BangFormatEnumMap = {
   BangFormat.openBasePath: 'open_base_path',

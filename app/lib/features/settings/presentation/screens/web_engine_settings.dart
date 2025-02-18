@@ -39,18 +39,21 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   await ref
                       .read(saveGeneralSettingsControllerProvider.notifier)
                       .save(
-                        (currentSettings) => value
-                            ? currentSettings.copyWith
-                                .deleteBrowsingDataOnQuit({})
-                            : currentSettings.copyWith
-                                .deleteBrowsingDataOnQuit(null),
+                        (currentSettings) =>
+                            value
+                                ? currentSettings.copyWith
+                                    .deleteBrowsingDataOnQuit({})
+                                : currentSettings.copyWith
+                                    .deleteBrowsingDataOnQuit(null),
                       );
                 },
               ),
               if (generalSettings.deleteBrowsingDataOnQuit != null)
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8,
+                  ),
                   child: Column(
                     children: [
                       for (final type in DeleteBrowsingDataType.values)
@@ -59,8 +62,9 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                               .contains(type),
                           controlAffinity: ListTileControlAffinity.leading,
                           title: Text(type.title),
-                          subtitle: type.description
-                              .mapNotNull((description) => Text(description)),
+                          subtitle: type.description.mapNotNull(
+                            (description) => Text(description),
+                          ),
                           onChanged: (value) async {
                             final notifier = ref.read(
                               saveGeneralSettingsControllerProvider.notifier,
@@ -70,19 +74,20 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                               await notifier.save(
                                 (currentSettings) => currentSettings.copyWith
                                     .deleteBrowsingDataOnQuit({
-                                  ...currentSettings.deleteBrowsingDataOnQuit!,
-                                  type,
-                                }),
+                                      ...currentSettings
+                                          .deleteBrowsingDataOnQuit!,
+                                      type,
+                                    }),
                               );
                             } else {
                               await notifier.save(
                                 (currentSettings) => currentSettings.copyWith
                                     .deleteBrowsingDataOnQuit(
-                                  {
-                                    ...currentSettings
-                                        .deleteBrowsingDataOnQuit!,
-                                  }..remove(type),
-                                ),
+                                      {
+                                        ...currentSettings
+                                            .deleteBrowsingDataOnQuit!,
+                                      }..remove(type),
+                                    ),
                               );
                             }
                           },
@@ -120,8 +125,10 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                 },
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,8 +171,10 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,9 +190,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                       groupValue: engineSettings.trackingProtectionPolicy,
                       onChanged: (value) async {
                         await ref
-                            .read(
-                              saveEngineSettingsControllerProvider.notifier,
-                            )
+                            .read(saveEngineSettingsControllerProvider.notifier)
                             .save(
                               (currentSettings) => currentSettings.copyWith
                                   .trackingProtectionPolicy(value),
@@ -199,9 +206,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                       groupValue: engineSettings.trackingProtectionPolicy,
                       onChanged: (value) async {
                         await ref
-                            .read(
-                              saveEngineSettingsControllerProvider.notifier,
-                            )
+                            .read(saveEngineSettingsControllerProvider.notifier)
                             .save(
                               (currentSettings) => currentSettings.copyWith
                                   .trackingProtectionPolicy(value),
@@ -217,9 +222,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                       groupValue: engineSettings.trackingProtectionPolicy,
                       onChanged: (value) async {
                         await ref
-                            .read(
-                              saveEngineSettingsControllerProvider.notifier,
-                            )
+                            .read(saveEngineSettingsControllerProvider.notifier)
                             .save(
                               (currentSettings) => currentSettings.copyWith
                                   .trackingProtectionPolicy(value),
@@ -239,8 +242,10 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,43 +256,41 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                       contentPadding: EdgeInsets.zero,
                     ),
                     CheckboxListTile.adaptive(
-                      value: engineSettings.cookieBannerHandlingMode ==
+                      value:
+                          engineSettings.cookieBannerHandlingMode ==
                           CookieBannerHandlingMode.rejectAll,
                       title: const Text('In normal browsing'),
                       controlAffinity: ListTileControlAffinity.leading,
                       onChanged: (value) async {
                         await ref
-                            .read(
-                              saveEngineSettingsControllerProvider.notifier,
-                            )
+                            .read(saveEngineSettingsControllerProvider.notifier)
                             .save(
                               (currentSettings) => currentSettings.copyWith
                                   .cookieBannerHandlingMode(
-                                value!
-                                    ? CookieBannerHandlingMode.rejectAll
-                                    : CookieBannerHandlingMode.disabled,
-                              ),
+                                    value!
+                                        ? CookieBannerHandlingMode.rejectAll
+                                        : CookieBannerHandlingMode.disabled,
+                                  ),
                             );
                       },
                     ),
                     CheckboxListTile.adaptive(
-                      value: engineSettings
+                      value:
+                          engineSettings
                               .cookieBannerHandlingModePrivateBrowsing ==
                           CookieBannerHandlingMode.rejectAll,
                       title: const Text('In private browsing'),
                       controlAffinity: ListTileControlAffinity.leading,
                       onChanged: (value) async {
                         await ref
-                            .read(
-                              saveEngineSettingsControllerProvider.notifier,
-                            )
+                            .read(saveEngineSettingsControllerProvider.notifier)
                             .save(
                               (currentSettings) => currentSettings.copyWith
                                   .cookieBannerHandlingModePrivateBrowsing(
-                                value!
-                                    ? CookieBannerHandlingMode.rejectAll
-                                    : CookieBannerHandlingMode.disabled,
-                              ),
+                                    value!
+                                        ? CookieBannerHandlingMode.rejectAll
+                                        : CookieBannerHandlingMode.disabled,
+                                  ),
                             );
                       },
                     ),

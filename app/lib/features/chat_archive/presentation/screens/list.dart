@@ -48,8 +48,9 @@ class ChatArchiveListScreen extends HookConsumerWidget {
                       ),
                       onTap: () async {
                         await context.push(
-                          ChatArchiveDetailRoute(fileName: chat.fileName)
-                              .location,
+                          ChatArchiveDetailRoute(
+                            fileName: chat.fileName,
+                          ).location,
                         );
                       },
                     );
@@ -65,13 +66,15 @@ class ChatArchiveListScreen extends HookConsumerWidget {
               onRetry: () => ref.refresh(chatArchiveRepositoryProvider),
             );
           },
-          loading: () => ListView.builder(
-            itemCount: 3,
-            itemBuilder: (context, index) => const ListTile(
-              title: Bone.text(),
-              subtitle: Bone.text(),
-            ),
-          ),
+          loading:
+              () => ListView.builder(
+                itemCount: 3,
+                itemBuilder:
+                    (context, index) => const ListTile(
+                      title: Bone.text(),
+                      subtitle: Bone.text(),
+                    ),
+              ),
         ),
       ),
     );

@@ -75,9 +75,10 @@ class _QaChatInputState extends State<QaChatInput> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomSafeArea = widget.handleSafeArea == true
-        ? MediaQuery.of(context).padding.bottom
-        : 0.0;
+    final bottomSafeArea =
+        widget.handleSafeArea == true
+            ? MediaQuery.of(context).padding.bottom
+            : 0.0;
     final inputTheme = context.select((ChatTheme theme) => theme.inputTheme);
     final onAttachmentTap = context.read<OnAttachmentTapCallback?>();
 
@@ -100,11 +101,13 @@ class _QaChatInputState extends State<QaChatInput> {
               children: [
                 if (widget.topWidget != null) widget.topWidget!,
                 Padding(
-                  padding: widget.handleSafeArea == true
-                      ? (widget.padding
-                              ?.add(EdgeInsets.only(bottom: bottomSafeArea)) ??
-                          EdgeInsets.only(bottom: bottomSafeArea))
-                      : (widget.padding ?? EdgeInsets.zero),
+                  padding:
+                      widget.handleSafeArea == true
+                          ? (widget.padding?.add(
+                                EdgeInsets.only(bottom: bottomSafeArea),
+                              ) ??
+                              EdgeInsets.only(bottom: bottomSafeArea))
+                          : (widget.padding ?? EdgeInsets.zero),
                   child: Row(
                     children: [
                       if (widget.attachmentIcon != null)
@@ -142,8 +145,8 @@ class _QaChatInputState extends State<QaChatInput> {
                         IconButton(
                           icon: widget.sendIcon!,
                           color: inputTheme.hintStyle?.color,
-                          onPressed: () =>
-                              _handleSubmitted(_textController.text),
+                          onPressed:
+                              () => _handleSubmitted(_textController.text),
                         )
                       else
                         const SizedBox.shrink(),
@@ -168,9 +171,9 @@ class _QaChatInputState extends State<QaChatInput> {
       final bottomSafeArea = MediaQuery.of(context).padding.bottom;
 
       context.read<ChatInputHeightNotifier>().updateHeight(
-            // only set real height of the input, ignoring safe area
-            widget.handleSafeArea == true ? height - bottomSafeArea : height,
-          );
+        // only set real height of the input, ignoring safe area
+        widget.handleSafeArea == true ? height - bottomSafeArea : height,
+      );
     }
   }
 

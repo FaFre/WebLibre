@@ -10,7 +10,7 @@ class _OverlayPortalControllerHook extends Hook<OverlayPortalController> {
 
   @override
   HookState<OverlayPortalController, Hook<OverlayPortalController>>
-      createState() {
+  createState() {
     return _OverlayPortalControllerHookState();
   }
 }

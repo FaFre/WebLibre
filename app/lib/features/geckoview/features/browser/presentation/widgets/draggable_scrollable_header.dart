@@ -18,12 +18,7 @@ class DraggableScrollableHeader extends StatelessWidget {
       onVerticalDragUpdate: (details) {
         // Use the DraggableScrollableSheet's controller
         controller.jumpTo(
-          min(
-            1,
-            controller.pixelsToSize(
-              controller.pixels - details.delta.dy,
-            ),
-          ),
+          min(1, controller.pixelsToSize(controller.pixels - details.delta.dy)),
         );
       },
       child: child,

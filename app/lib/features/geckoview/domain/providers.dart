@@ -13,16 +13,15 @@ import 'package:url_launcher/url_launcher.dart';
 part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
-GeckoSelectionActionService selectionActionService(
-  Ref ref,
-) {
+GeckoSelectionActionService selectionActionService(Ref ref) {
   final service = GeckoSelectionActionService.setUp();
 
   unawaited(
     service.setActions([
       SearchAction((text) async {
-        final defaultSearchBang =
-            await ref.read(defaultSearchBangDataProvider.future);
+        final defaultSearchBang = await ref.read(
+          defaultSearchBangDataProvider.future,
+        );
 
         if (defaultSearchBang != null) {
           await ref
@@ -33,14 +32,14 @@ GeckoSelectionActionService selectionActionService(
         }
       }),
       PrivateSearchAction((text) async {
-        final defaultSearchBang =
-            await ref.read(defaultSearchBangDataProvider.future);
+        final defaultSearchBang = await ref.read(
+          defaultSearchBangDataProvider.future,
+        );
 
         if (defaultSearchBang != null) {
-          await ref.read(tabRepositoryProvider.notifier).addTab(
-                url: defaultSearchBang.getUrl(text),
-                private: true,
-              );
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(url: defaultSearchBang.getUrl(text), private: true);
         } else {
           logger.e('No default search bang found');
         }
@@ -132,12 +131,13 @@ class EngineReadyState extends _$EngineReadyState {
         eventService.engineReadyStateEvents
             .firstWhere((value) => value == true)
             .timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            logger.w('Waiting for engine ready state timed out');
-            return true;
-          },
-        ).whenComplete(() => state = true),
+              const Duration(seconds: 5),
+              onTimeout: () {
+                logger.w('Waiting for engine ready state timed out');
+                return true;
+              },
+            )
+            .whenComplete(() => state = true),
       );
     }
 

@@ -19,8 +19,9 @@ sealed class FtsQueryBuilder {
   ///https://www.sqlite.org/fts5.html#fts5_strings
   ///
   ///Elsewise ths string needs to get quoted
-  static final _barewordPattern =
-      RegExp(r'^([^\x00-\x7F]|[\w]|[\d]|[_]|[\x1A])+$');
+  static final _barewordPattern = RegExp(
+    r'^([^\x00-\x7F]|[\w]|[\d]|[_]|[\x1A])+$',
+  );
 
   static bool _isReservedBareword(Bareword input) =>
       _reservedBarewords.contains(input.word);
@@ -36,27 +37,29 @@ sealed class FtsQueryBuilder {
   }) {
     final matches = _tokenizePattern.allMatches(input);
 
-    final barewords = matches
-        .map((match) {
-          if (match.group(1) != null) {
-            return EnclosedBareword(match.group(1)!);
-          } else if (_barewordPattern.hasMatch(match.group(2)!)) {
-            return SimpleBareword(match.group(2)!);
-          } else {
-            return EnclosedBareword(match.group(2)!);
-          }
-        })
-        .where((token) => token.word.isNotEmpty)
-        .whereNot(_isReservedBareword)
-        .toList();
+    final barewords =
+        matches
+            .map((match) {
+              if (match.group(1) != null) {
+                return EnclosedBareword(match.group(1)!);
+              } else if (_barewordPattern.hasMatch(match.group(2)!)) {
+                return SimpleBareword(match.group(2)!);
+              } else {
+                return EnclosedBareword(match.group(2)!);
+              }
+            })
+            .where((token) => token.word.isNotEmpty)
+            .whereNot(_isReservedBareword)
+            .toList();
 
     //Merge short tokens
     _mergeShortBarewords(barewords, minTokenLength);
 
-    _tokens = barewords
-        .where((bareword) => bareword.word.length >= minTokenLength)
-        .take(tokenLimit)
-        .toList();
+    _tokens =
+        barewords
+            .where((bareword) => bareword.word.length >= minTokenLength)
+            .take(tokenLimit)
+            .toList();
   }
 
   static void _mergeShortBarewords(
@@ -149,8 +152,8 @@ sealed class FtsQueryBuilder {
 
       //Remove dependend phrases
       if (joinedPhrase.whereType<JoinedBareword>().any(
-            (joined) => joined.dependencies.contains(bareword),
-          )) {
+        (joined) => joined.dependencies.contains(bareword),
+      )) {
         joinedPhrase.removeAt(i);
         i--;
       }
@@ -164,9 +167,9 @@ sealed class FtsQueryBuilder {
     String Function(List<Bareword> phrase) barewordConcat,
     String phraseConcat,
   ) {
-    final phrases = _generatePhrases(tokens)
-        .map(_removeDependendBarewords)
-        .expand(_combineUnenclosed);
+    final phrases = _generatePhrases(
+      tokens,
+    ).map(_removeDependendBarewords).expand(_combineUnenclosed);
 
     return phrases
         .where((phrase) => phrase.isNotEmpty)
@@ -189,17 +192,13 @@ final class PrefixQueryBuilder extends FtsQueryBuilder {
 
   @override
   String build() {
-    return _buildQuery(
-      _tokens,
-      (phrase) {
-        if (phrase.length == 1) {
-          return '${phrase.first}*';
-        }
+    return _buildQuery(_tokens, (phrase) {
+      if (phrase.length == 1) {
+        return '${phrase.first}*';
+      }
 
-        return 'NEAR(${phrase.map((bareword) => '$bareword*').join(' ')})';
-      },
-      ' OR ',
-    );
+      return 'NEAR(${phrase.map((bareword) => '$bareword*').join(' ')})';
+    }, ' OR ');
   }
 }
 
@@ -212,11 +211,7 @@ final class TrigramQueryBuilder extends FtsQueryBuilder {
 
   @override
   String build() {
-    return _buildQuery(
-      _tokens,
-      (phrase) => phrase.join(' '),
-      ' OR ',
-    );
+    return _buildQuery(_tokens, (phrase) => phrase.join(' '), ' OR ');
   }
 }
 

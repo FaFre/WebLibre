@@ -13,14 +13,15 @@ String _$kagiAutosuggestServiceHash() =>
 @ProviderFor(KagiAutosuggestService)
 final kagiAutosuggestServiceProvider =
     NotifierProvider<KagiAutosuggestService, void>.internal(
-  KagiAutosuggestService.new,
-  name: r'kagiAutosuggestServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$kagiAutosuggestServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      KagiAutosuggestService.new,
+      name: r'kagiAutosuggestServiceProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$kagiAutosuggestServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$KagiAutosuggestService = Notifier<void>;
 // ignore_for_file: type=lint

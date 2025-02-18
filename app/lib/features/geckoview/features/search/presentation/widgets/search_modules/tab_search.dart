@@ -32,33 +32,31 @@ class TabSearch extends HookConsumerWidget {
       ),
     );
 
-    final tabs = ref
-        .watch(
-          seamlessFilteredTabPreviewsProvider(
-            TabSearchPartition.search,
-            (selectedContainer.value != null)
-                ? ContainerFilterById(containerId: selectedContainer.value!.id)
-                : ContainerFilterDisabled(),
-          ),
-        )
-        .collection;
-
-    useListenableCallback(
-      searchTextController,
-      () async {
-        await ref
-            .read(
-              tabSearchRepositoryProvider(TabSearchPartition.search).notifier,
+    final tabs =
+        ref
+            .watch(
+              seamlessFilteredTabPreviewsProvider(
+                TabSearchPartition.search,
+                (selectedContainer.value != null)
+                    ? ContainerFilterById(
+                      containerId: selectedContainer.value!.id,
+                    )
+                    : ContainerFilterDisabled(),
+              ),
             )
-            .addQuery(
-              searchTextController.text,
-              // ignore: avoid_redundant_argument_values
-              matchPrefix: _matchPrefix,
-              // ignore: avoid_redundant_argument_values
-              matchSuffix: _matchSuffix,
-            );
-      },
-    );
+            .collection;
+
+    useListenableCallback(searchTextController, () async {
+      await ref
+          .read(tabSearchRepositoryProvider(TabSearchPartition.search).notifier)
+          .addQuery(
+            searchTextController.text,
+            // ignore: avoid_redundant_argument_values
+            matchPrefix: _matchPrefix,
+            // ignore: avoid_redundant_argument_values
+            matchSuffix: _matchSuffix,
+          );
+    });
 
     return MultiSliver(
       children: [
@@ -68,10 +66,7 @@ class TabSearch extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Tabs',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
+                Text('Tabs', style: Theme.of(context).textTheme.labelSmall),
                 ContainerChips(
                   displayMenu: false,
                   selectedContainer: selectedContainer.value,
@@ -100,48 +95,49 @@ class TabSearch extends HookConsumerWidget {
 
             return ListTile(
               leading: RepaintBoundary(
-                child: (result.icon != null)
-                    ? RawImage(
-                        image: result.icon?.value,
-                        height: 24,
-                        width: 24,
-                      )
-                    : UrlIcon(result.url, iconSize: 24),
+                child:
+                    (result.icon != null)
+                        ? RawImage(
+                          image: result.icon?.value,
+                          height: 24,
+                          width: 24,
+                        )
+                        : UrlIcon(result.url, iconSize: 24),
               ),
               title: result.title.mapNotNull(
                 (title) => MarkdownBody(
                   data: title,
                   styleSheet: MarkdownStyleSheet(
                     p: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),
-              subtitle: (bodyHasMatch || urlHasMatch)
-                  ? MarkdownBody(
-                      data: bodyHasMatch
-                          ? result.content!
-                          : result.highlightedUrl!,
-                      styleSheet: MarkdownStyleSheet(
-                        p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                        a: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              decoration: TextDecoration.none,
-                            ),
+              subtitle:
+                  (bodyHasMatch || urlHasMatch)
+                      ? MarkdownBody(
+                        data:
+                            bodyHasMatch
+                                ? result.content!
+                                : result.highlightedUrl!,
+                        styleSheet: MarkdownStyleSheet(
+                          p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          a: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      )
+                      : Text(
+                        result.url.toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    )
-                  : Text(
-                      result.url.toString(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
               onTap: () async {
                 await ref
                     .read(tabRepositoryProvider.notifier)

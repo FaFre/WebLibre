@@ -7,9 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'engine_settings.g.dart';
 
-typedef UpdateEngineSettingsFunc = EngineSettings Function(
-  EngineSettings currentSettings,
-);
+typedef UpdateEngineSettingsFunc =
+    EngineSettings Function(EngineSettings currentSettings);
 
 @Riverpod(keepAlive: true)
 class EngineSettingsRepository extends _$EngineSettingsRepository {
@@ -39,34 +38,52 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         .allSettingsOfPartitionKey(_partitionKey)
         .watch()
         .listen((entries) {
-      final settings = Map.fromEntries(entries);
+          final settings = Map.fromEntries(entries);
 
-      state = EngineSettings.fromJson({
-        'incognitoMode': settings['incognitoMode']
-            ?.readAs(DriftSqlType.bool, db.typeMapping),
-        'javascriptEnabled': settings['javascriptEnabled']
-            ?.readAs(DriftSqlType.bool, db.typeMapping),
-        'trackingProtectionPolicy': settings['trackingProtectionPolicy']
-            ?.readAs(DriftSqlType.string, db.typeMapping),
-        'httpsOnlyMode': settings['httpsOnlyMode']
-            ?.readAs(DriftSqlType.string, db.typeMapping),
-        'globalPrivacyControlEnabled': settings['globalPrivacyControlEnabled']
-            ?.readAs(DriftSqlType.bool, db.typeMapping),
-        'cookieBannerHandlingMode': settings['cookieBannerHandlingMode']
-            ?.readAs(DriftSqlType.string, db.typeMapping),
-        'cookieBannerHandlingModePrivateBrowsing':
-            settings['cookieBannerHandlingModePrivateBrowsing']
+          state = EngineSettings.fromJson({
+            'incognitoMode': settings['incognitoMode']?.readAs(
+              DriftSqlType.bool,
+              db.typeMapping,
+            ),
+            'javascriptEnabled': settings['javascriptEnabled']?.readAs(
+              DriftSqlType.bool,
+              db.typeMapping,
+            ),
+            'trackingProtectionPolicy': settings['trackingProtectionPolicy']
                 ?.readAs(DriftSqlType.string, db.typeMapping),
-        'cookieBannerHandlingGlobalRules':
-            settings['cookieBannerHandlingGlobalRules']
-                ?.readAs(DriftSqlType.bool, db.typeMapping),
-        'cookieBannerHandlingGlobalRulesSubFrames':
-            settings['cookieBannerHandlingGlobalRulesSubFrames']
-                ?.readAs(DriftSqlType.bool, db.typeMapping),
-        'webContentIsolationStrategy': settings['webContentIsolationStrategy']
-            ?.readAs(DriftSqlType.string, db.typeMapping),
-      });
-    });
+            'httpsOnlyMode': settings['httpsOnlyMode']?.readAs(
+              DriftSqlType.string,
+              db.typeMapping,
+            ),
+            'globalPrivacyControlEnabled':
+                settings['globalPrivacyControlEnabled']?.readAs(
+                  DriftSqlType.bool,
+                  db.typeMapping,
+                ),
+            'cookieBannerHandlingMode': settings['cookieBannerHandlingMode']
+                ?.readAs(DriftSqlType.string, db.typeMapping),
+            'cookieBannerHandlingModePrivateBrowsing':
+                settings['cookieBannerHandlingModePrivateBrowsing']?.readAs(
+                  DriftSqlType.string,
+                  db.typeMapping,
+                ),
+            'cookieBannerHandlingGlobalRules':
+                settings['cookieBannerHandlingGlobalRules']?.readAs(
+                  DriftSqlType.bool,
+                  db.typeMapping,
+                ),
+            'cookieBannerHandlingGlobalRulesSubFrames':
+                settings['cookieBannerHandlingGlobalRulesSubFrames']?.readAs(
+                  DriftSqlType.bool,
+                  db.typeMapping,
+                ),
+            'webContentIsolationStrategy':
+                settings['webContentIsolationStrategy']?.readAs(
+                  DriftSqlType.string,
+                  db.typeMapping,
+                ),
+          });
+        });
 
     ref.onDispose(() {
       unawaited(watchSub.cancel());

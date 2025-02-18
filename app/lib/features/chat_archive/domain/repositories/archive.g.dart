@@ -39,21 +39,15 @@ class ReadArchivedChatFamily extends Family<AsyncValue<String>> {
   const ReadArchivedChatFamily();
 
   /// See also [readArchivedChat].
-  ReadArchivedChatProvider call(
-    String fileName,
-  ) {
-    return ReadArchivedChatProvider(
-      fileName,
-    );
+  ReadArchivedChatProvider call(String fileName) {
+    return ReadArchivedChatProvider(fileName);
   }
 
   @override
   ReadArchivedChatProvider getProviderOverride(
     covariant ReadArchivedChatProvider provider,
   ) {
-    return call(
-      provider.fileName,
-    );
+    return call(provider.fileName);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -74,24 +68,20 @@ class ReadArchivedChatFamily extends Family<AsyncValue<String>> {
 /// See also [readArchivedChat].
 class ReadArchivedChatProvider extends AutoDisposeFutureProvider<String> {
   /// See also [readArchivedChat].
-  ReadArchivedChatProvider(
-    String fileName,
-  ) : this._internal(
-          (ref) => readArchivedChat(
-            ref as ReadArchivedChatRef,
-            fileName,
-          ),
-          from: readArchivedChatProvider,
-          name: r'readArchivedChatProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$readArchivedChatHash,
-          dependencies: ReadArchivedChatFamily._dependencies,
-          allTransitiveDependencies:
-              ReadArchivedChatFamily._allTransitiveDependencies,
-          fileName: fileName,
-        );
+  ReadArchivedChatProvider(String fileName)
+    : this._internal(
+        (ref) => readArchivedChat(ref as ReadArchivedChatRef, fileName),
+        from: readArchivedChatProvider,
+        name: r'readArchivedChatProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$readArchivedChatHash,
+        dependencies: ReadArchivedChatFamily._dependencies,
+        allTransitiveDependencies:
+            ReadArchivedChatFamily._allTransitiveDependencies,
+        fileName: fileName,
+      );
 
   ReadArchivedChatProvider._internal(
     super._createNotifier, {
@@ -150,7 +140,8 @@ mixin ReadArchivedChatRef on AutoDisposeFutureProviderRef<String> {
 }
 
 class _ReadArchivedChatProviderElement
-    extends AutoDisposeFutureProviderElement<String> with ReadArchivedChatRef {
+    extends AutoDisposeFutureProviderElement<String>
+    with ReadArchivedChatRef {
   _ReadArchivedChatProviderElement(super.provider);
 
   @override
@@ -163,12 +154,15 @@ String _$chatArchiveRepositoryHash() =>
 /// See also [ChatArchiveRepository].
 @ProviderFor(ChatArchiveRepository)
 final chatArchiveRepositoryProvider = AutoDisposeStreamNotifierProvider<
-    ChatArchiveRepository, List<ChatEntity>>.internal(
+  ChatArchiveRepository,
+  List<ChatEntity>
+>.internal(
   ChatArchiveRepository.new,
   name: r'chatArchiveRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$chatArchiveRepositoryHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$chatArchiveRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

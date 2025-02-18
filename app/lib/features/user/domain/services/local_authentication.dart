@@ -23,9 +23,7 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
   }
 
   void evictCacheOnBackground() {
-    _cache.removeWhere(
-      (key, value) => value.$2.lockOnAppBackground,
-    );
+    _cache.removeWhere((key, value) => value.$2.lockOnAppBackground);
   }
 
   Future<bool> authenticate({
@@ -38,9 +36,7 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
       var result = useAuthCache && _cacheAuth(authKey);
 
       if (!result) {
-        result = await _auth.authenticate(
-          localizedReason: localizedReason,
-        );
+        result = await _auth.authenticate(localizedReason: localizedReason);
       }
 
       if (result && settings != null) {

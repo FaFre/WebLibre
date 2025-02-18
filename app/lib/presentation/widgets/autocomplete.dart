@@ -39,18 +39,18 @@ class ExternalResultsAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
-  })  : assert(
-          fieldViewBuilder != null ||
-              (key != null &&
-                  focusNode != null &&
-                  textEditingController != null),
-          'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
-        ),
-        assert((focusNode == null) == (textEditingController == null)),
-        assert(
-          !(textEditingController != null && initialValue != null),
-          'textEditingController and initialValue cannot be simultaneously defined.',
-        );
+  }) : assert(
+         fieldViewBuilder != null ||
+             (key != null &&
+                 focusNode != null &&
+                 textEditingController != null),
+         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
+       ),
+       assert((focusNode == null) == (textEditingController == null)),
+       assert(
+         !(textEditingController != null && initialValue != null),
+         'textEditingController and initialValue cannot be simultaneously defined.',
+       );
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
   /// Builds the field whose input is used to get the options.
@@ -131,7 +131,7 @@ class ExternalResultsAutocomplete<T extends Object> extends StatefulWidget {
   final AutocompleteOnSelected<T>? onSelected;
 
   final FutureOr<void> Function(TextEditingValue textEditingValue)
-      onTextChanged;
+  onTextChanged;
 
   /// The [TextEditingController] that is used for the text field.
   ///
@@ -194,31 +194,31 @@ class _RawAutocompleteState<T extends Object>
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
     return widget.textEditingController ??
-        (_internalTextEditingController ??= TextEditingController()
-          ..addListener(_onChangedField));
+        (_internalTextEditingController ??=
+            TextEditingController()..addListener(_onChangedField));
   }
 
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode {
     return widget.focusNode ??
-        (_internalFocusNode ??= FocusNode()
-          ..addListener(_updateOptionsViewVisibility));
+        (_internalFocusNode ??=
+            FocusNode()..addListener(_updateOptionsViewVisibility));
   }
 
   late final Map<Type, CallbackAction<Intent>> _actionMap =
       <Type, CallbackAction<Intent>>{
-    AutocompletePreviousOptionIntent:
-        _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(
-      onInvoke: _highlightPreviousOption,
-      isEnabledCallback: () => _canShowOptionsView,
-    ),
-    AutocompleteNextOptionIntent:
-        _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(
-      onInvoke: _highlightNextOption,
-      isEnabledCallback: () => _canShowOptionsView,
-    ),
-    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
-  };
+        AutocompletePreviousOptionIntent:
+            _AutocompleteCallbackAction<AutocompletePreviousOptionIntent>(
+              onInvoke: _highlightPreviousOption,
+              isEnabledCallback: () => _canShowOptionsView,
+            ),
+        AutocompleteNextOptionIntent:
+            _AutocompleteCallbackAction<AutocompleteNextOptionIntent>(
+              onInvoke: _highlightNextOption,
+              isEnabledCallback: () => _canShowOptionsView,
+            ),
+        DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
+      };
 
   late StreamSubscription<Iterable<T>> _optionsSubscription;
   Iterable<T> _options = Iterable<T>.empty();
@@ -230,11 +230,11 @@ class _RawAutocompleteState<T extends Object>
 
   static const Map<ShortcutActivator, Intent> _shortcuts =
       <ShortcutActivator, Intent>{
-    SingleActivator(LogicalKeyboardKey.arrowUp):
-        AutocompletePreviousOptionIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowDown):
-        AutocompleteNextOptionIntent(),
-  };
+        SingleActivator(LogicalKeyboardKey.arrowUp):
+            AutocompletePreviousOptionIntent(),
+        SingleActivator(LogicalKeyboardKey.arrowDown):
+            AutocompleteNextOptionIntent(),
+      };
 
   bool get _canShowOptionsView =>
       _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
@@ -324,17 +324,15 @@ class _RawAutocompleteState<T extends Object>
 
   Widget _buildOptionsView(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    final Alignment followerAlignment =
-        switch (widget.optionsViewOpenDirection) {
+    final Alignment followerAlignment = switch (widget
+        .optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => AlignmentDirectional.bottomStart,
       OptionsViewOpenDirection.down => AlignmentDirectional.topStart,
-    }
-            .resolve(textDirection);
+    }.resolve(textDirection);
     final Alignment targetAnchor = switch (widget.optionsViewOpenDirection) {
       OptionsViewOpenDirection.up => AlignmentDirectional.topStart,
       OptionsViewOpenDirection.down => AlignmentDirectional.bottomStart,
-    }
-        .resolve(textDirection);
+    }.resolve(textDirection);
 
     return CompositedTransformFollower(
       link: _optionsLayerLink,
@@ -345,8 +343,9 @@ class _RawAutocompleteState<T extends Object>
         child: AutocompleteHighlightedOption(
           highlightIndexNotifier: _highlightedOptionIndex,
           child: Builder(
-            builder: (BuildContext context) =>
-                widget.optionsViewBuilder(context, _select, _options),
+            builder:
+                (BuildContext context) =>
+                    widget.optionsViewBuilder(context, _select, _options),
           ),
         ),
       ),
@@ -358,8 +357,9 @@ class _RawAutocompleteState<T extends Object>
     super.initState();
     final TextEditingController initialController =
         widget.textEditingController ??
-            (_internalTextEditingController =
-                TextEditingController.fromValue(widget.initialValue));
+        (_internalTextEditingController = TextEditingController.fromValue(
+          widget.initialValue,
+        ));
     initialController.addListener(_onChangedField);
     widget.focusNode?.addListener(_updateOptionsViewVisibility);
     _optionsSubscription = widget.optionsStream.listen(_onUpateOptions);
@@ -406,7 +406,8 @@ class _RawAutocompleteState<T extends Object>
 
   @override
   Widget build(BuildContext context) {
-    final Widget fieldView = widget.fieldViewBuilder?.call(
+    final Widget fieldView =
+        widget.fieldViewBuilder?.call(
           context,
           _textEditingController,
           _focusNode,

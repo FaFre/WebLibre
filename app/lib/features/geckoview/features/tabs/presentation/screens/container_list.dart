@@ -19,9 +19,7 @@ class ContainerListScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Containers'),
-      ),
+      appBar: AppBar(title: const Text('Containers')),
       body: HookConsumer(
         builder: (context, ref, child) {
           final containersAsync = ref.watch(containersWithCountProvider);
@@ -30,79 +28,90 @@ class ContainerListScreen extends HookConsumerWidget {
           return Skeletonizer(
             enabled: containersAsync.isLoading,
             child: containersAsync.when(
-              data: (containers) => FadingScroll(
-                fadingSize: 25,
-                builder: (context, controller) {
-                  return ListView.builder(
-                    controller: controller,
-                    itemCount: containers.length,
-                    itemBuilder: (context, index) {
-                      final container = containers[index];
-                      return Slidable(
-                        key: ValueKey(container.id),
-                        endActionPane: ActionPane(
-                          motion: const ScrollMotion(),
-                          children: [
-                            SlidableAction(
-                              onPressed: (context) async {
-                                await ref
-                                    .read(containerRepositoryProvider.notifier)
-                                    .deleteContainer(container.id);
-                              },
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.errorContainer,
-                              foregroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .onErrorContainer,
-                              icon: Icons.delete,
-                              label: 'Delete',
+              data:
+                  (containers) => FadingScroll(
+                    fadingSize: 25,
+                    builder: (context, controller) {
+                      return ListView.builder(
+                        controller: controller,
+                        itemCount: containers.length,
+                        itemBuilder: (context, index) {
+                          final container = containers[index];
+                          return Slidable(
+                            key: ValueKey(container.id),
+                            endActionPane: ActionPane(
+                              motion: const ScrollMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (context) async {
+                                    await ref
+                                        .read(
+                                          containerRepositoryProvider.notifier,
+                                        )
+                                        .deleteContainer(container.id);
+                                  },
+                                  backgroundColor:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.errorContainer,
+                                  foregroundColor:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onErrorContainer,
+                                  icon: Icons.delete,
+                                  label: 'Delete',
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: ContainerListTile(
-                          container,
-                          isSelected: container.id == selectedContainer,
-                          onTap: () async {
-                            if (container.id == selectedContainer) {
-                              ref
-                                  .read(selectedContainerProvider.notifier)
-                                  .clearContainer();
-                            } else {
-                              final result = await ref
-                                  .read(selectedContainerProvider.notifier)
-                                  .setContainerId(container.id);
+                            child: ContainerListTile(
+                              container,
+                              isSelected: container.id == selectedContainer,
+                              onTap: () async {
+                                if (container.id == selectedContainer) {
+                                  ref
+                                      .read(selectedContainerProvider.notifier)
+                                      .clearContainer();
+                                } else {
+                                  final result = await ref
+                                      .read(selectedContainerProvider.notifier)
+                                      .setContainerId(container.id);
 
-                              if (context.mounted &&
-                                  result ==
-                                      SetContainerResult.successHasProxy) {
-                                await ref
-                                    .read(startProxyControllerProvider.notifier)
-                                    .maybeStartProxy(context);
-                              }
-                            }
-                          },
-                        ),
+                                  if (context.mounted &&
+                                      result ==
+                                          SetContainerResult.successHasProxy) {
+                                    await ref
+                                        .read(
+                                          startProxyControllerProvider.notifier,
+                                        )
+                                        .maybeStartProxy(context);
+                                  }
+                                }
+                              },
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
               error: (error, stackTrace) => SizedBox.shrink(),
-              loading: () => ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) => ContainerListTile(
-                  ContainerData(id: 'null', color: Colors.transparent),
-                  isSelected: false,
-                ),
-              ),
+              loading:
+                  () => ListView.builder(
+                    itemCount: 3,
+                    itemBuilder:
+                        (context, index) => ContainerListTile(
+                          ContainerData(id: 'null', color: Colors.transparent),
+                          isSelected: false,
+                        ),
+                  ),
             ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final initialColor =
-              await ref.read(unusedRandomContainerColorProvider.future);
+          final initialColor = await ref.read(
+            unusedRandomContainerColorProvider.future,
+          );
 
           if (context.mounted) {
             final result = await context.push<ContainerData?>(

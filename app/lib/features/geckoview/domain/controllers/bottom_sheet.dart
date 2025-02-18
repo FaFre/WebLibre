@@ -42,7 +42,8 @@ class BottomSheetExtend extends _$BottomSheetExtend {
       await _extentStreamController.close();
     });
 
-    return _extentStreamController.stream
-        .sampleTime(const Duration(milliseconds: 50));
+    return _extentStreamController.stream.sampleTime(
+      const Duration(milliseconds: 50),
+    );
   }
 }

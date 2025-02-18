@@ -10,24 +10,19 @@ class PreferenceSettingGroup with FastEquatable {
 
   final Map<String, PreferenceSetting> settings;
 
-  bool get isActive => settings.values
-      .every((setting) => setting.requireUserOptIn || setting.isActive);
+  bool get isActive => settings.values.every(
+    (setting) => setting.requireUserOptIn || setting.isActive,
+  );
 
   bool get isPartlyActive => settings.values.any((setting) => setting.isActive);
 
-  PreferenceSettingGroup({
-    required this.description,
-    required this.settings,
-  });
+  PreferenceSettingGroup({required this.description, required this.settings});
 
   @override
   bool get cacheHash => true;
 
   @override
-  List<Object?> get hashParameters => [
-        description,
-        settings,
-      ];
+  List<Object?> get hashParameters => [description, settings];
 }
 
 @JsonSerializable()
@@ -65,11 +60,11 @@ class PreferenceSetting with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-        value,
-        actualValue,
-        title,
-        description,
-        requireUserOptIn,
-        shouldBeDefault,
-      ];
+    value,
+    actualValue,
+    title,
+    description,
+    requireUserOptIn,
+    shouldBeDefault,
+  ];
 }

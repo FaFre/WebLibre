@@ -95,13 +95,9 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
     final ftsQuery = db.buildFtsQuery(searchString);
 
     if (ftsQuery.isNotEmpty) {
-      return db.queryBangs(
-        query: ftsQuery,
-      );
+      return db.queryBangs(query: ftsQuery);
     } else {
-      return db.queryBangsBasic(
-        query: db.buildLikeQuery(searchString),
-      );
+      return db.queryBangsBasic(query: db.buildLikeQuery(searchString));
     }
   }
 

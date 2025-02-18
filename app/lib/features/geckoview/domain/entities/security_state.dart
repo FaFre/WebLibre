@@ -11,11 +11,8 @@ class SecurityState with FastEquatable {
     required this.issuer,
   });
 
-  factory SecurityState.$default() => SecurityState(
-        secure: false,
-        host: "",
-        issuer: "",
-      );
+  factory SecurityState.$default() =>
+      SecurityState(secure: false, host: "", issuer: "");
 
   @override
   bool get cacheHash => true;

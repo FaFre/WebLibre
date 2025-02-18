@@ -12,14 +12,14 @@ class ProxySettingsReplucation extends _$ProxySettingsReplucation {
 
   @override
   void build() {
-    ref.listen(
-      torProxyServiceProvider.select((data) => data.valueOrNull),
-      (previous, next) async {
-        if (next != null) {
-          await _service.setProxyPort(next);
-        }
-      },
-    );
+    ref.listen(torProxyServiceProvider.select((data) => data.valueOrNull), (
+      previous,
+      next,
+    ) async {
+      if (next != null) {
+        await _service.setProxyPort(next);
+      }
+    });
 
     ref.listen(
       containersWithCountProvider.select(

@@ -44,18 +44,15 @@ class SearchField extends HookConsumerWidget {
     final suggestion = useState<String?>(null);
 
     if (showSuggestions) {
-      useListenableCallback(
-        textEditingController,
-        () async {
-          if (textEditingController.text.isNotEmpty) {
-            final result = await ref
-                .read(engineSuggestionsProvider.notifier)
-                .getAutocompleteSuggestion(textEditingController.text);
+      useListenableCallback(textEditingController, () async {
+        if (textEditingController.text.isNotEmpty) {
+          final result = await ref
+              .read(engineSuggestionsProvider.notifier)
+              .getAutocompleteSuggestion(textEditingController.text);
 
-            suggestion.value = result;
-          }
-        },
-      );
+          suggestion.value = result;
+        }
+      });
     }
 
     return AutoSuggestTextField(
@@ -66,33 +63,36 @@ class SearchField extends HookConsumerWidget {
       autofocus: autofocus,
       decoration: InputDecoration(
         border: InputBorder.none,
-        prefixIcon: (showBangIcon && activeBang != null)
-            ? Padding(
-                padding: const EdgeInsetsDirectional.all(12.0),
-                child: UrlIcon(activeBang!.getUrl(''), iconSize: 24.0),
-              )
-            : null,
+        prefixIcon:
+            (showBangIcon && activeBang != null)
+                ? Padding(
+                  padding: const EdgeInsetsDirectional.all(12.0),
+                  child: UrlIcon(activeBang!.getUrl(''), iconSize: 24.0),
+                )
+                : null,
         label: label ?? const Text('Search'),
         // hintText: 'Ask anything...',
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: hasText
-            ? IconButton(
-                onPressed: () {
-                  textEditingController.clear();
-                },
-                icon: const Icon(Icons.clear),
-              )
-            : SpeechToTextButton(
-                onTextReceived: (data) {
-                  textEditingController.text = data.toString();
-                },
-              ),
+        suffixIcon:
+            hasText
+                ? IconButton(
+                  onPressed: () {
+                    textEditingController.clear();
+                  },
+                  icon: const Icon(Icons.clear),
+                )
+                : SpeechToTextButton(
+                  onTextReceived: (data) {
+                    textEditingController.text = data.toString();
+                  },
+                ),
       ),
-      onTapOutside: (focusNode != null)
-          ? (event) {
-              focusNode!.unfocus();
-            }
-          : null,
+      onTapOutside:
+          (focusNode != null)
+              ? (event) {
+                focusNode!.unfocus();
+              }
+              : null,
       onSubmitted: onSubmitted,
     );
   }

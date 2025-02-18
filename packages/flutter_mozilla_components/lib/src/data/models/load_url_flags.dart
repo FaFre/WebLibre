@@ -18,8 +18,9 @@ class LoadUrlFlags {
   static const LoadUrlFlags EXTERNAL = LoadUrlFlags._(1 << 2);
   static const LoadUrlFlags ALLOW_POPUPS = LoadUrlFlags._(1 << 3);
   static const LoadUrlFlags BYPASS_CLASSIFIER = LoadUrlFlags._(1 << 4);
-  static const LoadUrlFlags LOAD_FLAGS_FORCE_ALLOW_DATA_URI =
-      LoadUrlFlags._(1 << 5);
+  static const LoadUrlFlags LOAD_FLAGS_FORCE_ALLOW_DATA_URI = LoadUrlFlags._(
+    1 << 5,
+  );
   static const LoadUrlFlags LOAD_FLAGS_REPLACE_HISTORY = LoadUrlFlags._(1 << 6);
   static const LoadUrlFlags LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE =
       LoadUrlFlags._(1 << 7);

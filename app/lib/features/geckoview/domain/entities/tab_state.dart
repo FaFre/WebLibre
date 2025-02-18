@@ -26,12 +26,12 @@ class TabState extends WebPageInfo with FastEquatable {
 
   @override
   BrowserIcon? get favicon => icon.mapNotNull(
-        (icon) => BrowserIcon(
-          image: icon,
-          dominantColor: null,
-          source: IconSource.memory,
-        ),
-      );
+    (icon) => BrowserIcon(
+      image: icon,
+      dominantColor: null,
+      source: IconSource.memory,
+    ),
+  );
 
   final EquatableImage? thumbnail;
 
@@ -64,40 +64,40 @@ class TabState extends WebPageInfo with FastEquatable {
   }) : super(title: title);
 
   factory TabState.$default(String tabId) => TabState(
-        id: tabId,
-        contextId: null,
-        url: Uri.parse('about:blank'),
-        title: "",
-        icon: null,
-        thumbnail: null,
-        progress: 0,
-        isPrivate: false,
-        isFullScreen: false,
-        isLoading: false,
-        securityInfoState: SecurityState.$default(),
-        historyState: HistoryState.$default(),
-        readerableState: ReaderableState.$default(),
-        findResultState: FindResultState.$default(),
-      );
+    id: tabId,
+    contextId: null,
+    url: Uri.parse('about:blank'),
+    title: "",
+    icon: null,
+    thumbnail: null,
+    progress: 0,
+    isPrivate: false,
+    isFullScreen: false,
+    isLoading: false,
+    securityInfoState: SecurityState.$default(),
+    historyState: HistoryState.$default(),
+    readerableState: ReaderableState.$default(),
+    findResultState: FindResultState.$default(),
+  );
 
   @override
   bool get cacheHash => true;
 
   @override
   List<Object?> get hashParameters => [
-        id,
-        contextId,
-        url,
-        title,
-        icon,
-        thumbnail,
-        progress,
-        isPrivate,
-        isFullScreen,
-        isLoading,
-        securityInfoState,
-        historyState,
-        readerableState,
-        findResultState,
-      ];
+    id,
+    contextId,
+    url,
+    title,
+    icon,
+    thumbnail,
+    progress,
+    isPrivate,
+    isFullScreen,
+    isLoading,
+    securityInfoState,
+    historyState,
+    readerableState,
+    findResultState,
+  ];
 }

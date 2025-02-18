@@ -24,17 +24,15 @@ class TabsActionButton extends HookConsumerWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8.0,
-          vertical: 15.0,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(
               width: 2.0,
-              color: isActive
-                  ? theme.colorScheme.primary
-                  : DefaultTextStyle.of(context).style.color!,
+              color:
+                  isActive
+                      ? theme.colorScheme.primary
+                      : DefaultTextStyle.of(context).style.color!,
             ),
             borderRadius: BorderRadius.circular(5.0),
           ),

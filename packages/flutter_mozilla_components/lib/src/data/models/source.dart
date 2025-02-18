@@ -42,12 +42,13 @@ abstract class Source {
     String? packageId,
     int? packageCategory,
   ) {
-    final caller = packageId != null
-        ? ExternalPackage(
-            packageId: packageId,
-            category: PackageCategory.fromInt(packageCategory).toValue(),
-          )
-        : null;
+    final caller =
+        packageId != null
+            ? ExternalPackage(
+              packageId: packageId,
+              category: PackageCategory.fromInt(packageCategory).toValue(),
+            )
+            : null;
 
     switch (sourceId) {
       case 1:

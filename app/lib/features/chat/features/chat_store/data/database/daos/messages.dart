@@ -13,9 +13,7 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
   MessagesDao(super.db);
 
   Selectable<int> messageCount({required String chatId}) {
-    return db.chatMessage.count(
-      where: (row) => row.chatId.equals(chatId),
-    );
+    return db.chatMessage.count(where: (row) => row.chatId.equals(chatId));
   }
 
   Selectable<ChatMessageData> chatMessages({required String chatId}) {
@@ -29,9 +27,9 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
       db.chatMessage.select()..where((row) => row.messageId.equals(messageId)),
     );
 
-    return db.selectExpressions([existsExpression]).map(
-      (row) => row.read(existsExpression)!,
-    );
+    return db
+        .selectExpressions([existsExpression])
+        .map((row) => row.read(existsExpression)!);
   }
 
   SingleOrNullSelectable<int> messageIndex({
@@ -52,39 +50,39 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
       return null;
     }
 
-    return db.transaction(
-      () async {
-        final String orderKey;
-        if (index != null) {
-          if (index <= 0) {
-            orderKey =
-                await db.leadingOrderKey(bucket: 0, chatId: chatId).getSingle();
-          } else {
-            orderKey = await db
-                .orderKeyBeforeIndex(chatId: chatId, rowIdx: index + 1)
-                .getSingle();
-          }
+    return db.transaction(() async {
+      final String orderKey;
+      if (index != null) {
+        if (index <= 0) {
+          orderKey =
+              await db.leadingOrderKey(bucket: 0, chatId: chatId).getSingle();
         } else {
           orderKey =
-              await db.trailingOrderKey(bucket: 0, chatId: chatId).getSingle();
+              await db
+                  .orderKeyBeforeIndex(chatId: chatId, rowIdx: index + 1)
+                  .getSingle();
         }
+      } else {
+        orderKey =
+            await db.trailingOrderKey(bucket: 0, chatId: chatId).getSingle();
+      }
 
-        await db.chatMessage.insertOne(
-          ChatMessageCompanion.insert(
-            messageId: message.id,
-            chatId: chatId,
-            orderKey: orderKey,
-            messageJson: jsonEncode(message.toJson()),
-          ),
-        );
+      await db.chatMessage.insertOne(
+        ChatMessageCompanion.insert(
+          messageId: message.id,
+          chatId: chatId,
+          orderKey: orderKey,
+          messageJson: jsonEncode(message.toJson()),
+        ),
+      );
 
-        final rowIdx = await db
-            .messageIndex(chatId: chatId, messageId: message.id)
-            .getSingle();
+      final rowIdx =
+          await db
+              .messageIndex(chatId: chatId, messageId: message.id)
+              .getSingle();
 
-        return rowIdx - 1;
-      },
-    );
+      return rowIdx - 1;
+    });
   }
 
   Future<int> removeMessage({required String messageId}) {
@@ -98,10 +96,10 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
     return (db.chatMessage.update()
           ..where((row) => row.messageId.equals(messageId)))
         .write(
-      ChatMessageCompanion(
-        messageJson: Value(jsonEncode(message.toJson())),
-      ),
-    );
+          ChatMessageCompanion(
+            messageJson: Value(jsonEncode(message.toJson())),
+          ),
+        );
   }
 
   Future<int> deleteChatMessages({required String chatId}) {
@@ -120,21 +118,19 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
           await db.leadingOrderKey(bucket: 0, chatId: chatId).getSingle();
 
       await db.chatMessage.insertAll(
-        messages.map(
-          (message) {
-            final insertable = ChatMessageCompanion.insert(
-              messageId: message.id,
-              chatId: chatId,
-              messageJson: jsonEncode(message.toJson()),
-              orderKey: currentOrderKey,
-              // timestamp: DateTime.now(),
-            );
+        messages.map((message) {
+          final insertable = ChatMessageCompanion.insert(
+            messageId: message.id,
+            chatId: chatId,
+            messageJson: jsonEncode(message.toJson()),
+            orderKey: currentOrderKey,
+            // timestamp: DateTime.now(),
+          );
 
-            currentOrderKey = LexoRank.parse(currentOrderKey).genPrev().value;
+          currentOrderKey = LexoRank.parse(currentOrderKey).genPrev().value;
 
-            return insertable;
-          },
-        ),
+          return insertable;
+        }),
       );
     });
   }

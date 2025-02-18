@@ -40,15 +40,18 @@ class ContainerChips extends HookConsumerWidget {
       () => searchTextController?.text,
     );
 
-    final containersAsync =
-        ref.watch(matchSortedContainersWithCountProvider(searchText));
+    final containersAsync = ref.watch(
+      matchSortedContainersWithCountProvider(searchText),
+    );
 
     final dragTargetTabId = useValueNotifier<String?>(null);
 
     return containersAsync.when(
       data: (containers) {
-        final availableContainers = containerFilter
-                .mapNotNull((filter) => containers.where(filter).toList()) ??
+        final availableContainers =
+            containerFilter.mapNotNull(
+              (filter) => containers.where(filter).toList(),
+            ) ??
             containers;
 
         if (selectedContainer == null &&
@@ -66,16 +69,17 @@ class ContainerChips extends HookConsumerWidget {
                   child: SelectableChips(
                     deleteIcon: false,
                     itemId: (container) => container.id,
-                    itemAvatar: (container) => Container(
-                      width: 20.0,
-                      height: 20.0,
-                      decoration: BoxDecoration(
-                        color: container.color,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    itemLabel: (container) =>
-                        Text(container.name ?? 'New Container'),
+                    itemAvatar:
+                        (container) => Container(
+                          width: 20.0,
+                          height: 20.0,
+                          decoration: BoxDecoration(
+                            color: container.color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                    itemLabel:
+                        (container) => Text(container.name ?? 'New Container'),
                     itemBadgeCount: (container) => container.tabCount,
                     itemWrap: (child, container) {
                       return HookBuilder(
@@ -85,7 +89,9 @@ class ContainerChips extends HookConsumerWidget {
 
                           return DragTarget<TabDragData>(
                             onMove: (details) {
-                              ref.read(willAcceptDropProvider.notifier).setData(
+                              ref
+                                  .read(willAcceptDropProvider.notifier)
+                                  .setData(
                                     ContainerDropData(details.data.tabId),
                                   );
 
@@ -103,12 +109,14 @@ class ContainerChips extends HookConsumerWidget {
                                   .read(tabDataRepositoryProvider.notifier)
                                   .containerTabId(details.data.tabId);
 
-                              final containerData =
-                                  await containerId.mapNotNull(
-                                (containerId) => ref
-                                    .read(containerRepositoryProvider.notifier)
-                                    .getContainerData(containerId),
-                              );
+                              final containerData = await containerId
+                                  .mapNotNull(
+                                    (containerId) => ref
+                                        .read(
+                                          containerRepositoryProvider.notifier,
+                                        )
+                                        .getContainerData(containerId),
+                                  );
 
                               if (container.metadata.contextualIdentity ==
                                   containerData?.metadata.contextualIdentity) {
@@ -139,24 +147,26 @@ class ContainerChips extends HookConsumerWidget {
                                   context.findRenderObject() as RenderBox?;
                               final position =
                                   renderBox?.localToGlobal(Offset.zero) ??
-                                      Offset.zero;
+                                  Offset.zero;
 
                               return OverlayPortal(
                                 controller: overlayController,
-                                overlayChildBuilder: (context) => Positioned(
-                                  top: position.dy,
-                                  left: position.dx,
-                                  child: IgnorePointer(
-                                    child: Transform.scale(
-                                      scale: 1.1,
-                                      child: child,
+                                overlayChildBuilder:
+                                    (context) => Positioned(
+                                      top: position.dy,
+                                      left: position.dx,
+                                      child: IgnorePointer(
+                                        child: Transform.scale(
+                                          scale: 1.1,
+                                          child: child,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
                                 child: HookBuilder(
                                   builder: (context) {
-                                    final dragTabId =
-                                        useValueListenable(dragTargetTabId);
+                                    final dragTabId = useValueListenable(
+                                      dragTargetTabId,
+                                    );
 
                                     return Opacity(
                                       opacity: (dragTabId == null) ? 1.0 : 0.0,
@@ -201,10 +211,7 @@ class ContainerChips extends HookConsumerWidget {
         );
       },
       error: (error, stackTrace) => const SizedBox.shrink(),
-      loading: () => const SizedBox(
-        height: 48,
-        width: double.infinity,
-      ),
+      loading: () => const SizedBox(height: 48, width: double.infinity),
     );
   }
 }

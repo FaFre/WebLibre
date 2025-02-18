@@ -23,8 +23,9 @@ class GeckoView extends StatefulWidget {
 }
 
 class _GeckoViewState extends State<GeckoView> {
-  static const platform =
-      MethodChannel('me.movenext.flutter_mozilla_components/trim_memory');
+  static const platform = MethodChannel(
+    'me.movenext.flutter_mozilla_components/trim_memory',
+  );
 
   final browserService = GeckoBrowserService();
 
@@ -46,10 +47,7 @@ class _GeckoViewState extends State<GeckoView> {
   Widget build(BuildContext context) {
     return PlatformViewLink(
       viewType: 'eu.lensai/gecko',
-      surfaceFactory: (
-        context,
-        controller,
-      ) {
+      surfaceFactory: (context, controller) {
         return AndroidViewSurface(
           controller: controller as AndroidViewController,
           gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -58,12 +56,12 @@ class _GeckoViewState extends State<GeckoView> {
       },
       onCreatePlatformView: (PlatformViewCreationParams params) {
         return PlatformViewsService.initExpensiveAndroidView(
-          id: params.id,
-          viewType: 'eu.lensai/gecko',
-          layoutDirection: TextDirection.ltr,
-          creationParams: {},
-          creationParamsCodec: const StandardMessageCodec(),
-        )
+            id: params.id,
+            viewType: 'eu.lensai/gecko',
+            layoutDirection: TextDirection.ltr,
+            creationParams: {},
+            creationParamsCodec: const StandardMessageCodec(),
+          )
           ..addOnPlatformViewCreatedListener((value) async {
             params.onPlatformViewCreated(value);
 

@@ -13,9 +13,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
 
 @Riverpod()
-Future<Color> unusedRandomContainerColor(
-  Ref ref,
-) async {
+Future<Color> unusedRandomContainerColor(Ref ref) async {
   final repository = ref.watch(containerRepositoryProvider.notifier);
 
   final allColors = colorTypes.flattened.toList();
@@ -30,9 +28,7 @@ Future<Color> unusedRandomContainerColor(
 }
 
 @Riverpod()
-Stream<List<ContainerDataWithCount>> containersWithCount(
-  Ref ref,
-) {
+Stream<List<ContainerDataWithCount>> containersWithCount(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
   return db.containersWithCount().watch();
 }
@@ -49,21 +45,19 @@ AsyncValue<List<ContainerDataWithCount>> matchSortedContainersWithCount(
       }
 
       return value.whenData(
-        (cb) => TokenizedFilter.sort(
-          items: cb,
-          toString: (item) => item.name,
-          query: searchText!,
-        ).filtered,
+        (cb) =>
+            TokenizedFilter.sort(
+              items: cb,
+              toString: (item) => item.name,
+              query: searchText!,
+            ).filtered,
       );
     }),
   );
 }
 
 @Riverpod()
-Stream<List<String>> containerTabIds(
-  Ref ref,
-  ContainerFilter containerFilter,
-) {
+Stream<List<String>> containerTabIds(Ref ref, ContainerFilter containerFilter) {
   final db = ref.watch(tabDatabaseProvider);
 
   switch (containerFilter) {

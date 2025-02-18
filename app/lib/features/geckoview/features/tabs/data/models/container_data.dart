@@ -24,10 +24,10 @@ class ContainerAuthSettings with FastEquatable {
     bool? lockOnAppBackground,
     Duration? lockTimeout,
   }) : this(
-          authenticationRequired: authenticationRequired ?? false,
-          lockOnAppBackground: lockOnAppBackground ?? false,
-          lockTimeout: lockTimeout,
-        );
+         authenticationRequired: authenticationRequired ?? false,
+         lockOnAppBackground: lockOnAppBackground ?? false,
+         lockTimeout: lockTimeout,
+       );
 
   factory ContainerAuthSettings.fromJson(Map<String, dynamic> json) =>
       _$ContainerAuthSettingsFromJson(json);
@@ -36,10 +36,10 @@ class ContainerAuthSettings with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-        authenticationRequired,
-        lockOnAppBackground,
-        lockTimeout,
-      ];
+    authenticationRequired,
+    lockOnAppBackground,
+    lockTimeout,
+  ];
 
   @override
   bool get cacheHash => true;
@@ -69,11 +69,11 @@ class ContainerMetadata with FastEquatable {
     ContainerAuthSettings? authSettings,
     bool? useProxy,
   }) : this(
-          iconData: iconData,
-          contextualIdentity: contextualIdentity,
-          authSettings: authSettings ?? ContainerAuthSettings.withDefaults(),
-          useProxy: useProxy ?? false,
-        );
+         iconData: iconData,
+         contextualIdentity: contextualIdentity,
+         authSettings: authSettings ?? ContainerAuthSettings.withDefaults(),
+         useProxy: useProxy ?? false,
+       );
 
   factory ContainerMetadata.fromJson(Map<String, dynamic> json) =>
       _$ContainerMetadataFromJson(json);
@@ -82,11 +82,11 @@ class ContainerMetadata with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-        iconData,
-        contextualIdentity,
-        authSettings,
-        useProxy,
-      ];
+    iconData,
+    contextualIdentity,
+    authSettings,
+    useProxy,
+  ];
 
   @override
   bool get cacheHash => true;
@@ -110,12 +110,7 @@ class ContainerData with FastEquatable {
   bool get cacheHash => true;
 
   @override
-  List<Object?> get hashParameters => [
-        id,
-        name,
-        color,
-        metadata,
-      ];
+  List<Object?> get hashParameters => [id, name, color, metadata];
 }
 
 class ContainerDataWithCount extends ContainerData {
@@ -133,8 +128,5 @@ class ContainerDataWithCount extends ContainerData {
   bool get cacheHash => true;
 
   @override
-  List<Object?> get hashParameters => [
-        ...super.hashParameters,
-        tabCount,
-      ];
+  List<Object?> get hashParameters => [...super.hashParameters, tabCount];
 }

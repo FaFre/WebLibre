@@ -5,15 +5,10 @@ class ReaderableState with FastEquatable {
 
   final bool active;
 
-  ReaderableState({
-    required this.readerable,
-    required this.active,
-  });
+  ReaderableState({required this.readerable, required this.active});
 
-  factory ReaderableState.$default() => ReaderableState(
-        readerable: false,
-        active: false,
-      );
+  factory ReaderableState.$default() =>
+      ReaderableState(readerable: false, active: false);
 
   @override
   bool get cacheHash => true;

@@ -13,14 +13,15 @@ String _$unusedRandomContainerColorHash() =>
 @ProviderFor(unusedRandomContainerColor)
 final unusedRandomContainerColorProvider =
     AutoDisposeFutureProvider<Color>.internal(
-  unusedRandomContainerColor,
-  name: r'unusedRandomContainerColorProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$unusedRandomContainerColorHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      unusedRandomContainerColor,
+      name: r'unusedRandomContainerColorProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$unusedRandomContainerColorHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -32,19 +33,20 @@ String _$containersWithCountHash() =>
 @ProviderFor(containersWithCount)
 final containersWithCountProvider =
     AutoDisposeStreamProvider<List<ContainerDataWithCount>>.internal(
-  containersWithCount,
-  name: r'containersWithCountProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$containersWithCountHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      containersWithCount,
+      name: r'containersWithCountProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$containersWithCountHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ContainersWithCountRef
-    = AutoDisposeStreamProviderRef<List<ContainerDataWithCount>>;
+typedef ContainersWithCountRef =
+    AutoDisposeStreamProviderRef<List<ContainerDataWithCount>>;
 String _$matchSortedContainersWithCountHash() =>
     r'0ed555f0cb72f4990a2841114d72f57d8178d5c3';
 
@@ -81,21 +83,15 @@ class MatchSortedContainersWithCountFamily
   const MatchSortedContainersWithCountFamily();
 
   /// See also [matchSortedContainersWithCount].
-  MatchSortedContainersWithCountProvider call(
-    String? searchText,
-  ) {
-    return MatchSortedContainersWithCountProvider(
-      searchText,
-    );
+  MatchSortedContainersWithCountProvider call(String? searchText) {
+    return MatchSortedContainersWithCountProvider(searchText);
   }
 
   @override
   MatchSortedContainersWithCountProvider getProviderOverride(
     covariant MatchSortedContainersWithCountProvider provider,
   ) {
-    return call(
-      provider.searchText,
-    );
+    return call(provider.searchText);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -117,24 +113,23 @@ class MatchSortedContainersWithCountFamily
 class MatchSortedContainersWithCountProvider
     extends AutoDisposeProvider<AsyncValue<List<ContainerDataWithCount>>> {
   /// See also [matchSortedContainersWithCount].
-  MatchSortedContainersWithCountProvider(
-    String? searchText,
-  ) : this._internal(
-          (ref) => matchSortedContainersWithCount(
-            ref as MatchSortedContainersWithCountRef,
-            searchText,
-          ),
-          from: matchSortedContainersWithCountProvider,
-          name: r'matchSortedContainersWithCountProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$matchSortedContainersWithCountHash,
-          dependencies: MatchSortedContainersWithCountFamily._dependencies,
-          allTransitiveDependencies:
-              MatchSortedContainersWithCountFamily._allTransitiveDependencies,
-          searchText: searchText,
-        );
+  MatchSortedContainersWithCountProvider(String? searchText)
+    : this._internal(
+        (ref) => matchSortedContainersWithCount(
+          ref as MatchSortedContainersWithCountRef,
+          searchText,
+        ),
+        from: matchSortedContainersWithCountProvider,
+        name: r'matchSortedContainersWithCountProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$matchSortedContainersWithCountHash,
+        dependencies: MatchSortedContainersWithCountFamily._dependencies,
+        allTransitiveDependencies:
+            MatchSortedContainersWithCountFamily._allTransitiveDependencies,
+        searchText: searchText,
+      );
 
   MatchSortedContainersWithCountProvider._internal(
     super._createNotifier, {
@@ -151,8 +146,9 @@ class MatchSortedContainersWithCountProvider
   @override
   Override overrideWith(
     AsyncValue<List<ContainerDataWithCount>> Function(
-            MatchSortedContainersWithCountRef provider)
-        create,
+      MatchSortedContainersWithCountRef provider,
+    )
+    create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -170,7 +166,7 @@ class MatchSortedContainersWithCountProvider
 
   @override
   AutoDisposeProviderElement<AsyncValue<List<ContainerDataWithCount>>>
-      createElement() {
+  createElement() {
     return _MatchSortedContainersWithCountProviderElement(this);
   }
 
@@ -219,21 +215,15 @@ class ContainerTabIdsFamily extends Family<AsyncValue<List<String>>> {
   const ContainerTabIdsFamily();
 
   /// See also [containerTabIds].
-  ContainerTabIdsProvider call(
-    ContainerFilter containerFilter,
-  ) {
-    return ContainerTabIdsProvider(
-      containerFilter,
-    );
+  ContainerTabIdsProvider call(ContainerFilter containerFilter) {
+    return ContainerTabIdsProvider(containerFilter);
   }
 
   @override
   ContainerTabIdsProvider getProviderOverride(
     covariant ContainerTabIdsProvider provider,
   ) {
-    return call(
-      provider.containerFilter,
-    );
+    return call(provider.containerFilter);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -254,24 +244,20 @@ class ContainerTabIdsFamily extends Family<AsyncValue<List<String>>> {
 /// See also [containerTabIds].
 class ContainerTabIdsProvider extends AutoDisposeStreamProvider<List<String>> {
   /// See also [containerTabIds].
-  ContainerTabIdsProvider(
-    ContainerFilter containerFilter,
-  ) : this._internal(
-          (ref) => containerTabIds(
-            ref as ContainerTabIdsRef,
-            containerFilter,
-          ),
-          from: containerTabIdsProvider,
-          name: r'containerTabIdsProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$containerTabIdsHash,
-          dependencies: ContainerTabIdsFamily._dependencies,
-          allTransitiveDependencies:
-              ContainerTabIdsFamily._allTransitiveDependencies,
-          containerFilter: containerFilter,
-        );
+  ContainerTabIdsProvider(ContainerFilter containerFilter)
+    : this._internal(
+        (ref) => containerTabIds(ref as ContainerTabIdsRef, containerFilter),
+        from: containerTabIdsProvider,
+        name: r'containerTabIdsProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$containerTabIdsHash,
+        dependencies: ContainerTabIdsFamily._dependencies,
+        allTransitiveDependencies:
+            ContainerTabIdsFamily._allTransitiveDependencies,
+        containerFilter: containerFilter,
+      );
 
   ContainerTabIdsProvider._internal(
     super._createNotifier, {
@@ -339,5 +325,6 @@ class _ContainerTabIdsProviderElement
   ContainerFilter get containerFilter =>
       (origin as ContainerTabIdsProvider).containerFilter;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

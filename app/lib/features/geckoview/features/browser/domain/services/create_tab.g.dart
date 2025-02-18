@@ -12,14 +12,15 @@ String _$createTabStreamHash() => r'2e802a10ecaf1862074f32b76e89c26997bdd7b2';
 @ProviderFor(CreateTabStream)
 final createTabStreamProvider =
     AutoDisposeStreamNotifierProvider<CreateTabStream, CreateTabSheet>.internal(
-  CreateTabStream.new,
-  name: r'createTabStreamProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$createTabStreamHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      CreateTabStream.new,
+      name: r'createTabStreamProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$createTabStreamHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$CreateTabStream = AutoDisposeStreamNotifier<CreateTabSheet>;
 // ignore_for_file: type=lint

@@ -209,10 +209,7 @@ class RecoverableTab {
   /// A [TabState] instance containing basic tab state.
   final TabState state;
 
-  const RecoverableTab({
-    this.engineSessionStateJson,
-    required this.state,
-  });
+  const RecoverableTab({this.engineSessionStateJson, required this.state});
 }
 
 /// A restored browser state, read from disk.
@@ -223,10 +220,7 @@ class RecoverableBrowserState {
   /// The ID of the selected tab in [tabs]. Or `null` if no selection was restored.
   final String? selectedTabId;
 
-  const RecoverableBrowserState({
-    required this.tabs,
-    this.selectedTabId,
-  });
+  const RecoverableBrowserState({required this.tabs, this.selectedTabId});
 }
 
 /// Indicates what location the tabs should be restored at
@@ -257,11 +251,7 @@ enum IconType {
 /// Supported sizes.
 ///
 /// We are trying to limit the supported sizes in order to optimize our caching strategy.
-enum IconSize {
-  defaultSize,
-  launcher,
-  launcherAdaptive,
-}
+enum IconSize { defaultSize, launcher, launcherAdaptive }
 
 /// A request to load an [Icon].
 class IconRequest {
@@ -346,12 +336,7 @@ enum IconSource {
   disk,
 }
 
-enum CookieSameSiteStatus {
-  noRestriction,
-  lax,
-  strict,
-  unspecified;
-}
+enum CookieSameSiteStatus { noRestriction, lax, strict, unspecified }
 
 class CookiePartitionKey {
   final String topLevelSite;
@@ -539,30 +524,13 @@ class TabContent {
   );
 }
 
-enum TrackingProtectionPolicy {
-  none,
-  recommended,
-  strict,
-  custom,
-}
+enum TrackingProtectionPolicy { none, recommended, strict, custom }
 
-enum HttpsOnlyMode {
-  disabled,
-  privateOnly,
-  enabled,
-}
+enum HttpsOnlyMode { disabled, privateOnly, enabled }
 
-enum ColorScheme {
-  system,
-  light,
-  dark,
-}
+enum ColorScheme { system, light, dark }
 
-enum CookieBannerHandlingMode {
-  disabled,
-  rejectAll,
-  rejectOrAcceptAll,
-}
+enum CookieBannerHandlingMode { disabled, rejectAll, rejectOrAcceptAll }
 
 enum WebContentIsolationStrategy {
   isolateNothing,
@@ -674,8 +642,9 @@ class AutocompleteResult {
     dartOptions: DartOptions(),
     kotlinOut:
         'android/src/main/kotlin/eu/lensai/flutter_mozilla_components/pigeons/Gecko.g.kt',
-    kotlinOptions:
-        KotlinOptions(package: 'eu.lensai.flutter_mozilla_components.pigeons'),
+    kotlinOptions: KotlinOptions(
+      package: 'eu.lensai.flutter_mozilla_components.pigeons',
+    ),
     dartPackageName: 'flutter_mozilla_components',
   ),
 )
@@ -759,9 +728,7 @@ abstract class GeckoSessionApi {
     required String? tabId, //If null = current tab
   });
 
-  void crashRecovery({
-    required List<String>? tabIds,
-  });
+  void crashRecovery({required List<String>? tabIds});
 
   void purgeHistory();
 
@@ -1037,10 +1004,7 @@ abstract class GeckoSuggestionEvents {
 
 @FlutterApi()
 abstract class GeckoTabContentEvents {
-  void onContentUpdate(
-    int timestamp,
-    TabContent content,
-  );
+  void onContentUpdate(int timestamp, TabContent content);
 }
 
 @HostApi()

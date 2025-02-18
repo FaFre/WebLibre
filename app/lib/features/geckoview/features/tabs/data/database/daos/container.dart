@@ -42,12 +42,14 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   }
 
   Selectable<Color> getDistinctColors() {
-    final query = db.selectOnly(db.container, distinct: true)
-      ..addColumns([db.container.color])
-      ..where(db.container.color.isNotNull());
+    final query =
+        db.selectOnly(db.container, distinct: true)
+          ..addColumns([db.container.color])
+          ..where(db.container.color.isNotNull());
 
-    return query
-        .map((row) => row.readWithConverter<Color?, int>(db.container.color)!);
+    return query.map(
+      (row) => row.readWithConverter<Color?, int>(db.container.color)!,
+    );
   }
 
   SingleSelectable<String> generateLeadingOrderKey(

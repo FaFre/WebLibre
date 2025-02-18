@@ -63,8 +63,9 @@ class BangDetails extends HookConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FilledButton.tonalIcon(
-                    style:
-                        const ButtonStyle(visualDensity: VisualDensity.compact),
+                    style: const ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                    ),
                     onPressed: () async {
                       final url = Uri.parse(bangData.getUrl('').origin);
 
@@ -79,9 +80,7 @@ class BangDetails extends HookConsumerWidget {
                     label: Text(bangData.domain),
                     icon: const Icon(Icons.open_in_new),
                   ),
-                  const SizedBox(
-                    width: 8,
-                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '!${bangData.trigger}',

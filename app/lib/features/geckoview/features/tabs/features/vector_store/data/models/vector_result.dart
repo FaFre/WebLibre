@@ -17,16 +17,13 @@ class VectorResult {
     required this.content,
     required String? metadata,
     required double? distance,
-  })  : metadata = (metadata != null)
-            ? jsonDecode(metadata) as Map<String, dynamic>
-            : const {},
-        distance = distance!;
+  }) : metadata =
+           (metadata != null)
+               ? jsonDecode(metadata) as Map<String, dynamic>
+               : const {},
+       distance = distance!;
 
   Document toDocument() {
-    return Document(
-      id: id,
-      pageContent: content,
-      metadata: metadata,
-    );
+    return Document(id: id, pageContent: content, metadata: metadata);
   }
 }

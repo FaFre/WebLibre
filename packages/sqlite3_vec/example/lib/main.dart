@@ -30,19 +30,15 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final version = widget.db //
-        .select('SELECT vec_version() as version;')
-        .first['version'];
+    final version =
+        widget
+            .db //
+            .select('SELECT vec_version() as version;')
+            .first['version'];
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('sqlite-vec'),
-        ),
-        body: Center(
-          child: Text(
-            'version: $version',
-          ),
-        ),
+        appBar: AppBar(title: const Text('sqlite-vec')),
+        body: Center(child: Text('version: $version')),
       ),
     );
   }

@@ -13,23 +13,20 @@ class TabList extends _$TabList {
   List<String> build() {
     final eventService = ref.watch(eventServiceProvider);
 
-    ref.listen(
-      fireImmediately: true,
-      engineReadyStateProvider,
-      (previous, next) async {
-        if (next) {
-          await GeckoTabService().syncEvents(onTabListChange: true);
-        }
-      },
-    );
+    ref.listen(fireImmediately: true, engineReadyStateProvider, (
+      previous,
+      next,
+    ) async {
+      if (next) {
+        await GeckoTabService().syncEvents(onTabListChange: true);
+      }
+    });
 
-    final tabListSub = eventService.tabListEvents.listen(
-      (tabs) async {
-        if (!const DeepCollectionEquality().equals(state, tabs)) {
-          state = tabs;
-        }
-      },
-    );
+    final tabListSub = eventService.tabListEvents.listen((tabs) async {
+      if (!const DeepCollectionEquality().equals(state, tabs)) {
+        state = tabs;
+      }
+    });
 
     ref.onDispose(() {
       unawaited(tabListSub.cancel());

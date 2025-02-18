@@ -25,8 +25,9 @@ class CreateTabSheetWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sharedContent = useMemoized(
-      () => parameter.content
-          .mapNotNull((content) => SharedContent.parse(content)),
+      () => parameter.content.mapNotNull(
+        (content) => SharedContent.parse(content),
+      ),
       [parameter],
     );
 
@@ -34,13 +35,12 @@ class CreateTabSheetWidget extends HookConsumerWidget {
       () =>
           parameter.preferredTool?.index ??
           switch (sharedContent) {
-            SharedText(text: final _) => KagiTool.search.index
+            SharedText(text: final _) => KagiTool.search.index,
             // (showEarlyAccessFeatures && text.length > 25)
             //     ? KagiTool.assistant.index
             //     : KagiTool.search.index,
-            ,
             SharedUrl() => KagiTool.summarizer.index,
-            null => KagiTool.search.index
+            null => KagiTool.search.index,
             // showEarlyAccessFeatures
             //     ? KagiTool.assistant.index
             //     : KagiTool.search.index,
@@ -62,15 +62,12 @@ class CreateTabSheetWidget extends HookConsumerWidget {
       },
     );
 
-    useEffect(
-      () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          onActiveToolChanged?.call(KagiTool.values[initialIndex]);
-        });
-        return null;
-      },
-      [initialIndex],
-    );
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onActiveToolChanged?.call(KagiTool.values[initialIndex]);
+      });
+      return null;
+    }, [initialIndex]);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -82,10 +79,7 @@ class CreateTabSheetWidget extends HookConsumerWidget {
             //   icon: Icon(KagiTool.search.icon),
             //   text: 'Search',
             // ),
-            Tab(
-              icon: Icon(KagiTool.summarizer.icon),
-              text: 'Summarize',
-            ),
+            Tab(icon: Icon(KagiTool.summarizer.icon), text: 'Summarize'),
             // if (showEarlyAccessFeatures)
             //   Tab(
             //     icon: Icon(KagiTool.assistant.icon),
@@ -102,10 +96,7 @@ class CreateTabSheetWidget extends HookConsumerWidget {
               //   sharedContent: sharedContent,
               //   onSubmit: onSubmit,
               // ),
-              SummarizeTab(
-                sharedContent: sharedContent,
-                onSubmit: onSubmit,
-              ),
+              SummarizeTab(sharedContent: sharedContent, onSubmit: onSubmit),
               // if (showEarlyAccessFeatures)
               //   AssistantTab(
               //     sharedContent: sharedContent,

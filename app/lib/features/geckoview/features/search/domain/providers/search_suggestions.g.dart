@@ -13,14 +13,15 @@ String _$defaultSearchSuggestionsHash() =>
 @ProviderFor(defaultSearchSuggestions)
 final defaultSearchSuggestionsProvider =
     Provider<ISearchSuggestionProvider>.internal(
-  defaultSearchSuggestions,
-  name: r'defaultSearchSuggestionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$defaultSearchSuggestionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      defaultSearchSuggestions,
+      name: r'defaultSearchSuggestionsProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$defaultSearchSuggestionsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -52,9 +53,7 @@ abstract class _$SearchSuggestions
     extends BuildlessAutoDisposeStreamNotifier<List<String>> {
   late final ISearchSuggestionProvider? suggestionsProvider;
 
-  Stream<List<String>> build({
-    ISearchSuggestionProvider? suggestionsProvider,
-  });
+  Stream<List<String>> build({ISearchSuggestionProvider? suggestionsProvider});
 }
 
 /// See also [SearchSuggestions].
@@ -70,18 +69,14 @@ class SearchSuggestionsFamily extends Family<AsyncValue<List<String>>> {
   SearchSuggestionsProvider call({
     ISearchSuggestionProvider? suggestionsProvider,
   }) {
-    return SearchSuggestionsProvider(
-      suggestionsProvider: suggestionsProvider,
-    );
+    return SearchSuggestionsProvider(suggestionsProvider: suggestionsProvider);
   }
 
   @override
   SearchSuggestionsProvider getProviderOverride(
     covariant SearchSuggestionsProvider provider,
   ) {
-    return call(
-      suggestionsProvider: provider.suggestionsProvider,
-    );
+    return call(suggestionsProvider: provider.suggestionsProvider);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -100,24 +95,24 @@ class SearchSuggestionsFamily extends Family<AsyncValue<List<String>>> {
 }
 
 /// See also [SearchSuggestions].
-class SearchSuggestionsProvider extends AutoDisposeStreamNotifierProviderImpl<
-    SearchSuggestions, List<String>> {
+class SearchSuggestionsProvider
+    extends
+        AutoDisposeStreamNotifierProviderImpl<SearchSuggestions, List<String>> {
   /// See also [SearchSuggestions].
-  SearchSuggestionsProvider({
-    ISearchSuggestionProvider? suggestionsProvider,
-  }) : this._internal(
-          () => SearchSuggestions()..suggestionsProvider = suggestionsProvider,
-          from: searchSuggestionsProvider,
-          name: r'searchSuggestionsProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$searchSuggestionsHash,
-          dependencies: SearchSuggestionsFamily._dependencies,
-          allTransitiveDependencies:
-              SearchSuggestionsFamily._allTransitiveDependencies,
-          suggestionsProvider: suggestionsProvider,
-        );
+  SearchSuggestionsProvider({ISearchSuggestionProvider? suggestionsProvider})
+    : this._internal(
+        () => SearchSuggestions()..suggestionsProvider = suggestionsProvider,
+        from: searchSuggestionsProvider,
+        name: r'searchSuggestionsProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$searchSuggestionsHash,
+        dependencies: SearchSuggestionsFamily._dependencies,
+        allTransitiveDependencies:
+            SearchSuggestionsFamily._allTransitiveDependencies,
+        suggestionsProvider: suggestionsProvider,
+      );
 
   SearchSuggestionsProvider._internal(
     super._createNotifier, {
@@ -132,12 +127,8 @@ class SearchSuggestionsProvider extends AutoDisposeStreamNotifierProviderImpl<
   final ISearchSuggestionProvider? suggestionsProvider;
 
   @override
-  Stream<List<String>> runNotifierBuild(
-    covariant SearchSuggestions notifier,
-  ) {
-    return notifier.build(
-      suggestionsProvider: suggestionsProvider,
-    );
+  Stream<List<String>> runNotifierBuild(covariant SearchSuggestions notifier) {
+    return notifier.build(suggestionsProvider: suggestionsProvider);
   }
 
   @override
@@ -158,7 +149,7 @@ class SearchSuggestionsProvider extends AutoDisposeStreamNotifierProviderImpl<
 
   @override
   AutoDisposeStreamNotifierProviderElement<SearchSuggestions, List<String>>
-      createElement() {
+  createElement() {
     return _SearchSuggestionsProviderElement(this);
   }
 
@@ -186,13 +177,18 @@ mixin SearchSuggestionsRef
 }
 
 class _SearchSuggestionsProviderElement
-    extends AutoDisposeStreamNotifierProviderElement<SearchSuggestions,
-        List<String>> with SearchSuggestionsRef {
+    extends
+        AutoDisposeStreamNotifierProviderElement<
+          SearchSuggestions,
+          List<String>
+        >
+    with SearchSuggestionsRef {
   _SearchSuggestionsProviderElement(super.provider);
 
   @override
   ISearchSuggestionProvider? get suggestionsProvider =>
       (origin as SearchSuggestionsProvider).suggestionsProvider;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

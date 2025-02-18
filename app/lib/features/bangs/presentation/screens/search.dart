@@ -22,8 +22,9 @@ class BangSearchScreen extends HookConsumerWidget {
     final resultsAsync = ref.watch(bangSearchProvider);
     final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
-    final textEditingController =
-        useTextEditingController(text: initialSearchText);
+    final textEditingController = useTextEditingController(
+      text: initialSearchText,
+    );
 
     useListenableCallback(textEditingController, () async {
       unawaited(
@@ -57,42 +58,44 @@ class BangSearchScreen extends HookConsumerWidget {
       ),
       body: resultsAsync.when(
         skipLoadingOnReload: true,
-        data: (bangs) => FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView.builder(
-              controller: controller,
-              itemCount: bangs.length,
-              itemBuilder: (context, index) {
-                final bang = bangs[index];
-                return BangDetails(
-                  bang,
-                  onTap: () {
-                    ref
-                        .read(selectedBangTriggerProvider().notifier)
-                        .setTrigger(bang.trigger);
+        data:
+            (bangs) => FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return ListView.builder(
+                  controller: controller,
+                  itemCount: bangs.length,
+                  itemBuilder: (context, index) {
+                    final bang = bangs[index];
+                    return BangDetails(
+                      bang,
+                      onTap: () {
+                        ref
+                            .read(selectedBangTriggerProvider().notifier)
+                            .setTrigger(bang.trigger);
 
-                    // if (ref.read(bottomSheetControllerProvider)
-                    //     is! CreateTabSheet) {
-                    //   ref.read(bottomSheetControllerProvider.notifier).show(
-                    //         CreateTabSheet(preferredTool: KagiTool.search),
-                    //       );
-                    // }
+                        // if (ref.read(bottomSheetControllerProvider)
+                        //     is! CreateTabSheet) {
+                        //   ref.read(bottomSheetControllerProvider.notifier).show(
+                        //         CreateTabSheet(preferredTool: KagiTool.search),
+                        //       );
+                        // }
 
-                    // context.go(BrowserRoute().location);
-                    context.pop();
+                        // context.go(BrowserRoute().location);
+                        context.pop();
+                      },
+                    );
                   },
                 );
               },
-            );
-          },
-        ),
-        error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Bang Search failed',
-            exception: error,
-          ),
-        ),
+            ),
+        error:
+            (error, stackTrace) => Center(
+              child: FailureWidget(
+                title: 'Bang Search failed',
+                exception: error,
+              ),
+            ),
         loading: () => const SizedBox.shrink(),
       ),
     );

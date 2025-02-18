@@ -62,9 +62,7 @@ class MainApp extends HookConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeMode,
           home: Scaffold(
-            appBar: AppBar(
-              title: const Text('Initiallization Error'),
-            ),
+            appBar: AppBar(title: const Text('Initiallization Error')),
             body: Center(
               child: FailureWidget(
                 title: 'Could not initialize App',

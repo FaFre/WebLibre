@@ -11,19 +11,21 @@ class ChatArchiveFileService extends _$ChatArchiveFileService {
   final Future<Directory> _archiveDirectoryFuture;
 
   ChatArchiveFileService()
-      : _archiveDirectoryFuture =
-            path_provider.getApplicationDocumentsDirectory().then(
-                  (documentDirectory) => Directory(
-                    path.join(documentDirectory.path, 'archive', 'chat'),
-                  ).create(recursive: true),
-                );
+    : _archiveDirectoryFuture = path_provider
+          .getApplicationDocumentsDirectory()
+          .then(
+            (documentDirectory) => Directory(
+              path.join(documentDirectory.path, 'archive', 'chat'),
+            ).create(recursive: true),
+          );
 
   Future<List<FileSystemEntity>> list() {
     return _archiveDirectoryFuture.then(
-      (value) => value
-          .list()
-          .where((file) => path.extension(file.path) == '.md')
-          .toList(),
+      (value) =>
+          value
+              .list()
+              .where((file) => path.extension(file.path) == '.md')
+              .toList(),
     );
   }
 
@@ -56,8 +58,9 @@ class ChatArchiveFileService extends _$ChatArchiveFileService {
 
   Stream<WatchEvent> _directoryStream() async* {
     final watcher = DirectoryWatcher(
-      await _archiveDirectoryFuture
-          .then((archiveDirectory) => archiveDirectory.absolute.path),
+      await _archiveDirectoryFuture.then(
+        (archiveDirectory) => archiveDirectory.absolute.path,
+      ),
     );
 
     yield* watcher.events.where((event) => path.extension(event.path) == '.md');

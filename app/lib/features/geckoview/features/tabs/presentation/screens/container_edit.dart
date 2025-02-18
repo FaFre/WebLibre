@@ -13,25 +13,11 @@ import 'package:lensai/presentation/icons/tor_icons.dart';
 enum _DialogMode { create, edit }
 
 const _timeoutOptions = <DropdownMenuItem<Duration?>>[
-  DropdownMenuItem(
-    child: Text('Immediately'),
-  ),
-  DropdownMenuItem(
-    value: Duration(minutes: 1),
-    child: Text('1 minute'),
-  ),
-  DropdownMenuItem(
-    value: Duration(minutes: 5),
-    child: Text('5 minutes'),
-  ),
-  DropdownMenuItem(
-    value: Duration(minutes: 15),
-    child: Text('15 minutes'),
-  ),
-  DropdownMenuItem(
-    value: Duration(hours: 1),
-    child: Text('1 hour'),
-  ),
+  DropdownMenuItem(child: Text('Immediately')),
+  DropdownMenuItem(value: Duration(minutes: 1), child: Text('1 minute')),
+  DropdownMenuItem(value: Duration(minutes: 5), child: Text('5 minutes')),
+  DropdownMenuItem(value: Duration(minutes: 15), child: Text('15 minutes')),
+  DropdownMenuItem(value: Duration(hours: 1), child: Text('1 hour')),
 ];
 
 class ContainerEditScreen extends HookConsumerWidget {
@@ -63,22 +49,22 @@ class ContainerEditScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedColor = useState(initialContainer.color);
-    final contextualIdentity =
-        useState(initialContainer.metadata.contextualIdentity);
+    final contextualIdentity = useState(
+      initialContainer.metadata.contextualIdentity,
+    );
     final authSettings = useState(initialContainer.metadata.authSettings);
     final useProxy = useState(initialContainer.metadata.useProxy);
 
-    final textController =
-        useTextEditingController(text: initialContainer.name);
+    final textController = useTextEditingController(
+      text: initialContainer.name,
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          switch (_mode) {
-            _DialogMode.create => 'New Container',
-            _DialogMode.edit => 'Edit Container',
-          },
-        ),
+        title: Text(switch (_mode) {
+          _DialogMode.create => 'New Container',
+          _DialogMode.edit => 'Edit Container',
+        }),
         actions: [
           IconButton(
             onPressed: () async {
@@ -95,7 +81,9 @@ class ContainerEditScreen extends HookConsumerWidget {
 
               //Check for permissions, when auth is set or getting set
               if (initialContainer
-                      .metadata.authSettings.authenticationRequired ||
+                      .metadata
+                      .authSettings
+                      .authenticationRequired ||
                   container.metadata.authSettings.authenticationRequired) {
                 final authResult = await ref
                     .read(localAuthenticationServiceProvider.notifier)
@@ -161,8 +149,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                       onPressed: () async {
                         final color = await showDialog<Color?>(
                           context: context,
-                          builder: (context) =>
-                              ColorPickerDialog(selectedColor.value),
+                          builder:
+                              (context) =>
+                                  ColorPickerDialog(selectedColor.value),
                         );
 
                         if (color != null) {
@@ -175,19 +164,22 @@ class ContainerEditScreen extends HookConsumerWidget {
                       title: const Text('Cookie Isolation'),
                       secondary: const Icon(MdiIcons.cookieLock),
                       contentPadding: EdgeInsets.zero,
-                      onChanged: (_mode == _DialogMode.create)
-                          ? (value) {
-                              contextualIdentity.value = value
-                                  ? initialContainer
-                                          .metadata.contextualIdentity ??
-                                      uuid.v4()
-                                  : null;
+                      onChanged:
+                          (_mode == _DialogMode.create)
+                              ? (value) {
+                                contextualIdentity.value =
+                                    value
+                                        ? initialContainer
+                                                .metadata
+                                                .contextualIdentity ??
+                                            uuid.v4()
+                                        : null;
 
-                              if (!value && useProxy.value) {
-                                useProxy.value = false;
+                                if (!value && useProxy.value) {
+                                  useProxy.value = false;
+                                }
                               }
-                            }
-                          : null,
+                              : null,
                     ),
                     SwitchListTile.adaptive(
                       value: useProxy.value,
@@ -196,19 +188,20 @@ class ContainerEditScreen extends HookConsumerWidget {
                       contentPadding: EdgeInsets.zero,
                       onChanged: switch (_mode) {
                         _DialogMode.create => (value) {
-                            if (value && contextualIdentity.value == null) {
-                              contextualIdentity.value = initialContainer
-                                      .metadata.contextualIdentity ??
-                                  uuid.v4();
-                            }
+                          if (value && contextualIdentity.value == null) {
+                            contextualIdentity.value =
+                                initialContainer.metadata.contextualIdentity ??
+                                uuid.v4();
+                          }
 
-                            useProxy.value = value;
-                          },
-                        _DialogMode.edit => (contextualIdentity.value != null)
-                            ? (value) {
+                          useProxy.value = value;
+                        },
+                        _DialogMode.edit =>
+                          (contextualIdentity.value != null)
+                              ? (value) {
                                 useProxy.value = value;
                               }
-                            : null,
+                              : null,
                       },
                     ),
                     SwitchListTile.adaptive(
@@ -224,9 +217,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                     if (authSettings.value.authenticationRequired)
                       CheckboxListTile.adaptive(
                         value: authSettings.value.lockOnAppBackground,
-                        title: const Text(
-                          'Auto-lock on background',
-                        ),
+                        title: const Text('Auto-lock on background'),
                         controlAffinity: ListTileControlAffinity.leading,
                         onChanged: (value) {
                           authSettings.value = authSettings.value.copyWith
@@ -236,23 +227,21 @@ class ContainerEditScreen extends HookConsumerWidget {
                     if (authSettings.value.authenticationRequired)
                       CheckboxListTile.adaptive(
                         value: authSettings.value.lockTimeout != null,
-                        title: const Text(
-                          'Timeout',
-                        ),
+                        title: const Text('Timeout'),
                         controlAffinity: ListTileControlAffinity.leading,
                         onChanged: (value) {
                           final newValue =
                               value! ? _timeoutOptions[1].value : null;
 
-                          authSettings.value =
-                              authSettings.value.copyWith.lockTimeout(newValue);
+                          authSettings.value = authSettings.value.copyWith
+                              .lockTimeout(newValue);
                         },
                         secondary: DropdownButton(
                           value: authSettings.value.lockTimeout,
                           items: _timeoutOptions,
                           onChanged: (value) {
-                            authSettings.value =
-                                authSettings.value.copyWith.lockTimeout(value);
+                            authSettings.value = authSettings.value.copyWith
+                                .lockTimeout(value);
                           },
                         ),
                       ),

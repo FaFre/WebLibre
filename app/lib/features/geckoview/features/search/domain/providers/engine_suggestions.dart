@@ -18,9 +18,7 @@ class EngineSuggestions extends _$EngineSuggestions {
 
   Future<void> addQuery(
     String query, {
-    List<GeckoSuggestionType> providers = const [
-      GeckoSuggestionType.history,
-    ],
+    List<GeckoSuggestionType> providers = const [GeckoSuggestionType.history],
   }) {
     return ref
         .read(engineSuggestionsServiceProvider)
@@ -39,16 +37,18 @@ AsyncValue<List<GeckoSuggestion>> engineHistorySuggestions(Ref ref) {
   return ref.watch(
     engineSuggestionsProvider.select(
       (suggestions) => suggestions.whenData(
-        (suggestions) => suggestions
-            .where(
-              (suggestion) =>
-                  suggestion.type == GeckoSuggestionType.history &&
-                  (suggestion.title?.isNotEmpty ?? false) &&
-                  (suggestion.description
-                          .mapNotNull((url) => Uri.tryParse(url)) !=
-                      null),
-            )
-            .toList(),
+        (suggestions) =>
+            suggestions
+                .where(
+                  (suggestion) =>
+                      suggestion.type == GeckoSuggestionType.history &&
+                      (suggestion.title?.isNotEmpty ?? false) &&
+                      (suggestion.description.mapNotNull(
+                            (url) => Uri.tryParse(url),
+                          ) !=
+                          null),
+                )
+                .toList(),
       ),
     ),
   );

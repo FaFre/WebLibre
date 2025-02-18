@@ -11,13 +11,17 @@ class _DraggableScrollableControllerHook
 
   @override
   HookState<DraggableScrollableController, Hook<DraggableScrollableController>>
-      createState() {
+  createState() {
     return _DraggableScrollableControllerHookState();
   }
 }
 
-class _DraggableScrollableControllerHookState extends HookState<
-    DraggableScrollableController, _DraggableScrollableControllerHook> {
+class _DraggableScrollableControllerHookState
+    extends
+        HookState<
+          DraggableScrollableController,
+          _DraggableScrollableControllerHook
+        > {
   late final _controller = DraggableScrollableController();
 
   @override

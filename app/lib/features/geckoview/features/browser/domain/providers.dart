@@ -40,14 +40,15 @@ class SelectedBangData extends _$SelectedBangData {
   @override
   BangData? build({String? domain}) {
     final repository = ref.watch(bangDataRepositoryProvider.notifier);
-    final selectedBangTrigger =
-        ref.watch(selectedBangTriggerProvider(domain: domain));
-
-    final subscription = repository.watchBang(selectedBangTrigger).listen(
-      (value) {
-        state = value;
-      },
+    final selectedBangTrigger = ref.watch(
+      selectedBangTriggerProvider(domain: domain),
     );
+
+    final subscription = repository.watchBang(selectedBangTrigger).listen((
+      value,
+    ) {
+      state = value;
+    });
 
     ref.onDispose(() {
       unawaited(subscription.cancel());
@@ -111,8 +112,9 @@ EquatableCollection<List<String>> availableTabIds(
   ContainerFilter containerFilter,
 ) {
   final containerTabs = ref.watch(
-    containerTabIdsProvider(containerFilter)
-        .select((value) => value.valueOrNull),
+    containerTabIdsProvider(
+      containerFilter,
+    ).select((value) => value.valueOrNull),
   );
   final tabList = ref.watch(tabListProvider);
 
@@ -130,13 +132,10 @@ EquatableCollection<Map<String, TabState>> availableTabStates(
   final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
   final tabStates = ref.watch(tabStatesProvider);
 
-  return EquatableCollection(
-    {
-      for (final tabId in availableTabs.collection)
-        if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
-    },
-    immutable: true,
-  );
+  return EquatableCollection({
+    for (final tabId in availableTabs.collection)
+      if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
+  }, immutable: true);
 }
 
 @Riverpod()
@@ -145,16 +144,17 @@ EquatableCollection<List<String>> seamlessFilteredTabIds(
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
 ) {
-  final tabSearchResults = ref
-      .watch(
-        tabSearchRepositoryProvider(searchPartition).select(
-          (value) => EquatableCollection(
-            value.valueOrNull?.map((tab) => tab.id).toList(),
-            immutable: true,
-          ),
-        ),
-      )
-      .collection;
+  final tabSearchResults =
+      ref
+          .watch(
+            tabSearchRepositoryProvider(searchPartition).select(
+              (value) => EquatableCollection(
+                value.valueOrNull?.map((tab) => tab.id).toList(),
+                immutable: true,
+              ),
+            ),
+          )
+          .collection;
 
   final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
 
@@ -176,19 +176,19 @@ EquatableCollection<List<TabPreview>> seamlessFilteredTabPreviews(
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
 ) {
-  final tabSearchResults = ref
-      .watch(
-        tabSearchRepositoryProvider(searchPartition).select(
-          (value) => EquatableCollection(
-            value.valueOrNull,
-            immutable: true,
-          ),
-        ),
-      )
-      .collection;
+  final tabSearchResults =
+      ref
+          .watch(
+            tabSearchRepositoryProvider(searchPartition).select(
+              (value) =>
+                  EquatableCollection(value.valueOrNull, immutable: true),
+            ),
+          )
+          .collection;
 
-  final availableTabStates =
-      ref.watch(availableTabStatesProvider(containerFilter));
+  final availableTabStates = ref.watch(
+    availableTabStatesProvider(containerFilter),
+  );
 
   if (tabSearchResults == null) {
     return EquatableCollection(
@@ -216,7 +216,8 @@ EquatableCollection<List<TabPreview>> seamlessFilteredTabPreviews(
             id: tab.id,
             title: tab.title ?? availableTabStates.collection[tab.id]!.title,
             icon: null,
-            url: tab.cleanUrl.mapNotNull(Uri.tryParse) ??
+            url:
+                tab.cleanUrl.mapNotNull(Uri.tryParse) ??
                 availableTabStates.collection[tab.id]!.url,
             highlightedUrl: tab.url,
             content: tab.extractedContent ?? tab.fullContent,

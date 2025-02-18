@@ -25,11 +25,12 @@ class ChatBackend extends _$ChatBackend {
       return _embeddingsUpdate!;
     }
 
-    _embeddingsUpdate =
-        ref.read(documentRepositoryProvider.notifier).updateEmbeddings(
-              mainDocumentId: _metadata?.mainDocumentId,
-              contextId: _metadata?.contextId,
-            );
+    _embeddingsUpdate = ref
+        .read(documentRepositoryProvider.notifier)
+        .updateEmbeddings(
+          mainDocumentId: _metadata?.mainDocumentId,
+          contextId: _metadata?.contextId,
+        );
 
     _embeddingsUpdate!.whenComplete(() => _embeddingsUpdate = null);
 
@@ -47,16 +48,10 @@ class ChatBackend extends _$ChatBackend {
     await prepareEmbeddings();
 
     return humanMessageResult.flatMapAsync((humanMessage) async {
-      await _chatRepository.setTyping(
-        author: MessageAuthor.ai,
-        typing: true,
-      );
+      await _chatRepository.setTyping(author: MessageAuthor.ai, typing: true);
 
       final result = await _qaMemoryChain.processQuestion(humanMessage.text);
-      await _chatRepository.setTyping(
-        author: MessageAuthor.ai,
-        typing: false,
-      );
+      await _chatRepository.setTyping(author: MessageAuthor.ai, typing: false);
 
       await _chatRepository.insertTextMessage(
         author: MessageAuthor.ai,

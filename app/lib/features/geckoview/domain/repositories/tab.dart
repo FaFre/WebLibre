@@ -98,16 +98,17 @@ class TabRepository extends _$TabRepository {
 
     final db = ref.watch(tabDatabaseProvider);
 
-    final tabAddedSub = eventSerivce.tabAddedStream.listen(
-      (tabId) async {
-        final containerId = ref.read(selectedContainerProvider);
-        await db.tabDao
-            .upsertUnassignedTab(tabId, containerId: Value(containerId));
-      },
-    );
+    final tabAddedSub = eventSerivce.tabAddedStream.listen((tabId) async {
+      final containerId = ref.read(selectedContainerProvider);
+      await db.tabDao.upsertUnassignedTab(
+        tabId,
+        containerId: Value(containerId),
+      );
+    });
 
-    final tabContentSub =
-        tabContentService.tabContentStream.listen((content) async {
+    final tabContentSub = tabContentService.tabContentStream.listen((
+      content,
+    ) async {
       await db.tabDao.updateTabContent(
         content.tabId,
         isProbablyReaderable: content.isProbablyReaderable,
@@ -118,42 +119,33 @@ class TabRepository extends _$TabRepository {
       );
     });
 
-    ref.listen(
-      selectedTabProvider,
-      (previous, tabId) async {
-        if (tabId != null) {
-          await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
-        }
-      },
-    );
+    ref.listen(selectedTabProvider, (previous, tabId) async {
+      if (tabId != null) {
+        await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
+      }
+    });
 
-    ref.listen(
-      tabListProvider,
-      (previous, next) async {
-        //Only sync tabs if there has been a previous value or is not empty
-        final syncTabs = next.isNotEmpty || (previous?.isNotEmpty ?? false);
+    ref.listen(tabListProvider, (previous, next) async {
+      //Only sync tabs if there has been a previous value or is not empty
+      final syncTabs = next.isNotEmpty || (previous?.isNotEmpty ?? false);
 
-        if (syncTabs) {
-          await db.tabDao.syncTabs(retainTabIds: next);
-        }
-      },
-    );
+      if (syncTabs) {
+        await db.tabDao.syncTabs(retainTabIds: next);
+      }
+    });
 
-    ref.listen(
-      tabStatesProvider,
-      (previous, next) async {
-        //Since state changes occure pretty often and our map always contains
-        //the latest state, we cache the value before starting debouncing and
-        //later diff to that, to avoid frequent database writes
-        if (!tabStateDebouncer.isDebouncing) {
-          debounceStartValue = previous;
-        }
+    ref.listen(tabStatesProvider, (previous, next) async {
+      //Since state changes occure pretty often and our map always contains
+      //the latest state, we cache the value before starting debouncing and
+      //later diff to that, to avoid frequent database writes
+      if (!tabStateDebouncer.isDebouncing) {
+        debounceStartValue = previous;
+      }
 
-        tabStateDebouncer.eventOccured(() async {
-          await db.tabDao.updateTabs(debounceStartValue, next);
-        });
-      },
-    );
+      tabStateDebouncer.eventOccured(() async {
+        await db.tabDao.updateTabs(debounceStartValue, next);
+      });
+    });
 
     ref.onDispose(() {
       tabStateDebouncer.dispose();

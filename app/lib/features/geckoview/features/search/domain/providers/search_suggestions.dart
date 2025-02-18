@@ -18,18 +18,17 @@ class SearchSuggestions extends _$SearchSuggestions {
   void addQuery(String query) => _addQueryBinding(query);
 
   @override
-  Stream<List<String>> build({
-    ISearchSuggestionProvider? suggestionsProvider,
-  }) {
+  Stream<List<String>> build({ISearchSuggestionProvider? suggestionsProvider}) {
     final defaultProvider = ref.watch(defaultSearchSuggestionsProvider);
     final resolvedProvider = suggestionsProvider ?? defaultProvider;
 
-    _addQueryBinding = ref
-        .watch(searchSuggestionsRepositoryProvider(resolvedProvider).notifier)
-        .addQuery;
+    _addQueryBinding =
+        ref
+            .watch(
+              searchSuggestionsRepositoryProvider(resolvedProvider).notifier,
+            )
+            .addQuery;
 
-    return ref.watch(
-      searchSuggestionsRepositoryProvider(resolvedProvider),
-    );
+    return ref.watch(searchSuggestionsRepositoryProvider(resolvedProvider));
   }
 }

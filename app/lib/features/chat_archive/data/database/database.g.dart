@@ -9,20 +9,29 @@ class Chat extends Table with TableInfo<Chat, ChatData> {
   final String? _alias;
   Chat(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> fileName = GeneratedColumn<String>(
-      'file_name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'file_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
-      'content', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [fileName, title, content];
   @override
@@ -36,12 +45,21 @@ class Chat extends Table with TableInfo<Chat, ChatData> {
   ChatData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ChatData(
-      fileName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}file_name'])!,
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      content: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      fileName:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}file_name'],
+          )!,
+      title:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}title'],
+          )!,
+      content:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}content'],
+          )!,
     );
   }
 
@@ -58,8 +76,11 @@ class ChatData extends DataClass implements Insertable<ChatData> {
   final String fileName;
   final String title;
   final String content;
-  const ChatData(
-      {required this.fileName, required this.title, required this.content});
+  const ChatData({
+    required this.fileName,
+    required this.title,
+    required this.content,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -69,8 +90,10 @@ class ChatData extends DataClass implements Insertable<ChatData> {
     return map;
   }
 
-  factory ChatData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory ChatData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChatData(
       fileName: serializer.fromJson<String>(json['file_name']),
@@ -139,9 +162,9 @@ class ChatCompanion extends UpdateCompanion<ChatData> {
     required String title,
     required String content,
     this.rowid = const Value.absent(),
-  })  : fileName = Value(fileName),
-        title = Value(title),
-        content = Value(content);
+  }) : fileName = Value(fileName),
+       title = Value(title),
+       content = Value(content);
   static Insertable<ChatData> custom({
     Expression<String>? fileName,
     Expression<String>? title,
@@ -156,11 +179,12 @@ class ChatCompanion extends UpdateCompanion<ChatData> {
     });
   }
 
-  ChatCompanion copyWith(
-      {Value<String>? fileName,
-      Value<String>? title,
-      Value<String>? content,
-      Value<int>? rowid}) {
+  ChatCompanion copyWith({
+    Value<String>? fileName,
+    Value<String>? title,
+    Value<String>? content,
+    Value<int>? rowid,
+  }) {
     return ChatCompanion(
       fileName: fileName ?? this.fileName,
       title: title ?? this.title,
@@ -206,15 +230,21 @@ class ChatFts extends Table
   final String? _alias;
   ChatFts(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
-      'content', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
+    'content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
   @override
   List<GeneratedColumn> get $columns => [title, content];
   @override
@@ -228,10 +258,16 @@ class ChatFts extends Table
   ChatFt map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ChatFt(
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      content: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      title:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}title'],
+          )!,
+      content:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}content'],
+          )!,
     );
   }
 
@@ -259,8 +295,10 @@ class ChatFt extends DataClass implements Insertable<ChatFt> {
     return map;
   }
 
-  factory ChatFt.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory ChatFt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChatFt(
       title: serializer.fromJson<String>(json['title']),
@@ -276,10 +314,8 @@ class ChatFt extends DataClass implements Insertable<ChatFt> {
     };
   }
 
-  ChatFt copyWith({String? title, String? content}) => ChatFt(
-        title: title ?? this.title,
-        content: content ?? this.content,
-      );
+  ChatFt copyWith({String? title, String? content}) =>
+      ChatFt(title: title ?? this.title, content: content ?? this.content);
   ChatFt copyWithCompanion(ChatFtsCompanion data) {
     return ChatFt(
       title: data.title.present ? data.title.value : this.title,
@@ -319,8 +355,8 @@ class ChatFtsCompanion extends UpdateCompanion<ChatFt> {
     required String title,
     required String content,
     this.rowid = const Value.absent(),
-  })  : title = Value(title),
-        content = Value(content);
+  }) : title = Value(title),
+       content = Value(content);
   static Insertable<ChatFt> custom({
     Expression<String>? title,
     Expression<String>? content,
@@ -333,8 +369,11 @@ class ChatFtsCompanion extends UpdateCompanion<ChatFt> {
     });
   }
 
-  ChatFtsCompanion copyWith(
-      {Value<String>? title, Value<String>? content, Value<int>? rowid}) {
+  ChatFtsCompanion copyWith({
+    Value<String>? title,
+    Value<String>? content,
+    Value<int>? rowid,
+  }) {
     return ChatFtsCompanion(
       title: title ?? this.title,
       content: content ?? this.content,
@@ -374,86 +413,95 @@ abstract class _$ChatSearchDatabase extends GeneratedDatabase {
   late final Chat chat = Chat(this);
   late final ChatFts chatFts = ChatFts(this);
   late final Trigger chatAfterInsert = Trigger(
-      'CREATE TRIGGER chat_after_insert AFTER INSERT ON chat BEGIN INSERT INTO chat_fts ("rowid", title, content) VALUES (new."rowid", new.title, new.content);END',
-      'chat_after_insert');
+    'CREATE TRIGGER chat_after_insert AFTER INSERT ON chat BEGIN INSERT INTO chat_fts ("rowid", title, content) VALUES (new."rowid", new.title, new.content);END',
+    'chat_after_insert',
+  );
   late final Trigger chatAfterDelete = Trigger(
-      'CREATE TRIGGER chat_after_delete AFTER DELETE ON chat BEGIN INSERT INTO chat_fts (chat_fts, "rowid", title, content) VALUES (\'delete\', old."rowid", old.title, old.content);END',
-      'chat_after_delete');
+    'CREATE TRIGGER chat_after_delete AFTER DELETE ON chat BEGIN INSERT INTO chat_fts (chat_fts, "rowid", title, content) VALUES (\'delete\', old."rowid", old.title, old.content);END',
+    'chat_after_delete',
+  );
   late final Trigger chatAfterUpdate = Trigger(
-      'CREATE TRIGGER chat_after_update AFTER UPDATE ON chat BEGIN INSERT INTO chat_fts (chat_fts, "rowid", title, content) VALUES (\'delete\', old."rowid", old.title, old.content);INSERT INTO chat_fts ("rowid", title, content) VALUES (new."rowid", new.title, new.content);END',
-      'chat_after_update');
+    'CREATE TRIGGER chat_after_update AFTER UPDATE ON chat BEGIN INSERT INTO chat_fts (chat_fts, "rowid", title, content) VALUES (\'delete\', old."rowid", old.title, old.content);INSERT INTO chat_fts ("rowid", title, content) VALUES (new."rowid", new.title, new.content);END',
+    'chat_after_update',
+  );
   late final SearchDao searchDao = SearchDao(this as ChatSearchDatabase);
-  Selectable<ChatQueryResult> chatQuery(
-      {required String beforeMatch,
-      required String afterMatch,
-      required String ellipsis,
-      required int snippetLength,
-      required String query}) {
+  Selectable<ChatQueryResult> chatQuery({
+    required String beforeMatch,
+    required String afterMatch,
+    required String ellipsis,
+    required int snippetLength,
+    required String query,
+  }) {
     return customSelect(
-        'SELECT c.file_name, highlight(chat_fts, 0, ?1, ?2) AS title, snippet(chat_fts, 1, ?1, ?2, ?3, ?4) AS content_snippet FROM chat_fts(?5)AS fts INNER JOIN chat AS c ON c."rowid" = fts."rowid" ORDER BY RANK',
-        variables: [
-          Variable<String>(beforeMatch),
-          Variable<String>(afterMatch),
-          Variable<String>(ellipsis),
-          Variable<int>(snippetLength),
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          chat,
-          chatFts,
-        }).map((QueryRow row) => ChatQueryResult(
-          fileName: row.read<String>('file_name'),
-          title: row.readNullable<String>('title'),
-          contentSnippet: row.readNullable<String>('content_snippet'),
-        ));
+      'SELECT c.file_name, highlight(chat_fts, 0, ?1, ?2) AS title, snippet(chat_fts, 1, ?1, ?2, ?3, ?4) AS content_snippet FROM chat_fts(?5)AS fts INNER JOIN chat AS c ON c."rowid" = fts."rowid" ORDER BY RANK',
+      variables: [
+        Variable<String>(beforeMatch),
+        Variable<String>(afterMatch),
+        Variable<String>(ellipsis),
+        Variable<int>(snippetLength),
+        Variable<String>(query),
+      ],
+      readsFrom: {chat, chatFts},
+    ).map(
+      (QueryRow row) => ChatQueryResult(
+        fileName: row.read<String>('file_name'),
+        title: row.readNullable<String>('title'),
+        contentSnippet: row.readNullable<String>('content_snippet'),
+      ),
+    );
   }
 
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [chat, chatFts, chatAfterInsert, chatAfterDelete, chatAfterUpdate];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    chat,
+    chatFts,
+    chatAfterInsert,
+    chatAfterDelete,
+    chatAfterUpdate,
+  ];
   @override
-  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
-        [
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('chat',
-                limitUpdateKind: UpdateKind.insert),
-            result: [
-              TableUpdate('chat_fts', kind: UpdateKind.insert),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('chat',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('chat_fts', kind: UpdateKind.insert),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('chat',
-                limitUpdateKind: UpdateKind.update),
-            result: [
-              TableUpdate('chat_fts', kind: UpdateKind.insert),
-            ],
-          ),
-        ],
-      );
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'chat',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('chat_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'chat',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('chat_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'chat',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [TableUpdate('chat_fts', kind: UpdateKind.insert)],
+    ),
+  ]);
 }
 
-typedef $ChatCreateCompanionBuilder = ChatCompanion Function({
-  required String fileName,
-  required String title,
-  required String content,
-  Value<int> rowid,
-});
-typedef $ChatUpdateCompanionBuilder = ChatCompanion Function({
-  Value<String> fileName,
-  Value<String> title,
-  Value<String> content,
-  Value<int> rowid,
-});
+typedef $ChatCreateCompanionBuilder =
+    ChatCompanion Function({
+      required String fileName,
+      required String title,
+      required String content,
+      Value<int> rowid,
+    });
+typedef $ChatUpdateCompanionBuilder =
+    ChatCompanion Function({
+      Value<String> fileName,
+      Value<String> title,
+      Value<String> content,
+      Value<int> rowid,
+    });
 
 class $ChatFilterComposer extends Composer<_$ChatSearchDatabase, Chat> {
   $ChatFilterComposer({
@@ -464,13 +512,19 @@ class $ChatFilterComposer extends Composer<_$ChatSearchDatabase, Chat> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get fileName => $composableBuilder(
-      column: $table.fileName, builder: (column) => ColumnFilters(column));
+    column: $table.fileName,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnFilters(column));
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnFilters(column));
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $ChatOrderingComposer extends Composer<_$ChatSearchDatabase, Chat> {
@@ -482,13 +536,19 @@ class $ChatOrderingComposer extends Composer<_$ChatSearchDatabase, Chat> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get fileName => $composableBuilder(
-      column: $table.fileName, builder: (column) => ColumnOrderings(column));
+    column: $table.fileName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnOrderings(column));
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnOrderings(column));
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $ChatAnnotationComposer extends Composer<_$ChatSearchDatabase, Chat> {
@@ -509,81 +569,97 @@ class $ChatAnnotationComposer extends Composer<_$ChatSearchDatabase, Chat> {
       $composableBuilder(column: $table.content, builder: (column) => column);
 }
 
-class $ChatTableManager extends RootTableManager<
-    _$ChatSearchDatabase,
-    Chat,
-    ChatData,
-    $ChatFilterComposer,
-    $ChatOrderingComposer,
-    $ChatAnnotationComposer,
-    $ChatCreateCompanionBuilder,
-    $ChatUpdateCompanionBuilder,
-    (ChatData, BaseReferences<_$ChatSearchDatabase, Chat, ChatData>),
-    ChatData,
-    PrefetchHooks Function()> {
+class $ChatTableManager
+    extends
+        RootTableManager<
+          _$ChatSearchDatabase,
+          Chat,
+          ChatData,
+          $ChatFilterComposer,
+          $ChatOrderingComposer,
+          $ChatAnnotationComposer,
+          $ChatCreateCompanionBuilder,
+          $ChatUpdateCompanionBuilder,
+          (ChatData, BaseReferences<_$ChatSearchDatabase, Chat, ChatData>),
+          ChatData,
+          PrefetchHooks Function()
+        > {
   $ChatTableManager(_$ChatSearchDatabase db, Chat table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $ChatFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $ChatOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $ChatAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> fileName = const Value.absent(),
-            Value<String> title = const Value.absent(),
-            Value<String> content = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatCompanion(
-            fileName: fileName,
-            title: title,
-            content: content,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String fileName,
-            required String title,
-            required String content,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatCompanion.insert(
-            fileName: fileName,
-            title: title,
-            content: content,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $ChatFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $ChatOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $ChatAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> fileName = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChatCompanion(
+                fileName: fileName,
+                title: title,
+                content: content,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String fileName,
+                required String title,
+                required String content,
+                Value<int> rowid = const Value.absent(),
+              }) => ChatCompanion.insert(
+                fileName: fileName,
+                title: title,
+                content: content,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $ChatProcessedTableManager = ProcessedTableManager<
-    _$ChatSearchDatabase,
-    Chat,
-    ChatData,
-    $ChatFilterComposer,
-    $ChatOrderingComposer,
-    $ChatAnnotationComposer,
-    $ChatCreateCompanionBuilder,
-    $ChatUpdateCompanionBuilder,
-    (ChatData, BaseReferences<_$ChatSearchDatabase, Chat, ChatData>),
-    ChatData,
-    PrefetchHooks Function()>;
-typedef $ChatFtsCreateCompanionBuilder = ChatFtsCompanion Function({
-  required String title,
-  required String content,
-  Value<int> rowid,
-});
-typedef $ChatFtsUpdateCompanionBuilder = ChatFtsCompanion Function({
-  Value<String> title,
-  Value<String> content,
-  Value<int> rowid,
-});
+typedef $ChatProcessedTableManager =
+    ProcessedTableManager<
+      _$ChatSearchDatabase,
+      Chat,
+      ChatData,
+      $ChatFilterComposer,
+      $ChatOrderingComposer,
+      $ChatAnnotationComposer,
+      $ChatCreateCompanionBuilder,
+      $ChatUpdateCompanionBuilder,
+      (ChatData, BaseReferences<_$ChatSearchDatabase, Chat, ChatData>),
+      ChatData,
+      PrefetchHooks Function()
+    >;
+typedef $ChatFtsCreateCompanionBuilder =
+    ChatFtsCompanion Function({
+      required String title,
+      required String content,
+      Value<int> rowid,
+    });
+typedef $ChatFtsUpdateCompanionBuilder =
+    ChatFtsCompanion Function({
+      Value<String> title,
+      Value<String> content,
+      Value<int> rowid,
+    });
 
 class $ChatFtsFilterComposer extends Composer<_$ChatSearchDatabase, ChatFts> {
   $ChatFtsFilterComposer({
@@ -594,10 +670,14 @@ class $ChatFtsFilterComposer extends Composer<_$ChatSearchDatabase, ChatFts> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnFilters(column));
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnFilters(column));
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $ChatFtsOrderingComposer extends Composer<_$ChatSearchDatabase, ChatFts> {
@@ -609,10 +689,14 @@ class $ChatFtsOrderingComposer extends Composer<_$ChatSearchDatabase, ChatFts> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get title => $composableBuilder(
-      column: $table.title, builder: (column) => ColumnOrderings(column));
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get content => $composableBuilder(
-      column: $table.content, builder: (column) => ColumnOrderings(column));
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $ChatFtsAnnotationComposer
@@ -631,67 +715,81 @@ class $ChatFtsAnnotationComposer
       $composableBuilder(column: $table.content, builder: (column) => column);
 }
 
-class $ChatFtsTableManager extends RootTableManager<
-    _$ChatSearchDatabase,
-    ChatFts,
-    ChatFt,
-    $ChatFtsFilterComposer,
-    $ChatFtsOrderingComposer,
-    $ChatFtsAnnotationComposer,
-    $ChatFtsCreateCompanionBuilder,
-    $ChatFtsUpdateCompanionBuilder,
-    (ChatFt, BaseReferences<_$ChatSearchDatabase, ChatFts, ChatFt>),
-    ChatFt,
-    PrefetchHooks Function()> {
+class $ChatFtsTableManager
+    extends
+        RootTableManager<
+          _$ChatSearchDatabase,
+          ChatFts,
+          ChatFt,
+          $ChatFtsFilterComposer,
+          $ChatFtsOrderingComposer,
+          $ChatFtsAnnotationComposer,
+          $ChatFtsCreateCompanionBuilder,
+          $ChatFtsUpdateCompanionBuilder,
+          (ChatFt, BaseReferences<_$ChatSearchDatabase, ChatFts, ChatFt>),
+          ChatFt,
+          PrefetchHooks Function()
+        > {
   $ChatFtsTableManager(_$ChatSearchDatabase db, ChatFts table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $ChatFtsFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $ChatFtsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $ChatFtsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> title = const Value.absent(),
-            Value<String> content = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatFtsCompanion(
-            title: title,
-            content: content,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String title,
-            required String content,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatFtsCompanion.insert(
-            title: title,
-            content: content,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $ChatFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $ChatFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $ChatFtsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> title = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChatFtsCompanion(
+                title: title,
+                content: content,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String title,
+                required String content,
+                Value<int> rowid = const Value.absent(),
+              }) => ChatFtsCompanion.insert(
+                title: title,
+                content: content,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $ChatFtsProcessedTableManager = ProcessedTableManager<
-    _$ChatSearchDatabase,
-    ChatFts,
-    ChatFt,
-    $ChatFtsFilterComposer,
-    $ChatFtsOrderingComposer,
-    $ChatFtsAnnotationComposer,
-    $ChatFtsCreateCompanionBuilder,
-    $ChatFtsUpdateCompanionBuilder,
-    (ChatFt, BaseReferences<_$ChatSearchDatabase, ChatFts, ChatFt>),
-    ChatFt,
-    PrefetchHooks Function()>;
+typedef $ChatFtsProcessedTableManager =
+    ProcessedTableManager<
+      _$ChatSearchDatabase,
+      ChatFts,
+      ChatFt,
+      $ChatFtsFilterComposer,
+      $ChatFtsOrderingComposer,
+      $ChatFtsAnnotationComposer,
+      $ChatFtsCreateCompanionBuilder,
+      $ChatFtsUpdateCompanionBuilder,
+      (ChatFt, BaseReferences<_$ChatSearchDatabase, ChatFts, ChatFt>),
+      ChatFt,
+      PrefetchHooks Function()
+    >;
 
 class $ChatSearchDatabaseManager {
   final _$ChatSearchDatabase _db;
@@ -704,9 +802,5 @@ class ChatQueryResult {
   final String fileName;
   final String? title;
   final String? contentSnippet;
-  ChatQueryResult({
-    required this.fileName,
-    this.title,
-    this.contentSnippet,
-  });
+  ChatQueryResult({required this.fileName, this.title, this.contentSnippet});
 }

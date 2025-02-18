@@ -22,8 +22,8 @@ class GeckoSelectionActionService extends GeckoSelectionActionEvents {
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
     GeckoSelectionActionController? api,
-  })  : _api = api ?? _apiInstance,
-        _actions = [] {
+  }) : _api = api ?? _apiInstance,
+       _actions = [] {
     GeckoSelectionActionEvents.setUp(
       this,
       binaryMessenger: binaryMessenger,

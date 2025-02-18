@@ -12,7 +12,8 @@ class Sqlite3Vec {
       //'macos' || 'ios' => DynamicLibrary.open('$_libName.framework/$_libName'),
       'android' || 'linux' => DynamicLibrary.open('lib$_libName.so'),
       //'windows' => DynamicLibrary.open('$_libName.dll'),
-      _ => throw UnsupportedError(
+      _ =>
+        throw UnsupportedError(
           'Unsupported platform: ${Platform.operatingSystem}',
         ),
     };

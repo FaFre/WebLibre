@@ -56,58 +56,58 @@ class ChatArchiveSearchScreen extends HookConsumerWidget {
       ),
       body: resultsAsync.when(
         skipLoadingOnReload: true,
-        data: (chats) => FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView.builder(
-              controller: controller,
-              itemCount: chats.length,
-              itemBuilder: (context, index) {
-                final chat = chats[index];
-                final chatEntity = ChatEntity.fromFileName(chat.fileName);
+        data:
+            (chats) => FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return ListView.builder(
+                  controller: controller,
+                  itemCount: chats.length,
+                  itemBuilder: (context, index) {
+                    final chat = chats[index];
+                    final chatEntity = ChatEntity.fromFileName(chat.fileName);
 
-                return Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () async {
-                      await context.push(
-                        ChatArchiveDetailRoute(fileName: chat.fileName)
-                            .location,
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          MarkdownBody(
-                            data: '## ${chat.title}',
+                    return Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () async {
+                          await context.push(
+                            ChatArchiveDetailRoute(
+                              fileName: chat.fileName,
+                            ).location,
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MarkdownBody(data: '## ${chat.title}'),
+                              if (chatEntity.dateTime != null)
+                                Text(
+                                  chatEntity.dateTime!
+                                      .formatWithMinutePrecision(),
+                                ),
+                              const SizedBox(height: 8.0),
+                              if (chat.contentSnippet != null)
+                                MarkdownBody(data: chat.contentSnippet!),
+                            ],
                           ),
-                          if (chatEntity.dateTime != null)
-                            Text(
-                              chatEntity.dateTime!.formatWithMinutePrecision(),
-                            ),
-                          const SizedBox(height: 8.0),
-                          if (chat.contentSnippet != null)
-                            MarkdownBody(
-                              data: chat.contentSnippet!,
-                            ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
-        error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Chat Search failed',
-            exception: error,
-          ),
-        ),
+            ),
+        error:
+            (error, stackTrace) => Center(
+              child: FailureWidget(
+                title: 'Chat Search failed',
+                exception: error,
+              ),
+            ),
         loading: () => const SizedBox.shrink(),
       ),
     );

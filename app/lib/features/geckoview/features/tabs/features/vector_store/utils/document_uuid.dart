@@ -11,7 +11,7 @@ class DocumentUuid {
   final Uint8List _baseBytes;
 
   DocumentUuid([Uint8List? baseBytes])
-      : _baseBytes = baseBytes ?? _rng.generate();
+    : _baseBytes = baseBytes ?? _rng.generate();
 
   factory DocumentUuid.fromUuid(String uuid) {
     return DocumentUuid(UuidParsing.parseAsByteList(uuid));

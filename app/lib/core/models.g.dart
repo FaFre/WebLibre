@@ -29,9 +29,10 @@ String _$embeddingModelHash() => r'40111a5f08b43afe6edd399ff0e6c022b3387265';
 final embeddingModelProvider = Provider<OpenAIEmbeddings>.internal(
   embeddingModel,
   name: r'embeddingModelProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$embeddingModelHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$embeddingModelHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -47,9 +48,10 @@ String _$embeddingDimensionsHash() =>
 final embeddingDimensionsProvider = Provider<int>.internal(
   embeddingDimensions,
   name: r'embeddingDimensionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$embeddingDimensionsHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$embeddingDimensionsHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

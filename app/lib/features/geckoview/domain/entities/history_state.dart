@@ -28,16 +28,20 @@ class HistoryState with FastEquatable {
   });
 
   factory HistoryState.$default() => HistoryState(
-        items: const [],
-        currentIndex: 0,
-        canGoBack: false,
-        canGoForward: false,
-      );
+    items: const [],
+    currentIndex: 0,
+    canGoBack: false,
+    canGoForward: false,
+  );
 
   @override
   bool get cacheHash => true;
 
   @override
-  List<Object?> get hashParameters =>
-      [items, currentIndex, canGoBack, canGoForward];
+  List<Object?> get hashParameters => [
+    items,
+    currentIndex,
+    canGoBack,
+    canGoForward,
+  ];
 }

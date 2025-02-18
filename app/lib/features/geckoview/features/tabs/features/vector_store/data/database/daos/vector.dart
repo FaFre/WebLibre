@@ -19,8 +19,9 @@ class VectorDao extends DatabaseAccessor<TabDatabase> with _$VectorDaoMixin {
   }
 
   Future<int> deleteDocumentsByMainDocumentId(String mainDocumentId) {
-    return db.document
-        .deleteWhere((doc) => doc.mainDocumentId.equals(mainDocumentId));
+    return db.document.deleteWhere(
+      (doc) => doc.mainDocumentId.equals(mainDocumentId),
+    );
   }
 
   SingleOrNullSelectable<DocumentData> getDocumentById(String documentId) {
@@ -70,9 +71,10 @@ class VectorDao extends DatabaseAccessor<TabDatabase> with _$VectorDaoMixin {
           mainDocumentId: Value.absentIfNull(mainDocumentId),
           contextId: Value.absentIfNull(contextId),
           content: document.pageContent,
-          metadata: (document.metadata.isNotEmpty)
-              ? Value(jsonEncode(document.metadata))
-              : const Value.absent(),
+          metadata:
+              (document.metadata.isNotEmpty)
+                  ? Value(jsonEncode(document.metadata))
+                  : const Value.absent(),
           contentHash: contentHash,
         );
       }),
@@ -82,19 +84,17 @@ class VectorDao extends DatabaseAccessor<TabDatabase> with _$VectorDaoMixin {
 
   Future<void> insertEmbeddings(List<(DocumentData, List<double>)> documents) {
     return db.documentVec.insertAll(
-      documents.map(
-        (doc) {
-          final (document, vector) = doc;
+      documents.map((doc) {
+        final (document, vector) = doc;
 
-          return DocumentVecCompanion.insert(
-            id: document.documentId,
-            embedding: serializeVector(vector),
-            mainDocumentId: Value.absentIfNull(document.mainDocumentId),
-            contextId: Value.absentIfNull(document.contextId),
-            contentHash: document.contentHash,
-          );
-        },
-      ),
+        return DocumentVecCompanion.insert(
+          id: document.documentId,
+          embedding: serializeVector(vector),
+          mainDocumentId: Value.absentIfNull(document.mainDocumentId),
+          contextId: Value.absentIfNull(document.contextId),
+          contentHash: document.contentHash,
+        );
+      }),
     );
   }
 
@@ -121,9 +121,10 @@ class VectorDao extends DatabaseAccessor<TabDatabase> with _$VectorDaoMixin {
             mainDocumentId: Value.absentIfNull(mainDocumentId),
             contextId: Value.absentIfNull(contextId),
             content: document.pageContent,
-            metadata: (document.metadata.isNotEmpty)
-                ? Value(jsonEncode(document.metadata))
-                : const Value.absent(),
+            metadata:
+                (document.metadata.isNotEmpty)
+                    ? Value(jsonEncode(document.metadata))
+                    : const Value.absent(),
             contentHash: contentHash,
           ),
         );

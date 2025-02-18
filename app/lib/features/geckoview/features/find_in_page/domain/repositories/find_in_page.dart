@@ -9,9 +9,10 @@ class FindInPageRepository extends _$FindInPageRepository {
 
   @override
   void build(String? tabId) {
-    _service = (tabId != null)
-        ? GeckoFindInPageService(tabId: tabId)
-        : GeckoFindInPageService.forActiveTab();
+    _service =
+        (tabId != null)
+            ? GeckoFindInPageService(tabId: tabId)
+            : GeckoFindInPageService.forActiveTab();
   }
 
   Future<void> findAll({required String text}) {
