@@ -1,4 +1,4 @@
-// ignore_for_file: constant_identifier_names, non_constant_identifier_names
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names copied from kotlin
 
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 

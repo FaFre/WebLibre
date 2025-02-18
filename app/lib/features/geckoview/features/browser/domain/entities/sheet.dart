@@ -1,7 +1,6 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:lensai/features/kagi/data/entities/modes.dart';
 
-// ignore: missing_override_of_must_be_overridden
 sealed class Sheet with FastEquatable {}
 
 class CreateTabSheet extends Sheet {

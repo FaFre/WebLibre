@@ -53,9 +53,9 @@ final _sharingIntentTransformer =
 Raw<Stream<ReceivedParameter>> sharingIntentStream(Ref ref) {
   final initialStream =
       FlutterSharingIntent.instance
-          // ignore: discarded_futures
+          // ignore: discarded_futures is used as stream
           .getInitialSharing()
-          // ignore: discarded_futures
+          // ignore: discarded_futures is used as stream
           .then((event) {
             FlutterSharingIntent.instance.reset();
             return event;

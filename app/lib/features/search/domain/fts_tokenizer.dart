@@ -198,7 +198,7 @@ final class PrefixQueryBuilder extends FtsQueryBuilder {
       }
 
       return 'NEAR(${phrase.map((bareword) => '$bareword*').join(' ')})';
-    }, ' OR ',);
+    }, ' OR ');
   }
 }
 

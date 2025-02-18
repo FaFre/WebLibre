@@ -1,7 +1,7 @@
 extension NullableX<T> on T? {
   @pragma('vm:prefer-inline')
   R? mapNotNull<R>(R? Function(T) callback) {
-    // ignore: null_check_on_nullable_type_parameter
+    // ignore: null_check_on_nullable_type_parameter validated
     return (this != null) ? callback(this!) : null;
   }
 }

@@ -66,7 +66,7 @@ class ChatArchiveDetailScreen extends HookConsumerWidget {
                     );
                   }
                 },
-                // ignore: deprecated_member_use
+                // ignore: deprecated_member_use use this icon for now
                 leadingIcon: const Icon(MdiIcons.languageMarkdown),
                 child: const Text('Copy as markdown'),
               ),

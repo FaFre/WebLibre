@@ -51,9 +51,9 @@ class TabSearch extends HookConsumerWidget {
           .read(tabSearchRepositoryProvider(TabSearchPartition.search).notifier)
           .addQuery(
             searchTextController.text,
-            // ignore: avoid_redundant_argument_values
+            // ignore: avoid_redundant_argument_values dont break things
             matchPrefix: _matchPrefix,
-            // ignore: avoid_redundant_argument_values
+            // ignore: avoid_redundant_argument_values dont break things
             matchSuffix: _matchSuffix,
           );
     });

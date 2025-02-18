@@ -100,6 +100,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                 subtitle: const Text(
                   'While turning off JavaScript boosts security, privacy, and speed, it may cause some sites to not work as intended.',
                 ),
+                // ignore: deprecated_member_use use this icon for now
                 secondary: const Icon(MdiIcons.languageJavascript),
                 value: engineSettings.javascriptEnabled,
                 onChanged: (value) async {

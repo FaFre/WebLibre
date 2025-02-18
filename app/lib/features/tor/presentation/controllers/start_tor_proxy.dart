@@ -9,6 +9,7 @@ part 'start_tor_proxy.g.dart';
 
 @Riverpod()
 class StartProxyController extends _$StartProxyController {
+  // ignore: document_ignores is used for dialog
   // ignore: avoid_build_context_in_providers
   Future<void> maybeStartProxy(BuildContext context) async {
     final torProxyRunning = ref.read(torProxyServiceProvider);

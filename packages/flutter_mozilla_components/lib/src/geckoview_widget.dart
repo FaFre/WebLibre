@@ -77,7 +77,7 @@ class _GeckoViewState extends State<GeckoView> {
               });
             });
           })
-          // ignore: discarded_futures
+          // ignore: discarded_futures that hos it is done in docs
           ..create();
       },
     );

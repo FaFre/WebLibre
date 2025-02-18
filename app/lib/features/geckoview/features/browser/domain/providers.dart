@@ -1,5 +1,3 @@
-// ignore_for_file: use_setters_to_change_properties
-
 import 'dart:async';
 
 import 'package:lensai/data/models/equatable_iterable.dart';
@@ -21,6 +19,8 @@ part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 class SelectedBangTrigger extends _$SelectedBangTrigger {
+  // ignore: document_ignores api decision
+  // ignore: use_setters_to_change_properties
   void setTrigger(String trigger) {
     state = trigger;
   }
@@ -60,6 +60,8 @@ class SelectedBangData extends _$SelectedBangData {
 
 @Riverpod(keepAlive: true)
 class LastUsedAssistantMode extends _$LastUsedAssistantMode {
+  // ignore: document_ignores api decision
+  // ignore: use_setters_to_change_properties
   void update(AssistantMode mode) {
     state = mode;
   }
@@ -72,6 +74,8 @@ class LastUsedAssistantMode extends _$LastUsedAssistantMode {
 
 @Riverpod(keepAlive: true)
 class ActiveResearchVariant extends _$ActiveResearchVariant {
+  // ignore: document_ignores api decision
+  // ignore: use_setters_to_change_properties
   void update(ResearchVariant mode) {
     state = mode;
   }
@@ -84,6 +88,8 @@ class ActiveResearchVariant extends _$ActiveResearchVariant {
 
 @Riverpod(keepAlive: true)
 class ActiveChatModel extends _$ActiveChatModel {
+  // ignore: document_ignores api decision
+  // ignore: use_setters_to_change_properties
   void update(ChatModel model) {
     state = model;
   }
@@ -96,6 +102,8 @@ class ActiveChatModel extends _$ActiveChatModel {
 
 @Riverpod(keepAlive: true)
 class ShowFindInPage extends _$ShowFindInPage {
+  // ignore: document_ignores api decision
+  // ignore: use_setters_to_change_properties
   void update(bool show) {
     state = show;
   }
@@ -135,7 +143,7 @@ EquatableCollection<Map<String, TabState>> availableTabStates(
   return EquatableCollection({
     for (final tabId in availableTabs.collection)
       if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
-  }, immutable: true,);
+  }, immutable: true);
 }
 
 @Riverpod()

@@ -255,6 +255,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   final filteredTabIds = ref.watch(
                     seamlessFilteredTabIdsProvider(
                       TabSearchPartition.preview,
+                      // ignore: document_ignores using fast equatable
                       // ignore: provider_parameters
                       ContainerFilterById(containerId: container),
                     ),
@@ -294,7 +295,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                     }
 
                     return null;
-                  }, [filteredTabIds, activeTab],);
+                  }, [filteredTabIds, activeTab]);
 
                   final tabs = useMemoized(() {
                     return filteredTabIds.collection
@@ -346,7 +347,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           ),
                         )
                         .toList();
-                  }, [filteredTabIds, activeTab],);
+                  }, [filteredTabIds, activeTab]);
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),

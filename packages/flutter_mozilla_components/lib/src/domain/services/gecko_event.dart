@@ -85,7 +85,7 @@ class GeckoEventService extends GeckoStateEvents {
     _historySubject.addWhenMoreRecent(timestamp, id, (
       tabId: id,
       history: state,
-    ),);
+    ));
   }
 
   @override
@@ -97,7 +97,7 @@ class GeckoEventService extends GeckoStateEvents {
     _readerableSubject.addWhenMoreRecent(timestamp, id, (
       tabId: id,
       readerable: state,
-    ),);
+    ));
   }
 
   @override
@@ -109,7 +109,7 @@ class GeckoEventService extends GeckoStateEvents {
     _securityInfoSubject.addWhenMoreRecent(timestamp, id, (
       tabId: id,
       securityInfo: state,
-    ),);
+    ));
   }
 
   @override
@@ -117,7 +117,7 @@ class GeckoEventService extends GeckoStateEvents {
     _iconChangeSubject.addWhenMoreRecent(timestamp, id, (
       tabId: id,
       bytes: bytes,
-    ),);
+    ));
   }
 
   @override
@@ -125,7 +125,7 @@ class GeckoEventService extends GeckoStateEvents {
     _iconUpdateSubject.addWhenMoreRecent(timestamp, url, (
       url: url,
       bytes: bytes,
-    ),);
+    ));
   }
 
   @override
@@ -133,7 +133,7 @@ class GeckoEventService extends GeckoStateEvents {
     _thumbnailSubject.addWhenMoreRecent(timestamp, id, (
       tabId: id,
       bytes: bytes,
-    ),);
+    ));
   }
 
   @override
@@ -141,7 +141,7 @@ class GeckoEventService extends GeckoStateEvents {
     _findResultsSubject.addWhenMoreRecent(timestamp, id, (
       tabId: id,
       results: results.nonNulls.toList(),
-    ),);
+    ));
   }
 
   @override

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_dynamic_calls wo know what we do
+
 import 'package:lensai/features/geckoview/features/preferences/data/models/preference_setting.dart';
 
 enum PreferencePartition {
@@ -19,9 +21,7 @@ Map<String, PreferenceSettingGroup> deserializePreferenceSettingGroups(
     (key, value) => MapEntry(
       key,
       PreferenceSettingGroup(
-        // ignore: avoid_dynamic_calls
         description: value['description'] as String?,
-        // ignore: avoid_dynamic_calls
         settings: (value['preferences'] as Map<String, dynamic>).map(
           (key, value) => MapEntry(
             key,

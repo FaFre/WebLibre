@@ -5,7 +5,7 @@ import 'package:sqlite3/sqlite3.dart';
 
 const String _libName = 'vec0';
 
-// ignore: avoid_classes_with_only_static_members
+// ignore: avoid_classes_with_only_static_members better like this
 class Sqlite3Vec {
   static void ensureExtensionLoaded() {
     final libPath = switch (Platform.operatingSystem) {

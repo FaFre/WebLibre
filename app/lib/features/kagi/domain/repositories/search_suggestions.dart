@@ -43,9 +43,9 @@ class SearchSuggestionsRepository extends _$SearchSuggestionsRepository {
           }
 
           return suggestionsProvider
-              // ignore: discarded_futures
+              // ignore: discarded_futures is used as stream
               .getSuggestions(query)
-              // ignore: discarded_futures
+              // ignore: discarded_futures is used as stream
               .then((result) {
                 result.onSuccess((result) {
                   _cache.set(query, result);

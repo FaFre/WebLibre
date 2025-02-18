@@ -22,7 +22,7 @@ class AppInitializationService extends _$AppInitializationService {
       initialized: false,
       stage: 'Loading Package Info...',
       errors: List.empty(),
-    ),);
+    ));
 
     return ref.read(packageInfoProvider.future);
   }
@@ -32,7 +32,7 @@ class AppInitializationService extends _$AppInitializationService {
       initialized: false,
       stage: 'Synchronizing Bangs...',
       errors: List.empty(),
-    ),);
+    ));
 
     return ref
         .read(bangSyncRepositoryProvider.notifier)
@@ -61,6 +61,6 @@ class AppInitializationService extends _$AppInitializationService {
       initialized: false,
       stage: null,
       errors: List.empty(),
-    ),);
+    ));
   }
 }

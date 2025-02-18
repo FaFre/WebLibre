@@ -13,7 +13,7 @@ FutureOr<bool> widgetPinnable(Ref ref) async {
 
 @Riverpod()
 Raw<Stream<ReceivedParameter>> appWidgetLaunchStream(Ref ref) {
-  // ignore: discarded_futures
+  // ignore: discarded_futures is used as stream
   final initialStream = HomeWidget.initiallyLaunchedFromHomeWidget().asStream();
 
   return ConcatStream([
