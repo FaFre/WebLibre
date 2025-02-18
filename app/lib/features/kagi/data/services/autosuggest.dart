@@ -33,6 +33,6 @@ class KagiAutosuggestService extends _$KagiAutosuggestService
         final List resultList => resultList.cast(),
         _ => [],
       };
-    }, exceptionHandler: handleHttpError);
+    }, exceptionHandler: handleHttpError,);
   }
 }

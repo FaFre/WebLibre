@@ -261,7 +261,7 @@ class WebPageDialog extends HookConsumerWidget {
 
                                   await Share.shareXFiles([
                                     file,
-                                  ], subject: precachedInfo?.title);
+                                  ], subject: precachedInfo?.title,);
                                 }
                               });
                             }

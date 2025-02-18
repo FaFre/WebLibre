@@ -50,12 +50,12 @@ class GeckoAddonService extends GeckoAddonEvents {
         _browserExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
           extensionId: extensionId,
           data: null,
-        ));
+        ),);
       case WebExtensionActionType.page:
         _pageExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
           extensionId: extensionId,
           data: null,
-        ));
+        ),);
     }
   }
 
@@ -71,12 +71,12 @@ class GeckoAddonService extends GeckoAddonEvents {
         _browserIconSubject.addWhenMoreRecent(timestamp, extensionId, (
           extensionId: extensionId,
           bytes: icon,
-        ));
+        ),);
       case WebExtensionActionType.page:
         _pageIconSubject.addWhenMoreRecent(timestamp, extensionId, (
           extensionId: extensionId,
           bytes: icon,
-        ));
+        ),);
     }
   }
 
@@ -92,12 +92,12 @@ class GeckoAddonService extends GeckoAddonEvents {
         _browserExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
           extensionId: extensionId,
           data: extensionData,
-        ));
+        ),);
       case WebExtensionActionType.page:
         _pageExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
           extensionId: extensionId,
           data: extensionData,
-        ));
+        ),);
     }
   }
 

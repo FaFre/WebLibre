@@ -107,7 +107,7 @@ class SummarizeTab extends HookConsumerWidget {
 
                     textController.addListener(debounce);
                     return () => textController.removeListener(debounce);
-                  }, [textController]);
+                  }, [textController],);
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,

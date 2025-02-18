@@ -6,5 +6,5 @@ void useOnInitialization(FutureOr<void> Function() callback) {
   useEffect(() {
     Future.microtask(callback);
     return null;
-  }, []);
+  }, [],);
 }

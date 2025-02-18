@@ -32,5 +32,5 @@ void useSyncPageWithTab(
       tabController.removeListener(syncPage);
       pageController.removeListener(syncTab);
     };
-  }, [tabController, pageController]);
+  }, [tabController, pageController],);
 }

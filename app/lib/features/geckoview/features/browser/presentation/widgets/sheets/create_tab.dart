@@ -67,7 +67,7 @@ class CreateTabSheetWidget extends HookConsumerWidget {
         onActiveToolChanged?.call(KagiTool.values[initialIndex]);
       });
       return null;
-    }, [initialIndex]);
+    }, [initialIndex],);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -204,7 +204,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
           'title': title,
           'resources': resources.map(_serializeResource).toList(),
         };
-      }, [response.body, url.toString()]);
+      }, [response.body, url.toString()],);
 
       final resources =
           (result['resources']! as List<Map<String, dynamic>>)
@@ -220,7 +220,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         title: result['title'] as String?,
         favicon: favicon,
       );
-    }, exceptionHandler: handleHttpError);
+    }, exceptionHandler: handleHttpError,);
   }
 
   Future<BrowserIcon?> getCachedIcon(Uri url) async {

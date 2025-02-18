@@ -135,7 +135,7 @@ EquatableCollection<Map<String, TabState>> availableTabStates(
   return EquatableCollection({
     for (final tabId in availableTabs.collection)
       if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
-  }, immutable: true);
+  }, immutable: true,);
 }
 
 @Riverpod()

@@ -64,7 +64,7 @@ class ContainerEditScreen extends HookConsumerWidget {
         title: Text(switch (_mode) {
           _DialogMode.create => 'New Container',
           _DialogMode.edit => 'Edit Container',
-        }),
+        },),
         actions: [
           IconButton(
             onPressed: () async {

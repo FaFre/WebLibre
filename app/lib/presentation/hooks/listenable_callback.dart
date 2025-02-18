@@ -9,5 +9,5 @@ void useListenableCallback(
   useEffect(() {
     listenable?.addListener(callback);
     return () => listenable?.removeListener(callback);
-  }, keys ?? [listenable]);
+  }, keys ?? [listenable],);
 }
