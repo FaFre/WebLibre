@@ -4,7 +4,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/providers.dart';
+import 'package:lensai/core/providers/global_drop.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/data/models/drag_data.dart';
 import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';

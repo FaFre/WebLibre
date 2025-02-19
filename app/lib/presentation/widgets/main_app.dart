@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/providers.dart';
+import 'package:lensai/core/providers/router.dart';
 import 'package:lensai/domain/services/app_initialization.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 

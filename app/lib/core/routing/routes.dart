@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lensai/core/routing/dialog_page.dart';
+import 'package:lensai/core/routing/widgets/dialog_page.dart';
 import 'package:lensai/data/models/web_page_info.dart';
 import 'package:lensai/features/about/presentation/screens/about.dart';
 import 'package:lensai/features/bangs/presentation/screens/categories.dart';

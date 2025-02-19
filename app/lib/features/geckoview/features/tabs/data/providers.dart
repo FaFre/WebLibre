@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:lensai/core/models.dart';
+import 'package:lensai/core/providers/models.dart';
 import 'package:lensai/data/database/functions/lexo_rank_functions.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:path/path.dart' as p;

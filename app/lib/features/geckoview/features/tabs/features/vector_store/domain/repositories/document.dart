@@ -5,7 +5,7 @@ import 'package:exceptions/exceptions.dart';
 import 'package:langchain/langchain.dart' as langchain;
 import 'package:langchain/langchain.dart';
 import 'package:langchain_openai/langchain_openai.dart';
-import 'package:lensai/core/models.dart';
+import 'package:lensai/core/providers/models.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
