@@ -34,7 +34,9 @@ abstract class _$FindInPageRepository
     extends BuildlessAutoDisposeNotifier<void> {
   late final String? tabId;
 
-  void build(String? tabId);
+  void build(
+    String? tabId,
+  );
 }
 
 /// See also [FindInPageRepository].
@@ -47,15 +49,21 @@ class FindInPageRepositoryFamily extends Family<void> {
   const FindInPageRepositoryFamily();
 
   /// See also [FindInPageRepository].
-  FindInPageRepositoryProvider call(String? tabId) {
-    return FindInPageRepositoryProvider(tabId);
+  FindInPageRepositoryProvider call(
+    String? tabId,
+  ) {
+    return FindInPageRepositoryProvider(
+      tabId,
+    );
   }
 
   @override
   FindInPageRepositoryProvider getProviderOverride(
     covariant FindInPageRepositoryProvider provider,
   ) {
-    return call(provider.tabId);
+    return call(
+      provider.tabId,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -77,20 +85,21 @@ class FindInPageRepositoryFamily extends Family<void> {
 class FindInPageRepositoryProvider
     extends AutoDisposeNotifierProviderImpl<FindInPageRepository, void> {
   /// See also [FindInPageRepository].
-  FindInPageRepositoryProvider(String? tabId)
-    : this._internal(
-        () => FindInPageRepository()..tabId = tabId,
-        from: findInPageRepositoryProvider,
-        name: r'findInPageRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$findInPageRepositoryHash,
-        dependencies: FindInPageRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            FindInPageRepositoryFamily._allTransitiveDependencies,
-        tabId: tabId,
-      );
+  FindInPageRepositoryProvider(
+    String? tabId,
+  ) : this._internal(
+          () => FindInPageRepository()..tabId = tabId,
+          from: findInPageRepositoryProvider,
+          name: r'findInPageRepositoryProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$findInPageRepositoryHash,
+          dependencies: FindInPageRepositoryFamily._dependencies,
+          allTransitiveDependencies:
+              FindInPageRepositoryFamily._allTransitiveDependencies,
+          tabId: tabId,
+        );
 
   FindInPageRepositoryProvider._internal(
     super._createNotifier, {
@@ -105,8 +114,12 @@ class FindInPageRepositoryProvider
   final String? tabId;
 
   @override
-  void runNotifierBuild(covariant FindInPageRepository notifier) {
-    return notifier.build(tabId);
+  void runNotifierBuild(
+    covariant FindInPageRepository notifier,
+  ) {
+    return notifier.build(
+      tabId,
+    );
   }
 
   @override
@@ -127,7 +140,7 @@ class FindInPageRepositoryProvider
 
   @override
   AutoDisposeNotifierProviderElement<FindInPageRepository, void>
-  createElement() {
+      createElement() {
     return _FindInPageRepositoryProviderElement(this);
   }
 
@@ -160,6 +173,5 @@ class _FindInPageRepositoryProviderElement
   @override
   String? get tabId => (origin as FindInPageRepositoryProvider).tabId;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

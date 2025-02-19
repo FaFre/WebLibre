@@ -13,10 +13,9 @@ String _$readerableServiceHash() => r'03182c8afc41f5184322a3206473cbfa96df5819';
 final readerableServiceProvider = Provider<GeckoReaderableService>.internal(
   readerableService,
   name: r'readerableServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$readerableServiceHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$readerableServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -31,15 +30,14 @@ String _$appearanceButtonVisibilityHash() =>
 @ProviderFor(appearanceButtonVisibility)
 final appearanceButtonVisibilityProvider =
     AutoDisposeStreamProvider<bool>.internal(
-      appearanceButtonVisibility,
-      name: r'appearanceButtonVisibilityProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$appearanceButtonVisibilityHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  appearanceButtonVisibility,
+  name: r'appearanceButtonVisibilityProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$appearanceButtonVisibilityHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

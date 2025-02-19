@@ -12,15 +12,14 @@ String _$cacheRepositoryHash() => r'548b7cba9a23c21bba39f0918d7d90acaaf8d8e9';
 @ProviderFor(CacheRepository)
 final cacheRepositoryProvider =
     NotifierProvider<CacheRepository, void>.internal(
-      CacheRepository.new,
-      name: r'cacheRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$cacheRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  CacheRepository.new,
+  name: r'cacheRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$cacheRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$CacheRepository = Notifier<void>;
 // ignore_for_file: type=lint

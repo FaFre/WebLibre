@@ -13,15 +13,14 @@ String _$selectedContainerDataHash() =>
 @ProviderFor(selectedContainerData)
 final selectedContainerDataProvider =
     AutoDisposeStreamProvider<ContainerData?>.internal(
-      selectedContainerData,
-      name: r'selectedContainerDataProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$selectedContainerDataHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  selectedContainerData,
+  name: r'selectedContainerDataProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedContainerDataHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -32,15 +31,14 @@ String _$selectedContainerHash() => r'f3dab491337396b8d56daed37a0d85c85aa8d64a';
 @ProviderFor(SelectedContainer)
 final selectedContainerProvider =
     NotifierProvider<SelectedContainer, String?>.internal(
-      SelectedContainer.new,
-      name: r'selectedContainerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$selectedContainerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  SelectedContainer.new,
+  name: r'selectedContainerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedContainerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$SelectedContainer = Notifier<String?>;
 // ignore_for_file: type=lint

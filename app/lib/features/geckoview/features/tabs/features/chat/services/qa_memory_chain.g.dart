@@ -98,24 +98,23 @@ class QAMemoryChainProvider
     String? mainDocumentId,
     String? contextId,
   }) : this._internal(
-         () =>
-             QAMemoryChain()
-               ..chatId = chatId
-               ..mainDocumentId = mainDocumentId
-               ..contextId = contextId,
-         from: qAMemoryChainProvider,
-         name: r'qAMemoryChainProvider',
-         debugGetCreateSourceHash:
-             const bool.fromEnvironment('dart.vm.product')
-                 ? null
-                 : _$qAMemoryChainHash,
-         dependencies: QAMemoryChainFamily._dependencies,
-         allTransitiveDependencies:
-             QAMemoryChainFamily._allTransitiveDependencies,
-         chatId: chatId,
-         mainDocumentId: mainDocumentId,
-         contextId: contextId,
-       );
+          () => QAMemoryChain()
+            ..chatId = chatId
+            ..mainDocumentId = mainDocumentId
+            ..contextId = contextId,
+          from: qAMemoryChainProvider,
+          name: r'qAMemoryChainProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$qAMemoryChainHash,
+          dependencies: QAMemoryChainFamily._dependencies,
+          allTransitiveDependencies:
+              QAMemoryChainFamily._allTransitiveDependencies,
+          chatId: chatId,
+          mainDocumentId: mainDocumentId,
+          contextId: contextId,
+        );
 
   QAMemoryChainProvider._internal(
     super._createNotifier, {
@@ -134,7 +133,9 @@ class QAMemoryChainProvider
   final String? contextId;
 
   @override
-  void runNotifierBuild(covariant QAMemoryChain notifier) {
+  void runNotifierBuild(
+    covariant QAMemoryChain notifier,
+  ) {
     return notifier.build(
       chatId: chatId,
       mainDocumentId: mainDocumentId,
@@ -147,11 +148,10 @@ class QAMemoryChainProvider
     return ProviderOverride(
       origin: this,
       override: QAMemoryChainProvider._internal(
-        () =>
-            create()
-              ..chatId = chatId
-              ..mainDocumentId = mainDocumentId
-              ..contextId = contextId,
+        () => create()
+          ..chatId = chatId
+          ..mainDocumentId = mainDocumentId
+          ..contextId = contextId,
         from: from,
         name: null,
         dependencies: null,
@@ -214,6 +214,5 @@ class _QAMemoryChainProviderElement
   @override
   String? get contextId => (origin as QAMemoryChainProvider).contextId;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

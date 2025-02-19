@@ -13,15 +13,14 @@ String _$readerableScreenControllerHash() =>
 @ProviderFor(ReaderableScreenController)
 final readerableScreenControllerProvider =
     AsyncNotifierProvider<ReaderableScreenController, void>.internal(
-      ReaderableScreenController.new,
-      name: r'readerableScreenControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$readerableScreenControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  ReaderableScreenController.new,
+  name: r'readerableScreenControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$readerableScreenControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$ReaderableScreenController = AsyncNotifier<void>;
 // ignore_for_file: type=lint

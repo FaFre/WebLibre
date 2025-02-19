@@ -39,13 +39,21 @@ class BangDataFamily extends Family<AsyncValue<BangData?>> {
   const BangDataFamily();
 
   /// See also [bangData].
-  BangDataProvider call(String? trigger) {
-    return BangDataProvider(trigger);
+  BangDataProvider call(
+    String? trigger,
+  ) {
+    return BangDataProvider(
+      trigger,
+    );
   }
 
   @override
-  BangDataProvider getProviderOverride(covariant BangDataProvider provider) {
-    return call(provider.trigger);
+  BangDataProvider getProviderOverride(
+    covariant BangDataProvider provider,
+  ) {
+    return call(
+      provider.trigger,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -66,19 +74,23 @@ class BangDataFamily extends Family<AsyncValue<BangData?>> {
 /// See also [bangData].
 class BangDataProvider extends AutoDisposeStreamProvider<BangData?> {
   /// See also [bangData].
-  BangDataProvider(String? trigger)
-    : this._internal(
-        (ref) => bangData(ref as BangDataRef, trigger),
-        from: bangDataProvider,
-        name: r'bangDataProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$bangDataHash,
-        dependencies: BangDataFamily._dependencies,
-        allTransitiveDependencies: BangDataFamily._allTransitiveDependencies,
-        trigger: trigger,
-      );
+  BangDataProvider(
+    String? trigger,
+  ) : this._internal(
+          (ref) => bangData(
+            ref as BangDataRef,
+            trigger,
+          ),
+          from: bangDataProvider,
+          name: r'bangDataProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$bangDataHash,
+          dependencies: BangDataFamily._dependencies,
+          allTransitiveDependencies: BangDataFamily._allTransitiveDependencies,
+          trigger: trigger,
+        );
 
   BangDataProvider._internal(
     super._createNotifier, {
@@ -137,8 +149,7 @@ mixin BangDataRef on AutoDisposeStreamProviderRef<BangData?> {
 }
 
 class _BangDataProviderElement
-    extends AutoDisposeStreamProviderElement<BangData?>
-    with BangDataRef {
+    extends AutoDisposeStreamProviderElement<BangData?> with BangDataRef {
   _BangDataProviderElement(super.provider);
 
   @override
@@ -153,10 +164,9 @@ String _$defaultSearchBangDataHash() =>
 final defaultSearchBangDataProvider = StreamProvider<BangData?>.internal(
   defaultSearchBangData,
   name: r'defaultSearchBangDataProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$defaultSearchBangDataHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$defaultSearchBangDataHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -170,20 +180,19 @@ String _$bangCategoriesHash() => r'947fcfd2dffcc7f585c6ed7379d319f4fe72293a';
 @ProviderFor(bangCategories)
 final bangCategoriesProvider =
     AutoDisposeStreamProvider<Map<String, List<String>>>.internal(
-      bangCategories,
-      name: r'bangCategoriesProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bangCategoriesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  bangCategories,
+  name: r'bangCategoriesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$bangCategoriesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef BangCategoriesRef =
-    AutoDisposeStreamProviderRef<Map<String, List<String>>>;
+typedef BangCategoriesRef
+    = AutoDisposeStreamProviderRef<Map<String, List<String>>>;
 String _$bangDataListHash() => r'cd034fdf046b156ac452edd0857ac054ab477917';
 
 /// See also [bangDataList].
@@ -201,18 +210,21 @@ class BangDataListFamily extends Family<AsyncValue<List<BangData>>> {
       ({String category, String? subCategory})? categoryFilter,
       String? domain,
       Iterable<BangGroup>? groups,
-      bool? orderMostFrequentFirst,
-    })?
-    filter,
+      bool? orderMostFrequentFirst
+    })? filter,
   }) {
-    return BangDataListProvider(filter: filter);
+    return BangDataListProvider(
+      filter: filter,
+    );
   }
 
   @override
   BangDataListProvider getProviderOverride(
     covariant BangDataListProvider provider,
   ) {
-    return call(filter: provider.filter);
+    return call(
+      filter: provider.filter,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -238,22 +250,24 @@ class BangDataListProvider extends AutoDisposeStreamProvider<List<BangData>> {
       ({String category, String? subCategory})? categoryFilter,
       String? domain,
       Iterable<BangGroup>? groups,
-      bool? orderMostFrequentFirst,
-    })?
-    filter,
+      bool? orderMostFrequentFirst
+    })? filter,
   }) : this._internal(
-         (ref) => bangDataList(ref as BangDataListRef, filter: filter),
-         from: bangDataListProvider,
-         name: r'bangDataListProvider',
-         debugGetCreateSourceHash:
-             const bool.fromEnvironment('dart.vm.product')
-                 ? null
-                 : _$bangDataListHash,
-         dependencies: BangDataListFamily._dependencies,
-         allTransitiveDependencies:
-             BangDataListFamily._allTransitiveDependencies,
-         filter: filter,
-       );
+          (ref) => bangDataList(
+            ref as BangDataListRef,
+            filter: filter,
+          ),
+          from: bangDataListProvider,
+          name: r'bangDataListProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$bangDataListHash,
+          dependencies: BangDataListFamily._dependencies,
+          allTransitiveDependencies:
+              BangDataListFamily._allTransitiveDependencies,
+          filter: filter,
+        );
 
   BangDataListProvider._internal(
     super._createNotifier, {
@@ -269,9 +283,8 @@ class BangDataListProvider extends AutoDisposeStreamProvider<List<BangData>> {
     ({String category, String? subCategory})? categoryFilter,
     String? domain,
     Iterable<BangGroup>? groups,
-    bool? orderMostFrequentFirst,
-  })?
-  filter;
+    bool? orderMostFrequentFirst
+  })? filter;
 
   @override
   Override overrideWith(
@@ -318,9 +331,8 @@ mixin BangDataListRef on AutoDisposeStreamProviderRef<List<BangData>> {
     ({String category, String? subCategory})? categoryFilter,
     String? domain,
     Iterable<BangGroup>? groups,
-    bool? orderMostFrequentFirst,
-  })?
-  get filter;
+    bool? orderMostFrequentFirst
+  })? get filter;
 }
 
 class _BangDataListProviderElement
@@ -333,9 +345,8 @@ class _BangDataListProviderElement
     ({String category, String? subCategory})? categoryFilter,
     String? domain,
     Iterable<BangGroup>? groups,
-    bool? orderMostFrequentFirst,
-  })?
-  get filter => (origin as BangDataListProvider).filter;
+    bool? orderMostFrequentFirst
+  })? get filter => (origin as BangDataListProvider).filter;
 }
 
 String _$frequentBangDataListHash() =>
@@ -345,15 +356,14 @@ String _$frequentBangDataListHash() =>
 @ProviderFor(frequentBangDataList)
 final frequentBangDataListProvider =
     AutoDisposeStreamProvider<List<BangData>>.internal(
-      frequentBangDataList,
-      name: r'frequentBangDataListProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$frequentBangDataListHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  frequentBangDataList,
+  name: r'frequentBangDataListProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$frequentBangDataListHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -364,20 +374,19 @@ String _$searchHistoryHash() => r'7b97798729643de8e44fd8024cdc02f35124b08b';
 @ProviderFor(searchHistory)
 final searchHistoryProvider =
     AutoDisposeStreamProvider<List<SearchHistoryEntry>>.internal(
-      searchHistory,
-      name: r'searchHistoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$searchHistoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  searchHistory,
+  name: r'searchHistoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$searchHistoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef SearchHistoryRef =
-    AutoDisposeStreamProviderRef<List<SearchHistoryEntry>>;
+typedef SearchHistoryRef
+    = AutoDisposeStreamProviderRef<List<SearchHistoryEntry>>;
 String _$lastSyncOfGroupHash() => r'23d07f3132ba9bb35a31f74e3a69698d31d4c569';
 
 /// See also [lastSyncOfGroup].
@@ -390,15 +399,21 @@ class LastSyncOfGroupFamily extends Family<AsyncValue<DateTime?>> {
   const LastSyncOfGroupFamily();
 
   /// See also [lastSyncOfGroup].
-  LastSyncOfGroupProvider call(BangGroup group) {
-    return LastSyncOfGroupProvider(group);
+  LastSyncOfGroupProvider call(
+    BangGroup group,
+  ) {
+    return LastSyncOfGroupProvider(
+      group,
+    );
   }
 
   @override
   LastSyncOfGroupProvider getProviderOverride(
     covariant LastSyncOfGroupProvider provider,
   ) {
-    return call(provider.group);
+    return call(
+      provider.group,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -419,20 +434,24 @@ class LastSyncOfGroupFamily extends Family<AsyncValue<DateTime?>> {
 /// See also [lastSyncOfGroup].
 class LastSyncOfGroupProvider extends AutoDisposeStreamProvider<DateTime?> {
   /// See also [lastSyncOfGroup].
-  LastSyncOfGroupProvider(BangGroup group)
-    : this._internal(
-        (ref) => lastSyncOfGroup(ref as LastSyncOfGroupRef, group),
-        from: lastSyncOfGroupProvider,
-        name: r'lastSyncOfGroupProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$lastSyncOfGroupHash,
-        dependencies: LastSyncOfGroupFamily._dependencies,
-        allTransitiveDependencies:
-            LastSyncOfGroupFamily._allTransitiveDependencies,
-        group: group,
-      );
+  LastSyncOfGroupProvider(
+    BangGroup group,
+  ) : this._internal(
+          (ref) => lastSyncOfGroup(
+            ref as LastSyncOfGroupRef,
+            group,
+          ),
+          from: lastSyncOfGroupProvider,
+          name: r'lastSyncOfGroupProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$lastSyncOfGroupHash,
+          dependencies: LastSyncOfGroupFamily._dependencies,
+          allTransitiveDependencies:
+              LastSyncOfGroupFamily._allTransitiveDependencies,
+          group: group,
+        );
 
   LastSyncOfGroupProvider._internal(
     super._createNotifier, {
@@ -511,15 +530,21 @@ class BangCountOfGroupFamily extends Family<AsyncValue<int>> {
   const BangCountOfGroupFamily();
 
   /// See also [bangCountOfGroup].
-  BangCountOfGroupProvider call(BangGroup group) {
-    return BangCountOfGroupProvider(group);
+  BangCountOfGroupProvider call(
+    BangGroup group,
+  ) {
+    return BangCountOfGroupProvider(
+      group,
+    );
   }
 
   @override
   BangCountOfGroupProvider getProviderOverride(
     covariant BangCountOfGroupProvider provider,
   ) {
-    return call(provider.group);
+    return call(
+      provider.group,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -540,20 +565,24 @@ class BangCountOfGroupFamily extends Family<AsyncValue<int>> {
 /// See also [bangCountOfGroup].
 class BangCountOfGroupProvider extends AutoDisposeStreamProvider<int> {
   /// See also [bangCountOfGroup].
-  BangCountOfGroupProvider(BangGroup group)
-    : this._internal(
-        (ref) => bangCountOfGroup(ref as BangCountOfGroupRef, group),
-        from: bangCountOfGroupProvider,
-        name: r'bangCountOfGroupProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$bangCountOfGroupHash,
-        dependencies: BangCountOfGroupFamily._dependencies,
-        allTransitiveDependencies:
-            BangCountOfGroupFamily._allTransitiveDependencies,
-        group: group,
-      );
+  BangCountOfGroupProvider(
+    BangGroup group,
+  ) : this._internal(
+          (ref) => bangCountOfGroup(
+            ref as BangCountOfGroupRef,
+            group,
+          ),
+          from: bangCountOfGroupProvider,
+          name: r'bangCountOfGroupProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$bangCountOfGroupHash,
+          dependencies: BangCountOfGroupFamily._dependencies,
+          allTransitiveDependencies:
+              BangCountOfGroupFamily._allTransitiveDependencies,
+          group: group,
+        );
 
   BangCountOfGroupProvider._internal(
     super._createNotifier, {
@@ -612,13 +641,11 @@ mixin BangCountOfGroupRef on AutoDisposeStreamProviderRef<int> {
 }
 
 class _BangCountOfGroupProviderElement
-    extends AutoDisposeStreamProviderElement<int>
-    with BangCountOfGroupRef {
+    extends AutoDisposeStreamProviderElement<int> with BangCountOfGroupRef {
   _BangCountOfGroupProviderElement(super.provider);
 
   @override
   BangGroup get group => (origin as BangCountOfGroupProvider).group;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

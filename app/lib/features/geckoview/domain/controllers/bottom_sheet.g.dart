@@ -13,15 +13,14 @@ String _$bottomSheetControllerHash() =>
 @ProviderFor(BottomSheetController)
 final bottomSheetControllerProvider =
     AutoDisposeNotifierProvider<BottomSheetController, Sheet?>.internal(
-      BottomSheetController.new,
-      name: r'bottomSheetControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bottomSheetControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  BottomSheetController.new,
+  name: r'bottomSheetControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$bottomSheetControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$BottomSheetController = AutoDisposeNotifier<Sheet?>;
 String _$bottomSheetExtendHash() => r'7e11b9047c15bdeb4dfcb488a8573daadb64e25c';
@@ -30,15 +29,14 @@ String _$bottomSheetExtendHash() => r'7e11b9047c15bdeb4dfcb488a8573daadb64e25c';
 @ProviderFor(BottomSheetExtend)
 final bottomSheetExtendProvider =
     StreamNotifierProvider<BottomSheetExtend, double>.internal(
-      BottomSheetExtend.new,
-      name: r'bottomSheetExtendProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bottomSheetExtendHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  BottomSheetExtend.new,
+  name: r'bottomSheetExtendProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$bottomSheetExtendHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$BottomSheetExtend = StreamNotifier<double>;
 // ignore_for_file: type=lint

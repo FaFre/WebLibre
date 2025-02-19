@@ -10,8 +10,7 @@ abstract class _$EngineSettingsCWProxy {
   EngineSettings javascriptEnabled(bool? javascriptEnabled);
 
   EngineSettings trackingProtectionPolicy(
-    TrackingProtectionPolicy? trackingProtectionPolicy,
-  );
+      TrackingProtectionPolicy? trackingProtectionPolicy);
 
   EngineSettings httpsOnlyMode(HttpsOnlyMode? httpsOnlyMode);
 
@@ -20,24 +19,19 @@ abstract class _$EngineSettingsCWProxy {
   EngineSettings preferredColorScheme(ColorScheme? preferredColorScheme);
 
   EngineSettings cookieBannerHandlingMode(
-    CookieBannerHandlingMode? cookieBannerHandlingMode,
-  );
+      CookieBannerHandlingMode? cookieBannerHandlingMode);
 
   EngineSettings cookieBannerHandlingModePrivateBrowsing(
-    CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing,
-  );
+      CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing);
 
   EngineSettings cookieBannerHandlingGlobalRules(
-    bool? cookieBannerHandlingGlobalRules,
-  );
+      bool? cookieBannerHandlingGlobalRules);
 
   EngineSettings cookieBannerHandlingGlobalRulesSubFrames(
-    bool? cookieBannerHandlingGlobalRulesSubFrames,
-  );
+      bool? cookieBannerHandlingGlobalRulesSubFrames);
 
   EngineSettings webContentIsolationStrategy(
-    WebContentIsolationStrategy? webContentIsolationStrategy,
-  );
+      WebContentIsolationStrategy? webContentIsolationStrategy);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -71,8 +65,8 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
 
   @override
   EngineSettings trackingProtectionPolicy(
-    TrackingProtectionPolicy? trackingProtectionPolicy,
-  ) => this(trackingProtectionPolicy: trackingProtectionPolicy);
+          TrackingProtectionPolicy? trackingProtectionPolicy) =>
+      this(trackingProtectionPolicy: trackingProtectionPolicy);
 
   @override
   EngineSettings httpsOnlyMode(HttpsOnlyMode? httpsOnlyMode) =>
@@ -80,8 +74,8 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
 
   @override
   EngineSettings globalPrivacyControlEnabled(
-    bool? globalPrivacyControlEnabled,
-  ) => this(globalPrivacyControlEnabled: globalPrivacyControlEnabled);
+          bool? globalPrivacyControlEnabled) =>
+      this(globalPrivacyControlEnabled: globalPrivacyControlEnabled);
 
   @override
   EngineSettings preferredColorScheme(ColorScheme? preferredColorScheme) =>
@@ -89,36 +83,35 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
 
   @override
   EngineSettings cookieBannerHandlingMode(
-    CookieBannerHandlingMode? cookieBannerHandlingMode,
-  ) => this(cookieBannerHandlingMode: cookieBannerHandlingMode);
+          CookieBannerHandlingMode? cookieBannerHandlingMode) =>
+      this(cookieBannerHandlingMode: cookieBannerHandlingMode);
 
   @override
   EngineSettings cookieBannerHandlingModePrivateBrowsing(
-    CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing,
-  ) => this(
-    cookieBannerHandlingModePrivateBrowsing:
-        cookieBannerHandlingModePrivateBrowsing,
-  );
+          CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing) =>
+      this(
+          cookieBannerHandlingModePrivateBrowsing:
+              cookieBannerHandlingModePrivateBrowsing);
 
   @override
   EngineSettings cookieBannerHandlingGlobalRules(
-    bool? cookieBannerHandlingGlobalRules,
-  ) => this(cookieBannerHandlingGlobalRules: cookieBannerHandlingGlobalRules);
+          bool? cookieBannerHandlingGlobalRules) =>
+      this(cookieBannerHandlingGlobalRules: cookieBannerHandlingGlobalRules);
 
   @override
   EngineSettings cookieBannerHandlingGlobalRulesSubFrames(
-    bool? cookieBannerHandlingGlobalRulesSubFrames,
-  ) => this(
-    cookieBannerHandlingGlobalRulesSubFrames:
-        cookieBannerHandlingGlobalRulesSubFrames,
-  );
+          bool? cookieBannerHandlingGlobalRulesSubFrames) =>
+      this(
+          cookieBannerHandlingGlobalRulesSubFrames:
+              cookieBannerHandlingGlobalRulesSubFrames);
 
   @override
   EngineSettings webContentIsolationStrategy(
-    WebContentIsolationStrategy? webContentIsolationStrategy,
-  ) => this(webContentIsolationStrategy: webContentIsolationStrategy);
+          WebContentIsolationStrategy? webContentIsolationStrategy) =>
+      this(webContentIsolationStrategy: webContentIsolationStrategy);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -140,31 +133,28 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? webContentIsolationStrategy = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
-      javascriptEnabled:
-          javascriptEnabled == const $CopyWithPlaceholder()
-              ? _value.javascriptEnabled
-              // ignore: cast_nullable_to_non_nullable
-              : javascriptEnabled as bool?,
+      javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
+          ? _value.javascriptEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : javascriptEnabled as bool?,
       trackingProtectionPolicy:
           trackingProtectionPolicy == const $CopyWithPlaceholder()
               ? _value.trackingProtectionPolicy
               // ignore: cast_nullable_to_non_nullable
               : trackingProtectionPolicy as TrackingProtectionPolicy?,
-      httpsOnlyMode:
-          httpsOnlyMode == const $CopyWithPlaceholder()
-              ? _value.httpsOnlyMode
-              // ignore: cast_nullable_to_non_nullable
-              : httpsOnlyMode as HttpsOnlyMode?,
+      httpsOnlyMode: httpsOnlyMode == const $CopyWithPlaceholder()
+          ? _value.httpsOnlyMode
+          // ignore: cast_nullable_to_non_nullable
+          : httpsOnlyMode as HttpsOnlyMode?,
       globalPrivacyControlEnabled:
           globalPrivacyControlEnabled == const $CopyWithPlaceholder()
               ? _value.globalPrivacyControlEnabled
               // ignore: cast_nullable_to_non_nullable
               : globalPrivacyControlEnabled as bool?,
-      preferredColorScheme:
-          preferredColorScheme == const $CopyWithPlaceholder()
-              ? _value.preferredColorScheme
-              // ignore: cast_nullable_to_non_nullable
-              : preferredColorScheme as ColorScheme?,
+      preferredColorScheme: preferredColorScheme == const $CopyWithPlaceholder()
+          ? _value.preferredColorScheme
+          // ignore: cast_nullable_to_non_nullable
+          : preferredColorScheme as ColorScheme?,
       cookieBannerHandlingMode:
           cookieBannerHandlingMode == const $CopyWithPlaceholder()
               ? _value.cookieBannerHandlingMode
@@ -211,57 +201,47 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
     EngineSettings.withDefaults(
       javascriptEnabled: json['javascriptEnabled'] as bool?,
       trackingProtectionPolicy: $enumDecodeNullable(
-        _$TrackingProtectionPolicyEnumMap,
-        json['trackingProtectionPolicy'],
-      ),
-      httpsOnlyMode: $enumDecodeNullable(
-        _$HttpsOnlyModeEnumMap,
-        json['httpsOnlyMode'],
-      ),
+          _$TrackingProtectionPolicyEnumMap, json['trackingProtectionPolicy']),
+      httpsOnlyMode:
+          $enumDecodeNullable(_$HttpsOnlyModeEnumMap, json['httpsOnlyMode']),
       globalPrivacyControlEnabled: json['globalPrivacyControlEnabled'] as bool?,
       preferredColorScheme: $enumDecodeNullable(
-        _$ColorSchemeEnumMap,
-        json['preferredColorScheme'],
-      ),
+          _$ColorSchemeEnumMap, json['preferredColorScheme']),
       cookieBannerHandlingMode: $enumDecodeNullable(
-        _$CookieBannerHandlingModeEnumMap,
-        json['cookieBannerHandlingMode'],
-      ),
+          _$CookieBannerHandlingModeEnumMap, json['cookieBannerHandlingMode']),
       cookieBannerHandlingModePrivateBrowsing: $enumDecodeNullable(
-        _$CookieBannerHandlingModeEnumMap,
-        json['cookieBannerHandlingModePrivateBrowsing'],
-      ),
+          _$CookieBannerHandlingModeEnumMap,
+          json['cookieBannerHandlingModePrivateBrowsing']),
       cookieBannerHandlingGlobalRules:
           json['cookieBannerHandlingGlobalRules'] as bool?,
       cookieBannerHandlingGlobalRulesSubFrames:
           json['cookieBannerHandlingGlobalRulesSubFrames'] as bool?,
       webContentIsolationStrategy: $enumDecodeNullable(
-        _$WebContentIsolationStrategyEnumMap,
-        json['webContentIsolationStrategy'],
-      ),
+          _$WebContentIsolationStrategyEnumMap,
+          json['webContentIsolationStrategy']),
     );
 
-Map<String, dynamic> _$EngineSettingsToJson(
-  EngineSettings instance,
-) => <String, dynamic>{
-  'javascriptEnabled': instance.javascriptEnabled,
-  'trackingProtectionPolicy':
-      _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,
-  'httpsOnlyMode': _$HttpsOnlyModeEnumMap[instance.httpsOnlyMode]!,
-  'preferredColorScheme': _$ColorSchemeEnumMap[instance.preferredColorScheme]!,
-  'globalPrivacyControlEnabled': instance.globalPrivacyControlEnabled,
-  'cookieBannerHandlingMode':
-      _$CookieBannerHandlingModeEnumMap[instance.cookieBannerHandlingMode]!,
-  'cookieBannerHandlingModePrivateBrowsing':
-      _$CookieBannerHandlingModeEnumMap[instance
-          .cookieBannerHandlingModePrivateBrowsing]!,
-  'cookieBannerHandlingGlobalRules': instance.cookieBannerHandlingGlobalRules,
-  'cookieBannerHandlingGlobalRulesSubFrames':
-      instance.cookieBannerHandlingGlobalRulesSubFrames,
-  'webContentIsolationStrategy':
-      _$WebContentIsolationStrategyEnumMap[instance
-          .webContentIsolationStrategy]!,
-};
+Map<String, dynamic> _$EngineSettingsToJson(EngineSettings instance) =>
+    <String, dynamic>{
+      'javascriptEnabled': instance.javascriptEnabled,
+      'trackingProtectionPolicy':
+          _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,
+      'httpsOnlyMode': _$HttpsOnlyModeEnumMap[instance.httpsOnlyMode]!,
+      'preferredColorScheme':
+          _$ColorSchemeEnumMap[instance.preferredColorScheme]!,
+      'globalPrivacyControlEnabled': instance.globalPrivacyControlEnabled,
+      'cookieBannerHandlingMode':
+          _$CookieBannerHandlingModeEnumMap[instance.cookieBannerHandlingMode]!,
+      'cookieBannerHandlingModePrivateBrowsing':
+          _$CookieBannerHandlingModeEnumMap[
+              instance.cookieBannerHandlingModePrivateBrowsing]!,
+      'cookieBannerHandlingGlobalRules':
+          instance.cookieBannerHandlingGlobalRules,
+      'cookieBannerHandlingGlobalRulesSubFrames':
+          instance.cookieBannerHandlingGlobalRulesSubFrames,
+      'webContentIsolationStrategy': _$WebContentIsolationStrategyEnumMap[
+          instance.webContentIsolationStrategy]!,
+    };
 
 const _$TrackingProtectionPolicyEnumMap = {
   TrackingProtectionPolicy.none: 'none',

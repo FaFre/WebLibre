@@ -46,6 +46,7 @@ class _$ContainerAuthSettingsCWProxyImpl
       this(lockTimeout: lockTimeout);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerAuthSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -63,16 +64,14 @@ class _$ContainerAuthSettingsCWProxyImpl
               ? _value.authenticationRequired
               // ignore: cast_nullable_to_non_nullable
               : authenticationRequired as bool,
-      lockOnAppBackground:
-          lockOnAppBackground == const $CopyWithPlaceholder()
-              ? _value.lockOnAppBackground
-              // ignore: cast_nullable_to_non_nullable
-              : lockOnAppBackground as bool,
-      lockTimeout:
-          lockTimeout == const $CopyWithPlaceholder()
-              ? _value.lockTimeout
-              // ignore: cast_nullable_to_non_nullable
-              : lockTimeout as Duration?,
+      lockOnAppBackground: lockOnAppBackground == const $CopyWithPlaceholder()
+          ? _value.lockOnAppBackground
+          // ignore: cast_nullable_to_non_nullable
+          : lockOnAppBackground as bool,
+      lockTimeout: lockTimeout == const $CopyWithPlaceholder()
+          ? _value.lockTimeout
+          // ignore: cast_nullable_to_non_nullable
+          : lockTimeout as Duration?,
     );
   }
 }
@@ -128,6 +127,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata useProxy(bool useProxy) => this(useProxy: useProxy);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerMetadata(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -141,26 +141,22 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? useProxy = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
-      iconData:
-          iconData == const $CopyWithPlaceholder()
-              ? _value.iconData
-              // ignore: cast_nullable_to_non_nullable
-              : iconData as IconData?,
-      contextualIdentity:
-          contextualIdentity == const $CopyWithPlaceholder()
-              ? _value.contextualIdentity
-              // ignore: cast_nullable_to_non_nullable
-              : contextualIdentity as String?,
-      authSettings:
-          authSettings == const $CopyWithPlaceholder()
-              ? _value.authSettings
-              // ignore: cast_nullable_to_non_nullable
-              : authSettings as ContainerAuthSettings,
-      useProxy:
-          useProxy == const $CopyWithPlaceholder()
-              ? _value.useProxy
-              // ignore: cast_nullable_to_non_nullable
-              : useProxy as bool,
+      iconData: iconData == const $CopyWithPlaceholder()
+          ? _value.iconData
+          // ignore: cast_nullable_to_non_nullable
+          : iconData as IconData?,
+      contextualIdentity: contextualIdentity == const $CopyWithPlaceholder()
+          ? _value.contextualIdentity
+          // ignore: cast_nullable_to_non_nullable
+          : contextualIdentity as String?,
+      authSettings: authSettings == const $CopyWithPlaceholder()
+          ? _value.authSettings
+          // ignore: cast_nullable_to_non_nullable
+          : authSettings as ContainerAuthSettings,
+      useProxy: useProxy == const $CopyWithPlaceholder()
+          ? _value.useProxy
+          // ignore: cast_nullable_to_non_nullable
+          : useProxy as bool,
     );
   }
 }
@@ -215,6 +211,7 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
       this(metadata: metadata);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerData(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -228,26 +225,22 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
     Object? metadata = const $CopyWithPlaceholder(),
   }) {
     return ContainerData(
-      id:
-          id == const $CopyWithPlaceholder()
-              ? _value.id
-              // ignore: cast_nullable_to_non_nullable
-              : id as String,
-      name:
-          name == const $CopyWithPlaceholder()
-              ? _value.name
-              // ignore: cast_nullable_to_non_nullable
-              : name as String?,
-      color:
-          color == const $CopyWithPlaceholder()
-              ? _value.color
-              // ignore: cast_nullable_to_non_nullable
-              : color as Color,
-      metadata:
-          metadata == const $CopyWithPlaceholder()
-              ? _value.metadata
-              // ignore: cast_nullable_to_non_nullable
-              : metadata as ContainerMetadata?,
+      id: id == const $CopyWithPlaceholder()
+          ? _value.id
+          // ignore: cast_nullable_to_non_nullable
+          : id as String,
+      name: name == const $CopyWithPlaceholder()
+          ? _value.name
+          // ignore: cast_nullable_to_non_nullable
+          : name as String?,
+      color: color == const $CopyWithPlaceholder()
+          ? _value.color
+          // ignore: cast_nullable_to_non_nullable
+          : color as Color,
+      metadata: metadata == const $CopyWithPlaceholder()
+          ? _value.metadata
+          // ignore: cast_nullable_to_non_nullable
+          : metadata as ContainerMetadata?,
     );
   }
 }
@@ -263,46 +256,39 @@ extension $ContainerDataCopyWith on ContainerData {
 // **************************************************************************
 
 ContainerAuthSettings _$ContainerAuthSettingsFromJson(
-  Map<String, dynamic> json,
-) => ContainerAuthSettings(
-  authenticationRequired: json['authenticationRequired'] as bool,
-  lockOnAppBackground: json['lockOnAppBackground'] as bool,
-  lockTimeout:
-      json['lockTimeout'] == null
+        Map<String, dynamic> json) =>
+    ContainerAuthSettings(
+      authenticationRequired: json['authenticationRequired'] as bool,
+      lockOnAppBackground: json['lockOnAppBackground'] as bool,
+      lockTimeout: json['lockTimeout'] == null
           ? null
           : Duration(microseconds: (json['lockTimeout'] as num).toInt()),
-);
+    );
 
 Map<String, dynamic> _$ContainerAuthSettingsToJson(
-  ContainerAuthSettings instance,
-) => <String, dynamic>{
-  'authenticationRequired': instance.authenticationRequired,
-  'lockOnAppBackground': instance.lockOnAppBackground,
-  'lockTimeout': instance.lockTimeout?.inMicroseconds,
-};
+        ContainerAuthSettings instance) =>
+    <String, dynamic>{
+      'authenticationRequired': instance.authenticationRequired,
+      'lockOnAppBackground': instance.lockOnAppBackground,
+      'lockTimeout': instance.lockTimeout?.inMicroseconds,
+    };
 
 ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
     ContainerMetadata.withDefaults(
       iconData: _$JsonConverterFromJson<Map<String, dynamic>, IconData>(
-        json['iconData'],
-        const IconDataJsonConverter().fromJson,
-      ),
+          json['iconData'], const IconDataJsonConverter().fromJson),
       contextualIdentity: json['contextualIdentity'] as String?,
-      authSettings:
-          json['authSettings'] == null
-              ? null
-              : ContainerAuthSettings.fromJson(
-                json['authSettings'] as Map<String, dynamic>,
-              ),
+      authSettings: json['authSettings'] == null
+          ? null
+          : ContainerAuthSettings.fromJson(
+              json['authSettings'] as Map<String, dynamic>),
       useProxy: json['useProxy'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ContainerMetadataToJson(ContainerMetadata instance) =>
     <String, dynamic>{
       'iconData': _$JsonConverterToJson<Map<String, dynamic>, IconData>(
-        instance.iconData,
-        const IconDataJsonConverter().toJson,
-      ),
+          instance.iconData, const IconDataJsonConverter().toJson),
       'contextualIdentity': instance.contextualIdentity,
       'authSettings': instance.authSettings,
       'useProxy': instance.useProxy,
@@ -311,9 +297,11 @@ Map<String, dynamic> _$ContainerMetadataToJson(ContainerMetadata instance) =>
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
-) => json == null ? null : fromJson(json as Json);
+) =>
+    json == null ? null : fromJson(json as Json);
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,
   Json? Function(Value value) toJson,
-) => value == null ? null : toJson(value);
+) =>
+    value == null ? null : toJson(value);

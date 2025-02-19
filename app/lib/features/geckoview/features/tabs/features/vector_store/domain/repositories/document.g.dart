@@ -13,15 +13,14 @@ String _$documentRepositoryHash() =>
 @ProviderFor(DocumentRepository)
 final documentRepositoryProvider =
     AutoDisposeNotifierProvider<DocumentRepository, void>.internal(
-      DocumentRepository.new,
-      name: r'documentRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$documentRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  DocumentRepository.new,
+  name: r'documentRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$documentRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$DocumentRepository = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint

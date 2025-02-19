@@ -13,15 +13,14 @@ String _$preferenceSettingContentHash() =>
 @ProviderFor(_preferenceSettingContent)
 final _preferenceSettingContentProvider =
     FutureProvider<Map<String, dynamic>>.internal(
-      _preferenceSettingContent,
-      name: r'_preferenceSettingContentProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$preferenceSettingContentHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  _preferenceSettingContent,
+  name: r'_preferenceSettingContentProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$preferenceSettingContentHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -61,15 +60,21 @@ class _PreferenceSettingGroupsFamily
   const _PreferenceSettingGroupsFamily();
 
   /// See also [_preferenceSettingGroups].
-  _PreferenceSettingGroupsProvider call(PreferencePartition partition) {
-    return _PreferenceSettingGroupsProvider(partition);
+  _PreferenceSettingGroupsProvider call(
+    PreferencePartition partition,
+  ) {
+    return _PreferenceSettingGroupsProvider(
+      partition,
+    );
   }
 
   @override
   _PreferenceSettingGroupsProvider getProviderOverride(
     covariant _PreferenceSettingGroupsProvider provider,
   ) {
-    return call(provider.partition);
+    return call(
+      provider.partition,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -91,23 +96,24 @@ class _PreferenceSettingGroupsFamily
 class _PreferenceSettingGroupsProvider
     extends FutureProvider<Map<String, PreferenceSettingGroup>> {
   /// See also [_preferenceSettingGroups].
-  _PreferenceSettingGroupsProvider(PreferencePartition partition)
-    : this._internal(
-        (ref) => _preferenceSettingGroups(
-          ref as _PreferenceSettingGroupsRef,
-          partition,
-        ),
-        from: _preferenceSettingGroupsProvider,
-        name: r'_preferenceSettingGroupsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$preferenceSettingGroupsHash,
-        dependencies: _PreferenceSettingGroupsFamily._dependencies,
-        allTransitiveDependencies:
-            _PreferenceSettingGroupsFamily._allTransitiveDependencies,
-        partition: partition,
-      );
+  _PreferenceSettingGroupsProvider(
+    PreferencePartition partition,
+  ) : this._internal(
+          (ref) => _preferenceSettingGroups(
+            ref as _PreferenceSettingGroupsRef,
+            partition,
+          ),
+          from: _preferenceSettingGroupsProvider,
+          name: r'_preferenceSettingGroupsProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$preferenceSettingGroupsHash,
+          dependencies: _PreferenceSettingGroupsFamily._dependencies,
+          allTransitiveDependencies:
+              _PreferenceSettingGroupsFamily._allTransitiveDependencies,
+          partition: partition,
+        );
 
   _PreferenceSettingGroupsProvider._internal(
     super._createNotifier, {
@@ -124,9 +130,8 @@ class _PreferenceSettingGroupsProvider
   @override
   Override overrideWith(
     FutureOr<Map<String, PreferenceSettingGroup>> Function(
-      _PreferenceSettingGroupsRef provider,
-    )
-    create,
+            _PreferenceSettingGroupsRef provider)
+        create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -198,14 +203,20 @@ class _PreferenceSettingGroupFamily
     PreferencePartition partition,
     String groupName,
   ) {
-    return _PreferenceSettingGroupProvider(partition, groupName);
+    return _PreferenceSettingGroupProvider(
+      partition,
+      groupName,
+    );
   }
 
   @override
   _PreferenceSettingGroupProvider getProviderOverride(
     covariant _PreferenceSettingGroupProvider provider,
   ) {
-    return call(provider.partition, provider.groupName);
+    return call(
+      provider.partition,
+      provider.groupName,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -231,23 +242,23 @@ class _PreferenceSettingGroupProvider
     PreferencePartition partition,
     String groupName,
   ) : this._internal(
-        (ref) => _preferenceSettingGroup(
-          ref as _PreferenceSettingGroupRef,
-          partition,
-          groupName,
-        ),
-        from: _preferenceSettingGroupProvider,
-        name: r'_preferenceSettingGroupProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$preferenceSettingGroupHash,
-        dependencies: _PreferenceSettingGroupFamily._dependencies,
-        allTransitiveDependencies:
-            _PreferenceSettingGroupFamily._allTransitiveDependencies,
-        partition: partition,
-        groupName: groupName,
-      );
+          (ref) => _preferenceSettingGroup(
+            ref as _PreferenceSettingGroupRef,
+            partition,
+            groupName,
+          ),
+          from: _preferenceSettingGroupProvider,
+          name: r'_preferenceSettingGroupProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$preferenceSettingGroupHash,
+          dependencies: _PreferenceSettingGroupFamily._dependencies,
+          allTransitiveDependencies:
+              _PreferenceSettingGroupFamily._allTransitiveDependencies,
+          partition: partition,
+          groupName: groupName,
+        );
 
   _PreferenceSettingGroupProvider._internal(
     super._createNotifier, {
@@ -266,9 +277,8 @@ class _PreferenceSettingGroupProvider
   @override
   Override overrideWith(
     FutureOr<PreferenceSettingGroup> Function(
-      _PreferenceSettingGroupRef provider,
-    )
-    create,
+            _PreferenceSettingGroupRef provider)
+        create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -335,29 +345,24 @@ String _$preferenceRepositoryHash() =>
 /// See also [_PreferenceRepository].
 @ProviderFor(_PreferenceRepository)
 final _preferenceRepositoryProvider = AutoDisposeNotifierProvider<
-  _PreferenceRepository,
-  Raw<Stream<Map<String, Object>>>
->.internal(
+    _PreferenceRepository, Raw<Stream<Map<String, Object>>>>.internal(
   _PreferenceRepository.new,
   name: r'_preferenceRepositoryProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$preferenceRepositoryHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$preferenceRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$PreferenceRepository =
-    AutoDisposeNotifier<Raw<Stream<Map<String, Object>>>>;
+typedef _$PreferenceRepository
+    = AutoDisposeNotifier<Raw<Stream<Map<String, Object>>>>;
 String _$unifiedPreferenceSettingsRepositoryHash() =>
     r'35aa16ffa7aa1453c8331ed7470ef85a68d27178';
 
 abstract class _$UnifiedPreferenceSettingsRepository
-    extends
-        BuildlessAutoDisposeStreamNotifier<
-          Map<String, PreferenceSettingGroup>
-        > {
+    extends BuildlessAutoDisposeStreamNotifier<
+        Map<String, PreferenceSettingGroup>> {
   late final PreferencePartition partition;
 
   Stream<Map<String, PreferenceSettingGroup>> build(
@@ -380,14 +385,18 @@ class UnifiedPreferenceSettingsRepositoryFamily
   UnifiedPreferenceSettingsRepositoryProvider call(
     PreferencePartition partition,
   ) {
-    return UnifiedPreferenceSettingsRepositoryProvider(partition);
+    return UnifiedPreferenceSettingsRepositoryProvider(
+      partition,
+    );
   }
 
   @override
   UnifiedPreferenceSettingsRepositoryProvider getProviderOverride(
     covariant UnifiedPreferenceSettingsRepositoryProvider provider,
   ) {
-    return call(provider.partition);
+    return call(
+      provider.partition,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -407,27 +416,25 @@ class UnifiedPreferenceSettingsRepositoryFamily
 
 /// See also [UnifiedPreferenceSettingsRepository].
 class UnifiedPreferenceSettingsRepositoryProvider
-    extends
-        AutoDisposeStreamNotifierProviderImpl<
-          UnifiedPreferenceSettingsRepository,
-          Map<String, PreferenceSettingGroup>
-        > {
+    extends AutoDisposeStreamNotifierProviderImpl<
+        UnifiedPreferenceSettingsRepository,
+        Map<String, PreferenceSettingGroup>> {
   /// See also [UnifiedPreferenceSettingsRepository].
-  UnifiedPreferenceSettingsRepositoryProvider(PreferencePartition partition)
-    : this._internal(
-        () => UnifiedPreferenceSettingsRepository()..partition = partition,
-        from: unifiedPreferenceSettingsRepositoryProvider,
-        name: r'unifiedPreferenceSettingsRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$unifiedPreferenceSettingsRepositoryHash,
-        dependencies: UnifiedPreferenceSettingsRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            UnifiedPreferenceSettingsRepositoryFamily
-                ._allTransitiveDependencies,
-        partition: partition,
-      );
+  UnifiedPreferenceSettingsRepositoryProvider(
+    PreferencePartition partition,
+  ) : this._internal(
+          () => UnifiedPreferenceSettingsRepository()..partition = partition,
+          from: unifiedPreferenceSettingsRepositoryProvider,
+          name: r'unifiedPreferenceSettingsRepositoryProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$unifiedPreferenceSettingsRepositoryHash,
+          dependencies: UnifiedPreferenceSettingsRepositoryFamily._dependencies,
+          allTransitiveDependencies: UnifiedPreferenceSettingsRepositoryFamily
+              ._allTransitiveDependencies,
+          partition: partition,
+        );
 
   UnifiedPreferenceSettingsRepositoryProvider._internal(
     super._createNotifier, {
@@ -445,7 +452,9 @@ class UnifiedPreferenceSettingsRepositoryProvider
   Stream<Map<String, PreferenceSettingGroup>> runNotifierBuild(
     covariant UnifiedPreferenceSettingsRepository notifier,
   ) {
-    return notifier.build(partition);
+    return notifier.build(
+      partition,
+    );
   }
 
   @override
@@ -465,11 +474,8 @@ class UnifiedPreferenceSettingsRepositoryProvider
   }
 
   @override
-  AutoDisposeStreamNotifierProviderElement<
-    UnifiedPreferenceSettingsRepository,
-    Map<String, PreferenceSettingGroup>
-  >
-  createElement() {
+  AutoDisposeStreamNotifierProviderElement<UnifiedPreferenceSettingsRepository,
+      Map<String, PreferenceSettingGroup>> createElement() {
     return _UnifiedPreferenceSettingsRepositoryProviderElement(this);
   }
 
@@ -491,20 +497,16 @@ class UnifiedPreferenceSettingsRepositoryProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin UnifiedPreferenceSettingsRepositoryRef
-    on
-        AutoDisposeStreamNotifierProviderRef<
-          Map<String, PreferenceSettingGroup>
-        > {
+    on AutoDisposeStreamNotifierProviderRef<
+        Map<String, PreferenceSettingGroup>> {
   /// The parameter `partition` of this provider.
   PreferencePartition get partition;
 }
 
 class _UnifiedPreferenceSettingsRepositoryProviderElement
-    extends
-        AutoDisposeStreamNotifierProviderElement<
-          UnifiedPreferenceSettingsRepository,
-          Map<String, PreferenceSettingGroup>
-        >
+    extends AutoDisposeStreamNotifierProviderElement<
+        UnifiedPreferenceSettingsRepository,
+        Map<String, PreferenceSettingGroup>>
     with UnifiedPreferenceSettingsRepositoryRef {
   _UnifiedPreferenceSettingsRepositoryProviderElement(super.provider);
 
@@ -543,14 +545,20 @@ class PreferenceSettingsGroupRepositoryFamily
     PreferencePartition partition,
     String groupName,
   ) {
-    return PreferenceSettingsGroupRepositoryProvider(partition, groupName);
+    return PreferenceSettingsGroupRepositoryProvider(
+      partition,
+      groupName,
+    );
   }
 
   @override
   PreferenceSettingsGroupRepositoryProvider getProviderOverride(
     covariant PreferenceSettingsGroupRepositoryProvider provider,
   ) {
-    return call(provider.partition, provider.groupName);
+    return call(
+      provider.partition,
+      provider.groupName,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -570,32 +578,28 @@ class PreferenceSettingsGroupRepositoryFamily
 
 /// See also [PreferenceSettingsGroupRepository].
 class PreferenceSettingsGroupRepositoryProvider
-    extends
-        AutoDisposeStreamNotifierProviderImpl<
-          PreferenceSettingsGroupRepository,
-          PreferenceSettingGroup
-        > {
+    extends AutoDisposeStreamNotifierProviderImpl<
+        PreferenceSettingsGroupRepository, PreferenceSettingGroup> {
   /// See also [PreferenceSettingsGroupRepository].
   PreferenceSettingsGroupRepositoryProvider(
     PreferencePartition partition,
     String groupName,
   ) : this._internal(
-        () =>
-            PreferenceSettingsGroupRepository()
-              ..partition = partition
-              ..groupName = groupName,
-        from: preferenceSettingsGroupRepositoryProvider,
-        name: r'preferenceSettingsGroupRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$preferenceSettingsGroupRepositoryHash,
-        dependencies: PreferenceSettingsGroupRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            PreferenceSettingsGroupRepositoryFamily._allTransitiveDependencies,
-        partition: partition,
-        groupName: groupName,
-      );
+          () => PreferenceSettingsGroupRepository()
+            ..partition = partition
+            ..groupName = groupName,
+          from: preferenceSettingsGroupRepositoryProvider,
+          name: r'preferenceSettingsGroupRepositoryProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$preferenceSettingsGroupRepositoryHash,
+          dependencies: PreferenceSettingsGroupRepositoryFamily._dependencies,
+          allTransitiveDependencies: PreferenceSettingsGroupRepositoryFamily
+              ._allTransitiveDependencies,
+          partition: partition,
+          groupName: groupName,
+        );
 
   PreferenceSettingsGroupRepositoryProvider._internal(
     super._createNotifier, {
@@ -615,7 +619,10 @@ class PreferenceSettingsGroupRepositoryProvider
   Stream<PreferenceSettingGroup> runNotifierBuild(
     covariant PreferenceSettingsGroupRepository notifier,
   ) {
-    return notifier.build(partition, groupName);
+    return notifier.build(
+      partition,
+      groupName,
+    );
   }
 
   @override
@@ -623,10 +630,9 @@ class PreferenceSettingsGroupRepositoryProvider
     return ProviderOverride(
       origin: this,
       override: PreferenceSettingsGroupRepositoryProvider._internal(
-        () =>
-            create()
-              ..partition = partition
-              ..groupName = groupName,
+        () => create()
+          ..partition = partition
+          ..groupName = groupName,
         from: from,
         name: null,
         dependencies: null,
@@ -639,11 +645,8 @@ class PreferenceSettingsGroupRepositoryProvider
   }
 
   @override
-  AutoDisposeStreamNotifierProviderElement<
-    PreferenceSettingsGroupRepository,
-    PreferenceSettingGroup
-  >
-  createElement() {
+  AutoDisposeStreamNotifierProviderElement<PreferenceSettingsGroupRepository,
+      PreferenceSettingGroup> createElement() {
     return _PreferenceSettingsGroupRepositoryProviderElement(this);
   }
 
@@ -676,12 +679,9 @@ mixin PreferenceSettingsGroupRepositoryRef
 }
 
 class _PreferenceSettingsGroupRepositoryProviderElement
-    extends
-        AutoDisposeStreamNotifierProviderElement<
-          PreferenceSettingsGroupRepository,
-          PreferenceSettingGroup
-        >
-    with PreferenceSettingsGroupRepositoryRef {
+    extends AutoDisposeStreamNotifierProviderElement<
+        PreferenceSettingsGroupRepository,
+        PreferenceSettingGroup> with PreferenceSettingsGroupRepositoryRef {
   _PreferenceSettingsGroupRepositoryProviderElement(super.provider);
 
   @override
@@ -691,6 +691,5 @@ class _PreferenceSettingsGroupRepositoryProviderElement
   String get groupName =>
       (origin as PreferenceSettingsGroupRepositoryProvider).groupName;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

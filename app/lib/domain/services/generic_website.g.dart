@@ -13,15 +13,14 @@ String _$genericWebsiteServiceHash() =>
 @ProviderFor(GenericWebsiteService)
 final genericWebsiteServiceProvider =
     NotifierProvider<GenericWebsiteService, void>.internal(
-      GenericWebsiteService.new,
-      name: r'genericWebsiteServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$genericWebsiteServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  GenericWebsiteService.new,
+  name: r'genericWebsiteServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$genericWebsiteServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$GenericWebsiteService = Notifier<void>;
 // ignore_for_file: type=lint

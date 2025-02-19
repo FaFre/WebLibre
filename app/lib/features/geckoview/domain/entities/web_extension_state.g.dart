@@ -69,6 +69,7 @@ class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
   WebExtensionState icon(EquatableImage? icon) => this(icon: icon);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebExtensionState(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -85,41 +86,34 @@ class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
     Object? icon = const $CopyWithPlaceholder(),
   }) {
     return WebExtensionState(
-      extensionId:
-          extensionId == const $CopyWithPlaceholder()
-              ? _value.extensionId
-              // ignore: cast_nullable_to_non_nullable
-              : extensionId as String,
-      enabled:
-          enabled == const $CopyWithPlaceholder()
-              ? _value.enabled
-              // ignore: cast_nullable_to_non_nullable
-              : enabled as bool,
-      title:
-          title == const $CopyWithPlaceholder()
-              ? _value.title
-              // ignore: cast_nullable_to_non_nullable
-              : title as String?,
-      badgeText:
-          badgeText == const $CopyWithPlaceholder()
-              ? _value.badgeText
-              // ignore: cast_nullable_to_non_nullable
-              : badgeText as String?,
-      badgeTextColor:
-          badgeTextColor == const $CopyWithPlaceholder()
-              ? _value.badgeTextColor
-              // ignore: cast_nullable_to_non_nullable
-              : badgeTextColor as Color?,
-      badgeBackgroundColor:
-          badgeBackgroundColor == const $CopyWithPlaceholder()
-              ? _value.badgeBackgroundColor
-              // ignore: cast_nullable_to_non_nullable
-              : badgeBackgroundColor as Color?,
-      icon:
-          icon == const $CopyWithPlaceholder()
-              ? _value.icon
-              // ignore: cast_nullable_to_non_nullable
-              : icon as EquatableImage?,
+      extensionId: extensionId == const $CopyWithPlaceholder()
+          ? _value.extensionId
+          // ignore: cast_nullable_to_non_nullable
+          : extensionId as String,
+      enabled: enabled == const $CopyWithPlaceholder()
+          ? _value.enabled
+          // ignore: cast_nullable_to_non_nullable
+          : enabled as bool,
+      title: title == const $CopyWithPlaceholder()
+          ? _value.title
+          // ignore: cast_nullable_to_non_nullable
+          : title as String?,
+      badgeText: badgeText == const $CopyWithPlaceholder()
+          ? _value.badgeText
+          // ignore: cast_nullable_to_non_nullable
+          : badgeText as String?,
+      badgeTextColor: badgeTextColor == const $CopyWithPlaceholder()
+          ? _value.badgeTextColor
+          // ignore: cast_nullable_to_non_nullable
+          : badgeTextColor as Color?,
+      badgeBackgroundColor: badgeBackgroundColor == const $CopyWithPlaceholder()
+          ? _value.badgeBackgroundColor
+          // ignore: cast_nullable_to_non_nullable
+          : badgeBackgroundColor as Color?,
+      icon: icon == const $CopyWithPlaceholder()
+          ? _value.icon
+          // ignore: cast_nullable_to_non_nullable
+          : icon as EquatableImage?,
     );
   }
 }

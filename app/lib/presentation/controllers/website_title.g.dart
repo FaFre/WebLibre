@@ -39,13 +39,21 @@ class PageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
   const PageInfoFamily();
 
   /// See also [pageInfo].
-  PageInfoProvider call(Uri url) {
-    return PageInfoProvider(url);
+  PageInfoProvider call(
+    Uri url,
+  ) {
+    return PageInfoProvider(
+      url,
+    );
   }
 
   @override
-  PageInfoProvider getProviderOverride(covariant PageInfoProvider provider) {
-    return call(provider.url);
+  PageInfoProvider getProviderOverride(
+    covariant PageInfoProvider provider,
+  ) {
+    return call(
+      provider.url,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -66,19 +74,23 @@ class PageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
 /// See also [pageInfo].
 class PageInfoProvider extends FutureProvider<WebPageInfo> {
   /// See also [pageInfo].
-  PageInfoProvider(Uri url)
-    : this._internal(
-        (ref) => pageInfo(ref as PageInfoRef, url),
-        from: pageInfoProvider,
-        name: r'pageInfoProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$pageInfoHash,
-        dependencies: PageInfoFamily._dependencies,
-        allTransitiveDependencies: PageInfoFamily._allTransitiveDependencies,
-        url: url,
-      );
+  PageInfoProvider(
+    Uri url,
+  ) : this._internal(
+          (ref) => pageInfo(
+            ref as PageInfoRef,
+            url,
+          ),
+          from: pageInfoProvider,
+          name: r'pageInfoProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$pageInfoHash,
+          dependencies: PageInfoFamily._dependencies,
+          allTransitiveDependencies: PageInfoFamily._allTransitiveDependencies,
+          url: url,
+        );
 
   PageInfoProvider._internal(
     super._createNotifier, {
@@ -143,6 +155,5 @@ class _PageInfoProviderElement extends FutureProviderElement<WebPageInfo>
   @override
   Uri get url => (origin as PageInfoProvider).url;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

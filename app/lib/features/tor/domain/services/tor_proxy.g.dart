@@ -12,15 +12,14 @@ String _$torProxyServiceHash() => r'85ed8e3b49007aa56e6b82ff802a3e0ce567a0c8';
 @ProviderFor(TorProxyService)
 final torProxyServiceProvider =
     AsyncNotifierProvider<TorProxyService, int?>.internal(
-      TorProxyService.new,
-      name: r'torProxyServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$torProxyServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  TorProxyService.new,
+  name: r'torProxyServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$torProxyServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$TorProxyService = AsyncNotifier<int?>;
 // ignore_for_file: type=lint

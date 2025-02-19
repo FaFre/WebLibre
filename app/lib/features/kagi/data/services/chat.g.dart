@@ -12,15 +12,14 @@ String _$kagiChatServiceHash() => r'a112b70b42fe9d650c9d4dc643bf965ddce7bfa6';
 @ProviderFor(KagiChatService)
 final kagiChatServiceProvider =
     NotifierProvider<KagiChatService, void>.internal(
-      KagiChatService.new,
-      name: r'kagiChatServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$kagiChatServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  KagiChatService.new,
+  name: r'kagiChatServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$kagiChatServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$KagiChatService = Notifier<void>;
 // ignore_for_file: type=lint

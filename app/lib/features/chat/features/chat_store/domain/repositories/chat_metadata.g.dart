@@ -34,7 +34,9 @@ abstract class _$ChatMetadataRepository
     extends BuildlessAutoDisposeNotifier<void> {
   late final String chatId;
 
-  void build(String chatId);
+  void build(
+    String chatId,
+  );
 }
 
 /// See also [ChatMetadataRepository].
@@ -47,15 +49,21 @@ class ChatMetadataRepositoryFamily extends Family<void> {
   const ChatMetadataRepositoryFamily();
 
   /// See also [ChatMetadataRepository].
-  ChatMetadataRepositoryProvider call(String chatId) {
-    return ChatMetadataRepositoryProvider(chatId);
+  ChatMetadataRepositoryProvider call(
+    String chatId,
+  ) {
+    return ChatMetadataRepositoryProvider(
+      chatId,
+    );
   }
 
   @override
   ChatMetadataRepositoryProvider getProviderOverride(
     covariant ChatMetadataRepositoryProvider provider,
   ) {
-    return call(provider.chatId);
+    return call(
+      provider.chatId,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -77,20 +85,21 @@ class ChatMetadataRepositoryFamily extends Family<void> {
 class ChatMetadataRepositoryProvider
     extends AutoDisposeNotifierProviderImpl<ChatMetadataRepository, void> {
   /// See also [ChatMetadataRepository].
-  ChatMetadataRepositoryProvider(String chatId)
-    : this._internal(
-        () => ChatMetadataRepository()..chatId = chatId,
-        from: chatMetadataRepositoryProvider,
-        name: r'chatMetadataRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$chatMetadataRepositoryHash,
-        dependencies: ChatMetadataRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            ChatMetadataRepositoryFamily._allTransitiveDependencies,
-        chatId: chatId,
-      );
+  ChatMetadataRepositoryProvider(
+    String chatId,
+  ) : this._internal(
+          () => ChatMetadataRepository()..chatId = chatId,
+          from: chatMetadataRepositoryProvider,
+          name: r'chatMetadataRepositoryProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$chatMetadataRepositoryHash,
+          dependencies: ChatMetadataRepositoryFamily._dependencies,
+          allTransitiveDependencies:
+              ChatMetadataRepositoryFamily._allTransitiveDependencies,
+          chatId: chatId,
+        );
 
   ChatMetadataRepositoryProvider._internal(
     super._createNotifier, {
@@ -105,8 +114,12 @@ class ChatMetadataRepositoryProvider
   final String chatId;
 
   @override
-  void runNotifierBuild(covariant ChatMetadataRepository notifier) {
-    return notifier.build(chatId);
+  void runNotifierBuild(
+    covariant ChatMetadataRepository notifier,
+  ) {
+    return notifier.build(
+      chatId,
+    );
   }
 
   @override
@@ -127,7 +140,7 @@ class ChatMetadataRepositoryProvider
 
   @override
   AutoDisposeNotifierProviderElement<ChatMetadataRepository, void>
-  createElement() {
+      createElement() {
     return _ChatMetadataRepositoryProviderElement(this);
   }
 
@@ -160,6 +173,5 @@ class _ChatMetadataRepositoryProviderElement
   @override
   String get chatId => (origin as ChatMetadataRepositoryProvider).chatId;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -19,7 +19,11 @@ abstract class _$WebPageInfoCWProxy {
   /// ```dart
   /// WebPageInfo(...).copyWith(id: 12, name: "My name")
   /// ````
-  WebPageInfo call({Uri url, String? title, BrowserIcon? favicon});
+  WebPageInfo call({
+    Uri url,
+    String? title,
+    BrowserIcon? favicon,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfWebPageInfo.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfWebPageInfo.copyWith.fieldName(...)`
@@ -38,6 +42,7 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
   WebPageInfo favicon(BrowserIcon? favicon) => this(favicon: favicon);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebPageInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -50,21 +55,18 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
     Object? favicon = const $CopyWithPlaceholder(),
   }) {
     return WebPageInfo(
-      url:
-          url == const $CopyWithPlaceholder()
-              ? _value.url
-              // ignore: cast_nullable_to_non_nullable
-              : url as Uri,
-      title:
-          title == const $CopyWithPlaceholder()
-              ? _value.title
-              // ignore: cast_nullable_to_non_nullable
-              : title as String?,
-      favicon:
-          favicon == const $CopyWithPlaceholder()
-              ? _value.favicon
-              // ignore: cast_nullable_to_non_nullable
-              : favicon as BrowserIcon?,
+      url: url == const $CopyWithPlaceholder()
+          ? _value.url
+          // ignore: cast_nullable_to_non_nullable
+          : url as Uri,
+      title: title == const $CopyWithPlaceholder()
+          ? _value.title
+          // ignore: cast_nullable_to_non_nullable
+          : title as String?,
+      favicon: favicon == const $CopyWithPlaceholder()
+          ? _value.favicon
+          // ignore: cast_nullable_to_non_nullable
+          : favicon as BrowserIcon?,
     );
   }
 }

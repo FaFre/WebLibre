@@ -13,15 +13,14 @@ String _$startProxyControllerHash() =>
 @ProviderFor(StartProxyController)
 final startProxyControllerProvider =
     AutoDisposeNotifierProvider<StartProxyController, void>.internal(
-      StartProxyController.new,
-      name: r'startProxyControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$startProxyControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  StartProxyController.new,
+  name: r'startProxyControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$startProxyControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$StartProxyController = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint

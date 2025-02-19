@@ -34,7 +34,9 @@ abstract class _$WebExtensionsState
     extends BuildlessNotifier<Map<String, WebExtensionState>> {
   late final WebExtensionActionType actionType;
 
-  Map<String, WebExtensionState> build(WebExtensionActionType actionType);
+  Map<String, WebExtensionState> build(
+    WebExtensionActionType actionType,
+  );
 }
 
 /// See also [WebExtensionsState].
@@ -47,15 +49,21 @@ class WebExtensionsStateFamily extends Family<Map<String, WebExtensionState>> {
   const WebExtensionsStateFamily();
 
   /// See also [WebExtensionsState].
-  WebExtensionsStateProvider call(WebExtensionActionType actionType) {
-    return WebExtensionsStateProvider(actionType);
+  WebExtensionsStateProvider call(
+    WebExtensionActionType actionType,
+  ) {
+    return WebExtensionsStateProvider(
+      actionType,
+    );
   }
 
   @override
   WebExtensionsStateProvider getProviderOverride(
     covariant WebExtensionsStateProvider provider,
   ) {
-    return call(provider.actionType);
+    return call(
+      provider.actionType,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -74,27 +82,24 @@ class WebExtensionsStateFamily extends Family<Map<String, WebExtensionState>> {
 }
 
 /// See also [WebExtensionsState].
-class WebExtensionsStateProvider
-    extends
-        NotifierProviderImpl<
-          WebExtensionsState,
-          Map<String, WebExtensionState>
-        > {
+class WebExtensionsStateProvider extends NotifierProviderImpl<
+    WebExtensionsState, Map<String, WebExtensionState>> {
   /// See also [WebExtensionsState].
-  WebExtensionsStateProvider(WebExtensionActionType actionType)
-    : this._internal(
-        () => WebExtensionsState()..actionType = actionType,
-        from: webExtensionsStateProvider,
-        name: r'webExtensionsStateProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$webExtensionsStateHash,
-        dependencies: WebExtensionsStateFamily._dependencies,
-        allTransitiveDependencies:
-            WebExtensionsStateFamily._allTransitiveDependencies,
-        actionType: actionType,
-      );
+  WebExtensionsStateProvider(
+    WebExtensionActionType actionType,
+  ) : this._internal(
+          () => WebExtensionsState()..actionType = actionType,
+          from: webExtensionsStateProvider,
+          name: r'webExtensionsStateProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$webExtensionsStateHash,
+          dependencies: WebExtensionsStateFamily._dependencies,
+          allTransitiveDependencies:
+              WebExtensionsStateFamily._allTransitiveDependencies,
+          actionType: actionType,
+        );
 
   WebExtensionsStateProvider._internal(
     super._createNotifier, {
@@ -112,7 +117,9 @@ class WebExtensionsStateProvider
   Map<String, WebExtensionState> runNotifierBuild(
     covariant WebExtensionsState notifier,
   ) {
-    return notifier.build(actionType);
+    return notifier.build(
+      actionType,
+    );
   }
 
   @override
@@ -133,7 +140,7 @@ class WebExtensionsStateProvider
 
   @override
   NotifierProviderElement<WebExtensionsState, Map<String, WebExtensionState>>
-  createElement() {
+      createElement() {
     return _WebExtensionsStateProviderElement(this);
   }
 
@@ -160,19 +167,14 @@ mixin WebExtensionsStateRef
   WebExtensionActionType get actionType;
 }
 
-class _WebExtensionsStateProviderElement
-    extends
-        NotifierProviderElement<
-          WebExtensionsState,
-          Map<String, WebExtensionState>
-        >
-    with WebExtensionsStateRef {
+class _WebExtensionsStateProviderElement extends NotifierProviderElement<
+    WebExtensionsState,
+    Map<String, WebExtensionState>> with WebExtensionsStateRef {
   _WebExtensionsStateProviderElement(super.provider);
 
   @override
   WebExtensionActionType get actionType =>
       (origin as WebExtensionsStateProvider).actionType;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

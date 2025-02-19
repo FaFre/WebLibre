@@ -13,15 +13,14 @@ String _$kagiSessionServiceHash() =>
 @ProviderFor(KagiSessionService)
 final kagiSessionServiceProvider =
     AutoDisposeNotifierProvider<KagiSessionService, void>.internal(
-      KagiSessionService.new,
-      name: r'kagiSessionServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$kagiSessionServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  KagiSessionService.new,
+  name: r'kagiSessionServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$kagiSessionServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$KagiSessionService = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint

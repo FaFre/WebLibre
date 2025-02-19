@@ -39,15 +39,24 @@ class TriggerBangSearchFamily extends Family<AsyncValue<Uri>> {
   const TriggerBangSearchFamily();
 
   /// See also [triggerBangSearch].
-  TriggerBangSearchProvider call(BangData bang, String searchQuery) {
-    return TriggerBangSearchProvider(bang, searchQuery);
+  TriggerBangSearchProvider call(
+    BangData bang,
+    String searchQuery,
+  ) {
+    return TriggerBangSearchProvider(
+      bang,
+      searchQuery,
+    );
   }
 
   @override
   TriggerBangSearchProvider getProviderOverride(
     covariant TriggerBangSearchProvider provider,
   ) {
-    return call(provider.bang, provider.searchQuery);
+    return call(
+      provider.bang,
+      provider.searchQuery,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -68,22 +77,27 @@ class TriggerBangSearchFamily extends Family<AsyncValue<Uri>> {
 /// See also [triggerBangSearch].
 class TriggerBangSearchProvider extends AutoDisposeFutureProvider<Uri> {
   /// See also [triggerBangSearch].
-  TriggerBangSearchProvider(BangData bang, String searchQuery)
-    : this._internal(
-        (ref) =>
-            triggerBangSearch(ref as TriggerBangSearchRef, bang, searchQuery),
-        from: triggerBangSearchProvider,
-        name: r'triggerBangSearchProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$triggerBangSearchHash,
-        dependencies: TriggerBangSearchFamily._dependencies,
-        allTransitiveDependencies:
-            TriggerBangSearchFamily._allTransitiveDependencies,
-        bang: bang,
-        searchQuery: searchQuery,
-      );
+  TriggerBangSearchProvider(
+    BangData bang,
+    String searchQuery,
+  ) : this._internal(
+          (ref) => triggerBangSearch(
+            ref as TriggerBangSearchRef,
+            bang,
+            searchQuery,
+          ),
+          from: triggerBangSearchProvider,
+          name: r'triggerBangSearchProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$triggerBangSearchHash,
+          dependencies: TriggerBangSearchFamily._dependencies,
+          allTransitiveDependencies:
+              TriggerBangSearchFamily._allTransitiveDependencies,
+          bang: bang,
+          searchQuery: searchQuery,
+        );
 
   TriggerBangSearchProvider._internal(
     super._createNotifier, {
@@ -151,8 +165,7 @@ mixin TriggerBangSearchRef on AutoDisposeFutureProviderRef<Uri> {
 }
 
 class _TriggerBangSearchProviderElement
-    extends AutoDisposeFutureProviderElement<Uri>
-    with TriggerBangSearchRef {
+    extends AutoDisposeFutureProviderElement<Uri> with TriggerBangSearchRef {
   _TriggerBangSearchProviderElement(super.provider);
 
   @override
@@ -160,6 +173,5 @@ class _TriggerBangSearchProviderElement
   @override
   String get searchQuery => (origin as TriggerBangSearchProvider).searchQuery;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

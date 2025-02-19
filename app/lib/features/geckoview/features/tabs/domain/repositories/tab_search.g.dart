@@ -34,7 +34,9 @@ abstract class _$TabSearchRepository
     extends BuildlessAutoDisposeAsyncNotifier<List<TabQueryResult>?> {
   late final TabSearchPartition partition;
 
-  FutureOr<List<TabQueryResult>?> build(TabSearchPartition partition);
+  FutureOr<List<TabQueryResult>?> build(
+    TabSearchPartition partition,
+  );
 }
 
 /// See also [TabSearchRepository].
@@ -48,15 +50,21 @@ class TabSearchRepositoryFamily
   const TabSearchRepositoryFamily();
 
   /// See also [TabSearchRepository].
-  TabSearchRepositoryProvider call(TabSearchPartition partition) {
-    return TabSearchRepositoryProvider(partition);
+  TabSearchRepositoryProvider call(
+    TabSearchPartition partition,
+  ) {
+    return TabSearchRepositoryProvider(
+      partition,
+    );
   }
 
   @override
   TabSearchRepositoryProvider getProviderOverride(
     covariant TabSearchRepositoryProvider provider,
   ) {
-    return call(provider.partition);
+    return call(
+      provider.partition,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -75,27 +83,24 @@ class TabSearchRepositoryFamily
 }
 
 /// See also [TabSearchRepository].
-class TabSearchRepositoryProvider
-    extends
-        AutoDisposeAsyncNotifierProviderImpl<
-          TabSearchRepository,
-          List<TabQueryResult>?
-        > {
+class TabSearchRepositoryProvider extends AutoDisposeAsyncNotifierProviderImpl<
+    TabSearchRepository, List<TabQueryResult>?> {
   /// See also [TabSearchRepository].
-  TabSearchRepositoryProvider(TabSearchPartition partition)
-    : this._internal(
-        () => TabSearchRepository()..partition = partition,
-        from: tabSearchRepositoryProvider,
-        name: r'tabSearchRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$tabSearchRepositoryHash,
-        dependencies: TabSearchRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            TabSearchRepositoryFamily._allTransitiveDependencies,
-        partition: partition,
-      );
+  TabSearchRepositoryProvider(
+    TabSearchPartition partition,
+  ) : this._internal(
+          () => TabSearchRepository()..partition = partition,
+          from: tabSearchRepositoryProvider,
+          name: r'tabSearchRepositoryProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$tabSearchRepositoryHash,
+          dependencies: TabSearchRepositoryFamily._dependencies,
+          allTransitiveDependencies:
+              TabSearchRepositoryFamily._allTransitiveDependencies,
+          partition: partition,
+        );
 
   TabSearchRepositoryProvider._internal(
     super._createNotifier, {
@@ -113,7 +118,9 @@ class TabSearchRepositoryProvider
   FutureOr<List<TabQueryResult>?> runNotifierBuild(
     covariant TabSearchRepository notifier,
   ) {
-    return notifier.build(partition);
+    return notifier.build(
+      partition,
+    );
   }
 
   @override
@@ -133,11 +140,8 @@ class TabSearchRepositoryProvider
   }
 
   @override
-  AutoDisposeAsyncNotifierProviderElement<
-    TabSearchRepository,
-    List<TabQueryResult>?
-  >
-  createElement() {
+  AutoDisposeAsyncNotifierProviderElement<TabSearchRepository,
+      List<TabQueryResult>?> createElement() {
     return _TabSearchRepositoryProviderElement(this);
   }
 
@@ -164,18 +168,13 @@ mixin TabSearchRepositoryRef
 }
 
 class _TabSearchRepositoryProviderElement
-    extends
-        AutoDisposeAsyncNotifierProviderElement<
-          TabSearchRepository,
-          List<TabQueryResult>?
-        >
-    with TabSearchRepositoryRef {
+    extends AutoDisposeAsyncNotifierProviderElement<TabSearchRepository,
+        List<TabQueryResult>?> with TabSearchRepositoryRef {
   _TabSearchRepositoryProviderElement(super.provider);
 
   @override
   TabSearchPartition get partition =>
       (origin as TabSearchRepositoryProvider).partition;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

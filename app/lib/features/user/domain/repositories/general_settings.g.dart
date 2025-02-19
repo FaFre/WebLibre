@@ -13,15 +13,14 @@ String _$generalSettingsRepositoryHash() =>
 @ProviderFor(GeneralSettingsRepository)
 final generalSettingsRepositoryProvider =
     NotifierProvider<GeneralSettingsRepository, GeneralSettings>.internal(
-      GeneralSettingsRepository.new,
-      name: r'generalSettingsRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$generalSettingsRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  GeneralSettingsRepository.new,
+  name: r'generalSettingsRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$generalSettingsRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$GeneralSettingsRepository = Notifier<GeneralSettings>;
 // ignore_for_file: type=lint

@@ -7,9 +7,9 @@ part of 'chat_metadata.dart';
 // **************************************************************************
 
 ChatMetadata _$ChatMetadataFromJson(Map<String, dynamic> json) => ChatMetadata(
-  mainDocumentId: json['mainDocumentId'] as String?,
-  contextId: json['contextId'] as String?,
-);
+      mainDocumentId: json['mainDocumentId'] as String?,
+      contextId: json['contextId'] as String?,
+    );
 
 Map<String, dynamic> _$ChatMetadataToJson(ChatMetadata instance) =>
     <String, dynamic>{

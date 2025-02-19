@@ -39,13 +39,21 @@ class TabStateFamily extends Family<TabState?> {
   const TabStateFamily();
 
   /// See also [tabState].
-  TabStateProvider call(String? tabId) {
-    return TabStateProvider(tabId);
+  TabStateProvider call(
+    String? tabId,
+  ) {
+    return TabStateProvider(
+      tabId,
+    );
   }
 
   @override
-  TabStateProvider getProviderOverride(covariant TabStateProvider provider) {
-    return call(provider.tabId);
+  TabStateProvider getProviderOverride(
+    covariant TabStateProvider provider,
+  ) {
+    return call(
+      provider.tabId,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -66,19 +74,23 @@ class TabStateFamily extends Family<TabState?> {
 /// See also [tabState].
 class TabStateProvider extends AutoDisposeProvider<TabState?> {
   /// See also [tabState].
-  TabStateProvider(String? tabId)
-    : this._internal(
-        (ref) => tabState(ref as TabStateRef, tabId),
-        from: tabStateProvider,
-        name: r'tabStateProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$tabStateHash,
-        dependencies: TabStateFamily._dependencies,
-        allTransitiveDependencies: TabStateFamily._allTransitiveDependencies,
-        tabId: tabId,
-      );
+  TabStateProvider(
+    String? tabId,
+  ) : this._internal(
+          (ref) => tabState(
+            ref as TabStateRef,
+            tabId,
+          ),
+          from: tabStateProvider,
+          name: r'tabStateProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$tabStateHash,
+          dependencies: TabStateFamily._dependencies,
+          allTransitiveDependencies: TabStateFamily._allTransitiveDependencies,
+          tabId: tabId,
+        );
 
   TabStateProvider._internal(
     super._createNotifier, {
@@ -93,7 +105,9 @@ class TabStateProvider extends AutoDisposeProvider<TabState?> {
   final String? tabId;
 
   @override
-  Override overrideWith(TabState? Function(TabStateRef provider) create) {
+  Override overrideWith(
+    TabState? Function(TabStateRef provider) create,
+  ) {
     return ProviderOverride(
       origin: this,
       override: TabStateProvider._internal(
@@ -149,10 +163,9 @@ String _$selectedTabStateHash() => r'dbd36af7af286bd9d079f30e8e11bbda23bf7728';
 final selectedTabStateProvider = AutoDisposeProvider<TabState?>.internal(
   selectedTabState,
   name: r'selectedTabStateProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$selectedTabStateHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedTabStateHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -166,15 +179,13 @@ String _$tabStatesHash() => r'296d85ec016b22236b5830fce6b01cda81fbc02d';
 @ProviderFor(TabStates)
 final tabStatesProvider =
     NotifierProvider<TabStates, Map<String, TabState>>.internal(
-      TabStates.new,
-      name: r'tabStatesProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$tabStatesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  TabStates.new,
+  name: r'tabStatesProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$tabStatesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$TabStates = Notifier<Map<String, TabState>>;
 // ignore_for_file: type=lint

@@ -53,14 +53,18 @@ class SearchSuggestionsRepositoryFamily
   SearchSuggestionsRepositoryProvider call(
     ISearchSuggestionProvider suggestionsProvider,
   ) {
-    return SearchSuggestionsRepositoryProvider(suggestionsProvider);
+    return SearchSuggestionsRepositoryProvider(
+      suggestionsProvider,
+    );
   }
 
   @override
   SearchSuggestionsRepositoryProvider getProviderOverride(
     covariant SearchSuggestionsRepositoryProvider provider,
   ) {
-    return call(provider.suggestionsProvider);
+    return call(
+      provider.suggestionsProvider,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -79,30 +83,25 @@ class SearchSuggestionsRepositoryFamily
 }
 
 /// See also [SearchSuggestionsRepository].
-class SearchSuggestionsRepositoryProvider
-    extends
-        NotifierProviderImpl<
-          SearchSuggestionsRepository,
-          Raw<Stream<List<String>>>
-        > {
+class SearchSuggestionsRepositoryProvider extends NotifierProviderImpl<
+    SearchSuggestionsRepository, Raw<Stream<List<String>>>> {
   /// See also [SearchSuggestionsRepository].
   SearchSuggestionsRepositoryProvider(
     ISearchSuggestionProvider suggestionsProvider,
   ) : this._internal(
-        () =>
-            SearchSuggestionsRepository()
-              ..suggestionsProvider = suggestionsProvider,
-        from: searchSuggestionsRepositoryProvider,
-        name: r'searchSuggestionsRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$searchSuggestionsRepositoryHash,
-        dependencies: SearchSuggestionsRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            SearchSuggestionsRepositoryFamily._allTransitiveDependencies,
-        suggestionsProvider: suggestionsProvider,
-      );
+          () => SearchSuggestionsRepository()
+            ..suggestionsProvider = suggestionsProvider,
+          from: searchSuggestionsRepositoryProvider,
+          name: r'searchSuggestionsRepositoryProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$searchSuggestionsRepositoryHash,
+          dependencies: SearchSuggestionsRepositoryFamily._dependencies,
+          allTransitiveDependencies:
+              SearchSuggestionsRepositoryFamily._allTransitiveDependencies,
+          suggestionsProvider: suggestionsProvider,
+        );
 
   SearchSuggestionsRepositoryProvider._internal(
     super._createNotifier, {
@@ -120,7 +119,9 @@ class SearchSuggestionsRepositoryProvider
   Raw<Stream<List<String>>> runNotifierBuild(
     covariant SearchSuggestionsRepository notifier,
   ) {
-    return notifier.build(suggestionsProvider);
+    return notifier.build(
+      suggestionsProvider,
+    );
   }
 
   @override
@@ -140,11 +141,8 @@ class SearchSuggestionsRepositoryProvider
   }
 
   @override
-  NotifierProviderElement<
-    SearchSuggestionsRepository,
-    Raw<Stream<List<String>>>
-  >
-  createElement() {
+  NotifierProviderElement<SearchSuggestionsRepository,
+      Raw<Stream<List<String>>>> createElement() {
     return _SearchSuggestionsRepositoryProviderElement(this);
   }
 
@@ -172,18 +170,13 @@ mixin SearchSuggestionsRepositoryRef
 }
 
 class _SearchSuggestionsRepositoryProviderElement
-    extends
-        NotifierProviderElement<
-          SearchSuggestionsRepository,
-          Raw<Stream<List<String>>>
-        >
-    with SearchSuggestionsRepositoryRef {
+    extends NotifierProviderElement<SearchSuggestionsRepository,
+        Raw<Stream<List<String>>>> with SearchSuggestionsRepositoryRef {
   _SearchSuggestionsRepositoryProviderElement(super.provider);
 
   @override
   ISearchSuggestionProvider get suggestionsProvider =>
       (origin as SearchSuggestionsRepositoryProvider).suggestionsProvider;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

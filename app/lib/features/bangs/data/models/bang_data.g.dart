@@ -84,6 +84,7 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
   BangData icon(BrowserIcon? icon) => this(icon: icon);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BangData(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -103,56 +104,46 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
     Object? icon = const $CopyWithPlaceholder(),
   }) {
     return BangData(
-      websiteName:
-          websiteName == const $CopyWithPlaceholder()
-              ? _value.websiteName
-              // ignore: cast_nullable_to_non_nullable
-              : websiteName as String,
-      domain:
-          domain == const $CopyWithPlaceholder()
-              ? _value.domain
-              // ignore: cast_nullable_to_non_nullable
-              : domain as String,
-      trigger:
-          trigger == const $CopyWithPlaceholder()
-              ? _value.trigger
-              // ignore: cast_nullable_to_non_nullable
-              : trigger as String,
-      urlTemplate:
-          urlTemplate == const $CopyWithPlaceholder()
-              ? _value.urlTemplate
-              // ignore: cast_nullable_to_non_nullable
-              : urlTemplate as String,
-      category:
-          category == const $CopyWithPlaceholder()
-              ? _value.category
-              // ignore: cast_nullable_to_non_nullable
-              : category as String?,
-      subCategory:
-          subCategory == const $CopyWithPlaceholder()
-              ? _value.subCategory
-              // ignore: cast_nullable_to_non_nullable
-              : subCategory as String?,
-      format:
-          format == const $CopyWithPlaceholder()
-              ? _value.format
-              // ignore: cast_nullable_to_non_nullable
-              : format as Set<BangFormat>?,
-      frequency:
-          frequency == const $CopyWithPlaceholder()
-              ? _value.frequency
-              // ignore: cast_nullable_to_non_nullable
-              : frequency as int?,
-      lastUsed:
-          lastUsed == const $CopyWithPlaceholder()
-              ? _value.lastUsed
-              // ignore: cast_nullable_to_non_nullable
-              : lastUsed as DateTime?,
-      icon:
-          icon == const $CopyWithPlaceholder()
-              ? _value.icon
-              // ignore: cast_nullable_to_non_nullable
-              : icon as BrowserIcon?,
+      websiteName: websiteName == const $CopyWithPlaceholder()
+          ? _value.websiteName
+          // ignore: cast_nullable_to_non_nullable
+          : websiteName as String,
+      domain: domain == const $CopyWithPlaceholder()
+          ? _value.domain
+          // ignore: cast_nullable_to_non_nullable
+          : domain as String,
+      trigger: trigger == const $CopyWithPlaceholder()
+          ? _value.trigger
+          // ignore: cast_nullable_to_non_nullable
+          : trigger as String,
+      urlTemplate: urlTemplate == const $CopyWithPlaceholder()
+          ? _value.urlTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : urlTemplate as String,
+      category: category == const $CopyWithPlaceholder()
+          ? _value.category
+          // ignore: cast_nullable_to_non_nullable
+          : category as String?,
+      subCategory: subCategory == const $CopyWithPlaceholder()
+          ? _value.subCategory
+          // ignore: cast_nullable_to_non_nullable
+          : subCategory as String?,
+      format: format == const $CopyWithPlaceholder()
+          ? _value.format
+          // ignore: cast_nullable_to_non_nullable
+          : format as Set<BangFormat>?,
+      frequency: frequency == const $CopyWithPlaceholder()
+          ? _value.frequency
+          // ignore: cast_nullable_to_non_nullable
+          : frequency as int?,
+      lastUsed: lastUsed == const $CopyWithPlaceholder()
+          ? _value.lastUsed
+          // ignore: cast_nullable_to_non_nullable
+          : lastUsed as DateTime?,
+      icon: icon == const $CopyWithPlaceholder()
+          ? _value.icon
+          // ignore: cast_nullable_to_non_nullable
+          : icon as BrowserIcon?,
     );
   }
 }

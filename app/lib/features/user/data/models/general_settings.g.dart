@@ -12,8 +12,7 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings enableReadability(bool enableReadability);
 
   GeneralSettings deleteBrowsingDataOnQuit(
-    Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
-  );
+      Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -43,10 +42,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
 
   @override
   GeneralSettings deleteBrowsingDataOnQuit(
-    Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
-  ) => this(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
+          Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit) =>
+      this(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
 
   @override
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -59,16 +59,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
-      themeMode:
-          themeMode == const $CopyWithPlaceholder()
-              ? _value.themeMode
-              // ignore: cast_nullable_to_non_nullable
-              : themeMode as ThemeMode,
-      enableReadability:
-          enableReadability == const $CopyWithPlaceholder()
-              ? _value.enableReadability
-              // ignore: cast_nullable_to_non_nullable
-              : enableReadability as bool,
+      themeMode: themeMode == const $CopyWithPlaceholder()
+          ? _value.themeMode
+          // ignore: cast_nullable_to_non_nullable
+          : themeMode as ThemeMode,
+      enableReadability: enableReadability == const $CopyWithPlaceholder()
+          ? _value.enableReadability
+          // ignore: cast_nullable_to_non_nullable
+          : enableReadability as bool,
       deleteBrowsingDataOnQuit:
           deleteBrowsingDataOnQuit == const $CopyWithPlaceholder()
               ? _value.deleteBrowsingDataOnQuit
@@ -102,10 +100,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
     <String, dynamic>{
       'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
       'enableReadability': instance.enableReadability,
-      'deleteBrowsingDataOnQuit':
-          instance.deleteBrowsingDataOnQuit
-              ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
-              .toList(),
+      'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
+          ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
+          .toList(),
     };
 
 const _$ThemeModeEnumMap = {

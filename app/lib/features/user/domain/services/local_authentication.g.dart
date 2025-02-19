@@ -13,15 +13,14 @@ String _$localAuthenticationServiceHash() =>
 @ProviderFor(LocalAuthenticationService)
 final localAuthenticationServiceProvider =
     AsyncNotifierProvider<LocalAuthenticationService, bool>.internal(
-      LocalAuthenticationService.new,
-      name: r'localAuthenticationServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$localAuthenticationServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  LocalAuthenticationService.new,
+  name: r'localAuthenticationServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$localAuthenticationServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$LocalAuthenticationService = AsyncNotifier<bool>;
 // ignore_for_file: type=lint
