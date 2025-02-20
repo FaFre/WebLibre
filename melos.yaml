@@ -11,6 +11,12 @@ scripts:
       dart pub upgrade --major-versions --tighten
     exec:
       concurrency: 1
+  validate-dependencies:
+    description: Validates dependcies in the workspace
+    packageFilters:
+      noDependsOn: melos
+    exec: |
+      dart pub global run dependency_validator
   build-watch:
     description: Generate and watch files with build_runner in the workspace
     packageFilters:
