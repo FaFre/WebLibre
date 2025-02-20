@@ -74,14 +74,6 @@ class BangSearchScreen extends HookConsumerWidget {
                             .read(selectedBangTriggerProvider().notifier)
                             .setTrigger(bang.trigger);
 
-                        // if (ref.read(bottomSheetControllerProvider)
-                        //     is! CreateTabSheet) {
-                        //   ref.read(bottomSheetControllerProvider.notifier).show(
-                        //         CreateTabSheet(preferredTool: KagiTool.search),
-                        //       );
-                        // }
-
-                        // context.go(BrowserRoute().location);
                         context.pop();
                       },
                     );

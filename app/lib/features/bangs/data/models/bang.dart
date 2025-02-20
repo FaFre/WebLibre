@@ -4,25 +4,9 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lensai/features/bangs/data/database/database.dart'
     show BangCompanion;
+import 'package:lensai/features/bangs/data/models/bang_group.dart';
 
 part 'bang.g.dart';
-
-enum BangGroup {
-  general('https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json'),
-  assistant(
-    'https://raw.githubusercontent.com/FaFre/bangs/main/data/assistant_bangs.json',
-  ),
-  kagi(
-    'https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json',
-  ),
-  custom(
-    'https://raw.githubusercontent.com/FaFre/bangs/refs/heads/custom/data/custom.json',
-  );
-
-  final String url;
-
-  const BangGroup(this.url);
-}
 
 enum BangFormat {
   ///When the bang is invoked with no query, opens the base path of the URL (/)

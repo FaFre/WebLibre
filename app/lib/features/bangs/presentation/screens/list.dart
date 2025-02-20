@@ -8,7 +8,6 @@ import 'package:lensai/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
-import 'package:lensai/features/kagi/data/entities/modes.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 
 class BangListScreen extends HookConsumerWidget {
@@ -20,14 +19,9 @@ class BangListScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bangsAsync = ref.watch(
-      bangDataListProvider(
-        filter: (
-          categoryFilter: category.mapNotNull(
-            (category) => (category: category, subCategory: subCategory),
-          ),
-          domain: null,
-          groups: null,
-          orderMostFrequentFirst: null,
+      bangListProvider(
+        categoryFilter: category.mapNotNull(
+          (category) => (category: category, subCategory: subCategory),
         ),
       ),
     );
@@ -49,16 +43,7 @@ class BangListScreen extends HookConsumerWidget {
                           .read(selectedBangTriggerProvider().notifier)
                           .setTrigger(bang.trigger);
 
-                      if (ref.read(bottomSheetControllerProvider)
-                          is! CreateTabSheet) {
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .show(
-                              CreateTabSheet(preferredTool: KagiTool.search),
-                            );
-                      }
-
-                      context.go(BrowserRoute().location);
+                      context.go(const SearchRoute().location);
                     },
                   );
                 },

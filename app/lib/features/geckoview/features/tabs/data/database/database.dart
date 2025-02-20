@@ -7,7 +7,7 @@ import 'package:lensai/features/geckoview/features/tabs/data/database/daos/tab.d
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/database/daos/vector.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/database/database.dart';
+import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/database/migrator.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
 import 'package:lensai/features/search/domain/fts_tokenizer.dart';
 

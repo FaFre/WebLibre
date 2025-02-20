@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/controllers/overlay_dialog.dart';
+import 'package:lensai/features/geckoview/domain/controllers/overlay.dart';
 import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
 import 'package:lensai/presentation/icons/tor_icons.dart';
 import 'package:lensai/presentation/widgets/animate_gradient_shader.dart';
@@ -10,7 +10,7 @@ class TorNotification extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(torProxyServiceProvider, (previous, next) {
       if (!next.isLoading) {
-        ref.read(overlayDialogControllerProvider.notifier).dismiss();
+        ref.read(overlayControllerProvider.notifier).dismiss();
       }
     });
 
@@ -45,9 +45,7 @@ class TorNotification extends HookConsumerWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    ref
-                        .read(overlayDialogControllerProvider.notifier)
-                        .dismiss();
+                    ref.read(overlayControllerProvider.notifier).dismiss();
                   },
                   icon: const Icon(Icons.close, color: Colors.white),
                 ),

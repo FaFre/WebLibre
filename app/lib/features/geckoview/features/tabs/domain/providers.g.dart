@@ -6,25 +6,6 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$unusedRandomContainerColorHash() =>
-    r'913499b3de281ea0020db97ed67121652f53ec08';
-
-/// See also [unusedRandomContainerColor].
-@ProviderFor(unusedRandomContainerColor)
-final unusedRandomContainerColorProvider =
-    AutoDisposeFutureProvider<Color>.internal(
-  unusedRandomContainerColor,
-  name: r'unusedRandomContainerColorProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$unusedRandomContainerColorHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef UnusedRandomContainerColorRef = AutoDisposeFutureProviderRef<Color>;
 String _$containersWithCountHash() =>
     r'ee0734e4b71472b79636816616a158f54fa6bc23';
 
@@ -207,7 +188,7 @@ class _MatchSortedContainersWithCountProviderElement
       (origin as MatchSortedContainersWithCountProvider).searchText;
 }
 
-String _$containerTabIdsHash() => r'6472a865c287d7f87ec49a401c8184bfe7528ab8';
+String _$containerTabIdsHash() => r'355c65523db29f376faa293ab1f1ed8273696548';
 
 /// See also [containerTabIds].
 @ProviderFor(containerTabIds)

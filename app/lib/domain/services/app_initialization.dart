@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:exceptions/exceptions.dart';
 import 'package:lensai/features/about/data/repositories/package_info_repository.dart';
 import 'package:lensai/features/bangs/data/models/bang.dart';
+import 'package:lensai/features/bangs/data/models/bang_group.dart';
 import 'package:lensai/features/bangs/domain/repositories/sync.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

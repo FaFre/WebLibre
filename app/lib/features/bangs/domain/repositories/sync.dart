@@ -1,9 +1,9 @@
 import 'package:drift/isolate.dart';
 import 'package:exceptions/exceptions.dart';
 import 'package:lensai/features/bangs/data/database/database.dart';
-import 'package:lensai/features/bangs/data/models/bang.dart';
+import 'package:lensai/features/bangs/data/models/bang_group.dart';
 import 'package:lensai/features/bangs/data/providers.dart';
-import 'package:lensai/features/bangs/data/services/source.dart';
+import 'package:lensai/features/bangs/data/services/data_source.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -12,7 +12,7 @@ part 'sync.g.dart';
 @Riverpod(keepAlive: true)
 class BangSyncRepository extends _$BangSyncRepository {
   static Future<Result<void>> _fetchAndSync({
-    required BangSourceService sourceService,
+    required BangDataSourceService sourceService,
     required BangDatabase db,
     required Uri url,
     required BangGroup group,
@@ -20,7 +20,7 @@ class BangSyncRepository extends _$BangSyncRepository {
   }) async {
     if (syncInterval != null) {
       final lastSync =
-          await db.syncDao.lastSyncOfGroup(group).getSingleOrNull();
+          await db.syncDao.getLastSyncOfGroup(group).getSingleOrNull();
 
       if (lastSync != null &&
           DateTime.now().difference(lastSync) < syncInterval) {
@@ -52,7 +52,9 @@ class BangSyncRepository extends _$BangSyncRepository {
               computation: (db) async {
                 final ref = ProviderContainer();
                 final result = await _fetchAndSync(
-                  sourceService: ref.read(bangSourceServiceProvider.notifier),
+                  sourceService: ref.read(
+                    bangDataSourceServiceProvider.notifier,
+                  ),
                   db: db,
                   url: Uri.parse(group.url),
                   group: group,
@@ -79,7 +81,7 @@ class BangSyncRepository extends _$BangSyncRepository {
     return ref
         .read(bangDatabaseProvider)
         .syncDao
-        .lastSyncOfGroup(group)
+        .getLastSyncOfGroup(group)
         .watchSingleOrNull();
   }
 

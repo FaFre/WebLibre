@@ -29,7 +29,7 @@ class SettingDao extends DatabaseAccessor<UserDatabase> with _$SettingDaoMixin {
     );
   }
 
-  Selectable<MapEntry<String, DriftAny?>> allSettingsOfPartitionKey(
+  Selectable<MapEntry<String, DriftAny?>> getAllSettingsOfPartitionKey(
     String? partitionKey,
   ) {
     final query =

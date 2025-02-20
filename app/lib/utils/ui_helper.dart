@@ -23,3 +23,16 @@ Future<void> launchUrlFeedback(
     }
   }
 }
+
+void showTabBackButtonMessage(BuildContext context, int tabCount) {
+  ScaffoldMessenger.of(context)
+    ..clearSnackBars()
+    ..showSnackBar(
+      SnackBar(
+        content:
+            (tabCount > 1)
+                ? const Text('Please click BACK again to close current tab')
+                : const Text('Please click BACK again to exit app'),
+      ),
+    );
+}

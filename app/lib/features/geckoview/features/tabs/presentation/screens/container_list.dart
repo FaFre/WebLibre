@@ -109,9 +109,10 @@ class ContainerListScreen extends HookConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final initialColor = await ref.read(
-            unusedRandomContainerColorProvider.future,
-          );
+          final initialColor =
+              await ref
+                  .read(containerRepositoryProvider.notifier)
+                  .unusedRandomContainerColor();
 
           if (context.mounted) {
             final result = await context.push<ContainerData?>(

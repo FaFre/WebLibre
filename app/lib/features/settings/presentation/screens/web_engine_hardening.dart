@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/data/models/equatable_iterable.dart';
+import 'package:lensai/domain/entities/equatable_iterable.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:lensai/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';

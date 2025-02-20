@@ -35,7 +35,7 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
     final db = ref.watch(userDatabaseProvider);
 
     final watchSub = db.settingDao
-        .allSettingsOfPartitionKey(_partitionKey)
+        .getAllSettingsOfPartitionKey(_partitionKey)
         .watch()
         .listen((entries) {
           final settings = Map.fromEntries(entries);

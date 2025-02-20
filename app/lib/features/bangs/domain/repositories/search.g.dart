@@ -22,7 +22,7 @@ final bangSearchProvider =
 
 typedef _$BangSearch = AutoDisposeStreamNotifier<List<BangData>>;
 String _$seamlessBangProviderHash() =>
-    r'd2c8e94d6305a6a37cc27f8bc3617521f513e537';
+    r'c4c0b452c94ba447be5b02dfef5bc16148cc3dc7';
 
 /// See also [SeamlessBangProvider].
 @ProviderFor(SeamlessBangProvider)

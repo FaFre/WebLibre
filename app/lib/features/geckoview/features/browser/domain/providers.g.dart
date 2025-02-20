@@ -6,7 +6,7 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$availableTabIdsHash() => r'd8b55b012b38111c8d5e069987a55645d1a71b89';
+String _$availableTabIdsHash() => r'e5c5f25dea67f7739dfb1d0d9e4453079817a7bc';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -908,56 +908,6 @@ class _SelectedBangDataProviderElement
   String? get domain => (origin as SelectedBangDataProvider).domain;
 }
 
-String _$lastUsedAssistantModeHash() =>
-    r'1255a2754a3ea5ea058d110fd9743897fe103a69';
-
-/// See also [LastUsedAssistantMode].
-@ProviderFor(LastUsedAssistantMode)
-final lastUsedAssistantModeProvider =
-    NotifierProvider<LastUsedAssistantMode, AssistantMode>.internal(
-  LastUsedAssistantMode.new,
-  name: r'lastUsedAssistantModeProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$lastUsedAssistantModeHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$LastUsedAssistantMode = Notifier<AssistantMode>;
-String _$activeResearchVariantHash() =>
-    r'8c65a3f5ead6cc4f9e2af85b607b7a49b0764ee3';
-
-/// See also [ActiveResearchVariant].
-@ProviderFor(ActiveResearchVariant)
-final activeResearchVariantProvider =
-    NotifierProvider<ActiveResearchVariant, ResearchVariant>.internal(
-  ActiveResearchVariant.new,
-  name: r'activeResearchVariantProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$activeResearchVariantHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$ActiveResearchVariant = Notifier<ResearchVariant>;
-String _$activeChatModelHash() => r'675f406af8b4aa92699d59e37b5805a81d03a799';
-
-/// See also [ActiveChatModel].
-@ProviderFor(ActiveChatModel)
-final activeChatModelProvider =
-    NotifierProvider<ActiveChatModel, ChatModel>.internal(
-  ActiveChatModel.new,
-  name: r'activeChatModelProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$activeChatModelHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$ActiveChatModel = Notifier<ChatModel>;
 String _$showFindInPageHash() => r'7ee5703f7d0c7e8a8dd6b0849d7b1e0a41fe24d9';
 
 /// See also [ShowFindInPage].

@@ -12,11 +12,11 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
     with _$MessagesDaoMixin {
   MessagesDao(super.db);
 
-  Selectable<int> messageCount({required String chatId}) {
+  Selectable<int> getMessageCount({required String chatId}) {
     return db.chatMessage.count(where: (row) => row.chatId.equals(chatId));
   }
 
-  Selectable<ChatMessageData> chatMessages({required String chatId}) {
+  Selectable<ChatMessageData> getChatMessages({required String chatId}) {
     return db.chatMessage.select()
       ..where((t) => t.chatId.equals(chatId))
       ..orderBy([(row) => OrderingTerm(expression: row.orderKey)]);
@@ -32,7 +32,7 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
         .map((row) => row.read(existsExpression)!);
   }
 
-  SingleOrNullSelectable<int> messageIndex({
+  SingleOrNullSelectable<int> getMessageIndex({
     required String chatId,
     required String messageId,
   }) {

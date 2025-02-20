@@ -10,8 +10,6 @@ import 'package:lensai/core/providers/global_drop.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/data/models/drag_data.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
@@ -25,60 +23,12 @@ import 'package:lensai/features/tor/presentation/controllers/start_tor_proxy.dar
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 
-class _TabDraggable extends HookConsumerWidget {
-  final String tabId;
-  final String? activeTabId;
-
-  final void Function() onClose;
-
-  _TabDraggable({
-    required this.tabId,
-    required this.activeTabId,
-    required this.onClose,
-  }) : super(key: ValueKey(tabId));
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tab = ref.watch(tabStateProvider(tabId));
-
-    if (tab == null) {
-      return const SizedBox.shrink();
-    }
-
-    return TabPreview(
-      tab: tab,
-      isActive: tabId == activeTabId,
-      onTap: () async {
-        if (tabId != activeTabId) {
-          //Close first to avoid rebuilds
-          onClose();
-          await ref.read(tabRepositoryProvider.notifier).selectTab(tab.id);
-        } else {
-          onClose();
-        }
-      },
-      // onDoubleTap: () {
-      //   ref.read(overlayDialogControllerProvider.notifier).show(
-      //         TabActionDialog(
-      //           initialTab: tab,
-      //           onDismiss:
-      //               ref.read(overlayDialogControllerProvider.notifier).dismiss,
-      //         ),
-      //       );
-      // },
-      onDelete: () async {
-        await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
-      },
-    );
-  }
-}
-
-class _Tab extends HookConsumerWidget {
+class _TabSheetHeader extends HookConsumerWidget {
   static const headerSize = 124.0;
 
   final VoidCallback onClose;
 
-  const _Tab({required this.onClose});
+  const _TabSheetHeader({required this.onClose});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -245,7 +195,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           children: [
             DraggableScrollableHeader(
               controller: draggableScrollableController,
-              child: _Tab(onClose: onClose),
+              child: _TabSheetHeader(onClose: onClose),
             ),
             Expanded(
               child: HookConsumer(
@@ -304,7 +254,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             key: Key(tabId),
                             data: TabDragData(tabId),
                             child: Consumer(
-                              child: _TabDraggable(
+                              child: TabPreviewDraggable(
                                 tabId: tabId,
                                 activeTabId: activeTab,
                                 onClose: onClose,
@@ -420,7 +370,10 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(top: _Tab.headerSize + 4, right: 4),
+          padding: const EdgeInsets.only(
+            top: _TabSheetHeader.headerSize + 4,
+            right: 4,
+          ),
           child: FloatingActionButton.small(
             onPressed: () async {
               await context.push(const SearchRoute().location);

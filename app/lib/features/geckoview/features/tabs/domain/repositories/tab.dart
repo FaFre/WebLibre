@@ -6,9 +6,6 @@ part 'tab.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabDataRepository extends _$TabDataRepository {
-  @override
-  void build() {}
-
   Future<void> assignContainer(String tabId, String? containerId) {
     return ref
         .read(tabDatabaseProvider)
@@ -40,7 +37,10 @@ class TabDataRepository extends _$TabDataRepository {
     return ref
         .read(tabDatabaseProvider)
         .tabDao
-        .tabContainerId(tabId)
+        .getTabContainerId(tabId)
         .getSingleOrNull();
   }
+
+  @override
+  void build() {}
 }

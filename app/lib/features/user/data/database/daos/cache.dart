@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/extensions/database_table_size.dart';
+import 'package:lensai/data/database/extensions/database_table_size.dart';
 import 'package:lensai/features/user/data/database/database.dart';
 
 part 'cache.g.dart';
@@ -8,7 +8,7 @@ part 'cache.g.dart';
 class CacheDao extends DatabaseAccessor<UserDatabase> with _$CacheDaoMixin {
   CacheDao(super.attachedDatabase);
 
-  SingleSelectable<double> iconCacheSize() {
+  SingleSelectable<double> getIconCacheSize() {
     return db.tableSize(db.iconCache);
   }
 

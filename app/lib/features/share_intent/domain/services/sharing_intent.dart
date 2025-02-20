@@ -1,12 +1,10 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter_pdf_text/flutter_pdf_text.dart';
 import 'package:flutter_sharing_intent/flutter_sharing_intent.dart';
 import 'package:flutter_sharing_intent/model/sharing_file.dart';
 import 'package:lensai/core/logger.dart';
-import 'package:lensai/data/models/received_parameter.dart';
-import 'package:lensai/features/kagi/data/entities/modes.dart';
+import 'package:lensai/data/models/received_intent_parameter.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -16,7 +14,7 @@ import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
 part 'sharing_intent.g.dart';
 
 final _sharingIntentTransformer =
-    StreamTransformer<List<SharedFile>, ReceivedParameter>.fromHandlers(
+    StreamTransformer<List<SharedFile>, ReceivedIntentParameter>.fromHandlers(
       handleData: (files, sink) async {
         //For now only one file is supported to share with the app
         final data = files.firstOrNull;
@@ -30,17 +28,12 @@ final _sharingIntentTransformer =
                 final mimeType = mime.lookupMimeType(file.path);
                 switch (mimeType) {
                   case 'application/pdf':
-                    final content = await PDFDoc.fromFile(
-                      file,
-                    ).then((doc) => doc.text);
-                    sink.add(
-                      ReceivedParameter(content, KagiTool.summarizer.name),
-                    );
+                    sink.add(ReceivedIntentParameter(data.value, null));
                   default:
                     logger.w('Unhandled mime type: $mimeType');
                 }
               } else {
-                sink.add(ReceivedParameter(data.value, null));
+                sink.add(ReceivedIntentParameter(data.value, null));
               }
             default:
               logger.w('Unhandled media type: $data');
@@ -50,7 +43,7 @@ final _sharingIntentTransformer =
     );
 
 @Riverpod()
-Raw<Stream<ReceivedParameter>> sharingIntentStream(Ref ref) {
+Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
   final initialStream =
       FlutterSharingIntent.instance
           // ignore: discarded_futures is used as stream

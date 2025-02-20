@@ -6,7 +6,7 @@ import 'package:lensai/core/error_observer.dart';
 import 'package:lensai/domain/services/app_initialization.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:lensai/presentation/hooks/on_initialization.dart';
-import 'package:lensai/presentation/widgets/main_app.dart';
+import 'package:lensai/presentation/main_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

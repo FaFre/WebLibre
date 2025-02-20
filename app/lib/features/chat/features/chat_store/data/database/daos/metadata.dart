@@ -9,7 +9,7 @@ class MetadataDao extends DatabaseAccessor<ChatDatabase>
     with _$MetadataDaoMixin {
   MetadataDao(super.db);
 
-  SingleOrNullSelectable<ChatMetadata> chatMetadata(String chatId) {
+  SingleOrNullSelectable<ChatMetadata> getChatMetadata(String chatId) {
     final statement =
         db.chatData.selectOnly()
           ..addColumns([db.chatData.metadata])

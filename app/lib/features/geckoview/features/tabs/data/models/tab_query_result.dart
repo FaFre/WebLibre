@@ -1,4 +1,6 @@
-class TabQueryResult {
+import 'package:fast_equatable/fast_equatable.dart';
+
+class TabQueryResult with FastEquatable {
   final String id;
 
   final String? title;
@@ -19,4 +21,18 @@ class TabQueryResult {
     this.fullContent,
     required this.weightedRank,
   });
+
+  @override
+  bool get cacheHash => true;
+
+  @override
+  List<Object?> get hashParameters => [
+    id,
+    title,
+    cleanUrl,
+    url,
+    extractedContent,
+    fullContent,
+    weightedRank,
+  ];
 }

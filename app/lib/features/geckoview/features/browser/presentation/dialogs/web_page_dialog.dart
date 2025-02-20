@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -14,22 +13,16 @@ import 'package:lensai/features/bangs/presentation/widgets/site_search.dart';
 import 'package:lensai/features/chat/features/chat_store/data/models/chat_metadata.dart';
 import 'package:lensai/features/chat/features/chat_store/domain/repositories/chat_metadata.dart';
 import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:lensai/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:lensai/features/kagi/data/entities/modes.dart';
-import 'package:lensai/features/kagi/utils/url_builder.dart' as uri_builder;
-import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
+import 'package:lensai/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
 import 'package:lensai/features/user/domain/providers.dart';
-import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:lensai/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:lensai/presentation/widgets/website_title_tile.dart';
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
-import 'package:lensai/utils/uri_parser.dart' as uri_parser;
+
 import 'package:share_plus/share_plus.dart';
 
 class WebPageDialog extends HookConsumerWidget {
@@ -43,14 +36,7 @@ class WebPageDialog extends HookConsumerWidget {
     final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
     final availableBangsAsync = ref.watch(
-      bangDataListProvider(
-        filter: (
-          domain: url.host,
-          groups: null,
-          categoryFilter: null,
-          orderMostFrequentFirst: true,
-        ),
-      ),
+      bangListProvider(domain: url.host, orderMostFrequentFirst: true),
     );
 
     final availableBangCount = availableBangsAsync.valueOrNull?.length;
@@ -75,74 +61,9 @@ class WebPageDialog extends HookConsumerWidget {
               width: double.maxFinite,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: HookConsumer(
-                  builder: (context, ref, child) {
-                    final addressTextController = useTextEditingController(
-                      text: url.toString(),
-                    );
-                    final addressTextFocusNode = useFocusNode();
-
-                    final suggestion = useState<String?>(null);
-
-                    useListenableCallback(addressTextController, () async {
-                      if (addressTextController.text.isNotEmpty) {
-                        final result = await ref
-                            .read(engineSuggestionsProvider.notifier)
-                            .getAutocompleteSuggestion(
-                              addressTextController.text,
-                            );
-
-                        suggestion.value = result;
-                      }
-                    });
-
-                    return AutoSuggestTextField(
-                      controller: addressTextController,
-                      focusNode: addressTextFocusNode,
-                      suggestion: suggestion.value,
-                      enableIMEPersonalizedLearning: !incognitoEnabled,
-                      keyboardType: TextInputType.url,
-                      decoration: const InputDecoration(
-                        label: Text('Address'),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                      ),
-                      onTap: () {
-                        if (!addressTextFocusNode.hasFocus) {
-                          // Select all text when the field is tapped
-                          addressTextController.selection = TextSelection(
-                            baseOffset: 0,
-                            extentOffset: addressTextController.text.length,
-                          );
-                        }
-                      },
-                      onSubmitted: (value) async {
-                        if (value.isNotEmpty) {
-                          var newUrl = uri_parser.tryParseUrl(
-                            value,
-                            eagerParsing: true,
-                          );
-
-                          if (newUrl == null) {
-                            final defaultSearchBang = await ref.read(
-                              defaultSearchBangDataProvider.future,
-                            );
-
-                            newUrl = defaultSearchBang?.getUrl(value);
-                          }
-
-                          if (newUrl != null) {
-                            await ref
-                                .read(tabSessionProvider(tabId: null).notifier)
-                                .loadUrl(url: newUrl);
-
-                            if (context.mounted) {
-                              context.pop();
-                            }
-                          }
-                        }
-                      },
-                    );
-                  },
+                child: AddressWithSuggestionsField(
+                  url: url,
+                  incognitoEnabled: incognitoEnabled,
                 ),
               ),
             ),
@@ -273,7 +194,7 @@ class WebPageDialog extends HookConsumerWidget {
                         ),
                         const Divider(),
                         ListTile(
-                          leading: Icon(KagiTool.assistant.icon),
+                          leading: const Icon(MdiIcons.brain),
                           title: const Text('QA Chat'),
                           onTap: () async {
                             final selectedTabId =
@@ -306,24 +227,24 @@ class WebPageDialog extends HookConsumerWidget {
                             }
                           },
                         ),
-                        ListTile(
-                          leading: Icon(KagiTool.summarizer.icon),
-                          title: const Text('Summarize'),
-                          onTap: () async {
-                            final summarizerUrl = uri_builder.summarizerUri(
-                              document: SharedUrl(url),
-                              mode: SummarizerMode.keyMoments,
-                            );
+                        // ListTile(
+                        //   leading: Icon(MdiIcons.text),
+                        //   title: const Text('Summarize'),
+                        //   onTap: () async {
+                        //     final summarizerUrl = uri_builder.summarizerUri(
+                        //       document: SharedUrl(url),
+                        //       mode: SummarizerMode.keyMoments,
+                        //     );
 
-                            await ref
-                                .read(tabRepositoryProvider.notifier)
-                                .addTab(url: summarizerUrl);
+                        //     await ref
+                        //         .read(tabRepositoryProvider.notifier)
+                        //         .addTab(url: summarizerUrl);
 
-                            if (context.mounted) {
-                              context.pop();
-                            }
-                          },
-                        ),
+                        //     if (context.mounted) {
+                        //       context.pop();
+                        //     }
+                        //   },
+                        // ),
                       ],
                     ),
                   );

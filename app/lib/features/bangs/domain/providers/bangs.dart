@@ -1,5 +1,5 @@
-import 'package:lensai/features/bangs/data/models/bang.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
+import 'package:lensai/features/bangs/data/models/bang_group.dart';
 import 'package:lensai/features/bangs/data/models/search_history_entry.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
 import 'package:lensai/features/bangs/domain/repositories/sync.dart';
@@ -8,15 +8,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'bangs.g.dart';
 
-@Riverpod()
-Stream<BangData?> bangData(Ref ref, String? trigger) {
-  final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  return repository.watchBang(trigger);
-}
-
 @Riverpod(keepAlive: true)
 Stream<BangData?> defaultSearchBangData(Ref ref) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
+  //TODO: Setting
   return repository.watchBang('lai');
 }
 
@@ -27,27 +22,24 @@ Stream<Map<String, List<String>>> bangCategories(Ref ref) {
 }
 
 @Riverpod()
-Stream<List<BangData>> bangDataList(
+Stream<List<BangData>> bangList(
   Ref ref, {
-  ({
-    Iterable<BangGroup>? groups,
-    String? domain,
-    ({String category, String? subCategory})? categoryFilter,
-    bool? orderMostFrequentFirst,
-  })?
-  filter,
+  List<BangGroup>? groups,
+  String? domain,
+  ({String category, String? subCategory})? categoryFilter,
+  bool? orderMostFrequentFirst,
 }) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchBangs(
-    groups: filter?.groups,
-    domain: filter?.domain,
-    categoryFilter: filter?.categoryFilter,
-    orderMostFrequentFirst: filter?.orderMostFrequentFirst,
+    groups: groups,
+    domain: domain,
+    categoryFilter: categoryFilter,
+    orderMostFrequentFirst: orderMostFrequentFirst,
   );
 }
 
 @Riverpod()
-Stream<List<BangData>> frequentBangDataList(Ref ref) {
+Stream<List<BangData>> frequentBangList(Ref ref) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchFrequentBangs();
 }

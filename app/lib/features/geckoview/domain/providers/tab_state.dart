@@ -3,24 +3,21 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/extensions/image.dart';
 import 'package:lensai/extensions/nullable.dart';
-import 'package:lensai/features/geckoview/domain/entities/find_result_state.dart';
-import 'package:lensai/features/geckoview/domain/entities/history_state.dart';
-import 'package:lensai/features/geckoview/domain/entities/readerable_state.dart';
-import 'package:lensai/features/geckoview/domain/entities/security_state.dart';
-import 'package:lensai/features/geckoview/domain/entities/tab_state.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/find_result.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/history.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/readerable.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/security.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/utils/image_helper.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:synchronized/synchronized.dart';
 
 part 'tab_state.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabStates extends _$TabStates {
-  final _lock = Lock();
-
   void _onTabContentStateChange(TabContentState contentState) {
     final current =
         state[contentState.id] ?? TabState.$default(contentState.id);
@@ -137,25 +134,25 @@ class TabStates extends _$TabStates {
 
     final subscriptions = [
       eventService.tabContentEvents.listen((event) async {
-        await _lock.synchronized(() => _onTabContentStateChange(event));
+        _onTabContentStateChange(event);
       }),
       eventService.iconChangeEvents.listen((event) async {
-        await _lock.synchronized(() => _onIconChange(event));
+        await _onIconChange(event);
       }),
       eventService.thumbnailEvents.listen((event) async {
-        await _lock.synchronized(() => _onThumbnailChange(event));
+        await _onThumbnailChange(event);
       }),
       eventService.securityInfoEvents.listen((event) async {
-        await _lock.synchronized(() => _onSecurityInfoStateChange(event));
+        _onSecurityInfoStateChange(event);
       }),
       eventService.historyEvents.listen((event) async {
-        await _lock.synchronized(() => _onHistoryStateChange(event));
+        _onHistoryStateChange(event);
       }),
       eventService.readerableEvents.listen((event) async {
-        await _lock.synchronized(() => _onReaderableStateChange(event));
+        _onReaderableStateChange(event);
       }),
       eventService.findResultsEvent.listen((event) async {
-        await _lock.synchronized(() => _onFindResultsChange(event));
+        _onFindResultsChange(event);
       }),
     ];
 

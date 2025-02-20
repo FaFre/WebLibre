@@ -43,7 +43,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
     return ref
         .read(userDatabaseProvider)
         .settingDao
-        .allSettingsOfPartitionKey(_partitionKey)
+        .getAllSettingsOfPartitionKey(_partitionKey)
         .get()
         .then(_deserializeSettings);
   }
@@ -68,7 +68,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
     final db = ref.watch(userDatabaseProvider);
 
     final watchSub = db.settingDao
-        .allSettingsOfPartitionKey(_partitionKey)
+        .getAllSettingsOfPartitionKey(_partitionKey)
         .watch()
         .listen((event) {
           state = _deserializeSettings(event);

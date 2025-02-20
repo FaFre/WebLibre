@@ -191,7 +191,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     return Result.fromAsync(() async {
       final response = await _client
           .get(url)
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 15));
 
       final result = await compute((args) async {
         final document = html_parser.parse(args[0]);

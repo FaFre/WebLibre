@@ -5,19 +5,16 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/domain/entities/equatable_image.dart';
 import 'package:lensai/extensions/image.dart';
 import 'package:lensai/extensions/nullable.dart';
-import 'package:lensai/features/geckoview/domain/entities/web_extension_state.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/web_extension.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/utils/image_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:synchronized/synchronized.dart';
 
 part 'web_extensions_state.g.dart';
 
 @Riverpod(keepAlive: true)
 class WebExtensionsState extends _$WebExtensionsState {
   final _imageCache = <String, EquatableImage>{};
-
-  final _lock = Lock();
 
   void _onExtensionUpdate(ExtensionDataEvent event) {
     final ExtensionDataEvent(:extensionId, :data) = event;
@@ -76,18 +73,18 @@ class WebExtensionsState extends _$WebExtensionsState {
     final subscriptions = switch (actionType) {
       WebExtensionActionType.browser => [
         addonService.browserExtensionStream.listen((event) async {
-          await _lock.synchronized(() => _onExtensionUpdate(event));
+          _onExtensionUpdate(event);
         }),
         addonService.browserIconStream.listen((event) async {
-          await _lock.synchronized(() => _onIconChange(event));
+          await _onIconChange(event);
         }),
       ],
       WebExtensionActionType.page => [
         addonService.pageExtensionStream.listen((event) async {
-          await _lock.synchronized(() => _onExtensionUpdate(event));
+          _onExtensionUpdate(event);
         }),
         addonService.pageIconStream.listen((event) async {
-          await _lock.synchronized(() => _onIconChange(event));
+          await _onIconChange(event);
         }),
       ],
     };

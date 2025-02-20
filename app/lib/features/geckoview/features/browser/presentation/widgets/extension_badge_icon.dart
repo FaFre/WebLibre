@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lensai/features/geckoview/domain/entities/web_extension_state.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/web_extension.dart';
 
 class ExtensionBadgeIcon extends StatelessWidget {
   final WebExtensionState state;

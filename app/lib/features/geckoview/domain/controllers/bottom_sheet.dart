@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/services/create_tab.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -11,8 +10,7 @@ part 'bottom_sheet.g.dart';
 class BottomSheetController extends _$BottomSheetController {
   @override
   Sheet? build() {
-    //Don't use select here because it will only fire on new != previous
-    return ref.watch(createTabStreamProvider).valueOrNull;
+    return null;
   }
 
   // ignore: use_setters_to_change_properties api decision

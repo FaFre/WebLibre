@@ -1,5 +1,5 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/data/models/equatable_iterable.dart';
+import 'package:lensai/domain/entities/equatable_iterable.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

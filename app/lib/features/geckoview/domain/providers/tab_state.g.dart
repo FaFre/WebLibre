@@ -173,7 +173,7 @@ final selectedTabStateProvider = AutoDisposeProvider<TabState?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedTabStateRef = AutoDisposeProviderRef<TabState?>;
-String _$tabStatesHash() => r'296d85ec016b22236b5830fce6b01cda81fbc02d';
+String _$tabStatesHash() => r'c2169e467962d006015bf50d09e93b3f4bf596e6';
 
 /// See also [TabStates].
 @ProviderFor(TabStates)

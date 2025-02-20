@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lensai/features/geckoview/domain/entities/tab_state.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
+import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
+import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 
 class TabPreview extends StatelessWidget {
   final TabState tab;
@@ -96,6 +99,54 @@ class TabPreview extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class TabPreviewDraggable extends HookConsumerWidget {
+  final String tabId;
+  final String? activeTabId;
+
+  final void Function() onClose;
+
+  TabPreviewDraggable({
+    required this.tabId,
+    required this.activeTabId,
+    required this.onClose,
+  }) : super(key: ValueKey(tabId));
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tab = ref.watch(tabStateProvider(tabId));
+
+    if (tab == null) {
+      return const SizedBox.shrink();
+    }
+
+    return TabPreview(
+      tab: tab,
+      isActive: tabId == activeTabId,
+      onTap: () async {
+        if (tabId != activeTabId) {
+          //Close first to avoid rebuilds
+          onClose();
+          await ref.read(tabRepositoryProvider.notifier).selectTab(tab.id);
+        } else {
+          onClose();
+        }
+      },
+      // onDoubleTap: () {
+      //   ref.read(overlayDialogControllerProvider.notifier).show(
+      //         TabActionDialog(
+      //           initialTab: tab,
+      //           onDismiss:
+      //               ref.read(overlayDialogControllerProvider.notifier).dismiss,
+      //         ),
+      //       );
+      // },
+      onDelete: () async {
+        await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
+      },
     );
   }
 }

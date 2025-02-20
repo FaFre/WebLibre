@@ -10,15 +10,15 @@ part 'providers.g.dart';
 const _authKey = 'pb_auth';
 
 @Riverpod()
-Stream<double> iconCacheSizeMegabytes(Ref ref) {
-  final repository = ref.watch(userDatabaseProvider);
-  return repository.cacheDao.iconCacheSize().watchSingle();
-}
-
-@Riverpod()
 Future<String?> _storedAuthData(Ref ref) {
   const secureStorage = FlutterSecureStorage();
   return secureStorage.read(key: _authKey);
+}
+
+@Riverpod()
+Stream<double> iconCacheSizeMegabytes(Ref ref) {
+  final repository = ref.watch(userDatabaseProvider);
+  return repository.cacheDao.getIconCacheSize().watchSingle();
 }
 
 @Riverpod(keepAlive: true)

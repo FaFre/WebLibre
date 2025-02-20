@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:lensai/domain/entities/equatable_iterable.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,7 +10,7 @@ part 'tab_list.g.dart';
 @Riverpod(keepAlive: true)
 class TabList extends _$TabList {
   @override
-  List<String> build() {
+  EquatableCollection<List<String>> build() {
     final eventService = ref.watch(eventServiceProvider);
 
     ref.listen(fireImmediately: true, engineReadyStateProvider, (
@@ -23,8 +23,10 @@ class TabList extends _$TabList {
     });
 
     final tabListSub = eventService.tabListEvents.listen((tabs) async {
-      if (!const DeepCollectionEquality().equals(state, tabs)) {
-        state = tabs;
+      final equatableTabs = EquatableCollection(tabs, immutable: true);
+
+      if (equatableTabs != state) {
+        state = equatableTabs;
       }
     });
 
@@ -32,6 +34,6 @@ class TabList extends _$TabList {
       unawaited(tabListSub.cancel());
     });
 
-    return [];
+    return EquatableCollection([], immutable: true);
   }
 }

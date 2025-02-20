@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/geckoview/domain/entities/tab_state.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 import 'package:lexo_rank/lexo_rank.dart';
@@ -17,7 +17,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
 
   Selectable<TabData> allTabData() => db.tab.select();
 
-  SingleOrNullSelectable<TabData> tabDataById(String id) =>
+  SingleOrNullSelectable<TabData> getTabDataById(String id) =>
       db.tab.select()..where((t) => t.id.equals(id));
 
   Selectable<String> containerTabIds(String? containerId) {
@@ -34,7 +34,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return query.map((row) => row.read(db.tab.id)!);
   }
 
-  Selectable<String> allTabIds() {
+  Selectable<String> getAllTabIds() {
     final query =
         selectOnly(db.tab)
           ..addColumns([db.tab.id])
@@ -43,7 +43,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return query.map((row) => row.read(db.tab.id)!);
   }
 
-  SingleOrNullSelectable<String?> tabContainerId(String tabId) {
+  SingleOrNullSelectable<String?> getTabContainerId(String tabId) {
     final query =
         selectOnly(db.tab)
           ..addColumns([db.tab.containerId])

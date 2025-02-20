@@ -1,8 +1,10 @@
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:lensai/features/geckoview/features/tabs/utils/color_palette.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'container.g.dart';
@@ -65,6 +67,18 @@ class ContainerRepository extends _$ContainerRepository {
         .containerDao
         .generateOrderKeyAfterTabId(containerId, tabId)
         .getSingle();
+  }
+
+  Future<Color> unusedRandomContainerColor() async {
+    final allColors = colorTypes.flattened.toList();
+    final usedColors = await getDistinctColors();
+
+    Color randomColor;
+    do {
+      randomColor = randomColorShade(allColors);
+    } while (usedColors.contains(randomColor));
+
+    return randomColor;
   }
 
   @override

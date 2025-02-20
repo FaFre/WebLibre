@@ -1,17 +1,16 @@
 import 'dart:async';
 
-import 'package:lensai/data/models/equatable_iterable.dart';
+import 'package:lensai/domain/entities/equatable_iterable.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
-import 'package:lensai/features/geckoview/domain/entities/tab_state.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/features/search/domain/entities/tab_preview.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:lensai/features/kagi/data/entities/modes.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -59,48 +58,6 @@ class SelectedBangData extends _$SelectedBangData {
 }
 
 @Riverpod(keepAlive: true)
-class LastUsedAssistantMode extends _$LastUsedAssistantMode {
-  // ignore: document_ignores api decision
-  // ignore: use_setters_to_change_properties
-  void update(AssistantMode mode) {
-    state = mode;
-  }
-
-  @override
-  AssistantMode build() {
-    return AssistantMode.research;
-  }
-}
-
-@Riverpod(keepAlive: true)
-class ActiveResearchVariant extends _$ActiveResearchVariant {
-  // ignore: document_ignores api decision
-  // ignore: use_setters_to_change_properties
-  void update(ResearchVariant mode) {
-    state = mode;
-  }
-
-  @override
-  ResearchVariant build() {
-    return ResearchVariant.expert;
-  }
-}
-
-@Riverpod(keepAlive: true)
-class ActiveChatModel extends _$ActiveChatModel {
-  // ignore: document_ignores api decision
-  // ignore: use_setters_to_change_properties
-  void update(ChatModel model) {
-    state = model;
-  }
-
-  @override
-  ChatModel build() {
-    return ChatModel.gpt4o;
-  }
-}
-
-@Riverpod(keepAlive: true)
 class ShowFindInPage extends _$ShowFindInPage {
   // ignore: document_ignores api decision
   // ignore: use_setters_to_change_properties
@@ -127,7 +84,10 @@ EquatableCollection<List<String>> availableTabIds(
   final tabList = ref.watch(tabListProvider);
 
   return EquatableCollection(
-    containerTabs?.where((tabId) => tabList.contains(tabId)).toList() ?? [],
+    containerTabs
+            ?.where((tabId) => tabList.collection.contains(tabId))
+            .toList() ??
+        [],
     immutable: true,
   );
 }

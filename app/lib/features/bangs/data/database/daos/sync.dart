@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:lensai/features/bangs/data/database/database.dart';
 import 'package:lensai/features/bangs/data/models/bang.dart';
+import 'package:lensai/features/bangs/data/models/bang_group.dart';
 
 part 'sync.g.dart';
 
@@ -8,7 +9,7 @@ part 'sync.g.dart';
 class SyncDao extends DatabaseAccessor<BangDatabase> with _$SyncDaoMixin {
   SyncDao(super.db);
 
-  SingleOrNullSelectable<DateTime?> lastSyncOfGroup(BangGroup group) {
+  SingleOrNullSelectable<DateTime?> getLastSyncOfGroup(BangGroup group) {
     final query =
         selectOnly(db.bangSync)
           ..addColumns([db.bangSync.lastSync])

@@ -3,14 +3,16 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/extensions/nullable.dart';
-import 'package:lensai/features/geckoview/domain/entities/tab_state.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
 import 'package:lensai/utils/debouncer.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -93,9 +95,6 @@ class TabRepository extends _$TabRepository {
     final eventSerivce = ref.watch(eventServiceProvider);
     final tabContentService = ref.watch(tabContentServiceProvider);
 
-    final tabStateDebouncer = Debouncer(const Duration(seconds: 3));
-    Map<String, TabState>? debounceStartValue;
-
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen((tabId) async {
@@ -127,12 +126,17 @@ class TabRepository extends _$TabRepository {
 
     ref.listen(tabListProvider, (previous, next) async {
       //Only sync tabs if there has been a previous value or is not empty
-      final syncTabs = next.isNotEmpty || (previous?.isNotEmpty ?? false);
+      final syncTabs =
+          next.collection.isNotEmpty ||
+          (previous?.collection.isNotEmpty ?? false);
 
       if (syncTabs) {
-        await db.tabDao.syncTabs(retainTabIds: next);
+        await db.tabDao.syncTabs(retainTabIds: next.collection);
       }
     });
+
+    final tabStateDebouncer = Debouncer(const Duration(seconds: 3));
+    Map<String, TabState>? debounceStartValue;
 
     ref.listen(tabStatesProvider, (previous, next) async {
       //Since state changes occure pretty often and our map always contains
@@ -144,6 +148,16 @@ class TabRepository extends _$TabRepository {
 
       tabStateDebouncer.eventOccured(() async {
         await db.tabDao.updateTabs(debounceStartValue, next);
+      });
+    });
+
+    ref.listen(intentStreamProvider, (previous, next) {
+      next.whenData((value) async {
+        switch (value) {
+          case SharedUrl():
+            await addTab(url: value.url);
+          case SharedText():
+        }
       });
     });
 

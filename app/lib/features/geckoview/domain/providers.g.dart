@@ -93,25 +93,6 @@ final engineSuggestionsServiceProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef EngineSuggestionsServiceRef = ProviderRef<GeckoSuggestionsService>;
-String _$selectedTabSessionNotifierHash() =>
-    r'aef19991d5b05a2bb28e8a6ccb57dc75c2f3148f';
-
-/// See also [selectedTabSessionNotifier].
-@ProviderFor(selectedTabSessionNotifier)
-final selectedTabSessionNotifierProvider =
-    AutoDisposeProvider<Raw<TabSession>>.internal(
-  selectedTabSessionNotifier,
-  name: r'selectedTabSessionNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedTabSessionNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedTabSessionNotifierRef = AutoDisposeProviderRef<Raw<TabSession>>;
 String _$engineReadyStateHash() => r'c682333e2e07cf0635aa7ae793a2088ca648c950';
 
 /// See also [EngineReadyState].

@@ -1,5 +1,5 @@
 import 'package:home_widget/home_widget.dart';
-import 'package:lensai/data/models/received_parameter.dart';
+import 'package:lensai/data/models/received_intent_parameter.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -12,12 +12,12 @@ FutureOr<bool> widgetPinnable(Ref ref) async {
 }
 
 @Riverpod()
-Raw<Stream<ReceivedParameter>> appWidgetLaunchStream(Ref ref) {
+Raw<Stream<ReceivedIntentParameter>> appWidgetLaunchStream(Ref ref) {
   // ignore: discarded_futures is used as stream
   final initialStream = HomeWidget.initiallyLaunchedFromHomeWidget().asStream();
 
   return ConcatStream([
     initialStream,
     HomeWidget.widgetClicked,
-  ]).whereNotNull().map((uri) => ReceivedParameter(null, uri.host));
+  ]).whereNotNull().map((uri) => ReceivedIntentParameter(null, uri.host));
 }

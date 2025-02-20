@@ -7,7 +7,7 @@ part of 'web_extensions_state.dart';
 // **************************************************************************
 
 String _$webExtensionsStateHash() =>
-    r'4e6dc46e49ff353e1c3cc4616008685c0e21501d';
+    r'7fd0cb313fb433f7896bfe0f89a4545f94f58793';
 
 /// Copied from Dart SDK
 class _SystemHash {

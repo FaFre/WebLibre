@@ -42,9 +42,9 @@ class SiteSearch extends HookConsumerWidget {
 
     Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
-        final searchUri = await ref.read(
-          triggerBangSearchProvider(activeBang, query).future,
-        );
+        final searchUri = await ref
+            .read(bangSearchProvider.notifier)
+            .triggerBangSearch(activeBang, query);
 
         await ref.read(tabRepositoryProvider.notifier).addTab(url: searchUri);
 

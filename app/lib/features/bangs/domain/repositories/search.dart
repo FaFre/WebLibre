@@ -57,6 +57,6 @@ class SeamlessBangProvider extends _$SeamlessBangProvider {
   AsyncValue<List<BangData>> build() {
     return _hasSearch
         ? ref.watch(bangSearchProvider)
-        : ref.watch(frequentBangDataListProvider);
+        : ref.watch(frequentBangListProvider);
   }
 }

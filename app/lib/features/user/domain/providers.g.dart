@@ -6,25 +6,6 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$iconCacheSizeMegabytesHash() =>
-    r'43162fce3ce8b04a5a55ed52021b274afbde2861';
-
-/// See also [iconCacheSizeMegabytes].
-@ProviderFor(iconCacheSizeMegabytes)
-final iconCacheSizeMegabytesProvider =
-    AutoDisposeStreamProvider<double>.internal(
-  iconCacheSizeMegabytes,
-  name: r'iconCacheSizeMegabytesProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$iconCacheSizeMegabytesHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef IconCacheSizeMegabytesRef = AutoDisposeStreamProviderRef<double>;
 String _$storedAuthDataHash() => r'5f7e3ef6233a2036f7ce3728131901a46b1e548e';
 
 /// See also [_storedAuthData].
@@ -42,6 +23,25 @@ final _storedAuthDataProvider = AutoDisposeFutureProvider<String?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef _StoredAuthDataRef = AutoDisposeFutureProviderRef<String?>;
+String _$iconCacheSizeMegabytesHash() =>
+    r'5d7f5f6485060b08ce4fd8fa634f07bf8bfdbd2d';
+
+/// See also [iconCacheSizeMegabytes].
+@ProviderFor(iconCacheSizeMegabytes)
+final iconCacheSizeMegabytesProvider =
+    AutoDisposeStreamProvider<double>.internal(
+  iconCacheSizeMegabytes,
+  name: r'iconCacheSizeMegabytesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$iconCacheSizeMegabytesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef IconCacheSizeMegabytesRef = AutoDisposeStreamProviderRef<double>;
 String _$authStoreHash() => r'766c001bbb8d7dc4e148eff3816c414d78e77f26';
 
 /// See also [authStore].

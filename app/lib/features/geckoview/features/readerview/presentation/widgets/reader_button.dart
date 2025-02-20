@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/entities/readerable_state.dart';
+import 'package:lensai/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';

@@ -21,7 +21,7 @@ class AboutDialogScreen extends HookConsumerWidget {
       ),
       applicationName: packageInfo.appName,
       applicationVersion: packageInfo.version,
-      applicationLegalese: 'Copyright © Fabian Freund, 2024',
+      applicationLegalese: 'Copyright © Fabian Freund, 2025',
     );
   }
 }

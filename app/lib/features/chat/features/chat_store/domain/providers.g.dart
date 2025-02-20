@@ -158,7 +158,7 @@ class _ChatControllerProviderElement
   String get chatId => (origin as ChatControllerProvider).chatId;
 }
 
-String _$chatMetadataHash() => r'22252e4a4c4e9cb039c5eee0e0f6eb5b8bd03944';
+String _$chatMetadataHash() => r'e50f492ae69168c9f9c4df89e29424b72b681e27';
 
 /// See also [chatMetadata].
 @ProviderFor(chatMetadata)

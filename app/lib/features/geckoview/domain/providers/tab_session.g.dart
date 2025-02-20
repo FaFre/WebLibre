@@ -6,6 +6,25 @@ part of 'tab_session.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$selectedTabSessionNotifierHash() =>
+    r'aef19991d5b05a2bb28e8a6ccb57dc75c2f3148f';
+
+/// See also [selectedTabSessionNotifier].
+@ProviderFor(selectedTabSessionNotifier)
+final selectedTabSessionNotifierProvider =
+    AutoDisposeProvider<Raw<TabSession>>.internal(
+  selectedTabSessionNotifier,
+  name: r'selectedTabSessionNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedTabSessionNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SelectedTabSessionNotifierRef = AutoDisposeProviderRef<Raw<TabSession>>;
 String _$tabSessionHash() => r'e4fbbcd430037cc01adb799783fb7974a11a27bf';
 
 /// Copied from Dart SDK

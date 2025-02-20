@@ -24,12 +24,12 @@ final widgetPinnableProvider = FutureProvider<bool>.internal(
 // ignore: unused_element
 typedef WidgetPinnableRef = FutureProviderRef<bool>;
 String _$appWidgetLaunchStreamHash() =>
-    r'8eb98d88e74cc4f7573968563c106b8e6beee289';
+    r'ed042d1391ae3dbc26f806d6fa2e9a4a2464ae44';
 
 /// See also [appWidgetLaunchStream].
 @ProviderFor(appWidgetLaunchStream)
 final appWidgetLaunchStreamProvider =
-    AutoDisposeProvider<Raw<Stream<ReceivedParameter>>>.internal(
+    AutoDisposeProvider<Raw<Stream<ReceivedIntentParameter>>>.internal(
   appWidgetLaunchStream,
   name: r'appWidgetLaunchStreamProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -42,6 +42,6 @@ final appWidgetLaunchStreamProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppWidgetLaunchStreamRef
-    = AutoDisposeProviderRef<Raw<Stream<ReceivedParameter>>>;
+    = AutoDisposeProviderRef<Raw<Stream<ReceivedIntentParameter>>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

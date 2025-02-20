@@ -1,8 +1,9 @@
 import 'dart:convert';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:langchain/langchain.dart';
 
-class VectorResult {
+class VectorResult with FastEquatable {
   final String id;
   final String? mainDocumentId;
   final String? contextId;
@@ -26,4 +27,17 @@ class VectorResult {
   Document toDocument() {
     return Document(id: id, pageContent: content, metadata: metadata);
   }
+
+  @override
+  bool get cacheHash => true;
+
+  @override
+  List<Object?> get hashParameters => [
+    id,
+    mainDocumentId,
+    contextId,
+    content,
+    metadata,
+    distance,
+  ];
 }

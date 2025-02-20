@@ -6,11 +6,12 @@ part of 'tab_list.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tabListHash() => r'039099bfa102a86fd73c0544ea71f93f91e9d352';
+String _$tabListHash() => r'bb8b6cca42a8aace8bd9808fdeac4fe4965ac867';
 
 /// See also [TabList].
 @ProviderFor(TabList)
-final tabListProvider = NotifierProvider<TabList, List<String>>.internal(
+final tabListProvider =
+    NotifierProvider<TabList, EquatableCollection<List<String>>>.internal(
   TabList.new,
   name: r'tabListProvider',
   debugGetCreateSourceHash:
@@ -19,6 +20,6 @@ final tabListProvider = NotifierProvider<TabList, List<String>>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef _$TabList = Notifier<List<String>>;
+typedef _$TabList = Notifier<EquatableCollection<List<String>>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

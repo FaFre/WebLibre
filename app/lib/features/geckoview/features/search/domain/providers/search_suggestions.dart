@@ -1,5 +1,5 @@
-import 'package:lensai/features/kagi/data/services/autosuggest.dart';
-import 'package:lensai/features/kagi/domain/repositories/search_suggestions.dart';
+import 'package:lensai/features/geckoview/features/search/domain/repositories/search_suggestions.dart';
+import 'package:lensai/features/search/domain/autosuggest/kagi.dart';
 import 'package:lensai/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

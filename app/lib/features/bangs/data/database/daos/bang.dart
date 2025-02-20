@@ -3,6 +3,7 @@ import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/database/database.dart';
 import 'package:lensai/features/bangs/data/models/bang.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
+import 'package:lensai/features/bangs/data/models/bang_group.dart';
 
 part 'bang.g.dart';
 
@@ -121,18 +122,4 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
   Future<int> removeSearchEntry(String searchQuery) {
     return db.bangHistory.deleteWhere((t) => t.searchQuery.equals(searchQuery));
   }
-
-  // Future<int> upsertBangIcon(String trigger, BrowserIcon icon) async {
-  //   //TODO: swithc to WEBP in future, requires 3rd party
-  //   final compressed = await icon.image.toByteData(format: ImageByteFormat.png);
-
-  //   return db.bangIcon.insertOne(
-  //     BangIconCompanion.insert(
-  //       trigger: trigger,
-  //       iconData: compressed!.buffer.asUint8List(),
-  //       fetchDate: DateTime.now(),
-  //     ),
-  //     mode: InsertMode.insertOrReplace,
-  //   );
-  // }
 }
