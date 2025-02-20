@@ -123,31 +123,31 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             reloadSession = true
         }
         if(settings.httpsOnlyMode != null) {
-            components.core.engineSettings.httpsOnlyMode = components.core.engineSettings.httpsOnlyMode
+            components.core.engine.settings.httpsOnlyMode = components.core.engineSettings.httpsOnlyMode
         }
         if(settings.globalPrivacyControlEnabled != null) {
-            components.core.engineSettings.globalPrivacyControlEnabled = components.core.engineSettings.globalPrivacyControlEnabled
+            components.core.engine.settings.globalPrivacyControlEnabled = components.core.engineSettings.globalPrivacyControlEnabled
         }
         if(settings.preferredColorScheme != null) {
-            components.core.engineSettings.preferredColorScheme = components.core.engineSettings.preferredColorScheme
+            components.core.engine.settings.preferredColorScheme = components.core.engineSettings.preferredColorScheme
             reloadSession = true
         }
         if(settings.cookieBannerHandlingMode != null) {
-            components.core.engineSettings.cookieBannerHandlingMode = components.core.engineSettings.cookieBannerHandlingMode
+            components.core.engine.settings.cookieBannerHandlingMode = components.core.engineSettings.cookieBannerHandlingMode
             reloadSession = true
         }
         if(settings.cookieBannerHandlingModePrivateBrowsing != null) {
-            components.core.engineSettings.cookieBannerHandlingModePrivateBrowsing = components.core.engineSettings.cookieBannerHandlingModePrivateBrowsing
+            components.core.engine.settings.cookieBannerHandlingModePrivateBrowsing = components.core.engineSettings.cookieBannerHandlingModePrivateBrowsing
             reloadSession = true
         }
         if(settings.cookieBannerHandlingGlobalRules != null) {
-            components.core.engineSettings.cookieBannerHandlingGlobalRules = components.core.engineSettings.cookieBannerHandlingGlobalRules
+            components.core.engine.settings.cookieBannerHandlingGlobalRules = components.core.engineSettings.cookieBannerHandlingGlobalRules
         }
         if(settings.cookieBannerHandlingGlobalRulesSubFrames != null) {
-            components.core.engineSettings.cookieBannerHandlingGlobalRulesSubFrames = components.core.engineSettings.cookieBannerHandlingGlobalRulesSubFrames
+            components.core.engine.settings.cookieBannerHandlingGlobalRulesSubFrames = components.core.engineSettings.cookieBannerHandlingGlobalRulesSubFrames
         }
         if(settings.webContentIsolationStrategy != null) {
-            components.core.engineSettings.webContentIsolationStrategy = components.core.engineSettings.webContentIsolationStrategy
+            components.core.engine.settings.webContentIsolationStrategy = components.core.engineSettings.webContentIsolationStrategy
         }
 
         if(reloadSession) {
