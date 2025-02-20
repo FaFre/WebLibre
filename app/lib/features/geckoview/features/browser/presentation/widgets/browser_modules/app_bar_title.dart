@@ -8,12 +8,12 @@ class AppBarTitle extends StatelessWidget {
   final TabState tab;
 
   final void Function()? onTap;
-  final void Function()? onDoubleTap;
+  final void Function()? onLongPress;
 
   const AppBarTitle({
     required this.tab,
     this.onTap,
-    this.onDoubleTap,
+    this.onLongPress,
     super.key,
   });
 
@@ -42,7 +42,7 @@ class AppBarTitle extends StatelessWidget {
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
-      onDoubleTap: onDoubleTap,
+      onLongPress: onLongPress,
       child: Row(
         children: [
           Skeletonizer(

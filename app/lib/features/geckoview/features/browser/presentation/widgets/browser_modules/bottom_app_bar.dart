@@ -61,7 +61,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                               extra: tabState,
                             );
                           },
-                          onDoubleTap: () async {
+                          onLongPress: () async {
                             final newUrl = await showDialog<Uri?>(
                               context: context,
                               builder:
