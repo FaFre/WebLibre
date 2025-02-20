@@ -13,10 +13,8 @@ dependencies:
   drift: ^2.25.1
   dynamic_color: ^1.7.0
   exceptions: ^0.6.1
-  expandable_page_view: ^1.0.17
   fading_scroll: ^0.9.1
   fast_equatable: ^1.1.0
-  file_picker: ^9.0.0
   flutter:
     sdk: flutter
   flutter_background_service: ^5.1.0
@@ -29,7 +27,6 @@ dependencies:
   flutter_material_design_icons: ^1.1.7447
   flutter_mozilla_components:
     path: ../packages/flutter_mozilla_components
-  flutter_pdf_text: ^0.9.0
   flutter_reorderable_grid_view:
     path: ../../flutter-reorderable-grid-view
   flutter_secure_storage: ^10.0.0-beta.4
@@ -52,7 +49,6 @@ dependencies:
       url: https://github.com/FaFre/lexo_rank.git
   local_auth: ^2.3.0
   logger: ^2.5.0
-  markdown: ^7.3.0
   mime: ^2.0.0
   package_info_plus: ^8.2.1
   path: ^1.9.1
@@ -72,7 +68,6 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.30
   sqlite3_vec:
     path: ../packages/sqlite3_vec
-  synchronized: ^3.3.1
   text_scroll: ^0.2.0
   timeago: ^3.7.0
   tor:
@@ -85,7 +80,6 @@ dependencies:
       url: https://github.com/FaFre/uri-to-file.git
   url_launcher: ^6.3.1
   uuid: ^4.5.1
-  watcher: ^1.1.1
   xxh3: ^1.2.0
 
 dependency_overrides:
