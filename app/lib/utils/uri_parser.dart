@@ -1,5 +1,5 @@
 final _domainRegex = RegExp(r'\.[a-zA-Z]{2,}$');
-const _supportedSchemes = {'https', 'http', 'ftp', 'file', 'about'};
+const _supportedSchemes = {'https', 'http', 'ftp', 'file', 'content', 'about'};
 
 Uri? tryParseUrl(String? input, {bool eagerParsing = false}) {
   if (input != null) {
