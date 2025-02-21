@@ -1,12 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:lensai/domain/entities/equatable_image.dart';
 import 'package:lensai/utils/lru_cache.dart';
 import 'package:xxh3/xxh3.dart';
 
-final _cache = LRUCache<int, Image>(100);
+final _cache = LRUCache<int, EquatableImage>(100);
 
-Future<Image?> tryDecodeImage(
+Future<EquatableImage?> tryDecodeImage(
   Uint8List bytes, {
   int? targetWidth,
   int? targetHeight,
@@ -28,9 +29,9 @@ Future<Image?> tryDecodeImage(
     );
 
     final frameInfo = await codec.getNextFrame();
-    final image = frameInfo.image;
+    final image = EquatableImage(frameInfo.image, hash: digest);
 
-    if (image.width > 0) {
+    if (image.value.width > 0) {
       _cache.set(digest, image);
       return image;
     }

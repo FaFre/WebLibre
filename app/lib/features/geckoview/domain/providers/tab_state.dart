@@ -39,10 +39,7 @@ class TabStates extends _$TabStates {
   Future<void> _onIconChange(IconChangeEvent event) async {
     final IconChangeEvent(:tabId, :bytes) = event;
 
-    final image = await bytes.mapNotNull(
-      (bytes) =>
-          tryDecodeImage(bytes).then((image) async => image?.toEquatable()),
-    );
+    final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
 
     final current = state[tabId] ?? TabState.$default(tabId);
     state = {...state}..[tabId] = current.copyWith.icon(image);
@@ -51,10 +48,7 @@ class TabStates extends _$TabStates {
   Future<void> _onThumbnailChange(ThumbnailEvent event) async {
     final ThumbnailEvent(:tabId, :bytes) = event;
 
-    final image = await bytes.mapNotNull(
-      (bytes) =>
-          tryDecodeImage(bytes).then((image) async => image?.toEquatable()),
-    );
+    final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
 
     final current = state[tabId] ?? TabState.$default(tabId);
     state = {...state}..[tabId] = current.copyWith.thumbnail(image);

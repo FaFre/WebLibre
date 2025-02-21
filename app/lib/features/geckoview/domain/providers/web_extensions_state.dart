@@ -50,9 +50,7 @@ class WebExtensionsState extends _$WebExtensionsState {
   Future<void> _onIconChange(ExtensionIconEvent event) async {
     final ExtensionIconEvent(:extensionId, :bytes) = event;
 
-    final image = await tryDecodeImage(
-      bytes,
-    ).then((image) async => image?.toEquatable());
+    final image = await tryDecodeImage(bytes);
 
     if (image != null) {
       if (_imageCache[extensionId] != image) {

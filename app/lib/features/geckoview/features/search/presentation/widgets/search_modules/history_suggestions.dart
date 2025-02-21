@@ -66,7 +66,7 @@ class HistorySuggestions extends HookConsumerWidget {
                       return ListTile(
                         leading: RepaintBoundary(
                           child: RawImage(
-                            image: icon.data,
+                            image: icon.data?.value,
                             height: 24,
                             width: 24,
                           ),

@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:lensai/domain/entities/equatable_image.dart';
 import 'package:xxh3/xxh3.dart';
 
 extension ImageHash on Image {
@@ -14,7 +13,7 @@ extension ImageHash on Image {
     return null;
   }
 
-  Future<EquatableImage> toEquatable() {
-    return EquatableImage.calculate(this);
-  }
+  // Future<EquatableImage> toEquatable() {
+  //   return EquatableImage.calculate(this);
+  // }
 }

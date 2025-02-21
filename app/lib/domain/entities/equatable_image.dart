@@ -1,18 +1,18 @@
 import 'dart:ui';
 
-import 'package:lensai/extensions/image.dart';
-
 class EquatableImage {
   final Image value;
   final int? _imageHash;
 
   EquatableImage(this.value, {required int? hash}) : _imageHash = hash;
 
-  static Future<EquatableImage> calculate(Image image) async {
-    final imageHash = await image.calculateHash();
+  //For now we only calculate the has from encoded image on decoding
 
-    return EquatableImage(image, hash: imageHash);
-  }
+  // static Future<EquatableImage> calculate(Image image) async {
+  //   final imageHash = await image.calculateHash();
+
+  //   return EquatableImage(image, hash: imageHash);
+  // }
 
   @override
   int get hashCode => _imageHash.hashCode;
