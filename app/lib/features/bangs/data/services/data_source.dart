@@ -12,21 +12,20 @@ part 'data_source.g.dart';
 
 @Riverpod()
 class BangDataSourceService extends _$BangDataSourceService {
-  late http.Client _client;
-
   @override
-  void build() {
-    _client = http.Client();
-  }
+  void build() {}
 
   Future<Result<List<Bang>>> getBangs(Uri url, BangGroup? group) async {
     return Result.fromAsync(() async {
-      final response = await _client
-          .get(url)
-          .timeout(const Duration(seconds: 30));
-      return await compute((args) => jsonDecode(utf8.decode(args[0])) as List, [
-        response.bodyBytes,
-      ]).then(
+      return await compute((args) async {
+        final client = http.Client();
+        final url = Uri.parse(args[0]);
+        final response = await client
+            .get(url)
+            .timeout(const Duration(seconds: 30));
+
+        return jsonDecode(utf8.decode(response.bodyBytes)) as List;
+      }, [url.toString()]).then(
         (json) =>
             json.map((e) {
               var bang = Bang.fromJson(e as Map<String, dynamic>);

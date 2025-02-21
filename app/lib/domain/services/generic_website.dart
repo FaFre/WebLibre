@@ -57,8 +57,6 @@ Iterable<ResourceSize> sizesToList(String? sizes) sync* {
 class GenericWebsiteService extends _$GenericWebsiteService {
   final GeckoIconService _iconsService;
 
-  late http.Client _client;
-
   //Global icon cache
   late CacheRepository _cacheRepository;
   //Local decoded icon cache
@@ -70,7 +68,6 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
   @override
   void build() {
-    _client = http.Client();
     _cacheRepository = ref.watch(cacheRepositoryProvider.notifier);
   }
 
@@ -189,22 +186,27 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
   Future<Result<WebPageInfo>> fetchPageInfo(Uri url) async {
     return Result.fromAsync(() async {
-      final response = await _client
-          .get(url)
-          .timeout(const Duration(seconds: 15));
+      final result = await compute((String urlString) async {
+        final client = http.Client();
+        try {
+          final baseUri = Uri.parse(urlString);
+          final response = await client
+              .get(baseUri)
+              .timeout(const Duration(seconds: 15));
 
-      final result = await compute((args) async {
-        final document = html_parser.parse(args[0]);
-        final baseUri = Uri.parse(args[1]);
+          final document = html_parser.parse(response.body);
 
-        final title = document.querySelector('title')?.text;
-        final resources = _extractIcons(baseUri, document);
+          final title = document.querySelector('title')?.text;
+          final resources = _extractIcons(baseUri, document);
 
-        return {
-          'title': title,
-          'resources': resources.map(_serializeResource).toList(),
-        };
-      }, [response.body, url.toString()]);
+          return {
+            'title': title,
+            'resources': resources.map(_serializeResource).toList(),
+          };
+        } finally {
+          client.close();
+        }
+      }, url.toString());
 
       final resources =
           (result['resources']! as List<Map<String, dynamic>>)

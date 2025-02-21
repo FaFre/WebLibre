@@ -7,7 +7,7 @@ part of 'data_source.dart';
 // **************************************************************************
 
 String _$bangDataSourceServiceHash() =>
-    r'fb00762858a2878505c14e2b1a0f26c1b2f60d7d';
+    r'883fd708053523def4a5bc966c0b6ad88e085215';
 
 /// See also [BangDataSourceService].
 @ProviderFor(BangDataSourceService)
