@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/error_observer.dart';
+import 'package:lensai/core/providers/defaults.dart';
 import 'package:lensai/domain/services/app_initialization.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:lensai/presentation/hooks/on_initialization.dart';
@@ -36,14 +37,35 @@ void main() async {
 
           return DynamicColorBuilder(
             builder: (lightDynamic, darkDynamic) {
+              ColorScheme lightColorScheme;
+              ColorScheme darkColorScheme;
+
+              if (lightDynamic != null && darkDynamic != null) {
+                // On Android S+ devices, use the provided dynamic color scheme.
+                // (Recommended) Harmonize the dynamic color scheme' built-in semantic colors.
+                lightColorScheme = lightDynamic.harmonized();
+
+                // Repeat for the dark color scheme.
+                darkColorScheme = darkDynamic.harmonized();
+              } else {
+                // Otherwise, use fallback schemes.
+                lightColorScheme = ColorScheme.fromSeed(
+                  seedColor: ref.read(lightSeedColorFallbackProvider),
+                );
+                darkColorScheme = ColorScheme.fromSeed(
+                  seedColor: ref.read(darkSeedColorFallbackProvider),
+                  brightness: Brightness.dark,
+                );
+              }
+
               return MainApp(
                 theme: ThemeData(
                   useMaterial3: true,
-                  colorScheme: lightDynamic?.harmonized(),
+                  colorScheme: lightColorScheme,
                 ),
                 darkTheme: ThemeData(
                   useMaterial3: true,
-                  colorScheme: darkDynamic?.harmonized(),
+                  colorScheme: darkColorScheme,
                 ),
                 themeMode: themeMode,
               );
