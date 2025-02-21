@@ -26,7 +26,8 @@ if (flutterVersionName == null) {
 android {
     namespace = "me.movenext.bang_navigator"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    //Temporary fix
+    ndkVersion = "27.0.12077973" //flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
