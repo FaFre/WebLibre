@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/extensions/nullable.dart';
+import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -157,6 +159,11 @@ class TabRepository extends _$TabRepository {
           case SharedUrl():
             await addTab(url: value.url);
           case SharedText():
+            final defaultSearchBang =
+                ref.read(selectedBangDataProvider()) ??
+                await ref.read(defaultSearchBangDataProvider.future);
+
+            await addTab(url: defaultSearchBang?.getUrl(value.text));
         }
       });
     });
