@@ -15,7 +15,7 @@ List<RouteBase> get $appRoutes => [
     ];
 
 RouteBase get $aboutRoute => GoRouteData.$route(
-      path: 'about',
+      path: '/about',
       name: 'AboutRoute',
       factory: $AboutRouteExtension._fromState,
     );
@@ -24,7 +24,7 @@ extension $AboutRouteExtension on AboutRoute {
   static AboutRoute _fromState(GoRouterState state) => AboutRoute();
 
   String get location => GoRouteData.$location(
-        'about',
+        '/about',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -38,7 +38,7 @@ extension $AboutRouteExtension on AboutRoute {
 }
 
 RouteBase get $userAuthRoute => GoRouteData.$route(
-      path: 'userAuth',
+      path: '/userAuth',
       name: 'UserAuthRoute',
       factory: $UserAuthRouteExtension._fromState,
     );
@@ -47,7 +47,7 @@ extension $UserAuthRouteExtension on UserAuthRoute {
   static UserAuthRoute _fromState(GoRouterState state) => UserAuthRoute();
 
   String get location => GoRouteData.$location(
-        'userAuth',
+        '/userAuth',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -375,7 +375,7 @@ extension $ContainerEditRouteExtension on ContainerEditRoute {
 }
 
 RouteBase get $bangCategoriesRoute => GoRouteData.$route(
-      path: 'bangs',
+      path: '/bangs',
       name: 'BangRoute',
       factory: $BangCategoriesRouteExtension._fromState,
       routes: [
@@ -404,7 +404,7 @@ extension $BangCategoriesRouteExtension on BangCategoriesRoute {
       BangCategoriesRoute();
 
   String get location => GoRouteData.$location(
-        'bangs',
+        '/bangs',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -424,7 +424,7 @@ extension $BangSearchRouteExtension on BangSearchRoute {
       );
 
   String get location => GoRouteData.$location(
-        'bangs/search/${Uri.encodeComponent(searchText)}',
+        '/bangs/search/${Uri.encodeComponent(searchText)}',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -443,7 +443,7 @@ extension $BangCategoryRouteExtension on BangCategoryRoute {
       );
 
   String get location => GoRouteData.$location(
-        'bangs/category/${Uri.encodeComponent(category)}',
+        '/bangs/category/${Uri.encodeComponent(category)}',
       );
 
   void go(BuildContext context) => context.go(location);
@@ -464,7 +464,7 @@ extension $BangSubCategoryRouteExtension on BangSubCategoryRoute {
       );
 
   String get location => GoRouteData.$location(
-        'bangs/category/${Uri.encodeComponent(category)}/${Uri.encodeComponent(subCategory)}',
+        '/bangs/category/${Uri.encodeComponent(category)}/${Uri.encodeComponent(subCategory)}',
       );
 
   void go(BuildContext context) => context.go(location);

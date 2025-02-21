@@ -2,7 +2,7 @@ part of 'routes.dart';
 
 @TypedGoRoute<BangCategoriesRoute>(
   name: 'BangRoute',
-  path: 'bangs',
+  path: '/bangs',
   routes: [
     TypedGoRoute<BangSearchRoute>(
       name: 'BangSearchRoute',

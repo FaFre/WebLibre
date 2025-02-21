@@ -26,7 +26,7 @@ part 'routes.settings.dart';
 part 'routes.browser.dart';
 part 'routes.bangs.dart';
 
-@TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: 'about')
+@TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
 class AboutRoute extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
@@ -34,7 +34,7 @@ class AboutRoute extends GoRouteData {
   }
 }
 
-@TypedGoRoute<UserAuthRoute>(name: 'UserAuthRoute', path: 'userAuth')
+@TypedGoRoute<UserAuthRoute>(name: 'UserAuthRoute', path: '/userAuth')
 class UserAuthRoute extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
