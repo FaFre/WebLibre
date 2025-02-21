@@ -5,8 +5,6 @@ import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/bangs/presentation/widgets/bang_details.dart';
-import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 

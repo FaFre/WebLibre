@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/extensions/image.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/history.dart';

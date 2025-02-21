@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/domain/entities/equatable_image.dart';
-import 'package:lensai/extensions/image.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/web_extension.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
