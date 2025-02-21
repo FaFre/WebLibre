@@ -55,47 +55,52 @@ export default class BackgroundMain {
     )
   }
 
-  // TODO: Fix in @types/firefox-webext-browser
   async onRequest(requestDetails: Pick<_OnRequestDetails, 'cookieStoreId' | 'url' | 'tabId'>): Promise<DoNotProxy | ProxyInfo[]> {
-    const tab = (await browser.tabs.get(requestDetails.tabId))
+    if (requestDetails.tabId > -1) {
+      const tab = (await browser.tabs.get(requestDetails.tabId))
 
-    if (tab.cookieStoreId?.startsWith(containerIdentifier) === true) {
-      try {
-        const cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
+      if (tab.cookieStoreId?.startsWith(containerIdentifier) === true) {
+        try {
+          const cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
 
-        const proxies = await this.store.getProxiesForContainer(cookieStoreId)
+          const proxies = await this.store.getProxiesForContainer(cookieStoreId)
 
-        if (proxies.length > 0) {
-          proxies.forEach(p => {
-            if (p.type === ProxyType.Http || p.type === ProxyType.Https) {
-              this.initializeAuthListener(cookieStoreId, p)
-            }
-          })
-
-          const result: ProxyInfo[] = proxies.filter((p: ProxySettings) => {
-            try {
-              const documentUrl = new URL(requestDetails.url)
-              const isLocalhost = localhosts.has(documentUrl.hostname)
-              if (isLocalhost && p.doNotProxyLocal) {
-                return false
-              }
-            } catch (e) {
-              console.error(e)
-            }
-
-            return true
-          }).map(p => p.asProxyInfo())
-
-          if (result.length === 0) {
-            return [emergencyBreak]
+          if (proxies === null) {
+            return doNotProxy
           }
-          return result
-        }
 
-        return [emergencyBreak]
-      } catch (e: unknown) {
-        console.error(`Error in onRequest listener: ${e as string}`)
-        return [emergencyBreak]
+          if (proxies.length > 0) {
+            proxies.forEach(p => {
+              if (p.type === ProxyType.Http || p.type === ProxyType.Https) {
+                this.initializeAuthListener(cookieStoreId, p)
+              }
+            })
+
+            const result: ProxyInfo[] = proxies.filter((p: ProxySettings) => {
+              try {
+                const documentUrl = new URL(requestDetails.url)
+                const isLocalhost = localhosts.has(documentUrl.hostname)
+                if (isLocalhost && p.doNotProxyLocal) {
+                  return false
+                }
+              } catch (e) {
+                console.error(e)
+              }
+
+              return true
+            }).map(p => p.asProxyInfo())
+
+            if (result.length === 0) {
+              return [emergencyBreak]
+            }
+            return result
+          }
+
+          return [emergencyBreak]
+        } catch (e: unknown) {
+          console.error(`Error in onRequest listener: ${e as string}`)
+          return [emergencyBreak]
+        }
       }
     }
 

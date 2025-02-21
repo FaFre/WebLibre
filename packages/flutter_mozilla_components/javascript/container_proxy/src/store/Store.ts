@@ -119,13 +119,13 @@ export class Store {
     }
   }
 
-  async getProxiesForContainer(cookieStoreId: string): Promise<ProxySettings[]> {
+  async getProxiesForContainer(cookieStoreId: string): Promise<ProxySettings[] | null> {
     const relations = await this.getRelations()
 
     const proxyIds: string[] = relations[cookieStoreId] ?? []
 
     if (proxyIds.length === 0) {
-      return []
+      return null
     }
 
     const proxies = await this.getAllProxies()
