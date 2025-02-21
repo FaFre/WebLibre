@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/search.dart';
+import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/search/domain/providers/search_suggestions.dart';
@@ -17,11 +18,13 @@ import 'package:lensai/presentation/widgets/selectable_chips.dart';
 class SiteSearch extends HookConsumerWidget {
   final String domain;
   final List<BangData> availableBangs;
+  final bool searchInNewTab;
 
   const SiteSearch({
     required this.domain,
     required this.availableBangs,
     super.key,
+    this.searchInNewTab = true,
   });
 
   @override
@@ -46,7 +49,13 @@ class SiteSearch extends HookConsumerWidget {
             .read(bangSearchProvider.notifier)
             .triggerBangSearch(activeBang, query);
 
-        await ref.read(tabRepositoryProvider.notifier).addTab(url: searchUri);
+        if (searchInNewTab) {
+          await ref.read(tabRepositoryProvider.notifier).addTab(url: searchUri);
+        } else {
+          await ref
+              .read(tabSessionProvider(tabId: null).notifier)
+              .loadUrl(url: searchUri);
+        }
 
         if (context.mounted) {
           context.pop();

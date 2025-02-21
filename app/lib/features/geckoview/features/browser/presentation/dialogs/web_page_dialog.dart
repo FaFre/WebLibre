@@ -89,6 +89,7 @@ class WebPageDialog extends HookConsumerWidget {
                               return SiteSearch(
                                 domain: url.host,
                                 availableBangs: availableBangs,
+                                searchInNewTab: false,
                               );
                             },
                             error:
