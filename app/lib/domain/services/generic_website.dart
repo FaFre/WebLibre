@@ -13,6 +13,8 @@ import 'package:lensai/data/models/web_page_info.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
+import 'package:lensai/presentation/controllers/website_title.dart';
+import 'package:lensai/utils/feed_finder.dart';
 import 'package:lensai/utils/lru_cache.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -198,10 +200,15 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
           final title = document.querySelector('title')?.text;
           final resources = _extractIcons(baseUri, document);
+          final feeds = await FeedFinder(
+            url: baseUri,
+            document: document,
+          ).parse(verifyCandidates: false);
 
           return {
             'title': title,
             'resources': resources.map(_serializeResource).toList(),
+            'feeds': feeds,
           };
         } finally {
           client.close();
@@ -221,6 +228,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         url: url,
         title: result['title'] as String?,
         favicon: favicon,
+        feeds: result['feeds'] as Set<String>?,
       );
     }, exceptionHandler: handleHttpError);
   }
@@ -278,9 +286,10 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       return cachedIcon;
     }
 
-    return fetchPageInfo(
-      url,
-    ).then((result) => result.flatMap((pageInfo) => pageInfo.favicon!).value);
+    final result = await ref.read(pageInfoProvider(url).future);
+    final favicon = result.favicon!;
+
+    return favicon;
   }
 
   // Future<Uri?> tryUpgradeToHttps(Uri httpUri) async {

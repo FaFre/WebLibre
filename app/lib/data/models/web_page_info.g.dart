@@ -13,6 +13,8 @@ abstract class _$WebPageInfoCWProxy {
 
   WebPageInfo favicon(BrowserIcon? favicon);
 
+  WebPageInfo feeds(Set<String>? feeds);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebPageInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +25,7 @@ abstract class _$WebPageInfoCWProxy {
     Uri url,
     String? title,
     BrowserIcon? favicon,
+    Set<String>? feeds,
   });
 }
 
@@ -42,6 +45,9 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
   WebPageInfo favicon(BrowserIcon? favicon) => this(favicon: favicon);
 
   @override
+  WebPageInfo feeds(Set<String>? feeds) => this(feeds: feeds);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebPageInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -53,6 +59,7 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
     Object? url = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? favicon = const $CopyWithPlaceholder(),
+    Object? feeds = const $CopyWithPlaceholder(),
   }) {
     return WebPageInfo(
       url: url == const $CopyWithPlaceholder()
@@ -67,6 +74,10 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
           ? _value.favicon
           // ignore: cast_nullable_to_non_nullable
           : favicon as BrowserIcon?,
+      feeds: feeds == const $CopyWithPlaceholder()
+          ? _value.feeds
+          // ignore: cast_nullable_to_non_nullable
+          : feeds as Set<String>?,
     );
   }
 }

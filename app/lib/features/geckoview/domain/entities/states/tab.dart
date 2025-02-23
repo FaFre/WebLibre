@@ -1,5 +1,4 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/data/models/web_page_info.dart';
 import 'package:lensai/domain/entities/equatable_image.dart';
@@ -13,7 +12,7 @@ import 'package:lensai/features/geckoview/domain/entities/states/security.dart';
 part 'tab.g.dart';
 
 @CopyWith()
-class TabState extends WebPageInfo with FastEquatable {
+class TabState extends WebPageInfo {
   @CopyWithField(immutable: true)
   final String id;
 
@@ -85,10 +84,9 @@ class TabState extends WebPageInfo with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
+    ...super.hashParameters,
     id,
     contextId,
-    url,
-    title,
     icon,
     thumbnail,
     progress,
