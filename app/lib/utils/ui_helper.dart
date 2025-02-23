@@ -17,9 +17,15 @@ Future<void> launchUrlFeedback(
   Uri url, {
   LaunchMode mode = LaunchMode.externalApplication,
 }) async {
-  if (!await launchUrl(url, mode: mode)) {
+  if (await canLaunchUrl(url)) {
+    if (!await launchUrl(url, mode: mode)) {
+      if (context.mounted) {
+        showErrorMessage(context, 'Could not launch URL ($url)');
+      }
+    }
+  } else {
     if (context.mounted) {
-      showErrorMessage(context, 'Could not launch URL ($url)');
+      showErrorMessage(context, 'Can not handle "${url.scheme}"');
     }
   }
 }
