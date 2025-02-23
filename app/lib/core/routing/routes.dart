@@ -8,6 +8,8 @@ import 'package:lensai/features/bangs/presentation/screens/list.dart';
 import 'package:lensai/features/bangs/presentation/screens/search.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/dialogs/web_page_dialog.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/screens/browser.dart';
+import 'package:lensai/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:lensai/features/geckoview/features/contextmenu/presentation/context_menu_dialog.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/screens/search.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/screens/container_edit.dart';

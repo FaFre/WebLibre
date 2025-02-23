@@ -7,6 +7,10 @@ part of 'routes.dart';
     TypedGoRoute<WebPageRoute>(name: 'WebPageRoute', path: 'page/:url'),
     TypedGoRoute<SearchRoute>(name: 'SearchRoute', path: 'search/:searchText'),
     TypedGoRoute<TorProxyRoute>(name: 'TorProxyRoute', path: 'tor_proxy'),
+    TypedGoRoute<ContextMenuRoute>(
+      name: 'ContextMenuRoute',
+      path: 'context_menu',
+    ),
     TypedGoRoute<ContainerListRoute>(
       name: 'ContainerListRoute',
       path: 'containers',
@@ -94,6 +98,20 @@ class ContainerCreateRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) {
     return ContainerEditScreen.create(
       initialContainer: state.extra! as ContainerData,
+    );
+  }
+}
+
+class ContextMenuRoute extends GoRouteData {
+  const ContextMenuRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(
+      builder:
+          (_) => ContextMenuDialog(
+            hitResult: HitResultJson.fromJson(state.extra! as String),
+          ),
     );
   }
 }

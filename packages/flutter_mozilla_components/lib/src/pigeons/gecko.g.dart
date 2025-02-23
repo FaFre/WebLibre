@@ -125,6 +125,23 @@ enum WebContentIsolationStrategy {
   isolateHighValue,
 }
 
+/// Status that represents every state that a download can be in.
+enum DownloadStatus {
+  /// Indicates that the download is in the first state after creation but not yet [DOWNLOADING].
+  initiated,
+  /// Indicates that an [INITIATED] download is now actively being downloaded.
+  downloading,
+  /// Indicates that the download that has been [DOWNLOADING] has been paused.
+  paused,
+  /// Indicates that the download that has been [DOWNLOADING] has been cancelled.
+  cancelled,
+  /// Indicates that the download that has been [DOWNLOADING] has moved to failed because
+  /// something unexpected has happened.
+  failed,
+  /// Indicates that the [DOWNLOADING] download has been completed.
+  completed,
+}
+
 /// Translation options that map to the Gecko Translations Options.
 ///
 /// @property downloadModel If the necessary models should be downloaded on request. If false, then
@@ -1314,6 +1331,344 @@ class AutocompleteResult {
   }
 }
 
+/// Represents all the different supported types of data that can be found from long clicking
+/// an element.
+sealed class HitResult {
+}
+
+/// Default type if we're unable to match the type to anything. It may or may not have a src.
+class UnknownHitResult extends HitResult {
+  UnknownHitResult({
+    required this.src,
+  });
+
+  String src;
+
+  Object encode() {
+    return <Object?>[
+      src,
+    ];
+  }
+
+  static UnknownHitResult decode(Object result) {
+    result as List<Object?>;
+    return UnknownHitResult(
+      src: result[0]! as String,
+    );
+  }
+}
+
+/// If the HTML element was of type 'HTMLImageElement'.
+class ImageHitResult extends HitResult {
+  ImageHitResult({
+    required this.src,
+    this.title,
+  });
+
+  String src;
+
+  String? title;
+
+  Object encode() {
+    return <Object?>[
+      src,
+      title,
+    ];
+  }
+
+  static ImageHitResult decode(Object result) {
+    result as List<Object?>;
+    return ImageHitResult(
+      src: result[0]! as String,
+      title: result[1] as String?,
+    );
+  }
+}
+
+/// If the HTML element was of type 'HTMLVideoElement'.
+class VideoHitResult extends HitResult {
+  VideoHitResult({
+    required this.src,
+    this.title,
+  });
+
+  String src;
+
+  String? title;
+
+  Object encode() {
+    return <Object?>[
+      src,
+      title,
+    ];
+  }
+
+  static VideoHitResult decode(Object result) {
+    result as List<Object?>;
+    return VideoHitResult(
+      src: result[0]! as String,
+      title: result[1] as String?,
+    );
+  }
+}
+
+/// If the HTML element was of type 'HTMLAudioElement'.
+class AudioHitResult extends HitResult {
+  AudioHitResult({
+    required this.src,
+    this.title,
+  });
+
+  String src;
+
+  String? title;
+
+  Object encode() {
+    return <Object?>[
+      src,
+      title,
+    ];
+  }
+
+  static AudioHitResult decode(Object result) {
+    result as List<Object?>;
+    return AudioHitResult(
+      src: result[0]! as String,
+      title: result[1] as String?,
+    );
+  }
+}
+
+/// If the HTML element was of type 'HTMLImageElement' and contained a URI.
+class ImageSrcHitResult extends HitResult {
+  ImageSrcHitResult({
+    required this.src,
+    required this.uri,
+  });
+
+  String src;
+
+  String uri;
+
+  Object encode() {
+    return <Object?>[
+      src,
+      uri,
+    ];
+  }
+
+  static ImageSrcHitResult decode(Object result) {
+    result as List<Object?>;
+    return ImageSrcHitResult(
+      src: result[0]! as String,
+      uri: result[1]! as String,
+    );
+  }
+}
+
+/// The type used if the URI is prepended with 'tel:'.
+class PhoneHitResult extends HitResult {
+  PhoneHitResult({
+    required this.src,
+  });
+
+  String src;
+
+  Object encode() {
+    return <Object?>[
+      src,
+    ];
+  }
+
+  static PhoneHitResult decode(Object result) {
+    result as List<Object?>;
+    return PhoneHitResult(
+      src: result[0]! as String,
+    );
+  }
+}
+
+/// The type used if the URI is prepended with 'mailto:'.
+class EmailHitResult extends HitResult {
+  EmailHitResult({
+    required this.src,
+  });
+
+  String src;
+
+  Object encode() {
+    return <Object?>[
+      src,
+    ];
+  }
+
+  static EmailHitResult decode(Object result) {
+    result as List<Object?>;
+    return EmailHitResult(
+      src: result[0]! as String,
+    );
+  }
+}
+
+/// The type used if the URI is prepended with 'geo:'.
+class GeoHitResult extends HitResult {
+  GeoHitResult({
+    required this.src,
+  });
+
+  String src;
+
+  Object encode() {
+    return <Object?>[
+      src,
+    ];
+  }
+
+  static GeoHitResult decode(Object result) {
+    result as List<Object?>;
+    return GeoHitResult(
+      src: result[0]! as String,
+    );
+  }
+}
+
+class DownloadState {
+  DownloadState({
+    required this.url,
+    this.fileName,
+    this.contentType,
+    this.contentLength,
+    this.currentBytesCopied,
+    this.status,
+    this.userAgent,
+    this.destinationDirectory,
+    this.directoryPath,
+    this.referrerUrl,
+    this.skipConfirmation,
+    this.openInApp,
+    this.id,
+    this.sessionId,
+    this.private,
+    this.createdTime,
+    this.notificationId,
+  });
+
+  String url;
+
+  String? fileName;
+
+  String? contentType;
+
+  int? contentLength;
+
+  int? currentBytesCopied;
+
+  DownloadStatus? status;
+
+  String? userAgent;
+
+  String? destinationDirectory;
+
+  String? directoryPath;
+
+  String? referrerUrl;
+
+  bool? skipConfirmation;
+
+  bool? openInApp;
+
+  String? id;
+
+  String? sessionId;
+
+  bool? private;
+
+  int? createdTime;
+
+  int? notificationId;
+
+  Object encode() {
+    return <Object?>[
+      url,
+      fileName,
+      contentType,
+      contentLength,
+      currentBytesCopied,
+      status,
+      userAgent,
+      destinationDirectory,
+      directoryPath,
+      referrerUrl,
+      skipConfirmation,
+      openInApp,
+      id,
+      sessionId,
+      private,
+      createdTime,
+      notificationId,
+    ];
+  }
+
+  static DownloadState decode(Object result) {
+    result as List<Object?>;
+    return DownloadState(
+      url: result[0]! as String,
+      fileName: result[1] as String?,
+      contentType: result[2] as String?,
+      contentLength: result[3] as int?,
+      currentBytesCopied: result[4] as int?,
+      status: result[5] as DownloadStatus?,
+      userAgent: result[6] as String?,
+      destinationDirectory: result[7] as String?,
+      directoryPath: result[8] as String?,
+      referrerUrl: result[9] as String?,
+      skipConfirmation: result[10] as bool?,
+      openInApp: result[11] as bool?,
+      id: result[12] as String?,
+      sessionId: result[13] as String?,
+      private: result[14] as bool?,
+      createdTime: result[15] as int?,
+      notificationId: result[16] as int?,
+    );
+  }
+}
+
+class ShareInternetResourceState {
+  ShareInternetResourceState({
+    required this.url,
+    this.contentType,
+    required this.private,
+    this.referrerUrl,
+  });
+
+  String url;
+
+  String? contentType;
+
+  bool private;
+
+  String? referrerUrl;
+
+  Object encode() {
+    return <Object?>[
+      url,
+      contentType,
+      private,
+      referrerUrl,
+    ];
+  }
+
+  static ShareInternetResourceState decode(Object result) {
+    result as List<Object?>;
+    return ShareInternetResourceState(
+      url: result[0]! as String,
+      contentType: result[1] as String?,
+      private: result[2]! as bool,
+      referrerUrl: result[3] as String?,
+    );
+  }
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -1361,92 +1716,125 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is WebContentIsolationStrategy) {
       buffer.putUint8(141);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    }    else if (value is DownloadStatus) {
       buffer.putUint8(142);
-      writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+      writeValue(buffer, value.index);
+    }    else if (value is TranslationOptions) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+    }    else if (value is ReaderState) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(147);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(148);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(149);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(150);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is TabState) {
       buffer.putUint8(151);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableBrowserState) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is RecoverableBrowserState) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is Resource) {
       buffer.putUint8(156);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is IconResult) {
       buffer.putUint8(157);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(158);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is Cookie) {
       buffer.putUint8(159);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(160);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(161);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is ReaderableState) {
       buffer.putUint8(162);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(163);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(164);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(165);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(166);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(167);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is TabContent) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(170);
+      writeValue(buffer, value.encode());
+    }    else if (value is AutocompleteResult) {
+      buffer.putUint8(171);
+      writeValue(buffer, value.encode());
+    }    else if (value is UnknownHitResult) {
+      buffer.putUint8(172);
+      writeValue(buffer, value.encode());
+    }    else if (value is ImageHitResult) {
+      buffer.putUint8(173);
+      writeValue(buffer, value.encode());
+    }    else if (value is VideoHitResult) {
+      buffer.putUint8(174);
+      writeValue(buffer, value.encode());
+    }    else if (value is AudioHitResult) {
+      buffer.putUint8(175);
+      writeValue(buffer, value.encode());
+    }    else if (value is ImageSrcHitResult) {
+      buffer.putUint8(176);
+      writeValue(buffer, value.encode());
+    }    else if (value is PhoneHitResult) {
+      buffer.putUint8(177);
+      writeValue(buffer, value.encode());
+    }    else if (value is EmailHitResult) {
+      buffer.putUint8(178);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeoHitResult) {
+      buffer.putUint8(179);
+      writeValue(buffer, value.encode());
+    }    else if (value is DownloadState) {
+      buffer.putUint8(180);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareInternetResourceState) {
+      buffer.putUint8(181);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1496,63 +1884,86 @@ class _PigeonCodec extends StandardMessageCodec {
         final int? value = readValue(buffer) as int?;
         return value == null ? null : WebContentIsolationStrategy.values[value];
       case 142: 
-        return TranslationOptions.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : DownloadStatus.values[value];
       case 143: 
-        return ReaderState.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 144: 
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 145: 
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 146: 
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 147: 
-        return ExternalPackage.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 148: 
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 149: 
-        return SourceValue.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 150: 
-        return TabState.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 151: 
-        return RecoverableTab.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 152: 
-        return RecoverableBrowserState.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 153: 
-        return IconRequest.decode(readValue(buffer)!);
+        return RecoverableBrowserState.decode(readValue(buffer)!);
       case 154: 
-        return ResourceSize.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 155: 
-        return Resource.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 156: 
-        return IconResult.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 157: 
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 158: 
-        return Cookie.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 159: 
-        return HistoryItem.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 160: 
-        return HistoryState.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 161: 
-        return ReaderableState.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 162: 
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 163: 
-        return TabContentState.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 164: 
-        return FindResultState.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 165: 
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 166: 
-        return WebExtensionData.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 167: 
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 168: 
-        return TabContent.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 169: 
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 170: 
+        return GeckoEngineSettings.decode(readValue(buffer)!);
+      case 171: 
         return AutocompleteResult.decode(readValue(buffer)!);
+      case 172: 
+        return UnknownHitResult.decode(readValue(buffer)!);
+      case 173: 
+        return ImageHitResult.decode(readValue(buffer)!);
+      case 174: 
+        return VideoHitResult.decode(readValue(buffer)!);
+      case 175: 
+        return AudioHitResult.decode(readValue(buffer)!);
+      case 176: 
+        return ImageSrcHitResult.decode(readValue(buffer)!);
+      case 177: 
+        return PhoneHitResult.decode(readValue(buffer)!);
+      case 178: 
+        return EmailHitResult.decode(readValue(buffer)!);
+      case 179: 
+        return GeoHitResult.decode(readValue(buffer)!);
+      case 180: 
+        return DownloadState.decode(readValue(buffer)!);
+      case 181: 
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -2940,6 +3351,8 @@ abstract class GeckoStateEvents {
 
   void onFindResults(int timestamp, String id, List<FindResultState> results);
 
+  void onLongPress(int timestamp, String id, HitResult hitResult);
+
   static void setUp(GeckoStateEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
@@ -3312,6 +3725,37 @@ abstract class GeckoStateEvents {
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null List<FindResultState>.');
           try {
             api.onFindResults(arg_timestamp!, arg_id!, arg_results!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_timestamp = (args[0] as int?);
+          assert(arg_timestamp != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null int.');
+          final String? arg_id = (args[1] as String?);
+          assert(arg_id != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null String.');
+          final HitResult? arg_hitResult = (args[2] as HitResult?);
+          assert(arg_hitResult != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null HitResult.');
+          try {
+            api.onLongPress(arg_timestamp!, arg_id!, arg_hitResult!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -3945,6 +4389,89 @@ class GeckoDeleteBrowsingDataController {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+}
+
+class GeckoDownloadsApi {
+  /// Constructor for [GeckoDownloadsApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoDownloadsApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<void> requestDownload(String tabId, DownloadState state) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.requestDownload$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, state]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> copyInternetResource(String tabId, ShareInternetResourceState state) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.copyInternetResource$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, state]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> shareInternetResource(String tabId, ShareInternetResourceState state) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.shareInternetResource$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, state]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {

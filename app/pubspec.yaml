@@ -17,6 +17,7 @@ dependencies:
   fast_equatable: ^1.1.0
   flutter:
     sdk: flutter
+  flutter_auto_size_text: ^4.1.0
   flutter_background_service: ^5.1.0
   flutter_chat_core: 
     path: ../../flutter_chat_ui/packages/flutter_chat_core

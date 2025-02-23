@@ -8,6 +8,7 @@ import 'package:lensai/data/models/drag_data.dart';
 import 'package:lensai/extensions/media_query.dart';
 import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:lensai/features/geckoview/domain/controllers/overlay.dart';
+import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
@@ -17,6 +18,7 @@ import 'package:lensai/features/geckoview/features/browser/presentation/widgets/
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
+import 'package:lensai/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:lensai/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/widgets/reader_appearance_button.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/chat/presentation/widgets/tab_qa_chat.dart';
@@ -29,6 +31,8 @@ class BrowserScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final eventService = ref.watch(eventServiceProvider);
+
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
     final displayedOverlay = ref.watch(overlayControllerProvider);
 
@@ -47,6 +51,16 @@ class BrowserScreen extends HookConsumerWidget {
         overlayController.hide();
       }
     });
+
+    useOnStreamChange(
+      eventService.longPressEvent,
+      onData: (event) async {
+        await context.push(
+          const ContextMenuRoute().location,
+          extra: event.hitResult.toJson(),
+        );
+      },
+    );
 
     return PopScope(
       //We need this for BackButtonListener to work downstream

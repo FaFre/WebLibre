@@ -228,6 +228,11 @@ RouteBase get $browserRoute => GoRouteData.$route(
           factory: $TorProxyRouteExtension._fromState,
         ),
         GoRouteData.$route(
+          path: 'context_menu',
+          name: 'ContextMenuRoute',
+          factory: $ContextMenuRouteExtension._fromState,
+        ),
+        GoRouteData.$route(
           path: 'containers',
           name: 'ContainerListRoute',
           factory: $ContainerListRouteExtension._fromState,
@@ -308,6 +313,24 @@ extension $TorProxyRouteExtension on TorProxyRoute {
 
   String get location => GoRouteData.$location(
         '/tor_proxy',
+      );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $ContextMenuRouteExtension on ContextMenuRoute {
+  static ContextMenuRoute _fromState(GoRouterState state) =>
+      const ContextMenuRoute();
+
+  String get location => GoRouteData.$location(
+        '/context_menu',
       );
 
   void go(BuildContext context) => context.go(location);

@@ -9,6 +9,7 @@ import eu.lensai.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoContainerProxyApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoCookieApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoDeleteBrowsingDataControllerImpl
+import eu.lensai.flutter_mozilla_components.api.GeckoDownloadsApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoFindApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoIconsApiImpl
@@ -24,6 +25,7 @@ import eu.lensai.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoCookieApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
+import eu.lensai.flutter_mozilla_components.pigeons.GeckoDownloadsApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoFindApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoIconsApi
@@ -120,6 +122,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
       selectionActionDelegate
     ))
     GeckoDeleteBrowsingDataController.setUp(_flutterPluginBinding.binaryMessenger, GeckoDeleteBrowsingDataControllerImpl())
+    GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl())
 
     ReaderViewEvents.setUp(
       _flutterPluginBinding.binaryMessenger,

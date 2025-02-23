@@ -6,6 +6,7 @@ export 'src/domain/services/gecko_addon.dart';
 export 'src/domain/services/gecko_container_proxy.dart';
 export 'src/domain/services/gecko_cookie.dart';
 export 'src/domain/services/gecko_delete_browser_data.dart';
+export 'src/domain/services/gecko_downloads.dart';
 export 'src/domain/services/gecko_engine_settings.dart';
 export 'src/domain/services/gecko_event.dart';
 export 'src/domain/services/gecko_find_in_page.dart';
@@ -20,22 +21,31 @@ export 'src/domain/services/gecko_tab_content.dart';
 export 'src/geckoview_widget.dart';
 export 'src/pigeons/gecko.g.dart'
     show
+        AudioHitResult,
         ColorScheme,
         CookieBannerHandlingMode,
         CookieSameSiteStatus,
+        EmailHitResult,
         GeckoEngineSettings,
         GeckoSuggestion,
         GeckoSuggestionType,
+        GeoHitResult,
         HistoryMetadataKey,
+        HitResult,
         HttpsOnlyMode,
         IconSource,
         IconType,
+        ImageHitResult,
+        ImageSrcHitResult,
+        PhoneHitResult,
         Resource,
         ResourceSize,
         SecurityInfoState,
         TabContent,
         TabContentState,
         TrackingProtectionPolicy,
+        UnknownHitResult,
+        VideoHitResult,
         WebContentIsolationStrategy,
         WebExtensionActionType,
         WebExtensionData;

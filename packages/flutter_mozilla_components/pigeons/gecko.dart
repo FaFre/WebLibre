@@ -580,61 +580,147 @@ class AutocompleteResult {
   );
 }
 
-// /// Represents all the different supported types of data that can be found from long clicking
-// /// an element.
-// sealed class HitResult {
-//   final String src;
+/// Represents all the different supported types of data that can be found from long clicking
+/// an element.
+sealed class HitResult {}
 
-//   HitResult(this.src);
-// }
+/// Default type if we're unable to match the type to anything. It may or may not have a src.
+class UnknownHitResult extends HitResult {
+  final String src;
 
-// /// Default type if we're unable to match the type to anything. It may or may not have a src.
-// class UnknownHitResult extends HitResult {
-//   UnknownHitResult(super.src);
-// }
+  UnknownHitResult(this.src);
+}
 
-// /// If the HTML element was of type 'HTMLImageElement'.
-// class ImageHitResult extends HitResult {
-//   final String? title;
+/// If the HTML element was of type 'HTMLImageElement'.
+class ImageHitResult extends HitResult {
+  final String src;
+  final String? title;
 
-//   ImageHitResult(super.src, {this.title});
-// }
+  ImageHitResult(this.src, {this.title});
+}
 
-// /// If the HTML element was of type 'HTMLVideoElement'.
-// class VideoHitResult extends HitResult {
-//   final String? title;
+/// If the HTML element was of type 'HTMLVideoElement'.
+class VideoHitResult extends HitResult {
+  final String src;
+  final String? title;
 
-//   VideoHitResult(super.src, {this.title});
-// }
+  VideoHitResult(this.src, {this.title});
+}
 
-// /// If the HTML element was of type 'HTMLAudioElement'.
-// class AudioHitResult extends HitResult {
-//   final String? title;
+/// If the HTML element was of type 'HTMLAudioElement'.
+class AudioHitResult extends HitResult {
+  final String src;
+  final String? title;
 
-//   AudioHitResult(super.src, {this.title});
-// }
+  AudioHitResult(this.src, {this.title});
+}
 
-// /// If the HTML element was of type 'HTMLImageElement' and contained a URI.
-// class ImageSrcHitResult extends HitResult {
-//   final String uri;
+/// If the HTML element was of type 'HTMLImageElement' and contained a URI.
+class ImageSrcHitResult extends HitResult {
+  final String src;
+  final String uri;
 
-//   ImageSrcHitResult(super.src, this.uri);
-// }
+  ImageSrcHitResult(this.src, this.uri);
+}
 
-// /// The type used if the URI is prepended with 'tel:'.
-// class PhoneHitResult extends HitResult {
-//   PhoneHitResult(super.src);
-// }
+/// The type used if the URI is prepended with 'tel:'.
+class PhoneHitResult extends HitResult {
+  final String src;
 
-// /// The type used if the URI is prepended with 'mailto:'.
-// class EmailHitResult extends HitResult {
-//   EmailHitResult(super.src);
-// }
+  PhoneHitResult(this.src);
+}
 
-// /// The type used if the URI is prepended with 'geo:'.
-// class GeoHitResult extends HitResult {
-//   GeoHitResult(super.src);
-// }
+/// The type used if the URI is prepended with 'mailto:'.
+class EmailHitResult extends HitResult {
+  final String src;
+
+  EmailHitResult(this.src);
+}
+
+/// The type used if the URI is prepended with 'geo:'.
+class GeoHitResult extends HitResult {
+  final String src;
+
+  GeoHitResult(this.src);
+}
+
+/// Status that represents every state that a download can be in.
+enum DownloadStatus {
+  /// Indicates that the download is in the first state after creation but not yet [DOWNLOADING].
+  initiated,
+
+  /// Indicates that an [INITIATED] download is now actively being downloaded.
+  downloading,
+
+  /// Indicates that the download that has been [DOWNLOADING] has been paused.
+  paused,
+
+  /// Indicates that the download that has been [DOWNLOADING] has been cancelled.
+  cancelled,
+
+  /// Indicates that the download that has been [DOWNLOADING] has moved to failed because
+  /// something unexpected has happened.
+  failed,
+
+  /// Indicates that the [DOWNLOADING] download has been completed.
+  completed,
+}
+
+class DownloadState {
+  final String url;
+  final String? fileName;
+  final String? contentType;
+  final int? contentLength;
+  final int? currentBytesCopied;
+  final DownloadStatus? status;
+  final String? userAgent;
+  final String? destinationDirectory;
+  final String? directoryPath;
+  final String? referrerUrl;
+  final bool? skipConfirmation;
+  final bool? openInApp;
+  final String? id;
+  final String? sessionId;
+  final bool? private;
+  final int? createdTime;
+  //final Response? response;
+  final int? notificationId;
+
+  DownloadState(
+    this.url,
+    this.fileName,
+    this.contentType,
+    this.contentLength,
+    this.currentBytesCopied,
+    this.status,
+    this.userAgent,
+    this.destinationDirectory,
+    this.directoryPath,
+    this.referrerUrl,
+    this.skipConfirmation,
+    this.openInApp,
+    this.id,
+    this.sessionId,
+    this.private,
+    this.createdTime,
+    this.notificationId,
+  );
+}
+
+class ShareInternetResourceState {
+  final String url;
+  final String? contentType;
+  final bool private;
+  // final Response? response ;
+  final String? referrerUrl;
+
+  ShareInternetResourceState(
+    this.url,
+    this.contentType,
+    this.private,
+    this.referrerUrl,
+  );
+}
 
 @ConfigurePigeon(
   PigeonOptions(
@@ -933,6 +1019,7 @@ abstract class GeckoStateEvents {
   void onThumbnailChange(int timestamp, String id, Uint8List? bytes);
 
   void onFindResults(int timestamp, String id, List<FindResultState> results);
+  void onLongPress(int timestamp, String id, HitResult hitResult);
 }
 
 @HostApi()
@@ -1021,4 +1108,11 @@ abstract class GeckoDeleteBrowsingDataController {
   void deleteSitePermissions();
   @async
   void deleteDownloads();
+}
+
+@HostApi()
+abstract class GeckoDownloadsApi {
+  void requestDownload(String tabId, DownloadState state);
+  void copyInternetResource(String tabId, ShareInternetResourceState state);
+  void shareInternetResource(String tabId, ShareInternetResourceState state);
 }

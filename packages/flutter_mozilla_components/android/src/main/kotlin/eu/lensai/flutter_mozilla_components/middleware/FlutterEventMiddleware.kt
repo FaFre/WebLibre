@@ -8,7 +8,15 @@ import android.util.Log
 import eu.lensai.flutter_mozilla_components.GlobalComponents
 import eu.lensai.flutter_mozilla_components.ext.resize
 import eu.lensai.flutter_mozilla_components.ext.toWebPBytes
+import eu.lensai.flutter_mozilla_components.pigeons.AudioHitResult
+import eu.lensai.flutter_mozilla_components.pigeons.EmailHitResult
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoStateEvents
+import eu.lensai.flutter_mozilla_components.pigeons.GeoHitResult
+import eu.lensai.flutter_mozilla_components.pigeons.ImageHitResult
+import eu.lensai.flutter_mozilla_components.pigeons.ImageSrcHitResult
+import eu.lensai.flutter_mozilla_components.pigeons.PhoneHitResult
+import eu.lensai.flutter_mozilla_components.pigeons.UnknownHitResult
+import eu.lensai.flutter_mozilla_components.pigeons.VideoHitResult
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.LastAccessAction
@@ -16,6 +24,7 @@ import mozilla.components.browser.state.action.ReaderAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.browser.state.state.BrowserState
+import mozilla.components.concept.engine.HitResult
 import mozilla.components.feature.addons.logger
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.MiddlewareContext
@@ -78,6 +87,24 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                         System.currentTimeMillis(),
                         action.pageUrl,
                         bytes
+                    ) { _ -> }
+                }
+            }
+            is ContentAction.UpdateHitResultAction -> {
+                runOnUiThread {
+                    flutterEvents.onLongPress(
+                        System.currentTimeMillis(),
+                        action.sessionId,
+                        when(val result = action.hitResult) {
+                            is HitResult.AUDIO -> AudioHitResult(result.src, result.title)
+                            is HitResult.EMAIL -> EmailHitResult(result.src)
+                            is HitResult.GEO -> GeoHitResult(result.src)
+                            is HitResult.IMAGE -> ImageHitResult(result.src, result.title)
+                            is HitResult.IMAGE_SRC -> ImageSrcHitResult(result.src, result.uri)
+                            is HitResult.PHONE -> PhoneHitResult(result.src)
+                            is HitResult.UNKNOWN -> UnknownHitResult(result.src)
+                            is HitResult.VIDEO -> VideoHitResult(result.src, result.title)
+                        }
                     ) { _ -> }
                 }
             }

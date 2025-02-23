@@ -12,6 +12,7 @@ typedef IconChangeEvent = ({String tabId, Uint8List? bytes});
 typedef IconUpdateEvent = ({String url, Uint8List bytes});
 typedef ThumbnailEvent = ({String tabId, Uint8List? bytes});
 typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
+typedef LongPressEvent = ({String tabId, HitResult hitResult});
 
 class GeckoEventService extends GeckoStateEvents {
   // Stream controllers
@@ -29,6 +30,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _iconUpdateSubject = PublishSubject<IconUpdateEvent>();
   final _thumbnailSubject = PublishSubject<ThumbnailEvent>();
   final _findResultsSubject = PublishSubject<FindResultsEvent>();
+  final _longPressSubject = PublishSubject<LongPressEvent>();
 
   final _tabAddedSubject = PublishSubject<String>();
 
@@ -47,6 +49,7 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<IconUpdateEvent> get iconUpdateEvents => _iconUpdateSubject.stream;
   Stream<ThumbnailEvent> get thumbnailEvents => _thumbnailSubject.stream;
   Stream<FindResultsEvent> get findResultsEvent => _findResultsSubject.stream;
+  Stream<LongPressEvent> get longPressEvent => _longPressSubject.stream;
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
 
@@ -145,6 +148,14 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
+  void onLongPress(int timestamp, String id, HitResult hitResult) {
+    _longPressSubject.addWhenMoreRecent(timestamp, id, (
+      tabId: id,
+      hitResult: hitResult,
+    ));
+  }
+
+  @override
   void onTabAdded(int timestamp, String tabId) {
     _tabAddedSubject.addWhenMoreRecent(timestamp, null, tabId);
   }
@@ -170,6 +181,7 @@ class GeckoEventService extends GeckoStateEvents {
     unawaited(_iconChangeSubject.close());
     unawaited(_thumbnailSubject.close());
     unawaited(_findResultsSubject.close());
+    unawaited(_longPressSubject.close());
     unawaited(_tabAddedSubject.close());
   }
 }
