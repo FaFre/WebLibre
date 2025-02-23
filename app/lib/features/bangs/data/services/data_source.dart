@@ -19,12 +19,16 @@ class BangDataSourceService extends _$BangDataSourceService {
     return Result.fromAsync(() async {
       return await compute((args) async {
         final client = http.Client();
-        final url = Uri.parse(args[0]);
-        final response = await client
-            .get(url)
-            .timeout(const Duration(seconds: 30));
+        try {
+          final url = Uri.parse(args[0]);
+          final response = await client
+              .get(url)
+              .timeout(const Duration(seconds: 30));
 
-        return jsonDecode(utf8.decode(response.bodyBytes)) as List;
+          return jsonDecode(utf8.decode(response.bodyBytes)) as List;
+        } finally {
+          client.close();
+        }
       }, [url.toString()]).then(
         (json) =>
             json.map((e) {

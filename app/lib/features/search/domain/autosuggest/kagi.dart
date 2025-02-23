@@ -18,6 +18,10 @@ class KagiAutosuggestService extends _$KagiAutosuggestService
   @override
   void build() {
     _client = http.Client();
+
+    ref.onDispose(() {
+      _client.close();
+    });
   }
 
   @override
