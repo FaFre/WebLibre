@@ -1,0 +1,116 @@
+import 'package:lensai/data/database/converters/uri.dart';
+import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
+import 'package:lensai/features/web_feed/data/database/converters/feed_authors.dart';
+import 'package:lensai/features/web_feed/data/database/converters/feed_categories.dart';
+import 'package:lensai/features/web_feed/data/database/converters/feed_links.dart';
+import 'package:lensai/features/web_feed/data/models/feed_article.dart';
+
+CREATE TABLE feed (
+  url TEXT PRIMARY KEY NOT NULL MAPPED BY `const UriConverter()`,
+  title TEXT,
+  description TEXT,
+  authors TEXT MAPPED BY `const FeedAuthorsConverter()`,
+  tags TEXT MAPPED BY `const FeedCategoriesConverter()`,
+  last_fetched DATETIME
+);
+
+CREATE TABLE article (
+  id TEXT PRIMARY KEY NOT NULL,
+  feed_id TEXT NOT NULL MAPPED BY `const UriConverter()` REFERENCES feed ("url") ON DELETE CASCADE,
+  fetched DATETIME NOT NULL,
+  created DATETIME,
+  updated DATETIME,
+  last_read DATETIME, 
+  title TEXT,
+  authors TEXT MAPPED BY `const FeedAuthorsConverter()`,
+  tags TEXT MAPPED BY `const FeedCategoriesConverter()`,
+  links TEXT MAPPED BY `const FeedLinksConverter()`,
+  summaryMarkdown TEXT,
+  summaryPlain TEXT,
+  contentMarkdown TEXT,
+  contentPlain TEXT
+) WITH FeedArticle;
+
+CREATE INDEX article_feed_id ON article (feed_id);
+
+CREATE VIRTUAL TABLE article_fts 
+  USING fts5(
+    title,
+    summaryPlain,
+    contentPlain,
+    content=article,
+    tokenize="trigram"
+  );
+
+-- Triggers to keep the FTS index up to date.
+CREATE TRIGGER article_after_insert AFTER INSERT ON article BEGIN
+  INSERT INTO 
+    article_fts(rowid, title, summaryPlain, contentPlain) 
+    VALUES (new.rowid, new.title, new.summaryPlain, new.contentPlain);
+END;
+CREATE TRIGGER article_after_delete AFTER DELETE ON article BEGIN
+  INSERT INTO 
+    article_fts(article_fts, rowid, title, summaryPlain, contentPlain) 
+    VALUES('delete', old.rowid, old.title, old.summaryPlain, old.contentPlain);
+END;
+CREATE TRIGGER article_after_update AFTER UPDATE ON article BEGIN
+  INSERT INTO 
+    article_fts(article_fts, rowid, title, summaryPlain, contentPlain) 
+    VALUES('delete', old.rowid, old.title, old.summaryPlain, old.contentPlain);
+  INSERT INTO 
+    article_fts(rowid, title, summaryPlain, contentPlain) 
+    VALUES (new.rowid, new.title, new.summaryPlain, new.contentPlain);
+END;
+
+optimizeFtsIndex:
+  INSERT INTO article_fts(article_fts) VALUES ('optimize');
+
+queryArticlesBasic(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
+  WITH weights AS (
+  SELECT 
+    -- Customize these weights (higher = more important)
+    1.0 as title_weight    -- Title matches are most important
+  )
+  SELECT 
+      a.*,
+      highlight(article_fts, 0, :beforeMatch, :afterMatch) AS title,
+      (
+        bm25(article_fts, weights.title_weight)
+      ) AS weighted_rank
+    FROM article_fts(:query) fts
+    INNER JOIN
+      article a ON a.rowid = fts.rowid
+    CROSS JOIN weights
+    WHERE
+      fts.title LIKE :query AND
+      :feed_id IS NULL OR a.feed_id = :feed_id
+    ORDER BY 
+      weighted_rank ASC,
+      a.created DESC NULLS LAST;
+
+queryArticlesFullContent(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
+  WITH weights AS (
+  SELECT 
+    -- Customize these weights (higher = more important)
+    5.0 as title_weight,    -- Title matches are most important
+    2.0 as summary_weight,  -- Summary matches are quite important
+    1.0 as content_weight   -- Content matches are basic
+  )
+  SELECT 
+      a.*,
+      highlight(article_fts, 0, :beforeMatch, :afterMatch) AS title,
+      snippet(article_fts, 1, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS summary,
+      snippet(article_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS content,
+      (
+        bm25(article_fts, weights.title_weight, weights.summary_weight, 
+            weights.content_weight)
+      ) AS weighted_rank
+    FROM article_fts(:query) fts
+    INNER JOIN
+      article a ON a.rowid = fts.rowid
+    CROSS JOIN weights
+    WHERE
+      :feed_id IS NULL OR a.feed_id = :feed_id
+    ORDER BY 
+      weighted_rank ASC,
+      a.created DESC NULLS LAST;
