@@ -80,9 +80,6 @@ class TabState extends WebPageInfo {
   );
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     ...super.hashParameters,
     id,

@@ -8,9 +8,6 @@ final class ContainerDropData extends DropTargetData {
   ContainerDropData(this.tabId);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [tabId];
 }
 
@@ -18,9 +15,6 @@ final class DeleteDropData extends DropTargetData {
   final String tabId;
 
   DeleteDropData(this.tabId);
-
-  @override
-  bool get cacheHash => true;
 
   @override
   List<Object?> get hashParameters => [tabId];
@@ -32,9 +26,6 @@ final class TabDragData extends DragTargetData {
   final String tabId;
 
   TabDragData(this.tabId);
-
-  @override
-  bool get cacheHash => true;
 
   @override
   List<Object?> get hashParameters => [tabId];

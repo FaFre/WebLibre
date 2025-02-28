@@ -16,8 +16,5 @@ class FeedCategory with FastEquatable {
   Map<String, dynamic> toJson() => _$FeedCategoryToJson(this);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [id, title];
 }

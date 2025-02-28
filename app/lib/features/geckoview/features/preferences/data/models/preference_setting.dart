@@ -19,9 +19,6 @@ class PreferenceSettingGroup with FastEquatable {
   PreferenceSettingGroup({required this.description, required this.settings});
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [description, settings];
 }
 
@@ -54,9 +51,6 @@ class PreferenceSetting with FastEquatable {
       _$PreferenceSettingFromJson(json);
 
   Map<String, dynamic> toJson() => _$PreferenceSettingToJson(this);
-
-  @override
-  bool get cacheHash => true;
 
   @override
   List<Object?> get hashParameters => [

@@ -94,9 +94,6 @@ class FeedArticle with FastEquatable implements Insertable<FeedArticle> {
   }
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     id,
     feedId,

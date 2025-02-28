@@ -40,9 +40,6 @@ class ContainerAuthSettings with FastEquatable {
     lockOnAppBackground,
     lockTimeout,
   ];
-
-  @override
-  bool get cacheHash => true;
 }
 
 @CopyWith()
@@ -87,9 +84,6 @@ class ContainerMetadata with FastEquatable {
     authSettings,
     useProxy,
   ];
-
-  @override
-  bool get cacheHash => true;
 }
 
 @CopyWith()
@@ -107,9 +101,6 @@ class ContainerData with FastEquatable {
   }) : metadata = metadata ?? ContainerMetadata.withDefaults();
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [id, name, color, metadata];
 }
 
@@ -123,9 +114,6 @@ class ContainerDataWithCount extends ContainerData {
     super.metadata,
     required this.tabCount,
   });
-
-  @override
-  bool get cacheHash => true;
 
   @override
   List<Object?> get hashParameters => [...super.hashParameters, tabCount];

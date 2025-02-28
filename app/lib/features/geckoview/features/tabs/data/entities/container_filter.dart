@@ -8,16 +8,10 @@ class ContainerFilterById extends ContainerFilter {
   ContainerFilterById({required this.containerId});
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [containerId];
 }
 
 class ContainerFilterDisabled extends ContainerFilter {
-  @override
-  bool get cacheHash => true;
-
   @override
   List<Object?> get hashParameters => [null];
 }

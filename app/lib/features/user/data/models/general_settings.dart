@@ -45,9 +45,6 @@ class GeneralSettings with FastEquatable {
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     themeMode,
     enableReadability,

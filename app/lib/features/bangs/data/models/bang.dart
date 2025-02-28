@@ -114,9 +114,6 @@ class Bang with FastEquatable implements Insertable<Bang> {
   Map<String, dynamic> toJson() => _$BangToJson(this);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     group,
     websiteName,

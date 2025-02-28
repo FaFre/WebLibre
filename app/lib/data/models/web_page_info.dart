@@ -18,8 +18,5 @@ class WebPageInfo with FastEquatable {
   WebPageInfo({required this.url, this.title, this.favicon, this.feeds});
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [url, title, favicon, feeds];
 }

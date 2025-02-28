@@ -29,9 +29,6 @@ class WebExtensionState with FastEquatable {
   });
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     extensionId,
     title,

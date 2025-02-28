@@ -29,9 +29,6 @@ class VectorResult with FastEquatable {
   }
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     id,
     mainDocumentId,

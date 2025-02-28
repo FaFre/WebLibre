@@ -34,8 +34,5 @@ class FeedLink with FastEquatable {
   Map<String, dynamic> toJson() => _$FeedLinkToJson(this);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [uri, relation, title];
 }

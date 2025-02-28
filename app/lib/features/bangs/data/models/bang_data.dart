@@ -25,9 +25,6 @@ class BangData extends Bang {
   }) : frequency = frequency ?? 0;
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     ...super.hashParameters,
     frequency,

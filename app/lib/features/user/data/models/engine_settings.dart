@@ -86,9 +86,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   Map<String, dynamic> toJson() => _$EngineSettingsToJson(this);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
     super.javascriptEnabled,
     super.trackingProtectionPolicy,

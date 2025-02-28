@@ -15,8 +15,5 @@ class SecurityState with FastEquatable {
       SecurityState(secure: false, host: "", issuer: "");
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [secure, host, issuer];
 }

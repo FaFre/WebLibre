@@ -12,8 +12,5 @@ class FeedFilter with FastEquatable {
   FeedFilter({this.feedId, this.query, this.tags});
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [feedId, query, tags];
 }

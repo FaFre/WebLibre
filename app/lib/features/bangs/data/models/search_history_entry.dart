@@ -12,8 +12,5 @@ class SearchHistoryEntry with FastEquatable {
   });
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [searchQuery, trigger, searchDate];
 }

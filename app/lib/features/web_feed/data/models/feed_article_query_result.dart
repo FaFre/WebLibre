@@ -22,8 +22,5 @@ class FeedArticleQueryResult extends FeedArticle {
   });
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [...super.hashParameters, weightedRank];
 }

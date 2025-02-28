@@ -23,7 +23,4 @@ class FindResultState with FastEquatable {
     numberOfMatches,
     isDoneCounting,
   ];
-
-  @override
-  bool get cacheHash => true;
 }

@@ -11,8 +11,5 @@ class ReaderableState with FastEquatable {
       ReaderableState(readerable: false, active: false);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [readerable, active];
 }

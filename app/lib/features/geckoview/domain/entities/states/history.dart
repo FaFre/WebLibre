@@ -7,9 +7,6 @@ class HistoryItem with FastEquatable {
   HistoryItem({required this.url, required this.title});
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [url, title];
 }
 
@@ -33,9 +30,6 @@ class HistoryState with FastEquatable {
     canGoBack: false,
     canGoForward: false,
   );
-
-  @override
-  bool get cacheHash => true;
 
   @override
   List<Object?> get hashParameters => [

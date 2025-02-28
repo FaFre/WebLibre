@@ -30,7 +30,4 @@ class TabPreview with FastEquatable {
     highlightedUrl,
     content,
   ];
-
-  @override
-  bool get cacheHash => true;
 }

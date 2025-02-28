@@ -16,8 +16,5 @@ class FeedAuthor with FastEquatable {
   Map<String, dynamic> toJson() => _$FeedAuthorToJson(this);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [name, email];
 }
