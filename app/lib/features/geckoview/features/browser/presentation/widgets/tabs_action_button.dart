@@ -19,7 +19,7 @@ class TabsActionButton extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     final tabCount = ref.watch(
-      tabListProvider.select((tabs) => tabs.collection.length),
+      tabListProvider.select((tabs) => tabs.value.length),
     );
 
     return InkWell(

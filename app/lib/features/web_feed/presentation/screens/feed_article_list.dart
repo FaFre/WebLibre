@@ -1,7 +1,7 @@
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/domain/entities/equatable_iterable.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/models/feed_filter.dart';
 import 'package:lensai/features/web_feed/domain/providers.dart';
@@ -60,15 +60,12 @@ class FeedArticleListScreen extends HookConsumerWidget {
                     builder: (context, ref, child) {
                       final tags = ref.watch(
                         articleFilterProvider.select(
-                          (value) => EquatableCollection(
-                            value.tags ?? const {},
-                            immutable: false,
-                          ),
+                          (value) => EquatableValue(value.tags ?? const {}),
                         ),
                       );
 
                       return FeedArticleCard(
-                        selectedTags: tags.collection,
+                        selectedTags: tags.value,
                         onTagSelected: (tagId, value) {
                           if (value) {
                             ref

@@ -6,7 +6,7 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$availableTabIdsHash() => r'e5c5f25dea67f7739dfb1d0d9e4453079817a7bc';
+String _$availableTabIdsHash() => r'ec3691063293e1c19c997f7b60178938ae631c7f';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,7 +34,7 @@ class _SystemHash {
 const availableTabIdsProvider = AvailableTabIdsFamily();
 
 /// See also [availableTabIds].
-class AvailableTabIdsFamily extends Family<EquatableCollection<List<String>>> {
+class AvailableTabIdsFamily extends Family<EquatableValue<List<String>>> {
   /// See also [availableTabIds].
   const AvailableTabIdsFamily();
 
@@ -67,7 +67,7 @@ class AvailableTabIdsFamily extends Family<EquatableCollection<List<String>>> {
 
 /// See also [availableTabIds].
 class AvailableTabIdsProvider
-    extends AutoDisposeProvider<EquatableCollection<List<String>>> {
+    extends AutoDisposeProvider<EquatableValue<List<String>>> {
   /// See also [availableTabIds].
   AvailableTabIdsProvider(ContainerFilter containerFilter)
     : this._internal(
@@ -98,8 +98,7 @@ class AvailableTabIdsProvider
 
   @override
   Override overrideWith(
-    EquatableCollection<List<String>> Function(AvailableTabIdsRef provider)
-    create,
+    EquatableValue<List<String>> Function(AvailableTabIdsRef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -116,8 +115,7 @@ class AvailableTabIdsProvider
   }
 
   @override
-  AutoDisposeProviderElement<EquatableCollection<List<String>>>
-  createElement() {
+  AutoDisposeProviderElement<EquatableValue<List<String>>> createElement() {
     return _AvailableTabIdsProviderElement(this);
   }
 
@@ -139,13 +137,13 @@ class AvailableTabIdsProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin AvailableTabIdsRef
-    on AutoDisposeProviderRef<EquatableCollection<List<String>>> {
+    on AutoDisposeProviderRef<EquatableValue<List<String>>> {
   /// The parameter `containerFilter` of this provider.
   ContainerFilter get containerFilter;
 }
 
 class _AvailableTabIdsProviderElement
-    extends AutoDisposeProviderElement<EquatableCollection<List<String>>>
+    extends AutoDisposeProviderElement<EquatableValue<List<String>>>
     with AvailableTabIdsRef {
   _AvailableTabIdsProviderElement(super.provider);
 
@@ -155,7 +153,7 @@ class _AvailableTabIdsProviderElement
 }
 
 String _$availableTabStatesHash() =>
-    r'ca42dc8cb88070fb58ab085ab6c9bcbf31ef4f0b';
+    r'f506b050e1dc4f50fbd2699d97af5a16a037bc4b';
 
 /// See also [availableTabStates].
 @ProviderFor(availableTabStates)
@@ -163,7 +161,7 @@ const availableTabStatesProvider = AvailableTabStatesFamily();
 
 /// See also [availableTabStates].
 class AvailableTabStatesFamily
-    extends Family<EquatableCollection<Map<String, TabState>>> {
+    extends Family<EquatableValue<Map<String, TabState>>> {
   /// See also [availableTabStates].
   const AvailableTabStatesFamily();
 
@@ -196,7 +194,7 @@ class AvailableTabStatesFamily
 
 /// See also [availableTabStates].
 class AvailableTabStatesProvider
-    extends AutoDisposeProvider<EquatableCollection<Map<String, TabState>>> {
+    extends AutoDisposeProvider<EquatableValue<Map<String, TabState>>> {
   /// See also [availableTabStates].
   AvailableTabStatesProvider(ContainerFilter containerFilter)
     : this._internal(
@@ -228,7 +226,7 @@ class AvailableTabStatesProvider
 
   @override
   Override overrideWith(
-    EquatableCollection<Map<String, TabState>> Function(
+    EquatableValue<Map<String, TabState>> Function(
       AvailableTabStatesRef provider,
     )
     create,
@@ -248,7 +246,7 @@ class AvailableTabStatesProvider
   }
 
   @override
-  AutoDisposeProviderElement<EquatableCollection<Map<String, TabState>>>
+  AutoDisposeProviderElement<EquatableValue<Map<String, TabState>>>
   createElement() {
     return _AvailableTabStatesProviderElement(this);
   }
@@ -271,14 +269,13 @@ class AvailableTabStatesProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin AvailableTabStatesRef
-    on AutoDisposeProviderRef<EquatableCollection<Map<String, TabState>>> {
+    on AutoDisposeProviderRef<EquatableValue<Map<String, TabState>>> {
   /// The parameter `containerFilter` of this provider.
   ContainerFilter get containerFilter;
 }
 
 class _AvailableTabStatesProviderElement
-    extends
-        AutoDisposeProviderElement<EquatableCollection<Map<String, TabState>>>
+    extends AutoDisposeProviderElement<EquatableValue<Map<String, TabState>>>
     with AvailableTabStatesRef {
   _AvailableTabStatesProviderElement(super.provider);
 
@@ -288,7 +285,7 @@ class _AvailableTabStatesProviderElement
 }
 
 String _$seamlessFilteredTabIdsHash() =>
-    r'2e29ca53c35be89972d3f9aea24198fe1feb9e05';
+    r'171e0b942735066e25894dc2c1d99c367bf0d01a';
 
 /// See also [seamlessFilteredTabIds].
 @ProviderFor(seamlessFilteredTabIds)
@@ -296,7 +293,7 @@ const seamlessFilteredTabIdsProvider = SeamlessFilteredTabIdsFamily();
 
 /// See also [seamlessFilteredTabIds].
 class SeamlessFilteredTabIdsFamily
-    extends Family<EquatableCollection<List<String>>> {
+    extends Family<EquatableValue<List<String>>> {
   /// See also [seamlessFilteredTabIds].
   const SeamlessFilteredTabIdsFamily();
 
@@ -332,7 +329,7 @@ class SeamlessFilteredTabIdsFamily
 
 /// See also [seamlessFilteredTabIds].
 class SeamlessFilteredTabIdsProvider
-    extends AutoDisposeProvider<EquatableCollection<List<String>>> {
+    extends AutoDisposeProvider<EquatableValue<List<String>>> {
   /// See also [seamlessFilteredTabIds].
   SeamlessFilteredTabIdsProvider(
     TabSearchPartition searchPartition,
@@ -372,9 +369,7 @@ class SeamlessFilteredTabIdsProvider
 
   @override
   Override overrideWith(
-    EquatableCollection<List<String>> Function(
-      SeamlessFilteredTabIdsRef provider,
-    )
+    EquatableValue<List<String>> Function(SeamlessFilteredTabIdsRef provider)
     create,
   ) {
     return ProviderOverride(
@@ -393,8 +388,7 @@ class SeamlessFilteredTabIdsProvider
   }
 
   @override
-  AutoDisposeProviderElement<EquatableCollection<List<String>>>
-  createElement() {
+  AutoDisposeProviderElement<EquatableValue<List<String>>> createElement() {
     return _SeamlessFilteredTabIdsProviderElement(this);
   }
 
@@ -418,7 +412,7 @@ class SeamlessFilteredTabIdsProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin SeamlessFilteredTabIdsRef
-    on AutoDisposeProviderRef<EquatableCollection<List<String>>> {
+    on AutoDisposeProviderRef<EquatableValue<List<String>>> {
   /// The parameter `searchPartition` of this provider.
   TabSearchPartition get searchPartition;
 
@@ -427,7 +421,7 @@ mixin SeamlessFilteredTabIdsRef
 }
 
 class _SeamlessFilteredTabIdsProviderElement
-    extends AutoDisposeProviderElement<EquatableCollection<List<String>>>
+    extends AutoDisposeProviderElement<EquatableValue<List<String>>>
     with SeamlessFilteredTabIdsRef {
   _SeamlessFilteredTabIdsProviderElement(super.provider);
 
@@ -440,7 +434,7 @@ class _SeamlessFilteredTabIdsProviderElement
 }
 
 String _$seamlessFilteredTabPreviewsHash() =>
-    r'6beefa943d298b81482276f12484e27346ff9907';
+    r'c59c2819eda4f132e1a0f5f7784ddb3b5ceec817';
 
 /// See also [seamlessFilteredTabPreviews].
 @ProviderFor(seamlessFilteredTabPreviews)
@@ -448,7 +442,7 @@ const seamlessFilteredTabPreviewsProvider = SeamlessFilteredTabPreviewsFamily();
 
 /// See also [seamlessFilteredTabPreviews].
 class SeamlessFilteredTabPreviewsFamily
-    extends Family<EquatableCollection<List<TabPreview>>> {
+    extends Family<EquatableValue<List<TabPreview>>> {
   /// See also [seamlessFilteredTabPreviews].
   const SeamlessFilteredTabPreviewsFamily();
 
@@ -487,7 +481,7 @@ class SeamlessFilteredTabPreviewsFamily
 
 /// See also [seamlessFilteredTabPreviews].
 class SeamlessFilteredTabPreviewsProvider
-    extends AutoDisposeProvider<EquatableCollection<List<TabPreview>>> {
+    extends AutoDisposeProvider<EquatableValue<List<TabPreview>>> {
   /// See also [seamlessFilteredTabPreviews].
   SeamlessFilteredTabPreviewsProvider(
     TabSearchPartition searchPartition,
@@ -527,7 +521,7 @@ class SeamlessFilteredTabPreviewsProvider
 
   @override
   Override overrideWith(
-    EquatableCollection<List<TabPreview>> Function(
+    EquatableValue<List<TabPreview>> Function(
       SeamlessFilteredTabPreviewsRef provider,
     )
     create,
@@ -548,8 +542,7 @@ class SeamlessFilteredTabPreviewsProvider
   }
 
   @override
-  AutoDisposeProviderElement<EquatableCollection<List<TabPreview>>>
-  createElement() {
+  AutoDisposeProviderElement<EquatableValue<List<TabPreview>>> createElement() {
     return _SeamlessFilteredTabPreviewsProviderElement(this);
   }
 
@@ -573,7 +566,7 @@ class SeamlessFilteredTabPreviewsProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin SeamlessFilteredTabPreviewsRef
-    on AutoDisposeProviderRef<EquatableCollection<List<TabPreview>>> {
+    on AutoDisposeProviderRef<EquatableValue<List<TabPreview>>> {
   /// The parameter `searchPartition` of this provider.
   TabSearchPartition get searchPartition;
 
@@ -582,7 +575,7 @@ mixin SeamlessFilteredTabPreviewsRef
 }
 
 class _SeamlessFilteredTabPreviewsProviderElement
-    extends AutoDisposeProviderElement<EquatableCollection<List<TabPreview>>>
+    extends AutoDisposeProviderElement<EquatableValue<List<TabPreview>>>
     with SeamlessFilteredTabPreviewsRef {
   _SeamlessFilteredTabPreviewsProviderElement(super.provider);
 

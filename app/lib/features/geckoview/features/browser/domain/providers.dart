@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:lensai/domain/entities/equatable_iterable.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
@@ -71,7 +71,7 @@ class ShowFindInPage extends _$ShowFindInPage {
 }
 
 @Riverpod()
-EquatableCollection<List<String>> availableTabIds(
+EquatableValue<List<String>> availableTabIds(
   Ref ref,
   ContainerFilter containerFilter,
 ) {
@@ -82,31 +82,28 @@ EquatableCollection<List<String>> availableTabIds(
   );
   final tabList = ref.watch(tabListProvider);
 
-  return EquatableCollection(
-    containerTabs
-            ?.where((tabId) => tabList.collection.contains(tabId))
-            .toList() ??
+  return EquatableValue(
+    containerTabs?.where((tabId) => tabList.value.contains(tabId)).toList() ??
         [],
-    immutable: true,
   );
 }
 
 @Riverpod()
-EquatableCollection<Map<String, TabState>> availableTabStates(
+EquatableValue<Map<String, TabState>> availableTabStates(
   Ref ref,
   ContainerFilter containerFilter,
 ) {
   final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
   final tabStates = ref.watch(tabStatesProvider);
 
-  return EquatableCollection({
-    for (final tabId in availableTabs.collection)
+  return EquatableValue({
+    for (final tabId in availableTabs.value)
       if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
-  }, immutable: true);
+  });
 }
 
 @Riverpod()
-EquatableCollection<List<String>> seamlessFilteredTabIds(
+EquatableValue<List<String>> seamlessFilteredTabIds(
   Ref ref,
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
@@ -115,13 +112,12 @@ EquatableCollection<List<String>> seamlessFilteredTabIds(
       ref
           .watch(
             tabSearchRepositoryProvider(searchPartition).select(
-              (value) => EquatableCollection(
+              (value) => EquatableValue(
                 value.valueOrNull?.map((tab) => tab.id).toList(),
-                immutable: true,
               ),
             ),
           )
-          .collection;
+          .value;
 
   final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
 
@@ -129,16 +125,13 @@ EquatableCollection<List<String>> seamlessFilteredTabIds(
     return availableTabs;
   }
 
-  return EquatableCollection(
-    tabSearchResults
-        .where((tab) => availableTabs.collection.contains(tab))
-        .toList(),
-    immutable: true,
+  return EquatableValue(
+    tabSearchResults.where((tab) => availableTabs.value.contains(tab)).toList(),
   );
 }
 
 @Riverpod()
-EquatableCollection<List<TabPreview>> seamlessFilteredTabPreviews(
+EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
   Ref ref,
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
@@ -146,20 +139,19 @@ EquatableCollection<List<TabPreview>> seamlessFilteredTabPreviews(
   final tabSearchResults =
       ref
           .watch(
-            tabSearchRepositoryProvider(searchPartition).select(
-              (value) =>
-                  EquatableCollection(value.valueOrNull, immutable: true),
-            ),
+            tabSearchRepositoryProvider(
+              searchPartition,
+            ).select((value) => EquatableValue(value.valueOrNull)),
           )
-          .collection;
+          .value;
 
   final availableTabStates = ref.watch(
     availableTabStatesProvider(containerFilter),
   );
 
   if (tabSearchResults == null) {
-    return EquatableCollection(
-      availableTabStates.collection.values
+    return EquatableValue(
+      availableTabStates.value.values
           .map(
             (state) => TabPreview(
               id: state.id,
@@ -171,25 +163,23 @@ EquatableCollection<List<TabPreview>> seamlessFilteredTabPreviews(
             ),
           )
           .toList(),
-      immutable: true,
     );
   }
 
-  return EquatableCollection(
+  return EquatableValue(
     tabSearchResults
-        .where((tab) => availableTabStates.collection.containsKey(tab.id))
+        .where((tab) => availableTabStates.value.containsKey(tab.id))
         .map((tab) {
           return TabPreview(
             id: tab.id,
-            title: tab.title ?? availableTabStates.collection[tab.id]!.title,
+            title: tab.title ?? availableTabStates.value[tab.id]!.title,
             icon: null,
-            url: tab.cleanUrl ?? availableTabStates.collection[tab.id]!.url,
+            url: tab.cleanUrl ?? availableTabStates.value[tab.id]!.url,
             highlightedUrl: tab.url,
             content: tab.extractedContent ?? tab.fullContent,
           );
         })
         .whereType<TabPreview>()
         .toList(),
-    immutable: true,
   );
 }

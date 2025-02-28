@@ -119,7 +119,7 @@ class BrowserScreen extends HookConsumerWidget {
                             : null;
 
                     final tabCount = ref.read(
-                      tabListProvider.select((tabs) => tabs.collection.length),
+                      tabListProvider.select((tabs) => tabs.value.length),
                     );
 
                     //Don't do anything if a child route is active

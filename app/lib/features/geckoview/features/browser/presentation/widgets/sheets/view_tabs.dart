@@ -226,7 +226,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   );
 
                   useEffect(() {
-                    final index = filteredTabIds.collection.indexWhere(
+                    final index = filteredTabIds.value.indexWhere(
                       (webView) => webView == activeTab,
                     );
 
@@ -248,7 +248,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   }, [filteredTabIds, activeTab]);
 
                   final tabs = useMemoized(() {
-                    return filteredTabIds.collection
+                    return filteredTabIds.value
                         .mapIndexed(
                           (index, tabId) => CustomDraggable(
                             key: Key(tabId),
@@ -320,7 +320,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           containerRepositoryProvider.notifier,
                         );
 
-                        final tabId = filteredTabIds.collection[oldIndex];
+                        final tabId = filteredTabIds.value[oldIndex];
                         final containerId = await ref
                             .read(tabDataRepositoryProvider.notifier)
                             .containerTabId(tabId);
@@ -331,14 +331,14 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             containerId,
                           );
                         } else if (newIndex >=
-                            filteredTabIds.collection.length - 1) {
+                            filteredTabIds.value.length - 1) {
                           key = await containerRepository.getTrailingOrderKey(
                             containerId,
                           );
                         } else {
                           final orderAfterIndex = newIndex;
                           key = await containerRepository.getOrderKeyAfterTab(
-                            filteredTabIds.collection[orderAfterIndex],
+                            filteredTabIds.value[orderAfterIndex],
                             containerId,
                           );
                         }

@@ -6,7 +6,7 @@ part of 'tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tabRepositoryHash() => r'e6f9d58982f3bbe389e3a3299bb498c6e8e101eb';
+String _$tabRepositoryHash() => r'12e4fb7e9bf36a6df9f0a29df4b410f051d5c38e';
 
 /// See also [TabRepository].
 @ProviderFor(TabRepository)

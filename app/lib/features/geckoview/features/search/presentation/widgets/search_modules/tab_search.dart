@@ -44,7 +44,7 @@ class TabSearch extends HookConsumerWidget {
                     : ContainerFilterDisabled(),
               ),
             )
-            .collection;
+            .value;
 
     useListenableCallback(searchTextController, () async {
       await ref

@@ -2,17 +2,9 @@ import 'dart:ui';
 
 class EquatableImage {
   final Image value;
-  final int? _imageHash;
+  final int _imageHash;
 
-  EquatableImage(this.value, {required int? hash}) : _imageHash = hash;
-
-  //For now we only calculate the has from encoded image on decoding
-
-  // static Future<EquatableImage> calculate(Image image) async {
-  //   final imageHash = await image.calculateHash();
-
-  //   return EquatableImage(image, hash: imageHash);
-  // }
+  EquatableImage(this.value, {required int hash}) : _imageHash = hash;
 
   @override
   int get hashCode => _imageHash.hashCode;

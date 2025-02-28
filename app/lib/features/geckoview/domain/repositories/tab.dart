@@ -129,11 +129,10 @@ class TabRepository extends _$TabRepository {
     ref.listen(tabListProvider, (previous, next) async {
       //Only sync tabs if there has been a previous value or is not empty
       final syncTabs =
-          next.collection.isNotEmpty ||
-          (previous?.collection.isNotEmpty ?? false);
+          next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
 
       if (syncTabs) {
-        await db.tabDao.syncTabs(retainTabIds: next.collection);
+        await db.tabDao.syncTabs(retainTabIds: next.value);
       }
     });
 
