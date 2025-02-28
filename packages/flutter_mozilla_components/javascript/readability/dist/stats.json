@@ -1,8 +1,8 @@
 {
-  "hash": "68fe8281f85d9e1fa8f9",
+  "hash": "3b7b601a842a4a70dcf0",
   "version": "5.97.1",
-  "time": 560,
-  "builtAt": 1737227987116,
+  "time": 695,
+  "builtAt": 1740408169935,
   "publicPath": "auto",
   "outputPath": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/dist",
   "assetsByChunkName": {
@@ -14,14 +14,14 @@
     {
       "type": "asset",
       "name": "readability.min.js",
-      "size": 49051,
+      "size": 49105,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
       "info": {
         "javascriptModule": false,
         "minimized": true,
-        "size": 49051
+        "size": 49105
       },
       "chunkNames": [
         "main"
@@ -43,9 +43,9 @@
       "initial": true,
       "entry": true,
       "recorded": false,
-      "size": 122485,
+      "size": 122550,
       "sizes": {
-        "javascript": 121815,
+        "javascript": 121880,
         "runtime": 670
       },
       "names": [
@@ -59,7 +59,7 @@
         "readability.min.js"
       ],
       "auxiliaryFiles": [],
-      "hash": "bf73e1848f9bdc88f1b3",
+      "hash": "560dd27471dfc45dd435",
       "childrenByOrder": {},
       "id": 792,
       "siblings": [],
@@ -428,9 +428,9 @@
           "type": "module",
           "moduleType": "javascript/esm",
           "layer": null,
-          "size": 29333,
+          "size": 29398,
           "sizes": {
-            "javascript": 29333
+            "javascript": 29398
           },
           "built": true,
           "codeGenerated": true,
@@ -486,6 +486,7 @@
           ],
           "usedExports": true,
           "providedExports": [
+            "parseFullMarkdown",
             "parseReaderable"
           ],
           "optimizationBailout": [
@@ -497,9 +498,9 @@
               "type": "module",
               "moduleType": "javascript/auto",
               "layer": null,
-              "size": 4271,
+              "size": 4336,
               "sizes": {
-                "javascript": 4271
+                "javascript": 4336
               },
               "built": true,
               "codeGenerated": false,
@@ -529,6 +530,7 @@
               "reasons": [],
               "usedExports": true,
               "providedExports": [
+                "parseFullMarkdown",
                 "parseReaderable"
               ],
               "optimizationBailout": [
@@ -743,9 +745,9 @@
       "type": "module",
       "moduleType": "javascript/esm",
       "layer": null,
-      "size": 29333,
+      "size": 29398,
       "sizes": {
-        "javascript": 29333
+        "javascript": 29398
       },
       "built": true,
       "codeGenerated": true,
@@ -800,6 +802,7 @@
       ],
       "usedExports": true,
       "providedExports": [
+        "parseFullMarkdown",
         "parseReaderable"
       ],
       "optimizationBailout": [
@@ -811,9 +814,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 4271,
+          "size": 4336,
           "sizes": {
-            "javascript": 4271
+            "javascript": 4336
           },
           "built": true,
           "codeGenerated": false,
@@ -842,6 +845,7 @@
           "reasons": [],
           "usedExports": true,
           "providedExports": [
+            "parseFullMarkdown",
             "parseReaderable"
           ],
           "optimizationBailout": [
@@ -1478,11 +1482,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 49051
+          "size": 49105
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 49051,
+      "assetsSize": 49105,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,
@@ -1500,11 +1504,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 49051
+          "size": 49105
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 49051,
+      "assetsSize": 49105,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,

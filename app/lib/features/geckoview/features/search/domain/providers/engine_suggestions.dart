@@ -42,7 +42,7 @@ AsyncValue<List<GeckoSuggestion>> engineHistorySuggestions(Ref ref) {
                 .where(
                   (suggestion) =>
                       suggestion.type == GeckoSuggestionType.history &&
-                      (suggestion.title?.isNotEmpty ?? false) &&
+                      (suggestion.title.isNotEmpty) &&
                       (suggestion.description.mapNotNull(
                             (url) => Uri.tryParse(url),
                           ) !=

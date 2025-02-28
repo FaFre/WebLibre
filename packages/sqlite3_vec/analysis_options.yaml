@@ -19,7 +19,6 @@ linter:
     unawaited_futures: true
     discarded_futures: true
     collection_methods_unrelated_type: true
-    require_trailing_commas: false
 
 analyzer:
   plugins:

@@ -140,7 +140,7 @@ class TabRepository extends _$TabRepository {
     final tabStateDebouncer = Debouncer(const Duration(seconds: 3));
     Map<String, TabState>? debounceStartValue;
 
-    ref.listen(tabStatesProvider, (previous, next) async {
+    ref.listen(tabStatesProvider, (previous, next) {
       //Since state changes occure pretty often and our map always contains
       //the latest state, we cache the value before starting debouncing and
       //later diff to that, to avoid frequent database writes

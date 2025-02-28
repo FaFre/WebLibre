@@ -14,9 +14,10 @@ String _$defaultSearchBangDataHash() =>
 final defaultSearchBangDataProvider = StreamProvider<BangData?>.internal(
   defaultSearchBangData,
   name: r'defaultSearchBangDataProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$defaultSearchBangDataHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$defaultSearchBangDataHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -30,19 +31,20 @@ String _$bangCategoriesHash() => r'947fcfd2dffcc7f585c6ed7379d319f4fe72293a';
 @ProviderFor(bangCategories)
 final bangCategoriesProvider =
     AutoDisposeStreamProvider<Map<String, List<String>>>.internal(
-  bangCategories,
-  name: r'bangCategoriesProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$bangCategoriesHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      bangCategories,
+      name: r'bangCategoriesProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$bangCategoriesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef BangCategoriesRef
-    = AutoDisposeStreamProviderRef<Map<String, List<String>>>;
+typedef BangCategoriesRef =
+    AutoDisposeStreamProviderRef<Map<String, List<String>>>;
 String _$bangListHash() => r'dc168bd1246bea3e5f8015dd52fbf41c5f98ca13';
 
 /// Copied from Dart SDK
@@ -91,9 +93,7 @@ class BangListFamily extends Family<AsyncValue<List<BangData>>> {
   }
 
   @override
-  BangListProvider getProviderOverride(
-    covariant BangListProvider provider,
-  ) {
+  BangListProvider getProviderOverride(covariant BangListProvider provider) {
     return call(
       groups: provider.groups,
       domain: provider.domain,
@@ -126,26 +126,26 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
     ({String category, String? subCategory})? categoryFilter,
     bool? orderMostFrequentFirst,
   }) : this._internal(
-          (ref) => bangList(
-            ref as BangListRef,
-            groups: groups,
-            domain: domain,
-            categoryFilter: categoryFilter,
-            orderMostFrequentFirst: orderMostFrequentFirst,
-          ),
-          from: bangListProvider,
-          name: r'bangListProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$bangListHash,
-          dependencies: BangListFamily._dependencies,
-          allTransitiveDependencies: BangListFamily._allTransitiveDependencies,
-          groups: groups,
-          domain: domain,
-          categoryFilter: categoryFilter,
-          orderMostFrequentFirst: orderMostFrequentFirst,
-        );
+         (ref) => bangList(
+           ref as BangListRef,
+           groups: groups,
+           domain: domain,
+           categoryFilter: categoryFilter,
+           orderMostFrequentFirst: orderMostFrequentFirst,
+         ),
+         from: bangListProvider,
+         name: r'bangListProvider',
+         debugGetCreateSourceHash:
+             const bool.fromEnvironment('dart.vm.product')
+                 ? null
+                 : _$bangListHash,
+         dependencies: BangListFamily._dependencies,
+         allTransitiveDependencies: BangListFamily._allTransitiveDependencies,
+         groups: groups,
+         domain: domain,
+         categoryFilter: categoryFilter,
+         orderMostFrequentFirst: orderMostFrequentFirst,
+       );
 
   BangListProvider._internal(
     super._createNotifier, {
@@ -229,7 +229,8 @@ mixin BangListRef on AutoDisposeStreamProviderRef<List<BangData>> {
 }
 
 class _BangListProviderElement
-    extends AutoDisposeStreamProviderElement<List<BangData>> with BangListRef {
+    extends AutoDisposeStreamProviderElement<List<BangData>>
+    with BangListRef {
   _BangListProviderElement(super.provider);
 
   @override
@@ -250,14 +251,15 @@ String _$frequentBangListHash() => r'2c1ecb7e9416772fc1c32d01d767e1eb4f865975';
 @ProviderFor(frequentBangList)
 final frequentBangListProvider =
     AutoDisposeStreamProvider<List<BangData>>.internal(
-  frequentBangList,
-  name: r'frequentBangListProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$frequentBangListHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      frequentBangList,
+      name: r'frequentBangListProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$frequentBangListHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
@@ -268,19 +270,20 @@ String _$searchHistoryHash() => r'7b97798729643de8e44fd8024cdc02f35124b08b';
 @ProviderFor(searchHistory)
 final searchHistoryProvider =
     AutoDisposeStreamProvider<List<SearchHistoryEntry>>.internal(
-  searchHistory,
-  name: r'searchHistoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$searchHistoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      searchHistory,
+      name: r'searchHistoryProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$searchHistoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef SearchHistoryRef
-    = AutoDisposeStreamProviderRef<List<SearchHistoryEntry>>;
+typedef SearchHistoryRef =
+    AutoDisposeStreamProviderRef<List<SearchHistoryEntry>>;
 String _$lastSyncOfGroupHash() => r'23d07f3132ba9bb35a31f74e3a69698d31d4c569';
 
 /// See also [lastSyncOfGroup].
@@ -293,21 +296,15 @@ class LastSyncOfGroupFamily extends Family<AsyncValue<DateTime?>> {
   const LastSyncOfGroupFamily();
 
   /// See also [lastSyncOfGroup].
-  LastSyncOfGroupProvider call(
-    BangGroup group,
-  ) {
-    return LastSyncOfGroupProvider(
-      group,
-    );
+  LastSyncOfGroupProvider call(BangGroup group) {
+    return LastSyncOfGroupProvider(group);
   }
 
   @override
   LastSyncOfGroupProvider getProviderOverride(
     covariant LastSyncOfGroupProvider provider,
   ) {
-    return call(
-      provider.group,
-    );
+    return call(provider.group);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -328,24 +325,20 @@ class LastSyncOfGroupFamily extends Family<AsyncValue<DateTime?>> {
 /// See also [lastSyncOfGroup].
 class LastSyncOfGroupProvider extends AutoDisposeStreamProvider<DateTime?> {
   /// See also [lastSyncOfGroup].
-  LastSyncOfGroupProvider(
-    BangGroup group,
-  ) : this._internal(
-          (ref) => lastSyncOfGroup(
-            ref as LastSyncOfGroupRef,
-            group,
-          ),
-          from: lastSyncOfGroupProvider,
-          name: r'lastSyncOfGroupProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$lastSyncOfGroupHash,
-          dependencies: LastSyncOfGroupFamily._dependencies,
-          allTransitiveDependencies:
-              LastSyncOfGroupFamily._allTransitiveDependencies,
-          group: group,
-        );
+  LastSyncOfGroupProvider(BangGroup group)
+    : this._internal(
+        (ref) => lastSyncOfGroup(ref as LastSyncOfGroupRef, group),
+        from: lastSyncOfGroupProvider,
+        name: r'lastSyncOfGroupProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$lastSyncOfGroupHash,
+        dependencies: LastSyncOfGroupFamily._dependencies,
+        allTransitiveDependencies:
+            LastSyncOfGroupFamily._allTransitiveDependencies,
+        group: group,
+      );
 
   LastSyncOfGroupProvider._internal(
     super._createNotifier, {
@@ -424,21 +417,15 @@ class BangCountOfGroupFamily extends Family<AsyncValue<int>> {
   const BangCountOfGroupFamily();
 
   /// See also [bangCountOfGroup].
-  BangCountOfGroupProvider call(
-    BangGroup group,
-  ) {
-    return BangCountOfGroupProvider(
-      group,
-    );
+  BangCountOfGroupProvider call(BangGroup group) {
+    return BangCountOfGroupProvider(group);
   }
 
   @override
   BangCountOfGroupProvider getProviderOverride(
     covariant BangCountOfGroupProvider provider,
   ) {
-    return call(
-      provider.group,
-    );
+    return call(provider.group);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -459,24 +446,20 @@ class BangCountOfGroupFamily extends Family<AsyncValue<int>> {
 /// See also [bangCountOfGroup].
 class BangCountOfGroupProvider extends AutoDisposeStreamProvider<int> {
   /// See also [bangCountOfGroup].
-  BangCountOfGroupProvider(
-    BangGroup group,
-  ) : this._internal(
-          (ref) => bangCountOfGroup(
-            ref as BangCountOfGroupRef,
-            group,
-          ),
-          from: bangCountOfGroupProvider,
-          name: r'bangCountOfGroupProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$bangCountOfGroupHash,
-          dependencies: BangCountOfGroupFamily._dependencies,
-          allTransitiveDependencies:
-              BangCountOfGroupFamily._allTransitiveDependencies,
-          group: group,
-        );
+  BangCountOfGroupProvider(BangGroup group)
+    : this._internal(
+        (ref) => bangCountOfGroup(ref as BangCountOfGroupRef, group),
+        from: bangCountOfGroupProvider,
+        name: r'bangCountOfGroupProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$bangCountOfGroupHash,
+        dependencies: BangCountOfGroupFamily._dependencies,
+        allTransitiveDependencies:
+            BangCountOfGroupFamily._allTransitiveDependencies,
+        group: group,
+      );
 
   BangCountOfGroupProvider._internal(
     super._createNotifier, {
@@ -535,11 +518,13 @@ mixin BangCountOfGroupRef on AutoDisposeStreamProviderRef<int> {
 }
 
 class _BangCountOfGroupProviderElement
-    extends AutoDisposeStreamProviderElement<int> with BangCountOfGroupRef {
+    extends AutoDisposeStreamProviderElement<int>
+    with BangCountOfGroupRef {
   _BangCountOfGroupProviderElement(super.provider);
 
   @override
   BangGroup get group => (origin as BangCountOfGroupProvider).group;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

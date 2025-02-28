@@ -6,16 +6,17 @@ part of 'tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tabRepositoryHash() => r'f7d6584d9d6a320ebe4964dd5dc80bda987c40c2';
+String _$tabRepositoryHash() => r'e6f9d58982f3bbe389e3a3299bb498c6e8e101eb';
 
 /// See also [TabRepository].
 @ProviderFor(TabRepository)
 final tabRepositoryProvider = NotifierProvider<TabRepository, void>.internal(
   TabRepository.new,
   name: r'tabRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tabRepositoryHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$tabRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

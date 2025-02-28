@@ -74,10 +74,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
           orderKey: currentOrderKey,
         ),
         onConflict: DoUpdate(
-          (old) => TabCompanion.custom(
-            containerId:
-                (containerId.present) ? Variable(containerId.value) : null,
-            orderKey: (orderKey.present) ? Variable(orderKey.value) : null,
+          (old) => TabCompanion(
+            containerId: containerId,
+            orderKey: Value.absentIfNull(orderKey.value),
           ),
         ),
       );
@@ -107,10 +106,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
           orderKey: currentOrderKey,
         ),
         onConflict: DoUpdate(
-          (old) => TabCompanion.custom(
-            containerId:
-                (containerId.present) ? Variable(containerId.value) : null,
-            orderKey: (orderKey.present) ? Variable(orderKey.value) : null,
+          (old) => TabCompanion(
+            containerId: containerId,
+            orderKey: Value.absentIfNull(orderKey.value),
           ),
           where: (old) => old.containerId.isNull(),
         ),
@@ -160,7 +158,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     Map<String, TabState>? previous,
     Map<String, TabState> next,
   ) async {
-    await batch((batch) async {
+    await batch((batch) {
       for (final state in next.values) {
         final previousState = previous?[state.id];
 
@@ -172,7 +170,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
             TabCompanion(
               url:
                   (previousState?.url != state.url)
-                      ? Value(state.url.toString())
+                      ? Value(state.url)
                       : const Value.absent(),
               title:
                   (previousState?.title != state.title)
@@ -186,7 +184,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     });
   }
 
-  Future<void> syncTabs({required List<String> retainTabIds}) async {
+  Future<void> syncTabs({required List<String> retainTabIds}) {
     return db.transaction(() async {
       await (db.tab.delete()..where((t) => t.id.isNotIn(retainTabIds))).go();
 

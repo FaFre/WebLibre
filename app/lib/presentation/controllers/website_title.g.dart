@@ -6,7 +6,7 @@ part of 'website_title.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pageInfoHash() => r'f777a45aba30c82cf7b8790c07a804be364cfeb1';
+String _$pageInfoHash() => r'bdb860ec904959d7aa561045b85b75b209fb38e1';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -39,21 +39,13 @@ class PageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
   const PageInfoFamily();
 
   /// See also [pageInfo].
-  PageInfoProvider call(
-    Uri url,
-  ) {
-    return PageInfoProvider(
-      url,
-    );
+  PageInfoProvider call(Uri url) {
+    return PageInfoProvider(url);
   }
 
   @override
-  PageInfoProvider getProviderOverride(
-    covariant PageInfoProvider provider,
-  ) {
-    return call(
-      provider.url,
-    );
+  PageInfoProvider getProviderOverride(covariant PageInfoProvider provider) {
+    return call(provider.url);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -72,25 +64,21 @@ class PageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
 }
 
 /// See also [pageInfo].
-class PageInfoProvider extends FutureProvider<WebPageInfo> {
+class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
   /// See also [pageInfo].
-  PageInfoProvider(
-    Uri url,
-  ) : this._internal(
-          (ref) => pageInfo(
-            ref as PageInfoRef,
-            url,
-          ),
-          from: pageInfoProvider,
-          name: r'pageInfoProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$pageInfoHash,
-          dependencies: PageInfoFamily._dependencies,
-          allTransitiveDependencies: PageInfoFamily._allTransitiveDependencies,
-          url: url,
-        );
+  PageInfoProvider(Uri url)
+    : this._internal(
+        (ref) => pageInfo(ref as PageInfoRef, url),
+        from: pageInfoProvider,
+        name: r'pageInfoProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$pageInfoHash,
+        dependencies: PageInfoFamily._dependencies,
+        allTransitiveDependencies: PageInfoFamily._allTransitiveDependencies,
+        url: url,
+      );
 
   PageInfoProvider._internal(
     super._createNotifier, {
@@ -123,7 +111,7 @@ class PageInfoProvider extends FutureProvider<WebPageInfo> {
   }
 
   @override
-  FutureProviderElement<WebPageInfo> createElement() {
+  AutoDisposeFutureProviderElement<WebPageInfo> createElement() {
     return _PageInfoProviderElement(this);
   }
 
@@ -143,17 +131,19 @@ class PageInfoProvider extends FutureProvider<WebPageInfo> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin PageInfoRef on FutureProviderRef<WebPageInfo> {
+mixin PageInfoRef on AutoDisposeFutureProviderRef<WebPageInfo> {
   /// The parameter `url` of this provider.
   Uri get url;
 }
 
-class _PageInfoProviderElement extends FutureProviderElement<WebPageInfo>
+class _PageInfoProviderElement
+    extends AutoDisposeFutureProviderElement<WebPageInfo>
     with PageInfoRef {
   _PageInfoProviderElement(super.provider);
 
   @override
   Uri get url => (origin as PageInfoProvider).url;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

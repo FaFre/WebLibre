@@ -1,3 +1,4 @@
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
@@ -20,7 +21,7 @@ AsyncValue<List<ContainerDataWithCount>> matchSortedContainersWithCount(
 ) {
   return ref.watch(
     containersWithCountProvider.select((value) {
-      if (searchText?.isEmpty ?? true) {
+      if (searchText.isEmpty) {
         return value;
       }
 

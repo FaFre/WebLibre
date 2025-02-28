@@ -12,14 +12,15 @@ String _$tabDataRepositoryHash() => r'6c6f4aa5eaf4033541700bf18a592555a4b946d3';
 @ProviderFor(TabDataRepository)
 final tabDataRepositoryProvider =
     NotifierProvider<TabDataRepository, void>.internal(
-  TabDataRepository.new,
-  name: r'tabDataRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tabDataRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      TabDataRepository.new,
+      name: r'tabDataRepositoryProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$tabDataRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$TabDataRepository = Notifier<void>;
 // ignore_for_file: type=lint

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:lensai/domain/entities/equatable_iterable.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
@@ -184,9 +183,7 @@ EquatableCollection<List<TabPreview>> seamlessFilteredTabPreviews(
             id: tab.id,
             title: tab.title ?? availableTabStates.collection[tab.id]!.title,
             icon: null,
-            url:
-                tab.cleanUrl.mapNotNull(Uri.tryParse) ??
-                availableTabStates.collection[tab.id]!.url,
+            url: tab.cleanUrl ?? availableTabStates.collection[tab.id]!.url,
             highlightedUrl: tab.url,
             content: tab.extractedContent ?? tab.fullContent,
           );

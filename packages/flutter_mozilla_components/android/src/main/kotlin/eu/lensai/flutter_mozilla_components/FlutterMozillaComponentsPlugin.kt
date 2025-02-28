@@ -18,6 +18,7 @@ import eu.lensai.flutter_mozilla_components.api.GeckoSelectionActionControllerIm
 import eu.lensai.flutter_mozilla_components.api.GeckoSessionApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoSuggestionApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoTabsApiImpl
+import eu.lensai.flutter_mozilla_components.api.GeckoTurndownApiImpl
 import eu.lensai.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonsApi
@@ -38,6 +39,7 @@ import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoTabsApi
+import eu.lensai.flutter_mozilla_components.pigeons.GeckoTurndownApi
 import eu.lensai.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.lensai.flutter_mozilla_components.pigeons.ReaderViewEvents
 
@@ -123,6 +125,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     ))
     GeckoDeleteBrowsingDataController.setUp(_flutterPluginBinding.binaryMessenger, GeckoDeleteBrowsingDataControllerImpl())
     GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl())
+    GeckoTurndownApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTurndownApiImpl())
 
     ReaderViewEvents.setUp(
       _flutterPluginBinding.binaryMessenger,

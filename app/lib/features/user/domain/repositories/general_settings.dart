@@ -39,7 +39,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   }
 
   //Eager fetch, when up to date settings are required
-  Future<GeneralSettings> fetch() async {
+  Future<GeneralSettings> fetch() {
     return ref
         .read(userDatabaseProvider)
         .settingDao

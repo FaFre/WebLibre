@@ -1,5 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/browser_icon.dart';
 
 part 'web_page_info.g.dart';
@@ -12,7 +13,7 @@ class WebPageInfo with FastEquatable {
   final Set<String>? feeds;
 
   bool get isPageInfoComplete =>
-      (title?.isNotEmpty ?? false) && favicon != null;
+      title.isNotEmpty && favicon != null && feeds != null;
 
   WebPageInfo({required this.url, this.title, this.favicon, this.feeds});
 

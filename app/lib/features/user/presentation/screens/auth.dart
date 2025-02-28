@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/features/user/presentation/controllers/controllers.dart';
 
@@ -46,7 +47,7 @@ class UserAuthScreen extends HookConsumerWidget {
                   icon: Icon(Icons.account_circle),
                 ),
                 validator: (value) {
-                  if (value?.isEmpty ?? true) {
+                  if (value.isEmpty) {
                     return 'Email must be provided';
                   }
 
@@ -79,7 +80,7 @@ class UserAuthScreen extends HookConsumerWidget {
                         ),
                         obscureText: obscure.value,
                         validator: (value) {
-                          if (value?.isEmpty ?? true) {
+                          if (value.isEmpty) {
                             return 'Password must be provided';
                           }
 
@@ -105,7 +106,7 @@ class UserAuthScreen extends HookConsumerWidget {
                           ),
                           obscureText: obscure.value,
                           validator: (value) {
-                            if (value?.isEmpty ?? true) {
+                            if (value.isEmpty) {
                               return 'Password must be provided';
                             }
 

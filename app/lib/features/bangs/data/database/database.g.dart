@@ -9,58 +9,82 @@ class BangTable extends Table with TableInfo<BangTable, Bang> {
   final String? _alias;
   BangTable(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> trigger = GeneratedColumn<String>(
-      'trigger', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'trigger',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumnWithTypeConverter<BangGroup, int> group =
-      GeneratedColumn<int>('group', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<BangGroup>(BangTable.$convertergroup);
+      GeneratedColumn<int>(
+        'group',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<BangGroup>(BangTable.$convertergroup);
   late final GeneratedColumn<String> websiteName = GeneratedColumn<String>(
-      'website_name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'website_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> domain = GeneratedColumn<String>(
-      'domain', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'domain',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> urlTemplate = GeneratedColumn<String>(
-      'url_template', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'url_template',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> subCategory = GeneratedColumn<String>(
-      'sub_category', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      $customConstraints: '');
+    'sub_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumnWithTypeConverter<Set<BangFormat>?, String> format =
-      GeneratedColumn<String>('format', aliasedName, true,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<Set<BangFormat>?>(BangTable.$converterformat);
+      GeneratedColumn<String>(
+        'format',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<Set<BangFormat>?>(BangTable.$converterformat);
   @override
   List<GeneratedColumn> get $columns => [
-        trigger,
-        group,
-        websiteName,
-        domain,
-        urlTemplate,
-        category,
-        subCategory,
-        format
-      ];
+    trigger,
+    group,
+    websiteName,
+    domain,
+    urlTemplate,
+    category,
+    subCategory,
+    format,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -72,22 +96,46 @@ class BangTable extends Table with TableInfo<BangTable, Bang> {
   Bang map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Bang(
-      websiteName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}website_name'])!,
-      domain: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}domain'])!,
-      trigger: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}trigger'])!,
-      urlTemplate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}url_template'])!,
-      group: BangTable.$convertergroup.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}group'])!),
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}category']),
-      subCategory: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sub_category']),
-      format: BangTable.$converterformat.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}format'])),
+      websiteName:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}website_name'],
+          )!,
+      domain:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}domain'],
+          )!,
+      trigger:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}trigger'],
+          )!,
+      urlTemplate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}url_template'],
+          )!,
+      group: BangTable.$convertergroup.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}group'],
+        )!,
+      ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      ),
+      subCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sub_category'],
+      ),
+      format: BangTable.$converterformat.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}format'],
+        ),
+      ),
     );
   }
 
@@ -135,11 +183,11 @@ class BangCompanion extends UpdateCompanion<Bang> {
     this.subCategory = const Value.absent(),
     this.format = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : trigger = Value(trigger),
-        group = Value(group),
-        websiteName = Value(websiteName),
-        domain = Value(domain),
-        urlTemplate = Value(urlTemplate);
+  }) : trigger = Value(trigger),
+       group = Value(group),
+       websiteName = Value(websiteName),
+       domain = Value(domain),
+       urlTemplate = Value(urlTemplate);
   static Insertable<Bang> custom({
     Expression<String>? trigger,
     Expression<int>? group,
@@ -164,16 +212,17 @@ class BangCompanion extends UpdateCompanion<Bang> {
     });
   }
 
-  BangCompanion copyWith(
-      {Value<String>? trigger,
-      Value<BangGroup>? group,
-      Value<String>? websiteName,
-      Value<String>? domain,
-      Value<String>? urlTemplate,
-      Value<String?>? category,
-      Value<String?>? subCategory,
-      Value<Set<BangFormat>?>? format,
-      Value<int>? rowid}) {
+  BangCompanion copyWith({
+    Value<String>? trigger,
+    Value<BangGroup>? group,
+    Value<String>? websiteName,
+    Value<String>? domain,
+    Value<String>? urlTemplate,
+    Value<String?>? category,
+    Value<String?>? subCategory,
+    Value<Set<BangFormat>?>? format,
+    Value<int>? rowid,
+  }) {
     return BangCompanion(
       trigger: trigger ?? this.trigger,
       group: group ?? this.group,
@@ -194,8 +243,9 @@ class BangCompanion extends UpdateCompanion<Bang> {
       map['trigger'] = Variable<String>(trigger.value);
     }
     if (group.present) {
-      map['group'] =
-          Variable<int>(BangTable.$convertergroup.toSql(group.value));
+      map['group'] = Variable<int>(
+        BangTable.$convertergroup.toSql(group.value),
+      );
     }
     if (websiteName.present) {
       map['website_name'] = Variable<String>(websiteName.value);
@@ -213,8 +263,9 @@ class BangCompanion extends UpdateCompanion<Bang> {
       map['sub_category'] = Variable<String>(subCategory.value);
     }
     if (format.present) {
-      map['format'] =
-          Variable<String>(BangTable.$converterformat.toSql(format.value));
+      map['format'] = Variable<String>(
+        BangTable.$converterformat.toSql(format.value),
+      );
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -245,16 +296,22 @@ class BangSync extends Table with TableInfo<BangSync, BangSyncData> {
   final String? _alias;
   BangSync(this.attachedDatabase, [this._alias]);
   late final GeneratedColumnWithTypeConverter<BangGroup, int> group =
-      GeneratedColumn<int>('group', aliasedName, false,
-              type: DriftSqlType.int,
-              requiredDuringInsert: false,
-              $customConstraints: 'PRIMARY KEY NOT NULL')
-          .withConverter<BangGroup>(BangSync.$convertergroup);
+      GeneratedColumn<int>(
+        'group',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        $customConstraints: 'PRIMARY KEY NOT NULL',
+      ).withConverter<BangGroup>(BangSync.$convertergroup);
   late final GeneratedColumn<DateTime> lastSync = GeneratedColumn<DateTime>(
-      'last_sync', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'last_sync',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [group, lastSync];
   @override
@@ -268,10 +325,17 @@ class BangSync extends Table with TableInfo<BangSync, BangSyncData> {
   BangSyncData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangSyncData(
-      group: BangSync.$convertergroup.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}group'])!),
-      lastSync: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_sync'])!,
+      group: BangSync.$convertergroup.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}group'],
+        )!,
+      ),
+      lastSync:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}last_sync'],
+          )!,
     );
   }
 
@@ -300,12 +364,15 @@ class BangSyncData extends DataClass implements Insertable<BangSyncData> {
     return map;
   }
 
-  factory BangSyncData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory BangSyncData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BangSyncData(
-      group: BangSync.$convertergroup
-          .fromJson(serializer.fromJson<int>(json['group'])),
+      group: BangSync.$convertergroup.fromJson(
+        serializer.fromJson<int>(json['group']),
+      ),
       lastSync: serializer.fromJson<DateTime>(json['last_sync']),
     );
   }
@@ -319,9 +386,9 @@ class BangSyncData extends DataClass implements Insertable<BangSyncData> {
   }
 
   BangSyncData copyWith({BangGroup? group, DateTime? lastSync}) => BangSyncData(
-        group: group ?? this.group,
-        lastSync: lastSync ?? this.lastSync,
-      );
+    group: group ?? this.group,
+    lastSync: lastSync ?? this.lastSync,
+  );
   BangSyncData copyWithCompanion(BangSyncCompanion data) {
     return BangSyncData(
       group: data.group.present ? data.group.value : this.group,
@@ -369,8 +436,10 @@ class BangSyncCompanion extends UpdateCompanion<BangSyncData> {
     });
   }
 
-  BangSyncCompanion copyWith(
-      {Value<BangGroup>? group, Value<DateTime>? lastSync}) {
+  BangSyncCompanion copyWith({
+    Value<BangGroup>? group,
+    Value<DateTime>? lastSync,
+  }) {
     return BangSyncCompanion(
       group: group ?? this.group,
       lastSync: lastSync ?? this.lastSync,
@@ -406,21 +475,30 @@ class BangFrequency extends Table
   final String? _alias;
   BangFrequency(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> trigger = GeneratedColumn<String>(
-      'trigger', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints:
-          'PRIMARY KEY NOT NULL REFERENCES bang("trigger")ON DELETE CASCADE');
+    'trigger',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints:
+        'PRIMARY KEY NOT NULL REFERENCES bang("trigger")ON DELETE CASCADE',
+  );
   late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
-      'frequency', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'frequency',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<DateTime> lastUsed = GeneratedColumn<DateTime>(
-      'last_used', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'last_used',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [trigger, frequency, lastUsed];
   @override
@@ -434,12 +512,21 @@ class BangFrequency extends Table
   BangFrequencyData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangFrequencyData(
-      trigger: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}trigger'])!,
-      frequency: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}frequency'])!,
-      lastUsed: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_used'])!,
+      trigger:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}trigger'],
+          )!,
+      frequency:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}frequency'],
+          )!,
+      lastUsed:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}last_used'],
+          )!,
     );
   }
 
@@ -457,8 +544,11 @@ class BangFrequencyData extends DataClass
   final String trigger;
   final int frequency;
   final DateTime lastUsed;
-  const BangFrequencyData(
-      {required this.trigger, required this.frequency, required this.lastUsed});
+  const BangFrequencyData({
+    required this.trigger,
+    required this.frequency,
+    required this.lastUsed,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -468,8 +558,10 @@ class BangFrequencyData extends DataClass
     return map;
   }
 
-  factory BangFrequencyData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory BangFrequencyData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BangFrequencyData(
       trigger: serializer.fromJson<String>(json['trigger']),
@@ -487,13 +579,15 @@ class BangFrequencyData extends DataClass
     };
   }
 
-  BangFrequencyData copyWith(
-          {String? trigger, int? frequency, DateTime? lastUsed}) =>
-      BangFrequencyData(
-        trigger: trigger ?? this.trigger,
-        frequency: frequency ?? this.frequency,
-        lastUsed: lastUsed ?? this.lastUsed,
-      );
+  BangFrequencyData copyWith({
+    String? trigger,
+    int? frequency,
+    DateTime? lastUsed,
+  }) => BangFrequencyData(
+    trigger: trigger ?? this.trigger,
+    frequency: frequency ?? this.frequency,
+    lastUsed: lastUsed ?? this.lastUsed,
+  );
   BangFrequencyData copyWithCompanion(BangFrequencyCompanion data) {
     return BangFrequencyData(
       trigger: data.trigger.present ? data.trigger.value : this.trigger,
@@ -539,9 +633,9 @@ class BangFrequencyCompanion extends UpdateCompanion<BangFrequencyData> {
     required int frequency,
     required DateTime lastUsed,
     this.rowid = const Value.absent(),
-  })  : trigger = Value(trigger),
-        frequency = Value(frequency),
-        lastUsed = Value(lastUsed);
+  }) : trigger = Value(trigger),
+       frequency = Value(frequency),
+       lastUsed = Value(lastUsed);
   static Insertable<BangFrequencyData> custom({
     Expression<String>? trigger,
     Expression<int>? frequency,
@@ -556,11 +650,12 @@ class BangFrequencyCompanion extends UpdateCompanion<BangFrequencyData> {
     });
   }
 
-  BangFrequencyCompanion copyWith(
-      {Value<String>? trigger,
-      Value<int>? frequency,
-      Value<DateTime>? lastUsed,
-      Value<int>? rowid}) {
+  BangFrequencyCompanion copyWith({
+    Value<String>? trigger,
+    Value<int>? frequency,
+    Value<DateTime>? lastUsed,
+    Value<int>? rowid,
+  }) {
     return BangFrequencyCompanion(
       trigger: trigger ?? this.trigger,
       frequency: frequency ?? this.frequency,
@@ -605,20 +700,29 @@ class BangHistory extends Table with TableInfo<BangHistory, BangHistoryData> {
   final String? _alias;
   BangHistory(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> searchQuery = GeneratedColumn<String>(
-      'search_query', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'UNIQUE NOT NULL');
+    'search_query',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'UNIQUE NOT NULL',
+  );
   late final GeneratedColumn<String> trigger = GeneratedColumn<String>(
-      'trigger', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL REFERENCES bang("trigger")');
+    'trigger',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL REFERENCES bang("trigger")',
+  );
   late final GeneratedColumn<DateTime> searchDate = GeneratedColumn<DateTime>(
-      'search_date', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'search_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [searchQuery, trigger, searchDate];
   @override
@@ -632,12 +736,21 @@ class BangHistory extends Table with TableInfo<BangHistory, BangHistoryData> {
   BangHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangHistoryData(
-      searchQuery: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}search_query'])!,
-      trigger: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}trigger'])!,
-      searchDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}search_date'])!,
+      searchQuery:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}search_query'],
+          )!,
+      trigger:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}trigger'],
+          )!,
+      searchDate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}search_date'],
+          )!,
     );
   }
 
@@ -654,10 +767,11 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
   final String searchQuery;
   final String trigger;
   final DateTime searchDate;
-  const BangHistoryData(
-      {required this.searchQuery,
-      required this.trigger,
-      required this.searchDate});
+  const BangHistoryData({
+    required this.searchQuery,
+    required this.trigger,
+    required this.searchDate,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -667,8 +781,10 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
     return map;
   }
 
-  factory BangHistoryData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory BangHistoryData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BangHistoryData(
       searchQuery: serializer.fromJson<String>(json['search_query']),
@@ -686,13 +802,15 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
     };
   }
 
-  BangHistoryData copyWith(
-          {String? searchQuery, String? trigger, DateTime? searchDate}) =>
-      BangHistoryData(
-        searchQuery: searchQuery ?? this.searchQuery,
-        trigger: trigger ?? this.trigger,
-        searchDate: searchDate ?? this.searchDate,
-      );
+  BangHistoryData copyWith({
+    String? searchQuery,
+    String? trigger,
+    DateTime? searchDate,
+  }) => BangHistoryData(
+    searchQuery: searchQuery ?? this.searchQuery,
+    trigger: trigger ?? this.trigger,
+    searchDate: searchDate ?? this.searchDate,
+  );
   BangHistoryData copyWithCompanion(BangHistoryCompanion data) {
     return BangHistoryData(
       searchQuery:
@@ -740,9 +858,9 @@ class BangHistoryCompanion extends UpdateCompanion<BangHistoryData> {
     required String trigger,
     required DateTime searchDate,
     this.rowid = const Value.absent(),
-  })  : searchQuery = Value(searchQuery),
-        trigger = Value(trigger),
-        searchDate = Value(searchDate);
+  }) : searchQuery = Value(searchQuery),
+       trigger = Value(trigger),
+       searchDate = Value(searchDate);
   static Insertable<BangHistoryData> custom({
     Expression<String>? searchQuery,
     Expression<String>? trigger,
@@ -757,11 +875,12 @@ class BangHistoryCompanion extends UpdateCompanion<BangHistoryData> {
     });
   }
 
-  BangHistoryCompanion copyWith(
-      {Value<String>? searchQuery,
-      Value<String>? trigger,
-      Value<DateTime>? searchDate,
-      Value<int>? rowid}) {
+  BangHistoryCompanion copyWith({
+    Value<String>? searchQuery,
+    Value<String>? trigger,
+    Value<DateTime>? searchDate,
+    Value<int>? rowid,
+  }) {
     return BangHistoryCompanion(
       searchQuery: searchQuery ?? this.searchQuery,
       trigger: trigger ?? this.trigger,
@@ -807,15 +926,21 @@ class BangFts extends Table
   final String? _alias;
   BangFts(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> trigger = GeneratedColumn<String>(
-      'trigger', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
+    'trigger',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> websiteName = GeneratedColumn<String>(
-      'website_name', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: '');
+    'website_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: '',
+  );
   @override
   List<GeneratedColumn> get $columns => [trigger, websiteName];
   @override
@@ -829,10 +954,16 @@ class BangFts extends Table
   BangFt map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangFt(
-      trigger: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}trigger'])!,
-      websiteName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}website_name'])!,
+      trigger:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}trigger'],
+          )!,
+      websiteName:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}website_name'],
+          )!,
     );
   }
 
@@ -860,8 +991,10 @@ class BangFt extends DataClass implements Insertable<BangFt> {
     return map;
   }
 
-  factory BangFt.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory BangFt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BangFt(
       trigger: serializer.fromJson<String>(json['trigger']),
@@ -878,9 +1011,9 @@ class BangFt extends DataClass implements Insertable<BangFt> {
   }
 
   BangFt copyWith({String? trigger, String? websiteName}) => BangFt(
-        trigger: trigger ?? this.trigger,
-        websiteName: websiteName ?? this.websiteName,
-      );
+    trigger: trigger ?? this.trigger,
+    websiteName: websiteName ?? this.websiteName,
+  );
   BangFt copyWithCompanion(BangFtsCompanion data) {
     return BangFt(
       trigger: data.trigger.present ? data.trigger.value : this.trigger,
@@ -921,8 +1054,8 @@ class BangFtsCompanion extends UpdateCompanion<BangFt> {
     required String trigger,
     required String websiteName,
     this.rowid = const Value.absent(),
-  })  : trigger = Value(trigger),
-        websiteName = Value(websiteName);
+  }) : trigger = Value(trigger),
+       websiteName = Value(websiteName);
   static Insertable<BangFt> custom({
     Expression<String>? trigger,
     Expression<String>? websiteName,
@@ -935,8 +1068,11 @@ class BangFtsCompanion extends UpdateCompanion<BangFt> {
     });
   }
 
-  BangFtsCompanion copyWith(
-      {Value<String>? trigger, Value<String>? websiteName, Value<int>? rowid}) {
+  BangFtsCompanion copyWith({
+    Value<String>? trigger,
+    Value<String>? websiteName,
+    Value<int>? rowid,
+  }) {
     return BangFtsCompanion(
       trigger: trigger ?? this.trigger,
       websiteName: websiteName ?? this.websiteName,
@@ -978,84 +1114,139 @@ class BangDataView extends ViewInfo<BangDataView, BangData>
   BangDataView(this.attachedDatabase, [this._alias]);
   @override
   List<GeneratedColumn> get $columns => [
-        trigger,
-        group,
-        websiteName,
-        domain,
-        urlTemplate,
-        category,
-        subCategory,
-        format,
-        frequency,
-        lastUsed
-      ];
+    trigger,
+    group,
+    websiteName,
+    domain,
+    urlTemplate,
+    category,
+    subCategory,
+    format,
+    frequency,
+    lastUsed,
+  ];
   @override
   String get aliasedName => _alias ?? entityName;
   @override
   String get entityName => 'bang_data_view';
   @override
   Map<SqlDialect, String> get createViewStatements => {
-        SqlDialect.sqlite:
-            'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger"',
-      };
+    SqlDialect.sqlite:
+        'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger"',
+  };
   @override
   BangDataView get asDslTable => this;
   @override
   BangData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangData(
-      websiteName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}website_name'])!,
-      domain: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}domain'])!,
-      trigger: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}trigger'])!,
-      urlTemplate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}url_template'])!,
-      category: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}category']),
-      subCategory: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sub_category']),
-      format: BangTable.$converterformat.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}format'])),
-      frequency: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}frequency']),
-      lastUsed: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}last_used']),
+      websiteName:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}website_name'],
+          )!,
+      domain:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}domain'],
+          )!,
+      trigger:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}trigger'],
+          )!,
+      urlTemplate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}url_template'],
+          )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      ),
+      subCategory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sub_category'],
+      ),
+      format: BangTable.$converterformat.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}format'],
+        ),
+      ),
+      frequency: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}frequency'],
+      ),
+      lastUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_used'],
+      ),
     );
   }
 
   late final GeneratedColumn<String> trigger = GeneratedColumn<String>(
-      'trigger', aliasedName, false,
-      type: DriftSqlType.string);
+    'trigger',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+  );
   late final GeneratedColumnWithTypeConverter<BangGroup, int> group =
-      GeneratedColumn<int>('group', aliasedName, false, type: DriftSqlType.int)
-          .withConverter<BangGroup>(BangTable.$convertergroup);
+      GeneratedColumn<int>(
+        'group',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+      ).withConverter<BangGroup>(BangTable.$convertergroup);
   late final GeneratedColumn<String> websiteName = GeneratedColumn<String>(
-      'website_name', aliasedName, false,
-      type: DriftSqlType.string);
+    'website_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+  );
   late final GeneratedColumn<String> domain = GeneratedColumn<String>(
-      'domain', aliasedName, false,
-      type: DriftSqlType.string);
+    'domain',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+  );
   late final GeneratedColumn<String> urlTemplate = GeneratedColumn<String>(
-      'url_template', aliasedName, false,
-      type: DriftSqlType.string);
+    'url_template',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+  );
   late final GeneratedColumn<String> category = GeneratedColumn<String>(
-      'category', aliasedName, true,
-      type: DriftSqlType.string);
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
   late final GeneratedColumn<String> subCategory = GeneratedColumn<String>(
-      'sub_category', aliasedName, true,
-      type: DriftSqlType.string);
+    'sub_category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
   late final GeneratedColumnWithTypeConverter<Set<BangFormat>?, String> format =
-      GeneratedColumn<String>('format', aliasedName, true,
-              type: DriftSqlType.string)
-          .withConverter<Set<BangFormat>?>(BangTable.$converterformat);
+      GeneratedColumn<String>(
+        'format',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+      ).withConverter<Set<BangFormat>?>(BangTable.$converterformat);
   late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
-      'frequency', aliasedName, true,
-      type: DriftSqlType.int);
+    'frequency',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+  );
   late final GeneratedColumn<DateTime> lastUsed = GeneratedColumn<DateTime>(
-      'last_used', aliasedName, true,
-      type: DriftSqlType.dateTime);
+    'last_used',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+  );
   @override
   BangDataView createAlias(String alias) {
     return BangDataView(attachedDatabase, alias);
@@ -1077,14 +1268,17 @@ abstract class _$BangDatabase extends GeneratedDatabase {
   late final BangFts bangFts = BangFts(this);
   late final BangDataView bangDataView = BangDataView(this);
   late final Trigger bangAfterInsert = Trigger(
-      'CREATE TRIGGER bang_after_insert AFTER INSERT ON bang BEGIN INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
-      'bang_after_insert');
+    'CREATE TRIGGER bang_after_insert AFTER INSERT ON bang BEGIN INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
+    'bang_after_insert',
+  );
   late final Trigger bangAfterDelete = Trigger(
-      'CREATE TRIGGER bang_after_delete AFTER DELETE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);END',
-      'bang_after_delete');
+    'CREATE TRIGGER bang_after_delete AFTER DELETE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);END',
+    'bang_after_delete',
+  );
   late final Trigger bangAfterUpdate = Trigger(
-      'CREATE TRIGGER bang_after_update AFTER UPDATE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
-      'bang_after_update');
+    'CREATE TRIGGER bang_after_update AFTER UPDATE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
+    'bang_after_update',
+  );
   late final BangDao bangDao = BangDao(this as BangDatabase);
   late final SyncDao syncDao = SyncDao(this as BangDatabase);
   Future<int> optimizeFtsIndex() {
@@ -1097,74 +1291,68 @@ abstract class _$BangDatabase extends GeneratedDatabase {
 
   Selectable<BangData> queryBangs({required String query}) {
     return customSelect(
-        'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
-        variables: [
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          bangFrequency,
-          bangFts,
-          bang,
-        }).map((QueryRow row) => BangData(
-          websiteName: row.read<String>('website_name'),
-          domain: row.read<String>('domain'),
-          trigger: row.read<String>('trigger'),
-          urlTemplate: row.read<String>('url_template'),
-          category: row.readNullable<String>('category'),
-          subCategory: row.readNullable<String>('sub_category'),
-          format: BangTable.$converterformat
-              .fromSql(row.readNullable<String>('format')),
-          frequency: row.readNullable<int>('frequency'),
-          lastUsed: row.readNullable<DateTime>('last_used'),
-        ));
+      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
+      variables: [Variable<String>(query)],
+      readsFrom: {bangFrequency, bangFts, bang},
+    ).map(
+      (QueryRow row) => BangData(
+        websiteName: row.read<String>('website_name'),
+        domain: row.read<String>('domain'),
+        trigger: row.read<String>('trigger'),
+        urlTemplate: row.read<String>('url_template'),
+        category: row.readNullable<String>('category'),
+        subCategory: row.readNullable<String>('sub_category'),
+        format: BangTable.$converterformat.fromSql(
+          row.readNullable<String>('format'),
+        ),
+        frequency: row.readNullable<int>('frequency'),
+        lastUsed: row.readNullable<DateTime>('last_used'),
+      ),
+    );
   }
 
   Selectable<BangData> queryBangsBasic({required String query}) {
     return customSelect(
-        'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1 ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
-        variables: [
-          Variable<String>(query)
-        ],
-        readsFrom: {
-          bangFrequency,
-          bangFts,
-          bang,
-        }).map((QueryRow row) => BangData(
-          websiteName: row.read<String>('website_name'),
-          domain: row.read<String>('domain'),
-          trigger: row.read<String>('trigger'),
-          urlTemplate: row.read<String>('url_template'),
-          category: row.readNullable<String>('category'),
-          subCategory: row.readNullable<String>('sub_category'),
-          format: BangTable.$converterformat
-              .fromSql(row.readNullable<String>('format')),
-          frequency: row.readNullable<int>('frequency'),
-          lastUsed: row.readNullable<DateTime>('last_used'),
-        ));
+      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1 ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
+      variables: [Variable<String>(query)],
+      readsFrom: {bangFrequency, bangFts, bang},
+    ).map(
+      (QueryRow row) => BangData(
+        websiteName: row.read<String>('website_name'),
+        domain: row.read<String>('domain'),
+        trigger: row.read<String>('trigger'),
+        urlTemplate: row.read<String>('url_template'),
+        category: row.readNullable<String>('category'),
+        subCategory: row.readNullable<String>('sub_category'),
+        format: BangTable.$converterformat.fromSql(
+          row.readNullable<String>('format'),
+        ),
+        frequency: row.readNullable<int>('frequency'),
+        lastUsed: row.readNullable<DateTime>('last_used'),
+      ),
+    );
   }
 
   Selectable<String> categoriesJson() {
     return customSelect(
-        'WITH categories AS (SELECT b.category, json_group_array(DISTINCT b.sub_category ORDER BY b.sub_category)AS sub_categories FROM bang AS b WHERE b.category IS NOT NULL AND b.sub_category IS NOT NULL GROUP BY b.category ORDER BY b.category) SELECT json_group_object(c.category, json(c.sub_categories)) AS categories_json FROM categories AS c',
-        variables: [],
-        readsFrom: {
-          bang,
-        }).map((QueryRow row) => row.read<String>('categories_json'));
+      'WITH categories AS (SELECT b.category, json_group_array(DISTINCT b.sub_category ORDER BY b.sub_category)AS sub_categories FROM bang AS b WHERE b.category IS NOT NULL AND b.sub_category IS NOT NULL GROUP BY b.category ORDER BY b.category) SELECT json_group_object(c.category, json(c.sub_categories)) AS categories_json FROM categories AS c',
+      variables: [],
+      readsFrom: {bang},
+    ).map((QueryRow row) => row.read<String>('categories_json'));
   }
 
   Selectable<SearchHistoryEntry> searchHistoryEntries({required int limit}) {
     return customSelect(
-        'SELECT * FROM bang_history ORDER BY search_date DESC LIMIT ?1',
-        variables: [
-          Variable<int>(limit)
-        ],
-        readsFrom: {
-          bangHistory,
-        }).map((QueryRow row) => SearchHistoryEntry(
-          searchQuery: row.read<String>('search_query'),
-          trigger: row.read<String>('trigger'),
-          searchDate: row.read<DateTime>('search_date'),
-        ));
+      'SELECT * FROM bang_history ORDER BY search_date DESC LIMIT ?1',
+      variables: [Variable<int>(limit)],
+      readsFrom: {bangHistory},
+    ).map(
+      (QueryRow row) => SearchHistoryEntry(
+        searchQuery: row.read<String>('search_query'),
+        trigger: row.read<String>('trigger'),
+        searchDate: row.read<DateTime>('search_date'),
+      ),
+    );
   }
 
   Future<int> evictHistoryEntries({required int limit}) {
@@ -1181,106 +1369,110 @@ abstract class _$BangDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-        bang,
-        bangSync,
-        bangFrequency,
-        bangHistory,
-        bangFts,
-        bangDataView,
-        bangAfterInsert,
-        bangAfterDelete,
-        bangAfterUpdate
-      ];
+    bang,
+    bangSync,
+    bangFrequency,
+    bangHistory,
+    bangFts,
+    bangDataView,
+    bangAfterInsert,
+    bangAfterDelete,
+    bangAfterUpdate,
+  ];
   @override
-  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
-        [
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('bang',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('bang_frequency', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('bang',
-                limitUpdateKind: UpdateKind.insert),
-            result: [
-              TableUpdate('bang_fts', kind: UpdateKind.insert),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('bang',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('bang_fts', kind: UpdateKind.insert),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('bang',
-                limitUpdateKind: UpdateKind.update),
-            result: [
-              TableUpdate('bang_fts', kind: UpdateKind.insert),
-            ],
-          ),
-        ],
-      );
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('bang_frequency', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('bang_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('bang_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [TableUpdate('bang_fts', kind: UpdateKind.insert)],
+    ),
+  ]);
 }
 
-typedef $BangTableCreateCompanionBuilder = BangCompanion Function({
-  required String trigger,
-  required BangGroup group,
-  required String websiteName,
-  required String domain,
-  required String urlTemplate,
-  Value<String?> category,
-  Value<String?> subCategory,
-  Value<Set<BangFormat>?> format,
-  Value<int> rowid,
-});
-typedef $BangTableUpdateCompanionBuilder = BangCompanion Function({
-  Value<String> trigger,
-  Value<BangGroup> group,
-  Value<String> websiteName,
-  Value<String> domain,
-  Value<String> urlTemplate,
-  Value<String?> category,
-  Value<String?> subCategory,
-  Value<Set<BangFormat>?> format,
-  Value<int> rowid,
-});
+typedef $BangTableCreateCompanionBuilder =
+    BangCompanion Function({
+      required String trigger,
+      required BangGroup group,
+      required String websiteName,
+      required String domain,
+      required String urlTemplate,
+      Value<String?> category,
+      Value<String?> subCategory,
+      Value<Set<BangFormat>?> format,
+      Value<int> rowid,
+    });
+typedef $BangTableUpdateCompanionBuilder =
+    BangCompanion Function({
+      Value<String> trigger,
+      Value<BangGroup> group,
+      Value<String> websiteName,
+      Value<String> domain,
+      Value<String> urlTemplate,
+      Value<String?> category,
+      Value<String?> subCategory,
+      Value<Set<BangFormat>?> format,
+      Value<int> rowid,
+    });
 
 final class $BangTableReferences
     extends BaseReferences<_$BangDatabase, BangTable, Bang> {
   $BangTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static MultiTypedResultKey<BangFrequency, List<BangFrequencyData>>
-      _bangFrequencyRefsTable(_$BangDatabase db) =>
-          MultiTypedResultKey.fromTable(db.bangFrequency,
-              aliasName: $_aliasNameGenerator(
-                  db.bang.trigger, db.bangFrequency.trigger));
+  _bangFrequencyRefsTable(_$BangDatabase db) => MultiTypedResultKey.fromTable(
+    db.bangFrequency,
+    aliasName: $_aliasNameGenerator(db.bang.trigger, db.bangFrequency.trigger),
+  );
 
   $BangFrequencyProcessedTableManager get bangFrequencyRefs {
     final manager = $BangFrequencyTableManager($_db, $_db.bangFrequency).filter(
-        (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!));
+      (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!),
+    );
 
     final cache = $_typedResult.readTableOrNull(_bangFrequencyRefsTable($_db));
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 
   static MultiTypedResultKey<BangHistory, List<BangHistoryData>>
-      _bangHistoryRefsTable(_$BangDatabase db) => MultiTypedResultKey.fromTable(
-          db.bangHistory,
-          aliasName:
-              $_aliasNameGenerator(db.bang.trigger, db.bangHistory.trigger));
+  _bangHistoryRefsTable(_$BangDatabase db) => MultiTypedResultKey.fromTable(
+    db.bangHistory,
+    aliasName: $_aliasNameGenerator(db.bang.trigger, db.bangHistory.trigger),
+  );
 
   $BangHistoryProcessedTableManager get bangHistoryRefs {
     final manager = $BangHistoryTableManager($_db, $_db.bangHistory).filter(
-        (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!));
+      (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!),
+    );
 
     final cache = $_typedResult.readTableOrNull(_bangHistoryRefsTable($_db));
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: cache));
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -1293,72 +1485,94 @@ class $BangTableFilterComposer extends Composer<_$BangDatabase, BangTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get trigger => $composableBuilder(
-      column: $table.trigger, builder: (column) => ColumnFilters(column));
+    column: $table.trigger,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<BangGroup, BangGroup, int> get group =>
       $composableBuilder(
-          column: $table.group,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+        column: $table.group,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get websiteName => $composableBuilder(
-      column: $table.websiteName, builder: (column) => ColumnFilters(column));
+    column: $table.websiteName,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get domain => $composableBuilder(
-      column: $table.domain, builder: (column) => ColumnFilters(column));
+    column: $table.domain,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get urlTemplate => $composableBuilder(
-      column: $table.urlTemplate, builder: (column) => ColumnFilters(column));
+    column: $table.urlTemplate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get category => $composableBuilder(
-      column: $table.category, builder: (column) => ColumnFilters(column));
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get subCategory => $composableBuilder(
-      column: $table.subCategory, builder: (column) => ColumnFilters(column));
+    column: $table.subCategory,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<Set<BangFormat>?, Set<BangFormat>, String>
-      get format => $composableBuilder(
-          column: $table.format,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  get format => $composableBuilder(
+    column: $table.format,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   Expression<bool> bangFrequencyRefs(
-      Expression<bool> Function($BangFrequencyFilterComposer f) f) {
+    Expression<bool> Function($BangFrequencyFilterComposer f) f,
+  ) {
     final $BangFrequencyFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bangFrequency,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangFrequencyFilterComposer(
-              $db: $db,
-              $table: $db.bangFrequency,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bangFrequency,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangFrequencyFilterComposer(
+            $db: $db,
+            $table: $db.bangFrequency,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 
   Expression<bool> bangHistoryRefs(
-      Expression<bool> Function($BangHistoryFilterComposer f) f) {
+    Expression<bool> Function($BangHistoryFilterComposer f) f,
+  ) {
     final $BangHistoryFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bangHistory,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangHistoryFilterComposer(
-              $db: $db,
-              $table: $db.bangHistory,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bangHistory,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangHistoryFilterComposer(
+            $db: $db,
+            $table: $db.bangHistory,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
@@ -1372,28 +1586,44 @@ class $BangTableOrderingComposer extends Composer<_$BangDatabase, BangTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get trigger => $composableBuilder(
-      column: $table.trigger, builder: (column) => ColumnOrderings(column));
+    column: $table.trigger,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get group => $composableBuilder(
-      column: $table.group, builder: (column) => ColumnOrderings(column));
+    column: $table.group,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get websiteName => $composableBuilder(
-      column: $table.websiteName, builder: (column) => ColumnOrderings(column));
+    column: $table.websiteName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get domain => $composableBuilder(
-      column: $table.domain, builder: (column) => ColumnOrderings(column));
+    column: $table.domain,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get urlTemplate => $composableBuilder(
-      column: $table.urlTemplate, builder: (column) => ColumnOrderings(column));
+    column: $table.urlTemplate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get category => $composableBuilder(
-      column: $table.category, builder: (column) => ColumnOrderings(column));
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get subCategory => $composableBuilder(
-      column: $table.subCategory, builder: (column) => ColumnOrderings(column));
+    column: $table.subCategory,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get format => $composableBuilder(
-      column: $table.format, builder: (column) => ColumnOrderings(column));
+    column: $table.format,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $BangTableAnnotationComposer extends Composer<_$BangDatabase, BangTable> {
@@ -1411,198 +1641,245 @@ class $BangTableAnnotationComposer extends Composer<_$BangDatabase, BangTable> {
       $composableBuilder(column: $table.group, builder: (column) => column);
 
   GeneratedColumn<String> get websiteName => $composableBuilder(
-      column: $table.websiteName, builder: (column) => column);
+    column: $table.websiteName,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get domain =>
       $composableBuilder(column: $table.domain, builder: (column) => column);
 
   GeneratedColumn<String> get urlTemplate => $composableBuilder(
-      column: $table.urlTemplate, builder: (column) => column);
+    column: $table.urlTemplate,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get category =>
       $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<String> get subCategory => $composableBuilder(
-      column: $table.subCategory, builder: (column) => column);
+    column: $table.subCategory,
+    builder: (column) => column,
+  );
 
   GeneratedColumnWithTypeConverter<Set<BangFormat>?, String> get format =>
       $composableBuilder(column: $table.format, builder: (column) => column);
 
   Expression<T> bangFrequencyRefs<T extends Object>(
-      Expression<T> Function($BangFrequencyAnnotationComposer a) f) {
+    Expression<T> Function($BangFrequencyAnnotationComposer a) f,
+  ) {
     final $BangFrequencyAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bangFrequency,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangFrequencyAnnotationComposer(
-              $db: $db,
-              $table: $db.bangFrequency,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bangFrequency,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangFrequencyAnnotationComposer(
+            $db: $db,
+            $table: $db.bangFrequency,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 
   Expression<T> bangHistoryRefs<T extends Object>(
-      Expression<T> Function($BangHistoryAnnotationComposer a) f) {
+    Expression<T> Function($BangHistoryAnnotationComposer a) f,
+  ) {
     final $BangHistoryAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bangHistory,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangHistoryAnnotationComposer(
-              $db: $db,
-              $table: $db.bangHistory,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bangHistory,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangHistoryAnnotationComposer(
+            $db: $db,
+            $table: $db.bangHistory,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return f(composer);
   }
 }
 
-class $BangTableTableManager extends RootTableManager<
-    _$BangDatabase,
-    BangTable,
-    Bang,
-    $BangTableFilterComposer,
-    $BangTableOrderingComposer,
-    $BangTableAnnotationComposer,
-    $BangTableCreateCompanionBuilder,
-    $BangTableUpdateCompanionBuilder,
-    (Bang, $BangTableReferences),
-    Bang,
-    PrefetchHooks Function({bool bangFrequencyRefs, bool bangHistoryRefs})> {
+class $BangTableTableManager
+    extends
+        RootTableManager<
+          _$BangDatabase,
+          BangTable,
+          Bang,
+          $BangTableFilterComposer,
+          $BangTableOrderingComposer,
+          $BangTableAnnotationComposer,
+          $BangTableCreateCompanionBuilder,
+          $BangTableUpdateCompanionBuilder,
+          (Bang, $BangTableReferences),
+          Bang,
+          PrefetchHooks Function({bool bangFrequencyRefs, bool bangHistoryRefs})
+        > {
   $BangTableTableManager(_$BangDatabase db, BangTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $BangTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $BangTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $BangTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> trigger = const Value.absent(),
-            Value<BangGroup> group = const Value.absent(),
-            Value<String> websiteName = const Value.absent(),
-            Value<String> domain = const Value.absent(),
-            Value<String> urlTemplate = const Value.absent(),
-            Value<String?> category = const Value.absent(),
-            Value<String?> subCategory = const Value.absent(),
-            Value<Set<BangFormat>?> format = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangCompanion(
-            trigger: trigger,
-            group: group,
-            websiteName: websiteName,
-            domain: domain,
-            urlTemplate: urlTemplate,
-            category: category,
-            subCategory: subCategory,
-            format: format,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String trigger,
-            required BangGroup group,
-            required String websiteName,
-            required String domain,
-            required String urlTemplate,
-            Value<String?> category = const Value.absent(),
-            Value<String?> subCategory = const Value.absent(),
-            Value<Set<BangFormat>?> format = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangCompanion.insert(
-            trigger: trigger,
-            group: group,
-            websiteName: websiteName,
-            domain: domain,
-            urlTemplate: urlTemplate,
-            category: category,
-            subCategory: subCategory,
-            format: format,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $BangTableReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: (
-              {bangFrequencyRefs = false, bangHistoryRefs = false}) {
+          createFilteringComposer:
+              () => $BangTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $BangTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $BangTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> trigger = const Value.absent(),
+                Value<BangGroup> group = const Value.absent(),
+                Value<String> websiteName = const Value.absent(),
+                Value<String> domain = const Value.absent(),
+                Value<String> urlTemplate = const Value.absent(),
+                Value<String?> category = const Value.absent(),
+                Value<String?> subCategory = const Value.absent(),
+                Value<Set<BangFormat>?> format = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BangCompanion(
+                trigger: trigger,
+                group: group,
+                websiteName: websiteName,
+                domain: domain,
+                urlTemplate: urlTemplate,
+                category: category,
+                subCategory: subCategory,
+                format: format,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String trigger,
+                required BangGroup group,
+                required String websiteName,
+                required String domain,
+                required String urlTemplate,
+                Value<String?> category = const Value.absent(),
+                Value<String?> subCategory = const Value.absent(),
+                Value<Set<BangFormat>?> format = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BangCompanion.insert(
+                trigger: trigger,
+                group: group,
+                websiteName: websiteName,
+                domain: domain,
+                urlTemplate: urlTemplate,
+                category: category,
+                subCategory: subCategory,
+                format: format,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $BangTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({
+            bangFrequencyRefs = false,
+            bangHistoryRefs = false,
+          }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (bangFrequencyRefs) db.bangFrequency,
-                if (bangHistoryRefs) db.bangHistory
+                if (bangHistoryRefs) db.bangHistory,
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (bangFrequencyRefs)
-                    await $_getPrefetchedData<Bang, BangTable,
-                            BangFrequencyData>(
-                        currentTable: table,
-                        referencedTable:
-                            $BangTableReferences._bangFrequencyRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $BangTableReferences(db, table, p0)
-                                .bangFrequencyRefs,
-                        referencedItemsForCurrentItem:
-                            (item, referencedItems) => referencedItems
-                                .where((e) => e.trigger == item.trigger),
-                        typedResults: items),
+                    await $_getPrefetchedData<
+                      Bang,
+                      BangTable,
+                      BangFrequencyData
+                    >(
+                      currentTable: table,
+                      referencedTable: $BangTableReferences
+                          ._bangFrequencyRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $BangTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).bangFrequencyRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.trigger == item.trigger,
+                          ),
+                      typedResults: items,
+                    ),
                   if (bangHistoryRefs)
                     await $_getPrefetchedData<Bang, BangTable, BangHistoryData>(
-                        currentTable: table,
-                        referencedTable:
-                            $BangTableReferences._bangHistoryRefsTable(db),
-                        managerFromTypedResult: (p0) =>
-                            $BangTableReferences(db, table, p0).bangHistoryRefs,
-                        referencedItemsForCurrentItem:
-                            (item, referencedItems) => referencedItems
-                                .where((e) => e.trigger == item.trigger),
-                        typedResults: items)
+                      currentTable: table,
+                      referencedTable: $BangTableReferences
+                          ._bangHistoryRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $BangTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).bangHistoryRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.trigger == item.trigger,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $BangTableProcessedTableManager = ProcessedTableManager<
-    _$BangDatabase,
-    BangTable,
-    Bang,
-    $BangTableFilterComposer,
-    $BangTableOrderingComposer,
-    $BangTableAnnotationComposer,
-    $BangTableCreateCompanionBuilder,
-    $BangTableUpdateCompanionBuilder,
-    (Bang, $BangTableReferences),
-    Bang,
-    PrefetchHooks Function({bool bangFrequencyRefs, bool bangHistoryRefs})>;
-typedef $BangSyncCreateCompanionBuilder = BangSyncCompanion Function({
-  Value<BangGroup> group,
-  required DateTime lastSync,
-});
-typedef $BangSyncUpdateCompanionBuilder = BangSyncCompanion Function({
-  Value<BangGroup> group,
-  Value<DateTime> lastSync,
-});
+typedef $BangTableProcessedTableManager =
+    ProcessedTableManager<
+      _$BangDatabase,
+      BangTable,
+      Bang,
+      $BangTableFilterComposer,
+      $BangTableOrderingComposer,
+      $BangTableAnnotationComposer,
+      $BangTableCreateCompanionBuilder,
+      $BangTableUpdateCompanionBuilder,
+      (Bang, $BangTableReferences),
+      Bang,
+      PrefetchHooks Function({bool bangFrequencyRefs, bool bangHistoryRefs})
+    >;
+typedef $BangSyncCreateCompanionBuilder =
+    BangSyncCompanion Function({
+      Value<BangGroup> group,
+      required DateTime lastSync,
+    });
+typedef $BangSyncUpdateCompanionBuilder =
+    BangSyncCompanion Function({
+      Value<BangGroup> group,
+      Value<DateTime> lastSync,
+    });
 
 class $BangSyncFilterComposer extends Composer<_$BangDatabase, BangSync> {
   $BangSyncFilterComposer({
@@ -1614,11 +1891,14 @@ class $BangSyncFilterComposer extends Composer<_$BangDatabase, BangSync> {
   });
   ColumnWithTypeConverterFilters<BangGroup, BangGroup, int> get group =>
       $composableBuilder(
-          column: $table.group,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+        column: $table.group,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<DateTime> get lastSync => $composableBuilder(
-      column: $table.lastSync, builder: (column) => ColumnFilters(column));
+    column: $table.lastSync,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $BangSyncOrderingComposer extends Composer<_$BangDatabase, BangSync> {
@@ -1630,10 +1910,14 @@ class $BangSyncOrderingComposer extends Composer<_$BangDatabase, BangSync> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get group => $composableBuilder(
-      column: $table.group, builder: (column) => ColumnOrderings(column));
+    column: $table.group,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get lastSync => $composableBuilder(
-      column: $table.lastSync, builder: (column) => ColumnOrderings(column));
+    column: $table.lastSync,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $BangSyncAnnotationComposer extends Composer<_$BangDatabase, BangSync> {
@@ -1651,92 +1935,109 @@ class $BangSyncAnnotationComposer extends Composer<_$BangDatabase, BangSync> {
       $composableBuilder(column: $table.lastSync, builder: (column) => column);
 }
 
-class $BangSyncTableManager extends RootTableManager<
-    _$BangDatabase,
-    BangSync,
-    BangSyncData,
-    $BangSyncFilterComposer,
-    $BangSyncOrderingComposer,
-    $BangSyncAnnotationComposer,
-    $BangSyncCreateCompanionBuilder,
-    $BangSyncUpdateCompanionBuilder,
-    (BangSyncData, BaseReferences<_$BangDatabase, BangSync, BangSyncData>),
-    BangSyncData,
-    PrefetchHooks Function()> {
+class $BangSyncTableManager
+    extends
+        RootTableManager<
+          _$BangDatabase,
+          BangSync,
+          BangSyncData,
+          $BangSyncFilterComposer,
+          $BangSyncOrderingComposer,
+          $BangSyncAnnotationComposer,
+          $BangSyncCreateCompanionBuilder,
+          $BangSyncUpdateCompanionBuilder,
+          (
+            BangSyncData,
+            BaseReferences<_$BangDatabase, BangSync, BangSyncData>,
+          ),
+          BangSyncData,
+          PrefetchHooks Function()
+        > {
   $BangSyncTableManager(_$BangDatabase db, BangSync table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $BangSyncFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $BangSyncOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $BangSyncAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<BangGroup> group = const Value.absent(),
-            Value<DateTime> lastSync = const Value.absent(),
-          }) =>
-              BangSyncCompanion(
-            group: group,
-            lastSync: lastSync,
-          ),
-          createCompanionCallback: ({
-            Value<BangGroup> group = const Value.absent(),
-            required DateTime lastSync,
-          }) =>
-              BangSyncCompanion.insert(
-            group: group,
-            lastSync: lastSync,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $BangSyncFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $BangSyncOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $BangSyncAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<BangGroup> group = const Value.absent(),
+                Value<DateTime> lastSync = const Value.absent(),
+              }) => BangSyncCompanion(group: group, lastSync: lastSync),
+          createCompanionCallback:
+              ({
+                Value<BangGroup> group = const Value.absent(),
+                required DateTime lastSync,
+              }) => BangSyncCompanion.insert(group: group, lastSync: lastSync),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $BangSyncProcessedTableManager = ProcessedTableManager<
-    _$BangDatabase,
-    BangSync,
-    BangSyncData,
-    $BangSyncFilterComposer,
-    $BangSyncOrderingComposer,
-    $BangSyncAnnotationComposer,
-    $BangSyncCreateCompanionBuilder,
-    $BangSyncUpdateCompanionBuilder,
-    (BangSyncData, BaseReferences<_$BangDatabase, BangSync, BangSyncData>),
-    BangSyncData,
-    PrefetchHooks Function()>;
-typedef $BangFrequencyCreateCompanionBuilder = BangFrequencyCompanion Function({
-  required String trigger,
-  required int frequency,
-  required DateTime lastUsed,
-  Value<int> rowid,
-});
-typedef $BangFrequencyUpdateCompanionBuilder = BangFrequencyCompanion Function({
-  Value<String> trigger,
-  Value<int> frequency,
-  Value<DateTime> lastUsed,
-  Value<int> rowid,
-});
+typedef $BangSyncProcessedTableManager =
+    ProcessedTableManager<
+      _$BangDatabase,
+      BangSync,
+      BangSyncData,
+      $BangSyncFilterComposer,
+      $BangSyncOrderingComposer,
+      $BangSyncAnnotationComposer,
+      $BangSyncCreateCompanionBuilder,
+      $BangSyncUpdateCompanionBuilder,
+      (BangSyncData, BaseReferences<_$BangDatabase, BangSync, BangSyncData>),
+      BangSyncData,
+      PrefetchHooks Function()
+    >;
+typedef $BangFrequencyCreateCompanionBuilder =
+    BangFrequencyCompanion Function({
+      required String trigger,
+      required int frequency,
+      required DateTime lastUsed,
+      Value<int> rowid,
+    });
+typedef $BangFrequencyUpdateCompanionBuilder =
+    BangFrequencyCompanion Function({
+      Value<String> trigger,
+      Value<int> frequency,
+      Value<DateTime> lastUsed,
+      Value<int> rowid,
+    });
 
 final class $BangFrequencyReferences
     extends BaseReferences<_$BangDatabase, BangFrequency, BangFrequencyData> {
   $BangFrequencyReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static BangTable _triggerTable(_$BangDatabase db) => db.bang.createAlias(
-      $_aliasNameGenerator(db.bangFrequency.trigger, db.bang.trigger));
+    $_aliasNameGenerator(db.bangFrequency.trigger, db.bang.trigger),
+  );
 
   $BangTableProcessedTableManager get trigger {
     final $_column = $_itemColumn<String>('trigger')!;
 
-    final manager = $BangTableTableManager($_db, $_db.bang)
-        .filter((f) => f.trigger.sqlEquals($_column));
+    final manager = $BangTableTableManager(
+      $_db,
+      $_db.bang,
+    ).filter((f) => f.trigger.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_triggerTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -1750,28 +2051,35 @@ class $BangFrequencyFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get frequency => $composableBuilder(
-      column: $table.frequency, builder: (column) => ColumnFilters(column));
+    column: $table.frequency,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get lastUsed => $composableBuilder(
-      column: $table.lastUsed, builder: (column) => ColumnFilters(column));
+    column: $table.lastUsed,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $BangTableFilterComposer get trigger {
     final $BangTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bang,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangTableFilterComposer(
-              $db: $db,
-              $table: $db.bang,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bang,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangTableFilterComposer(
+            $db: $db,
+            $table: $db.bang,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -1786,28 +2094,35 @@ class $BangFrequencyOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get frequency => $composableBuilder(
-      column: $table.frequency, builder: (column) => ColumnOrderings(column));
+    column: $table.frequency,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get lastUsed => $composableBuilder(
-      column: $table.lastUsed, builder: (column) => ColumnOrderings(column));
+    column: $table.lastUsed,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $BangTableOrderingComposer get trigger {
     final $BangTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bang,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangTableOrderingComposer(
-              $db: $db,
-              $table: $db.bang,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bang,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangTableOrderingComposer(
+            $db: $db,
+            $table: $db.bang,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -1829,100 +2144,120 @@ class $BangFrequencyAnnotationComposer
 
   $BangTableAnnotationComposer get trigger {
     final $BangTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bang,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangTableAnnotationComposer(
-              $db: $db,
-              $table: $db.bang,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bang,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangTableAnnotationComposer(
+            $db: $db,
+            $table: $db.bang,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
 
-class $BangFrequencyTableManager extends RootTableManager<
-    _$BangDatabase,
-    BangFrequency,
-    BangFrequencyData,
-    $BangFrequencyFilterComposer,
-    $BangFrequencyOrderingComposer,
-    $BangFrequencyAnnotationComposer,
-    $BangFrequencyCreateCompanionBuilder,
-    $BangFrequencyUpdateCompanionBuilder,
-    (BangFrequencyData, $BangFrequencyReferences),
-    BangFrequencyData,
-    PrefetchHooks Function({bool trigger})> {
+class $BangFrequencyTableManager
+    extends
+        RootTableManager<
+          _$BangDatabase,
+          BangFrequency,
+          BangFrequencyData,
+          $BangFrequencyFilterComposer,
+          $BangFrequencyOrderingComposer,
+          $BangFrequencyAnnotationComposer,
+          $BangFrequencyCreateCompanionBuilder,
+          $BangFrequencyUpdateCompanionBuilder,
+          (BangFrequencyData, $BangFrequencyReferences),
+          BangFrequencyData,
+          PrefetchHooks Function({bool trigger})
+        > {
   $BangFrequencyTableManager(_$BangDatabase db, BangFrequency table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $BangFrequencyFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $BangFrequencyOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $BangFrequencyAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> trigger = const Value.absent(),
-            Value<int> frequency = const Value.absent(),
-            Value<DateTime> lastUsed = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangFrequencyCompanion(
-            trigger: trigger,
-            frequency: frequency,
-            lastUsed: lastUsed,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String trigger,
-            required int frequency,
-            required DateTime lastUsed,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangFrequencyCompanion.insert(
-            trigger: trigger,
-            frequency: frequency,
-            lastUsed: lastUsed,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $BangFrequencyReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $BangFrequencyFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $BangFrequencyOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $BangFrequencyAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> trigger = const Value.absent(),
+                Value<int> frequency = const Value.absent(),
+                Value<DateTime> lastUsed = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BangFrequencyCompanion(
+                trigger: trigger,
+                frequency: frequency,
+                lastUsed: lastUsed,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String trigger,
+                required int frequency,
+                required DateTime lastUsed,
+                Value<int> rowid = const Value.absent(),
+              }) => BangFrequencyCompanion.insert(
+                trigger: trigger,
+                frequency: frequency,
+                lastUsed: lastUsed,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $BangFrequencyReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: ({trigger = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
               addJoins: <
-                  T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic>>(state) {
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
                 if (trigger) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.trigger,
-                    referencedTable: $BangFrequencyReferences._triggerTable(db),
-                    referencedColumn:
-                        $BangFrequencyReferences._triggerTable(db).trigger,
-                  ) as T;
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.trigger,
+                            referencedTable: $BangFrequencyReferences
+                                ._triggerTable(db),
+                            referencedColumn:
+                                $BangFrequencyReferences
+                                    ._triggerTable(db)
+                                    .trigger,
+                          )
+                          as T;
                 }
 
                 return state;
@@ -1932,50 +2267,59 @@ class $BangFrequencyTableManager extends RootTableManager<
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $BangFrequencyProcessedTableManager = ProcessedTableManager<
-    _$BangDatabase,
-    BangFrequency,
-    BangFrequencyData,
-    $BangFrequencyFilterComposer,
-    $BangFrequencyOrderingComposer,
-    $BangFrequencyAnnotationComposer,
-    $BangFrequencyCreateCompanionBuilder,
-    $BangFrequencyUpdateCompanionBuilder,
-    (BangFrequencyData, $BangFrequencyReferences),
-    BangFrequencyData,
-    PrefetchHooks Function({bool trigger})>;
-typedef $BangHistoryCreateCompanionBuilder = BangHistoryCompanion Function({
-  required String searchQuery,
-  required String trigger,
-  required DateTime searchDate,
-  Value<int> rowid,
-});
-typedef $BangHistoryUpdateCompanionBuilder = BangHistoryCompanion Function({
-  Value<String> searchQuery,
-  Value<String> trigger,
-  Value<DateTime> searchDate,
-  Value<int> rowid,
-});
+typedef $BangFrequencyProcessedTableManager =
+    ProcessedTableManager<
+      _$BangDatabase,
+      BangFrequency,
+      BangFrequencyData,
+      $BangFrequencyFilterComposer,
+      $BangFrequencyOrderingComposer,
+      $BangFrequencyAnnotationComposer,
+      $BangFrequencyCreateCompanionBuilder,
+      $BangFrequencyUpdateCompanionBuilder,
+      (BangFrequencyData, $BangFrequencyReferences),
+      BangFrequencyData,
+      PrefetchHooks Function({bool trigger})
+    >;
+typedef $BangHistoryCreateCompanionBuilder =
+    BangHistoryCompanion Function({
+      required String searchQuery,
+      required String trigger,
+      required DateTime searchDate,
+      Value<int> rowid,
+    });
+typedef $BangHistoryUpdateCompanionBuilder =
+    BangHistoryCompanion Function({
+      Value<String> searchQuery,
+      Value<String> trigger,
+      Value<DateTime> searchDate,
+      Value<int> rowid,
+    });
 
 final class $BangHistoryReferences
     extends BaseReferences<_$BangDatabase, BangHistory, BangHistoryData> {
   $BangHistoryReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static BangTable _triggerTable(_$BangDatabase db) => db.bang.createAlias(
-      $_aliasNameGenerator(db.bangHistory.trigger, db.bang.trigger));
+    $_aliasNameGenerator(db.bangHistory.trigger, db.bang.trigger),
+  );
 
   $BangTableProcessedTableManager get trigger {
     final $_column = $_itemColumn<String>('trigger')!;
 
-    final manager = $BangTableTableManager($_db, $_db.bang)
-        .filter((f) => f.trigger.sqlEquals($_column));
+    final manager = $BangTableTableManager(
+      $_db,
+      $_db.bang,
+    ).filter((f) => f.trigger.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_triggerTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
-        manager.$state.copyWith(prefetchedData: [item]));
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -1988,28 +2332,35 @@ class $BangHistoryFilterComposer extends Composer<_$BangDatabase, BangHistory> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get searchQuery => $composableBuilder(
-      column: $table.searchQuery, builder: (column) => ColumnFilters(column));
+    column: $table.searchQuery,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get searchDate => $composableBuilder(
-      column: $table.searchDate, builder: (column) => ColumnFilters(column));
+    column: $table.searchDate,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $BangTableFilterComposer get trigger {
     final $BangTableFilterComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bang,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangTableFilterComposer(
-              $db: $db,
-              $table: $db.bang,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bang,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangTableFilterComposer(
+            $db: $db,
+            $table: $db.bang,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -2024,28 +2375,35 @@ class $BangHistoryOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get searchQuery => $composableBuilder(
-      column: $table.searchQuery, builder: (column) => ColumnOrderings(column));
+    column: $table.searchQuery,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get searchDate => $composableBuilder(
-      column: $table.searchDate, builder: (column) => ColumnOrderings(column));
+    column: $table.searchDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $BangTableOrderingComposer get trigger {
     final $BangTableOrderingComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bang,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangTableOrderingComposer(
-              $db: $db,
-              $table: $db.bang,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bang,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangTableOrderingComposer(
+            $db: $db,
+            $table: $db.bang,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
@@ -2060,107 +2418,131 @@ class $BangHistoryAnnotationComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   GeneratedColumn<String> get searchQuery => $composableBuilder(
-      column: $table.searchQuery, builder: (column) => column);
+    column: $table.searchQuery,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get searchDate => $composableBuilder(
-      column: $table.searchDate, builder: (column) => column);
+    column: $table.searchDate,
+    builder: (column) => column,
+  );
 
   $BangTableAnnotationComposer get trigger {
     final $BangTableAnnotationComposer composer = $composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.trigger,
-        referencedTable: $db.bang,
-        getReferencedColumn: (t) => t.trigger,
-        builder: (joinBuilder,
-                {$addJoinBuilderToRootComposer,
-                $removeJoinBuilderFromRootComposer}) =>
-            $BangTableAnnotationComposer(
-              $db: $db,
-              $table: $db.bang,
-              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-              joinBuilder: joinBuilder,
-              $removeJoinBuilderFromRootComposer:
-                  $removeJoinBuilderFromRootComposer,
-            ));
+      composer: this,
+      getCurrentColumn: (t) => t.trigger,
+      referencedTable: $db.bang,
+      getReferencedColumn: (t) => t.trigger,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BangTableAnnotationComposer(
+            $db: $db,
+            $table: $db.bang,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
     return composer;
   }
 }
 
-class $BangHistoryTableManager extends RootTableManager<
-    _$BangDatabase,
-    BangHistory,
-    BangHistoryData,
-    $BangHistoryFilterComposer,
-    $BangHistoryOrderingComposer,
-    $BangHistoryAnnotationComposer,
-    $BangHistoryCreateCompanionBuilder,
-    $BangHistoryUpdateCompanionBuilder,
-    (BangHistoryData, $BangHistoryReferences),
-    BangHistoryData,
-    PrefetchHooks Function({bool trigger})> {
+class $BangHistoryTableManager
+    extends
+        RootTableManager<
+          _$BangDatabase,
+          BangHistory,
+          BangHistoryData,
+          $BangHistoryFilterComposer,
+          $BangHistoryOrderingComposer,
+          $BangHistoryAnnotationComposer,
+          $BangHistoryCreateCompanionBuilder,
+          $BangHistoryUpdateCompanionBuilder,
+          (BangHistoryData, $BangHistoryReferences),
+          BangHistoryData,
+          PrefetchHooks Function({bool trigger})
+        > {
   $BangHistoryTableManager(_$BangDatabase db, BangHistory table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $BangHistoryFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $BangHistoryOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $BangHistoryAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> searchQuery = const Value.absent(),
-            Value<String> trigger = const Value.absent(),
-            Value<DateTime> searchDate = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangHistoryCompanion(
-            searchQuery: searchQuery,
-            trigger: trigger,
-            searchDate: searchDate,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String searchQuery,
-            required String trigger,
-            required DateTime searchDate,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangHistoryCompanion.insert(
-            searchQuery: searchQuery,
-            trigger: trigger,
-            searchDate: searchDate,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) =>
-                  (e.readTable(table), $BangHistoryReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $BangHistoryFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $BangHistoryOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $BangHistoryAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> searchQuery = const Value.absent(),
+                Value<String> trigger = const Value.absent(),
+                Value<DateTime> searchDate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BangHistoryCompanion(
+                searchQuery: searchQuery,
+                trigger: trigger,
+                searchDate: searchDate,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String searchQuery,
+                required String trigger,
+                required DateTime searchDate,
+                Value<int> rowid = const Value.absent(),
+              }) => BangHistoryCompanion.insert(
+                searchQuery: searchQuery,
+                trigger: trigger,
+                searchDate: searchDate,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $BangHistoryReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: ({trigger = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
               addJoins: <
-                  T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic>>(state) {
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
                 if (trigger) {
-                  state = state.withJoin(
-                    currentTable: table,
-                    currentColumn: table.trigger,
-                    referencedTable: $BangHistoryReferences._triggerTable(db),
-                    referencedColumn:
-                        $BangHistoryReferences._triggerTable(db).trigger,
-                  ) as T;
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.trigger,
+                            referencedTable: $BangHistoryReferences
+                                ._triggerTable(db),
+                            referencedColumn:
+                                $BangHistoryReferences
+                                    ._triggerTable(db)
+                                    .trigger,
+                          )
+                          as T;
                 }
 
                 return state;
@@ -2170,31 +2552,36 @@ class $BangHistoryTableManager extends RootTableManager<
               },
             );
           },
-        ));
+        ),
+      );
 }
 
-typedef $BangHistoryProcessedTableManager = ProcessedTableManager<
-    _$BangDatabase,
-    BangHistory,
-    BangHistoryData,
-    $BangHistoryFilterComposer,
-    $BangHistoryOrderingComposer,
-    $BangHistoryAnnotationComposer,
-    $BangHistoryCreateCompanionBuilder,
-    $BangHistoryUpdateCompanionBuilder,
-    (BangHistoryData, $BangHistoryReferences),
-    BangHistoryData,
-    PrefetchHooks Function({bool trigger})>;
-typedef $BangFtsCreateCompanionBuilder = BangFtsCompanion Function({
-  required String trigger,
-  required String websiteName,
-  Value<int> rowid,
-});
-typedef $BangFtsUpdateCompanionBuilder = BangFtsCompanion Function({
-  Value<String> trigger,
-  Value<String> websiteName,
-  Value<int> rowid,
-});
+typedef $BangHistoryProcessedTableManager =
+    ProcessedTableManager<
+      _$BangDatabase,
+      BangHistory,
+      BangHistoryData,
+      $BangHistoryFilterComposer,
+      $BangHistoryOrderingComposer,
+      $BangHistoryAnnotationComposer,
+      $BangHistoryCreateCompanionBuilder,
+      $BangHistoryUpdateCompanionBuilder,
+      (BangHistoryData, $BangHistoryReferences),
+      BangHistoryData,
+      PrefetchHooks Function({bool trigger})
+    >;
+typedef $BangFtsCreateCompanionBuilder =
+    BangFtsCompanion Function({
+      required String trigger,
+      required String websiteName,
+      Value<int> rowid,
+    });
+typedef $BangFtsUpdateCompanionBuilder =
+    BangFtsCompanion Function({
+      Value<String> trigger,
+      Value<String> websiteName,
+      Value<int> rowid,
+    });
 
 class $BangFtsFilterComposer extends Composer<_$BangDatabase, BangFts> {
   $BangFtsFilterComposer({
@@ -2205,10 +2592,14 @@ class $BangFtsFilterComposer extends Composer<_$BangDatabase, BangFts> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get trigger => $composableBuilder(
-      column: $table.trigger, builder: (column) => ColumnFilters(column));
+    column: $table.trigger,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get websiteName => $composableBuilder(
-      column: $table.websiteName, builder: (column) => ColumnFilters(column));
+    column: $table.websiteName,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $BangFtsOrderingComposer extends Composer<_$BangDatabase, BangFts> {
@@ -2220,10 +2611,14 @@ class $BangFtsOrderingComposer extends Composer<_$BangDatabase, BangFts> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get trigger => $composableBuilder(
-      column: $table.trigger, builder: (column) => ColumnOrderings(column));
+    column: $table.trigger,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get websiteName => $composableBuilder(
-      column: $table.websiteName, builder: (column) => ColumnOrderings(column));
+    column: $table.websiteName,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $BangFtsAnnotationComposer extends Composer<_$BangDatabase, BangFts> {
@@ -2238,70 +2633,86 @@ class $BangFtsAnnotationComposer extends Composer<_$BangDatabase, BangFts> {
       $composableBuilder(column: $table.trigger, builder: (column) => column);
 
   GeneratedColumn<String> get websiteName => $composableBuilder(
-      column: $table.websiteName, builder: (column) => column);
+    column: $table.websiteName,
+    builder: (column) => column,
+  );
 }
 
-class $BangFtsTableManager extends RootTableManager<
-    _$BangDatabase,
-    BangFts,
-    BangFt,
-    $BangFtsFilterComposer,
-    $BangFtsOrderingComposer,
-    $BangFtsAnnotationComposer,
-    $BangFtsCreateCompanionBuilder,
-    $BangFtsUpdateCompanionBuilder,
-    (BangFt, BaseReferences<_$BangDatabase, BangFts, BangFt>),
-    BangFt,
-    PrefetchHooks Function()> {
+class $BangFtsTableManager
+    extends
+        RootTableManager<
+          _$BangDatabase,
+          BangFts,
+          BangFt,
+          $BangFtsFilterComposer,
+          $BangFtsOrderingComposer,
+          $BangFtsAnnotationComposer,
+          $BangFtsCreateCompanionBuilder,
+          $BangFtsUpdateCompanionBuilder,
+          (BangFt, BaseReferences<_$BangDatabase, BangFts, BangFt>),
+          BangFt,
+          PrefetchHooks Function()
+        > {
   $BangFtsTableManager(_$BangDatabase db, BangFts table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $BangFtsFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $BangFtsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $BangFtsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> trigger = const Value.absent(),
-            Value<String> websiteName = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangFtsCompanion(
-            trigger: trigger,
-            websiteName: websiteName,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String trigger,
-            required String websiteName,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              BangFtsCompanion.insert(
-            trigger: trigger,
-            websiteName: websiteName,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $BangFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $BangFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $BangFtsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> trigger = const Value.absent(),
+                Value<String> websiteName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BangFtsCompanion(
+                trigger: trigger,
+                websiteName: websiteName,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String trigger,
+                required String websiteName,
+                Value<int> rowid = const Value.absent(),
+              }) => BangFtsCompanion.insert(
+                trigger: trigger,
+                websiteName: websiteName,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $BangFtsProcessedTableManager = ProcessedTableManager<
-    _$BangDatabase,
-    BangFts,
-    BangFt,
-    $BangFtsFilterComposer,
-    $BangFtsOrderingComposer,
-    $BangFtsAnnotationComposer,
-    $BangFtsCreateCompanionBuilder,
-    $BangFtsUpdateCompanionBuilder,
-    (BangFt, BaseReferences<_$BangDatabase, BangFts, BangFt>),
-    BangFt,
-    PrefetchHooks Function()>;
+typedef $BangFtsProcessedTableManager =
+    ProcessedTableManager<
+      _$BangDatabase,
+      BangFts,
+      BangFt,
+      $BangFtsFilterComposer,
+      $BangFtsOrderingComposer,
+      $BangFtsAnnotationComposer,
+      $BangFtsCreateCompanionBuilder,
+      $BangFtsUpdateCompanionBuilder,
+      (BangFt, BaseReferences<_$BangDatabase, BangFts, BangFt>),
+      BangFt,
+      PrefetchHooks Function()
+    >;
 
 class $BangDatabaseManager {
   final _$BangDatabase _db;

@@ -25,7 +25,7 @@ class KagiAutosuggestService extends _$KagiAutosuggestService
   }
 
   @override
-  Future<Result<List<String>>> getSuggestions(String query) async {
+  Future<Result<List<String>>> getSuggestions(String query) {
     return Result.fromAsync(() async {
       final response = await _client
           .get(_baseUrl.replace(queryParameters: {'q': query}))

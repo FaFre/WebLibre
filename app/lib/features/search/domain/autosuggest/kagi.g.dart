@@ -7,20 +7,21 @@ part of 'kagi.dart';
 // **************************************************************************
 
 String _$kagiAutosuggestServiceHash() =>
-    r'7cab576fa4f94096f723faa41f06cf16452b9a02';
+    r'039fe84dd480316eab38c80b41e16d16d6c14a7c';
 
 /// See also [KagiAutosuggestService].
 @ProviderFor(KagiAutosuggestService)
 final kagiAutosuggestServiceProvider =
     NotifierProvider<KagiAutosuggestService, void>.internal(
-  KagiAutosuggestService.new,
-  name: r'kagiAutosuggestServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$kagiAutosuggestServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      KagiAutosuggestService.new,
+      name: r'kagiAutosuggestServiceProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$kagiAutosuggestServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$KagiAutosuggestService = Notifier<void>;
 // ignore_for_file: type=lint

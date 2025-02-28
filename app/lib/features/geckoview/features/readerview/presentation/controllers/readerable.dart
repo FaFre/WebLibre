@@ -19,9 +19,9 @@ class ReaderableScreenController extends _$ReaderableScreenController {
   }
 
   @override
-  FutureOr<void> build() {
+  Future<void> build() {
     _service = ref.watch(readerableServiceProvider);
 
-    return null;
+    return Future.value();
   }
 }

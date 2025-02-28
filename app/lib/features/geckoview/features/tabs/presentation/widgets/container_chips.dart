@@ -11,7 +11,6 @@ import 'package:lensai/features/geckoview/features/tabs/data/models/container_da
 import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:lensai/presentation/hooks/overlay_portal_controller.dart';
 import 'package:lensai/presentation/widgets/selectable_chips.dart';
 
 class ContainerChips extends HookConsumerWidget {

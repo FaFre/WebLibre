@@ -7,7 +7,9 @@ part 'save_settings.g.dart';
 @Riverpod(keepAlive: true)
 class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
   @override
-  FutureOr<void> build() {}
+  Future<void> build() {
+    return Future.value();
+  }
 
   Future<void> save(UpdateGeneralSettingsFunc updateSettings) async {
     state = const AsyncLoading();
@@ -22,7 +24,9 @@ class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
 @Riverpod(keepAlive: true)
 class SaveEngineSettingsController extends _$SaveEngineSettingsController {
   @override
-  FutureOr<void> build() {}
+  Future<void> build() {
+    return Future.value();
+  }
 
   Future<void> save(UpdateEngineSettingsFunc updateSettings) async {
     state = const AsyncLoading();

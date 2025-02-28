@@ -2,6 +2,7 @@ import 'package:exceptions/exceptions.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:langchain/langchain.dart';
 import 'package:lensai/core/uuid.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/chat/features/chat_store/data/models/message_types.dart';
 import 'package:lensai/features/chat/features/chat_store/domain/controllers/drift_chat_controller.dart';
 import 'package:lensai/features/chat/features/chat_store/domain/providers.dart';
@@ -44,7 +45,7 @@ class ChatMessageRepository extends _$ChatMessageRepository {
       );
 
       await Future.wait(
-        typingMessages.map((message) => _controller.remove(message)),
+        typingMessages.map((message) => _controller.remove(message)).toList(),
       );
 
       _isTyping.remove(author);
@@ -56,7 +57,7 @@ class ChatMessageRepository extends _$ChatMessageRepository {
     required String content,
     List<AIChatMessageToolCall>? toolCalls,
     bool hideFromModelChatHistory = false,
-  }) async {
+  }) {
     final message = TextMessage(
       id: uuid.v4(),
       authorId: author.user.id,
@@ -64,7 +65,7 @@ class ChatMessageRepository extends _$ChatMessageRepository {
       text: content,
       isOnlyEmoji: isOnlyEmoji(content),
       metadata:
-          (hideFromModelChatHistory || (toolCalls?.isNotEmpty ?? false))
+          (hideFromModelChatHistory || (toolCalls.isNotEmpty))
               ? {
                 'toolCalls': toolCalls?.map((tool) => tool.toMap()).toList(),
                 if (hideFromModelChatHistory) 'hideFromModelChatHistory': true,

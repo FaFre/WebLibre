@@ -2980,6 +2980,42 @@ interface GeckoPrefApi {
   }
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface GeckoTurndownApi {
+  fun getMarkdown(htmlList: List<String>, callback: (Result<List<Any>>) -> Unit)
+
+  companion object {
+    /** The codec used by GeckoTurndownApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoTurndownApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoTurndownApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTurndownApi.getMarkdown$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val htmlListArg = args[0] as List<String>
+            api.getMarkdown(htmlListArg) { result: Result<List<Any>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoContainerProxyApi {
   fun setProxyPort(port: Long)
   fun addContainerProxy(contextId: String)

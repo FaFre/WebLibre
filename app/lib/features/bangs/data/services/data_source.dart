@@ -15,7 +15,7 @@ class BangDataSourceService extends _$BangDataSourceService {
   @override
   void build() {}
 
-  Future<Result<List<Bang>>> getBangs(Uri url, BangGroup? group) async {
+  Future<Result<List<Bang>>> getBangs(Uri url, BangGroup? group) {
     return Result.fromAsync(() async {
       return await compute((args) async {
         final client = http.Client();

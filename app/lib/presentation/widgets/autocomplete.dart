@@ -130,6 +130,7 @@ class ExternalResultsAutocomplete<T extends Object> extends StatefulWidget {
   /// {@endtemplate}
   final AutocompleteOnSelected<T>? onSelected;
 
+  // ignore: avoid_futureor_void
   final FutureOr<void> Function(TextEditingValue textEditingValue)
   onTextChanged;
 

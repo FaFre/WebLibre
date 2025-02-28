@@ -22,7 +22,7 @@ class SyncDao extends DatabaseAccessor<BangDatabase> with _$SyncDaoMixin {
     return db.bangSync.insertOne(
       BangSyncCompanion.insert(group: Value(group), lastSync: lastSync),
       onConflict: DoUpdate(
-        (old) => BangSyncCompanion.custom(lastSync: Variable(lastSync)),
+        (old) => BangSyncCompanion(lastSync: Value(lastSync)),
       ),
     );
   }

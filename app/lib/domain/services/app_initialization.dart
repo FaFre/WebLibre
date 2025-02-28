@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:exceptions/exceptions.dart';
+import 'package:lensai/core/providers/format.dart';
 import 'package:lensai/features/about/data/repositories/package_info_repository.dart';
 import 'package:lensai/features/bangs/data/models/bang_group.dart';
 import 'package:lensai/features/bangs/domain/repositories/sync.dart';
@@ -42,6 +43,8 @@ class AppInitializationService extends _$AppInitializationService {
   Future<void> initialize() async {
     state = await Result.fromAsync(() async {
       final errors = <ErrorMessage>[];
+
+      await ref.read(formatProvider.future);
 
       await _initPackageInfo();
 

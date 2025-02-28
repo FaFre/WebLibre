@@ -111,9 +111,9 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
       ),
       onConflict: DoUpdate(
         target: [db.bangHistory.searchQuery],
-        (old) => BangHistoryCompanion.custom(
-          trigger: Variable(trigger),
-          searchDate: Variable(DateTime.now()),
+        (old) => BangHistoryCompanion(
+          trigger: Value(trigger),
+          searchDate: Value(DateTime.now()),
         ),
       ),
     );

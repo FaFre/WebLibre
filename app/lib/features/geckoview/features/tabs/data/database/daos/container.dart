@@ -34,7 +34,7 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   }
 
   Future<void> deleteContainer(String id) {
-    return db.container.deleteOne(ContainerCompanion.custom(id: Variable(id)));
+    return db.container.deleteOne(ContainerCompanion(id: Value(id)));
   }
 
   SingleOrNullSelectable<ContainerData> getContainerData(String id) {

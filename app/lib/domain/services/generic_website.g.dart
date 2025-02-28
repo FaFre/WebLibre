@@ -7,20 +7,21 @@ part of 'generic_website.dart';
 // **************************************************************************
 
 String _$genericWebsiteServiceHash() =>
-    r'12396df7370ebc31b0a53b786e5a3e27c6d05177';
+    r'9d17f41596579c289a6cd021ed8d8049e1fb7aff';
 
 /// See also [GenericWebsiteService].
 @ProviderFor(GenericWebsiteService)
 final genericWebsiteServiceProvider =
     NotifierProvider<GenericWebsiteService, void>.internal(
-  GenericWebsiteService.new,
-  name: r'genericWebsiteServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$genericWebsiteServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      GenericWebsiteService.new,
+      name: r'genericWebsiteServiceProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$genericWebsiteServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$GenericWebsiteService = Notifier<void>;
 // ignore_for_file: type=lint

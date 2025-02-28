@@ -22,11 +22,17 @@ import 'package:lensai/features/settings/presentation/screens/web_engine_hardeni
 import 'package:lensai/features/settings/presentation/screens/web_engine_settings.dart';
 import 'package:lensai/features/tor/presentation/screens/tor_proxy.dart';
 import 'package:lensai/features/user/presentation/screens/auth.dart';
+import 'package:lensai/features/web_feed/data/database/database.dart';
+import 'package:lensai/features/web_feed/presentation/screens/feed_article.dart';
+import 'package:lensai/features/web_feed/presentation/screens/feed_article_list.dart';
+import 'package:lensai/features/web_feed/presentation/screens/feed_edit.dart';
+import 'package:lensai/features/web_feed/presentation/screens/feed_list.dart';
 
 part 'routes.g.dart';
 part 'routes.settings.dart';
 part 'routes.browser.dart';
 part 'routes.bangs.dart';
+part 'routes.feeds.dart';
 
 @TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
 class AboutRoute extends GoRouteData {

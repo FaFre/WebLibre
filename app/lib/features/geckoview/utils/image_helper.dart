@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:fast_equatable/hash.dart';
 import 'package:lensai/domain/entities/equatable_image.dart';
 import 'package:lensai/utils/lru_cache.dart';
-import 'package:xxh3/xxh3.dart';
 
 final _cache = LRUCache<int, EquatableImage>(100);
 
@@ -13,7 +13,7 @@ Future<EquatableImage?> tryDecodeImage(
   int? targetHeight,
   bool allowUpscaling = true,
 }) async {
-  final digest = xxh3(bytes);
+  final digest = secureHash(bytes);
 
   final cached = _cache.get(digest);
   if (cached != null) {

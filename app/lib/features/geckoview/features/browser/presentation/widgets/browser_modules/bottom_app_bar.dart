@@ -17,6 +17,7 @@ import 'package:lensai/features/geckoview/features/browser/presentation/widgets/
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page_visibility.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:lensai/features/web_feed/domain/services/feed_reader.dart';
 import 'package:lensai/presentation/hooks/menu_controller.dart';
 import 'package:lensai/presentation/icons/tor_icons.dart';
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
@@ -359,10 +360,28 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 ),
               MenuItemButton(
                 onPressed: () async {
-                  await context.push(UserAuthRoute().location);
+                  final res = await ref
+                      .read(feedReaderProvider.notifier)
+                      .parseFeed(
+                        Uri.parse('https://simonwillison.net/atom/everything/'),
+                      );
+
+                  if (context.mounted) {
+                    await context.push(
+                      FeedCreateRoute().location,
+                      extra: res.feedData,
+                    );
+                  }
                 },
                 leadingIcon: const Icon(Icons.info),
-                child: const Text('Auth'),
+                child: const Text('Add'),
+              ),
+              MenuItemButton(
+                onPressed: () async {
+                  await context.push(FeedListRoute().location);
+                },
+                leadingIcon: const Icon(Icons.info),
+                child: const Text('List'),
               ),
             ],
           ),

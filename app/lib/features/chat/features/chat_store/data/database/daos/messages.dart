@@ -110,7 +110,7 @@ class MessagesDao extends DatabaseAccessor<ChatDatabase>
   Future<void> replaceChatMessages({
     required String chatId,
     required List<Message> messages,
-  }) async {
+  }) {
     return db.transaction(() async {
       await deleteChatMessages(chatId: chatId);
 

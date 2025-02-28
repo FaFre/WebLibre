@@ -21,7 +21,7 @@ class SelectedTab extends _$SelectedTab {
       }
     });
 
-    final selectedTabSub = eventSerivce.selectedTabEvents.listen((tabId) async {
+    final selectedTabSub = eventSerivce.selectedTabEvents.listen((tabId) {
       state = tabId;
     });
 

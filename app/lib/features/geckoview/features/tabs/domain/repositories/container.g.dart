@@ -7,20 +7,21 @@ part of 'container.dart';
 // **************************************************************************
 
 String _$containerRepositoryHash() =>
-    r'e91db35caae057e777fbe3b77439289844f52677';
+    r'7bb9aa1b2d88e79b7d5e69df1817fb4c97a2a542';
 
 /// See also [ContainerRepository].
 @ProviderFor(ContainerRepository)
 final containerRepositoryProvider =
     NotifierProvider<ContainerRepository, void>.internal(
-  ContainerRepository.new,
-  name: r'containerRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$containerRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ContainerRepository.new,
+      name: r'containerRepositoryProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$containerRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ContainerRepository = Notifier<void>;
 // ignore_for_file: type=lint

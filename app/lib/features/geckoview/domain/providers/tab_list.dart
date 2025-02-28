@@ -22,7 +22,7 @@ class TabList extends _$TabList {
       }
     });
 
-    final tabListSub = eventService.tabListEvents.listen((tabs) async {
+    final tabListSub = eventService.tabListEvents.listen((tabs) {
       final equatableTabs = EquatableCollection(tabs, immutable: true);
 
       if (equatableTabs != state) {

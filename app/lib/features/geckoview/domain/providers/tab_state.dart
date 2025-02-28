@@ -126,7 +126,7 @@ class TabStates extends _$TabStates {
     final eventService = ref.watch(eventServiceProvider);
 
     final subscriptions = [
-      eventService.tabContentEvents.listen((event) async {
+      eventService.tabContentEvents.listen((event) {
         _onTabContentStateChange(event);
       }),
       eventService.iconChangeEvents.listen((event) async {
@@ -135,16 +135,16 @@ class TabStates extends _$TabStates {
       eventService.thumbnailEvents.listen((event) async {
         await _onThumbnailChange(event);
       }),
-      eventService.securityInfoEvents.listen((event) async {
+      eventService.securityInfoEvents.listen((event) {
         _onSecurityInfoStateChange(event);
       }),
-      eventService.historyEvents.listen((event) async {
+      eventService.historyEvents.listen((event) {
         _onHistoryStateChange(event);
       }),
-      eventService.readerableEvents.listen((event) async {
+      eventService.readerableEvents.listen((event) {
         _onReaderableStateChange(event);
       }),
-      eventService.findResultsEvent.listen((event) async {
+      eventService.findResultsEvent.listen((event) {
         _onFindResultsChange(event);
       }),
     ];

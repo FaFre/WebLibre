@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/features/contextmenu/extensions/hit_result.dart';
@@ -31,6 +32,10 @@ class SaveFile extends HookConsumerWidget {
             isPrivate: currentTab.isPrivate,
             referrerUrl: currentTab.url,
           );
+
+          if (context.mounted) {
+            context.pop();
+          }
         }
       },
     );

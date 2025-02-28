@@ -1,4 +1,5 @@
 import 'package:lensai/data/database/converters/color.dart';
+import 'package:lensai/data/database/converters/uri.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
@@ -14,7 +15,7 @@ CREATE TABLE tab (
   id TEXT PRIMARY KEY NOT NULL,
   container_id TEXT REFERENCES container (id) ON DELETE CASCADE,
   order_key TEXT NOT NULL,
-  url TEXT,
+  url TEXT MAPPED BY `const UriConverter()`,
   title TEXT,
   is_probably_readerable BOOL,
   extracted_content_markdown TEXT,

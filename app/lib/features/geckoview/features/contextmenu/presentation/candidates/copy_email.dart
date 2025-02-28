@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/contextmenu/extensions/hit_result.dart';
@@ -24,6 +25,10 @@ class CopyEmail extends HookConsumerWidget {
         final email = hitResult.tryGetLink().mapNotNull((url) => url.host);
         if (email != null) {
           await Clipboard.setData(ClipboardData(text: email));
+
+          if (context.mounted) {
+            context.pop();
+          }
         }
       },
     );

@@ -13,7 +13,7 @@ import 'package:lensai/features/geckoview/features/tabs/domain/providers/selecte
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:lensai/presentation/widgets/bang_icon.dart';
+import 'package:lensai/presentation/widgets/url_icon.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class TabSearch extends HookConsumerWidget {

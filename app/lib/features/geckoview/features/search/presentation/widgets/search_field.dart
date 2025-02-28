@@ -6,8 +6,8 @@ import 'package:lensai/features/geckoview/features/search/domain/providers/engin
 import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/auto_suggest_text_field.dart';
-import 'package:lensai/presentation/widgets/bang_icon.dart';
 import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
+import 'package:lensai/presentation/widgets/url_icon.dart';
 
 class SearchField extends HookConsumerWidget {
   final TextEditingController textEditingController;

@@ -39,21 +39,15 @@ class ChatControllerFamily extends Family<DriftChatController> {
   const ChatControllerFamily();
 
   /// See also [chatController].
-  ChatControllerProvider call(
-    String chatId,
-  ) {
-    return ChatControllerProvider(
-      chatId,
-    );
+  ChatControllerProvider call(String chatId) {
+    return ChatControllerProvider(chatId);
   }
 
   @override
   ChatControllerProvider getProviderOverride(
     covariant ChatControllerProvider provider,
   ) {
-    return call(
-      provider.chatId,
-    );
+    return call(provider.chatId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -74,24 +68,20 @@ class ChatControllerFamily extends Family<DriftChatController> {
 /// See also [chatController].
 class ChatControllerProvider extends AutoDisposeProvider<DriftChatController> {
   /// See also [chatController].
-  ChatControllerProvider(
-    String chatId,
-  ) : this._internal(
-          (ref) => chatController(
-            ref as ChatControllerRef,
-            chatId,
-          ),
-          from: chatControllerProvider,
-          name: r'chatControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$chatControllerHash,
-          dependencies: ChatControllerFamily._dependencies,
-          allTransitiveDependencies:
-              ChatControllerFamily._allTransitiveDependencies,
-          chatId: chatId,
-        );
+  ChatControllerProvider(String chatId)
+    : this._internal(
+        (ref) => chatController(ref as ChatControllerRef, chatId),
+        from: chatControllerProvider,
+        name: r'chatControllerProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$chatControllerHash,
+        dependencies: ChatControllerFamily._dependencies,
+        allTransitiveDependencies:
+            ChatControllerFamily._allTransitiveDependencies,
+        chatId: chatId,
+      );
 
   ChatControllerProvider._internal(
     super._createNotifier, {
@@ -170,21 +160,15 @@ class ChatMetadataFamily extends Family<AsyncValue<ChatMetadata?>> {
   const ChatMetadataFamily();
 
   /// See also [chatMetadata].
-  ChatMetadataProvider call(
-    String chatId,
-  ) {
-    return ChatMetadataProvider(
-      chatId,
-    );
+  ChatMetadataProvider call(String chatId) {
+    return ChatMetadataProvider(chatId);
   }
 
   @override
   ChatMetadataProvider getProviderOverride(
     covariant ChatMetadataProvider provider,
   ) {
-    return call(
-      provider.chatId,
-    );
+    return call(provider.chatId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -205,24 +189,20 @@ class ChatMetadataFamily extends Family<AsyncValue<ChatMetadata?>> {
 /// See also [chatMetadata].
 class ChatMetadataProvider extends AutoDisposeStreamProvider<ChatMetadata?> {
   /// See also [chatMetadata].
-  ChatMetadataProvider(
-    String chatId,
-  ) : this._internal(
-          (ref) => chatMetadata(
-            ref as ChatMetadataRef,
-            chatId,
-          ),
-          from: chatMetadataProvider,
-          name: r'chatMetadataProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$chatMetadataHash,
-          dependencies: ChatMetadataFamily._dependencies,
-          allTransitiveDependencies:
-              ChatMetadataFamily._allTransitiveDependencies,
-          chatId: chatId,
-        );
+  ChatMetadataProvider(String chatId)
+    : this._internal(
+        (ref) => chatMetadata(ref as ChatMetadataRef, chatId),
+        from: chatMetadataProvider,
+        name: r'chatMetadataProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$chatMetadataHash,
+        dependencies: ChatMetadataFamily._dependencies,
+        allTransitiveDependencies:
+            ChatMetadataFamily._allTransitiveDependencies,
+        chatId: chatId,
+      );
 
   ChatMetadataProvider._internal(
     super._createNotifier, {
@@ -288,5 +268,6 @@ class _ChatMetadataProviderElement
   @override
   String get chatId => (origin as ChatMetadataProvider).chatId;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

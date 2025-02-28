@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "turndown@movenext.me"
+    }
+  },
+  "name": "Converts html to markdown",
+  "version": "1.0",
+  "background": {
+    "scripts": [
+      "readability.min.js",
+      "background.js"
+    ]
+  },
+  "permissions": [
+    "geckoViewAddons",
+    "nativeMessaging",
+    "<all_urls>"
+  ]
+}

@@ -7,7 +7,6 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/data/models/web_page_info.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/bangs/presentation/widgets/site_search.dart';
 import 'package:lensai/features/chat/features/chat_store/data/models/chat_metadata.dart';
@@ -20,6 +19,7 @@ import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
 import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
+import 'package:lensai/presentation/widgets/website_feed_tile.dart';
 import 'package:lensai/presentation/widgets/website_title_tile.dart';
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
 
@@ -100,13 +100,13 @@ class WebPageDialog extends HookConsumerWidget {
                             loading:
                                 () => SiteSearch(
                                   domain: url.host,
-                                  availableBangs: [
-                                    BangData(
-                                      websiteName: 'websiteName',
-                                      domain: 'domain',
-                                      trigger: 'trigger',
-                                      urlTemplate: 'urlTemplate',
-                                    ),
+                                  availableBangs: const [
+                                    // BangData(
+                                    //   websiteName: 'websiteName',
+                                    //   domain: 'domain',
+                                    //   trigger: 'trigger',
+                                    //   urlTemplate: 'urlTemplate',
+                                    // ),
                                   ],
                                 ),
                           ),
@@ -115,6 +115,7 @@ class WebPageDialog extends HookConsumerWidget {
                             availableBangCount == null ||
                             availableBangCount > 0)
                           const Divider(),
+                        WebsiteFeedTile(url, precachedInfo: precachedInfo),
                         ListTile(
                           leading: const Icon(MdiIcons.contentCopy),
                           title: const Text('Copy address'),
@@ -138,11 +139,23 @@ class WebPageDialog extends HookConsumerWidget {
                           leading: const Icon(MdiIcons.tabPlus),
                           title: const Text('Clone tab'),
                           onTap: () async {
-                            await ref
+                            final tabId = await ref
                                 .read(tabRepositoryProvider.notifier)
                                 .addTab(url: url);
 
                             if (context.mounted) {
+                              //save reference before pop `ref` gets disposed
+                              final repo = ref.read(
+                                tabRepositoryProvider.notifier,
+                              );
+
+                              ui_helper.showTabSwitchMessage(
+                                context,
+                                onSwitch: () {
+                                  repo.selectTab(tabId);
+                                },
+                              );
+
                               context.pop();
                             }
                           },

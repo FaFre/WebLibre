@@ -22,8 +22,6 @@ import 'package:lensai/features/geckoview/features/contextmenu/extensions/hit_re
 import 'package:lensai/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/widgets/reader_appearance_button.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/chat/presentation/widgets/tab_qa_chat.dart';
-import 'package:lensai/presentation/hooks/draggable_scrollable_controller.dart';
-import 'package:lensai/presentation/hooks/overlay_portal_controller.dart';
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
 
 class BrowserScreen extends HookConsumerWidget {
@@ -98,7 +96,7 @@ class BrowserScreen extends HookConsumerWidget {
                 .read(tabRepositoryProvider.notifier)
                 .closeTab(details.data.tabId);
           },
-          builder: (context, _, __) {
+          builder: (context, _, _) {
             return OverlayPortal(
               controller: overlayController,
               overlayChildBuilder: (context) {
@@ -157,6 +155,11 @@ class BrowserScreen extends HookConsumerWidget {
                       );
 
                       await controller.goBack();
+                      return true;
+                    }
+
+                    //Go router has routes to go back to
+                    if (context.canPop()) {
                       return true;
                     }
 

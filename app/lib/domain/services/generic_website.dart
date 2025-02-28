@@ -13,8 +13,8 @@ import 'package:lensai/data/models/web_page_info.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
+import 'package:lensai/features/web_feed/utils/feed_finder.dart';
 import 'package:lensai/presentation/controllers/website_title.dart';
-import 'package:lensai/utils/feed_finder.dart';
 import 'package:lensai/utils/lru_cache.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -119,7 +119,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
                 url: _resolveRelativeUri(baseUrl, url).toString(),
                 type: type,
                 sizes: sizesToList(link.attributes['sizes']).toList(),
-                mimeType: (mimeType?.isNotEmpty ?? true) ? null : mimeType,
+                mimeType: mimeType.isNotEmpty ? mimeType : null,
                 maskable: false,
               ),
             );
@@ -186,7 +186,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     return icons;
   }
 
-  Future<Result<WebPageInfo>> fetchPageInfo(Uri url) async {
+  Future<Result<WebPageInfo>> fetchPageInfo(Uri url) {
     return Result.fromAsync(() async {
       final result = await compute((String urlString) async {
         final client = http.Client();
@@ -200,10 +200,8 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
           final title = document.querySelector('title')?.text;
           final resources = _extractIcons(baseUri, document);
-          final feeds = await FeedFinder(
-            url: baseUri,
-            document: document,
-          ).parse(verifyCandidates: false);
+          final feeds =
+              await FeedFinder(url: baseUri, document: document).parse();
 
           return {
             'title': title,

@@ -6,7 +6,9 @@ part 'controllers.g.dart';
 @Riverpod()
 class AuthController extends _$AuthController {
   @override
-  FutureOr<void> build() {}
+  Future<void> build() {
+    return Future.value();
+  }
 
   Future<void> authWithPassword(String user, String password) async {
     state = const AsyncLoading();

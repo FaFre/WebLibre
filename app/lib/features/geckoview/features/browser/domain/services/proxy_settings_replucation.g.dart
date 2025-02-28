@@ -13,14 +13,15 @@ String _$proxySettingsReplucationHash() =>
 @ProviderFor(ProxySettingsReplucation)
 final proxySettingsReplucationProvider =
     NotifierProvider<ProxySettingsReplucation, void>.internal(
-  ProxySettingsReplucation.new,
-  name: r'proxySettingsReplucationProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$proxySettingsReplucationHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ProxySettingsReplucation.new,
+      name: r'proxySettingsReplucationProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$proxySettingsReplucationHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ProxySettingsReplucation = Notifier<void>;
 // ignore_for_file: type=lint

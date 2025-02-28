@@ -8,6 +8,7 @@ import android.content.Context
 import eu.lensai.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.lensai.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.lensai.flutter_mozilla_components.feature.PrefManagerFeature
+import eu.lensai.flutter_mozilla_components.feature.TurndownFeature
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.concept.engine.DefaultSettings
@@ -52,6 +53,7 @@ object EngineProvider {
             CookieManagerFeature.install(it)
             PrefManagerFeature.install(it)
             ContainerProxyFeature.install(it)
+            TurndownFeature.install(it)
         }
     }
 

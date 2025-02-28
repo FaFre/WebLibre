@@ -12,8 +12,8 @@ import 'package:lensai/features/geckoview/features/search/domain/providers/searc
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:lensai/presentation/widgets/bang_icon.dart';
 import 'package:lensai/presentation/widgets/selectable_chips.dart';
+import 'package:lensai/presentation/widgets/url_icon.dart';
 
 class SiteSearch extends HookConsumerWidget {
   final String domain;
@@ -33,7 +33,7 @@ class SiteSearch extends HookConsumerWidget {
 
     final searchTextController = useTextEditingController();
 
-    useListenableCallback(searchTextController, () async {
+    useListenableCallback(searchTextController, () {
       ref
           .read(searchSuggestionsProvider().notifier)
           .addQuery(searchTextController.text);

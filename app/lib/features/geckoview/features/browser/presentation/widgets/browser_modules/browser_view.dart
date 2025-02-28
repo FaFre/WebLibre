@@ -20,7 +20,7 @@ import 'package:lensai/features/user/domain/services/local_authentication.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;
-  final FutureOr<void> Function()? postInitializationStep;
+  final Future<void> Function()? postInitializationStep;
 
   const BrowserView({
     this.screenshotPeriod = const Duration(seconds: 10),

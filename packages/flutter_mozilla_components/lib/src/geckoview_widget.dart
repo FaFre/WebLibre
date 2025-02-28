@@ -9,8 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/src/domain/services/gecko_browser.dart';
 
 class GeckoView extends StatefulWidget {
-  final FutureOr<void> Function()? preInitializationStep;
-  final FutureOr<void> Function()? postInitializationStep;
+  final Future<void> Function()? preInitializationStep;
+  final Future<void> Function()? postInitializationStep;
 
   const GeckoView({
     super.key,
@@ -62,7 +62,7 @@ class _GeckoViewState extends State<GeckoView> {
             creationParams: {},
             creationParamsCodec: const StandardMessageCodec(),
           )
-          ..addOnPlatformViewCreatedListener((value) async {
+          ..addOnPlatformViewCreatedListener((value) {
             params.onPlatformViewCreated(value);
 
             SchedulerBinding.instance.addPostFrameCallback((_) async {

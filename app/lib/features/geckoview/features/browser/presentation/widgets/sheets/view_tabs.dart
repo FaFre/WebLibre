@@ -137,7 +137,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                               .maybeStartProxy(context);
                         }
                       },
-                      onDeleted: (container) async {
+                      onDeleted: (container) {
                         ref
                             .read(selectedContainerProvider.notifier)
                             .clearContainer();

@@ -4,7 +4,7 @@ class TabQueryResult with FastEquatable {
   final String id;
 
   final String? title;
-  final String? cleanUrl;
+  final Uri? cleanUrl;
 
   final String? url;
   final String? extractedContent;

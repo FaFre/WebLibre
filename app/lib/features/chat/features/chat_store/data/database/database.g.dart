@@ -9,16 +9,22 @@ class ChatData extends Table with TableInfo<ChatData, ChatDataData> {
   final String? _alias;
   ChatData(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
-      'chat_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'chat_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumnWithTypeConverter<ChatMetadata, String> metadata =
-      GeneratedColumn<String>('metadata', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<ChatMetadata>(ChatData.$convertermetadata);
+      GeneratedColumn<String>(
+        'metadata',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<ChatMetadata>(ChatData.$convertermetadata);
   @override
   List<GeneratedColumn> get $columns => [chatId, metadata];
   @override
@@ -32,10 +38,17 @@ class ChatData extends Table with TableInfo<ChatData, ChatDataData> {
   ChatDataData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ChatDataData(
-      chatId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}chat_id'])!,
-      metadata: ChatData.$convertermetadata.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}metadata'])!),
+      chatId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}chat_id'],
+          )!,
+      metadata: ChatData.$convertermetadata.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}metadata'],
+        )!,
+      ),
     );
   }
 
@@ -59,14 +72,17 @@ class ChatDataData extends DataClass implements Insertable<ChatDataData> {
     final map = <String, Expression>{};
     map['chat_id'] = Variable<String>(chatId);
     {
-      map['metadata'] =
-          Variable<String>(ChatData.$convertermetadata.toSql(metadata));
+      map['metadata'] = Variable<String>(
+        ChatData.$convertermetadata.toSql(metadata),
+      );
     }
     return map;
   }
 
-  factory ChatDataData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory ChatDataData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChatDataData(
       chatId: serializer.fromJson<String>(json['chat_id']),
@@ -126,8 +142,8 @@ class ChatDataCompanion extends UpdateCompanion<ChatDataData> {
     required String chatId,
     required ChatMetadata metadata,
     this.rowid = const Value.absent(),
-  })  : chatId = Value(chatId),
-        metadata = Value(metadata);
+  }) : chatId = Value(chatId),
+       metadata = Value(metadata);
   static Insertable<ChatDataData> custom({
     Expression<String>? chatId,
     Expression<String>? metadata,
@@ -140,10 +156,11 @@ class ChatDataCompanion extends UpdateCompanion<ChatDataData> {
     });
   }
 
-  ChatDataCompanion copyWith(
-      {Value<String>? chatId,
-      Value<ChatMetadata>? metadata,
-      Value<int>? rowid}) {
+  ChatDataCompanion copyWith({
+    Value<String>? chatId,
+    Value<ChatMetadata>? metadata,
+    Value<int>? rowid,
+  }) {
     return ChatDataCompanion(
       chatId: chatId ?? this.chatId,
       metadata: metadata ?? this.metadata,
@@ -158,8 +175,9 @@ class ChatDataCompanion extends UpdateCompanion<ChatDataData> {
       map['chat_id'] = Variable<String>(chatId.value);
     }
     if (metadata.present) {
-      map['metadata'] =
-          Variable<String>(ChatData.$convertermetadata.toSql(metadata.value));
+      map['metadata'] = Variable<String>(
+        ChatData.$convertermetadata.toSql(metadata.value),
+      );
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -184,28 +202,44 @@ class ChatMessage extends Table with TableInfo<ChatMessage, ChatMessageData> {
   final String? _alias;
   ChatMessage(this.attachedDatabase, [this._alias]);
   late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-      'message_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'PRIMARY KEY NOT NULL');
+    'message_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
   late final GeneratedColumn<String> chatId = GeneratedColumn<String>(
-      'chat_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'chat_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> orderKey = GeneratedColumn<String>(
-      'order_key', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'order_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> messageJson = GeneratedColumn<String>(
-      'message_json', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+    'message_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [messageId, chatId, orderKey, messageJson];
+  List<GeneratedColumn> get $columns => [
+    messageId,
+    chatId,
+    orderKey,
+    messageJson,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -217,14 +251,26 @@ class ChatMessage extends Table with TableInfo<ChatMessage, ChatMessageData> {
   ChatMessageData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ChatMessageData(
-      messageId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_id'])!,
-      chatId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}chat_id'])!,
-      orderKey: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}order_key'])!,
-      messageJson: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}message_json'])!,
+      messageId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}message_id'],
+          )!,
+      chatId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}chat_id'],
+          )!,
+      orderKey:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}order_key'],
+          )!,
+      messageJson:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}message_json'],
+          )!,
     );
   }
 
@@ -242,11 +288,12 @@ class ChatMessageData extends DataClass implements Insertable<ChatMessageData> {
   final String chatId;
   final String orderKey;
   final String messageJson;
-  const ChatMessageData(
-      {required this.messageId,
-      required this.chatId,
-      required this.orderKey,
-      required this.messageJson});
+  const ChatMessageData({
+    required this.messageId,
+    required this.chatId,
+    required this.orderKey,
+    required this.messageJson,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -257,8 +304,10 @@ class ChatMessageData extends DataClass implements Insertable<ChatMessageData> {
     return map;
   }
 
-  factory ChatMessageData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory ChatMessageData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChatMessageData(
       messageId: serializer.fromJson<String>(json['message_id']),
@@ -278,17 +327,17 @@ class ChatMessageData extends DataClass implements Insertable<ChatMessageData> {
     };
   }
 
-  ChatMessageData copyWith(
-          {String? messageId,
-          String? chatId,
-          String? orderKey,
-          String? messageJson}) =>
-      ChatMessageData(
-        messageId: messageId ?? this.messageId,
-        chatId: chatId ?? this.chatId,
-        orderKey: orderKey ?? this.orderKey,
-        messageJson: messageJson ?? this.messageJson,
-      );
+  ChatMessageData copyWith({
+    String? messageId,
+    String? chatId,
+    String? orderKey,
+    String? messageJson,
+  }) => ChatMessageData(
+    messageId: messageId ?? this.messageId,
+    chatId: chatId ?? this.chatId,
+    orderKey: orderKey ?? this.orderKey,
+    messageJson: messageJson ?? this.messageJson,
+  );
   ChatMessageData copyWithCompanion(ChatMessageCompanion data) {
     return ChatMessageData(
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
@@ -341,10 +390,10 @@ class ChatMessageCompanion extends UpdateCompanion<ChatMessageData> {
     required String orderKey,
     required String messageJson,
     this.rowid = const Value.absent(),
-  })  : messageId = Value(messageId),
-        chatId = Value(chatId),
-        orderKey = Value(orderKey),
-        messageJson = Value(messageJson);
+  }) : messageId = Value(messageId),
+       chatId = Value(chatId),
+       orderKey = Value(orderKey),
+       messageJson = Value(messageJson);
   static Insertable<ChatMessageData> custom({
     Expression<String>? messageId,
     Expression<String>? chatId,
@@ -361,12 +410,13 @@ class ChatMessageCompanion extends UpdateCompanion<ChatMessageData> {
     });
   }
 
-  ChatMessageCompanion copyWith(
-      {Value<String>? messageId,
-      Value<String>? chatId,
-      Value<String>? orderKey,
-      Value<String>? messageJson,
-      Value<int>? rowid}) {
+  ChatMessageCompanion copyWith({
+    Value<String>? messageId,
+    Value<String>? chatId,
+    Value<String>? orderKey,
+    Value<String>? messageJson,
+    Value<int>? rowid,
+  }) {
     return ChatMessageCompanion(
       messageId: messageId ?? this.messageId,
       chatId: chatId ?? this.chatId,
@@ -415,80 +465,79 @@ abstract class _$ChatDatabase extends GeneratedDatabase {
   $ChatDatabaseManager get managers => $ChatDatabaseManager(this);
   late final ChatData chatData = ChatData(this);
   late final ChatMessage chatMessage = ChatMessage(this);
-  late final Index groupOrderIdx = Index('group_order_idx',
-      'CREATE UNIQUE INDEX group_order_idx ON chat_message (chat_id, order_key)');
+  late final Index groupOrderIdx = Index(
+    'group_order_idx',
+    'CREATE UNIQUE INDEX group_order_idx ON chat_message (chat_id, order_key)',
+  );
   late final MessagesDao messagesDao = MessagesDao(this as ChatDatabase);
   late final MetadataDao metadataDao = MetadataDao(this as ChatDatabase);
-  Selectable<String> leadingOrderKey(
-      {required int bucket, required String chatId}) {
+  Selectable<String> leadingOrderKey({
+    required int bucket,
+    required String chatId,
+  }) {
     return customSelect(
-        'SELECT lexo_rank_previous(?1, (SELECT order_key FROM chat_message WHERE chat_id = ?2 ORDER BY order_key LIMIT 1)) AS _c0',
-        variables: [
-          Variable<int>(bucket),
-          Variable<String>(chatId)
-        ],
-        readsFrom: {
-          chatMessage,
-        }).map((QueryRow row) => row.read<String>('_c0'));
+      'SELECT lexo_rank_previous(?1, (SELECT order_key FROM chat_message WHERE chat_id = ?2 ORDER BY order_key LIMIT 1)) AS _c0',
+      variables: [Variable<int>(bucket), Variable<String>(chatId)],
+      readsFrom: {chatMessage},
+    ).map((QueryRow row) => row.read<String>('_c0'));
   }
 
-  Selectable<String> trailingOrderKey(
-      {required int bucket, required String chatId}) {
+  Selectable<String> trailingOrderKey({
+    required int bucket,
+    required String chatId,
+  }) {
     return customSelect(
-        'SELECT lexo_rank_next(?1, (SELECT order_key FROM chat_message WHERE chat_id = ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
-        variables: [
-          Variable<int>(bucket),
-          Variable<String>(chatId)
-        ],
-        readsFrom: {
-          chatMessage,
-        }).map((QueryRow row) => row.read<String>('_c0'));
+      'SELECT lexo_rank_next(?1, (SELECT order_key FROM chat_message WHERE chat_id = ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
+      variables: [Variable<int>(bucket), Variable<String>(chatId)],
+      readsFrom: {chatMessage},
+    ).map((QueryRow row) => row.read<String>('_c0'));
   }
 
-  Selectable<String> orderKeyBeforeIndex(
-      {required String chatId, required int rowIdx}) {
+  Selectable<String> orderKeyBeforeIndex({
+    required String chatId,
+    required int rowIdx,
+  }) {
     return customSelect(
-        'WITH ordered_table AS (SELECT message_id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key, ROW_NUMBER()OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS row_idx, COUNT(*)OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS total_rows FROM chat_message WHERE chat_id = ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE row_idx = MIN(?2, total_rows)',
-        variables: [
-          Variable<String>(chatId),
-          Variable<int>(rowIdx)
-        ],
-        readsFrom: {
-          chatMessage,
-        }).map((QueryRow row) => row.read<String>('_c0'));
+      'WITH ordered_table AS (SELECT message_id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key, ROW_NUMBER()OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS row_idx, COUNT(*)OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS total_rows FROM chat_message WHERE chat_id = ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE row_idx = MIN(?2, total_rows)',
+      variables: [Variable<String>(chatId), Variable<int>(rowIdx)],
+      readsFrom: {chatMessage},
+    ).map((QueryRow row) => row.read<String>('_c0'));
   }
 
-  Selectable<int> messageIndex(
-      {required String chatId, required String messageId}) {
+  Selectable<int> messageIndex({
+    required String chatId,
+    required String messageId,
+  }) {
     return customSelect(
-        'WITH ordered_table AS (SELECT message_id, ROW_NUMBER()OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS row_idx FROM chat_message WHERE chat_id = ?1) SELECT row_idx FROM ordered_table WHERE message_id = ?2',
-        variables: [
-          Variable<String>(chatId),
-          Variable<String>(messageId)
-        ],
-        readsFrom: {
-          chatMessage,
-        }).map((QueryRow row) => row.read<int>('row_idx'));
+      'WITH ordered_table AS (SELECT message_id, ROW_NUMBER()OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS row_idx FROM chat_message WHERE chat_id = ?1) SELECT row_idx FROM ordered_table WHERE message_id = ?2',
+      variables: [Variable<String>(chatId), Variable<String>(messageId)],
+      readsFrom: {chatMessage},
+    ).map((QueryRow row) => row.read<int>('row_idx'));
   }
 
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [chatData, chatMessage, groupOrderIdx];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    chatData,
+    chatMessage,
+    groupOrderIdx,
+  ];
 }
 
-typedef $ChatDataCreateCompanionBuilder = ChatDataCompanion Function({
-  required String chatId,
-  required ChatMetadata metadata,
-  Value<int> rowid,
-});
-typedef $ChatDataUpdateCompanionBuilder = ChatDataCompanion Function({
-  Value<String> chatId,
-  Value<ChatMetadata> metadata,
-  Value<int> rowid,
-});
+typedef $ChatDataCreateCompanionBuilder =
+    ChatDataCompanion Function({
+      required String chatId,
+      required ChatMetadata metadata,
+      Value<int> rowid,
+    });
+typedef $ChatDataUpdateCompanionBuilder =
+    ChatDataCompanion Function({
+      Value<String> chatId,
+      Value<ChatMetadata> metadata,
+      Value<int> rowid,
+    });
 
 class $ChatDataFilterComposer extends Composer<_$ChatDatabase, ChatData> {
   $ChatDataFilterComposer({
@@ -499,12 +548,15 @@ class $ChatDataFilterComposer extends Composer<_$ChatDatabase, ChatData> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get chatId => $composableBuilder(
-      column: $table.chatId, builder: (column) => ColumnFilters(column));
+    column: $table.chatId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<ChatMetadata, ChatMetadata, String>
-      get metadata => $composableBuilder(
-          column: $table.metadata,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  get metadata => $composableBuilder(
+    column: $table.metadata,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 }
 
 class $ChatDataOrderingComposer extends Composer<_$ChatDatabase, ChatData> {
@@ -516,10 +568,14 @@ class $ChatDataOrderingComposer extends Composer<_$ChatDatabase, ChatData> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get chatId => $composableBuilder(
-      column: $table.chatId, builder: (column) => ColumnOrderings(column));
+    column: $table.chatId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get metadata => $composableBuilder(
-      column: $table.metadata, builder: (column) => ColumnOrderings(column));
+    column: $table.metadata,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $ChatDataAnnotationComposer extends Composer<_$ChatDatabase, ChatData> {
@@ -537,81 +593,100 @@ class $ChatDataAnnotationComposer extends Composer<_$ChatDatabase, ChatData> {
       $composableBuilder(column: $table.metadata, builder: (column) => column);
 }
 
-class $ChatDataTableManager extends RootTableManager<
-    _$ChatDatabase,
-    ChatData,
-    ChatDataData,
-    $ChatDataFilterComposer,
-    $ChatDataOrderingComposer,
-    $ChatDataAnnotationComposer,
-    $ChatDataCreateCompanionBuilder,
-    $ChatDataUpdateCompanionBuilder,
-    (ChatDataData, BaseReferences<_$ChatDatabase, ChatData, ChatDataData>),
-    ChatDataData,
-    PrefetchHooks Function()> {
+class $ChatDataTableManager
+    extends
+        RootTableManager<
+          _$ChatDatabase,
+          ChatData,
+          ChatDataData,
+          $ChatDataFilterComposer,
+          $ChatDataOrderingComposer,
+          $ChatDataAnnotationComposer,
+          $ChatDataCreateCompanionBuilder,
+          $ChatDataUpdateCompanionBuilder,
+          (
+            ChatDataData,
+            BaseReferences<_$ChatDatabase, ChatData, ChatDataData>,
+          ),
+          ChatDataData,
+          PrefetchHooks Function()
+        > {
   $ChatDataTableManager(_$ChatDatabase db, ChatData table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $ChatDataFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $ChatDataOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $ChatDataAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> chatId = const Value.absent(),
-            Value<ChatMetadata> metadata = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatDataCompanion(
-            chatId: chatId,
-            metadata: metadata,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String chatId,
-            required ChatMetadata metadata,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatDataCompanion.insert(
-            chatId: chatId,
-            metadata: metadata,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $ChatDataFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $ChatDataOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $ChatDataAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> chatId = const Value.absent(),
+                Value<ChatMetadata> metadata = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChatDataCompanion(
+                chatId: chatId,
+                metadata: metadata,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String chatId,
+                required ChatMetadata metadata,
+                Value<int> rowid = const Value.absent(),
+              }) => ChatDataCompanion.insert(
+                chatId: chatId,
+                metadata: metadata,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $ChatDataProcessedTableManager = ProcessedTableManager<
-    _$ChatDatabase,
-    ChatData,
-    ChatDataData,
-    $ChatDataFilterComposer,
-    $ChatDataOrderingComposer,
-    $ChatDataAnnotationComposer,
-    $ChatDataCreateCompanionBuilder,
-    $ChatDataUpdateCompanionBuilder,
-    (ChatDataData, BaseReferences<_$ChatDatabase, ChatData, ChatDataData>),
-    ChatDataData,
-    PrefetchHooks Function()>;
-typedef $ChatMessageCreateCompanionBuilder = ChatMessageCompanion Function({
-  required String messageId,
-  required String chatId,
-  required String orderKey,
-  required String messageJson,
-  Value<int> rowid,
-});
-typedef $ChatMessageUpdateCompanionBuilder = ChatMessageCompanion Function({
-  Value<String> messageId,
-  Value<String> chatId,
-  Value<String> orderKey,
-  Value<String> messageJson,
-  Value<int> rowid,
-});
+typedef $ChatDataProcessedTableManager =
+    ProcessedTableManager<
+      _$ChatDatabase,
+      ChatData,
+      ChatDataData,
+      $ChatDataFilterComposer,
+      $ChatDataOrderingComposer,
+      $ChatDataAnnotationComposer,
+      $ChatDataCreateCompanionBuilder,
+      $ChatDataUpdateCompanionBuilder,
+      (ChatDataData, BaseReferences<_$ChatDatabase, ChatData, ChatDataData>),
+      ChatDataData,
+      PrefetchHooks Function()
+    >;
+typedef $ChatMessageCreateCompanionBuilder =
+    ChatMessageCompanion Function({
+      required String messageId,
+      required String chatId,
+      required String orderKey,
+      required String messageJson,
+      Value<int> rowid,
+    });
+typedef $ChatMessageUpdateCompanionBuilder =
+    ChatMessageCompanion Function({
+      Value<String> messageId,
+      Value<String> chatId,
+      Value<String> orderKey,
+      Value<String> messageJson,
+      Value<int> rowid,
+    });
 
 class $ChatMessageFilterComposer extends Composer<_$ChatDatabase, ChatMessage> {
   $ChatMessageFilterComposer({
@@ -622,16 +697,24 @@ class $ChatMessageFilterComposer extends Composer<_$ChatDatabase, ChatMessage> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get messageId => $composableBuilder(
-      column: $table.messageId, builder: (column) => ColumnFilters(column));
+    column: $table.messageId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get chatId => $composableBuilder(
-      column: $table.chatId, builder: (column) => ColumnFilters(column));
+    column: $table.chatId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get orderKey => $composableBuilder(
-      column: $table.orderKey, builder: (column) => ColumnFilters(column));
+    column: $table.orderKey,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get messageJson => $composableBuilder(
-      column: $table.messageJson, builder: (column) => ColumnFilters(column));
+    column: $table.messageJson,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $ChatMessageOrderingComposer
@@ -644,16 +727,24 @@ class $ChatMessageOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get messageId => $composableBuilder(
-      column: $table.messageId, builder: (column) => ColumnOrderings(column));
+    column: $table.messageId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get chatId => $composableBuilder(
-      column: $table.chatId, builder: (column) => ColumnOrderings(column));
+    column: $table.chatId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get orderKey => $composableBuilder(
-      column: $table.orderKey, builder: (column) => ColumnOrderings(column));
+    column: $table.orderKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get messageJson => $composableBuilder(
-      column: $table.messageJson, builder: (column) => ColumnOrderings(column));
+    column: $table.messageJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $ChatMessageAnnotationComposer
@@ -675,84 +766,100 @@ class $ChatMessageAnnotationComposer
       $composableBuilder(column: $table.orderKey, builder: (column) => column);
 
   GeneratedColumn<String> get messageJson => $composableBuilder(
-      column: $table.messageJson, builder: (column) => column);
+    column: $table.messageJson,
+    builder: (column) => column,
+  );
 }
 
-class $ChatMessageTableManager extends RootTableManager<
-    _$ChatDatabase,
-    ChatMessage,
-    ChatMessageData,
-    $ChatMessageFilterComposer,
-    $ChatMessageOrderingComposer,
-    $ChatMessageAnnotationComposer,
-    $ChatMessageCreateCompanionBuilder,
-    $ChatMessageUpdateCompanionBuilder,
-    (
-      ChatMessageData,
-      BaseReferences<_$ChatDatabase, ChatMessage, ChatMessageData>
-    ),
-    ChatMessageData,
-    PrefetchHooks Function()> {
+class $ChatMessageTableManager
+    extends
+        RootTableManager<
+          _$ChatDatabase,
+          ChatMessage,
+          ChatMessageData,
+          $ChatMessageFilterComposer,
+          $ChatMessageOrderingComposer,
+          $ChatMessageAnnotationComposer,
+          $ChatMessageCreateCompanionBuilder,
+          $ChatMessageUpdateCompanionBuilder,
+          (
+            ChatMessageData,
+            BaseReferences<_$ChatDatabase, ChatMessage, ChatMessageData>,
+          ),
+          ChatMessageData,
+          PrefetchHooks Function()
+        > {
   $ChatMessageTableManager(_$ChatDatabase db, ChatMessage table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $ChatMessageFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $ChatMessageOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $ChatMessageAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> messageId = const Value.absent(),
-            Value<String> chatId = const Value.absent(),
-            Value<String> orderKey = const Value.absent(),
-            Value<String> messageJson = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatMessageCompanion(
-            messageId: messageId,
-            chatId: chatId,
-            orderKey: orderKey,
-            messageJson: messageJson,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String messageId,
-            required String chatId,
-            required String orderKey,
-            required String messageJson,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              ChatMessageCompanion.insert(
-            messageId: messageId,
-            chatId: chatId,
-            orderKey: orderKey,
-            messageJson: messageJson,
-            rowid: rowid,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
+          createFilteringComposer:
+              () => $ChatMessageFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $ChatMessageOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $ChatMessageAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> messageId = const Value.absent(),
+                Value<String> chatId = const Value.absent(),
+                Value<String> orderKey = const Value.absent(),
+                Value<String> messageJson = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChatMessageCompanion(
+                messageId: messageId,
+                chatId: chatId,
+                orderKey: orderKey,
+                messageJson: messageJson,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String messageId,
+                required String chatId,
+                required String orderKey,
+                required String messageJson,
+                Value<int> rowid = const Value.absent(),
+              }) => ChatMessageCompanion.insert(
+                messageId: messageId,
+                chatId: chatId,
+                orderKey: orderKey,
+                messageJson: messageJson,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $ChatMessageProcessedTableManager = ProcessedTableManager<
-    _$ChatDatabase,
-    ChatMessage,
-    ChatMessageData,
-    $ChatMessageFilterComposer,
-    $ChatMessageOrderingComposer,
-    $ChatMessageAnnotationComposer,
-    $ChatMessageCreateCompanionBuilder,
-    $ChatMessageUpdateCompanionBuilder,
-    (
+typedef $ChatMessageProcessedTableManager =
+    ProcessedTableManager<
+      _$ChatDatabase,
+      ChatMessage,
       ChatMessageData,
-      BaseReferences<_$ChatDatabase, ChatMessage, ChatMessageData>
-    ),
-    ChatMessageData,
-    PrefetchHooks Function()>;
+      $ChatMessageFilterComposer,
+      $ChatMessageOrderingComposer,
+      $ChatMessageAnnotationComposer,
+      $ChatMessageCreateCompanionBuilder,
+      $ChatMessageUpdateCompanionBuilder,
+      (
+        ChatMessageData,
+        BaseReferences<_$ChatDatabase, ChatMessage, ChatMessageData>,
+      ),
+      ChatMessageData,
+      PrefetchHooks Function()
+    >;
 
 class $ChatDatabaseManager {
   final _$ChatDatabase _db;

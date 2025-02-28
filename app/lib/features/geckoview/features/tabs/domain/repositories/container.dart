@@ -22,7 +22,7 @@ class ContainerRepository extends _$ContainerRepository {
         .replaceContainer(container);
   }
 
-  Future<ContainerData?> getContainerData(String id) async {
+  Future<ContainerData?> getContainerData(String id) {
     return ref
         .read(tabDatabaseProvider)
         .containerDao

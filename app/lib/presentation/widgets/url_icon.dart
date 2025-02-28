@@ -14,8 +14,9 @@ class UrlIcon extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final icon = useCachedFuture(
-      () async =>
-          ref.read(genericWebsiteServiceProvider.notifier).getUrlIcon(url),
+      () =>
+      // ignore: discarded_futures
+      ref.read(genericWebsiteServiceProvider.notifier).getUrlIcon(url),
       [url],
     );
 

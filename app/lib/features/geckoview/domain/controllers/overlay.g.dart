@@ -12,14 +12,15 @@ String _$overlayControllerHash() => r'b6dc3ca17611c4efadc7e8248d493cd3c7061e01';
 @ProviderFor(OverlayController)
 final overlayControllerProvider =
     AutoDisposeNotifierProvider<OverlayController, Widget?>.internal(
-  OverlayController.new,
-  name: r'overlayControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$overlayControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      OverlayController.new,
+      name: r'overlayControllerProvider',
+      debugGetCreateSourceHash:
+          const bool.fromEnvironment('dart.vm.product')
+              ? null
+              : _$overlayControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$OverlayController = AutoDisposeNotifier<Widget?>;
 // ignore_for_file: type=lint

@@ -69,7 +69,7 @@ class WebExtensionsState extends _$WebExtensionsState {
 
     final subscriptions = switch (actionType) {
       WebExtensionActionType.browser => [
-        addonService.browserExtensionStream.listen((event) async {
+        addonService.browserExtensionStream.listen((event) {
           _onExtensionUpdate(event);
         }),
         addonService.browserIconStream.listen((event) async {
@@ -77,7 +77,7 @@ class WebExtensionsState extends _$WebExtensionsState {
         }),
       ],
       WebExtensionActionType.page => [
-        addonService.pageExtensionStream.listen((event) async {
+        addonService.pageExtensionStream.listen((event) {
           _onExtensionUpdate(event);
         }),
         addonService.pageIconStream.listen((event) async {

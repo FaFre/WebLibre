@@ -7,7 +7,7 @@ final class ViewTabsSheet extends Sheet {
   bool get cacheHash => true;
 
   @override
-  List<Object?> get hashParameters => [];
+  List<Object?> get hashParameters => [null];
 }
 
 final class TabQaChatSheet extends Sheet {

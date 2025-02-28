@@ -29,7 +29,7 @@ class HistorySuggestions extends HookConsumerWidget {
     });
 
     if (historySuggestions.hasValue &&
-        (historySuggestions.valueOrNull?.isEmpty ?? true)) {
+        (historySuggestions.valueOrNull.isEmpty)) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 

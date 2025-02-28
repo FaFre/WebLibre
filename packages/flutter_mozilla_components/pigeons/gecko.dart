@@ -943,6 +943,12 @@ abstract class GeckoPrefApi {
 }
 
 @HostApi()
+abstract class GeckoTurndownApi {
+  @async
+  List<Object> getMarkdown(List<String> htmlList);
+}
+
+@HostApi()
 abstract class GeckoContainerProxyApi {
   void setProxyPort(int port);
   void addContainerProxy(String contextId);

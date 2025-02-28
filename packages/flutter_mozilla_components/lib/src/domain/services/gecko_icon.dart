@@ -13,7 +13,7 @@ class GeckoIconService {
     IconSize size = IconSize.defaultSize,
     bool isPrivate = false,
     bool waitOnNetworkLoad = true,
-  }) async {
+  }) {
     return _api.loadIcon(
       IconRequest(
         url: url.toString(),

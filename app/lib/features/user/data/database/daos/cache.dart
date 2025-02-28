@@ -33,9 +33,9 @@ class CacheDao extends DatabaseAccessor<UserDatabase> with _$CacheDaoMixin {
         fetchDate: DateTime.now(),
       ),
       onConflict: DoUpdate(
-        (old) => IconCacheCompanion.custom(
-          iconData: Variable(bytes),
-          fetchDate: Variable(DateTime.now()),
+        (old) => IconCacheCompanion(
+          iconData: Value(bytes),
+          fetchDate: Value(DateTime.now()),
         ),
       ),
     );

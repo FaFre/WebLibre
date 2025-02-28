@@ -6,106 +6,106 @@ const removeMarkdown = require('remove-markdown');
 const turndownService = new TurndownService();
 
 function sanitizeHtmlTags(node, unwantedSelectors) {
-  unwantedSelectors.forEach(selector => {
-      node.querySelectorAll(selector).forEach(el => el.remove());
-  });
+    unwantedSelectors.forEach(selector => {
+        node.querySelectorAll(selector).forEach(el => el.remove());
+    });
 
-  return node;
+    return node;
 }
 
 function parseFullMarkdown(node) {
-  const clonedDoc = node.cloneNode(true);
+    const clonedDoc = node.cloneNode(true);
 
-  sanitizeHtmlTags(clonedDoc, [
-      /* Navigation and Header Elements */
-      'nav',
-      'footer',
-      'header',
-      'aside',
-      'menu',
-      'toolbar',
+    sanitizeHtmlTags(clonedDoc, [
+        /* Navigation and Header Elements */
+        'nav',
+        'footer',
+        'header',
+        'aside',
+        'menu',
+        'toolbar',
 
-      /* Interactive Elements */
-      'form',
-      'button',
-      '[role="button"]',
-      '[type="button"]',
-      'dialog',
-      'modal',
+        /* Interactive Elements */
+        'form',
+        'button',
+        '[role="button"]',
+        '[type="button"]',
+        'dialog',
+        'modal',
 
-      /* Hidden Elements */
-      '[aria-hidden="true"]',
-      '[hidden]',
-      '[style*="display: none"]',
-      '[style*="visibility: hidden"]',
-      '.hidden',
-      '.invisible',
+        /* Hidden Elements */
+        '[aria-hidden="true"]',
+        '[hidden]',
+        '[style*="display: none"]',
+        '[style*="visibility: hidden"]',
+        '.hidden',
+        '.invisible',
 
-      /* Advertising and Marketing */
-      '.ad',
-      '.advertisement',
-      '.banner',
-      '.sponsored',
-      '.promotion',
-      '.popup',
-      '.newsletter',
-      '.subscribe',
+        /* Advertising and Marketing */
+        '.ad',
+        '.advertisement',
+        '.banner',
+        '.sponsored',
+        '.promotion',
+        '.popup',
+        '.newsletter',
+        '.subscribe',
 
-      /* Social Media */
-      '.social-share',
-      '.social-media',
-      '.share-buttons',
-      '.follow-us',
-      '.likes',
-      '.comments',
+        /* Social Media */
+        '.social-share',
+        '.social-media',
+        '.share-buttons',
+        '.follow-us',
+        '.likes',
+        '.comments',
 
-      /* Common UI Components */
-      '.cookie-notice',
-      '.cookie-banner',
-      '.modal',
-      '.overlay',
-      '.tooltip',
-      '.popup',
-      '.sidebar',
-      '.widget',
+        /* Common UI Components */
+        '.cookie-notice',
+        '.cookie-banner',
+        '.modal',
+        '.overlay',
+        '.tooltip',
+        '.popup',
+        '.sidebar',
+        '.widget',
 
-      /* Navigation Related */
-      '.breadcrumb',
-      '.pagination',
-      '.menu',
-      '.navbar',
-      '.navigation',
+        /* Navigation Related */
+        '.breadcrumb',
+        '.pagination',
+        '.menu',
+        '.navbar',
+        '.navigation',
 
-      /* Related Content */
-      '.related-posts',
-      '.recommended',
-      '.suggestions',
-      '.read-more',
+        /* Related Content */
+        '.related-posts',
+        '.recommended',
+        '.suggestions',
+        '.read-more',
 
-      /* Interactive Features */
-      '.search',
-      '.search-box',
-      '.login',
-      '.signup',
-      '.register',
+        /* Interactive Features */
+        '.search',
+        '.search-box',
+        '.login',
+        '.signup',
+        '.register',
 
-      /* Print-specific */
-      '.print-only',
-      '[media="print"]'
-  ]);
+        /* Print-specific */
+        '.print-only',
+        '[media="print"]'
+    ]);
 
-  const fullMarkdown = turndownService.turndown(clonedDoc.body.innerHTML);
+    const fullMarkdown = turndownService.turndown(clonedDoc.body.innerHTML);
 
-  let response = {
-      fullContentMarkdown: fullMarkdown,
-      fullContentPlain: removeMarkdown(fullMarkdown),
-  };
+    let response = {
+        fullContentMarkdown: fullMarkdown,
+        fullContentPlain: removeMarkdown(fullMarkdown),
+    };
 
-  return response;
+    return response;
 }
 
 function parseReaderable(document, options) {
-  const clonedDoc = document.cloneNode(true);
+    const clonedDoc = document.cloneNode(true);
     sanitizeHtmlTags(clonedDoc, [
         /* Technical Elements */
         'script',
@@ -143,4 +143,6 @@ function parseReaderable(document, options) {
 }
 
 window.parseReaderable = parseReaderable;
-export { parseReaderable };
+window.parseFullMarkdown = parseFullMarkdown;
+
+export { parseReaderable, parseFullMarkdown };

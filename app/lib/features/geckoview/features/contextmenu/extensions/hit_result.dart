@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/contextmenu/domain/converters/hit_result_converter.dart';
 
 extension HitResultJson on HitResult {
@@ -38,13 +39,11 @@ extension HitResultX on HitResult {
       UnknownHitResult(src: final src) => src,
       ImageSrcHitResult(uri: final uri) => uri,
       ImageHitResult(src: final src, title: final title) =>
-        title?.isEmpty ?? true
-            ? (src.length > maxTitleLength ? 'image' : src)
-            : title!,
+        title.isEmpty ? (src.length > maxTitleLength ? 'image' : src) : title!,
       VideoHitResult(src: final src, title: final title) =>
-        (title?.isEmpty ?? true) ? src : title!,
+        (title.isEmpty) ? src : title!,
       AudioHitResult(src: final src, title: final title) =>
-        (title?.isEmpty ?? true) ? src : title!,
+        (title.isEmpty) ? src : title!,
       _ => 'about:blank',
     };
   }

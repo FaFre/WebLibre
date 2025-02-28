@@ -5,8 +5,15 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'website_title.g.dart';
 
-@Riverpod(keepAlive: true)
-Future<WebPageInfo> pageInfo(Ref ref, Uri url) {
+@Riverpod()
+Future<WebPageInfo> pageInfo(Ref ref, Uri url) async {
   final websiteService = ref.watch(genericWebsiteServiceProvider.notifier);
-  return websiteService.fetchPageInfo(url).then((value) => value.value);
+
+  final result = await websiteService.fetchPageInfo(url);
+
+  if (result.isSuccess) {
+    ref.keepAlive();
+  }
+
+  return result.value;
 }

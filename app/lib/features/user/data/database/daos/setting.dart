@@ -23,9 +23,7 @@ class SettingDao extends DatabaseAccessor<UserDatabase> with _$SettingDaoMixin {
         partitionKey: Value(partitionKey),
         value: Value(driftvalue),
       ),
-      onConflict: DoUpdate(
-        (old) => SettingCompanion.custom(value: Variable(driftvalue)),
-      ),
+      onConflict: DoUpdate((old) => SettingCompanion(value: Value(driftvalue))),
     );
   }
 

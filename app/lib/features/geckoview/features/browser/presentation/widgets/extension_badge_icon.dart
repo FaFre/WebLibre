@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/web_extension.dart';
 
 class ExtensionBadgeIcon extends StatelessWidget {
@@ -8,7 +9,7 @@ class ExtensionBadgeIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasBadge = state.badgeText?.isNotEmpty ?? false;
+    final hasBadge = state.badgeText.isNotEmpty;
 
     return Badge(
       isLabelVisible: hasBadge,
