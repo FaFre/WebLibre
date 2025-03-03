@@ -23,6 +23,10 @@ class LRUCache<K, V> {
     _capacity = capacity;
   }
 
+  bool contains(K key) {
+    return _cache.containsKey(key);
+  }
+
   V? get(K key) {
     final value = _cache.remove(key); // Temporarily remove the item.
 

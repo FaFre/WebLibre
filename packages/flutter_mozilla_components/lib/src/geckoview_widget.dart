@@ -43,6 +43,29 @@ class _GeckoViewState extends State<GeckoView> {
     });
   }
 
+  Future<bool> _showNativeFragment({
+    int maxRetries = 100,
+
+    /// Default ist about one frame
+    Duration retryDelay = const Duration(milliseconds: 1000 ~/ 60),
+  }) async {
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      final result = await browserService.showNativeFragment();
+
+      if (result) {
+        debugPrint('Fragment ATTACHED after $attempt tries');
+        return true;
+      }
+
+      if (attempt < maxRetries - 1) {
+        await Future.delayed(retryDelay);
+      }
+    }
+
+    debugPrint('Fragment FAILED after $maxRetries tries');
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(
@@ -68,13 +91,8 @@ class _GeckoViewState extends State<GeckoView> {
             SchedulerBinding.instance.addPostFrameCallback((_) async {
               await widget.preInitializationStep?.call();
 
-              await Future.delayed(
-                //Wait for two more frames just to be sure view has been initialized
-                Duration(milliseconds: ((1000 / 60) * 2).toInt()),
-              ).whenComplete(() async {
-                await browserService.showNativeFragment();
-                await widget.postInitializationStep?.call();
-              });
+              await _showNativeFragment();
+              await widget.postInitializationStep?.call();
             });
           })
           // ignore: discarded_futures that hos it is done in docs

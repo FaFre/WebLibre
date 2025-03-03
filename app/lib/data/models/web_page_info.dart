@@ -10,7 +10,7 @@ class WebPageInfo with FastEquatable {
   final Uri url;
   final String? title;
   final BrowserIcon? favicon;
-  final Set<String>? feeds;
+  final Set<Uri>? feeds;
 
   bool get isPageInfoComplete =>
       title.isNotEmpty && favicon != null && feeds != null;

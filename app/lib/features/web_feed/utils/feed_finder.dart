@@ -32,7 +32,7 @@ class FeedFinder {
   //   return results;
   // }
 
-  void _parseBody(Set<String> candidates) {
+  void _parseBody(Set<Uri> candidates) {
     for (final a in document.querySelectorAll('a')) {
       var href = a.attributes['href'];
       if (href != null) {
@@ -46,13 +46,15 @@ class FeedFinder {
           // Fix naked URLs
           href = !href.startsWith('http') ? '$_base/$href' : href;
 
-          candidates.add(href);
+          if (Uri.tryParse(href) case final Uri uri) {
+            candidates.add(uri);
+          }
         }
       }
     }
   }
 
-  void _parseHead(Set<String> candidates) {
+  void _parseHead(Set<Uri> candidates) {
     for (final link in document.querySelectorAll("link[rel='alternate']")) {
       final type = link.attributes['type'];
       if (type != null) {
@@ -61,19 +63,22 @@ class FeedFinder {
           if (href != null) {
             // Fix relative URLs
             href = href.startsWith('/') ? _base + href : href;
-            candidates.add(href);
+
+            if (Uri.tryParse(href) case final Uri uri) {
+              candidates.add(uri);
+            }
           }
         }
       }
     }
   }
 
-  Future<Set<String>> parse({
+  Future<Set<Uri>> parse({
     bool parseHead = true,
     bool parseBody = true,
     // bool verifyCandidates = true,
   }) async {
-    final candidates = <String>{};
+    final candidates = <Uri>{};
 
     // Look for feed candidates in head
     if (parseHead) {

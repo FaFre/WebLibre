@@ -1,6 +1,10 @@
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 
 class FeedArticleQueryResult extends FeedArticle {
+  final String? titleHighlight;
+  final String? summarySnippet;
+  final String? contentSnippet;
+
   final double weightedRank;
 
   FeedArticleQueryResult({
@@ -8,19 +12,29 @@ class FeedArticleQueryResult extends FeedArticle {
     required super.feedId,
     required super.fetched,
     required this.weightedRank,
-    super.created,
-    super.updated,
-    super.lastRead,
-    super.title,
-    super.authors,
-    super.tags,
-    super.links,
-    super.summaryMarkdown,
-    super.summaryPlain,
-    super.contentMarkdown,
-    super.contentPlain,
+    required super.created,
+    required super.updated,
+    required super.lastRead,
+    required super.title,
+    required super.authors,
+    required super.tags,
+    required super.links,
+    required super.summaryMarkdown,
+    required super.summaryPlain,
+    required super.contentMarkdown,
+    required super.contentPlain,
+    required super.icon,
+    this.titleHighlight,
+    this.summarySnippet,
+    this.contentSnippet,
   });
 
   @override
-  List<Object?> get hashParameters => [...super.hashParameters, weightedRank];
+  List<Object?> get hashParameters => [
+    ...super.hashParameters,
+    weightedRank,
+    summarySnippet,
+    contentSnippet,
+    titleHighlight,
+  ];
 }

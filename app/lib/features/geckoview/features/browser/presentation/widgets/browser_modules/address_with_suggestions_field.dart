@@ -66,7 +66,7 @@ class AddressWithSuggestionsField extends HookConsumerWidget {
               defaultSearchBangDataProvider.future,
             );
 
-            newUrl = defaultSearchBang?.getUrl(value);
+            newUrl = defaultSearchBang?.getTemplateUrl(value);
           }
 
           if (newUrl != null) {

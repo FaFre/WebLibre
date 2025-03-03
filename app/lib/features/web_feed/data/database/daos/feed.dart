@@ -11,15 +11,19 @@ class FeedDao extends DatabaseAccessor<FeedDatabase> with _$FeedDaoMixin {
     return db.feed.select();
   }
 
-  Future<int> updateFeedFetched(Uri url, DateTime fetched) {
+  SingleOrNullSelectable<FeedData> getFeed(Uri feedId) {
+    return db.feed.select()..where((feed) => feed.url.equalsValue(feedId));
+  }
+
+  Future<int> updateFeedFetched(Uri feedId, DateTime fetched) {
     final statement =
-        db.feed.update()..where((feed) => feed.url.equalsValue(url));
+        db.feed.update()..where((feed) => feed.url.equalsValue(feedId));
 
     return statement.write(FeedCompanion(lastFetched: Value(fetched)));
   }
 
-  Future<int> deleteFeed(Uri url) {
-    return db.feed.deleteWhere((feed) => feed.url.equals(url.toString()));
+  Future<int> deleteFeed(Uri feedId) {
+    return db.feed.deleteWhere((feed) => feed.url.equals(feedId.toString()));
   }
 
   Future<int> upsertFeed(FeedData feedData) {

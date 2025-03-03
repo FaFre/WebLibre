@@ -8,6 +8,7 @@ import eu.lensai.flutter_mozilla_components.components.Features
 import eu.lensai.flutter_mozilla_components.components.Search
 import eu.lensai.flutter_mozilla_components.components.Services
 import eu.lensai.flutter_mozilla_components.components.UseCases
+import eu.lensai.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -21,10 +22,11 @@ class Components(private val context: Context,
                  val flutterEvents: GeckoStateEvents,
                  val readerViewController: ReaderViewController,
                  val selectionAction: SelectionActionDelegate,
-                 val addonEvents: GeckoAddonEvents,
-                 val tabContentEvents: GeckoTabContentEvents
+                 private val addonEvents: GeckoAddonEvents,
+                 private val tabContentEvents: GeckoTabContentEvents,
+                 private val extensionEvents: BrowserExtensionEvents
 ) {
-    val core by lazy { Core(context, this, flutterEvents) }
+    val core by lazy { Core(context, this, flutterEvents, extensionEvents) }
     val events by lazy { Events(flutterEvents) }
     val useCases by lazy { UseCases(context, core.engine, core.store) }
     val services by lazy { Services(context, useCases.tabsUseCases) }

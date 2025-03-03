@@ -25,6 +25,9 @@ class FeedArticle with FastEquatable implements Insertable<FeedArticle> {
   final String? contentMarkdown;
   final String? contentPlain;
 
+  //Derived by view from feed table, should not get inserted
+  final Uri? icon;
+
   FeedArticle({
     required this.id,
     required this.feedId,
@@ -40,6 +43,7 @@ class FeedArticle with FastEquatable implements Insertable<FeedArticle> {
     this.summaryPlain,
     this.contentMarkdown,
     this.contentPlain,
+    this.icon,
   });
 
   factory FeedArticle.fromJson(Map<String, dynamic> json) =>
@@ -109,5 +113,6 @@ class FeedArticle with FastEquatable implements Insertable<FeedArticle> {
     summaryPlain,
     contentMarkdown,
     contentPlain,
+    icon,
   ];
 }

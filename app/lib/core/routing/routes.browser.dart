@@ -36,17 +36,14 @@ class BrowserRoute extends GoRouteData {
 
 class WebPageRoute extends GoRouteData {
   final String url;
+  final WebPageInfo? $extra;
 
-  const WebPageRoute({required this.url});
+  const WebPageRoute({required this.url, required this.$extra});
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(
-      builder:
-          (_) => WebPageDialog(
-            url: Uri.parse(url),
-            precachedInfo: state.extra as WebPageInfo?,
-          ),
+      builder: (_) => WebPageDialog(url: Uri.parse(url), precachedInfo: $extra),
     );
   }
 }
@@ -85,33 +82,37 @@ class ContainerListRoute extends GoRouteData {
 }
 
 class ContainerEditRoute extends GoRouteData {
+  final ContainerData $extra;
+
+  ContainerEditRoute(this.$extra);
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ContainerEditScreen.edit(
-      initialContainer: state.extra! as ContainerData,
-    );
+    return ContainerEditScreen.edit(initialContainer: $extra);
   }
 }
 
 class ContainerCreateRoute extends GoRouteData {
+  final ContainerData $extra;
+
+  ContainerCreateRoute(this.$extra);
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ContainerEditScreen.create(
-      initialContainer: state.extra! as ContainerData,
-    );
+    return ContainerEditScreen.create(initialContainer: $extra);
   }
 }
 
 class ContextMenuRoute extends GoRouteData {
-  const ContextMenuRoute();
+  final String $extra;
+
+  const ContextMenuRoute(this.$extra);
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(
       builder:
-          (_) => ContextMenuDialog(
-            hitResult: HitResultJson.fromJson(state.extra! as String),
-          ),
+          (_) => ContextMenuDialog(hitResult: HitResultJson.fromJson($extra)),
     );
   }
 }

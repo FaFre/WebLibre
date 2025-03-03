@@ -22,7 +22,7 @@ final feedListProvider = AutoDisposeStreamProvider<List<FeedData>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FeedListRef = AutoDisposeStreamProviderRef<List<FeedData>>;
-String _$feedArticleListHash() => r'64e834a1b69d913f1c860b38956b69af9e89a833';
+String _$feedDataHash() => r'0599a2e3d159ef3abb6c3d2c871f87da2f5e646b';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -45,6 +45,124 @@ class _SystemHash {
   }
 }
 
+/// See also [feedData].
+@ProviderFor(feedData)
+const feedDataProvider = FeedDataFamily();
+
+/// See also [feedData].
+class FeedDataFamily extends Family<AsyncValue<FeedData?>> {
+  /// See also [feedData].
+  const FeedDataFamily();
+
+  /// See also [feedData].
+  FeedDataProvider call(Uri? feedId) {
+    return FeedDataProvider(feedId);
+  }
+
+  @override
+  FeedDataProvider getProviderOverride(covariant FeedDataProvider provider) {
+    return call(provider.feedId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'feedDataProvider';
+}
+
+/// See also [feedData].
+class FeedDataProvider extends AutoDisposeStreamProvider<FeedData?> {
+  /// See also [feedData].
+  FeedDataProvider(Uri? feedId)
+    : this._internal(
+        (ref) => feedData(ref as FeedDataRef, feedId),
+        from: feedDataProvider,
+        name: r'feedDataProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$feedDataHash,
+        dependencies: FeedDataFamily._dependencies,
+        allTransitiveDependencies: FeedDataFamily._allTransitiveDependencies,
+        feedId: feedId,
+      );
+
+  FeedDataProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.feedId,
+  }) : super.internal();
+
+  final Uri? feedId;
+
+  @override
+  Override overrideWith(
+    Stream<FeedData?> Function(FeedDataRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: FeedDataProvider._internal(
+        (ref) => create(ref as FeedDataRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        feedId: feedId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<FeedData?> createElement() {
+    return _FeedDataProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeedDataProvider && other.feedId == feedId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, feedId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin FeedDataRef on AutoDisposeStreamProviderRef<FeedData?> {
+  /// The parameter `feedId` of this provider.
+  Uri? get feedId;
+}
+
+class _FeedDataProviderElement
+    extends AutoDisposeStreamProviderElement<FeedData?>
+    with FeedDataRef {
+  _FeedDataProviderElement(super.provider);
+
+  @override
+  Uri? get feedId => (origin as FeedDataProvider).feedId;
+}
+
+String _$feedArticleListHash() => r'45d585cc9f59ad48a0d1d6fbcf802b1c7de7f6bc';
+
 /// See also [feedArticleList].
 @ProviderFor(feedArticleList)
 const feedArticleListProvider = FeedArticleListFamily();
@@ -55,15 +173,15 @@ class FeedArticleListFamily extends Family<AsyncValue<List<FeedArticle>>> {
   const FeedArticleListFamily();
 
   /// See also [feedArticleList].
-  FeedArticleListProvider call(FeedFilter filter) {
-    return FeedArticleListProvider(filter);
+  FeedArticleListProvider call(Uri? feedId) {
+    return FeedArticleListProvider(feedId);
   }
 
   @override
   FeedArticleListProvider getProviderOverride(
     covariant FeedArticleListProvider provider,
   ) {
-    return call(provider.filter);
+    return call(provider.feedId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -85,9 +203,9 @@ class FeedArticleListFamily extends Family<AsyncValue<List<FeedArticle>>> {
 class FeedArticleListProvider
     extends AutoDisposeStreamProvider<List<FeedArticle>> {
   /// See also [feedArticleList].
-  FeedArticleListProvider(FeedFilter filter)
+  FeedArticleListProvider(Uri? feedId)
     : this._internal(
-        (ref) => feedArticleList(ref as FeedArticleListRef, filter),
+        (ref) => feedArticleList(ref as FeedArticleListRef, feedId),
         from: feedArticleListProvider,
         name: r'feedArticleListProvider',
         debugGetCreateSourceHash:
@@ -97,7 +215,7 @@ class FeedArticleListProvider
         dependencies: FeedArticleListFamily._dependencies,
         allTransitiveDependencies:
             FeedArticleListFamily._allTransitiveDependencies,
-        filter: filter,
+        feedId: feedId,
       );
 
   FeedArticleListProvider._internal(
@@ -107,10 +225,10 @@ class FeedArticleListProvider
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.filter,
+    required this.feedId,
   }) : super.internal();
 
-  final FeedFilter filter;
+  final Uri? feedId;
 
   @override
   Override overrideWith(
@@ -125,7 +243,7 @@ class FeedArticleListProvider
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        filter: filter,
+        feedId: feedId,
       ),
     );
   }
@@ -137,13 +255,13 @@ class FeedArticleListProvider
 
   @override
   bool operator ==(Object other) {
-    return other is FeedArticleListProvider && other.filter == filter;
+    return other is FeedArticleListProvider && other.feedId == feedId;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, filter.hashCode);
+    hash = _SystemHash.combine(hash, feedId.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -152,8 +270,8 @@ class FeedArticleListProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin FeedArticleListRef on AutoDisposeStreamProviderRef<List<FeedArticle>> {
-  /// The parameter `filter` of this provider.
-  FeedFilter get filter;
+  /// The parameter `feedId` of this provider.
+  Uri? get feedId;
 }
 
 class _FeedArticleListProviderElement
@@ -162,10 +280,10 @@ class _FeedArticleListProviderElement
   _FeedArticleListProviderElement(super.provider);
 
   @override
-  FeedFilter get filter => (origin as FeedArticleListProvider).filter;
+  Uri? get feedId => (origin as FeedArticleListProvider).feedId;
 }
 
-String _$feedArticleHash() => r'b1670f2ce11636f42fc0595befe42ada19319880';
+String _$feedArticleHash() => r'18b5faf391867b95f4b3bc4f74a6083854b633a5';
 
 /// See also [feedArticle].
 @ProviderFor(feedArticle)
@@ -177,15 +295,15 @@ class FeedArticleFamily extends Family<AsyncValue<FeedArticle?>> {
   const FeedArticleFamily();
 
   /// See also [feedArticle].
-  FeedArticleProvider call(String articleId) {
-    return FeedArticleProvider(articleId);
+  FeedArticleProvider call(String articleId, {required bool updateReadDate}) {
+    return FeedArticleProvider(articleId, updateReadDate: updateReadDate);
   }
 
   @override
   FeedArticleProvider getProviderOverride(
     covariant FeedArticleProvider provider,
   ) {
-    return call(provider.articleId);
+    return call(provider.articleId, updateReadDate: provider.updateReadDate);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -206,9 +324,13 @@ class FeedArticleFamily extends Family<AsyncValue<FeedArticle?>> {
 /// See also [feedArticle].
 class FeedArticleProvider extends AutoDisposeStreamProvider<FeedArticle?> {
   /// See also [feedArticle].
-  FeedArticleProvider(String articleId)
+  FeedArticleProvider(String articleId, {required bool updateReadDate})
     : this._internal(
-        (ref) => feedArticle(ref as FeedArticleRef, articleId),
+        (ref) => feedArticle(
+          ref as FeedArticleRef,
+          articleId,
+          updateReadDate: updateReadDate,
+        ),
         from: feedArticleProvider,
         name: r'feedArticleProvider',
         debugGetCreateSourceHash:
@@ -218,6 +340,7 @@ class FeedArticleProvider extends AutoDisposeStreamProvider<FeedArticle?> {
         dependencies: FeedArticleFamily._dependencies,
         allTransitiveDependencies: FeedArticleFamily._allTransitiveDependencies,
         articleId: articleId,
+        updateReadDate: updateReadDate,
       );
 
   FeedArticleProvider._internal(
@@ -228,9 +351,11 @@ class FeedArticleProvider extends AutoDisposeStreamProvider<FeedArticle?> {
     required super.debugGetCreateSourceHash,
     required super.from,
     required this.articleId,
+    required this.updateReadDate,
   }) : super.internal();
 
   final String articleId;
+  final bool updateReadDate;
 
   @override
   Override overrideWith(
@@ -246,6 +371,7 @@ class FeedArticleProvider extends AutoDisposeStreamProvider<FeedArticle?> {
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
         articleId: articleId,
+        updateReadDate: updateReadDate,
       ),
     );
   }
@@ -257,13 +383,16 @@ class FeedArticleProvider extends AutoDisposeStreamProvider<FeedArticle?> {
 
   @override
   bool operator ==(Object other) {
-    return other is FeedArticleProvider && other.articleId == articleId;
+    return other is FeedArticleProvider &&
+        other.articleId == articleId &&
+        other.updateReadDate == updateReadDate;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, articleId.hashCode);
+    hash = _SystemHash.combine(hash, updateReadDate.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -274,6 +403,9 @@ class FeedArticleProvider extends AutoDisposeStreamProvider<FeedArticle?> {
 mixin FeedArticleRef on AutoDisposeStreamProviderRef<FeedArticle?> {
   /// The parameter `articleId` of this provider.
   String get articleId;
+
+  /// The parameter `updateReadDate` of this provider.
+  bool get updateReadDate;
 }
 
 class _FeedArticleProviderElement
@@ -283,17 +415,19 @@ class _FeedArticleProviderElement
 
   @override
   String get articleId => (origin as FeedArticleProvider).articleId;
+  @override
+  bool get updateReadDate => (origin as FeedArticleProvider).updateReadDate;
 }
 
 String _$unreadArticleCountHash() =>
-    r'6fb96215fb3b7739a6cbd594a0358415ced04fca';
+    r'709518ad229636df0f1095f47e3a6d116b3aa7e6';
 
-/// See also [_unreadArticleCount].
-@ProviderFor(_unreadArticleCount)
-final _unreadArticleCountProvider =
+/// See also [unreadArticleCount].
+@ProviderFor(unreadArticleCount)
+final unreadArticleCountProvider =
     AutoDisposeProvider<Raw<Stream<Map<String, int>>>>.internal(
-      _unreadArticleCount,
-      name: r'_unreadArticleCountProvider',
+      unreadArticleCount,
+      name: r'unreadArticleCountProvider',
       debugGetCreateSourceHash:
           const bool.fromEnvironment('dart.vm.product')
               ? null
@@ -304,10 +438,10 @@ final _unreadArticleCountProvider =
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef _UnreadArticleCountRef =
+typedef UnreadArticleCountRef =
     AutoDisposeProviderRef<Raw<Stream<Map<String, int>>>>;
 String _$unreadFeedArticleCountHash() =>
-    r'f8573674477f0d9813b42c82d75e8196c1c1445b';
+    r'5e0d8e58b3d1dec978dc07b22367f2cb037b1b15';
 
 /// See also [unreadFeedArticleCount].
 @ProviderFor(unreadFeedArticleCount)
@@ -427,6 +561,417 @@ class _UnreadFeedArticleCountProviderElement
 
   @override
   Uri get feedId => (origin as UnreadFeedArticleCountProvider).feedId;
+}
+
+String _$fetchWebFeedHash() => r'73bdf87ad7dbd039c7dc181d80acdf99d96fe1c6';
+
+/// See also [fetchWebFeed].
+@ProviderFor(fetchWebFeed)
+const fetchWebFeedProvider = FetchWebFeedFamily();
+
+/// See also [fetchWebFeed].
+class FetchWebFeedFamily extends Family<AsyncValue<FeedParseResult>> {
+  /// See also [fetchWebFeed].
+  const FetchWebFeedFamily();
+
+  /// See also [fetchWebFeed].
+  FetchWebFeedProvider call(Uri url) {
+    return FetchWebFeedProvider(url);
+  }
+
+  @override
+  FetchWebFeedProvider getProviderOverride(
+    covariant FetchWebFeedProvider provider,
+  ) {
+    return call(provider.url);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'fetchWebFeedProvider';
+}
+
+/// See also [fetchWebFeed].
+class FetchWebFeedProvider extends AutoDisposeFutureProvider<FeedParseResult> {
+  /// See also [fetchWebFeed].
+  FetchWebFeedProvider(Uri url)
+    : this._internal(
+        (ref) => fetchWebFeed(ref as FetchWebFeedRef, url),
+        from: fetchWebFeedProvider,
+        name: r'fetchWebFeedProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$fetchWebFeedHash,
+        dependencies: FetchWebFeedFamily._dependencies,
+        allTransitiveDependencies:
+            FetchWebFeedFamily._allTransitiveDependencies,
+        url: url,
+      );
+
+  FetchWebFeedProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.url,
+  }) : super.internal();
+
+  final Uri url;
+
+  @override
+  Override overrideWith(
+    FutureOr<FeedParseResult> Function(FetchWebFeedRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: FetchWebFeedProvider._internal(
+        (ref) => create(ref as FetchWebFeedRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        url: url,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<FeedParseResult> createElement() {
+    return _FetchWebFeedProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FetchWebFeedProvider && other.url == url;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, url.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin FetchWebFeedRef on AutoDisposeFutureProviderRef<FeedParseResult> {
+  /// The parameter `url` of this provider.
+  Uri get url;
+}
+
+class _FetchWebFeedProviderElement
+    extends AutoDisposeFutureProviderElement<FeedParseResult>
+    with FetchWebFeedRef {
+  _FetchWebFeedProviderElement(super.provider);
+
+  @override
+  Uri get url => (origin as FetchWebFeedProvider).url;
+}
+
+String _$articleSearchHash() => r'8bf2c4aa8d8b3918be8a416909535682abfbab35';
+
+abstract class _$ArticleSearch
+    extends BuildlessAutoDisposeStreamNotifier<List<FeedArticle>> {
+  late final Uri? feedId;
+
+  Stream<List<FeedArticle>> build(Uri? feedId);
+}
+
+/// See also [ArticleSearch].
+@ProviderFor(ArticleSearch)
+const articleSearchProvider = ArticleSearchFamily();
+
+/// See also [ArticleSearch].
+class ArticleSearchFamily extends Family<AsyncValue<List<FeedArticle>>> {
+  /// See also [ArticleSearch].
+  const ArticleSearchFamily();
+
+  /// See also [ArticleSearch].
+  ArticleSearchProvider call(Uri? feedId) {
+    return ArticleSearchProvider(feedId);
+  }
+
+  @override
+  ArticleSearchProvider getProviderOverride(
+    covariant ArticleSearchProvider provider,
+  ) {
+    return call(provider.feedId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'articleSearchProvider';
+}
+
+/// See also [ArticleSearch].
+class ArticleSearchProvider
+    extends
+        AutoDisposeStreamNotifierProviderImpl<
+          ArticleSearch,
+          List<FeedArticle>
+        > {
+  /// See also [ArticleSearch].
+  ArticleSearchProvider(Uri? feedId)
+    : this._internal(
+        () => ArticleSearch()..feedId = feedId,
+        from: articleSearchProvider,
+        name: r'articleSearchProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$articleSearchHash,
+        dependencies: ArticleSearchFamily._dependencies,
+        allTransitiveDependencies:
+            ArticleSearchFamily._allTransitiveDependencies,
+        feedId: feedId,
+      );
+
+  ArticleSearchProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.feedId,
+  }) : super.internal();
+
+  final Uri? feedId;
+
+  @override
+  Stream<List<FeedArticle>> runNotifierBuild(covariant ArticleSearch notifier) {
+    return notifier.build(feedId);
+  }
+
+  @override
+  Override overrideWith(ArticleSearch Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: ArticleSearchProvider._internal(
+        () => create()..feedId = feedId,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        feedId: feedId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamNotifierProviderElement<ArticleSearch, List<FeedArticle>>
+  createElement() {
+    return _ArticleSearchProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ArticleSearchProvider && other.feedId == feedId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, feedId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ArticleSearchRef
+    on AutoDisposeStreamNotifierProviderRef<List<FeedArticle>> {
+  /// The parameter `feedId` of this provider.
+  Uri? get feedId;
+}
+
+class _ArticleSearchProviderElement
+    extends
+        AutoDisposeStreamNotifierProviderElement<
+          ArticleSearch,
+          List<FeedArticle>
+        >
+    with ArticleSearchRef {
+  _ArticleSearchProviderElement(super.provider);
+
+  @override
+  Uri? get feedId => (origin as ArticleSearchProvider).feedId;
+}
+
+String _$filteredArticleListHash() =>
+    r'4443a4a92cab0c8f534a74a1cba681a8973b058e';
+
+abstract class _$FilteredArticleList
+    extends BuildlessAutoDisposeNotifier<AsyncValue<List<FeedArticle>>> {
+  late final Uri? feedId;
+
+  AsyncValue<List<FeedArticle>> build(Uri? feedId);
+}
+
+/// See also [FilteredArticleList].
+@ProviderFor(FilteredArticleList)
+const filteredArticleListProvider = FilteredArticleListFamily();
+
+/// See also [FilteredArticleList].
+class FilteredArticleListFamily extends Family<AsyncValue<List<FeedArticle>>> {
+  /// See also [FilteredArticleList].
+  const FilteredArticleListFamily();
+
+  /// See also [FilteredArticleList].
+  FilteredArticleListProvider call(Uri? feedId) {
+    return FilteredArticleListProvider(feedId);
+  }
+
+  @override
+  FilteredArticleListProvider getProviderOverride(
+    covariant FilteredArticleListProvider provider,
+  ) {
+    return call(provider.feedId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'filteredArticleListProvider';
+}
+
+/// See also [FilteredArticleList].
+class FilteredArticleListProvider
+    extends
+        AutoDisposeNotifierProviderImpl<
+          FilteredArticleList,
+          AsyncValue<List<FeedArticle>>
+        > {
+  /// See also [FilteredArticleList].
+  FilteredArticleListProvider(Uri? feedId)
+    : this._internal(
+        () => FilteredArticleList()..feedId = feedId,
+        from: filteredArticleListProvider,
+        name: r'filteredArticleListProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$filteredArticleListHash,
+        dependencies: FilteredArticleListFamily._dependencies,
+        allTransitiveDependencies:
+            FilteredArticleListFamily._allTransitiveDependencies,
+        feedId: feedId,
+      );
+
+  FilteredArticleListProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.feedId,
+  }) : super.internal();
+
+  final Uri? feedId;
+
+  @override
+  AsyncValue<List<FeedArticle>> runNotifierBuild(
+    covariant FilteredArticleList notifier,
+  ) {
+    return notifier.build(feedId);
+  }
+
+  @override
+  Override overrideWith(FilteredArticleList Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: FilteredArticleListProvider._internal(
+        () => create()..feedId = feedId,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        feedId: feedId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeNotifierProviderElement<
+    FilteredArticleList,
+    AsyncValue<List<FeedArticle>>
+  >
+  createElement() {
+    return _FilteredArticleListProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FilteredArticleListProvider && other.feedId == feedId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, feedId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin FilteredArticleListRef
+    on AutoDisposeNotifierProviderRef<AsyncValue<List<FeedArticle>>> {
+  /// The parameter `feedId` of this provider.
+  Uri? get feedId;
+}
+
+class _FilteredArticleListProviderElement
+    extends
+        AutoDisposeNotifierProviderElement<
+          FilteredArticleList,
+          AsyncValue<List<FeedArticle>>
+        >
+    with FilteredArticleListRef {
+  _FilteredArticleListProviderElement(super.provider);
+
+  @override
+  Uri? get feedId => (origin as FilteredArticleListProvider).feedId;
 }
 
 // ignore_for_file: type=lint

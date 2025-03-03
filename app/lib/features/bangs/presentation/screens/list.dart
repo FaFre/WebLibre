@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
@@ -29,6 +28,7 @@ class BangListScreen extends HookConsumerWidget {
         slivers: [
           SliverAppBar.medium(title: Text('$category: $subCategory')),
           bangsAsync.when(
+            skipLoadingOnReload: true,
             data: (bangs) {
               return SliverList.builder(
                 itemCount: bangs.length,
@@ -41,7 +41,7 @@ class BangListScreen extends HookConsumerWidget {
                           .read(selectedBangTriggerProvider().notifier)
                           .setTrigger(bang.trigger);
 
-                      context.go(const SearchRoute().location);
+                      const SearchRoute().go(context);
                     },
                   );
                 },

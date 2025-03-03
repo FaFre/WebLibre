@@ -16,11 +16,12 @@ class WebsiteTitleTile extends HookConsumerWidget {
     final pageInfoAsync =
         (precachedInfo?.isPageInfoComplete ?? false)
             ? AsyncValue.data(precachedInfo!)
-            : ref.watch(pageInfoProvider(url));
+            : ref.watch(pageInfoProvider(url, isImageRequest: false));
 
     return Skeletonizer(
       enabled: pageInfoAsync.isLoading && precachedInfo == null,
       child: pageInfoAsync.when(
+        skipLoadingOnReload: true,
         data: (info) {
           return ListTile(
             leading: RawImage(
@@ -36,7 +37,8 @@ class WebsiteTitleTile extends HookConsumerWidget {
         error: (error, stackTrace) {
           return FailureWidget(
             title: error.toString(),
-            onRetry: () => ref.refresh(pageInfoProvider(url)),
+            onRetry:
+                () => ref.refresh(pageInfoProvider(url, isImageRequest: false)),
           );
         },
         loading:

@@ -8,7 +8,8 @@ import android.content.Context
 import eu.lensai.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.lensai.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.lensai.flutter_mozilla_components.feature.PrefManagerFeature
-import eu.lensai.flutter_mozilla_components.feature.TurndownFeature
+import eu.lensai.flutter_mozilla_components.feature.BrowserExtensionFeature
+import eu.lensai.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.concept.engine.DefaultSettings
@@ -44,7 +45,7 @@ object EngineProvider {
         return runtime!!
     }
 
-    fun createEngine(context: Context, defaultSettings: DefaultSettings): Engine {
+    fun createEngine(context: Context, defaultSettings: DefaultSettings, extensionEvents: BrowserExtensionEvents): Engine {
         Logger.debug("Creating Engine")
         val runtime = getOrCreateRuntime(context)
 
@@ -53,7 +54,7 @@ object EngineProvider {
             CookieManagerFeature.install(it)
             PrefManagerFeature.install(it)
             ContainerProxyFeature.install(it)
-            TurndownFeature.install(it)
+            BrowserExtensionFeature.install(it, extensionEvents)
         }
     }
 

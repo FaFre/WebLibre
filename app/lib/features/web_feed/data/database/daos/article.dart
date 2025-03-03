@@ -10,7 +10,7 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
   ArticleDao(super.attachedDatabase);
 
   Selectable<FeedArticle> getFeedArticles(Uri? url) {
-    final select = db.article.select();
+    final select = db.articleView.select();
 
     if (url != null) {
       select.where((article) => article.feedId.equalsValue(url));
@@ -25,7 +25,7 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
   }
 
   SingleOrNullSelectable<FeedArticle> getArticleById(String articleId) {
-    return db.article.select()..where((row) => row.id.equals(articleId));
+    return db.articleView.select()..where((row) => row.id.equals(articleId));
   }
 
   Future<void> upsertArticles(List<FeedArticle> articles) {
@@ -111,8 +111,6 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
       return db.queryArticlesBasic(
         feedId: feedId?.toString(),
         query: db.buildLikeQuery(searchString),
-        beforeMatch: matchPrefix,
-        afterMatch: matchSuffix,
       );
     }
   }

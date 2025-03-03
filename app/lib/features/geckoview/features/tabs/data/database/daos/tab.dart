@@ -226,11 +226,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
         ellipsis: ellipsis,
       );
     } else {
-      return db.queryTabsBasic(
-        query: db.buildLikeQuery(searchString),
-        beforeMatch: matchPrefix,
-        afterMatch: matchSuffix,
-      );
+      return db.queryTabsBasic(query: db.buildLikeQuery(searchString));
     }
   }
 }

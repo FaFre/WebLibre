@@ -29,7 +29,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
           await ref
               .read(tabRepositoryProvider.notifier)
               .addTab(
-                url: defaultSearchBang.getUrl(text),
+                url: defaultSearchBang.getTemplateUrl(text),
                 parentId: currentTabId,
               );
         } else {

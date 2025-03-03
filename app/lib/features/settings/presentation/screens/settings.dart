@@ -1,7 +1,6 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 
@@ -31,7 +30,7 @@ class SettingsScreen extends HookConsumerWidget {
                   leading: const Icon(Icons.settings),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    await context.push(GeneralSettingsRoute().location);
+                    await GeneralSettingsRoute().push(context);
                   },
                 ),
               ),
@@ -48,7 +47,7 @@ class SettingsScreen extends HookConsumerWidget {
                   leading: const Icon(MdiIcons.web),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    await context.push(WebEngineSettingsRoute().location);
+                    await WebEngineSettingsRoute().push(context);
                   },
                 ),
               ),
@@ -65,7 +64,7 @@ class SettingsScreen extends HookConsumerWidget {
                   leading: const Icon(MdiIcons.exclamationThick),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    await context.push(BangSettingsRoute().location);
+                    await BangSettingsRoute().push(context);
                   },
                 ),
               ),

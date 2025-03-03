@@ -9,6 +9,8 @@ CREATE TABLE feed (
   url TEXT PRIMARY KEY NOT NULL MAPPED BY `const UriConverter()`,
   title TEXT,
   description TEXT,
+  icon TEXT MAPPED BY `const UriConverter()`,
+  site_link TEXT MAPPED BY `const UriConverter()`,
   authors TEXT MAPPED BY `const FeedAuthorsConverter()`,
   tags TEXT MAPPED BY `const FeedCategoriesConverter()`,
   last_fetched DATETIME
@@ -30,6 +32,15 @@ CREATE TABLE article (
   contentMarkdown TEXT,
   contentPlain TEXT
 ) WITH FeedArticle;
+
+CREATE VIEW article_view WITH FeedArticle AS
+  SELECT 
+    a.*,
+    f.icon
+  FROM
+    article a
+  INNER JOIN
+    feed f on f.url = a.feed_id;
 
 CREATE INDEX article_feed_id ON article (feed_id);
 
@@ -73,17 +84,19 @@ queryArticlesBasic(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
   )
   SELECT 
       a.*,
-      highlight(article_fts, 0, :beforeMatch, :afterMatch) AS title,
+      f.icon,
       (
         bm25(article_fts, weights.title_weight)
       ) AS weighted_rank
-    FROM article_fts(:query) fts
+    FROM article_fts fts
     INNER JOIN
       article a ON a.rowid = fts.rowid
+    INNER JOIN
+      feed f ON f.url = a.feed_id
     CROSS JOIN weights
     WHERE
       fts.title LIKE :query AND
-      :feed_id IS NULL OR a.feed_id = :feed_id
+      (:feed_id IS NULL OR a.feed_id = :feed_id)
     ORDER BY 
       weighted_rank ASC,
       a.created DESC NULLS LAST;
@@ -92,15 +105,16 @@ queryArticlesFullContent(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
   WITH weights AS (
   SELECT 
     -- Customize these weights (higher = more important)
-    5.0 as title_weight,    -- Title matches are most important
-    2.0 as summary_weight,  -- Summary matches are quite important
+    10.0 as title_weight,    -- Title matches are most important
+    3.0 as summary_weight,  -- Summary matches are quite important
     1.0 as content_weight   -- Content matches are basic
   )
   SELECT 
       a.*,
-      highlight(article_fts, 0, :beforeMatch, :afterMatch) AS title,
-      snippet(article_fts, 1, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS summary,
-      snippet(article_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS content,
+      f.icon,
+      highlight(article_fts, 0, :beforeMatch, :afterMatch) AS title_highlight,
+      snippet(article_fts, 1, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS summary_snippet,
+      snippet(article_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS content_snippet,
       (
         bm25(article_fts, weights.title_weight, weights.summary_weight, 
             weights.content_weight)
@@ -108,6 +122,8 @@ queryArticlesFullContent(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
     FROM article_fts(:query) fts
     INNER JOIN
       article a ON a.rowid = fts.rowid
+    INNER JOIN
+      feed f ON f.url = a.feed_id
     CROSS JOIN weights
     WHERE
       :feed_id IS NULL OR a.feed_id = :feed_id

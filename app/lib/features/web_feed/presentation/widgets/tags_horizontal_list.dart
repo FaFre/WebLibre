@@ -12,25 +12,27 @@ class TagsHorizontalList extends StatelessWidget {
     void Function(String tagId, bool value)? onTagSelected,
   }) {
     _tags =
-        tags
-            .map(
-              (tag) => Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: FilterChip(
-                  label: Text(
-                    '${tag.id} ${tag.title.mapNotNull((title) => '($title)') ?? ''}'
-                        .trim(),
-                  ),
-                  selected: selectedTags.contains(tag.id),
-                  onSelected: onTagSelected.mapNotNull(
-                    (onTagSelected) => (value) {
+        tags.map((tag) {
+          final label = Text(
+            '${tag.id} ${tag.title.mapNotNull((title) => '($title)') ?? ''}'
+                .trim(),
+          );
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child:
+                onTagSelected.mapNotNull(
+                  (onTagSelected) => FilterChip(
+                    label: label,
+                    selected: selectedTags.contains(tag.id),
+                    onSelected: (value) {
                       onTagSelected(tag.id, value);
                     },
                   ),
-                ),
-              ),
-            )
-            .toList();
+                ) ??
+                Chip(label: label),
+          );
+        }).toList();
   }
 
   @override
@@ -43,7 +45,8 @@ class TagsHorizontalList extends StatelessWidget {
           return ListView.builder(
             itemCount: _tags.length,
             controller: controller,
-            shrinkWrap: true,
+            //Improve list performance by not rendering outside screen at all
+            cacheExtent: 0,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) => _tags[index],
           );

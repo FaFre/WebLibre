@@ -1,11 +1,61 @@
+import 'dart:async';
+
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/database/database.dart';
-import 'package:lensai/features/web_feed/data/models/feed_filter.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
+import 'package:lensai/features/web_feed/data/models/feed_parse_result.dart';
+import 'package:lensai/features/web_feed/data/providers.dart';
+import 'package:lensai/features/web_feed/domain/providers/article_filter.dart';
 import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dart';
+import 'package:lensai/features/web_feed/domain/services/feed_reader.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'providers.g.dart';
+
+@Riverpod()
+class ArticleSearch extends _$ArticleSearch {
+  late StreamController<List<FeedArticle>> _streamController;
+
+  Future<void> search(
+    String input, {
+    int snippetLength = 120,
+    String matchPrefix = '***',
+    String matchSuffix = '***',
+    String ellipsis = '…',
+  }) async {
+    if (input.isNotEmpty) {
+      await ref
+          .read(feedDatabaseProvider)
+          .articleDao
+          .queryArticles(
+            matchPrefix: matchPrefix,
+            matchSuffix: matchSuffix,
+            ellipsis: ellipsis,
+            snippetLength: snippetLength,
+            searchString: input,
+            feedId: feedId,
+          )
+          .get()
+          .then((value) {
+            if (!_streamController.isClosed) {
+              _streamController.add(value);
+            }
+          });
+    }
+  }
+
+  @override
+  Stream<List<FeedArticle>> build(Uri? feedId) {
+    _streamController = StreamController();
+
+    ref.onDispose(() async {
+      await _streamController.close();
+    });
+
+    return _streamController.stream;
+  }
+}
 
 @Riverpod()
 Stream<List<FeedData>> feedList(Ref ref) {
@@ -14,25 +64,102 @@ Stream<List<FeedData>> feedList(Ref ref) {
 }
 
 @Riverpod()
-Stream<List<FeedArticle>> feedArticleList(Ref ref, FeedFilter filter) {
+Stream<FeedData?> feedData(Ref ref, Uri? feedId) {
   final repository = ref.watch(feedRepositoryProvider.notifier);
-  return repository.watchFeedArticles(filter);
+
+  if (feedId == null) {
+    return Stream.value(null);
+  }
+
+  return repository.watchFeed(feedId);
 }
 
 @Riverpod()
-Stream<FeedArticle?> feedArticle(Ref ref, String articleId) {
+Stream<List<FeedArticle>> feedArticleList(Ref ref, Uri? feedId) {
   final repository = ref.watch(feedRepositoryProvider.notifier);
-  return repository.watchArticle(articleId);
+  return repository.watchFeedArticles(feedId);
 }
 
 @Riverpod()
-Raw<Stream<Map<String, int>>> _unreadArticleCount(Ref ref) {
+class FilteredArticleList extends _$FilteredArticleList {
+  bool _hasSearch = false;
+
+  void search(String input) {
+    if (input.isNotEmpty) {
+      if (!_hasSearch) {
+        _hasSearch = true;
+        ref.invalidateSelf();
+      }
+
+      //Don't block
+      unawaited(ref.read(articleSearchProvider(feedId).notifier).search(input));
+    } else if (_hasSearch) {
+      _hasSearch = false;
+      ref.invalidateSelf();
+    }
+  }
+
+  @override
+  AsyncValue<List<FeedArticle>> build(Uri? feedId) {
+    final filterTags = ref.watch(articleFilterProvider);
+
+    final articlesAsync =
+        _hasSearch
+            ? ref.watch(articleSearchProvider(feedId))
+            : ref.watch(feedArticleListProvider(feedId));
+
+    return articlesAsync.whenData((articles) {
+      if (filterTags.isNotEmpty) {
+        return articles.where((article) {
+          final tags = article.tags?.map((tag) => tag.id).toSet();
+
+          final authors =
+              article.authors
+                  ?.map((author) => author.name.whenNotEmpty)
+                  .nonNulls
+                  .toSet();
+
+          return filterTags.every(
+            (filter) =>
+                (tags?.contains(filter) ?? false) ||
+                (authors?.contains(filter) ?? false),
+          );
+        }).toList();
+      }
+
+      return articles;
+    });
+  }
+}
+
+@Riverpod()
+Stream<FeedArticle?> feedArticle(
+  Ref ref,
+  String articleId, {
+  required bool updateReadDate,
+}) async* {
+  final repository = ref.watch(feedRepositoryProvider.notifier);
+
+  if (updateReadDate) {
+    await repository.touchArticleRead(articleId);
+  }
+
+  yield* repository.watchArticle(articleId);
+}
+
+@Riverpod()
+Raw<Stream<Map<String, int>>> unreadArticleCount(Ref ref) {
   final repository = ref.watch(feedRepositoryProvider.notifier);
   return repository.watchUnreadFeedArticleCount();
 }
 
 @Riverpod()
 Stream<int?> unreadFeedArticleCount(Ref ref, Uri feedId) {
-  final stream = ref.watch(_unreadArticleCountProvider);
+  final stream = ref.watch(unreadArticleCountProvider);
   return stream.map((counts) => counts[feedId.toString()]);
+}
+
+@Riverpod()
+Future<FeedParseResult> fetchWebFeed(Ref ref, Uri url) {
+  return ref.read(feedReaderProvider.notifier).parseFeed(url);
 }

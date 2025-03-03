@@ -6,7 +6,7 @@ part of 'search.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bangSearchHash() => r'ff7035d269041c6415f2a2afb0a71ef67d3b9841';
+String _$bangSearchHash() => r'6b7452d48698c01870c5c75f0c10cadaafc481c8';
 
 /// See also [BangSearch].
 @ProviderFor(BangSearch)
@@ -23,26 +23,22 @@ final bangSearchProvider =
     );
 
 typedef _$BangSearch = AutoDisposeStreamNotifier<List<BangData>>;
-String _$seamlessBangProviderHash() =>
-    r'c4c0b452c94ba447be5b02dfef5bc16148cc3dc7';
+String _$seamlessBangHash() => r'8bd7a2cbe4c302ae08f85167290666a7437f8b9b';
 
-/// See also [SeamlessBangProvider].
-@ProviderFor(SeamlessBangProvider)
-final seamlessBangProviderProvider = AutoDisposeNotifierProvider<
-  SeamlessBangProvider,
+/// See also [SeamlessBang].
+@ProviderFor(SeamlessBang)
+final seamlessBangProvider = AutoDisposeNotifierProvider<
+  SeamlessBang,
   AsyncValue<List<BangData>>
 >.internal(
-  SeamlessBangProvider.new,
-  name: r'seamlessBangProviderProvider',
+  SeamlessBang.new,
+  name: r'seamlessBangProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$seamlessBangProviderHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$seamlessBangHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SeamlessBangProvider =
-    AutoDisposeNotifier<AsyncValue<List<BangData>>>;
+typedef _$SeamlessBang = AutoDisposeNotifier<AsyncValue<List<BangData>>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

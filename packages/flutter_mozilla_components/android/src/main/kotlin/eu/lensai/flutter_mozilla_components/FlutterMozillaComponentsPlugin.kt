@@ -2,6 +2,7 @@ package eu.lensai.flutter_mozilla_components
 
 import android.app.Activity
 import android.content.Intent
+import android.view.View
 import androidx.fragment.app.FragmentActivity
 import eu.lensai.flutter_mozilla_components.activities.NotificationActivity
 import eu.lensai.flutter_mozilla_components.api.GeckoAddonsApiImpl
@@ -18,11 +19,13 @@ import eu.lensai.flutter_mozilla_components.api.GeckoSelectionActionControllerIm
 import eu.lensai.flutter_mozilla_components.api.GeckoSessionApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoSuggestionApiImpl
 import eu.lensai.flutter_mozilla_components.api.GeckoTabsApiImpl
-import eu.lensai.flutter_mozilla_components.api.GeckoTurndownApiImpl
+import eu.lensai.flutter_mozilla_components.api.GeckoBrowserExtensionApiImpl
 import eu.lensai.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
+import eu.lensai.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonsApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoBrowserApi
+import eu.lensai.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoCookieApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
@@ -39,7 +42,6 @@ import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionApi
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoTabsApi
-import eu.lensai.flutter_mozilla_components.pigeons.GeckoTurndownApi
 import eu.lensai.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.lensai.flutter_mozilla_components.pigeons.ReaderViewEvents
 
@@ -68,7 +70,6 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   private lateinit var _flutterEvents : GeckoStateEvents
 
   private var isPlatformViewRegistered = false
-  private var pendingFragmentShow = false
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     synchronized(this) {
@@ -92,6 +93,8 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     val readerViewController =
       ReaderViewController(_flutterPluginBinding.binaryMessenger)
 
+    val extensionEvents = BrowserExtensionEvents(_flutterPluginBinding.binaryMessenger)
+
     val addonEvents = GeckoAddonEvents(_flutterPluginBinding.binaryMessenger)
     val tabContentEvents = GeckoTabContentEvents(_flutterPluginBinding.binaryMessenger)
 
@@ -105,6 +108,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
       selectionActionDelegate,
       addonEvents,
       tabContentEvents,
+      extensionEvents
     )
 
     GeckoBrowserApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoBrowserApiImpl {
@@ -125,7 +129,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     ))
     GeckoDeleteBrowsingDataController.setUp(_flutterPluginBinding.binaryMessenger, GeckoDeleteBrowsingDataControllerImpl())
     GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl())
-    GeckoTurndownApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTurndownApiImpl())
+    GeckoBrowserExtensionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoBrowserExtensionApiImpl())
 
     ReaderViewEvents.setUp(
       _flutterPluginBinding.binaryMessenger,
@@ -137,21 +141,31 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     flutterPluginBinding.applicationContext.startActivity(intent)
   }
 
-  private fun showNativeFragment() {
+  private fun showNativeFragment(): Boolean {
     if (!isPlatformViewRegistered) {
-      pendingFragmentShow = true
-      return
+      return false
     }
 
-    if (activity == null) {
-      return
+    if (activity == null || activity !is FragmentActivity) {
+      return false
+    }
+
+    val fragmentActivity = activity as FragmentActivity
+
+    // Check if the container view exists in the view hierarchy
+    val container = fragmentActivity.findViewById<View>(FRAGMENT_CONTAINER_ID)
+    if (container == null) {
+      // Container doesn't exist yet, retry later
+      return false
     }
 
     val nativeFragment = BrowserFragment.create()
-    val fm = (activity as FragmentActivity).supportFragmentManager
+    val fm = fragmentActivity.supportFragmentManager
     fm.beginTransaction()
       .replace(FRAGMENT_CONTAINER_ID, nativeFragment)
       .commitAllowingStateLoss()
+
+    return true
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -170,12 +184,6 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     )
 
     isPlatformViewRegistered = true
-
-    // Process any pending fragment show request
-    if (pendingFragmentShow) {
-      pendingFragmentShow = false
-      showNativeFragment()
-    }
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
@@ -189,6 +197,5 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   override fun onDetachedFromActivity() {
     this.activity = null
     isPlatformViewRegistered = false
-    pendingFragmentShow = false
   }
 }

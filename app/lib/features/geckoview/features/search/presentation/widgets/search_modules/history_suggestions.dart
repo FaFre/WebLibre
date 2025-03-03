@@ -48,6 +48,7 @@ class HistorySuggestions extends HookConsumerWidget {
         SliverSkeletonizer(
           enabled: historySuggestions.isLoading,
           child: historySuggestions.when(
+            skipLoadingOnReload: true,
             data: (historySuggestions) {
               return SliverList.builder(
                 itemCount: historySuggestions.length,

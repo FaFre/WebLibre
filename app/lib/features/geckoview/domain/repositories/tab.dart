@@ -162,7 +162,7 @@ class TabRepository extends _$TabRepository {
                 ref.read(selectedBangDataProvider()) ??
                 await ref.read(defaultSearchBangDataProvider.future);
 
-            await addTab(url: defaultSearchBang?.getUrl(value.text));
+            await addTab(url: defaultSearchBang?.getTemplateUrl(value.text));
         }
       });
     });

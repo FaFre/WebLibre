@@ -1994,7 +1994,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
-  fun showNativeFragment()
+  fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
 
   companion object {
@@ -2011,8 +2011,7 @@ interface GeckoBrowserApi {
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
-              api.showNativeFragment()
-              listOf(null)
+              listOf(api.showNativeFragment())
             } catch (exception: Throwable) {
               wrapError(exception)
             }
@@ -2980,20 +2979,20 @@ interface GeckoPrefApi {
   }
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
-interface GeckoTurndownApi {
+interface GeckoBrowserExtensionApi {
   fun getMarkdown(htmlList: List<String>, callback: (Result<List<Any>>) -> Unit)
 
   companion object {
-    /** The codec used by GeckoTurndownApi. */
+    /** The codec used by GeckoBrowserExtensionApi. */
     val codec: MessageCodec<Any?> by lazy {
       GeckoPigeonCodec()
     }
-    /** Sets up an instance of `GeckoTurndownApi` to handle messages through the `binaryMessenger`. */
+    /** Sets up an instance of `GeckoBrowserExtensionApi` to handle messages through the `binaryMessenger`. */
     @JvmOverloads
-    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoTurndownApi?, messageChannelSuffix: String = "") {
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoBrowserExtensionApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTurndownApi.getMarkdown$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserExtensionApi.getMarkdown$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
@@ -4007,6 +4006,32 @@ interface GeckoDownloadsApi {
           channel.setMessageHandler(null)
         }
       }
+    }
+  }
+}
+/** Generated class from Pigeon that represents Flutter messages that can be called from Kotlin. */
+class BrowserExtensionEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by BrowserExtensionEvents. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  fun onFeedRequested(timestampArg: Long, urlArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(timestampArg, urlArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(createConnectionError(channelName)))
+      } 
     }
   }
 }

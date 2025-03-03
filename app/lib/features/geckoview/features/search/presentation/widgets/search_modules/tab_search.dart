@@ -96,13 +96,11 @@ class TabSearch extends HookConsumerWidget {
             return ListTile(
               leading: RepaintBoundary(
                 child:
-                    (result.icon != null)
-                        ? RawImage(
-                          image: result.icon?.value,
-                          height: 24,
-                          width: 24,
-                        )
-                        : UrlIcon(result.url, iconSize: 24),
+                    result.icon.mapNotNull(
+                      (icon) =>
+                          RawImage(image: icon.value, height: 24, width: 24),
+                    ) ??
+                    UrlIcon([result.url], iconSize: 24),
               ),
               title: result.title.mapNotNull(
                 (title) => MarkdownBody(

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/data/models/web_page_info.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/presentation/controllers/website_title.dart';
@@ -17,11 +20,12 @@ class WebsiteFeedTile extends HookConsumerWidget {
     final pageInfoAsync =
         (precachedInfo?.feeds != null)
             ? AsyncValue.data(precachedInfo!)
-            : ref.watch(pageInfoProvider(url));
+            : ref.watch(pageInfoProvider(url, isImageRequest: false));
 
     return Skeletonizer(
       enabled: pageInfoAsync.isLoading && precachedInfo?.feeds == null,
       child: pageInfoAsync.when(
+        skipLoadingOnReload: true,
         data: (info) {
           if (info.feeds.isEmpty) {
             return const SizedBox.shrink();
@@ -39,6 +43,13 @@ class WebsiteFeedTile extends HookConsumerWidget {
                 ),
               ),
             ),
+            onTap: () async {
+              await SelectFeedDialogRoute(
+                feedsJson: jsonEncode(
+                  info.feeds!.map((feed) => feed.toString()).toList(),
+                ),
+              ).push(context);
+            },
           );
         },
         error: (error, stackTrace) {

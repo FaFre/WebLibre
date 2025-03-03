@@ -1,6 +1,7 @@
 package eu.lensai.flutter_mozilla_components
 
 import android.content.Context
+import eu.lensai.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -44,7 +45,8 @@ object GlobalComponents {
         readerViewController: ReaderViewController,
         selectionAction: SelectionActionDelegate,
         addonEvents: GeckoAddonEvents,
-        tabContentEvents: GeckoTabContentEvents
+        tabContentEvents: GeckoTabContentEvents,
+        extensionEvents: BrowserExtensionEvents
     ) {
         Logger.debug("Creating new components")
 
@@ -54,7 +56,8 @@ object GlobalComponents {
             readerViewController,
             selectionAction,
             addonEvents,
-            tabContentEvents
+            tabContentEvents,
+            extensionEvents
         )
 
         //newComponents.crashReporter.install(applicationContext)

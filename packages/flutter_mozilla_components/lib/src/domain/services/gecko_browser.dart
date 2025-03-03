@@ -7,7 +7,7 @@ class GeckoBrowserService {
 
   GeckoBrowserService({GeckoBrowserApi? api}) : _api = api ?? _apiInstance;
 
-  Future<void> showNativeFragment() {
+  Future<bool> showNativeFragment() {
     return _api.showNativeFragment();
   }
 

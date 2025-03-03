@@ -2,7 +2,6 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
@@ -307,7 +306,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                 leading: const Icon(MdiIcons.shieldLock),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () async {
-                  await context.push(WebEngineHardeningRoute().location);
+                  await WebEngineHardeningRoute().push(context);
                 },
               ),
             ],

@@ -39,6 +39,7 @@ FeedArticle _$FeedArticleFromJson(Map<String, dynamic> json) => FeedArticle(
   summaryPlain: json['summaryPlain'] as String?,
   contentMarkdown: json['contentMarkdown'] as String?,
   contentPlain: json['contentPlain'] as String?,
+  icon: json['icon'] == null ? null : Uri.parse(json['icon'] as String),
 );
 
 Map<String, dynamic> _$FeedArticleToJson(FeedArticle instance) =>
@@ -57,4 +58,5 @@ Map<String, dynamic> _$FeedArticleToJson(FeedArticle instance) =>
       'summaryPlain': instance.summaryPlain,
       'contentMarkdown': instance.contentMarkdown,
       'contentPlain': instance.contentPlain,
+      'icon': instance.icon?.toString(),
     };

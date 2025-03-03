@@ -4,6 +4,7 @@ part of 'routes.dart';
   name: 'FeedListRoute',
   path: '/feeds',
   routes: [
+    TypedGoRoute<FeedAddRoute>(name: 'FeedAddRoute', path: 'add'),
     TypedGoRoute<FeedArticleListRoute>(
       name: 'FeedArticleListRoute',
       path: 'articles/:feedId',
@@ -12,7 +13,15 @@ part of 'routes.dart';
       name: 'FeedArticleRoute',
       path: 'article/:articleId',
     ),
-    TypedGoRoute<FeedCreateRoute>(name: 'FeedCreateRoute', path: 'create'),
+    TypedGoRoute<FeedCreateRoute>(
+      name: 'FeedCreateRoute',
+      path: 'create/:feedId',
+    ),
+    TypedGoRoute<SelectFeedDialogRoute>(
+      name: 'SelectFeedDialogRoute',
+      path: 'available/:feedsJson',
+    ),
+    TypedGoRoute<FeedEditRoute>(name: 'FeedEditRoute', path: 'edit/:feedId'),
   ],
 )
 class FeedListRoute extends GoRouteData {
@@ -23,9 +32,52 @@ class FeedListRoute extends GoRouteData {
 }
 
 class FeedCreateRoute extends GoRouteData {
+  final Uri feedId;
+
+  FeedCreateRoute({required this.feedId});
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return FeedEditScreen.create(initialFeed: state.extra! as FeedData);
+    return FeedEditScreen.create(feedId: feedId);
+  }
+}
+
+class SelectFeedDialogRoute extends GoRouteData {
+  final String feedsJson;
+
+  const SelectFeedDialogRoute({required this.feedsJson});
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    final feedUris = Set<Uri>.from(
+      (jsonDecode(feedsJson) as List<dynamic>).map(
+        (url) => Uri.parse(url as String),
+      ),
+    );
+
+    return DialogPage(builder: (_) => SelectFeedDialog(feedUris: feedUris));
+  }
+}
+
+class FeedEditRoute extends GoRouteData {
+  final Uri feedId;
+
+  const FeedEditRoute({required this.feedId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return FeedEditScreen.edit(feedId: feedId);
+  }
+}
+
+class FeedAddRoute extends GoRouteData {
+  final Uri? $extra;
+
+  const FeedAddRoute({this.$extra});
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(builder: (_) => AddFeedDialog(initialUri: $extra));
   }
 }
 

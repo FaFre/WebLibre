@@ -64,7 +64,6 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
         return ListView.builder(
           controller: controller,
           scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
           itemCount: items.length,
           itemBuilder: (context, index) {
             final item = items[index];

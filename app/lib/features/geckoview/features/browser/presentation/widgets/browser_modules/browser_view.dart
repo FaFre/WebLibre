@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/logger.dart';
+import 'package:lensai/core/routing/routes.dart';
+import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
+import 'package:lensai/features/geckoview/domain/providers/browser_extension.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
@@ -77,6 +80,12 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         }
       },
     );
+
+    ref.listen(feedRequestedProvider, (previous, next) async {
+      if (next.valueOrNull.mapNotNull(Uri.tryParse) case final Uri url) {
+        await FeedAddRoute($extra: url).push(context);
+      }
+    });
 
     return Visibility(
       visible: hasTab,

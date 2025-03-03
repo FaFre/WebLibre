@@ -1,15 +1,13 @@
-import 'package:collection/collection.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/models/feed_link.dart';
+import 'package:lensai/features/web_feed/extensions/atom.dart';
 
 extension FeedArticleX on FeedArticle {
   String get displayTitle =>
       title ??
       links
-          ?.firstWhereOrNull(
-            (link) => link.relation == FeedLinkRelation.alternate,
-          )
+          ?.getRelation(FeedLinkRelation.alternate)
           .mapNotNull(
             (link) => link.title.whenNotEmpty ?? link.uri.toString(),
           ) ??

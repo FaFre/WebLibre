@@ -71,7 +71,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
         : input;
   }
 
-  Uri getUrl(String? query) {
+  Uri getTemplateUrl(String? query) {
     final url =
         (query != null)
             ? urlTemplate.replaceAll(

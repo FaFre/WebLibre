@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/providers/format.dart';
 import 'package:lensai/core/routing/routes.dart';
@@ -10,6 +9,7 @@ import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/web_feed/data/models/feed_link.dart';
 import 'package:lensai/features/web_feed/domain/providers.dart';
+import 'package:lensai/features/web_feed/extensions/atom.dart';
 import 'package:lensai/features/web_feed/extensions/feed_article.dart';
 import 'package:lensai/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:lensai/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
@@ -26,13 +26,16 @@ class FeedArticleScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final articleAsync = ref.watch(feedArticleProvider(articleId));
+    final articleAsync = ref.watch(
+      feedArticleProvider(articleId, updateReadDate: true),
+    );
 
     return Scaffold(
       body: articleAsync.when(
+        skipLoadingOnReload: true,
         data: (article) {
           if (article == null) {
-            return SizedBox.shrink();
+            return const SizedBox.shrink();
           }
 
           return HookBuilder(
@@ -55,9 +58,7 @@ class FeedArticleScreen extends HookConsumerWidget {
               );
 
               final articleLink = useMemoized(
-                () => article.links?.firstWhereOrNull(
-                  (link) => link.relation == FeedLinkRelation.alternate,
-                ),
+                () => article.links?.getRelation(FeedLinkRelation.alternate),
               );
 
               final articleImages = useMemoized(
@@ -176,7 +177,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                     .addTab(url: articleLink.uri);
 
                                 if (context.mounted) {
-                                  context.go(BrowserRoute().location);
+                                  BrowserRoute().go(context);
                                 }
                               },
                               icon: const Icon(Icons.open_in_browser),
@@ -218,7 +219,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                 context,
                                 tabName: title.whenNotEmpty,
                                 onShow: () {
-                                  context.go(BrowserRoute().location);
+                                  BrowserRoute().go(context);
                                 },
                               );
                             }

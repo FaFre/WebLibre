@@ -9,17 +9,19 @@ import mozilla.components.feature.addons.logger
  * Implementation of GeckoBrowserApi that handles browser-related operations
  * @param showFragmentCallback Callback function to show native fragment
  */
-class GeckoBrowserApiImpl(private val showFragmentCallback: () -> Unit) : GeckoBrowserApi {
+class GeckoBrowserApiImpl(private val showFragmentCallback: () -> Boolean) : GeckoBrowserApi {
     companion object {
         private const val TAG = "GeckoBrowserApiImpl"
     }
 
-    override fun showNativeFragment() {
+    override fun showNativeFragment(): Boolean {
         try {
-            showFragmentCallback()
+            return showFragmentCallback()
         } catch (e: Exception) {
             logger.error("Failed to show native fragment", e)
         }
+
+        return false
     }
 
     override fun onTrimMemory(level: Long) {

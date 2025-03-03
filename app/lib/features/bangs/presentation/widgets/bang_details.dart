@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
@@ -38,7 +37,7 @@ class BangDetails extends HookConsumerWidget {
             children: [
               Row(
                 children: [
-                  UrlIcon(bangData.getUrl(''), iconSize: 34.0),
+                  UrlIcon([bangData.getTemplateUrl('')], iconSize: 34.0),
                   const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(
@@ -67,14 +66,14 @@ class BangDetails extends HookConsumerWidget {
                       visualDensity: VisualDensity.compact,
                     ),
                     onPressed: () async {
-                      final url = Uri.parse(bangData.getUrl('').origin);
+                      final url = Uri.parse(bangData.getTemplateUrl('').origin);
 
                       await ref
                           .read(tabRepositoryProvider.notifier)
                           .addTab(url: url);
 
                       if (context.mounted) {
-                        context.go(BrowserRoute().location);
+                        BrowserRoute().go(context);
                       }
                     },
                     label: Text(bangData.domain),

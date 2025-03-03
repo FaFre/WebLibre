@@ -22,7 +22,7 @@ class BangSearch extends _$BangSearch {
       maxEntryCount: 3,
     ); //TODO: make count dynamic
 
-    return bang.getUrl(searchQuery);
+    return bang.getTemplateUrl(searchQuery);
   }
 
   Future<void> search(String input) async {
@@ -50,7 +50,7 @@ class BangSearch extends _$BangSearch {
 }
 
 @Riverpod()
-class SeamlessBangProvider extends _$SeamlessBangProvider {
+class SeamlessBang extends _$SeamlessBang {
   bool _hasSearch = false;
 
   void search(String input) {
@@ -60,6 +60,7 @@ class SeamlessBangProvider extends _$SeamlessBangProvider {
         ref.invalidateSelf();
       }
 
+      //Don't block
       unawaited(ref.read(bangSearchProvider.notifier).search(input));
     } else if (_hasSearch) {
       _hasSearch = false;

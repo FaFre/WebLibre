@@ -81,6 +81,7 @@ class WebPageDialog extends HookConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: availableBangsAsync.when(
+                            skipLoadingOnReload: true,
                             data: (availableBangs) {
                               if (availableBangs.isEmpty) {
                                 return const SizedBox.shrink();

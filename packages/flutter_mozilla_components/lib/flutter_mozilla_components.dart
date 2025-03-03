@@ -18,7 +18,7 @@ export 'src/domain/services/gecko_session.dart';
 export 'src/domain/services/gecko_suggestions.dart';
 export 'src/domain/services/gecko_tab.dart';
 export 'src/domain/services/gecko_tab_content.dart';
-export 'src/domain/services/gecko_turndown.dart';
+export 'src/domain/services/gecko_browser_extension.dart';
 export 'src/geckoview_widget.dart';
 export 'src/pigeons/gecko.g.dart'
     show

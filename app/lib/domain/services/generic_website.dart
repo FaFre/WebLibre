@@ -186,15 +186,27 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     return icons;
   }
 
-  Future<Result<WebPageInfo>> fetchPageInfo(Uri url) {
+  Future<Result<WebPageInfo>> fetchPageInfo(Uri url, bool isImageRequest) {
     return Result.fromAsync(() async {
-      final result = await compute((String urlString) async {
+      final result = await compute((args) async {
+        final [String urlString, bool isImageRequest] = args;
+
         final client = http.Client();
         try {
           final baseUri = Uri.parse(urlString);
           final response = await client
               .get(baseUri)
               .timeout(const Duration(seconds: 15));
+
+          //When this is a request for an icon and we hit an image, directly return it
+          if (isImageRequest) {
+            final contentType = response.headers['content-type'];
+            if (contentType?.contains('image/') == true) {
+              return {
+                'imageBytes': [response.bodyBytes],
+              };
+            }
+          }
 
           final document = html_parser.parse(response.body);
 
@@ -206,12 +218,23 @@ class GenericWebsiteService extends _$GenericWebsiteService {
           return {
             'title': title,
             'resources': resources.map(_serializeResource).toList(),
-            'feeds': feeds,
+            'feeds': feeds.map((uri) => uri.toString()).toList(),
           };
         } finally {
           client.close();
         }
-      }, url.toString());
+      }, <dynamic>[url.toString(), isImageRequest]);
+
+      if (result['imageBytes'] case final Uint8List imageBytes) {
+        return WebPageInfo(
+          url: url,
+          favicon: await BrowserIcon.fromBytes(
+            imageBytes,
+            dominantColor: null,
+            source: IconSource.download,
+          ),
+        );
+      }
 
       final resources =
           (result['resources']! as List<Map<String, dynamic>>)
@@ -226,7 +249,9 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         url: url,
         title: result['title'] as String?,
         favicon: favicon,
-        feeds: result['feeds'] as Set<String>?,
+        feeds: Set.from(
+          (result['feeds']! as List<String>).map((url) => Uri.tryParse(url)),
+        ),
       );
     }, exceptionHandler: handleHttpError);
   }
@@ -277,17 +302,29 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     );
   }
 
-  Future<BrowserIcon> getUrlIcon(Uri url) async {
-    final cachedIcon = await getCachedIcon(url);
+  Future<BrowserIcon?> getUrlIcon(List<Uri> urlList) async {
+    for (final url in urlList) {
+      final cachedIcon = await getCachedIcon(url);
 
-    if (cachedIcon != null) {
-      return cachedIcon;
+      if (cachedIcon != null) {
+        return cachedIcon;
+      }
+
+      final result = await ref.read(
+        pageInfoProvider(url, isImageRequest: true).future,
+      );
+
+      if (result.favicon case final BrowserIcon favicon) {
+        //If it was a `isImageRequest` hit, we need to cache it at this point
+        if (!_browserIconCache.contains(url.origin)) {
+          _browserIconCache.set(url.origin, favicon);
+        }
+
+        return favicon;
+      }
     }
 
-    final result = await ref.read(pageInfoProvider(url).future);
-    final favicon = result.favicon!;
-
-    return favicon;
+    return null;
   }
 
   // Future<Uri?> tryUpgradeToHttps(Uri httpUri) async {

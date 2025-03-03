@@ -26,6 +26,12 @@ extension ParseAtomLink on List<AtomLink> {
   }
 }
 
+extension SelectFeedLink on List<FeedLink> {
+  FeedLink? getRelation(FeedLinkRelation relation) {
+    return firstWhereOrNull((link) => link.relation == relation);
+  }
+}
+
 extension ParseAtomCategory on List<AtomCategory> {
   List<FeedCategory> toFeedCategories() {
     return where((category) => category.term.isNotEmpty)

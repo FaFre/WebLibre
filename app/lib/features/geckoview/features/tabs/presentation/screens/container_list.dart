@@ -1,7 +1,6 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/core/uuid.dart';
@@ -28,6 +27,7 @@ class ContainerListScreen extends HookConsumerWidget {
           return Skeletonizer(
             enabled: containersAsync.isLoading,
             child: containersAsync.when(
+              skipLoadingOnReload: true,
               data:
                   (containers) => FadingScroll(
                     fadingSize: 25,
@@ -115,10 +115,9 @@ class ContainerListScreen extends HookConsumerWidget {
                   .unusedRandomContainerColor();
 
           if (context.mounted) {
-            final result = await context.push<ContainerData?>(
-              ContainerCreateRoute().location,
-              extra: ContainerData(id: uuid.v7(), color: initialColor),
-            );
+            final result = await ContainerCreateRoute(
+              ContainerData(id: uuid.v7(), color: initialColor),
+            ).push<ContainerData?>(context);
 
             if (result != null) {
               await ref

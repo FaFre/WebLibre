@@ -1,12 +1,12 @@
 package eu.lensai.flutter_mozilla_components.api
 
 import eu.lensai.flutter_mozilla_components.feature.ResultConsumer
-import eu.lensai.flutter_mozilla_components.feature.TurndownFeature
-import eu.lensai.flutter_mozilla_components.pigeons.GeckoTurndownApi
+import eu.lensai.flutter_mozilla_components.feature.BrowserExtensionFeature
+import eu.lensai.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
 import org.json.JSONArray
 import org.json.JSONObject
 
-class GeckoTurndownApiImpl : GeckoTurndownApi {
+class GeckoBrowserExtensionApiImpl : GeckoBrowserExtensionApi {
     private fun JSONObject.toMap(): Map<String, Any> {
         val map = mutableMapOf<String, Any>()
         val keys = this.keys()
@@ -38,7 +38,7 @@ class GeckoTurndownApiImpl : GeckoTurndownApi {
     }
 
     override fun getMarkdown(htmlList: List<String>, callback: (Result<List<Any>>) -> Unit) {
-        TurndownFeature.scheduleRequest("turndown", htmlList, object :
+        BrowserExtensionFeature.scheduleRequest("turndown", htmlList, object :
             ResultConsumer<JSONObject> {
             override fun success(result: JSONObject) {
                 val resultArray = result.getJSONArray("result")

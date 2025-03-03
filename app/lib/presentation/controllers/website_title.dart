@@ -6,10 +6,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'website_title.g.dart';
 
 @Riverpod()
-Future<WebPageInfo> pageInfo(Ref ref, Uri url) async {
+Future<WebPageInfo> pageInfo(
+  Ref ref,
+  Uri url, {
+  required bool isImageRequest,
+}) async {
   final websiteService = ref.watch(genericWebsiteServiceProvider.notifier);
 
-  final result = await websiteService.fetchPageInfo(url);
+  final result = await websiteService.fetchPageInfo(url, isImageRequest);
 
   if (result.isSuccess) {
     ref.keepAlive();

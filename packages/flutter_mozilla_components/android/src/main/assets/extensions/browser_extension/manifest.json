@@ -2,20 +2,24 @@
   "manifest_version": 2,
   "browser_specific_settings": {
     "gecko": {
-      "id": "turndown@movenext.me"
+      "id": "browser_extension@movenext.me"
     }
   },
-  "name": "Converts html to markdown",
+  "name": "Misc extensions",
   "version": "1.0",
   "background": {
     "scripts": [
       "readability.min.js",
-      "background.js"
+      "port.js",
+      "turndown.js",
+      "feed.js"
     ]
   },
   "permissions": [
     "geckoViewAddons",
     "nativeMessaging",
+    "webRequest",
+    "webRequestBlocking",
     "<all_urls>"
   ]
 }

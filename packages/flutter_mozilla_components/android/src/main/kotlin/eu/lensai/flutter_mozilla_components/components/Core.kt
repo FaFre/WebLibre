@@ -14,6 +14,7 @@ import eu.lensai.flutter_mozilla_components.activities.NotificationActivity
 import eu.lensai.flutter_mozilla_components.R
 import eu.lensai.flutter_mozilla_components.ext.getPreferenceKey
 import eu.lensai.flutter_mozilla_components.middleware.FlutterEventMiddleware
+import eu.lensai.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.FlowPreview
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
@@ -54,6 +55,7 @@ private const val DAY_IN_MINUTES = 24 * 60L
 class Core(private val context: Context,
            private val components: Components,
            private val flutterEvents: GeckoStateEvents,
+           private val extensionEvents: BrowserExtensionEvents
 ) {
     val prefs by lazy {
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -95,7 +97,7 @@ class Core(private val context: Context,
     }
 
     val engine: Engine by lazy {
-        EngineProvider.createEngine(context, engineSettings)
+        EngineProvider.createEngine(context, engineSettings, extensionEvents)
     }
 
     /**

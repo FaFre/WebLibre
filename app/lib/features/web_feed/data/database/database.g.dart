@@ -33,6 +33,24 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
+  late final GeneratedColumnWithTypeConverter<Uri?, String> icon =
+      GeneratedColumn<String>(
+        'icon',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<Uri?>(Feed.$convertericonn);
+  late final GeneratedColumnWithTypeConverter<Uri?, String> siteLink =
+      GeneratedColumn<String>(
+        'site_link',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<Uri?>(Feed.$convertersiteLinkn);
   late final GeneratedColumnWithTypeConverter<List<FeedAuthor>?, String>
   authors = GeneratedColumn<String>(
     'authors',
@@ -64,6 +82,8 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
     url,
     title,
     description,
+    icon,
+    siteLink,
     authors,
     tags,
     lastFetched,
@@ -93,6 +113,18 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      icon: Feed.$convertericonn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}icon'],
+        ),
+      ),
+      siteLink: Feed.$convertersiteLinkn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}site_link'],
+        ),
+      ),
       authors: Feed.$converterauthorsn.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -118,6 +150,12 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
   }
 
   static TypeConverter<Uri, String> $converterurl = const UriConverter();
+  static TypeConverter<Uri, String> $convertericon = const UriConverter();
+  static TypeConverter<Uri?, String?> $convertericonn =
+      NullAwareTypeConverter.wrap($convertericon);
+  static TypeConverter<Uri, String> $convertersiteLink = const UriConverter();
+  static TypeConverter<Uri?, String?> $convertersiteLinkn =
+      NullAwareTypeConverter.wrap($convertersiteLink);
   static TypeConverter<List<FeedAuthor>, String> $converterauthors =
       const FeedAuthorsConverter();
   static TypeConverter<List<FeedAuthor>?, String?> $converterauthorsn =
@@ -134,6 +172,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
   final Uri url;
   final String? title;
   final String? description;
+  final Uri? icon;
+  final Uri? siteLink;
   final List<FeedAuthor>? authors;
   final List<FeedCategory>? tags;
   final DateTime? lastFetched;
@@ -141,6 +181,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
     required this.url,
     this.title,
     this.description,
+    this.icon,
+    this.siteLink,
     this.authors,
     this.tags,
     this.lastFetched,
@@ -156,6 +198,14 @@ class FeedData extends DataClass implements Insertable<FeedData> {
     }
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || icon != null) {
+      map['icon'] = Variable<String>(Feed.$convertericonn.toSql(icon));
+    }
+    if (!nullToAbsent || siteLink != null) {
+      map['site_link'] = Variable<String>(
+        Feed.$convertersiteLinkn.toSql(siteLink),
+      );
     }
     if (!nullToAbsent || authors != null) {
       map['authors'] = Variable<String>(Feed.$converterauthorsn.toSql(authors));
@@ -178,6 +228,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
       url: serializer.fromJson<Uri>(json['url']),
       title: serializer.fromJson<String?>(json['title']),
       description: serializer.fromJson<String?>(json['description']),
+      icon: serializer.fromJson<Uri?>(json['icon']),
+      siteLink: serializer.fromJson<Uri?>(json['site_link']),
       authors: serializer.fromJson<List<FeedAuthor>?>(json['authors']),
       tags: serializer.fromJson<List<FeedCategory>?>(json['tags']),
       lastFetched: serializer.fromJson<DateTime?>(json['last_fetched']),
@@ -190,6 +242,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
       'url': serializer.toJson<Uri>(url),
       'title': serializer.toJson<String?>(title),
       'description': serializer.toJson<String?>(description),
+      'icon': serializer.toJson<Uri?>(icon),
+      'site_link': serializer.toJson<Uri?>(siteLink),
       'authors': serializer.toJson<List<FeedAuthor>?>(authors),
       'tags': serializer.toJson<List<FeedCategory>?>(tags),
       'last_fetched': serializer.toJson<DateTime?>(lastFetched),
@@ -200,6 +254,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
     Uri? url,
     Value<String?> title = const Value.absent(),
     Value<String?> description = const Value.absent(),
+    Value<Uri?> icon = const Value.absent(),
+    Value<Uri?> siteLink = const Value.absent(),
     Value<List<FeedAuthor>?> authors = const Value.absent(),
     Value<List<FeedCategory>?> tags = const Value.absent(),
     Value<DateTime?> lastFetched = const Value.absent(),
@@ -207,6 +263,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
     url: url ?? this.url,
     title: title.present ? title.value : this.title,
     description: description.present ? description.value : this.description,
+    icon: icon.present ? icon.value : this.icon,
+    siteLink: siteLink.present ? siteLink.value : this.siteLink,
     authors: authors.present ? authors.value : this.authors,
     tags: tags.present ? tags.value : this.tags,
     lastFetched: lastFetched.present ? lastFetched.value : this.lastFetched,
@@ -217,6 +275,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
       title: data.title.present ? data.title.value : this.title,
       description:
           data.description.present ? data.description.value : this.description,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      siteLink: data.siteLink.present ? data.siteLink.value : this.siteLink,
       authors: data.authors.present ? data.authors.value : this.authors,
       tags: data.tags.present ? data.tags.value : this.tags,
       lastFetched:
@@ -230,6 +290,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
           ..write('url: $url, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
+          ..write('icon: $icon, ')
+          ..write('siteLink: $siteLink, ')
           ..write('authors: $authors, ')
           ..write('tags: $tags, ')
           ..write('lastFetched: $lastFetched')
@@ -238,8 +300,16 @@ class FeedData extends DataClass implements Insertable<FeedData> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(url, title, description, authors, tags, lastFetched);
+  int get hashCode => Object.hash(
+    url,
+    title,
+    description,
+    icon,
+    siteLink,
+    authors,
+    tags,
+    lastFetched,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -247,6 +317,8 @@ class FeedData extends DataClass implements Insertable<FeedData> {
           other.url == this.url &&
           other.title == this.title &&
           other.description == this.description &&
+          other.icon == this.icon &&
+          other.siteLink == this.siteLink &&
           other.authors == this.authors &&
           other.tags == this.tags &&
           other.lastFetched == this.lastFetched);
@@ -256,6 +328,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
   final Value<Uri> url;
   final Value<String?> title;
   final Value<String?> description;
+  final Value<Uri?> icon;
+  final Value<Uri?> siteLink;
   final Value<List<FeedAuthor>?> authors;
   final Value<List<FeedCategory>?> tags;
   final Value<DateTime?> lastFetched;
@@ -264,6 +338,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
     this.url = const Value.absent(),
     this.title = const Value.absent(),
     this.description = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.siteLink = const Value.absent(),
     this.authors = const Value.absent(),
     this.tags = const Value.absent(),
     this.lastFetched = const Value.absent(),
@@ -273,6 +349,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
     required Uri url,
     this.title = const Value.absent(),
     this.description = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.siteLink = const Value.absent(),
     this.authors = const Value.absent(),
     this.tags = const Value.absent(),
     this.lastFetched = const Value.absent(),
@@ -282,6 +360,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
     Expression<String>? url,
     Expression<String>? title,
     Expression<String>? description,
+    Expression<String>? icon,
+    Expression<String>? siteLink,
     Expression<String>? authors,
     Expression<String>? tags,
     Expression<DateTime>? lastFetched,
@@ -291,6 +371,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
       if (url != null) 'url': url,
       if (title != null) 'title': title,
       if (description != null) 'description': description,
+      if (icon != null) 'icon': icon,
+      if (siteLink != null) 'site_link': siteLink,
       if (authors != null) 'authors': authors,
       if (tags != null) 'tags': tags,
       if (lastFetched != null) 'last_fetched': lastFetched,
@@ -302,6 +384,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
     Value<Uri>? url,
     Value<String?>? title,
     Value<String?>? description,
+    Value<Uri?>? icon,
+    Value<Uri?>? siteLink,
     Value<List<FeedAuthor>?>? authors,
     Value<List<FeedCategory>?>? tags,
     Value<DateTime?>? lastFetched,
@@ -311,6 +395,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
       url: url ?? this.url,
       title: title ?? this.title,
       description: description ?? this.description,
+      icon: icon ?? this.icon,
+      siteLink: siteLink ?? this.siteLink,
       authors: authors ?? this.authors,
       tags: tags ?? this.tags,
       lastFetched: lastFetched ?? this.lastFetched,
@@ -329,6 +415,14 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<String>(Feed.$convertericonn.toSql(icon.value));
+    }
+    if (siteLink.present) {
+      map['site_link'] = Variable<String>(
+        Feed.$convertersiteLinkn.toSql(siteLink.value),
+      );
     }
     if (authors.present) {
       map['authors'] = Variable<String>(
@@ -353,6 +447,8 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
           ..write('url: $url, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
+          ..write('icon: $icon, ')
+          ..write('siteLink: $siteLink, ')
           ..write('authors: $authors, ')
           ..write('tags: $tags, ')
           ..write('lastFetched: $lastFetched, ')
@@ -806,6 +902,226 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
   }
 }
 
+class ArticleView extends ViewInfo<ArticleView, FeedArticle>
+    implements HasResultSet {
+  final String? _alias;
+  @override
+  final _$FeedDatabase attachedDatabase;
+  ArticleView(this.attachedDatabase, [this._alias]);
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    feedId,
+    fetched,
+    created,
+    updated,
+    lastRead,
+    title,
+    authors,
+    tags,
+    links,
+    summaryMarkdown,
+    summaryPlain,
+    contentMarkdown,
+    contentPlain,
+    icon,
+  ];
+  @override
+  String get aliasedName => _alias ?? entityName;
+  @override
+  String get entityName => 'article_view';
+  @override
+  Map<SqlDialect, String> get createViewStatements => {
+    SqlDialect.sqlite:
+        'CREATE VIEW article_view AS SELECT a.*, f.icon FROM article AS a INNER JOIN feed AS f ON f.url = a.feed_id',
+  };
+  @override
+  ArticleView get asDslTable => this;
+  @override
+  FeedArticle map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FeedArticle(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      feedId: Article.$converterfeedId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}feed_id'],
+        )!,
+      ),
+      fetched:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}fetched'],
+          )!,
+      created: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created'],
+      ),
+      updated: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated'],
+      ),
+      lastRead: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_read'],
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      authors: Article.$converterauthorsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}authors'],
+        ),
+      ),
+      tags: Article.$convertertagsn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}tags'],
+        ),
+      ),
+      links: Article.$converterlinksn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}links'],
+        ),
+      ),
+      summaryMarkdown: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summaryMarkdown'],
+      ),
+      summaryPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summaryPlain'],
+      ),
+      contentMarkdown: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contentMarkdown'],
+      ),
+      contentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contentPlain'],
+      ),
+      icon: Feed.$convertericonn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}icon'],
+        ),
+      ),
+    );
+  }
+
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+  );
+  late final GeneratedColumnWithTypeConverter<Uri, String> feedId =
+      GeneratedColumn<String>(
+        'feed_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+      ).withConverter<Uri>(Article.$converterfeedId);
+  late final GeneratedColumn<DateTime> fetched = GeneratedColumn<DateTime>(
+    'fetched',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+  );
+  late final GeneratedColumn<DateTime> created = GeneratedColumn<DateTime>(
+    'created',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+  );
+  late final GeneratedColumn<DateTime> updated = GeneratedColumn<DateTime>(
+    'updated',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+  );
+  late final GeneratedColumn<DateTime> lastRead = GeneratedColumn<DateTime>(
+    'last_read',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+  );
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
+  late final GeneratedColumnWithTypeConverter<List<FeedAuthor>?, String>
+  authors = GeneratedColumn<String>(
+    'authors',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  ).withConverter<List<FeedAuthor>?>(Article.$converterauthorsn);
+  late final GeneratedColumnWithTypeConverter<List<FeedCategory>?, String>
+  tags = GeneratedColumn<String>(
+    'tags',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  ).withConverter<List<FeedCategory>?>(Article.$convertertagsn);
+  late final GeneratedColumnWithTypeConverter<List<FeedLink>?, String> links =
+      GeneratedColumn<String>(
+        'links',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+      ).withConverter<List<FeedLink>?>(Article.$converterlinksn);
+  late final GeneratedColumn<String> summaryMarkdown = GeneratedColumn<String>(
+    'summaryMarkdown',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
+  late final GeneratedColumn<String> summaryPlain = GeneratedColumn<String>(
+    'summaryPlain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
+  late final GeneratedColumn<String> contentMarkdown = GeneratedColumn<String>(
+    'contentMarkdown',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
+  late final GeneratedColumn<String> contentPlain = GeneratedColumn<String>(
+    'contentPlain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
+  late final GeneratedColumnWithTypeConverter<Uri?, String> icon =
+      GeneratedColumn<String>(
+        'icon',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+      ).withConverter<Uri?>(Feed.$convertericonn);
+  @override
+  ArticleView createAlias(String alias) {
+    return ArticleView(attachedDatabase, alias);
+  }
+
+  @override
+  Query? get query => null;
+  @override
+  Set<String> get readTables => const {'article', 'feed'};
+}
+
 class ArticleFts extends Table
     with
         TableInfo<ArticleFts, ArticleFt>,
@@ -1046,6 +1362,7 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
   $FeedDatabaseManager get managers => $FeedDatabaseManager(this);
   late final Feed feed = Feed(this);
   late final Article article = Article(this);
+  late final ArticleView articleView = ArticleView(this);
   late final Index articleFeedId = Index(
     'article_feed_id',
     'CREATE INDEX article_feed_id ON article (feed_id)',
@@ -1074,20 +1391,13 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
   }
 
   Selectable<FeedArticleQueryResult> queryArticlesBasic({
-    required String beforeMatch,
-    required String afterMatch,
     required String query,
     String? feedId,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 1.0 AS title_weight) SELECT a.*, highlight(article_fts, 0, ?1, ?2) AS title,(bm25(article_fts, weights.title_weight))AS weighted_rank FROM article_fts(?3)AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?3 AND ?4 IS NULL OR a.feed_id = ?4 ORDER BY weighted_rank ASC, a.created DESC NULLS LAST',
-      variables: [
-        Variable<String>(beforeMatch),
-        Variable<String>(afterMatch),
-        Variable<String>(query),
-        Variable<String>(feedId),
-      ],
-      readsFrom: {articleFts, article},
+      'WITH weights AS (SELECT 1.0 AS title_weight) SELECT a.*, f.icon,(bm25(article_fts, weights.title_weight))AS weighted_rank FROM article_fts AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" INNER JOIN feed AS f ON f.url = a.feed_id CROSS JOIN weights WHERE fts.title LIKE ?1 AND(?2 IS NULL OR a.feed_id = ?2)ORDER BY weighted_rank ASC, a.created DESC NULLS LAST',
+      variables: [Variable<String>(query), Variable<String>(feedId)],
+      readsFrom: {feed, articleFts, article},
     ).map(
       (QueryRow row) => FeedArticleQueryResult(
         id: row.read<String>('id'),
@@ -1114,6 +1424,10 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
         summaryPlain: row.readNullable<String>('summaryPlain'),
         contentMarkdown: row.readNullable<String>('contentMarkdown'),
         contentPlain: row.readNullable<String>('contentPlain'),
+        icon: NullAwareTypeConverter.wrapFromSql(
+          Feed.$convertericon,
+          row.readNullable<String>('icon'),
+        ),
       ),
     );
   }
@@ -1127,7 +1441,7 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
     String? feedId,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 5.0 AS title_weight, 2.0 AS summary_weight, 1.0 AS content_weight) SELECT a.*, highlight(article_fts, 0, ?1, ?2) AS title, snippet(article_fts, 1, ?1, ?2, ?3, ?4) AS summary, snippet(article_fts, 2, ?1, ?2, ?3, ?4) AS content,(bm25(article_fts, weights.title_weight, weights.summary_weight, weights.content_weight))AS weighted_rank FROM article_fts(?5)AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" CROSS JOIN weights WHERE ?6 IS NULL OR a.feed_id = ?6 ORDER BY weighted_rank ASC, a.created DESC NULLS LAST',
+      'WITH weights AS (SELECT 10.0 AS title_weight, 3.0 AS summary_weight, 1.0 AS content_weight) SELECT a.*, f.icon, highlight(article_fts, 0, ?1, ?2) AS title_highlight, snippet(article_fts, 1, ?1, ?2, ?3, ?4) AS summary_snippet, snippet(article_fts, 2, ?1, ?2, ?3, ?4) AS content_snippet,(bm25(article_fts, weights.title_weight, weights.summary_weight, weights.content_weight))AS weighted_rank FROM article_fts(?5)AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" INNER JOIN feed AS f ON f.url = a.feed_id CROSS JOIN weights WHERE ?6 IS NULL OR a.feed_id = ?6 ORDER BY weighted_rank ASC, a.created DESC NULLS LAST',
       variables: [
         Variable<String>(beforeMatch),
         Variable<String>(afterMatch),
@@ -1136,7 +1450,7 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
         Variable<String>(query),
         Variable<String>(feedId),
       ],
-      readsFrom: {articleFts, article},
+      readsFrom: {feed, articleFts, article},
     ).map(
       (QueryRow row) => FeedArticleQueryResult(
         id: row.read<String>('id'),
@@ -1163,6 +1477,13 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
         summaryPlain: row.readNullable<String>('summaryPlain'),
         contentMarkdown: row.readNullable<String>('contentMarkdown'),
         contentPlain: row.readNullable<String>('contentPlain'),
+        icon: NullAwareTypeConverter.wrapFromSql(
+          Feed.$convertericon,
+          row.readNullable<String>('icon'),
+        ),
+        titleHighlight: row.readNullable<String>('title_highlight'),
+        summarySnippet: row.readNullable<String>('summary_snippet'),
+        contentSnippet: row.readNullable<String>('content_snippet'),
       ),
     );
   }
@@ -1174,6 +1495,7 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     feed,
     article,
+    articleView,
     articleFeedId,
     articleFts,
     articleAfterInsert,
@@ -1218,6 +1540,8 @@ typedef $FeedCreateCompanionBuilder =
       required Uri url,
       Value<String?> title,
       Value<String?> description,
+      Value<Uri?> icon,
+      Value<Uri?> siteLink,
       Value<List<FeedAuthor>?> authors,
       Value<List<FeedCategory>?> tags,
       Value<DateTime?> lastFetched,
@@ -1228,6 +1552,8 @@ typedef $FeedUpdateCompanionBuilder =
       Value<Uri> url,
       Value<String?> title,
       Value<String?> description,
+      Value<Uri?> icon,
+      Value<Uri?> siteLink,
       Value<List<FeedAuthor>?> authors,
       Value<List<FeedCategory>?> tags,
       Value<DateTime?> lastFetched,
@@ -1281,6 +1607,18 @@ class $FeedFilterComposer extends Composer<_$FeedDatabase, Feed> {
     column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<Uri?, Uri, String> get icon =>
+      $composableBuilder(
+        column: $table.icon,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<Uri?, Uri, String> get siteLink =>
+      $composableBuilder(
+        column: $table.siteLink,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnWithTypeConverterFilters<List<FeedAuthor>?, List<FeedAuthor>, String>
   get authors => $composableBuilder(
@@ -1352,6 +1690,16 @@ class $FeedOrderingComposer extends Composer<_$FeedDatabase, Feed> {
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get siteLink => $composableBuilder(
+    column: $table.siteLink,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get authors => $composableBuilder(
     column: $table.authors,
     builder: (column) => ColumnOrderings(column),
@@ -1386,6 +1734,12 @@ class $FeedAnnotationComposer extends Composer<_$FeedDatabase, Feed> {
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<Uri?, String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Uri?, String> get siteLink =>
+      $composableBuilder(column: $table.siteLink, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<List<FeedAuthor>?, String> get authors =>
       $composableBuilder(column: $table.authors, builder: (column) => column);
@@ -1455,6 +1809,8 @@ class $FeedTableManager
                 Value<Uri> url = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<Uri?> icon = const Value.absent(),
+                Value<Uri?> siteLink = const Value.absent(),
                 Value<List<FeedAuthor>?> authors = const Value.absent(),
                 Value<List<FeedCategory>?> tags = const Value.absent(),
                 Value<DateTime?> lastFetched = const Value.absent(),
@@ -1463,6 +1819,8 @@ class $FeedTableManager
                 url: url,
                 title: title,
                 description: description,
+                icon: icon,
+                siteLink: siteLink,
                 authors: authors,
                 tags: tags,
                 lastFetched: lastFetched,
@@ -1473,6 +1831,8 @@ class $FeedTableManager
                 required Uri url,
                 Value<String?> title = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<Uri?> icon = const Value.absent(),
+                Value<Uri?> siteLink = const Value.absent(),
                 Value<List<FeedAuthor>?> authors = const Value.absent(),
                 Value<List<FeedCategory>?> tags = const Value.absent(),
                 Value<DateTime?> lastFetched = const Value.absent(),
@@ -1481,6 +1841,8 @@ class $FeedTableManager
                 url: url,
                 title: title,
                 description: description,
+                icon: icon,
+                siteLink: siteLink,
                 authors: authors,
                 tags: tags,
                 lastFetched: lastFetched,

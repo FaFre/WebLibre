@@ -37,7 +37,13 @@ private class NativeFragmentView(
             FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
             )
-        container = FrameLayout(activity!!)
+
+        // Ensure activity is not null before creating the container
+        if (activity == null) {
+            throw IllegalStateException("Activity cannot be null when creating NativeFragmentView")
+        }
+
+        container = FrameLayout(activity)
         container.layoutParams = vParams
         container.id = containerId
     }
@@ -45,8 +51,8 @@ private class NativeFragmentView(
     override fun onFlutterViewAttached(flutterView: View) {
         super.onFlutterViewAttached(flutterView)
 
-        components.engineReportedInitialized = false;
-        flutterEvents.onViewReadyStateChange(System.currentTimeMillis(),true) { _ -> }
+        components.engineReportedInitialized = false
+        flutterEvents.onViewReadyStateChange(System.currentTimeMillis(), true) { _ -> }
     }
 
     override fun getView(): View {

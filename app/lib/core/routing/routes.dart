@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lensai/core/routing/widgets/dialog_page.dart';
@@ -22,11 +24,12 @@ import 'package:lensai/features/settings/presentation/screens/web_engine_hardeni
 import 'package:lensai/features/settings/presentation/screens/web_engine_settings.dart';
 import 'package:lensai/features/tor/presentation/screens/tor_proxy.dart';
 import 'package:lensai/features/user/presentation/screens/auth.dart';
-import 'package:lensai/features/web_feed/data/database/database.dart';
+import 'package:lensai/features/web_feed/presentation/add_feed_dialog.dart';
 import 'package:lensai/features/web_feed/presentation/screens/feed_article.dart';
 import 'package:lensai/features/web_feed/presentation/screens/feed_article_list.dart';
 import 'package:lensai/features/web_feed/presentation/screens/feed_edit.dart';
 import 'package:lensai/features/web_feed/presentation/screens/feed_list.dart';
+import 'package:lensai/features/web_feed/presentation/select_feed_dialog.dart';
 
 part 'routes.g.dart';
 part 'routes.settings.dart';

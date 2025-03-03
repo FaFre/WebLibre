@@ -736,7 +736,7 @@ class ShareInternetResourceState {
 )
 @HostApi()
 abstract class GeckoBrowserApi {
-  void showNativeFragment();
+  bool showNativeFragment();
   void onTrimMemory(int level);
 }
 
@@ -943,7 +943,7 @@ abstract class GeckoPrefApi {
 }
 
 @HostApi()
-abstract class GeckoTurndownApi {
+abstract class GeckoBrowserExtensionApi {
   @async
   List<Object> getMarkdown(List<String> htmlList);
 }
@@ -1121,4 +1121,9 @@ abstract class GeckoDownloadsApi {
   void requestDownload(String tabId, DownloadState state);
   void copyInternetResource(String tabId, ShareInternetResourceState state);
   void shareInternetResource(String tabId, ShareInternetResourceState state);
+}
+
+@FlutterApi()
+abstract class BrowserExtensionEvents {
+  void onFeedRequested(int timestamp, String url);
 }

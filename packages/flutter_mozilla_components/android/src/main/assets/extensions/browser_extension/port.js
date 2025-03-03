@@ -1,0 +1,1 @@
+const port = browser.runtime.connectNative("mozacBrowserExtension");

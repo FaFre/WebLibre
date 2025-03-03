@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/extensions/uri.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
+import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
+import 'package:lensai/features/web_feed/domain/providers/article_filter.dart';
 import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dart';
 import 'package:lensai/features/web_feed/extensions/feed_article.dart';
 import 'package:lensai/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
@@ -15,34 +17,31 @@ import 'package:timeago/timeago.dart' as timeago;
 class FeedArticleCard extends HookConsumerWidget {
   final FeedArticle article;
 
-  final Set<String> selectedTags;
-  final void Function(String tagId, bool value)? onTagSelected;
-
-  const FeedArticleCard({
-    super.key,
-    required this.article,
-    this.onTagSelected,
-    this.selectedTags = const {},
-  });
+  const FeedArticleCard({super.key, required this.article});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
+    final tags = ref.watch(articleFilterProvider);
+
+    final titleHighlight = switch (article) {
+      final FeedArticleQueryResult result => result.titleHighlight.whenNotEmpty,
+      _ => null,
+    };
+
+    final searchSnippet = switch (article) {
+      final FeedArticleQueryResult result =>
+        result.summarySnippet.whenNotEmpty ??
+            result.contentSnippet.whenNotEmpty,
+      _ => null,
+    };
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
-          await ref
-              .read(feedRepositoryProvider.notifier)
-              .touchArticleRead(article.id);
-
-          if (context.mounted) {
-            await context.push(
-              FeedArticleRoute(articleId: article.id).location,
-              extra: article,
-            );
-          }
+          await FeedArticleRoute(articleId: article.id).push(context);
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -52,17 +51,55 @@ class FeedArticleCard extends HookConsumerWidget {
             children: [
               Row(
                 children: [
-                  UrlIcon(article.feedId.base, iconSize: 34.0),
+                  UrlIcon([
+                    article.icon ?? article.feedId.base,
+                  ], iconSize: 34.0),
                   const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          article.displayTitle,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        if (article.summaryPlain != null)
+                        if (titleHighlight.isNotEmpty)
+                          MarkdownBody(
+                            data: titleHighlight!,
+                            styleSheet: MarkdownStyleSheet(
+                              p: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        if (titleHighlight.isEmpty)
+                          Text(
+                            article.displayTitle,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        if (searchSnippet.isNotEmpty)
+                          MarkdownBody(
+                            data: searchSnippet!,
+                            styleSheet: MarkdownStyleSheet(
+                              p: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
+                              a: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ),
+                        if (searchSnippet.isEmpty &&
+                            article.summaryPlain != null)
                           Text(
                             article.summaryPlain!,
                             style: theme.textTheme.bodySmall,
@@ -86,15 +123,35 @@ class FeedArticleCard extends HookConsumerWidget {
               if (article.authors.isNotEmpty || article.tags.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 if (article.authors.isNotEmpty)
-                  AuthorsHorizontalList(authors: article.authors!),
+                  AuthorsHorizontalList(
+                    authors: article.authors!,
+                    selectedTags: tags,
+                    onTagSelected: (tagId, value) {
+                      if (value) {
+                        ref.read(articleFilterProvider.notifier).addTag(tagId);
+                      } else {
+                        ref
+                            .read(articleFilterProvider.notifier)
+                            .removeTag(tagId);
+                      }
+                    },
+                  ),
                 if (article.tags.isNotEmpty)
                   TagsHorizontalList(
                     tags: article.tags!,
-                    selectedTags: selectedTags,
-                    onTagSelected: onTagSelected,
+                    selectedTags: tags,
+                    onTagSelected: (tagId, value) {
+                      if (value) {
+                        ref.read(articleFilterProvider.notifier).addTag(tagId);
+                      } else {
+                        ref
+                            .read(articleFilterProvider.notifier)
+                            .removeTag(tagId);
+                      }
+                    },
                   ),
-                const Divider(),
               ],
+              const Divider(),
               Row(
                 children: [
                   Text(

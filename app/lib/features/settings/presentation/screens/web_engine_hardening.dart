@@ -1,7 +1,6 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
@@ -33,6 +32,7 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Web Engine Hardening')),
       body: preferenceGroups.when(
+        skipLoadingOnReload: true,
         data: (data) {
           return Column(
             children: [
@@ -85,11 +85,9 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
                                 ),
                                 trailing: const Icon(Icons.chevron_right),
                                 onTap: () async {
-                                  await context.push(
-                                    WebEngineHardeningGroupRoute(
-                                      group: group.key,
-                                    ).location,
-                                  );
+                                  await WebEngineHardeningGroupRoute(
+                                    group: group.key,
+                                  ).push(context);
                                 },
                               ),
                             ),

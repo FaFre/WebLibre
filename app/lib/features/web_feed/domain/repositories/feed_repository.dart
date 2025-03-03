@@ -1,6 +1,4 @@
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/database/database.dart';
-import 'package:lensai/features/web_feed/data/models/feed_filter.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -13,11 +11,11 @@ class FeedRepository extends _$FeedRepository {
     return ref.read(feedDatabaseProvider).feedDao.getFeeds().get();
   }
 
-  Future<void> touchFeedFetched(Uri url) {
+  Future<void> touchFeedFetched(Uri feedId) {
     return ref
         .read(feedDatabaseProvider)
         .feedDao
-        .updateFeedFetched(url, DateTime.now());
+        .updateFeedFetched(feedId, DateTime.now());
   }
 
   Future<void> upsertFeed(FeedData feedData) {
@@ -28,8 +26,8 @@ class FeedRepository extends _$FeedRepository {
     return ref.read(feedDatabaseProvider).articleDao.upsertArticles(articles);
   }
 
-  Future<int> deleteFeed(Uri url) {
-    return ref.read(feedDatabaseProvider).feedDao.deleteFeed(url);
+  Future<int> deleteFeed(Uri feedId) {
+    return ref.read(feedDatabaseProvider).feedDao.deleteFeed(feedId);
   }
 
   Future<void> touchArticleRead(String articleId) {
@@ -50,46 +48,20 @@ class FeedRepository extends _$FeedRepository {
     return ref.read(feedDatabaseProvider).feedDao.getFeeds().watch();
   }
 
-  Stream<List<FeedArticle>> watchFeedArticles(
-    FeedFilter filter, {
-    int snippetLength = 120,
-    String matchPrefix = '***',
-    String matchSuffix = '***',
-    String ellipsis = '…',
-  }) {
-    final stream =
-        filter.query.isNotEmpty
-            ? ref
-                .read(feedDatabaseProvider)
-                .articleDao
-                .queryArticles(
-                  matchPrefix: matchPrefix,
-                  matchSuffix: matchSuffix,
-                  ellipsis: ellipsis,
-                  snippetLength: snippetLength,
-                  searchString: filter.query!,
-                  feedId: filter.feedId,
-                )
-                .watch()
-            : ref
-                .read(feedDatabaseProvider)
-                .articleDao
-                .getFeedArticles(filter.feedId)
-                .watch();
+  Stream<FeedData?> watchFeed(Uri feedId) {
+    return ref
+        .read(feedDatabaseProvider)
+        .feedDao
+        .getFeed(feedId)
+        .watchSingleOrNull();
+  }
 
-    if (filter.tags.isNotEmpty) {
-      return stream.map(
-        (articles) =>
-            articles
-                .where(
-                  (article) =>
-                      article.tags?.toSet().containsAll(filter.tags!) ?? false,
-                )
-                .toList(),
-      );
-    } else {
-      return stream;
-    }
+  Stream<List<FeedArticle>> watchFeedArticles(Uri? feedId) {
+    return ref
+        .read(feedDatabaseProvider)
+        .articleDao
+        .getFeedArticles(feedId)
+        .watch();
   }
 
   Stream<FeedArticle?> watchArticle(String articleId) {

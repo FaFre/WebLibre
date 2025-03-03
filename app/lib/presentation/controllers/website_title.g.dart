@@ -6,7 +6,7 @@ part of 'website_title.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pageInfoHash() => r'bdb860ec904959d7aa561045b85b75b209fb38e1';
+String _$pageInfoHash() => r'dd5644057e4ba7280275105de4788eb4046592d4';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -39,13 +39,13 @@ class PageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
   const PageInfoFamily();
 
   /// See also [pageInfo].
-  PageInfoProvider call(Uri url) {
-    return PageInfoProvider(url);
+  PageInfoProvider call(Uri url, {required bool isImageRequest}) {
+    return PageInfoProvider(url, isImageRequest: isImageRequest);
   }
 
   @override
   PageInfoProvider getProviderOverride(covariant PageInfoProvider provider) {
-    return call(provider.url);
+    return call(provider.url, isImageRequest: provider.isImageRequest);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -66,9 +66,10 @@ class PageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
 /// See also [pageInfo].
 class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
   /// See also [pageInfo].
-  PageInfoProvider(Uri url)
+  PageInfoProvider(Uri url, {required bool isImageRequest})
     : this._internal(
-        (ref) => pageInfo(ref as PageInfoRef, url),
+        (ref) =>
+            pageInfo(ref as PageInfoRef, url, isImageRequest: isImageRequest),
         from: pageInfoProvider,
         name: r'pageInfoProvider',
         debugGetCreateSourceHash:
@@ -78,6 +79,7 @@ class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
         dependencies: PageInfoFamily._dependencies,
         allTransitiveDependencies: PageInfoFamily._allTransitiveDependencies,
         url: url,
+        isImageRequest: isImageRequest,
       );
 
   PageInfoProvider._internal(
@@ -88,9 +90,11 @@ class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
     required super.debugGetCreateSourceHash,
     required super.from,
     required this.url,
+    required this.isImageRequest,
   }) : super.internal();
 
   final Uri url;
+  final bool isImageRequest;
 
   @override
   Override overrideWith(
@@ -106,6 +110,7 @@ class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
         url: url,
+        isImageRequest: isImageRequest,
       ),
     );
   }
@@ -117,13 +122,16 @@ class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
 
   @override
   bool operator ==(Object other) {
-    return other is PageInfoProvider && other.url == url;
+    return other is PageInfoProvider &&
+        other.url == url &&
+        other.isImageRequest == isImageRequest;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, url.hashCode);
+    hash = _SystemHash.combine(hash, isImageRequest.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -134,6 +142,9 @@ class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
 mixin PageInfoRef on AutoDisposeFutureProviderRef<WebPageInfo> {
   /// The parameter `url` of this provider.
   Uri get url;
+
+  /// The parameter `isImageRequest` of this provider.
+  bool get isImageRequest;
 }
 
 class _PageInfoProviderElement
@@ -143,6 +154,8 @@ class _PageInfoProviderElement
 
   @override
   Uri get url => (origin as PageInfoProvider).url;
+  @override
+  bool get isImageRequest => (origin as PageInfoProvider).isImageRequest;
 }
 
 // ignore_for_file: type=lint

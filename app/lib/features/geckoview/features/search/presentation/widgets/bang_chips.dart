@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
@@ -52,15 +51,16 @@ class BangChips extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final availableBangs = ref.watch(seamlessBangProviderProvider);
+    final availableBangs = ref.watch(seamlessBangProvider);
 
     useListenableCallback(searchTextController, () {
       ref
-          .read(seamlessBangProviderProvider.notifier)
+          .read(seamlessBangProvider.notifier)
           .search(searchTextController!.text);
     });
 
     return availableBangs.when(
+      skipLoadingOnReload: true,
       data: (availableBangs) {
         return SizedBox(
           height: 48,
@@ -71,7 +71,8 @@ class BangChips extends HookConsumerWidget {
                   child: SelectableChips(
                     itemId: (bang) => bang.trigger,
                     itemAvatar:
-                        (bang) => UrlIcon(bang.getUrl(''), iconSize: 20),
+                        (bang) =>
+                            UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
                     itemLabel: (bang) => Text(bang.websiteName),
                     availableItems: availableBangs,
                     selectedItem: activeBang,
@@ -97,14 +98,12 @@ class BangChips extends HookConsumerWidget {
                   onPressed: () async {
                     final searchText = searchTextController?.text.trim();
 
-                    await context.push(
-                      BangSearchRoute(
-                        searchText:
-                            (searchText.isEmpty)
-                                ? BangSearchRoute.emptySearchText
-                                : searchText!,
-                      ).location,
-                    );
+                    await BangSearchRoute(
+                      searchText:
+                          (searchText.isEmpty)
+                              ? BangSearchRoute.emptySearchText
+                              : searchText!,
+                    ).push(context);
                   },
                   icon: const Icon(Icons.chevron_right),
                 ),

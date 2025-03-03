@@ -7,17 +7,17 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 class UrlIcon extends HookConsumerWidget {
   final double iconSize;
-  final Uri url;
+  final List<Uri> urlList;
 
-  const UrlIcon(this.url, {required this.iconSize, super.key});
+  const UrlIcon(this.urlList, {required this.iconSize, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final icon = useCachedFuture(
       () =>
       // ignore: discarded_futures
-      ref.read(genericWebsiteServiceProvider.notifier).getUrlIcon(url),
-      [url],
+      ref.read(genericWebsiteServiceProvider.notifier).getUrlIcon(urlList),
+      [urlList],
     );
 
     return Skeletonizer(

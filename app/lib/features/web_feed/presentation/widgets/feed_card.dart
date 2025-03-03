@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
@@ -26,7 +25,7 @@ class FeedCard extends HookConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
-          await context.push(FeedArticleListRoute(feedId: feed.url).location);
+          await FeedArticleListRoute(feedId: feed.url).push(context);
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -36,7 +35,9 @@ class FeedCard extends HookConsumerWidget {
             children: [
               Row(
                 children: [
-                  UrlIcon(feed.url.base, iconSize: 34.0),
+                  UrlIcon([
+                    feed.icon ?? feed.siteLink ?? feed.url.base,
+                  ], iconSize: 34.0),
                   const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(
@@ -55,6 +56,12 @@ class FeedCard extends HookConsumerWidget {
                           ),
                       ],
                     ),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      await FeedEditRoute(feedId: feed.url).push(context);
+                    },
+                    icon: const Icon(Icons.edit),
                   ),
                 ],
               ),
@@ -89,6 +96,7 @@ class FeedCard extends HookConsumerWidget {
                       );
 
                       return countAsync.when(
+                        skipLoadingOnReload: true,
                         data: (count) {
                           if (count == null) {
                             return const SizedBox();

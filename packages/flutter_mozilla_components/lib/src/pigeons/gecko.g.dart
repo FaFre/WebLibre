@@ -1983,7 +1983,7 @@ class GeckoBrowserApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> showNativeFragment() async {
+  Future<bool> showNativeFragment() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.showNativeFragment$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -2001,8 +2001,13 @@ class GeckoBrowserApi {
         message: pigeonVar_replyList[1] as String?,
         details: pigeonVar_replyList[2],
       );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
     } else {
-      return;
+      return (pigeonVar_replyList[0] as bool?)!;
     }
   }
 
@@ -3123,11 +3128,11 @@ class GeckoPrefApi {
   }
 }
 
-class GeckoTurndownApi {
-  /// Constructor for [GeckoTurndownApi].  The [binaryMessenger] named argument is
+class GeckoBrowserExtensionApi {
+  /// Constructor for [GeckoBrowserExtensionApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoTurndownApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+  GeckoBrowserExtensionApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
       : pigeonVar_binaryMessenger = binaryMessenger,
         pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
@@ -3137,7 +3142,7 @@ class GeckoTurndownApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<List<Object>> getMarkdown(List<String> htmlList) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTurndownApi.getMarkdown$pigeonVar_messageChannelSuffix';
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserExtensionApi.getMarkdown$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -4526,6 +4531,44 @@ class GeckoDownloadsApi {
       );
     } else {
       return;
+    }
+  }
+}
+
+abstract class BrowserExtensionEvents {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  void onFeedRequested(int timestamp, String url);
+
+  static void setUp(BrowserExtensionEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_timestamp = (args[0] as int?);
+          assert(arg_timestamp != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null int.');
+          final String? arg_url = (args[1] as String?);
+          assert(arg_url != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null String.');
+          try {
+            api.onFeedRequested(arg_timestamp!, arg_url!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
     }
   }
 }

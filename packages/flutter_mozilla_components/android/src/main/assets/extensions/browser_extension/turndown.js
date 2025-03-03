@@ -1,4 +1,3 @@
-const port = browser.runtime.connectNative("mozacTurndownHtml");
 const parser = new DOMParser();
 
 port.onMessage.addListener(message => {
@@ -15,6 +14,7 @@ port.onMessage.addListener(message => {
         });
 
         port.postMessage({
+          "type": "turndown",
           "id": requestId,
           "status": "success",
           "result": results

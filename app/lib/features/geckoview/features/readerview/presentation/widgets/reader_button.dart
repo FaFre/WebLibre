@@ -45,6 +45,7 @@ class ReaderButton extends HookConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 8.0),
         child: readerChanging.when(
+          skipLoadingOnReload: true,
           data:
               (_) => Visibility(
                 visible: readerabilityState.readerable,

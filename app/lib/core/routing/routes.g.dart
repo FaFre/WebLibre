@@ -270,20 +270,24 @@ extension $BrowserRouteExtension on BrowserRoute {
 }
 
 extension $WebPageRouteExtension on WebPageRoute {
-  static WebPageRoute _fromState(GoRouterState state) =>
-      WebPageRoute(url: state.pathParameters['url']!);
+  static WebPageRoute _fromState(GoRouterState state) => WebPageRoute(
+    url: state.pathParameters['url']!,
+    $extra: state.extra as WebPageInfo?,
+  );
 
   String get location =>
       GoRouteData.$location('/page/${Uri.encodeComponent(url)}');
 
-  void go(BuildContext context) => context.go(location);
+  void go(BuildContext context) => context.go(location, extra: $extra);
 
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: $extra);
 
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+      context.pushReplacement(location, extra: $extra);
 
-  void replace(BuildContext context) => context.replace(location);
+  void replace(BuildContext context) =>
+      context.replace(location, extra: $extra);
 }
 
 extension $SearchRouteExtension on SearchRoute {
@@ -322,18 +326,20 @@ extension $TorProxyRouteExtension on TorProxyRoute {
 
 extension $ContextMenuRouteExtension on ContextMenuRoute {
   static ContextMenuRoute _fromState(GoRouterState state) =>
-      const ContextMenuRoute();
+      ContextMenuRoute(state.extra as String);
 
   String get location => GoRouteData.$location('/context_menu');
 
-  void go(BuildContext context) => context.go(location);
+  void go(BuildContext context) => context.go(location, extra: $extra);
 
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: $extra);
 
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+      context.pushReplacement(location, extra: $extra);
 
-  void replace(BuildContext context) => context.replace(location);
+  void replace(BuildContext context) =>
+      context.replace(location, extra: $extra);
 }
 
 extension $ContainerListRouteExtension on ContainerListRoute {
@@ -354,34 +360,38 @@ extension $ContainerListRouteExtension on ContainerListRoute {
 
 extension $ContainerCreateRouteExtension on ContainerCreateRoute {
   static ContainerCreateRoute _fromState(GoRouterState state) =>
-      ContainerCreateRoute();
+      ContainerCreateRoute(state.extra as ContainerData);
 
   String get location => GoRouteData.$location('/containers/create');
 
-  void go(BuildContext context) => context.go(location);
+  void go(BuildContext context) => context.go(location, extra: $extra);
 
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: $extra);
 
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+      context.pushReplacement(location, extra: $extra);
 
-  void replace(BuildContext context) => context.replace(location);
+  void replace(BuildContext context) =>
+      context.replace(location, extra: $extra);
 }
 
 extension $ContainerEditRouteExtension on ContainerEditRoute {
   static ContainerEditRoute _fromState(GoRouterState state) =>
-      ContainerEditRoute();
+      ContainerEditRoute(state.extra as ContainerData);
 
   String get location => GoRouteData.$location('/containers/edit');
 
-  void go(BuildContext context) => context.go(location);
+  void go(BuildContext context) => context.go(location, extra: $extra);
 
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: $extra);
 
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+      context.pushReplacement(location, extra: $extra);
 
-  void replace(BuildContext context) => context.replace(location);
+  void replace(BuildContext context) =>
+      context.replace(location, extra: $extra);
 }
 
 RouteBase get $bangCategoriesRoute => GoRouteData.$route(
@@ -493,6 +503,12 @@ RouteBase get $feedListRoute => GoRouteData.$route(
   factory: $FeedListRouteExtension._fromState,
   routes: [
     GoRouteData.$route(
+      path: 'add',
+      name: 'FeedAddRoute',
+
+      factory: $FeedAddRouteExtension._fromState,
+    ),
+    GoRouteData.$route(
       path: 'articles/:feedId',
       name: 'FeedArticleListRoute',
 
@@ -505,10 +521,22 @@ RouteBase get $feedListRoute => GoRouteData.$route(
       factory: $FeedArticleRouteExtension._fromState,
     ),
     GoRouteData.$route(
-      path: 'create',
+      path: 'create/:feedId',
       name: 'FeedCreateRoute',
 
       factory: $FeedCreateRouteExtension._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'available/:feedsJson',
+      name: 'SelectFeedDialogRoute',
+
+      factory: $SelectFeedDialogRouteExtension._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'edit/:feedId',
+      name: 'FeedEditRoute',
+
+      factory: $FeedEditRouteExtension._fromState,
     ),
   ],
 );
@@ -526,6 +554,24 @@ extension $FeedListRouteExtension on FeedListRoute {
       context.pushReplacement(location);
 
   void replace(BuildContext context) => context.replace(location);
+}
+
+extension $FeedAddRouteExtension on FeedAddRoute {
+  static FeedAddRoute _fromState(GoRouterState state) =>
+      FeedAddRoute($extra: state.extra as Uri?);
+
+  String get location => GoRouteData.$location('/feeds/add');
+
+  void go(BuildContext context) => context.go(location, extra: $extra);
+
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: $extra);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: $extra);
+
+  void replace(BuildContext context) =>
+      context.replace(location, extra: $extra);
 }
 
 extension $FeedArticleListRouteExtension on FeedArticleListRoute {
@@ -564,9 +610,48 @@ extension $FeedArticleRouteExtension on FeedArticleRoute {
 }
 
 extension $FeedCreateRouteExtension on FeedCreateRoute {
-  static FeedCreateRoute _fromState(GoRouterState state) => FeedCreateRoute();
+  static FeedCreateRoute _fromState(GoRouterState state) =>
+      FeedCreateRoute(feedId: Uri.parse(state.pathParameters['feedId']!)!);
 
-  String get location => GoRouteData.$location('/feeds/create');
+  String get location => GoRouteData.$location(
+    '/feeds/create/${Uri.encodeComponent(feedId.toString())}',
+  );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $SelectFeedDialogRouteExtension on SelectFeedDialogRoute {
+  static SelectFeedDialogRoute _fromState(GoRouterState state) =>
+      SelectFeedDialogRoute(feedsJson: state.pathParameters['feedsJson']!);
+
+  String get location => GoRouteData.$location(
+    '/feeds/available/${Uri.encodeComponent(feedsJson)}',
+  );
+
+  void go(BuildContext context) => context.go(location);
+
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  void replace(BuildContext context) => context.replace(location);
+}
+
+extension $FeedEditRouteExtension on FeedEditRoute {
+  static FeedEditRoute _fromState(GoRouterState state) =>
+      FeedEditRoute(feedId: Uri.parse(state.pathParameters['feedId']!)!);
+
+  String get location => GoRouteData.$location(
+    '/feeds/edit/${Uri.encodeComponent(feedId.toString())}',
+  );
 
   void go(BuildContext context) => context.go(location);
 
