@@ -167,10 +167,10 @@ class TabRepository extends _$TabRepository {
       });
     });
 
-    ref.onDispose(() {
+    ref.onDispose(() async {
       tabStateDebouncer.dispose();
-      unawaited(tabAddedSub.cancel());
-      unawaited(tabContentSub.cancel());
+      await tabAddedSub.cancel();
+      await tabContentSub.cancel();
     });
   }
 }

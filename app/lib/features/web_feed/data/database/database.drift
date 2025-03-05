@@ -27,8 +27,10 @@ CREATE TABLE article (
   authors TEXT MAPPED BY `const FeedAuthorsConverter()`,
   tags TEXT MAPPED BY `const FeedCategoriesConverter()`,
   links TEXT MAPPED BY `const FeedLinksConverter()`,
+  summaryHtml TEXT,
   summaryMarkdown TEXT,
   summaryPlain TEXT,
+  contentHtml TEXT,
   contentMarkdown TEXT,
   contentPlain TEXT
 ) WITH FeedArticle;
@@ -36,7 +38,8 @@ CREATE TABLE article (
 CREATE VIEW article_view WITH FeedArticle AS
   SELECT 
     a.*,
-    f.icon
+    f.icon,
+    f.site_link
   FROM
     article a
   INNER JOIN

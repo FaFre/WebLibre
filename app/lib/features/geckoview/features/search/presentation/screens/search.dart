@@ -9,6 +9,7 @@ import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_field.dart';
+import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
@@ -116,6 +117,7 @@ class SearchScreen extends HookConsumerWidget {
             ),
             const SliverToBoxAdapter(child: Divider()),
             TabSearch(searchTextController: searchTextController),
+            FeedSearch(searchTextController: searchTextController),
             HistorySuggestions(searchTextController: searchTextController),
           ],
         ),

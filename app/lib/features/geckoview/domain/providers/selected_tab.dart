@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -25,8 +23,8 @@ class SelectedTab extends _$SelectedTab {
       state = tabId;
     });
 
-    ref.onDispose(() {
-      unawaited(selectedTabSub.cancel());
+    ref.onDispose(() async {
+      await selectedTabSub.cancel();
     });
 
     return null;

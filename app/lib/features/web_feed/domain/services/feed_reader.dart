@@ -28,7 +28,7 @@ class FeedReader extends _$FeedReader {
         final parser = FeedParser.parse(url: url, xmlString: response.body);
         final result = FeedParseResult(
           feedData: parser.readGeneralData(),
-          articleData: await parser.readArticles(),
+          articleData: parser.readArticles(),
         );
 
         return result.toJson();

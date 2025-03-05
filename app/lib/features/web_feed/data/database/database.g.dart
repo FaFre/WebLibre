@@ -547,6 +547,14 @@ class Article extends Table with TableInfo<Article, FeedArticle> {
         requiredDuringInsert: false,
         $customConstraints: '',
       ).withConverter<List<FeedLink>?>(Article.$converterlinksn);
+  late final GeneratedColumn<String> summaryHtml = GeneratedColumn<String>(
+    'summaryHtml',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumn<String> summaryMarkdown = GeneratedColumn<String>(
     'summaryMarkdown',
     aliasedName,
@@ -557,6 +565,14 @@ class Article extends Table with TableInfo<Article, FeedArticle> {
   );
   late final GeneratedColumn<String> summaryPlain = GeneratedColumn<String>(
     'summaryPlain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<String> contentHtml = GeneratedColumn<String>(
+    'contentHtml',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -591,8 +607,10 @@ class Article extends Table with TableInfo<Article, FeedArticle> {
     authors,
     tags,
     links,
+    summaryHtml,
     summaryMarkdown,
     summaryPlain,
+    contentHtml,
     contentMarkdown,
     contentPlain,
   ];
@@ -657,6 +675,10 @@ class Article extends Table with TableInfo<Article, FeedArticle> {
           data['${effectivePrefix}links'],
         ),
       ),
+      summaryHtml: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summaryHtml'],
+      ),
       summaryMarkdown: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}summaryMarkdown'],
@@ -664,6 +686,10 @@ class Article extends Table with TableInfo<Article, FeedArticle> {
       summaryPlain: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}summaryPlain'],
+      ),
+      contentHtml: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contentHtml'],
       ),
       contentMarkdown: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -709,8 +735,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
   final Value<List<FeedAuthor>?> authors;
   final Value<List<FeedCategory>?> tags;
   final Value<List<FeedLink>?> links;
+  final Value<String?> summaryHtml;
   final Value<String?> summaryMarkdown;
   final Value<String?> summaryPlain;
+  final Value<String?> contentHtml;
   final Value<String?> contentMarkdown;
   final Value<String?> contentPlain;
   final Value<int> rowid;
@@ -725,8 +753,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
     this.authors = const Value.absent(),
     this.tags = const Value.absent(),
     this.links = const Value.absent(),
+    this.summaryHtml = const Value.absent(),
     this.summaryMarkdown = const Value.absent(),
     this.summaryPlain = const Value.absent(),
+    this.contentHtml = const Value.absent(),
     this.contentMarkdown = const Value.absent(),
     this.contentPlain = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -742,8 +772,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
     this.authors = const Value.absent(),
     this.tags = const Value.absent(),
     this.links = const Value.absent(),
+    this.summaryHtml = const Value.absent(),
     this.summaryMarkdown = const Value.absent(),
     this.summaryPlain = const Value.absent(),
+    this.contentHtml = const Value.absent(),
     this.contentMarkdown = const Value.absent(),
     this.contentPlain = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -761,8 +793,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
     Expression<String>? authors,
     Expression<String>? tags,
     Expression<String>? links,
+    Expression<String>? summaryHtml,
     Expression<String>? summaryMarkdown,
     Expression<String>? summaryPlain,
+    Expression<String>? contentHtml,
     Expression<String>? contentMarkdown,
     Expression<String>? contentPlain,
     Expression<int>? rowid,
@@ -778,8 +812,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
       if (authors != null) 'authors': authors,
       if (tags != null) 'tags': tags,
       if (links != null) 'links': links,
+      if (summaryHtml != null) 'summaryHtml': summaryHtml,
       if (summaryMarkdown != null) 'summaryMarkdown': summaryMarkdown,
       if (summaryPlain != null) 'summaryPlain': summaryPlain,
+      if (contentHtml != null) 'contentHtml': contentHtml,
       if (contentMarkdown != null) 'contentMarkdown': contentMarkdown,
       if (contentPlain != null) 'contentPlain': contentPlain,
       if (rowid != null) 'rowid': rowid,
@@ -797,8 +833,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
     Value<List<FeedAuthor>?>? authors,
     Value<List<FeedCategory>?>? tags,
     Value<List<FeedLink>?>? links,
+    Value<String?>? summaryHtml,
     Value<String?>? summaryMarkdown,
     Value<String?>? summaryPlain,
+    Value<String?>? contentHtml,
     Value<String?>? contentMarkdown,
     Value<String?>? contentPlain,
     Value<int>? rowid,
@@ -814,8 +852,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
       authors: authors ?? this.authors,
       tags: tags ?? this.tags,
       links: links ?? this.links,
+      summaryHtml: summaryHtml ?? this.summaryHtml,
       summaryMarkdown: summaryMarkdown ?? this.summaryMarkdown,
       summaryPlain: summaryPlain ?? this.summaryPlain,
+      contentHtml: contentHtml ?? this.contentHtml,
       contentMarkdown: contentMarkdown ?? this.contentMarkdown,
       contentPlain: contentPlain ?? this.contentPlain,
       rowid: rowid ?? this.rowid,
@@ -861,11 +901,17 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
         Article.$converterlinksn.toSql(links.value),
       );
     }
+    if (summaryHtml.present) {
+      map['summaryHtml'] = Variable<String>(summaryHtml.value);
+    }
     if (summaryMarkdown.present) {
       map['summaryMarkdown'] = Variable<String>(summaryMarkdown.value);
     }
     if (summaryPlain.present) {
       map['summaryPlain'] = Variable<String>(summaryPlain.value);
+    }
+    if (contentHtml.present) {
+      map['contentHtml'] = Variable<String>(contentHtml.value);
     }
     if (contentMarkdown.present) {
       map['contentMarkdown'] = Variable<String>(contentMarkdown.value);
@@ -892,8 +938,10 @@ class ArticleCompanion extends UpdateCompanion<FeedArticle> {
           ..write('authors: $authors, ')
           ..write('tags: $tags, ')
           ..write('links: $links, ')
+          ..write('summaryHtml: $summaryHtml, ')
           ..write('summaryMarkdown: $summaryMarkdown, ')
           ..write('summaryPlain: $summaryPlain, ')
+          ..write('contentHtml: $contentHtml, ')
           ..write('contentMarkdown: $contentMarkdown, ')
           ..write('contentPlain: $contentPlain, ')
           ..write('rowid: $rowid')
@@ -920,8 +968,10 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
     authors,
     tags,
     links,
+    summaryHtml,
     summaryMarkdown,
     summaryPlain,
+    contentHtml,
     contentMarkdown,
     contentPlain,
     icon,
@@ -991,6 +1041,10 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
           data['${effectivePrefix}links'],
         ),
       ),
+      summaryHtml: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summaryHtml'],
+      ),
       summaryMarkdown: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}summaryMarkdown'],
@@ -998,6 +1052,10 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
       summaryPlain: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}summaryPlain'],
+      ),
+      contentHtml: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contentHtml'],
       ),
       contentMarkdown: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1080,6 +1138,12 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
         true,
         type: DriftSqlType.string,
       ).withConverter<List<FeedLink>?>(Article.$converterlinksn);
+  late final GeneratedColumn<String> summaryHtml = GeneratedColumn<String>(
+    'summaryHtml',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
   late final GeneratedColumn<String> summaryMarkdown = GeneratedColumn<String>(
     'summaryMarkdown',
     aliasedName,
@@ -1088,6 +1152,12 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
   );
   late final GeneratedColumn<String> summaryPlain = GeneratedColumn<String>(
     'summaryPlain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+  );
+  late final GeneratedColumn<String> contentHtml = GeneratedColumn<String>(
+    'contentHtml',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -1420,8 +1490,10 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
           Article.$converterlinks,
           row.readNullable<String>('links'),
         ),
+        summaryHtml: row.readNullable<String>('summaryHtml'),
         summaryMarkdown: row.readNullable<String>('summaryMarkdown'),
         summaryPlain: row.readNullable<String>('summaryPlain'),
+        contentHtml: row.readNullable<String>('contentHtml'),
         contentMarkdown: row.readNullable<String>('contentMarkdown'),
         contentPlain: row.readNullable<String>('contentPlain'),
         icon: NullAwareTypeConverter.wrapFromSql(
@@ -1473,8 +1545,10 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
           Article.$converterlinks,
           row.readNullable<String>('links'),
         ),
+        summaryHtml: row.readNullable<String>('summaryHtml'),
         summaryMarkdown: row.readNullable<String>('summaryMarkdown'),
         summaryPlain: row.readNullable<String>('summaryPlain'),
+        contentHtml: row.readNullable<String>('contentHtml'),
         contentMarkdown: row.readNullable<String>('contentMarkdown'),
         contentPlain: row.readNullable<String>('contentPlain'),
         icon: NullAwareTypeConverter.wrapFromSql(
@@ -1911,8 +1985,10 @@ typedef $ArticleCreateCompanionBuilder =
       Value<List<FeedAuthor>?> authors,
       Value<List<FeedCategory>?> tags,
       Value<List<FeedLink>?> links,
+      Value<String?> summaryHtml,
       Value<String?> summaryMarkdown,
       Value<String?> summaryPlain,
+      Value<String?> contentHtml,
       Value<String?> contentMarkdown,
       Value<String?> contentPlain,
       Value<int> rowid,
@@ -1929,8 +2005,10 @@ typedef $ArticleUpdateCompanionBuilder =
       Value<List<FeedAuthor>?> authors,
       Value<List<FeedCategory>?> tags,
       Value<List<FeedLink>?> links,
+      Value<String?> summaryHtml,
       Value<String?> summaryMarkdown,
       Value<String?> summaryPlain,
+      Value<String?> contentHtml,
       Value<String?> contentMarkdown,
       Value<String?> contentPlain,
       Value<int> rowid,
@@ -2018,6 +2096,11 @@ class $ArticleFilterComposer extends Composer<_$FeedDatabase, Article> {
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
+  ColumnFilters<String> get summaryHtml => $composableBuilder(
+    column: $table.summaryHtml,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get summaryMarkdown => $composableBuilder(
     column: $table.summaryMarkdown,
     builder: (column) => ColumnFilters(column),
@@ -2025,6 +2108,11 @@ class $ArticleFilterComposer extends Composer<_$FeedDatabase, Article> {
 
   ColumnFilters<String> get summaryPlain => $composableBuilder(
     column: $table.summaryPlain,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contentHtml => $composableBuilder(
+    column: $table.contentHtml,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2115,6 +2203,11 @@ class $ArticleOrderingComposer extends Composer<_$FeedDatabase, Article> {
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get summaryHtml => $composableBuilder(
+    column: $table.summaryHtml,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get summaryMarkdown => $composableBuilder(
     column: $table.summaryMarkdown,
     builder: (column) => ColumnOrderings(column),
@@ -2122,6 +2215,11 @@ class $ArticleOrderingComposer extends Composer<_$FeedDatabase, Article> {
 
   ColumnOrderings<String> get summaryPlain => $composableBuilder(
     column: $table.summaryPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contentHtml => $composableBuilder(
+    column: $table.contentHtml,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2194,6 +2292,11 @@ class $ArticleAnnotationComposer extends Composer<_$FeedDatabase, Article> {
   GeneratedColumnWithTypeConverter<List<FeedLink>?, String> get links =>
       $composableBuilder(column: $table.links, builder: (column) => column);
 
+  GeneratedColumn<String> get summaryHtml => $composableBuilder(
+    column: $table.summaryHtml,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get summaryMarkdown => $composableBuilder(
     column: $table.summaryMarkdown,
     builder: (column) => column,
@@ -2201,6 +2304,11 @@ class $ArticleAnnotationComposer extends Composer<_$FeedDatabase, Article> {
 
   GeneratedColumn<String> get summaryPlain => $composableBuilder(
     column: $table.summaryPlain,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contentHtml => $composableBuilder(
+    column: $table.contentHtml,
     builder: (column) => column,
   );
 
@@ -2276,8 +2384,10 @@ class $ArticleTableManager
                 Value<List<FeedAuthor>?> authors = const Value.absent(),
                 Value<List<FeedCategory>?> tags = const Value.absent(),
                 Value<List<FeedLink>?> links = const Value.absent(),
+                Value<String?> summaryHtml = const Value.absent(),
                 Value<String?> summaryMarkdown = const Value.absent(),
                 Value<String?> summaryPlain = const Value.absent(),
+                Value<String?> contentHtml = const Value.absent(),
                 Value<String?> contentMarkdown = const Value.absent(),
                 Value<String?> contentPlain = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2292,8 +2402,10 @@ class $ArticleTableManager
                 authors: authors,
                 tags: tags,
                 links: links,
+                summaryHtml: summaryHtml,
                 summaryMarkdown: summaryMarkdown,
                 summaryPlain: summaryPlain,
+                contentHtml: contentHtml,
                 contentMarkdown: contentMarkdown,
                 contentPlain: contentPlain,
                 rowid: rowid,
@@ -2310,8 +2422,10 @@ class $ArticleTableManager
                 Value<List<FeedAuthor>?> authors = const Value.absent(),
                 Value<List<FeedCategory>?> tags = const Value.absent(),
                 Value<List<FeedLink>?> links = const Value.absent(),
+                Value<String?> summaryHtml = const Value.absent(),
                 Value<String?> summaryMarkdown = const Value.absent(),
                 Value<String?> summaryPlain = const Value.absent(),
+                Value<String?> contentHtml = const Value.absent(),
                 Value<String?> contentMarkdown = const Value.absent(),
                 Value<String?> contentPlain = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2326,8 +2440,10 @@ class $ArticleTableManager
                 authors: authors,
                 tags: tags,
                 links: links,
+                summaryHtml: summaryHtml,
                 summaryMarkdown: summaryMarkdown,
                 summaryPlain: summaryPlain,
+                contentHtml: contentHtml,
                 contentMarkdown: contentMarkdown,
                 contentPlain: contentPlain,
                 rowid: rowid,

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
@@ -30,8 +28,8 @@ class TabList extends _$TabList {
       }
     });
 
-    ref.onDispose(() {
-      unawaited(tabListSub.cancel());
+    ref.onDispose(() async {
+      await tabListSub.cancel();
     });
 
     return EquatableValue([]);

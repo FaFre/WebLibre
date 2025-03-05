@@ -1,3 +1,4 @@
+import 'package:lensai/core/logger.dart';
 import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dart';
 import 'package:lensai/features/web_feed/domain/services/feed_reader.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,17 +15,25 @@ class FetchArticlesController extends _$FetchArticlesController {
 
       await Future.wait(
         feeds.map((feed) async {
-          final result = await ref
-              .read(feedReaderProvider.notifier)
-              .parseFeed(feed.url);
+          try {
+            final result = await ref
+                .read(feedReaderProvider.notifier)
+                .parseFeed(feed.url);
 
-          await ref
-              .read(feedRepositoryProvider.notifier)
-              .upsertArticles(result.articleData);
+            await ref
+                .read(feedRepositoryProvider.notifier)
+                .upsertArticles(result.articleData);
 
-          await ref
-              .read(feedRepositoryProvider.notifier)
-              .touchFeedFetched(feed.url);
+            await ref
+                .read(feedRepositoryProvider.notifier)
+                .touchFeedFetched(feed.url);
+          } catch (e, s) {
+            logger.e(
+              'Failed fetching feed ${feed.url}',
+              error: e,
+              stackTrace: s,
+            );
+          }
         }).toList(),
       );
     });

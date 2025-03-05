@@ -10,6 +10,7 @@ import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dar
 import 'package:lensai/features/web_feed/domain/services/feed_reader.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'providers.g.dart';
 
@@ -53,7 +54,7 @@ class ArticleSearch extends _$ArticleSearch {
       await _streamController.close();
     });
 
-    return _streamController.stream;
+    return ConcatStream([Stream.value([]), _streamController.stream]);
   }
 }
 

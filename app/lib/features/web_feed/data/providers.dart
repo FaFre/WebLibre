@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -38,8 +37,8 @@ FeedDatabase feedDatabase(Ref ref) {
     }),
   );
 
-  ref.onDispose(() {
-    unawaited(db.close());
+  ref.onDispose(() async {
+    await db.close();
   });
 
   return db;

@@ -15,11 +15,12 @@ import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/services/proxy_settings_replucation.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:lensai/features/geckoview/features/tabs/features/vector_store/domain/repositories/document.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:lensai/features/user/domain/services/local_authentication.dart';
+import 'package:lensai/features/web_feed/domain/services/article_content_processor.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;
@@ -151,7 +152,12 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       (previous, next) {},
     );
 
-    ref.listenManual(proxySettingsReplucationProvider, (previous, next) {});
+    ref.listenManual(proxySettingsReplicationProvider, (previous, next) {});
+
+    ref.listenManual(
+      articleContentProcessorServiceProvider,
+      (previous, next) {},
+    );
   }
 
   @override

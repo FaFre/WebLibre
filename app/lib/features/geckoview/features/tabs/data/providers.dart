@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:lensai/core/providers/models.dart';
@@ -51,8 +49,8 @@ TabDatabase tabDatabase(Ref ref) {
     embeddingDimensions: dimensions,
   );
 
-  ref.onDispose(() {
-    unawaited(db.close());
+  ref.onDispose(() async {
+    await db.close();
   });
 
   return db;

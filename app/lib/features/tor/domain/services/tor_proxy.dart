@@ -71,8 +71,8 @@ class TorProxyService extends _$TorProxyService {
 
     await _tor.initializeService();
 
-    ref.onDispose(() {
-      unawaited(portSub.cancel());
+    ref.onDispose(() async {
+      await portSub.cancel();
       _tor.dispose();
     });
 

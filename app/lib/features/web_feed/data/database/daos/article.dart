@@ -24,8 +24,43 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
     ]);
   }
 
+  Selectable<FeedArticle> getUnprocessedArticles() {
+    return db.articleView.select()..where(
+      (article) =>
+          (article.contentHtml.isNotNull() &
+              (article.contentMarkdown.isNull() |
+                  article.contentPlain.isNull())) |
+          (article.summaryHtml.isNotNull() &
+              (article.summaryMarkdown.isNull() |
+                  article.summaryPlain.isNull())),
+    );
+  }
+
   SingleOrNullSelectable<FeedArticle> getArticleById(String articleId) {
     return db.articleView.select()..where((row) => row.id.equals(articleId));
+  }
+
+  Future<void> updateArticleContent(List<FeedArticle> articles) {
+    return db.transaction(() async {
+      await Future.wait(
+        articles.map((newArticle) {
+          final statement =
+              db.article.update()
+                ..where((article) => article.id.equals(newArticle.id));
+
+          return statement.write(
+            ArticleCompanion(
+              summaryHtml: Value(newArticle.summaryHtml),
+              summaryMarkdown: Value(newArticle.summaryMarkdown),
+              summaryPlain: Value(newArticle.summaryPlain),
+              contentHtml: Value(newArticle.contentHtml),
+              contentMarkdown: Value(newArticle.contentMarkdown),
+              contentPlain: Value(newArticle.contentPlain),
+            ),
+          );
+        }),
+      );
+    });
   }
 
   Future<void> upsertArticles(List<FeedArticle> articles) {
@@ -39,9 +74,11 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
                   (old) {
                     return ArticleCompanion(
                       authors: Value(article.authors),
+                      contentHtml: Value(article.contentHtml),
                       contentMarkdown: Value(article.contentMarkdown),
                       contentPlain: Value(article.contentPlain),
                       links: Value(article.links),
+                      summaryHtml: Value(article.summaryHtml),
                       summaryMarkdown: Value(article.summaryMarkdown),
                       summaryPlain: Value(article.summaryPlain),
                       tags: Value(article.tags),

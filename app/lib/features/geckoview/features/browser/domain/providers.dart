@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
@@ -48,8 +46,8 @@ class SelectedBangData extends _$SelectedBangData {
       state = value;
     });
 
-    ref.onDispose(() {
-      unawaited(subscription.cancel());
+    ref.onDispose(() async {
+      await subscription.cancel();
     });
 
     return null;

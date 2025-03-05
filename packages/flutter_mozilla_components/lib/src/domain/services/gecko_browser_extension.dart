@@ -14,9 +14,16 @@ class GeckoBrowserExtensionService extends BrowserExtensionEvents {
   Stream<String> get feedRequested => _feedRequest.stream;
 
   static Future<List<TurndownResults>> turndownHtml(
-    List<String> htmlList,
-  ) async {
-    final markdownResult = await _apiInstance.getMarkdown(htmlList);
+    List<String> htmlList, {
+    Duration timeout = const Duration(seconds: 1),
+  }) async {
+    if (htmlList.isEmpty) {
+      return [];
+    }
+
+    final markdownResult = await _apiInstance
+        .getMarkdown(htmlList)
+        .timeout(timeout);
 
     final results =
         markdownResult

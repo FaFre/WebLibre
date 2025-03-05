@@ -20,7 +20,7 @@ class HistorySuggestions extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historySuggestions = ref.watch(engineHistorySuggestionsProvider);
+    final historySuggestionsAsync = ref.watch(engineHistorySuggestionsProvider);
 
     useListenableCallback(searchTextController, () async {
       await ref
@@ -28,8 +28,8 @@ class HistorySuggestions extends HookConsumerWidget {
           .addQuery(searchTextController.text);
     });
 
-    if (historySuggestions.hasValue &&
-        (historySuggestions.valueOrNull.isEmpty)) {
+    if (historySuggestionsAsync.hasValue &&
+        (historySuggestionsAsync.valueOrNull.isEmpty)) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
@@ -46,8 +46,8 @@ class HistorySuggestions extends HookConsumerWidget {
           ),
         ),
         SliverSkeletonizer(
-          enabled: historySuggestions.isLoading,
-          child: historySuggestions.when(
+          enabled: historySuggestionsAsync.isLoading,
+          child: historySuggestionsAsync.when(
             skipLoadingOnReload: true,
             data: (historySuggestions) {
               return SliverList.builder(
@@ -109,14 +109,16 @@ class HistorySuggestions extends HookConsumerWidget {
               );
             },
             error: (error, stackTrace) {
-              return FailureWidget(
-                title: 'Could not load history',
-                exception: error,
+              return SliverToBoxAdapter(
+                child: FailureWidget(
+                  title: 'Could not load history',
+                  exception: error,
+                ),
               );
             },
             loading:
                 () => SliverList.builder(
-                  itemCount: historySuggestions.valueOrNull?.length ?? 3,
+                  itemCount: historySuggestionsAsync.valueOrNull?.length ?? 3,
                   itemBuilder: (context, index) {
                     return const ListTile(title: Bone.text());
                   },

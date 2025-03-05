@@ -4,10 +4,10 @@ import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'proxy_settings_replucation.g.dart';
+part 'proxy_settings_replication.g.dart';
 
 @Riverpod(keepAlive: true)
-class ProxySettingsReplucation extends _$ProxySettingsReplucation {
+class ProxySettingsReplication extends _$ProxySettingsReplication {
   final _service = GeckoContainerProxyService();
 
   @override

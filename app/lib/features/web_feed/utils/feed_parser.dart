@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/database/database.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
@@ -79,28 +78,11 @@ class FeedParser {
     }
   }
 
-  Future<List<FeedArticle>> readArticles() async {
+  List<FeedArticle> readArticles() {
     final fetchDate = DateTime.now();
 
     switch (_feed) {
       case final Rss1Feed feed:
-        final processedContents =
-            await GeckoBrowserExtensionService.turndownHtml(
-              feed.items.map((item) => item.content?.value ?? '').toList(),
-            );
-
-        final processedSummaries =
-            await GeckoBrowserExtensionService.turndownHtml(
-              feed.items
-                  .map(
-                    (item) =>
-                        item.description.whenNotEmpty ??
-                        item.dc?.description ??
-                        '',
-                  )
-                  .toList(),
-            );
-
         return feed.items.mapIndexed((i, item) {
           final title = item.title.whenNotEmpty ?? item.dc?.title.whenNotEmpty;
 
@@ -119,32 +101,19 @@ class FeedParser {
             authors: item.dc?.creator.whenNotEmpty.mapNotNull(
               (creator) => [FeedAuthor(name: creator)],
             ),
-            summaryPlain: processedSummaries[i].plain.whenNotEmpty,
-            summaryMarkdown: processedSummaries[i].markdown.whenNotEmpty,
-            links: link.mapNotNull((link) => [FeedLink(uri: link)]),
+            summaryHtml:
+                item.description.whenNotEmpty ??
+                item.dc?.description.whenNotEmpty,
+            links: link.mapNotNull(
+              (link) => [
+                FeedLink(uri: link, relation: FeedLinkRelation.alternate),
+              ],
+            ),
             tags: item.dc?.toFeedCategories(),
-            contentPlain: processedContents[i].plain.trim().whenNotEmpty,
-            contentMarkdown: processedContents[i].markdown?.trim().whenNotEmpty,
+            contentHtml: item.content?.value.whenNotEmpty,
           );
         }).toList();
       case final RssFeed feed:
-        final processedContents =
-            await GeckoBrowserExtensionService.turndownHtml(
-              feed.items.map((item) => item.content?.value ?? '').toList(),
-            );
-
-        final processedSummaries =
-            await GeckoBrowserExtensionService.turndownHtml(
-              feed.items
-                  .map(
-                    (item) =>
-                        item.description.whenNotEmpty ??
-                        item.dc?.description ??
-                        '',
-                  )
-                  .toList(),
-            );
-
         return feed.items.mapIndexed((i, item) {
           final title = item.title.whenNotEmpty ?? item.dc?.title.whenNotEmpty;
 
@@ -173,28 +142,22 @@ class FeedParser {
             authors: author.mapNotNull(
               (creator) => [FeedAuthor(name: creator)],
             ),
-            summaryPlain: processedSummaries[i].plain.whenNotEmpty,
-            summaryMarkdown: processedSummaries[i].markdown.whenNotEmpty,
-            links: link.mapNotNull((link) => [FeedLink(uri: link)]),
+            summaryHtml:
+                item.description.whenNotEmpty ??
+                item.dc?.description.whenNotEmpty,
+            links: link.mapNotNull(
+              (link) => [
+                FeedLink(uri: link, relation: FeedLinkRelation.alternate),
+              ],
+            ),
             tags:
                 categories.isNotEmpty
                     ? categories
                     : item.dc?.toFeedCategories(),
-            contentPlain: processedContents[i].plain.trim().whenNotEmpty,
-            contentMarkdown: processedContents[i].markdown?.trim().whenNotEmpty,
+            contentHtml: item.content?.value.whenNotEmpty,
           );
         }).toList();
       case final AtomFeed feed:
-        final processedContents =
-            await GeckoBrowserExtensionService.turndownHtml(
-              feed.items.map((item) => item.content ?? '').toList(),
-            );
-
-        final processedSummaries =
-            await GeckoBrowserExtensionService.turndownHtml(
-              feed.items.map((item) => item.summary ?? '').toList(),
-            );
-
         final feedLink = feed.links.toFeedLinks().getRelation(
           FeedLinkRelation.self,
         );
@@ -218,16 +181,14 @@ class FeedParser {
             id: uniqueId,
             feedId: url,
             title: item.title.whenNotEmpty,
-            summaryPlain: processedSummaries[i].plain.whenNotEmpty,
-            summaryMarkdown: processedSummaries[i].markdown.whenNotEmpty,
+            summaryHtml: item.summary.whenNotEmpty,
             links: itemLinks,
             authors: authors.isNotEmpty ? authors : null,
             tags: tags,
             fetched: fetchDate,
             created: published,
             updated: updated,
-            contentPlain: processedContents[i].plain.trim().whenNotEmpty,
-            contentMarkdown: processedContents[i].markdown?.trim().whenNotEmpty,
+            contentHtml: item.content.whenNotEmpty,
           );
         }).toList();
       default:

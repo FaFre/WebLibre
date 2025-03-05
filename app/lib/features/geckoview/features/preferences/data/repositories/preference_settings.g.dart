@@ -330,7 +330,7 @@ class _PreferenceSettingGroupProviderElement
 }
 
 String _$preferenceRepositoryHash() =>
-    r'53c0cbbf60e44c3834fe3e3255836f7e27f09c7f';
+    r'b2b7f75b3d30842b3006bb18af89f7ff90ba4ce7';
 
 /// See also [_PreferenceRepository].
 @ProviderFor(_PreferenceRepository)

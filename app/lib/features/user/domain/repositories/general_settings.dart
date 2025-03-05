@@ -74,8 +74,8 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
           state = _deserializeSettings(event);
         });
 
-    ref.onDispose(() {
-      unawaited(watchSub.cancel());
+    ref.onDispose(() async {
+      await watchSub.cancel();
     });
 
     return GeneralSettings.withDefaults();

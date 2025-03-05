@@ -108,8 +108,8 @@ class DocumentRepository extends _$DocumentRepository {
       }
     });
 
-    ref.onDispose(() {
-      unawaited(tabContentSub.cancel());
+    ref.onDispose(() async {
+      await tabContentSub.cancel();
     });
   }
 }

@@ -827,7 +827,7 @@ class _ArticleSearchProviderElement
 }
 
 String _$filteredArticleListHash() =>
-    r'4443a4a92cab0c8f534a74a1cba681a8973b058e';
+    r'a691c3c6aa722dd85ee4980e6c48721a8025f1d8';
 
 abstract class _$FilteredArticleList
     extends BuildlessAutoDisposeNotifier<AsyncValue<List<FeedArticle>>> {

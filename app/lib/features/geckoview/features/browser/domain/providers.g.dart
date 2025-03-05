@@ -719,7 +719,7 @@ class _SelectedBangTriggerProviderElement
   String? get domain => (origin as SelectedBangTriggerProvider).domain;
 }
 
-String _$selectedBangDataHash() => r'28c394e5989e108870ca5733e916b80b3cf8972c';
+String _$selectedBangDataHash() => r'666858556efe59d2de38a04fda30e8ec227c6675';
 
 abstract class _$SelectedBangData
     extends BuildlessAutoDisposeNotifier<BangData?> {

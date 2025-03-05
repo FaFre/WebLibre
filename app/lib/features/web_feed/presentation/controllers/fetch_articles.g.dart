@@ -7,7 +7,7 @@ part of 'fetch_articles.dart';
 // **************************************************************************
 
 String _$fetchArticlesControllerHash() =>
-    r'63da7f6ba9eab28aebff4c60d98e2f2a404c5138';
+    r'7604d9352da886624c3cf6862b89c397edda1f28';
 
 /// See also [FetchArticlesController].
 @ProviderFor(FetchArticlesController)

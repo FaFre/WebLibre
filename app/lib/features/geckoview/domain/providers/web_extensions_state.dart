@@ -86,9 +86,9 @@ class WebExtensionsState extends _$WebExtensionsState {
       ],
     };
 
-    ref.onDispose(() {
+    ref.onDispose(() async {
       for (final sub in subscriptions) {
-        unawaited(sub.cancel());
+        await sub.cancel();
       }
     });
 

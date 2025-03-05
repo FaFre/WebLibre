@@ -68,8 +68,8 @@ class _PreferenceRepository extends _$PreferenceRepository {
   Raw<Stream<Map<String, Object>>> build() {
     _prefSubject = BehaviorSubject<Map<String, Object>>();
 
-    ref.onDispose(() {
-      unawaited(_prefSubject.close());
+    ref.onDispose(() async {
+      await _prefSubject.close();
     });
 
     ref.onAddListener(() async {

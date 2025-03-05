@@ -7,6 +7,7 @@ environment:
   sdk: '>=3.7.0 <4.0.0'
 
 dependencies:
+  background_fetch: ^1.3.7
   collection: ^1.19.1
   copy_with_extension: ^6.0.1
   crypto: ^3.0.6

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:lensai/data/database/functions/lexo_rank_functions.dart';
@@ -44,8 +42,8 @@ ChatDatabase chatDatabase(Ref ref) {
     }),
   );
 
-  ref.onDispose(() {
-    unawaited(db.close());
+  ref.onDispose(() async {
+    await db.close();
   });
 
   return db;

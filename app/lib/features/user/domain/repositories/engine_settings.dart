@@ -85,8 +85,8 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
           });
         });
 
-    ref.onDispose(() {
-      unawaited(watchSub.cancel());
+    ref.onDispose(() async {
+      await watchSub.cancel();
     });
 
     return EngineSettings.withDefaults();

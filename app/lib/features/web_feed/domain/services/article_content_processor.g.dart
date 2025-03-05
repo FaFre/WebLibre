@@ -1,28 +1,28 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'proxy_settings_replucation.dart';
+part of 'article_content_processor.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$proxySettingsReplucationHash() =>
-    r'b00fc9a9c8b385a0f8a5830e9ba1c329d340c0ae';
+String _$articleContentProcessorServiceHash() =>
+    r'182cd89e38a0a9a86b7425c16ad2bd1fc39c6704';
 
-/// See also [ProxySettingsReplucation].
-@ProviderFor(ProxySettingsReplucation)
-final proxySettingsReplucationProvider =
-    NotifierProvider<ProxySettingsReplucation, void>.internal(
-      ProxySettingsReplucation.new,
-      name: r'proxySettingsReplucationProvider',
+/// See also [ArticleContentProcessorService].
+@ProviderFor(ArticleContentProcessorService)
+final articleContentProcessorServiceProvider =
+    NotifierProvider<ArticleContentProcessorService, void>.internal(
+      ArticleContentProcessorService.new,
+      name: r'articleContentProcessorServiceProvider',
       debugGetCreateSourceHash:
           const bool.fromEnvironment('dart.vm.product')
               ? null
-              : _$proxySettingsReplucationHash,
+              : _$articleContentProcessorServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$ProxySettingsReplucation = Notifier<void>;
+typedef _$ArticleContentProcessorService = Notifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

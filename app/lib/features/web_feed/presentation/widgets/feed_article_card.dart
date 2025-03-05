@@ -6,8 +6,10 @@ import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/extensions/uri.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
+import 'package:lensai/features/web_feed/data/models/feed_link.dart';
 import 'package:lensai/features/web_feed/domain/providers/article_filter.dart';
 import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dart';
+import 'package:lensai/features/web_feed/extensions/atom.dart';
 import 'package:lensai/features/web_feed/extensions/feed_article.dart';
 import 'package:lensai/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:lensai/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
@@ -52,7 +54,12 @@ class FeedArticleCard extends HookConsumerWidget {
               Row(
                 children: [
                   UrlIcon([
-                    article.icon ?? article.feedId.base,
+                    article.icon ??
+                        article.links
+                            ?.getRelation(FeedLinkRelation.alternate)
+                            ?.uri ??
+                        article.siteLink ??
+                        article.feedId.base,
                   ], iconSize: 34.0),
                   const SizedBox(width: 12.0),
                   Expanded(
