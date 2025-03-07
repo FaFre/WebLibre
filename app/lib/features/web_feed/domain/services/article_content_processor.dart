@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/core/logger.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,10 +28,10 @@ class ArticleContentProcessorService extends _$ArticleContentProcessorService {
           articles
               .mapIndexed(
                 (index, article) => article.copyWith(
-                  contentMarkdown: content[index].markdown.whenNotEmpty,
-                  contentPlain: content[index].plain.whenNotEmpty,
-                  summaryMarkdown: summary[index].markdown.whenNotEmpty,
-                  summaryPlain: summary[index].plain.whenNotEmpty,
+                  contentMarkdown: content[index].markdown ?? '',
+                  contentPlain: content[index].plain,
+                  summaryMarkdown: summary[index].markdown ?? '',
+                  summaryPlain: summary[index].plain,
                 ),
               )
               .toList(),

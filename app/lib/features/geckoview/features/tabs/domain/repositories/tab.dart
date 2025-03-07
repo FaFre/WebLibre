@@ -24,8 +24,8 @@ class TabDataRepository extends _$TabDataRepository {
     final tabIds =
         await ref
             .read(tabDatabaseProvider)
-            .tabDao
-            .containerTabIds(containerId)
+            .containerDao
+            .getContainerTabIds(containerId)
             .get();
 
     if (tabIds.isNotEmpty) {

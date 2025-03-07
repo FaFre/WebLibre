@@ -684,7 +684,7 @@ class _FetchWebFeedProviderElement
   Uri get url => (origin as FetchWebFeedProvider).url;
 }
 
-String _$articleSearchHash() => r'8bf2c4aa8d8b3918be8a416909535682abfbab35';
+String _$articleSearchHash() => r'cc59a5d3c4b926db9f03ed96db592965ff925b04';
 
 abstract class _$ArticleSearch
     extends BuildlessAutoDisposeStreamNotifier<List<FeedArticle>> {

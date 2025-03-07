@@ -58,6 +58,10 @@ class TabSearch extends HookConsumerWidget {
           );
     });
 
+    if (tabs.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
     return MultiSliver(
       children: [
         SliverToBoxAdapter(

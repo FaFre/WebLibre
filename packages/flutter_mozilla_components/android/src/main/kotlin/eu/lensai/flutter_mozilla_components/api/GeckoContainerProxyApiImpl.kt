@@ -1,7 +1,10 @@
 package eu.lensai.flutter_mozilla_components.api
 
+import eu.lensai.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.lensai.flutter_mozilla_components.feature.ContainerProxyFeature
+import eu.lensai.flutter_mozilla_components.feature.ResultConsumer
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
+import org.json.JSONObject
 
 class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
     override fun setProxyPort(port: Long) {
@@ -14,5 +17,19 @@ class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
 
     override fun removeContainerProxy(contextId: String) {
         ContainerProxyFeature.scheduleRequest("removeContainerProxy", contextId)
+    }
+
+    override fun healthcheck(callback: (Result<Boolean>) -> Unit) {
+        ContainerProxyFeature.scheduleRequestWithResponse("healthcheck", Unit, object :
+            ResultConsumer<JSONObject> {
+            override fun success(result: JSONObject) {
+                val resultStatus = result.getBoolean("result")
+                callback(Result.success(resultStatus))
+            }
+
+            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
+            }
+        })
     }
 }

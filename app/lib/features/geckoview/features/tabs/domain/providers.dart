@@ -43,7 +43,7 @@ Stream<List<String>> containerTabIds(Ref ref, ContainerFilter containerFilter) {
 
   switch (containerFilter) {
     case ContainerFilterById(:final containerId):
-      return db.tabDao.containerTabIds(containerId).watch();
+      return db.containerDao.getContainerTabIds(containerId).watch();
     case ContainerFilterDisabled():
       return db.tabDao.getAllTabIds().watch();
   }

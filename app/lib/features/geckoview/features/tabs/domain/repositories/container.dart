@@ -15,6 +15,10 @@ class ContainerRepository extends _$ContainerRepository {
     return ref.read(tabDatabaseProvider).containerDao.addContainer(container);
   }
 
+  Future<List<ContainerDataWithCount>> getAllContainersWithCount() {
+    return ref.read(tabDatabaseProvider).containersWithCount().get();
+  }
+
   Future<void> replaceContainer(ContainerData container) {
     return ref
         .read(tabDatabaseProvider)
@@ -28,6 +32,14 @@ class ContainerRepository extends _$ContainerRepository {
         .containerDao
         .getContainerData(id)
         .getSingleOrNull();
+  }
+
+  Future<List<String>> getContainerTabIds(String? id) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getContainerTabIds(id)
+        .get();
   }
 
   Future<void> deleteContainer(String id) async {

@@ -26,7 +26,7 @@ final selectedTabSessionNotifierProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedTabSessionNotifierRef = AutoDisposeProviderRef<Raw<TabSession>>;
-String _$tabSessionHash() => r'e4fbbcd430037cc01adb799783fb7974a11a27bf';
+String _$tabSessionHash() => r'33d68f3860b3bc9a92db386535c7482bf4416008';
 
 /// Copied from Dart SDK
 class _SystemHash {

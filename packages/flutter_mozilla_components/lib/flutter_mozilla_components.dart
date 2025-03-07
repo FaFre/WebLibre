@@ -3,6 +3,7 @@ export 'src/data/models/load_url_flags.dart';
 export 'src/data/models/source.dart';
 export 'src/domain/entities/default_selection_actions.dart';
 export 'src/domain/services/gecko_addon.dart';
+export 'src/domain/services/gecko_browser.dart';
 export 'src/domain/services/gecko_browser_extension.dart';
 export 'src/domain/services/gecko_container_proxy.dart';
 export 'src/domain/services/gecko_cookie.dart';

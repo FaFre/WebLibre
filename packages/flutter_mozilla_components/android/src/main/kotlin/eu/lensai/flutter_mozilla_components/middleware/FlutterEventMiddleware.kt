@@ -50,7 +50,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
     ) {
         when (action) {
             is ContentAction.UpdateThumbnailAction -> {
-                val resized = action.thumbnail.resize(maxWidth = 640, maxHeight = 480);
+                val resized = action.thumbnail.resize(maxWidth = 1280, maxHeight = 800);
                 val bytes = resized.toWebPBytes()
 
                 runOnUiThread {

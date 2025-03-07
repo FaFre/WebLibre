@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/core/providers/format.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/extensions/uri.dart';
@@ -80,6 +81,8 @@ class FeedSearch extends HookConsumerWidget {
                       _ => null,
                     };
 
+                    final articleDate = article.updated ?? article.created;
+
                     return ListTile(
                       leading: RepaintBoundary(
                         child: UrlIcon([
@@ -108,38 +111,55 @@ class FeedSearch extends HookConsumerWidget {
                                 article.displayTitle,
                                 style: theme.textTheme.titleMedium,
                               ),
-                      subtitle:
-                          (searchSnippet.isNotEmpty)
-                              ? MarkdownBody(
-                                data: searchSnippet!,
-                                styleSheet: MarkdownStyleSheet(
-                                  p: Theme.of(
-                                    context,
-                                  ).textTheme.bodyMedium?.copyWith(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                  ),
-                                  a: Theme.of(
-                                    context,
-                                  ).textTheme.bodyMedium?.copyWith(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                    decoration: TextDecoration.none,
-                                  ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (searchSnippet.isNotEmpty)
+                            MarkdownBody(
+                              data: searchSnippet!,
+                              styleSheet: MarkdownStyleSheet(
+                                p: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                 ),
-                              )
-                              : ((article.summaryPlain != null)
-                                  ? Text(
-                                    article.summaryPlain!,
-                                    style: theme.textTheme.bodySmall,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  )
-                                  : null),
+                                a: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                            )
+                          else
+                            (article.summaryPlain != null)
+                                ? Text(
+                                  article.summaryPlain!,
+                                  style: theme.textTheme.bodySmall,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                                : const SizedBox.shrink(),
+                          if (articleDate != null)
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: Text(
+                                ref
+                                    .read(formatProvider.notifier)
+                                    .fullDateTimeWithTimezone(articleDate),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                       onTap: () {
                         FeedArticleRoute(
                           articleId: article.id,

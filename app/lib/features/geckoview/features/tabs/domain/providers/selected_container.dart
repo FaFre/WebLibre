@@ -1,3 +1,4 @@
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
@@ -48,13 +49,18 @@ class SelectedContainer extends _$SelectedContainer {
       }
 
       if (passAuth) {
-        state = id;
-
         if (container.metadata.useProxy) {
-          return SetContainerResult.successHasProxy;
-        }
+          final proxyPluginHealthy =
+              await GeckoContainerProxyService().healthcheck();
 
-        return SetContainerResult.success;
+          if (proxyPluginHealthy) {
+            state = id;
+            return SetContainerResult.successHasProxy;
+          }
+        } else {
+          state = id;
+          return SetContainerResult.success;
+        }
       }
     }
 

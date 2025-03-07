@@ -975,6 +975,7 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
     contentMarkdown,
     contentPlain,
     icon,
+    siteLink,
   ];
   @override
   String get aliasedName => _alias ?? entityName;
@@ -983,7 +984,7 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
   @override
   Map<SqlDialect, String> get createViewStatements => {
     SqlDialect.sqlite:
-        'CREATE VIEW article_view AS SELECT a.*, f.icon FROM article AS a INNER JOIN feed AS f ON f.url = a.feed_id',
+        'CREATE VIEW article_view AS SELECT a.*, f.icon, f.site_link FROM article AS a INNER JOIN feed AS f ON f.url = a.feed_id',
   };
   @override
   ArticleView get asDslTable => this;
@@ -1069,6 +1070,12 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}icon'],
+        ),
+      ),
+      siteLink: Feed.$convertersiteLinkn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}site_link'],
         ),
       ),
     );
@@ -1181,6 +1188,13 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
         true,
         type: DriftSqlType.string,
       ).withConverter<Uri?>(Feed.$convertericonn);
+  late final GeneratedColumnWithTypeConverter<Uri?, String> siteLink =
+      GeneratedColumn<String>(
+        'site_link',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+      ).withConverter<Uri?>(Feed.$convertersiteLinkn);
   @override
   ArticleView createAlias(String alias) {
     return ArticleView(attachedDatabase, alias);

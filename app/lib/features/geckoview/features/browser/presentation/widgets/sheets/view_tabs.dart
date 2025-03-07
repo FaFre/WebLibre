@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -166,6 +167,20 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
     super.key,
   });
 
+  int _calculateCrossAxisItemCount({
+    required double screenWidth,
+    required double horizontalPadding,
+    required double crossAxisSpacing,
+  }) {
+    final totalHorizontalPadding = horizontalPadding * 2;
+    final availableWidth =
+        screenWidth - totalHorizontalPadding - crossAxisSpacing;
+
+    final crossAxisCount = availableWidth ~/ 180.0;
+
+    return crossAxisCount;
+  }
+
   double _calculateItemHeight({
     required double screenWidth,
     required double childAspectRatio,
@@ -212,6 +227,25 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                   final activeTab = ref.watch(selectedTabProvider);
 
+                  final crossAxisCount = useMemoized(
+                    () {
+                      final calculatedCount = _calculateCrossAxisItemCount(
+                        screenWidth: MediaQuery.of(context).size.width,
+                        horizontalPadding: 4.0,
+                        crossAxisSpacing: 8.0,
+                      );
+
+                      return math.max(
+                        math.min(calculatedCount, filteredTabIds.value.length),
+                        1,
+                      );
+                    },
+                    [
+                      MediaQuery.of(context).size.width,
+                      filteredTabIds.value.length,
+                    ],
+                  );
+
                   final itemHeight = useMemoized(
                     () => _calculateItemHeight(
                       screenWidth: MediaQuery.of(context).size.width,
@@ -219,9 +253,9 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                       horizontalPadding: 4.0,
                       mainAxisSpacing: 8.0,
                       crossAxisSpacing: 8.0,
-                      crossAxisCount: 2,
+                      crossAxisCount: crossAxisCount,
                     ),
-                    [MediaQuery.of(context).size.width],
+                    [MediaQuery.of(context).size.width, crossAxisCount],
                   );
 
                   useEffect(() {
@@ -349,14 +383,13 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                       builder: (children) {
                         return GridView.builder(
                           controller: sheetScrollController,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                //Sync values for itemHeight calculation _calculateItemHeight
-                                childAspectRatio: 0.75,
-                                mainAxisSpacing: 8.0,
-                                crossAxisSpacing: 8.0,
-                                crossAxisCount: 2,
-                              ),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            //Sync values for itemHeight calculation _calculateItemHeight
+                            childAspectRatio: 0.75,
+                            mainAxisSpacing: 8.0,
+                            crossAxisSpacing: 8.0,
+                            crossAxisCount: crossAxisCount,
+                          ),
                           itemCount: children.length,
                           itemBuilder: (context, index) => children[index],
                         );

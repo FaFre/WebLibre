@@ -4,7 +4,7 @@ part of 'routes.dart';
   name: 'FeedListRoute',
   path: '/feeds',
   routes: [
-    TypedGoRoute<FeedAddRoute>(name: 'FeedAddRoute', path: 'add'),
+    TypedGoRoute<FeedAddRoute>(name: FeedAddRoute.name, path: 'add'),
     TypedGoRoute<FeedArticleListRoute>(
       name: 'FeedArticleListRoute',
       path: 'articles/:feedId',
@@ -72,6 +72,8 @@ class FeedEditRoute extends GoRouteData {
 
 class FeedAddRoute extends GoRouteData {
   final Uri? $extra;
+
+  static const name = 'FeedAddRoute';
 
   const FeedAddRoute({this.$extra});
 

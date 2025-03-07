@@ -41,6 +41,8 @@ abstract class _$FeedArticleCWProxy {
 
   FeedArticle icon(Uri? icon);
 
+  FeedArticle siteLink(Uri? siteLink);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `FeedArticle(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -65,6 +67,7 @@ abstract class _$FeedArticleCWProxy {
     String? contentMarkdown,
     String? contentPlain,
     Uri? icon,
+    Uri? siteLink,
   });
 }
 
@@ -132,6 +135,9 @@ class _$FeedArticleCWProxyImpl implements _$FeedArticleCWProxy {
   FeedArticle icon(Uri? icon) => this(icon: icon);
 
   @override
+  FeedArticle siteLink(Uri? siteLink) => this(siteLink: siteLink);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `FeedArticle(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -156,6 +162,7 @@ class _$FeedArticleCWProxyImpl implements _$FeedArticleCWProxy {
     Object? contentMarkdown = const $CopyWithPlaceholder(),
     Object? contentPlain = const $CopyWithPlaceholder(),
     Object? icon = const $CopyWithPlaceholder(),
+    Object? siteLink = const $CopyWithPlaceholder(),
   }) {
     return FeedArticle(
       id:
@@ -243,6 +250,11 @@ class _$FeedArticleCWProxyImpl implements _$FeedArticleCWProxy {
               ? _value.icon
               // ignore: cast_nullable_to_non_nullable
               : icon as Uri?,
+      siteLink:
+          siteLink == const $CopyWithPlaceholder()
+              ? _value.siteLink
+              // ignore: cast_nullable_to_non_nullable
+              : siteLink as Uri?,
     );
   }
 }
@@ -293,6 +305,8 @@ FeedArticle _$FeedArticleFromJson(Map<String, dynamic> json) => FeedArticle(
   contentMarkdown: json['contentMarkdown'] as String?,
   contentPlain: json['contentPlain'] as String?,
   icon: json['icon'] == null ? null : Uri.parse(json['icon'] as String),
+  siteLink:
+      json['siteLink'] == null ? null : Uri.parse(json['siteLink'] as String),
 );
 
 Map<String, dynamic> _$FeedArticleToJson(FeedArticle instance) =>
@@ -314,4 +328,5 @@ Map<String, dynamic> _$FeedArticleToJson(FeedArticle instance) =>
       'contentMarkdown': instance.contentMarkdown,
       'contentPlain': instance.contentPlain,
       'icon': instance.icon?.toString(),
+      'siteLink': instance.siteLink?.toString(),
     };

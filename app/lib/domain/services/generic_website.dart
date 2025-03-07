@@ -247,7 +247,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
       return WebPageInfo(
         url: url,
-        title: result['title'] as String?,
+        title: (result['title'] as String?)?.trim(),
         favicon: favicon,
         feeds: Set.from(
           (result['feeds']! as List<String>).map((url) => Uri.tryParse(url)),
@@ -257,21 +257,23 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   }
 
   Future<BrowserIcon?> getCachedIcon(Uri url) async {
-    final cachedBrowserIcon = _browserIconCache.get(url.origin);
-    if (cachedBrowserIcon != null) {
-      return cachedBrowserIcon;
-    }
+    if (url.scheme.startsWith('http')) {
+      final cachedBrowserIcon = _browserIconCache.get(url.origin);
+      if (cachedBrowserIcon != null) {
+        return cachedBrowserIcon;
+      }
 
-    final cachedIcon = await _cacheRepository.getCachedIcon(url.origin);
-    if (cachedIcon != null) {
-      return _browserIconCache.set(
-        url.origin,
-        await BrowserIcon.fromBytes(
-          cachedIcon,
-          dominantColor: null,
-          source: IconSource.disk,
-        ),
-      );
+      final cachedIcon = await _cacheRepository.getCachedIcon(url.origin);
+      if (cachedIcon != null) {
+        return _browserIconCache.set(
+          url.origin,
+          await BrowserIcon.fromBytes(
+            cachedIcon,
+            dominantColor: null,
+            source: IconSource.disk,
+          ),
+        );
+      }
     }
 
     return null;

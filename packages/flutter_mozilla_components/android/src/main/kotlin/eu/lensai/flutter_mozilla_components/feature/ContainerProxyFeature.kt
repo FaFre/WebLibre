@@ -20,6 +20,10 @@ object ContainerProxyFeature {
     private const val CONTAINER_PROXY_REPORTER_EXTENSION_URL = "resource://android/assets/extensions/container_proxy/"
     private const val CONTAINER_PROXY_REPORTER_MESSAGING_ID = "containerProxy"
 
+    private var nextRequestId: Int = 0
+    private val requestHandlers = HashMap<Int, ResultConsumer<JSONObject>>()
+    private val mutex = Mutex()
+
     @VisibleForTesting
     // This is an internal var to make it mutable for unit testing purposes only
     internal var extensionController = WebExtensionController(
@@ -40,7 +44,55 @@ object ContainerProxyFeature {
         }
     }
 
+    fun scheduleRequestWithResponse(
+        command: String,
+        args: Any,
+        callback: ResultConsumer<JSONObject>
+    ) {
+        val message = JSONObject()
+        message.put("action", command);
+        message.put("args", args)
+
+        runBlocking {
+            withContext(Dispatchers.Default) {
+                mutex.withLock {
+                    message.put("id", nextRequestId)
+
+                    requestHandlers[nextRequestId] = callback
+
+                    nextRequestId += 1
+
+                    extensionController.sendBackgroundMessage(message)
+                }
+            }
+        }
+    }
+
     private class ContainerProxyBackgroundMessageHandler() : MessageHandler {
+        override fun onPortMessage(message: Any, port: Port) {
+            runBlocking {
+                withContext(Dispatchers.Default) {
+                    mutex.withLock {
+                        val messageJSON = message as JSONObject;
+                        val type = messageJSON.getString("type")
+
+                        if (type == "healthcheck") {
+                            val requestId = messageJSON.getInt("id")
+                            val status = messageJSON.getString("status")
+                            if (status == "success") {
+                                requestHandlers[requestId]?.success(message)
+                            } else {
+                                requestHandlers[requestId]?.error(
+                                    "Container Proxy",
+                                    "Failed to perform operation",
+                                    message.getString("error")
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/logger.dart';
 import 'package:lensai/core/routing/routes.dart';
@@ -20,7 +21,9 @@ import 'package:lensai/features/geckoview/features/tabs/features/vector_store/do
 import 'package:lensai/features/user/domain/repositories/cache.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:lensai/features/user/domain/services/local_authentication.dart';
+import 'package:lensai/features/web_feed/domain/providers/add_dialog_blocking.dart';
 import 'package:lensai/features/web_feed/domain/services/article_content_processor.dart';
+import 'package:lensai/presentation/hooks/on_initialization.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;
@@ -56,6 +59,16 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   @override
   Widget build(BuildContext context) {
+    useOnInitialization(() async {
+      await ref.read(generalSettingsRepositoryProvider.notifier).fetch().then((
+        settings,
+      ) {
+        ref
+            .read(browserDataServiceProvider.notifier)
+            .deleteDataOnEngineStart(settings.deleteBrowsingDataOnQuit);
+      });
+    });
+
     final hasTab = ref.watch(
       selectedTabProvider.select((value) => value != null),
     );
@@ -84,7 +97,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     ref.listen(feedRequestedProvider, (previous, next) async {
       if (next.valueOrNull.mapNotNull(Uri.tryParse) case final Uri url) {
-        await FeedAddRoute($extra: url).push(context);
+        if (GoRouterState.of(context).topRoute?.name != FeedAddRoute.name) {
+          if (ref.read(addFeedDialogBlockingProvider.notifier).canPush(url)) {
+            await FeedAddRoute($extra: url).push(context);
+          }
+        }
       }
     });
 
@@ -93,15 +110,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       replacement: SizedBox.expand(child: Container(color: Colors.grey[800])),
       child: GeckoView(
         preInitializationStep: () async {
-          await ref
-              .read(generalSettingsRepositoryProvider.notifier)
-              .fetch()
-              .then((settings) {
-                ref
-                    .read(browserDataServiceProvider.notifier)
-                    .deleteData(settings.deleteBrowsingDataOnQuit);
-              });
-
           await ref
               .read(eventServiceProvider)
               .viewReadyStateEvents

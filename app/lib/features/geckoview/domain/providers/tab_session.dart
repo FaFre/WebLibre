@@ -22,6 +22,10 @@ class TabSession extends _$TabSession {
     );
   }
 
+  Future<void> stopLoading() {
+    return _sessionService.stopLoading();
+  }
+
   Future<void> reload() {
     return _sessionService.reload();
   }

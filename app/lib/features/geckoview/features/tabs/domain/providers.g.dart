@@ -183,7 +183,7 @@ class _MatchSortedContainersWithCountProviderElement
       (origin as MatchSortedContainersWithCountProvider).searchText;
 }
 
-String _$containerTabIdsHash() => r'355c65523db29f376faa293ab1f1ed8273696548';
+String _$containerTabIdsHash() => r'61716a2ae74ffa590c1498d259382e69e24ad7f1';
 
 /// See also [containerTabIds].
 @ProviderFor(containerTabIds)

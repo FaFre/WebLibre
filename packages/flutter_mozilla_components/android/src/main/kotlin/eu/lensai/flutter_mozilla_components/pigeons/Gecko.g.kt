@@ -1994,6 +1994,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
+  fun initialize()
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
 
@@ -2006,6 +2007,22 @@ interface GeckoBrowserApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: GeckoBrowserApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.initialize()
+              listOf(null)
+            } catch (exception: Throwable) {
+              wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.showNativeFragment$separatedMessageChannelSuffix", codec)
         if (api != null) {
@@ -3019,6 +3036,7 @@ interface GeckoContainerProxyApi {
   fun setProxyPort(port: Long)
   fun addContainerProxy(contextId: String)
   fun removeContainerProxy(contextId: String)
+  fun healthcheck(callback: (Result<Boolean>) -> Unit)
 
   companion object {
     /** The codec used by GeckoContainerProxyApi. */
@@ -3078,6 +3096,24 @@ interface GeckoContainerProxyApi {
               wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.healthcheck$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.healthcheck{ result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(wrapResult(data))
+              }
+            }
           }
         } else {
           channel.setMessageHandler(null)

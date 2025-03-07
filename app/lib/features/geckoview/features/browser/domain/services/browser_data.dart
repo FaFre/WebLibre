@@ -4,9 +4,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'browser_data.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class BrowserDataService extends _$BrowserDataService {
   final _service = GeckoDeleteBrowserDataService();
+
+  var _onStartDeleted = false;
+
+  Future<void> deleteDataOnEngineStart(
+    Set<DeleteBrowsingDataType>? types,
+  ) async {
+    if (!_onStartDeleted) {
+      _onStartDeleted = true;
+      return deleteData(types);
+    }
+  }
 
   Future<void> deleteData(Set<DeleteBrowsingDataType>? types) async {
     if (types != null) {

@@ -7,7 +7,8 @@ console.log('Background script started')
 const store = new Store()
 
 interface Message {
-    action: 'setProxyPort' | 'addContainerProxy' | 'removeContainerProxy';
+    id: String | undefined;
+    action: 'setProxyPort' | 'addContainerProxy' | 'removeContainerProxy' | 'healthcheck';
     args: any;
 }
 
@@ -35,8 +36,14 @@ port.onMessage.addListener((raw: unknown): void => {
         case "removeContainerProxy":
             store.removeContainerProxyRelation(message.args, "tor")
             break
-
-
+        case "healthcheck":
+            port.postMessage({
+                "type": "healthcheck",
+                "id": message.id,
+                "status": "success",
+                "result": true
+            });
+            break
     }
 });
 

@@ -20,20 +20,6 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
   SingleOrNullSelectable<TabData> getTabDataById(String id) =>
       db.tab.select()..where((t) => t.id.equals(id));
 
-  Selectable<String> containerTabIds(String? containerId) {
-    final query =
-        selectOnly(db.tab)
-          ..addColumns([db.tab.id])
-          ..where(
-            (containerId != null)
-                ? db.tab.containerId.equals(containerId)
-                : db.tab.containerId.isNull(),
-          )
-          ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
-
-    return query.map((row) => row.read(db.tab.id)!);
-  }
-
   Selectable<String> getAllTabIds() {
     final query =
         selectOnly(db.tab)

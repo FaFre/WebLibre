@@ -16,8 +16,9 @@ extension ParseRssCategory on List<RssCategory> {
   List<FeedCategory> toFeedCategories() {
     return where((category) => category.value.isNotEmpty)
         .map(
-          (category) =>
-              FeedCategory(id: '${category.domain} ${category.value}'.trim()),
+          (category) => FeedCategory(
+            id: '${category.domain ?? ''} ${category.value ?? ''}'.trim(),
+          ),
         )
         .toList();
   }

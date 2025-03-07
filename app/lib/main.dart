@@ -1,6 +1,8 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show GeckoBrowserService;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/error_observer.dart';
@@ -15,6 +17,8 @@ import 'package:lensai/presentation/main_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await GeckoBrowserService().initialize();
 
   await BackgroundFetch.registerHeadlessTask(backgroundFetch);
 

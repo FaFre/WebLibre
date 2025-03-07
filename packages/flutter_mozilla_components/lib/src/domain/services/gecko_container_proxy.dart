@@ -14,4 +14,12 @@ class GeckoContainerProxyService {
   Future<void> removeContainerProxy(String contextId) {
     return _apiInstance.removeContainerProxy(contextId);
   }
+
+  Future<bool> healthcheck() {
+    try {
+      return _apiInstance.healthcheck();
+    } catch (_) {
+      return Future.value(false);
+    }
+  }
 }

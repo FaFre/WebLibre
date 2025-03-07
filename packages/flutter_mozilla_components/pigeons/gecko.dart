@@ -736,6 +736,7 @@ class ShareInternetResourceState {
 )
 @HostApi()
 abstract class GeckoBrowserApi {
+  void initialize();
   bool showNativeFragment();
   void onTrimMemory(int level);
 }
@@ -953,6 +954,9 @@ abstract class GeckoContainerProxyApi {
   void setProxyPort(int port);
   void addContainerProxy(String contextId);
   void removeContainerProxy(String contextId);
+
+  @async
+  bool healthcheck();
 }
 
 @HostApi()

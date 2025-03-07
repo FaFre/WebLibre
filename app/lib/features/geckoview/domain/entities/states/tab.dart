@@ -60,7 +60,7 @@ class TabState extends WebPageInfo {
     required this.historyState,
     required this.readerableState,
     required this.findResultState,
-  }) : super(title: title);
+  }) : super(title: title.trim());
 
   factory TabState.$default(String tabId) => TabState(
     id: tabId,

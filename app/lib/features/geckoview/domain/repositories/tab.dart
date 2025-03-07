@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:lensai/core/logger.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
@@ -14,6 +16,7 @@ import 'package:lensai/features/geckoview/features/browser/domain/providers/inte
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
 import 'package:lensai/utils/debouncer.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -80,15 +83,117 @@ class TabRepository extends _$TabRepository {
     );
   }
 
-  Future<void> selectTab(String tabId) {
-    return _tabsService.selectTab(tabId: tabId);
+  Future<bool> selectTab(String tabId) async {
+    final containerId = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .containerTabId(tabId);
+
+    final containerData = await containerId.mapNotNull(
+      (containerId) => ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainerData(containerId),
+    );
+
+    if (containerData != null) {
+      if (containerData.metadata.authSettings.authenticationRequired) {
+        if (containerId != ref.read(selectedContainerProvider)) {
+          logger.w(
+            'Tried to open authenticated tab $tabId but container not selected',
+          );
+          return false;
+        }
+      }
+
+      if (containerData.metadata.useProxy) {
+        final proxyPluginHealthy =
+            await GeckoContainerProxyService().healthcheck();
+
+        if (!proxyPluginHealthy) {
+          logger.w(
+            'Tried to open proxied tab $tabId but proxy plugin not responding',
+          );
+          return false;
+        }
+      }
+    }
+
+    await _tabsService.selectTab(tabId: tabId);
+    return true;
   }
 
-  Future<void> closeTab(String tabId) {
+  Future<void> _selectNextTab(String tabId) async {
+    if (ref.read(tabListProvider).value.length == 1) {
+      return;
+    }
+
+    final currentContainerId = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .containerTabId(tabId);
+
+    final sameContainerTabs = await ref
+        .read(containerRepositoryProvider.notifier)
+        .getContainerTabIds(currentContainerId);
+
+    final nextAvailabeInContainer = sameContainerTabs.firstWhereOrNull(
+      (tab) => tab != tabId,
+    );
+
+    if (nextAvailabeInContainer != null) {
+      return _tabsService.selectTab(tabId: sameContainerTabs.first);
+    }
+
+    final unassignedTabs = await ref
+        .read(containerRepositoryProvider.notifier)
+        .getContainerTabIds(currentContainerId);
+
+    if (unassignedTabs.isNotEmpty) {
+      return _tabsService.selectTab(tabId: unassignedTabs.first);
+    }
+
+    //We only take containers without authentication!
+    final availableContainers =
+        await ref
+            .read(containerRepositoryProvider.notifier)
+            .getAllContainersWithCount();
+
+    final nextAvailableContainerUnauthenticated = availableContainers
+        .firstWhereOrNull(
+          (container) =>
+              container.metadata.authSettings.authenticationRequired == false,
+        );
+
+    final nextContainerTabs = await nextAvailableContainerUnauthenticated
+        .mapNotNull(
+          (container) => ref
+              .read(containerRepositoryProvider.notifier)
+              .getContainerTabIds(container.id),
+        );
+
+    if (nextContainerTabs.isNotEmpty) {
+      return _tabsService.selectTab(tabId: nextContainerTabs!.first);
+    }
+
+    if (availableContainers.isNotEmpty) {
+      //Last resort push new tab to avoid any authenticated tab is selected
+      // ignore: avoid_redundant_argument_values
+      await addTab(selectTab: true);
+    }
+  }
+
+  Future<void> closeTab(String tabId) async {
+    if (ref.read(selectedTabProvider) == tabId) {
+      await _selectNextTab(tabId);
+    }
+
     return _tabsService.removeTab(tabId: tabId);
   }
 
-  Future<void> closeTabs(List<String> tabIds) {
+  Future<void> closeTabs(List<String> tabIds) async {
+    final selectedTab = ref.read(selectedTabProvider);
+    if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
+      await _selectNextTab(selectedTab!);
+    }
+
     return _tabsService.removeTabs(ids: tabIds);
   }
 

@@ -1,7 +1,7 @@
 part of 'routes.dart';
 
 @TypedGoRoute<BrowserRoute>(
-  name: 'BrowserRoute',
+  name: BrowserRoute.name,
   path: '/',
   routes: [
     TypedGoRoute<WebPageRoute>(name: 'WebPageRoute', path: 'page/:url'),
@@ -28,6 +28,8 @@ part of 'routes.dart';
   ],
 )
 class BrowserRoute extends GoRouteData {
+  static const name = 'BrowserRoute';
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BrowserScreen();

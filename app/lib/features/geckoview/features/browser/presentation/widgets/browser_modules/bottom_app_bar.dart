@@ -311,11 +311,17 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                       ).select((value) => value?.historyState),
                     );
 
+                    final isLoading = ref.watch(
+                      selectedTabStateProvider.select(
+                        (state) => state?.isLoading ?? false,
+                      ),
+                    );
+
                     return Row(
                       children: [
                         Expanded(
                           child:
-                              (history?.canGoBack == true)
+                              (history?.canGoBack == true || isLoading)
                                   ? IconButton(
                                     onPressed: () async {
                                       final controller = ref.read(
@@ -324,7 +330,12 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                         ).notifier,
                                       );
 
-                                      await controller.goBack();
+                                      if (isLoading) {
+                                        await controller.stopLoading();
+                                      } else {
+                                        await controller.goBack();
+                                      }
+
                                       trippleDotMenuController.close();
                                     },
                                     icon: const Icon(Icons.arrow_back),

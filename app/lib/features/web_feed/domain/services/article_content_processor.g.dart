@@ -7,7 +7,7 @@ part of 'article_content_processor.dart';
 // **************************************************************************
 
 String _$articleContentProcessorServiceHash() =>
-    r'182cd89e38a0a9a86b7425c16ad2bd1fc39c6704';
+    r'e7cc3da71f6dcf39b0c10df4dcd061f816d5c12e';
 
 /// See also [ArticleContentProcessorService].
 @ProviderFor(ArticleContentProcessorService)
