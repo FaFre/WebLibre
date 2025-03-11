@@ -144,7 +144,7 @@ class TabRepository extends _$TabRepository {
 
     final unassignedTabs = await ref
         .read(containerRepositoryProvider.notifier)
-        .getContainerTabIds(currentContainerId);
+        .getContainerTabIds(null);
 
     if (unassignedTabs.isNotEmpty) {
       return _tabsService.selectTab(tabId: unassignedTabs.first);

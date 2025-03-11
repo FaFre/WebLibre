@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
+import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -45,13 +46,7 @@ class AppBarTitle extends StatelessWidget {
       onLongPress: onLongPress,
       child: Row(
         children: [
-          Skeletonizer(
-            enabled: tab.icon == null,
-            child: Skeleton.replace(
-              replacement: const Bone.icon(size: 16),
-              child: RawImage(image: tab.icon?.value, height: 16, width: 16),
-            ),
-          ),
+          TabIcon(state: tab),
           const SizedBox(width: 8),
           Expanded(
             child: Column(

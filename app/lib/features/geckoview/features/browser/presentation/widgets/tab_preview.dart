@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
+import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 
 class TabPreview extends StatelessWidget {
   final TabState tab;
@@ -66,7 +67,7 @@ class TabPreview extends StatelessWidget {
               Row(
                 children: [
                   const SizedBox(width: 6.0),
-                  RawImage(image: tab.icon?.value, height: 16, width: 16),
+                  TabIcon(state: tab),
                   const SizedBox(width: 6.0),
                   Expanded(
                     child: Text(
