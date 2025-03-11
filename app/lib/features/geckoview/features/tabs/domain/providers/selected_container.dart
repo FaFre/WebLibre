@@ -1,8 +1,10 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:lensai/features/user/domain/services/local_authentication.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -80,6 +82,22 @@ class SelectedContainer extends _$SelectedContainer {
         }
       }
     });
+
+    ref.listen(selectedTabProvider, (previous, next) async {
+      if (next != null) {
+        final tabContainerId = await ref
+            .read(tabDataRepositoryProvider.notifier)
+            .containerTabId(next);
+
+        if (tabContainerId != stateOrNull) {
+          if (tabContainerId != null) {
+            await setContainerId(tabContainerId);
+          } else {
+            clearContainer();
+          }
+        }
+      }
+    }, fireImmediately: true);
 
     return null;
   }
