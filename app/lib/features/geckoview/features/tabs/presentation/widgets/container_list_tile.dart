@@ -7,12 +7,9 @@ class ContainerListTile extends HookWidget {
   final ContainerData container;
   final bool isSelected;
 
-  final void Function()? onTap;
-
   const ContainerListTile(
     this.container, {
     required this.isSelected,
-    this.onTap,
     super.key,
   });
 
@@ -25,13 +22,10 @@ class ContainerListTile extends HookWidget {
         selected: isSelected,
         leading: CircleAvatar(backgroundColor: container.color),
         title: Text(container.name ?? 'New Container'),
-        trailing: IconButton(
-          onPressed: () async {
-            await ContainerEditRoute(container).push(context);
-          },
-          icon: const Icon(Icons.chevron_right),
-        ),
-        onTap: onTap,
+        onTap: () async {
+          await ContainerEditRoute(container).push(context);
+        },
+        trailing: const Icon(Icons.chevron_right),
       ),
     );
   }

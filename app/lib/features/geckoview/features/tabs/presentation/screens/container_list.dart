@@ -39,6 +39,63 @@ class ContainerListScreen extends HookConsumerWidget {
                           final container = containers[index];
                           return Slidable(
                             key: ValueKey(container.id),
+                            startActionPane: ActionPane(
+                              motion: const ScrollMotion(),
+                              children: [
+                                if (container.id != selectedContainer)
+                                  SlidableAction(
+                                    onPressed: (context) async {
+                                      final result = await ref
+                                          .read(
+                                            selectedContainerProvider.notifier,
+                                          )
+                                          .setContainerId(container.id);
+
+                                      if (context.mounted &&
+                                          result ==
+                                              SetContainerResult
+                                                  .successHasProxy) {
+                                        await ref
+                                            .read(
+                                              startProxyControllerProvider
+                                                  .notifier,
+                                            )
+                                            .maybeStartProxy(context);
+                                      }
+                                    },
+                                    foregroundColor:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimaryContainer,
+                                    backgroundColor:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer,
+                                    icon: Icons.check,
+                                    label: 'Select',
+                                  )
+                                else
+                                  SlidableAction(
+                                    onPressed: (context) {
+                                      ref
+                                          .read(
+                                            selectedContainerProvider.notifier,
+                                          )
+                                          .clearContainer();
+                                    },
+                                    foregroundColor:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimaryContainer,
+                                    backgroundColor:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer,
+                                    icon: Icons.close,
+                                    label: 'Unselect',
+                                  ),
+                              ],
+                            ),
                             endActionPane: ActionPane(
                               motion: const ScrollMotion(),
                               children: [
@@ -66,27 +123,6 @@ class ContainerListScreen extends HookConsumerWidget {
                             child: ContainerListTile(
                               container,
                               isSelected: container.id == selectedContainer,
-                              onTap: () async {
-                                if (container.id == selectedContainer) {
-                                  ref
-                                      .read(selectedContainerProvider.notifier)
-                                      .clearContainer();
-                                } else {
-                                  final result = await ref
-                                      .read(selectedContainerProvider.notifier)
-                                      .setContainerId(container.id);
-
-                                  if (context.mounted &&
-                                      result ==
-                                          SetContainerResult.successHasProxy) {
-                                    await ref
-                                        .read(
-                                          startProxyControllerProvider.notifier,
-                                        )
-                                        .maybeStartProxy(context);
-                                  }
-                                }
-                              },
                             ),
                           );
                         },
@@ -107,7 +143,7 @@ class ContainerListScreen extends HookConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final initialColor =
               await ref
@@ -126,7 +162,8 @@ class ContainerListScreen extends HookConsumerWidget {
             }
           }
         },
-        child: const Icon(Icons.add),
+        label: const Text('Container'),
+        icon: const Icon(Icons.add),
       ),
     );
   }
