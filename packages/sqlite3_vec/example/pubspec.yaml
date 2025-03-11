@@ -10,7 +10,7 @@ dependencies:
 
   sqlite3_vec:
     path: ../
-  sqlite3: ^2.7.4
+  sqlite3: ^2.7.5
   sqlite3_flutter_libs: ^0.5.31
 
 dev_dependencies:
