@@ -8,13 +8,15 @@ import 'package:text_scroll/text_scroll.dart';
 class AppBarTitle extends StatelessWidget {
   final TabState tab;
 
-  final void Function()? onTap;
-  final void Function()? onLongPress;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final GestureDragEndCallback? onHorizontalDragEnd;
 
   const AppBarTitle({
     required this.tab,
     this.onTap,
     this.onLongPress,
+    this.onHorizontalDragEnd,
     super.key,
   });
 
@@ -44,6 +46,7 @@ class AppBarTitle extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
+      onHorizontalDragEnd: onHorizontalDragEnd,
       child: Row(
         children: [
           TabIcon(state: tab),

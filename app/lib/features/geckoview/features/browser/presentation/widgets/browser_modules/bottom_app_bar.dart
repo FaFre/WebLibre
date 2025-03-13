@@ -75,6 +75,13 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                   .loadUrl(url: newUrl);
                             }
                           },
+                          onHorizontalDragEnd: (details) async {
+                            if (details.localPosition.dx > 150) {
+                              await ref
+                                  .read(tabRepositoryProvider.notifier)
+                                  .selectPreviousTab();
+                            }
+                          },
                         )
                         : const SizedBox.shrink();
                   },
@@ -117,11 +124,6 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                       .read(bottomSheetControllerProvider.notifier)
                       .show(ViewTabsSheet());
                 }
-              },
-              onDoubleTap: () async {
-                await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .selectPreviousTab();
               },
               onLongPress: () {
                 if (tabMenuController.isOpen) {
