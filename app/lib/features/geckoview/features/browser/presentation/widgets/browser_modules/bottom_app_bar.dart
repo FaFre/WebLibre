@@ -118,6 +118,11 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                       .show(ViewTabsSheet());
                 }
               },
+              onDoubleTap: () async {
+                await ref
+                    .read(tabRepositoryProvider.notifier)
+                    .selectPreviousTab();
+              },
               onLongPress: () {
                 if (tabMenuController.isOpen) {
                   tabMenuController.close();

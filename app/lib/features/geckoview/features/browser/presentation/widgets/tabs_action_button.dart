@@ -4,12 +4,14 @@ import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
 
 class TabsActionButton extends HookConsumerWidget {
   final bool isActive;
-  final VoidCallback onTap;
-  final VoidCallback onLongPress;
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
 
   const TabsActionButton({
-    required this.onTap,
-    required this.onLongPress,
+    this.onTap,
+    this.onDoubleTap,
+    this.onLongPress,
     this.isActive = false,
     super.key,
   });
@@ -24,6 +26,7 @@ class TabsActionButton extends HookConsumerWidget {
 
     return InkWell(
       onTap: onTap,
+      onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),

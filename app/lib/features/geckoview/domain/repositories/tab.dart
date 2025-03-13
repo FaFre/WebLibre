@@ -27,6 +27,8 @@ part 'tab.g.dart';
 class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
 
+  String? _previousTabId;
+
   Future<String> addTab({
     Uri? url,
     bool selectTab = true,
@@ -81,6 +83,14 @@ class TabRepository extends _$TabRepository {
       },
       containerId: Value(containerData?.id),
     );
+  }
+
+  Future<bool> selectPreviousTab() async {
+    if (_previousTabId != null) {
+      return selectTab(_previousTabId!);
+    }
+
+    return false;
   }
 
   Future<bool> selectTab(String tabId) async {
@@ -227,6 +237,7 @@ class TabRepository extends _$TabRepository {
 
     ref.listen(selectedTabProvider, (previous, tabId) async {
       if (tabId != null) {
+        _previousTabId = previous;
         await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
       }
     });
