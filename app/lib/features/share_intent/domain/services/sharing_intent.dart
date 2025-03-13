@@ -23,6 +23,7 @@ final _sharingIntentTransformer =
           switch (data.type) {
             case SharedMediaType.TEXT:
             case SharedMediaType.URL:
+            case SharedMediaType.WEB_SEARCH:
               if (uri_to_file.isUriSupported(data.value!)) {
                 final file = await uri_to_file.toFile(data.value!);
                 final mimeType = mime.lookupMimeType(file.path);
@@ -35,6 +36,7 @@ final _sharingIntentTransformer =
               } else {
                 sink.add(ReceivedIntentParameter(data.value, null));
               }
+
             default:
               logger.w('Unhandled media type: $data');
           }
