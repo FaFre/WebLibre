@@ -19,6 +19,7 @@ class AutoSuggestTextField extends HookWidget {
   final int? maxLength;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onEditingComplete;
+  final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onSubmitted;
   final List<TextInputFormatter>? inputFormatters;
   final bool? enabled;
@@ -46,6 +47,7 @@ class AutoSuggestTextField extends HookWidget {
     this.maxLength,
     this.onChanged,
     this.onEditingComplete,
+    this.validator,
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
@@ -62,13 +64,64 @@ class AutoSuggestTextField extends HookWidget {
       controller.text.isNotEmpty &&
       suggestion!.startsWith(controller.text);
 
+  static int _getLineCountUsingBoxes(
+    String text,
+    TextStyle style,
+    double maxWidth,
+  ) {
+    final textSpan = TextSpan(text: text, style: style);
+
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout(maxWidth: maxWidth);
+
+    // Select all text
+    final selection = TextSelection(baseOffset: 0, extentOffset: text.length);
+
+    // Each box represents one line
+    final lines = textPainter.getBoxesForSelection(selection);
+    return lines.length;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final textFieldKey = useMemoized(() => GlobalKey());
+
+    final showSuggestion = useListenableSelector(controller, () {
+      if (maxLines != 1) {
+        final box = textFieldKey.currentContext?.findRenderObject();
+        if (box case final RenderBox box) {
+          final width = box.size.width;
+
+          final lines = _getLineCountUsingBoxes(
+            controller.text,
+            style ?? Theme.of(context).textTheme.bodyLarge!,
+            width,
+          );
+
+          final suggestionLines = suggestion.mapNotNull(
+            (suggestion) => _getLineCountUsingBoxes(
+              suggestion,
+              style ?? Theme.of(context).textTheme.bodyLarge!,
+              width,
+            ),
+          );
+
+          return lines == 1 && suggestionLines == 1;
+        }
+      }
+
+      return true;
+    });
+
     final baseDecoration = decoration ?? const InputDecoration();
 
     return Stack(
       children: [
-        if (suggestion != null)
+        if (showSuggestion && suggestion != null)
           AbsorbPointer(
             child: TextField(
               minLines: minLines,
@@ -143,7 +196,8 @@ class AutoSuggestTextField extends HookWidget {
               ),
             ),
           ),
-        TextField(
+        TextFormField(
+          key: textFieldKey,
           controller: controller,
           focusNode: focusNode,
           decoration: baseDecoration.copyWith(
@@ -163,7 +217,8 @@ class AutoSuggestTextField extends HookWidget {
           maxLength: maxLength,
           onChanged: onChanged,
           onEditingComplete: onEditingComplete,
-          onSubmitted: onSubmitted.mapNotNull(
+          validator: validator,
+          onFieldSubmitted: onSubmitted.mapNotNull(
             (onSubmitted) => (value) {
               if (_suggestionHasMatch()) {
                 onSubmitted(suggestion!);
