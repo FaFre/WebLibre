@@ -10,12 +10,14 @@ class AppBarTitle extends StatelessWidget {
 
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final GestureDragStartCallback? onHorizontalDragStart;
   final GestureDragEndCallback? onHorizontalDragEnd;
 
   const AppBarTitle({
     required this.tab,
     this.onTap,
     this.onLongPress,
+    this.onHorizontalDragStart,
     this.onHorizontalDragEnd,
     super.key,
   });
@@ -46,6 +48,7 @@ class AppBarTitle extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
+      onHorizontalDragStart: onHorizontalDragStart,
       onHorizontalDragEnd: onHorizontalDragEnd,
       child: Row(
         children: [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
@@ -50,6 +51,8 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   builder: (context, ref, child) {
                     final tabState = ref.watch(tabStateProvider(selectedTabId));
 
+                    final dragStartPosition = useRef(Offset.zero);
+
                     return (tabState != null)
                         ? AppBarTitle(
                           tab: tabState,
@@ -75,8 +78,15 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                   .loadUrl(url: newUrl);
                             }
                           },
+                          onHorizontalDragStart: (details) {
+                            dragStartPosition.value = details.globalPosition;
+                          },
                           onHorizontalDragEnd: (details) async {
-                            if (details.localPosition.dx > 150) {
+                            final distance =
+                                dragStartPosition.value -
+                                details.globalPosition;
+
+                            if (distance.dx.abs() > 50) {
                               await ref
                                   .read(tabRepositoryProvider.notifier)
                                   .selectPreviousTab();
