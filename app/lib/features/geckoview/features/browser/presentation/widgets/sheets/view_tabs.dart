@@ -335,6 +335,8 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: ReorderableBuilder(
+                      //Rebuild when cross axis count changes
+                      key: ValueKey(crossAxisCount),
                       scrollController: sheetScrollController,
                       children: tabs,
                       onDragStarted: (index) {
