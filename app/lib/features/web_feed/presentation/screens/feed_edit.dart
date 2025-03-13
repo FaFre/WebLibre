@@ -1,3 +1,4 @@
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -109,6 +110,7 @@ class _FeedEditContent extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final initialTags = useMemoized(
       () => initialFeed.tags?.map((tag) => tag.id).toSet(),
+      [EquatableValue(initialFeed.tags)],
     );
     final tags = useRef(initialTags ?? {});
 

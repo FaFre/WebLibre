@@ -24,7 +24,7 @@ class TabIcon extends HookConsumerWidget {
           .getCachedIcon(state.url);
 
       return icon?.image.value;
-    });
+    }, [state.icon, state.url]);
 
     return Skeletonizer(
       enabled:

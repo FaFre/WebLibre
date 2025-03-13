@@ -51,6 +51,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                   if (article.summaryMarkdown.isNotEmpty) _Pages.summary,
                   if (article.contentMarkdown.isNotEmpty) _Pages.content,
                 ],
+                [article],
               );
 
               final tabController = useTabController(
@@ -59,11 +60,13 @@ class FeedArticleScreen extends HookConsumerWidget {
 
               final articleLink = useMemoized(
                 () => article.links?.getRelation(FeedLinkRelation.alternate),
+                [article],
               );
 
               final articleImages = useMemoized(
                 () => (article.contentMarkdown ?? article.summaryMarkdown)
                     .mapNotNull(extractImagesFromMarkdown),
+                [article],
               );
 
               final bottomHeight = useMemoized(() {
@@ -83,7 +86,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                 }
 
                 return height;
-              });
+              }, [article]);
 
               return NestedScrollView(
                 headerSliverBuilder:
