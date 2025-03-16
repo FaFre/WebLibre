@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -14,6 +15,7 @@ import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
@@ -135,6 +137,12 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(browserViewLifecycleProvider.notifier)
+          .update(SchedulerBinding.instance.lifecycleState);
+    });
+
     WidgetsBinding.instance.addObserver(this);
 
     //Initialize and register dependencies
@@ -171,6 +179,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+
+    ref.read(browserViewLifecycleProvider.notifier).update(state);
 
     switch (state) {
       case AppLifecycleState.detached:

@@ -7,7 +7,7 @@ part of 'start_tor_proxy.dart';
 // **************************************************************************
 
 String _$startProxyControllerHash() =>
-    r'7ba8d6eded4664a8aa3eb1360926c56e9185cac9';
+    r'b83cdc1b6d1c358a2042ff2b7cc2f19f82e5d5ed';
 
 /// See also [StartProxyController].
 @ProviderFor(StartProxyController)

@@ -3,6 +3,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
+import 'package:lensai/presentation/hooks/on_initialization.dart';
 
 class TorProxyScreen extends HookConsumerWidget {
   const TorProxyScreen();
@@ -10,6 +11,10 @@ class TorProxyScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final torProxyPort = ref.watch(torProxyServiceProvider);
+
+    useOnInitialization(() async {
+      await ref.read(torProxyServiceProvider.notifier).requestSync();
+    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tor Proxy')),

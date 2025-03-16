@@ -12,24 +12,28 @@ class StartProxyController extends _$StartProxyController {
   // ignore: document_ignores is used for dialog
   // ignore: avoid_build_context_in_providers
   Future<void> maybeStartProxy(BuildContext context) async {
-    final torProxyRunning = ref.read(torProxyServiceProvider);
+    final torProxyRunning =
+        await ref.read(torProxyServiceProvider.notifier).requestSync();
 
-    if (torProxyRunning.valueOrNull == null) {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) {
-          return TorDialog();
-        },
-      );
+    if (torProxyRunning == null) {
+      if (context.mounted) {
+        final result = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return TorDialog();
+          },
+        );
 
-      if (result == true) {
-        final connection = ref.read(torProxyServiceProvider.notifier).connect();
+        if (result == true) {
+          final connection =
+              ref.read(torProxyServiceProvider.notifier).connect();
 
-        ref
-            .read(overlayControllerProvider.notifier)
-            .show(Positioned(top: 0, left: 0, child: TorNotification()));
+          ref
+              .read(overlayControllerProvider.notifier)
+              .show(Positioned(top: 0, left: 0, child: TorNotification()));
 
-        await connection;
+          await connection;
+        }
       }
     }
   }
