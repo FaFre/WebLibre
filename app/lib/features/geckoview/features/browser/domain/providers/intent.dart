@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:lensai/data/models/received_intent_parameter.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/app_widget/domain/services/home_widget.dart';
+import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
 import 'package:lensai/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,7 +25,7 @@ final _contentParserTransformer =
     );
 
 @Riverpod()
-class IntentStream extends _$IntentStream {
+class EngineBoundIntentStream extends _$EngineBoundIntentStream {
   late StreamController<SharedContent> _streamController;
 
   @override
@@ -33,6 +34,11 @@ class IntentStream extends _$IntentStream {
     ref.onDispose(() async {
       await _streamController.close();
     });
+
+    final engineReady = ref.watch(engineReadyStateProvider);
+    if (!engineReady) {
+      return const Stream.empty();
+    }
 
     final sharingItentStream = ref.watch(sharingIntentStreamProvider);
     final appWidgetLaunchStream = ref.watch(appWidgetLaunchStreamProvider);

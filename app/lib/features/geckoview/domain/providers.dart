@@ -136,7 +136,7 @@ class EngineReadyState extends _$EngineReadyState {
         eventService.engineReadyStateEvents
             .firstWhere((value) => value == true)
             .timeout(
-              const Duration(seconds: 5),
+              const Duration(seconds: 3),
               onTimeout: () {
                 logger.w('Waiting for engine ready state timed out');
                 return true;

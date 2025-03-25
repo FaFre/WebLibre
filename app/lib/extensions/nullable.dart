@@ -1,26 +1,30 @@
 extension NullableX<T extends Object?> on T? {
   @pragma('vm:prefer-inline')
   R? mapNotNull<R>(R? Function(T) callback) {
-    // We can simplify this by using the null-aware operator
-    return this != null ? callback(this as T) : null;
+    // Already optimized, but can simplify further
+    return this == null ? null : callback(this as T);
   }
 }
 
 extension NullableStringX on String? {
   @pragma('vm:prefer-inline')
-  String? get whenNotEmpty => (this?.isNotEmpty ?? false) ? this : null;
+  String? get whenNotEmpty {
+    // Avoid double null check
+    final value = this;
+    return value != null && value.isNotEmpty ? value : null;
+  }
 
   @pragma('vm:prefer-inline')
-  bool get isNotEmpty => this?.isNotEmpty ?? false;
+  bool get isNotEmpty => this != null && this!.isNotEmpty;
 
   @pragma('vm:prefer-inline')
-  bool get isEmpty => this?.isEmpty ?? true;
+  bool get isEmpty => this == null || this!.isEmpty;
 }
 
 extension NullableIterable on Iterable? {
   @pragma('vm:prefer-inline')
-  bool get isNotEmpty => this?.isNotEmpty ?? false;
+  bool get isNotEmpty => this != null && this!.isNotEmpty;
 
   @pragma('vm:prefer-inline')
-  bool get isEmpty => this?.isEmpty ?? true;
+  bool get isEmpty => this == null || this!.isEmpty;
 }

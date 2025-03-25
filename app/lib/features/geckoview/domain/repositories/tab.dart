@@ -268,7 +268,7 @@ class TabRepository extends _$TabRepository {
       });
     });
 
-    ref.listen(intentStreamProvider, (previous, next) {
+    ref.listen(engineBoundIntentStreamProvider, (previous, next) {
       next.whenData((value) async {
         switch (value) {
           case SharedUrl():

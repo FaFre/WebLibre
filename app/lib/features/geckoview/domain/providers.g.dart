@@ -96,7 +96,7 @@ final engineSuggestionsServiceProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef EngineSuggestionsServiceRef = ProviderRef<GeckoSuggestionsService>;
-String _$engineReadyStateHash() => r'c682333e2e07cf0635aa7ae793a2088ca648c950';
+String _$engineReadyStateHash() => r'a892c48ffc29e3414de12e66d9bfec522e4f40a8';
 
 /// See also [EngineReadyState].
 @ProviderFor(EngineReadyState)

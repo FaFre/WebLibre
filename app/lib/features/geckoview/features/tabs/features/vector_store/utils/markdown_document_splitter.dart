@@ -5,7 +5,7 @@ import 'package:lensai/features/geckoview/features/tabs/features/vector_store/ut
 
 typedef DocumentParts = ({String mainDocumentId, List<Document> parts});
 
-List<Document> mergeShortDocuments(
+List<Document> _mergeShortDocuments(
   List<Document> documents,
   int maxLength, {
   String separator = '\n',
@@ -69,7 +69,7 @@ DocumentParts? splitMarkdownDocument(
   }
 
   final headerKeys = headersToSplitOn.map((header) => header.$2).toSet();
-  final mergedDocChunks = mergeShortDocuments(
+  final mergedDocChunks = _mergeShortDocuments(
     docChunks,
     chunkSize,
     doMerge: (a, b) {
