@@ -76,7 +76,7 @@ dependencies:
   sqlite3: ^2.7.5
   sqlite3_flutter_libs: ^0.5.31
   sqlite3_vec:
-    path: ../packages/sqlite3_vec
+    git: https://github.com/FaFre/sqlite3_vec.git
   text_scroll: ^0.2.0
   timeago: ^3.7.0
   tor:

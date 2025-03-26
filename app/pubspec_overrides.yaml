@@ -1,9 +1,7 @@
-# melos_managed_dependency_overrides: flutter_mozilla_components,sqlite3_vec,cross_cache,flutter_chat_core
+# melos_managed_dependency_overrides: flutter_mozilla_components,cross_cache,flutter_chat_core
 dependency_overrides:
   flutter_mozilla_components:
     path: ../packages/flutter_mozilla_components
-  sqlite3_vec:
-    path: ../packages/sqlite3_vec
   cross_cache:
     path: ../../flutter_chat_ui/packages/cross_cache
   flutter_chat_core:

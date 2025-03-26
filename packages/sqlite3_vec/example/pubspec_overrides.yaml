@@ -1,4 +1,0 @@
-# melos_managed_dependency_overrides: sqlite3_vec
-dependency_overrides:
-  sqlite3_vec:
-    path: ..
