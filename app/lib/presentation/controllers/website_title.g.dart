@@ -158,5 +158,168 @@ class _PageInfoProviderElement
   bool get isImageRequest => (origin as PageInfoProvider).isImageRequest;
 }
 
+String _$completePageInfoHash() => r'18d196f4fb9323cdcb8dfa1bde4a70bf25f10e2b';
+
+abstract class _$CompletePageInfo
+    extends BuildlessAutoDisposeNotifier<AsyncValue<WebPageInfo>> {
+  late final Uri url;
+  late final WebPageInfo? cached;
+
+  AsyncValue<WebPageInfo> build(Uri url, WebPageInfo? cached);
+}
+
+/// See also [CompletePageInfo].
+@ProviderFor(CompletePageInfo)
+const completePageInfoProvider = CompletePageInfoFamily();
+
+/// See also [CompletePageInfo].
+class CompletePageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
+  /// See also [CompletePageInfo].
+  const CompletePageInfoFamily();
+
+  /// See also [CompletePageInfo].
+  CompletePageInfoProvider call(Uri url, WebPageInfo? cached) {
+    return CompletePageInfoProvider(url, cached);
+  }
+
+  @override
+  CompletePageInfoProvider getProviderOverride(
+    covariant CompletePageInfoProvider provider,
+  ) {
+    return call(provider.url, provider.cached);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'completePageInfoProvider';
+}
+
+/// See also [CompletePageInfo].
+class CompletePageInfoProvider
+    extends
+        AutoDisposeNotifierProviderImpl<
+          CompletePageInfo,
+          AsyncValue<WebPageInfo>
+        > {
+  /// See also [CompletePageInfo].
+  CompletePageInfoProvider(Uri url, WebPageInfo? cached)
+    : this._internal(
+        () =>
+            CompletePageInfo()
+              ..url = url
+              ..cached = cached,
+        from: completePageInfoProvider,
+        name: r'completePageInfoProvider',
+        debugGetCreateSourceHash:
+            const bool.fromEnvironment('dart.vm.product')
+                ? null
+                : _$completePageInfoHash,
+        dependencies: CompletePageInfoFamily._dependencies,
+        allTransitiveDependencies:
+            CompletePageInfoFamily._allTransitiveDependencies,
+        url: url,
+        cached: cached,
+      );
+
+  CompletePageInfoProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.url,
+    required this.cached,
+  }) : super.internal();
+
+  final Uri url;
+  final WebPageInfo? cached;
+
+  @override
+  AsyncValue<WebPageInfo> runNotifierBuild(
+    covariant CompletePageInfo notifier,
+  ) {
+    return notifier.build(url, cached);
+  }
+
+  @override
+  Override overrideWith(CompletePageInfo Function() create) {
+    return ProviderOverride(
+      origin: this,
+      override: CompletePageInfoProvider._internal(
+        () =>
+            create()
+              ..url = url
+              ..cached = cached,
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        url: url,
+        cached: cached,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeNotifierProviderElement<CompletePageInfo, AsyncValue<WebPageInfo>>
+  createElement() {
+    return _CompletePageInfoProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CompletePageInfoProvider &&
+        other.url == url &&
+        other.cached == cached;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, url.hashCode);
+    hash = _SystemHash.combine(hash, cached.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin CompletePageInfoRef
+    on AutoDisposeNotifierProviderRef<AsyncValue<WebPageInfo>> {
+  /// The parameter `url` of this provider.
+  Uri get url;
+
+  /// The parameter `cached` of this provider.
+  WebPageInfo? get cached;
+}
+
+class _CompletePageInfoProviderElement
+    extends
+        AutoDisposeNotifierProviderElement<
+          CompletePageInfo,
+          AsyncValue<WebPageInfo>
+        >
+    with CompletePageInfoRef {
+  _CompletePageInfoProviderElement(super.provider);
+
+  @override
+  Uri get url => (origin as CompletePageInfoProvider).url;
+  @override
+  WebPageInfo? get cached => (origin as CompletePageInfoProvider).cached;
+}
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

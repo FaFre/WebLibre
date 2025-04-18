@@ -6,6 +6,34 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'website_title.g.dart';
 
 @Riverpod()
+class CompletePageInfo extends _$CompletePageInfo {
+  @override
+  AsyncValue<WebPageInfo> build(Uri url, WebPageInfo? cached) {
+    if (cached?.isPageInfoComplete == true) {
+      return AsyncData(cached!);
+    }
+
+    ref.listen(pageInfoProvider(url, isImageRequest: false), (previous, next) {
+      if (cached != null && next.hasValue) {
+        state = AsyncData(
+          WebPageInfo(
+            url: url,
+            //Cached is preferred as this comes from gecko and is more likely to be correct compared to manual request
+            favicon: cached.favicon ?? next.value!.favicon,
+            feeds: cached.feeds ?? next.value!.feeds,
+            title: cached.title ?? next.value!.title,
+          ),
+        );
+      } else {
+        state = next;
+      }
+    });
+
+    return (cached != null) ? AsyncData(cached) : const AsyncLoading();
+  }
+}
+
+@Riverpod()
 Future<WebPageInfo> pageInfo(
   Ref ref,
   Uri url, {
