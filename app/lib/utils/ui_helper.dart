@@ -14,12 +14,17 @@ void showErrorMessage(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
-void showTabBackButtonMessage(BuildContext context, int tabCount) {
+void showTabBackButtonMessage(
+  BuildContext context,
+  int tabCount,
+  Duration duration,
+) {
   final snackbar = SnackBar(
     content:
         (tabCount > 1)
-            ? const Text('Please click BACK again to close current tab')
-            : const Text('Please click BACK again to exit app'),
+            ? const Text('Navigate BACK again to close current tab')
+            : const Text('Navigate BACK again to exit app'),
+    duration: duration,
   );
 
   ScaffoldMessenger.of(context)
@@ -42,6 +47,20 @@ void showTabOpenedMessage(
     action: onShow.mapNotNull(
       (onPressed) => SnackBarAction(label: 'Show', onPressed: onPressed),
     ),
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+void showSuggestNewTabMessage(
+  BuildContext context, {
+  required void Function() onAdd,
+  Duration duration = const Duration(seconds: 2),
+}) {
+  final snackBar = SnackBar(
+    content: const Text('Want to open a new tab?'),
+    action: SnackBarAction(label: 'New Tab', onPressed: onAdd),
+    duration: duration,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);

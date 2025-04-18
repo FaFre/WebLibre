@@ -27,6 +27,8 @@ import 'package:lensai/features/geckoview/features/tabs/features/chat/presentati
 import 'package:lensai/utils/ui_helper.dart' as ui_helper;
 
 class BrowserScreen extends HookConsumerWidget {
+  Duration get _backButtonPressTimeout => const Duration(seconds: 2);
+
   const BrowserScreen({super.key});
 
   @override
@@ -189,7 +191,7 @@ class BrowserScreen extends HookConsumerWidget {
                           DateTime.now().difference(
                                 lastBackButtonPress.value!,
                               ) <
-                              const Duration(seconds: 2)) {
+                              _backButtonPressTimeout) {
                         lastBackButtonPress.value = null;
 
                         if (tabState != null && tabCount > 1) {
@@ -203,7 +205,11 @@ class BrowserScreen extends HookConsumerWidget {
                         }
                       } else {
                         lastBackButtonPress.value = DateTime.now();
-                        ui_helper.showTabBackButtonMessage(context, tabCount);
+                        ui_helper.showTabBackButtonMessage(
+                          context,
+                          tabCount,
+                          _backButtonPressTimeout,
+                        );
 
                         return true;
                       }

@@ -26,6 +26,7 @@ import 'package:lensai/features/user/domain/services/local_authentication.dart';
 import 'package:lensai/features/web_feed/domain/providers/add_dialog_blocking.dart';
 import 'package:lensai/features/web_feed/domain/services/article_content_processor.dart';
 import 'package:lensai/presentation/hooks/on_initialization.dart';
+import 'package:lensai/utils/ui_helper.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;
@@ -203,6 +204,13 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           );
           _timerPaused = false;
         }
+
+        showSuggestNewTabMessage(
+          context,
+          onAdd: () async {
+            await const SearchRoute().push(context);
+          },
+        );
     }
   }
 
