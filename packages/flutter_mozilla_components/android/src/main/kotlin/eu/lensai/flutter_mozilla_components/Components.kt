@@ -16,6 +16,8 @@ import eu.lensai.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.lensai.flutter_mozilla_components.pigeons.ReaderViewController
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
+import mozilla.components.feature.downloads.DefaultFileSizeFormatter
+import mozilla.components.feature.downloads.FileSizeFormatter
 import mozilla.components.support.base.android.NotificationsDelegate
 
 class Components(private val context: Context,
@@ -42,4 +44,6 @@ class Components(private val context: Context,
             notificationManagerCompat,
         )
     }
+
+    val fileSizeFormatter: FileSizeFormatter by lazy { DefaultFileSizeFormatter(context) }
 }

@@ -22,7 +22,7 @@ import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
-import mozilla.components.feature.downloads.temporary.ShareDownloadFeature
+import mozilla.components.feature.downloads.temporary.ShareResourceFeature
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
 import mozilla.components.feature.prompts.PromptFeature
@@ -48,7 +48,7 @@ import mozilla.components.support.locale.ActivityContextWrapper
 @SuppressWarnings("LargeClass")
 abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, ActivityResultHandler {
     private val sessionFeature = ViewBoundFeatureWrapper<SessionFeature>()
-    private val shareDownloadsFeature = ViewBoundFeatureWrapper<ShareDownloadFeature>()
+    private val shareResourceFeature = ViewBoundFeatureWrapper<ShareResourceFeature>()
     private val downloadsFeature = ViewBoundFeatureWrapper<DownloadsFeature>()
     private val appLinksFeature = ViewBoundFeatureWrapper<AppLinksFeature>()
     private val promptFeature = ViewBoundFeatureWrapper<PromptFeature>()
@@ -151,8 +151,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             view = view,
         )
 
-        shareDownloadsFeature.set(
-            ShareDownloadFeature(
+        shareResourceFeature.set(
+            ShareResourceFeature(
                 context = requireContext().applicationContext,
                 httpClient = components.core.client,
                 store = components.core.store,

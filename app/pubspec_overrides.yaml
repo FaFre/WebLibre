@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: flutter_mozilla_components,cross_cache,flutter_chat_core
+# melos_managed_dependency_overrides: flutter_mozilla_components,cross_cache,flutter_chat_core,langchain_core,tavily_dart
 dependency_overrides:
   flutter_mozilla_components:
     path: ../packages/flutter_mozilla_components
@@ -6,3 +6,13 @@ dependency_overrides:
     path: ../../flutter_chat_ui/packages/cross_cache
   flutter_chat_core:
     path: ../../flutter_chat_ui/packages/flutter_chat_core
+  langchain_core:
+    git:
+      url: https://github.com/FaFre/langchain_dart.git
+      ref: static_objectbox
+      path: packages/langchain_core
+  tavily_dart:
+    git:
+      url: https://github.com/FaFre/langchain_dart.git
+      ref: static_objectbox
+      path: packages/tavily_dart

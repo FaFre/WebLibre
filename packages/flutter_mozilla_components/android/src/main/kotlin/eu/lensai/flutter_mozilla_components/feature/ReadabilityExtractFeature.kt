@@ -16,7 +16,7 @@ import mozilla.components.support.ktx.android.org.json.tryGetInt
 import mozilla.components.support.ktx.android.org.json.tryGetString
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.filterChanged
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
-import mozilla.components.support.webextensions.WebExtensionController
+import mozilla.components.support.webextensions.BuiltInWebExtensionController
 import org.json.JSONObject
 
 class ReadabilityExtractFeature(
@@ -61,7 +61,7 @@ class ReadabilityExtractFeature(
     private var sessionScope: CoroutineScope? = null
     private var historyScope: CoroutineScope? = null
 
-    private var extensionController = WebExtensionController(
+    private var extensionController = BuiltInWebExtensionController(
         READER_EXTRACT_EXTENSION_ID,
         READER_EXTRACT_EXTENSION_URL,
         READER_EXTRACT_CONTENT_PORT,

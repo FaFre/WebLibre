@@ -7,7 +7,8 @@ import eu.lensai.flutter_mozilla_components.pigeons.GeckoDownloadsApi
 import eu.lensai.flutter_mozilla_components.pigeons.ShareInternetResourceState
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.CopyInternetResourceAction
-import mozilla.components.browser.state.action.ShareInternetResourceAction
+import mozilla.components.browser.state.action.ShareResourceAction
+import mozilla.components.browser.state.state.content.ShareResourceState
 import java.util.UUID
 
 class GeckoDownloadsApiImpl : GeckoDownloadsApi {
@@ -29,11 +30,11 @@ class GeckoDownloadsApiImpl : GeckoDownloadsApi {
     }
 
     override fun shareInternetResource(tabId: String, state: ShareInternetResourceState) {
-        components.core.store.dispatch(ShareInternetResourceAction.AddShareAction(tabId, state.toMozillaShareInternetResourceState()))
+        components.core.store.dispatch(ShareResourceAction.AddShareAction(tabId, state.toMozillaShareInternetResourceState()))
     }
 
-    private fun ShareInternetResourceState.toMozillaShareInternetResourceState(): mozilla.components.browser.state.state.content.ShareInternetResourceState {
-        return mozilla.components.browser.state.state.content.ShareInternetResourceState(
+    private fun ShareInternetResourceState.toMozillaShareInternetResourceState(): ShareResourceState.InternetResource {
+        return ShareResourceState.InternetResource(
             url = url,
             contentType = contentType,
             private = private,
@@ -41,16 +42,6 @@ class GeckoDownloadsApiImpl : GeckoDownloadsApi {
             referrerUrl = referrerUrl
         )
     }
-
-    fun mozilla.components.browser.state.state.content.ShareInternetResourceState.toPigeonShareInternetResourceState(): eu.lensai.flutter_mozilla_components.pigeons.ShareInternetResourceState {
-        return eu.lensai.flutter_mozilla_components.pigeons.ShareInternetResourceState(
-            url = url,
-            contentType = contentType,
-            private = private,
-            referrerUrl = referrerUrl
-        )
-    }
-
 
     private fun DownloadState.toMozillaDownloadState(): mozilla.components.browser.state.state.content.DownloadState {
         return mozilla.components.browser.state.state.content.DownloadState(
