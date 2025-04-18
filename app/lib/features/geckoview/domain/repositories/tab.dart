@@ -28,6 +28,15 @@ class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
 
   String? _previousTabId;
+  final _tabFromIntent = <String>{};
+
+  bool hasLaunchedFromIntent(String? tabId) {
+    if (tabId == null) {
+      return false;
+    }
+
+    return _tabFromIntent.contains(tabId);
+  }
 
   Future<String> addTab({
     Uri? url,
@@ -272,13 +281,15 @@ class TabRepository extends _$TabRepository {
       next.whenData((value) async {
         switch (value) {
           case SharedUrl():
-            await addTab(url: value.url);
+            _tabFromIntent.add(await addTab(url: value.url));
           case SharedText():
             final defaultSearchBang =
                 ref.read(selectedBangDataProvider()) ??
                 await ref.read(defaultSearchBangDataProvider.future);
 
-            await addTab(url: defaultSearchBang?.getTemplateUrl(value.text));
+            _tabFromIntent.add(
+              await addTab(url: defaultSearchBang?.getTemplateUrl(value.text)),
+            );
         }
       });
     });

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -187,6 +188,14 @@ class BrowserScreen extends HookConsumerWidget {
                         return true;
                       }
 
+                      if (ref
+                          .read(tabRepositoryProvider.notifier)
+                          .hasLaunchedFromIntent(selectedTabId)) {
+                        //Mark back as unhandled and navigator will pop
+                        await SystemNavigator.pop();
+                        return false;
+                      }
+
                       if (lastBackButtonPress.value != null &&
                           DateTime.now().difference(
                                 lastBackButtonPress.value!,
@@ -201,6 +210,7 @@ class BrowserScreen extends HookConsumerWidget {
                           return true;
                         } else {
                           //Mark back as unhandled and navigator will pop
+                          await SystemNavigator.pop();
                           return false;
                         }
                       } else {
