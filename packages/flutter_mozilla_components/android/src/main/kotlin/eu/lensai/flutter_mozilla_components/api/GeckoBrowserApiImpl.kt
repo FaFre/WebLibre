@@ -87,12 +87,12 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
     override fun initialize() {
         synchronized(this) {
-            setupGeckoEngine()
-
             if(!isGeckoInitialized) {
                 Log.addSink(AndroidLogSink())
-                isGeckoInitialized = true
             }
+
+            setupGeckoEngine()
+            isGeckoInitialized = true
         }
     }
 
