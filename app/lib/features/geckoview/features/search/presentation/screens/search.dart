@@ -13,6 +13,7 @@ import 'package:lensai/features/geckoview/features/search/presentation/widgets/s
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
+import 'package:lensai/presentation/hooks/sampled_value_notifier.dart';
 import 'package:lensai/utils/uri_parser.dart' as uri_parser;
 
 class SearchScreen extends HookConsumerWidget {
@@ -26,6 +27,10 @@ class SearchScreen extends HookConsumerWidget {
 
     final searchTextController = useTextEditingController(
       text: initialSearchText,
+    );
+    final sampledSearchText = useSampledValueNotifier(
+      source: searchTextController,
+      sampleDuration: const Duration(milliseconds: 150),
     );
     final searchFocusNode = useFocusNode();
 
@@ -116,9 +121,9 @@ class SearchScreen extends HookConsumerWidget {
               submitSearch: submitSearch,
             ),
             const SliverToBoxAdapter(child: Divider()),
-            TabSearch(searchTextController: searchTextController),
-            FeedSearch(searchTextController: searchTextController),
-            HistorySuggestions(searchTextController: searchTextController),
+            TabSearch(searchTextListenable: sampledSearchText),
+            FeedSearch(searchTextNotifier: sampledSearchText),
+            HistorySuggestions(searchTextListenable: sampledSearchText),
           ],
         ),
       ),

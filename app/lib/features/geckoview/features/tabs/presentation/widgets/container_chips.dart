@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -20,22 +21,22 @@ class ContainerChips extends HookConsumerWidget {
   final void Function(ContainerDataWithCount)? onSelected;
   final void Function(ContainerDataWithCount)? onDeleted;
 
-  final TextEditingController? searchTextController;
+  final ValueListenable<TextEditingValue>? searchTextListenable;
 
   const ContainerChips({
     required this.selectedContainer,
     required this.onSelected,
     required this.onDeleted,
     this.containerFilter,
-    this.searchTextController,
+    this.searchTextListenable,
     this.displayMenu = true,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchText = useListenableSelector(
-      searchTextController,
-      () => searchTextController?.text,
+      searchTextListenable,
+      () => searchTextListenable?.value.text,
     );
 
     final containersAsync = ref.watch(

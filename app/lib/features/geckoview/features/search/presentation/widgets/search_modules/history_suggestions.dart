@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -14,18 +15,18 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class HistorySuggestions extends HookConsumerWidget {
-  final TextEditingController searchTextController;
+  final ValueListenable<TextEditingValue> searchTextListenable;
 
-  const HistorySuggestions({super.key, required this.searchTextController});
+  const HistorySuggestions({super.key, required this.searchTextListenable});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historySuggestionsAsync = ref.watch(engineHistorySuggestionsProvider);
 
-    useListenableCallback(searchTextController, () async {
+    useListenableCallback(searchTextListenable, () async {
       await ref
           .watch(engineSuggestionsProvider.notifier)
-          .addQuery(searchTextController.text);
+          .addQuery(searchTextListenable.value.text);
     });
 
     if (historySuggestionsAsync.hasValue &&

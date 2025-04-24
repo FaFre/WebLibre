@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -20,9 +21,9 @@ class TabSearch extends HookConsumerWidget {
   static const _matchPrefix = '***';
   static const _matchSuffix = '***';
 
-  final TextEditingController searchTextController;
+  final ValueListenable<TextEditingValue> searchTextListenable;
 
-  const TabSearch({required this.searchTextController});
+  const TabSearch({required this.searchTextListenable});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,11 +47,11 @@ class TabSearch extends HookConsumerWidget {
             )
             .value;
 
-    useListenableCallback(searchTextController, () async {
+    useListenableCallback(searchTextListenable, () async {
       await ref
           .read(tabSearchRepositoryProvider(TabSearchPartition.search).notifier)
           .addQuery(
-            searchTextController.text,
+            searchTextListenable.value.text,
             // ignore: avoid_redundant_argument_values dont break things
             matchPrefix: _matchPrefix,
             // ignore: avoid_redundant_argument_values dont break things
@@ -81,7 +82,7 @@ class TabSearch extends HookConsumerWidget {
                     selectedContainer.value = null;
                   },
                   containerFilter: (container) => (container.tabCount ?? 0) > 0,
-                  searchTextController: searchTextController,
+                  searchTextListenable: searchTextListenable,
                 ),
               ],
             ),

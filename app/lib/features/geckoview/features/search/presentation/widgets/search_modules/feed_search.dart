@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -20,9 +21,9 @@ class FeedSearch extends HookConsumerWidget {
   static const _matchPrefix = '***';
   static const _matchSuffix = '***';
 
-  final TextEditingController searchTextController;
+  final ValueListenable<TextEditingValue> searchTextNotifier;
 
-  const FeedSearch({required this.searchTextController});
+  const FeedSearch({required this.searchTextNotifier});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,11 +31,11 @@ class FeedSearch extends HookConsumerWidget {
 
     final articlesAsync = ref.watch(articleSearchProvider(null));
 
-    useListenableCallback(searchTextController, () async {
+    useListenableCallback(searchTextNotifier, () async {
       await ref
           .read(articleSearchProvider(null).notifier)
           .search(
-            searchTextController.text,
+            searchTextNotifier.value.text,
             // ignore: avoid_redundant_argument_values dont break things
             matchPrefix: _matchPrefix,
             // ignore: avoid_redundant_argument_values dont break things
