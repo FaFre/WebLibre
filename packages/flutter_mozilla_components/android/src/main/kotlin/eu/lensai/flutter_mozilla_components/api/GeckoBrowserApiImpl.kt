@@ -89,10 +89,10 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         synchronized(this) {
             if(!isGeckoInitialized) {
                 Log.addSink(AndroidLogSink())
-            }
 
-            setupGeckoEngine()
-            isGeckoInitialized = true
+                setupGeckoEngine()
+                isGeckoInitialized = true
+            }
         }
     }
 

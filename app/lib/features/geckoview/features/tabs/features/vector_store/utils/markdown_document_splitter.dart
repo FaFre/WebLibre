@@ -8,6 +8,7 @@ typedef DocumentParts = ({String mainDocumentId, List<Document> parts});
 List<Document> _mergeShortDocuments(
   List<Document> documents,
   int maxLength, {
+  // ignore: unused_element_parameter
   String separator = '\n',
   required Document Function(Document a, Document b) doMerge,
   int Function(String) lengthFunction = TextSplitter.defaultLengthFunction,

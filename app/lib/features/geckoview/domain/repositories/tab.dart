@@ -256,6 +256,10 @@ class TabRepository extends _$TabRepository {
       final syncTabs =
           next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
 
+      if (_previousTabId != null && !next.value.contains(_previousTabId)) {
+        _previousTabId = null;
+      }
+
       if (syncTabs) {
         await db.tabDao.syncTabs(retainTabIds: next.value);
       }

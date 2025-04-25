@@ -49,6 +49,7 @@ class FeedSearch extends HookConsumerWidget {
 
     return MultiSliver(
       children: [
+        const SliverToBoxAdapter(child: Divider()),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(left: 16.0),
