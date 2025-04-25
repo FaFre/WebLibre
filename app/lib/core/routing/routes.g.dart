@@ -214,7 +214,7 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: $WebPageRouteExtension._fromState,
     ),
     GoRouteData.$route(
-      path: 'search/:searchText',
+      path: 'search/:tabType/:searchText',
       name: 'SearchRoute',
 
       factory: $SearchRouteExtension._fromState,
@@ -292,12 +292,14 @@ extension $WebPageRouteExtension on WebPageRoute {
 
 extension $SearchRouteExtension on SearchRoute {
   static SearchRoute _fromState(GoRouterState state) => SearchRoute(
+    tabType: _$TabTypeEnumMap._$fromName(state.pathParameters['tabType']!)!,
     searchText:
         state.pathParameters['searchText'] ?? SearchRoute.emptySearchText,
   );
 
-  String get location =>
-      GoRouteData.$location('/search/${Uri.encodeComponent(searchText)}');
+  String get location => GoRouteData.$location(
+    '/search/${Uri.encodeComponent(_$TabTypeEnumMap[tabType]!)}/${Uri.encodeComponent(searchText)}',
+  );
 
   void go(BuildContext context) => context.go(location);
 
@@ -308,6 +310,11 @@ extension $SearchRouteExtension on SearchRoute {
 
   void replace(BuildContext context) => context.replace(location);
 }
+
+const _$TabTypeEnumMap = {
+  TabType.regular: 'regular',
+  TabType.private: 'private',
+};
 
 extension $TorProxyRouteExtension on TorProxyRoute {
   static TorProxyRoute _fromState(GoRouterState state) => TorProxyRoute();
@@ -392,6 +399,11 @@ extension $ContainerEditRouteExtension on ContainerEditRoute {
 
   void replace(BuildContext context) =>
       context.replace(location, extra: $extra);
+}
+
+extension<T extends Enum> on Map<T, String> {
+  T? _$fromName(String? value) =>
+      entries.where((element) => element.value == value).firstOrNull?.key;
 }
 
 RouteBase get $bangCategoriesRoute => GoRouteData.$route(

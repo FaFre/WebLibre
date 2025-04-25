@@ -210,7 +210,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         showSuggestNewTabMessage(
           context,
           onAdd: () async {
-            await const SearchRoute().push(context);
+            await const SearchRoute(tabType: TabType.regular).push(context);
           },
         );
     }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/bangs/domain/providers/search.dart';
@@ -18,12 +20,16 @@ import 'package:lensai/utils/uri_parser.dart' as uri_parser;
 
 class SearchScreen extends HookConsumerWidget {
   final String? initialSearchText;
+  final TabType tabType;
 
-  const SearchScreen({required this.initialSearchText});
+  const SearchScreen({required this.initialSearchText, required this.tabType});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
+
+    final selectedTabType = useState(tabType);
+    final isPrivate = selectedTabType.value == TabType.private;
 
     final searchTextController = useTextEditingController(
       text: initialSearchText,
@@ -52,11 +58,17 @@ class SearchScreen extends HookConsumerWidget {
 
     Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
-        final searchUri = await ref
-            .read(bangSearchProvider.notifier)
-            .triggerBangSearch(activeBang, query);
+        final searchUri = activeBang.getTemplateUrl(query);
 
-        await ref.read(tabRepositoryProvider.notifier).addTab(url: searchUri);
+        if (!isPrivate) {
+          await ref
+              .read(bangSearchProvider.notifier)
+              .triggerBangSearch(activeBang, query);
+        }
+
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .addTab(url: searchUri, private: isPrivate);
 
         if (context.mounted) {
           ref.read(bottomSheetControllerProvider.notifier).dismiss();
@@ -75,43 +87,72 @@ class SearchScreen extends HookConsumerWidget {
               floating: true,
               pinned: true,
               automaticallyImplyLeading: false,
-              title: SearchField(
-                showBangIcon: showBangIcon.value,
-                textEditingController: searchTextController,
-                focusNode: searchFocusNode,
-                autofocus: true,
-                onSubmitted: (value) async {
-                  if (value.isNotEmpty) {
-                    var newUrl = uri_parser.tryParseUrl(
-                      value,
-                      eagerParsing: true,
-                    );
+              title: Align(
+                child: SegmentedButton(
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(
+                      value: TabType.regular,
+                      label: Text('Regular'),
+                      icon: Icon(MdiIcons.tab),
+                    ),
+                    ButtonSegment(
+                      value: TabType.private,
+                      label: Text('Private'),
+                      icon: Icon(MdiIcons.tabUnselected),
+                    ),
+                  ],
+                  selected: {selectedTabType.value},
+                  onSelectionChanged: (value) {
+                    selectedTabType.value = value.first;
+                  },
+                ),
+              ),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(kToolbarHeight),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: SearchField(
+                    showBangIcon: showBangIcon.value,
+                    textEditingController: searchTextController,
+                    focusNode: searchFocusNode,
+                    autofocus: true,
+                    onSubmitted: (value) async {
+                      if (value.isNotEmpty) {
+                        var newUrl = uri_parser.tryParseUrl(
+                          value,
+                          eagerParsing: true,
+                        );
 
-                    if (newUrl == null) {
-                      final defaultSearchBang =
-                          ref.read(selectedBangDataProvider()) ??
-                          await ref.read(defaultSearchBangDataProvider.future);
+                        if (newUrl == null) {
+                          final defaultSearchBang =
+                              ref.read(selectedBangDataProvider()) ??
+                              await ref.read(
+                                defaultSearchBangDataProvider.future,
+                              );
 
-                      newUrl = defaultSearchBang?.getTemplateUrl(value);
-                    }
+                          newUrl = defaultSearchBang?.getTemplateUrl(value);
+                        }
 
-                    if (newUrl != null) {
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(url: newUrl);
+                        if (newUrl != null) {
+                          await ref
+                              .read(tabRepositoryProvider.notifier)
+                              .addTab(url: newUrl, private: isPrivate);
 
-                      if (context.mounted) {
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .dismiss();
+                          if (context.mounted) {
+                            ref
+                                .read(bottomSheetControllerProvider.notifier)
+                                .dismiss();
 
-                        context.pop();
+                            context.pop();
+                          }
+                        }
                       }
-                    }
-                  }
-                },
-                activeBang: activeBang,
-                showSuggestions: true,
+                    },
+                    activeBang: activeBang,
+                    showSuggestions: true,
+                  ),
+                ),
               ),
             ),
             const SliverToBoxAdapter(child: Divider()),
@@ -120,10 +161,12 @@ class SearchScreen extends HookConsumerWidget {
               activeBang: activeBang,
               submitSearch: submitSearch,
             ),
-            const SliverToBoxAdapter(child: Divider()),
             TabSearch(searchTextListenable: sampledSearchText),
             FeedSearch(searchTextNotifier: sampledSearchText),
-            HistorySuggestions(searchTextListenable: sampledSearchText),
+            HistorySuggestions(
+              isPrivate: isPrivate,
+              searchTextListenable: sampledSearchText,
+            ),
           ],
         ),
       ),

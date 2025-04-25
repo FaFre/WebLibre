@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/search.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
+import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/search/domain/providers/search_suggestions.dart';
@@ -45,12 +46,21 @@ class SiteSearch extends HookConsumerWidget {
 
     Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
-        final searchUri = await ref
-            .read(bangSearchProvider.notifier)
-            .triggerBangSearch(activeBang, query);
+        final isPrivate =
+            ref.read(selectedTabStateProvider)?.isPrivate ?? false;
+
+        final searchUri = activeBang.getTemplateUrl(query);
+
+        if (!isPrivate) {
+          await ref
+              .read(bangSearchProvider.notifier)
+              .triggerBangSearch(activeBang, query);
+        }
 
         if (searchInNewTab) {
-          await ref.read(tabRepositoryProvider.notifier).addTab(url: searchUri);
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(url: searchUri, private: isPrivate);
         } else {
           await ref
               .read(tabSessionProvider(tabId: null).notifier)

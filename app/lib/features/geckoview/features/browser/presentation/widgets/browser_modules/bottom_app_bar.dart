@@ -106,7 +106,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
               return child!;
             },
             menuChildren: [
-              if (selectedTabId != null)
+              if (selectedTabId != null) ...[
                 MenuItemButton(
                   onPressed: () async {
                     await ref
@@ -116,11 +116,24 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   leadingIcon: const Icon(Icons.close),
                   child: const Text('Close Tab'),
                 ),
+                const Divider(),
+              ],
               MenuItemButton(
                 onPressed: () async {
-                  await const SearchRoute().push(context);
+                  await const SearchRoute(
+                    tabType: TabType.private,
+                  ).push(context);
                 },
-                leadingIcon: const Icon(Icons.add),
+                leadingIcon: const Icon(MdiIcons.tabUnselected),
+                child: const Text('Add Private Tab'),
+                ),
+              MenuItemButton(
+                onPressed: () async {
+                  await const SearchRoute(
+                    tabType: TabType.regular,
+                  ).push(context);
+                },
+                leadingIcon: const Icon(MdiIcons.tabPlus),
                 child: const Text('Add Tab'),
               ),
             ],

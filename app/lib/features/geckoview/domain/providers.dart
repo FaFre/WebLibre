@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/core/logger.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
-import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,13 +24,14 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         );
 
         if (defaultSearchBang != null) {
-          final currentTabId = ref.read(selectedTabProvider);
+          final currentTab = ref.read(selectedTabStateProvider);
 
           await ref
               .read(tabRepositoryProvider.notifier)
               .addTab(
                 url: defaultSearchBang.getTemplateUrl(text),
-                parentId: currentTabId,
+                parentId: currentTab?.id,
+                private: currentTab?.isPrivate ?? false,
               );
         } else {
           logger.e('No default search bang found');
@@ -50,7 +51,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
       //   }
       // }),
       ShareAction((text) async {
-        await Share.share(text);
+        await SharePlus.instance.share(ShareParams(text: text));
       }),
       CallAction((text) async {
         final uri = Uri.tryParse('tel:${text.replaceAll(' ', '')}');

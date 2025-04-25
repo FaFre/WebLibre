@@ -162,6 +162,31 @@ class WebPageDialog extends HookConsumerWidget {
                           },
                         ),
                         ListTile(
+                          leading: const Icon(MdiIcons.tabUnselected),
+                          title: const Text('Clone as private tab'),
+                          onTap: () async {
+                            final tabId = await ref
+                                .read(tabRepositoryProvider.notifier)
+                                .addTab(url: url, private: true);
+
+                            if (context.mounted) {
+                              //save reference before pop `ref` gets disposed
+                              final repo = ref.read(
+                                tabRepositoryProvider.notifier,
+                              );
+
+                              ui_helper.showTabSwitchMessage(
+                                context,
+                                onSwitch: () {
+                                  repo.selectTab(tabId);
+                                },
+                              );
+
+                              context.pop();
+                            }
+                          },
+                        ),
+                        ListTile(
                           leading: const Icon(Icons.share),
                           title: const Text('Share link'),
                           onTap: () async {

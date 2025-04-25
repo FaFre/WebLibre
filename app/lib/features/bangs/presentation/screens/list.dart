@@ -41,7 +41,7 @@ class BangListScreen extends HookConsumerWidget {
                           .read(selectedBangTriggerProvider().notifier)
                           .setTrigger(bang.trigger);
 
-                      const SearchRoute().go(context);
+                      const SearchRoute(tabType: TabType.regular).go(context);
                     },
                   );
                 },

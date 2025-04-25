@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/providers/global_drop.dart';
@@ -62,7 +63,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton.icon(
-                      icon: const Icon(Icons.search),
+                      icon: const Icon(MdiIcons.tabSearch),
                       label: const Text('Search'),
                       onPressed: () {
                         searchMode.value = true;
@@ -410,7 +411,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              await const SearchRoute().push(context);
+              await const SearchRoute(tabType: TabType.regular).push(context);
 
               onClose();
             },

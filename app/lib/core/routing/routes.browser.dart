@@ -5,7 +5,10 @@ part of 'routes.dart';
   path: '/',
   routes: [
     TypedGoRoute<WebPageRoute>(name: 'WebPageRoute', path: 'page/:url'),
-    TypedGoRoute<SearchRoute>(name: 'SearchRoute', path: 'search/:searchText'),
+    TypedGoRoute<SearchRoute>(
+      name: 'SearchRoute',
+      path: 'search/:tabType/:searchText',
+    ),
     TypedGoRoute<TorProxyRoute>(name: 'TorProxyRoute', path: 'tor_proxy'),
     TypedGoRoute<ContextMenuRoute>(
       name: 'ContextMenuRoute',
@@ -50,17 +53,25 @@ class WebPageRoute extends GoRouteData {
   }
 }
 
+enum TabType { regular, private }
+
 class SearchRoute extends GoRouteData {
   static const String emptySearchText = ' ';
+
+  final TabType tabType;
 
   //This should be nullable but isnt allowed by go_router
   final String searchText;
 
-  const SearchRoute({this.searchText = SearchRoute.emptySearchText});
+  const SearchRoute({
+    required this.tabType,
+    this.searchText = SearchRoute.emptySearchText,
+  });
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return SearchScreen(
+      tabType: tabType,
       initialSearchText:
           (searchText.isEmpty || searchText == emptySearchText)
               ? null

@@ -3,7 +3,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:lensai/utils/ui_helper.dart';
@@ -23,14 +23,15 @@ class OpenInNewTab extends HookConsumerWidget {
       leading: const Icon(MdiIcons.tabPlus),
       title: const Text('Open in new tab'),
       onTap: () async {
-        final currentTabId = ref.read(selectedTabProvider);
+        final currentTab = ref.read(selectedTabStateProvider);
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: hitResult.tryGetLink(),
-              parentId: currentTabId,
+              parentId: currentTab?.id,
               selectTab: false,
+              private: currentTab?.isPrivate ?? false,
             );
 
         if (context.mounted) {

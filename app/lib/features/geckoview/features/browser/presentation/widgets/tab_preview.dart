@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
@@ -34,10 +35,13 @@ class TabPreview extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(16.0)),
       ),
       child: Material(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+        color:
+            tab.isPrivate
+                ? const Color(0xFF25003E)
+                : colorScheme.surfaceContainerHighest,
+        borderRadius: const BorderRadius.all(Radius.circular(14.0)),
         child: InkWell(
-          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(14.0)),
           onTap: onTap,
           onDoubleTap: onDoubleTap,
           child: Column(
@@ -46,11 +50,15 @@ class TabPreview extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 6.0),
+                      padding: const EdgeInsets.only(left: 6.0, top: 2.0),
                       child: Text(
                         overflow: TextOverflow.ellipsis,
                         tab.title,
                         maxLines: 2,
+                        style:
+                            tab.isPrivate
+                                ? const TextStyle(color: Colors.white)
+                                : null,
                       ),
                     ),
                   ),
@@ -72,9 +80,16 @@ class TabPreview extends StatelessWidget {
                   Expanded(
                     child: Text(
                       tab.url.authority,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: tab.isPrivate ? Colors.white : null,
+                      ),
                     ),
                   ),
+                  if (tab.isPrivate) ...[
+                    const SizedBox(width: 6.0),
+                    const Icon(MdiIcons.dominoMask, color: Color(0xFF8000D7)),
+                  ],
+                  const SizedBox(width: 8.0),
                 ],
               ),
               const SizedBox(height: 6),
@@ -82,8 +97,8 @@ class TabPreview extends StatelessWidget {
                 Expanded(
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(16.0),
-                      bottomRight: Radius.circular(16.0),
+                      bottomLeft: Radius.circular(14.0),
+                      bottomRight: Radius.circular(14.0),
                     ),
                     child: SizedBox(
                       width: double.infinity,

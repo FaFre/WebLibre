@@ -15,9 +15,14 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class HistorySuggestions extends HookConsumerWidget {
+  final bool isPrivate;
   final ValueListenable<TextEditingValue> searchTextListenable;
 
-  const HistorySuggestions({super.key, required this.searchTextListenable});
+  const HistorySuggestions({
+    super.key,
+    required this.isPrivate,
+    required this.searchTextListenable,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -89,7 +94,7 @@ class HistorySuggestions extends HookConsumerWidget {
                                 case final Uri url) {
                               await ref
                                   .read(tabRepositoryProvider.notifier)
-                                  .addTab(url: url);
+                                  .addTab(url: url, private: isPrivate);
 
                               if (context.mounted) {
                                 ref
