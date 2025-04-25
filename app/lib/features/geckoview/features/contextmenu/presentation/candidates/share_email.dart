@@ -24,7 +24,7 @@ class ShareEmail extends HookConsumerWidget {
       onTap: () async {
         final email = hitResult.tryGetLink().mapNotNull((url) => url.path);
         if (email != null) {
-          await Share.share(email);
+          await SharePlus.instance.share(ShareParams(text: email));
 
           if (context.mounted) {
             context.pop();

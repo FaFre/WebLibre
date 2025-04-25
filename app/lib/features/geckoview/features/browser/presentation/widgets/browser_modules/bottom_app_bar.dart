@@ -126,7 +126,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 },
                 leadingIcon: const Icon(MdiIcons.tabUnselected),
                 child: const Text('Add Private Tab'),
-                ),
+              ),
               MenuItemButton(
                 onPressed: () async {
                   await const SearchRoute(
@@ -300,7 +300,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                     final tabState = ref.read(tabStateProvider(selectedTabId));
 
                     if (tabState?.url case final Uri url) {
-                      await Share.shareUri(url);
+                      await SharePlus.instance.share(ShareParams(uri: url));
                     }
                   },
                   leadingIcon: const Icon(Icons.share),

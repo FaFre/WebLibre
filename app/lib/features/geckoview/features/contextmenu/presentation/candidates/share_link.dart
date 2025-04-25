@@ -21,7 +21,9 @@ class ShareLink extends HookConsumerWidget {
       leading: const Icon(Icons.share),
       title: const Text('Share link'),
       onTap: () async {
-        await hitResult.tryGetLink().mapNotNull((url) => Share.shareUri(url));
+        await hitResult.tryGetLink().mapNotNull(
+          (url) => SharePlus.instance.share(ShareParams(uri: url)),
+        );
 
         if (context.mounted) {
           context.pop();

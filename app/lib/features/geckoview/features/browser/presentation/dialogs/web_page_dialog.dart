@@ -190,7 +190,9 @@ class WebPageDialog extends HookConsumerWidget {
                           leading: const Icon(Icons.share),
                           title: const Text('Share link'),
                           onTap: () async {
-                            await Share.shareUri(url);
+                            await SharePlus.instance.share(
+                              ShareParams(uri: url),
+                            );
 
                             if (context.mounted) {
                               context.pop();
@@ -220,9 +222,12 @@ class WebPageDialog extends HookConsumerWidget {
                                     mimeType: 'image/png',
                                   );
 
-                                  await Share.shareXFiles([
-                                    file,
-                                  ], subject: precachedInfo?.title);
+                                  await SharePlus.instance.share(
+                                    ShareParams(
+                                      files: [file],
+                                      subject: precachedInfo?.title,
+                                    ),
+                                  );
                                 }
                               });
                             }
