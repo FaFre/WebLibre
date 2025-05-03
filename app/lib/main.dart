@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:background_fetch/background_fetch.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService;
@@ -17,6 +20,11 @@ import 'package:lensai/presentation/main_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (kDebugMode) {
+    final serviceProtocolInfo = await Service.getInfo();
+    logger.d('VM: ${serviceProtocolInfo.serverUri}');
+  }
 
   await GeckoBrowserService().initialize();
 
