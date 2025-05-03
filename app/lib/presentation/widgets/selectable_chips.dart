@@ -63,6 +63,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
       builder: (context, controller) {
         return ListView.builder(
           controller: controller,
+          //Improve list performance by not rendering outside screen at all
+          cacheExtent: 0,
           scrollDirection: Axis.horizontal,
           itemCount: items.length,
           itemBuilder: (context, index) {

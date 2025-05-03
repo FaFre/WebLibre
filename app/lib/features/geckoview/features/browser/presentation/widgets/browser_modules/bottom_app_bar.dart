@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
+import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_session.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/providers/web_extensions_state.dart';
@@ -24,12 +25,8 @@ import 'package:lensai/utils/ui_helper.dart' as ui_helper;
 import 'package:share_plus/share_plus.dart';
 
 class BrowserBottomAppBar extends HookConsumerWidget {
-  const BrowserBottomAppBar({
-    required this.selectedTabId,
-    required this.displayedSheet,
-  });
+  const BrowserBottomAppBar({required this.displayedSheet});
 
-  final String? selectedTabId;
   final Sheet? displayedSheet;
 
   @override
@@ -39,17 +36,26 @@ class BrowserBottomAppBar extends HookConsumerWidget {
     final tabMenuController = useMenuController();
     final trippleDotMenuController = useMenuController();
 
+    final selectedTabId = ref.watch(selectedTabProvider);
+    final isPrivateTab = ref.watch(
+      selectedTabStateProvider.select((state) => state?.isPrivate ?? false),
+    );
+
     return BottomAppBar(
       height: AppBar().preferredSize.height,
       padding: EdgeInsets.zero,
       child: AppBar(
         automaticallyImplyLeading: false,
         titleSpacing: 8.0,
+        backgroundColor:
+            (isPrivateTab && displayedSheet is! ViewTabsSheet)
+                ? const Color(0x648000D7)
+                : null,
         title:
             (selectedTabId != null && displayedSheet is! ViewTabsSheet)
                 ? HookConsumer(
                   builder: (context, ref, child) {
-                    final tabState = ref.watch(tabStateProvider(selectedTabId));
+                    final tabState = ref.watch(selectedTabStateProvider);
 
                     final dragStartPosition = useRef(Offset.zero);
 
@@ -111,7 +117,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   onPressed: () async {
                     await ref
                         .read(tabRepositoryProvider.notifier)
-                        .closeTab(selectedTabId!);
+                        .closeTab(selectedTabId);
                   },
                   leadingIcon: const Icon(Icons.close),
                   child: const Text('Close Tab'),
@@ -374,7 +380,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                     onPressed: () async {
                                       await ref
                                           .read(tabRepositoryProvider.notifier)
-                                          .closeTab(selectedTabId!);
+                                          .closeTab(selectedTabId);
                                       trippleDotMenuController.close();
                                     },
                                     icon: const Icon(Icons.close),

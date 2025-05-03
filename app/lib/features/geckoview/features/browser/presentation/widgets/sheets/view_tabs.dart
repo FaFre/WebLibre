@@ -11,6 +11,7 @@ import 'package:lensai/core/providers/global_drop.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/data/models/drag_data.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
@@ -91,7 +92,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                   // enableIMEPersonalizedLearning: !incognitoEnabled,
                   decoration: InputDecoration(
                     // border: InputBorder.none,
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(MdiIcons.tabSearch),
                     hintText: 'Search inside tabs...',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     suffixIcon: Row(
@@ -411,7 +412,11 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              await const SearchRoute(tabType: TabType.regular).push(context);
+              final isCurrentPrivate =
+                  ref.read(selectedTabStateProvider)?.isPrivate ?? false;
+              await SearchRoute(
+                tabType: isCurrentPrivate ? TabType.private : TabType.regular,
+              ).push(context);
 
               onClose();
             },

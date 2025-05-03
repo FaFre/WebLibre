@@ -88,24 +88,33 @@ class SearchScreen extends HookConsumerWidget {
               pinned: true,
               automaticallyImplyLeading: false,
               title: Align(
-                child: SegmentedButton(
-                  showSelectedIcon: false,
-                  segments: const [
-                    ButtonSegment(
-                      value: TabType.regular,
-                      label: Text('Regular'),
-                      icon: Icon(MdiIcons.tab),
-                    ),
-                    ButtonSegment(
-                      value: TabType.private,
-                      label: Text('Private'),
-                      icon: Icon(MdiIcons.tabUnselected),
-                    ),
-                  ],
-                  selected: {selectedTabType.value},
-                  onSelectionChanged: (value) {
-                    selectedTabType.value = value.first;
-                  },
+                child: Focus(
+                  canRequestFocus: false,
+                  child: SegmentedButton(
+                    showSelectedIcon: false,
+                    segments: const [
+                      ButtonSegment(
+                        value: TabType.regular,
+                        label: Text('Regular'),
+                        icon: Icon(MdiIcons.tab),
+                      ),
+                      ButtonSegment(
+                        value: TabType.private,
+                        label: Text('Private'),
+                        icon: Icon(MdiIcons.tabUnselected),
+                      ),
+                    ],
+                    selected: {selectedTabType.value},
+                    onSelectionChanged: (value) {
+                      selectedTabType.value = value.first;
+                    },
+                    style: switch (selectedTabType.value) {
+                      TabType.regular => null,
+                      TabType.private => SegmentedButton.styleFrom(
+                        selectedBackgroundColor: const Color(0x648000D7),
+                      ),
+                    },
+                  ),
                 ),
               ),
               bottom: PreferredSize(

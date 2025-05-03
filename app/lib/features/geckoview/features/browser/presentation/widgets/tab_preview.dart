@@ -87,7 +87,22 @@ class TabPreview extends StatelessWidget {
                   ),
                   if (tab.isPrivate) ...[
                     const SizedBox(width: 6.0),
-                    const Icon(MdiIcons.dominoMask, color: Color(0xFF8000D7)),
+                    const SizedBox(
+                      height: 16,
+                      width: 24,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Positioned(
+                            top: -4,
+                            child: Icon(
+                              MdiIcons.dominoMask,
+                              color: Color(0xFF8000D7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                   const SizedBox(width: 8.0),
                 ],

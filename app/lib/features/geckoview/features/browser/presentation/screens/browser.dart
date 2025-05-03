@@ -39,10 +39,6 @@ class BrowserScreen extends HookConsumerWidget {
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
     final displayedOverlay = ref.watch(overlayControllerProvider);
 
-    final selectedTabId = ref.watch(
-      selectedTabStateProvider.select((value) => value?.id),
-    );
-
     final lastBackButtonPress = useRef<DateTime?>(null);
 
     final overlayController = useOverlayPortalController();
@@ -91,10 +87,7 @@ class BrowserScreen extends HookConsumerWidget {
 
               return Visibility(
                 visible: !tabInFullScreen,
-                child: BrowserBottomAppBar(
-                  selectedTabId: selectedTabId,
-                  displayedSheet: displayedSheet,
-                ),
+                child: BrowserBottomAppBar(displayedSheet: displayedSheet),
               );
             },
           ),
@@ -129,10 +122,7 @@ class BrowserScreen extends HookConsumerWidget {
                           : null,
                   child: BackButtonListener(
                     onBackButtonPressed: () async {
-                      final tabState =
-                          (selectedTabId != null)
-                              ? ref.read(tabStateProvider(selectedTabId))
-                              : null;
+                      final tabState = ref.read(selectedTabStateProvider);
 
                       final tabCount = ref.read(
                         tabListProvider.select((tabs) => tabs.value.length),
@@ -167,7 +157,7 @@ class BrowserScreen extends HookConsumerWidget {
                         lastBackButtonPress.value = null;
 
                         final controller = ref.read(
-                          tabSessionProvider(tabId: selectedTabId).notifier,
+                          selectedTabSessionNotifierProvider,
                         );
 
                         await controller.stopLoading();
@@ -176,7 +166,7 @@ class BrowserScreen extends HookConsumerWidget {
                         lastBackButtonPress.value = null;
 
                         final controller = ref.read(
-                          tabSessionProvider(tabId: selectedTabId).notifier,
+                          selectedTabSessionNotifierProvider,
                         );
 
                         await controller.goBack();
@@ -190,7 +180,7 @@ class BrowserScreen extends HookConsumerWidget {
 
                       if (ref
                           .read(tabRepositoryProvider.notifier)
-                          .hasLaunchedFromIntent(selectedTabId)) {
+                          .hasLaunchedFromIntent(tabState?.id)) {
                         //Mark back as unhandled and navigator will pop
                         await SystemNavigator.pop();
                         return false;
