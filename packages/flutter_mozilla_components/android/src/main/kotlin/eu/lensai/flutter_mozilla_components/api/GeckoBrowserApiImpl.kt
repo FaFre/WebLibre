@@ -109,7 +109,13 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     private fun setupGeckoEngine() {
         val selectionActionEvents = GeckoSelectionActionEvents(_flutterPluginBinding.binaryMessenger)
 
-        val selectionActionDelegate = DefaultSelectionActionDelegate(selectionActionEvents)
+        val selectionActionDelegate = DefaultSelectionActionDelegate(selectionActionEvents) { actions ->
+            val processTextAction = "android.intent.action.PROCESS_TEXT"
+            val withoutProcessText = actions.filter { it != processTextAction }.toTypedArray()
+            val processTextActions = actions.filter { it == processTextAction }.toTypedArray()
+
+            withoutProcessText + processTextActions
+        }
 
         val readerViewController =
             ReaderViewController(_flutterPluginBinding.binaryMessenger)

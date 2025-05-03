@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/core/logger.dart';
+import 'package:lensai/core/providers/router.dart';
+import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
@@ -19,6 +21,17 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
   unawaited(
     service.setActions([
       SearchAction((text) async {
+        final router = ref.read(routerProvider);
+        final isCurrentPrivate =
+            ref.read(selectedTabStateProvider)?.isPrivate ?? false;
+        final route = SearchRoute(
+          tabType: isCurrentPrivate ? TabType.private : TabType.regular,
+          searchText: text,
+        );
+
+        await router.push(route.location);
+      }),
+      DefaultSearchAction((text) async {
         final defaultSearchBang = await ref.read(
           defaultSearchBangDataProvider.future,
         );
@@ -37,19 +50,6 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
           logger.e('No default search bang found');
         }
       }),
-      // PrivateSearchAction((text) async {
-      //   final defaultSearchBang = await ref.read(
-      //     defaultSearchBangDataProvider.future,
-      //   );
-
-      //   if (defaultSearchBang != null) {
-      //     await ref
-      //         .read(tabRepositoryProvider.notifier)
-      //         .addTab(url: defaultSearchBang.getUrl(text), private: true);
-      //   } else {
-      //     logger.e('No default search bang found');
-      //   }
-      // }),
       ShareAction((text) async {
         await SharePlus.instance.share(ShareParams(text: text));
       }),

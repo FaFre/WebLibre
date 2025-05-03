@@ -33,6 +33,15 @@ class EmailAction extends BaseSelectionAction {
       );
 }
 
+class DefaultSearchAction extends BaseSelectionAction {
+  DefaultSearchAction(PerformAction action)
+    : super(
+        id: 'CUSTOM_CONTEXT_MENU_SEARCH_DEFAULT',
+        title: 'Web Search',
+        performAction: action,
+      );
+}
+
 class SearchAction extends BaseSelectionAction {
   SearchAction(PerformAction action)
     : super(
