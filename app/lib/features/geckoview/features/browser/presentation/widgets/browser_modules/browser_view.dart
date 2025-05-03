@@ -30,10 +30,12 @@ import 'package:lensai/utils/ui_helper.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;
+  final Duration suggestionTimeout;
   final Future<void> Function()? postInitializationStep;
 
   const BrowserView({
     this.screenshotPeriod = const Duration(seconds: 10),
+    this.suggestionTimeout = const Duration(seconds: 10),
     this.postInitializationStep,
   });
 
@@ -47,6 +49,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   //This is managed by widget state changes to resume a timer
   bool _timerPaused = false;
+
+  DateTime? _suggestionCountTime;
 
   Future<void> _timerTick(Timer timer) async {
     await ref
@@ -198,6 +202,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         ref
             .read(localAuthenticationServiceProvider.notifier)
             .evictCacheOnBackground();
+
+        if (state == AppLifecycleState.paused) {
+          _suggestionCountTime = DateTime.now();
+        }
       case AppLifecycleState.resumed:
         if (_timerPaused) {
           _periodicScreenshotUpdate = Timer.periodic(
@@ -207,12 +215,18 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _timerPaused = false;
         }
 
-        showSuggestNewTabMessage(
-          context,
-          onAdd: () async {
-            await const SearchRoute(tabType: TabType.regular).push(context);
-          },
-        );
+        if (_suggestionCountTime == null ||
+            DateTime.now().difference(_suggestionCountTime!) >
+                widget.suggestionTimeout) {
+          showSuggestNewTabMessage(
+            context,
+            onAdd: () async {
+              await const SearchRoute(tabType: TabType.regular).push(context);
+            },
+          );
+
+          _suggestionCountTime = DateTime.now();
+        }
     }
   }
 
