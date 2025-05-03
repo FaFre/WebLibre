@@ -11,7 +11,7 @@ dependencies:
   collection: ^1.19.1
   copy_with_extension: ^6.0.1
   crypto: ^3.0.6
-  drift: ^2.26.0
+  drift: ^2.26.1
   dynamic_color: ^1.7.0
   exceptions: ^0.6.1
   fading_scroll: ^0.9.1
@@ -63,8 +63,11 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.5
   pocketbase: ^0.22.0
-  provider: ^6.1.4
-  receive_intent: ^0.2.7
+  provider: ^6.1.5
+  receive_intent:
+    git:
+      url: https://github.com/FaFre/receive_intent.git
+      ref: fix_recreate_activity
   riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
   rss_dart: ^1.0.12
@@ -113,10 +116,10 @@ dev_dependencies:
   copy_with_extension_gen: ^6.0.1
   custom_lint: ^0.7.3
   dependency_validator: ^5.0.2
-  drift_dev: ^2.26.0
+  drift_dev: ^2.26.1
   fast_equatable_lint: ^0.3.1
   flutter_launcher_icons: ^0.14.3
-  go_router_builder: ^2.8.2
+  go_router_builder: ^2.9.0
   json_serializable: ^6.9.5
   lint: ^2.8.0
   riverpod_generator: ^2.6.4
