@@ -59,6 +59,7 @@ object GlobalComponents {
             tabContentEvents,
             extensionEvents
         )
+        _components = newComponents
 
         //newComponents.crashReporter.install(applicationContext)
 
@@ -109,7 +110,5 @@ object GlobalComponents {
         GlobalScope.launch(Dispatchers.IO) {
             newComponents.core.fileUploadsDirCleaner.cleanUploadsDirectory()
         }
-
-        _components = newComponents
     }
 }

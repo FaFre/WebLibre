@@ -64,6 +64,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     fun attachBinding(flutterPluginBinding: FlutterPluginBinding) {
         _flutterPluginBinding = flutterPluginBinding
         _flutterEvents = GeckoStateEvents(_flutterPluginBinding.binaryMessenger)
+
+        isGeckoInitialized = false
     }
 
     fun attachActivity(activity: Activity) {
