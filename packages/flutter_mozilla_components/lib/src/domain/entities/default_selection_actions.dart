@@ -60,6 +60,15 @@ class PrivateSearchAction extends BaseSelectionAction {
       );
 }
 
+class FindInPageAction extends BaseSelectionAction {
+  FindInPageAction(PerformAction action)
+    : super(
+        id: 'CUSTOM_CONTEXT_MENU_FIND_IN_PAGE',
+        title: 'Find in page',
+        performAction: action,
+      );
+}
+
 class ShareAction extends BaseSelectionAction {
   ShareAction(PerformAction action)
     : super(

@@ -1,28 +1,28 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'find_in_page_visibility.dart';
+part of 'find_in_page.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$findInPageVisibilityControllerHash() =>
-    r'365819c6b181ff2cefc022360413a918457e06d7';
+String _$findInPageControllerHash() =>
+    r'bb8584767aa8ad93e3bccd69d1012daaa8c5e9ea';
 
-/// See also [FindInPageVisibilityController].
-@ProviderFor(FindInPageVisibilityController)
-final findInPageVisibilityControllerProvider =
-    AutoDisposeNotifierProvider<FindInPageVisibilityController, bool>.internal(
-      FindInPageVisibilityController.new,
-      name: r'findInPageVisibilityControllerProvider',
+/// See also [FindInPageController].
+@ProviderFor(FindInPageController)
+final findInPageControllerProvider =
+    AutoDisposeNotifierProvider<FindInPageController, FindInPageState>.internal(
+      FindInPageController.new,
+      name: r'findInPageControllerProvider',
       debugGetCreateSourceHash:
           const bool.fromEnvironment('dart.vm.product')
               ? null
-              : _$findInPageVisibilityControllerHash,
+              : _$findInPageControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$FindInPageVisibilityController = AutoDisposeNotifier<bool>;
+typedef _$FindInPageController = AutoDisposeNotifier<FindInPageState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

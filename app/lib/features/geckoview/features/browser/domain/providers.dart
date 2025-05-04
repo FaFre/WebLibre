@@ -54,20 +54,6 @@ class SelectedBangData extends _$SelectedBangData {
   }
 }
 
-@Riverpod(keepAlive: true)
-class ShowFindInPage extends _$ShowFindInPage {
-  // ignore: document_ignores api decision
-  // ignore: use_setters_to_change_properties
-  void update(bool show) {
-    state = show;
-  }
-
-  @override
-  bool build() {
-    return false;
-  }
-}
-
 @Riverpod()
 EquatableValue<List<String>> availableTabIds(
   Ref ref,

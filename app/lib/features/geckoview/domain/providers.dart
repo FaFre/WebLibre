@@ -7,6 +7,7 @@ import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
+import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
@@ -49,6 +50,9 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         } else {
           logger.e('No default search bang found');
         }
+      }),
+      FindInPageAction((text) {
+        ref.read(findInPageControllerProvider.notifier).findAll(text: text);
       }),
       ShareAction((text) async {
         await SharePlus.instance.share(ShareParams(text: text));

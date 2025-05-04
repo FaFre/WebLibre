@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
-import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page_visibility.dart';
+import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 
 class FindInPageWidget extends HookConsumerWidget {
   final EdgeInsetsGeometry padding;
@@ -12,15 +11,15 @@ class FindInPageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showFindInPage = ref.watch(findInPageVisibilityControllerProvider);
-    final findInteractionController = ref.watch(
-      findInPageRepositoryProvider(null).notifier,
+    final findInPageState = ref.watch(findInPageControllerProvider);
+
+    final textController = useTextEditingController(
+      text: findInPageState.searchText,
+      keys: [findInPageState.searchText],
     );
 
-    final textController = useTextEditingController();
-
     return Visibility(
-      visible: showFindInPage,
+      visible: findInPageState.visible,
       child: Padding(
         padding: padding,
         child: Material(
@@ -38,9 +37,13 @@ class FindInPageWidget extends HookConsumerWidget {
                   keyboardType: TextInputType.text,
                   onSubmitted: (value) async {
                     if (value == '') {
-                      await findInteractionController.clearMatches();
+                      await ref
+                          .read(findInPageControllerProvider.notifier)
+                          .clearMatches();
                     } else {
-                      await findInteractionController.findAll(text: value);
+                      await ref
+                          .read(findInPageControllerProvider.notifier)
+                          .findAll(text: value);
                     }
                   },
                 ),
@@ -69,23 +72,27 @@ class FindInPageWidget extends HookConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.arrow_upward),
                 onPressed: () async {
-                  await findInteractionController.findNext(forward: false);
+                  await ref
+                      .read(findInPageControllerProvider.notifier)
+                      .findNext(forward: false);
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.arrow_downward),
                 onPressed: () async {
-                  await findInteractionController.findNext();
+                  await ref
+                      .read(findInPageControllerProvider.notifier)
+                      .findNext();
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: () async {
-                  ref
-                      .read(findInPageVisibilityControllerProvider.notifier)
-                      .hide();
+                  ref.read(findInPageControllerProvider.notifier).hide();
 
-                  await findInteractionController.clearMatches();
+                  await ref
+                      .read(findInPageControllerProvider.notifier)
+                      .clearMatches();
                   textController.clear();
                 },
               ),

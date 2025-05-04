@@ -17,7 +17,7 @@ import 'package:lensai/features/geckoview/features/browser/presentation/widgets/
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/edit_url_dialog.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
-import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page_visibility.dart';
+import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:lensai/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:lensai/presentation/hooks/menu_controller.dart';
 import 'package:lensai/presentation/icons/tor_icons.dart';
@@ -316,9 +316,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
               if (selectedTabId != null)
                 MenuItemButton(
                   onPressed: () {
-                    ref
-                        .read(findInPageVisibilityControllerProvider.notifier)
-                        .show();
+                    ref.read(findInPageControllerProvider.notifier).show();
                   },
                   leadingIcon: const Icon(Icons.search),
                   child: const Text('Find in page'),
