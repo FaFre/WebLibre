@@ -239,7 +239,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                       return math.max(
                         math.min(calculatedCount, filteredTabIds.value.length),
-                        1,
+                        2,
                       );
                     },
                     [
