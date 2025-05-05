@@ -24,4 +24,16 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
             WebExtensionActionType.PAGE -> components.features.webExtensionToolbarFeature.invokeAddonPageAction(extensionId)
         }
     }
+
+    override fun installAddon(url: String, callback: (Result<Unit>) -> Unit) {
+        components.core.addonManager.installAddon(
+            url = url,
+            onSuccess = { _ ->
+                callback(Result.success(Unit))
+            },
+            onError = { e ->
+                callback(Result.failure(e))
+            }
+        )
+    }
 }

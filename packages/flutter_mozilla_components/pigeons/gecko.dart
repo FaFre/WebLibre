@@ -1058,6 +1058,9 @@ abstract class GeckoAddonsApi {
   void startAddonManagerActivity();
 
   void invokeAddonAction(String extensionId, WebExtensionActionType actionType);
+
+  @async
+  void installAddon(String url);
 }
 
 @FlutterApi()

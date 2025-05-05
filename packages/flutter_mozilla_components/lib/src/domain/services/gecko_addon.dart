@@ -39,6 +39,10 @@ class GeckoAddonService extends GeckoAddonEvents {
     return _api.invokeAddonAction(extensionId, actionType);
   }
 
+  Future<void> installAddon(Uri url) {
+    return _api.installAddon(url.toString());
+  }
+
   @override
   void onRemoveWebExtensionAction(
     int timestamp,
