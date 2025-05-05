@@ -1,33 +1,85 @@
 package me.movenext.simple_intent_receiver
 
+import android.content.Context
+import android.content.Intent
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.PluginRegistry
+import me.movenext.simple_intent_receiver.pigeons.Intent as PigeonIntent
 
-/** SimpleIntentReceiverPlugin */
-class SimpleIntentReceiverPlugin: FlutterPlugin, MethodCallHandler {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
-  private lateinit var channel : MethodChannel
+class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.NewIntentListener {
+  private lateinit var context: Context
+  private var intentReceiver: IntentReceiver? = null
+  private var handledInitialIntent = false
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "simple_intent_receiver")
-    channel.setMethodCallHandler(this)
-  }
+    context = flutterPluginBinding.applicationContext
 
-  override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
-    }
+    intentReceiver = IntentReceiver(flutterPluginBinding.binaryMessenger)
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
+    intentReceiver = null
+  }
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    binding.addOnNewIntentListener(this)
+
+    // Process the initial intent if available
+    binding.activity.intent?.let { intent ->
+      if (!handledInitialIntent) {
+        handleIntent(intent)
+        handledInitialIntent = true
+      }
+    }
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+    // No implementation needed
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    binding.addOnNewIntentListener(this)
+  }
+
+  override fun onDetachedFromActivity() {
+    // No implementation needed
+  }
+
+  override fun onNewIntent(intent: Intent): Boolean {
+    return handleIntent(intent)
+  }
+
+  private fun handleIntent(intent: Intent): Boolean {
+    val pigeonIntent = convertToPigeonIntent(intent)
+    intentReceiver?.sendIntent(System.currentTimeMillis(), pigeonIntent)
+    return true
+  }
+
+  private fun convertToPigeonIntent(intent: Intent): PigeonIntent {
+    val action = intent.action
+    val data = intent.dataString
+    val fromPackageName = intent.getPackage()
+
+    // Extract categories
+    val categories = ArrayList<String>()
+    intent.categories?.let {
+      categories.addAll(it)
+    }
+
+    // Extract extras
+    val extras = HashMap<String, Any?>()
+    intent.extras?.keySet()?.forEach { key ->
+      extras[key] = intent.extras?.get(key)
+    }
+
+    return PigeonIntent(
+      fromPackageName = fromPackageName,
+      action = action,
+      data = data,
+      categories = categories,
+      extra = extras
+    )
   }
 }

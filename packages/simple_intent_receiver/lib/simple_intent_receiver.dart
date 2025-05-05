@@ -1,8 +1,2 @@
-
-import 'simple_intent_receiver_platform_interface.dart';
-
-class SimpleIntentReceiver {
-  Future<String?> getPlatformVersion() {
-    return SimpleIntentReceiverPlatform.instance.getPlatformVersion();
-  }
-}
+export 'src/intent_receiver.dart';
+export 'src/pigeons/intent.g.dart' show Intent;
