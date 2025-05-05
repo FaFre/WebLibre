@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:lensai/core/logger.dart';
 import 'package:lensai/data/models/received_intent_parameter.dart';
 import 'package:mime/mime.dart' as mime;
-import 'package:receive_intent/receive_intent.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
 
 part 'sharing_intent.g.dart';
@@ -16,11 +15,11 @@ final _sharingIntentTransformer =
       handleData: (intent, sink) async {
         final data = switch (intent.action) {
           'android.intent.action.WEB_SEARCH' =>
-            intent.extra?['query'] as String?,
+            intent.extra['query'] as String?,
           'android.intent.action.VIEW' => intent.data,
           'android.intent.action.SEND' =>
-            intent.extra?['android.intent.extra.STREAM'] as String? ??
-                intent.extra?['android.intent.extra.TEXT'] as String?,
+            intent.extra['android.intent.extra.STREAM'] as String? ??
+                intent.extra['android.intent.extra.TEXT'] as String?,
           _ => null,
         };
 
@@ -41,11 +40,9 @@ final _sharingIntentTransformer =
       },
     );
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
-  return ConcatStream([
-    // ignore: discarded_futures
-    ReceiveIntent.getInitialIntent().asStream(),
-    ReceiveIntent.receivedIntentStream,
-  ]).whereNotNull().transform(_sharingIntentTransformer);
+  final receiver = IntentReceiver.setUp();
+
+  return receiver.events.transform(_sharingIntentTransformer);
 }

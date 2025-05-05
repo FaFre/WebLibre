@@ -7,12 +7,12 @@ part of 'sharing_intent.dart';
 // **************************************************************************
 
 String _$sharingIntentStreamHash() =>
-    r'caf4ba31e79fd028a2497f6acc6d5a927924ed78';
+    r'486f994fc0e01a2cffdb19d93f0a332f96a9850c';
 
 /// See also [sharingIntentStream].
 @ProviderFor(sharingIntentStream)
 final sharingIntentStreamProvider =
-    AutoDisposeProvider<Raw<Stream<ReceivedIntentParameter>>>.internal(
+    Provider<Raw<Stream<ReceivedIntentParameter>>>.internal(
       sharingIntentStream,
       name: r'sharingIntentStreamProvider',
       debugGetCreateSourceHash:
@@ -26,6 +26,6 @@ final sharingIntentStreamProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SharingIntentStreamRef =
-    AutoDisposeProviderRef<Raw<Stream<ReceivedIntentParameter>>>;
+    ProviderRef<Raw<Stream<ReceivedIntentParameter>>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

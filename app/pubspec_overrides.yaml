@@ -1,7 +1,9 @@
-# melos_managed_dependency_overrides: flutter_mozilla_components,cross_cache,flutter_chat_core,langchain_core,tavily_dart
+# melos_managed_dependency_overrides: flutter_mozilla_components,simple_intent_receiver,cross_cache,flutter_chat_core,langchain_core,tavily_dart
 dependency_overrides:
   flutter_mozilla_components:
     path: ../packages/flutter_mozilla_components
+  simple_intent_receiver:
+    path: ../packages/simple_intent_receiver
   cross_cache:
     path: ../../flutter_chat_ui/packages/cross_cache
   flutter_chat_core:

@@ -64,15 +64,13 @@ dependencies:
   path_provider: ^2.1.5
   pocketbase: ^0.22.0
   provider: ^6.1.5
-  receive_intent:
-    git:
-      url: https://github.com/FaFre/receive_intent.git
-      ref: fix_recreate_activity
   riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
   rss_dart: ^1.0.12
   rxdart: ^0.28.0
   share_plus: ^11.0.0
+  simple_intent_receiver:
+    path: ../packages/simple_intent_receiver
   skeletonizer: ^1.4.3
   sliver_tools: ^0.2.12
   speech_to_text_google_dialog: 
