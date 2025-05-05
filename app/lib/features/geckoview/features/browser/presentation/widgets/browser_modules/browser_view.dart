@@ -35,7 +35,7 @@ class BrowserView extends StatefulHookConsumerWidget {
 
   const BrowserView({
     this.screenshotPeriod = const Duration(seconds: 10),
-    this.suggestionTimeout = const Duration(seconds: 10),
+    this.suggestionTimeout = const Duration(seconds: 30),
     this.postInitializationStep,
   });
 
@@ -215,7 +215,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _timerPaused = false;
         }
 
-        if (_suggestionCountTime == null ||
+        if (_suggestionCountTime != null ||
             DateTime.now().difference(_suggestionCountTime!) >
                 widget.suggestionTimeout) {
           showSuggestNewTabMessage(
@@ -224,9 +224,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
               await const SearchRoute(tabType: TabType.regular).push(context);
             },
           );
-
-          _suggestionCountTime = DateTime.now();
         }
+
+        _suggestionCountTime = null;
     }
   }
 
