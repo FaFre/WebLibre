@@ -6,12 +6,12 @@ part 'find_in_page_state.g.dart';
 @CopyWith()
 class FindInPageState with FastEquatable {
   final bool visible;
-  final String? searchText;
+  final String? lastSearchText;
 
-  FindInPageState({required this.visible, required this.searchText});
+  FindInPageState({required this.visible, required this.lastSearchText});
 
-  FindInPageState.hidden() : visible = false, searchText = null;
+  FindInPageState.hidden() : visible = false, lastSearchText = null;
 
   @override
-  List<Object?> get hashParameters => [visible, searchText];
+  List<Object?> get hashParameters => [visible, lastSearchText];
 }

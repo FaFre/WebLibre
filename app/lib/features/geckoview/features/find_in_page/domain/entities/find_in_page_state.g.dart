@@ -9,7 +9,7 @@ part of 'find_in_page_state.dart';
 abstract class _$FindInPageStateCWProxy {
   FindInPageState visible(bool visible);
 
-  FindInPageState searchText(String? searchText);
+  FindInPageState lastSearchText(String? lastSearchText);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `FindInPageState(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -17,7 +17,7 @@ abstract class _$FindInPageStateCWProxy {
   /// ```dart
   /// FindInPageState(...).copyWith(id: 12, name: "My name")
   /// ````
-  FindInPageState call({bool visible, String? searchText});
+  FindInPageState call({bool visible, String? lastSearchText});
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfFindInPageState.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfFindInPageState.copyWith.fieldName(...)`
@@ -30,8 +30,8 @@ class _$FindInPageStateCWProxyImpl implements _$FindInPageStateCWProxy {
   FindInPageState visible(bool visible) => this(visible: visible);
 
   @override
-  FindInPageState searchText(String? searchText) =>
-      this(searchText: searchText);
+  FindInPageState lastSearchText(String? lastSearchText) =>
+      this(lastSearchText: lastSearchText);
 
   @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `FindInPageState(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -42,7 +42,7 @@ class _$FindInPageStateCWProxyImpl implements _$FindInPageStateCWProxy {
   /// ````
   FindInPageState call({
     Object? visible = const $CopyWithPlaceholder(),
-    Object? searchText = const $CopyWithPlaceholder(),
+    Object? lastSearchText = const $CopyWithPlaceholder(),
   }) {
     return FindInPageState(
       visible:
@@ -50,11 +50,11 @@ class _$FindInPageStateCWProxyImpl implements _$FindInPageStateCWProxy {
               ? _value.visible
               // ignore: cast_nullable_to_non_nullable
               : visible as bool,
-      searchText:
-          searchText == const $CopyWithPlaceholder()
-              ? _value.searchText
+      lastSearchText:
+          lastSearchText == const $CopyWithPlaceholder()
+              ? _value.lastSearchText
               // ignore: cast_nullable_to_non_nullable
-              : searchText as String?,
+              : lastSearchText as String?,
     );
   }
 }

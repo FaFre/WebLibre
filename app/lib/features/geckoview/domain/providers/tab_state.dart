@@ -9,9 +9,11 @@ import 'package:lensai/features/geckoview/domain/entities/states/security.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:lensai/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:lensai/features/geckoview/utils/image_helper.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'tab_state.g.dart';
 
@@ -105,19 +107,24 @@ class TabStates extends _$TabStates {
 
   void _onFindResultsChange(FindResultsEvent event) {
     final FindResultsEvent(:tabId, :results) = event;
+    final current = state[tabId] ?? TabState.$default(tabId);
 
     if (results.isNotEmpty) {
       final result = results.last;
 
-      final current = state[tabId] ?? TabState.$default(tabId);
       state = {...state}
         ..[tabId] = current.copyWith.findResultState(
           FindResultState(
+            lastSearchText: ref.read(findInPageRepositoryProvider(tabId)),
             activeMatchOrdinal: result.activeMatchOrdinal,
             numberOfMatches: result.numberOfMatches,
             isDoneCounting: result.isDoneCounting,
           ),
         );
+    } else if (current.findResultState.hasMatches) {
+      state = {
+        ...state,
+      }..[tabId] = current.copyWith.findResultState(FindResultState.$default());
     }
   }
 
@@ -144,9 +151,11 @@ class TabStates extends _$TabStates {
       eventService.readerableEvents.listen((event) {
         _onReaderableStateChange(event);
       }),
-      eventService.findResultsEvent.listen((event) {
-        _onFindResultsChange(event);
-      }),
+      eventService.findResultsEvent
+          .debounceTime(const Duration(milliseconds: 25))
+          .listen((event) {
+            _onFindResultsChange(event);
+          }),
     ];
 
     ref.listen(fireImmediately: true, engineReadyStateProvider, (

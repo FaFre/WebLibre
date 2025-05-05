@@ -1,8 +1,8 @@
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/features/find_in_page/presentation/domain/entities/find_in_page_state.dart';
+import 'package:lensai/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
+import 'package:lensai/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'find_in_page.g.dart';
@@ -13,24 +13,23 @@ class FindInPageController extends _$FindInPageController {
     state = state.copyWith.visible(true);
   }
 
-  void hide() {
+  Future<void> hide() async {
+    await clearMatches();
     state = FindInPageState.hidden();
   }
 
   Future<void> findAll({required String text}) {
-    final service = GeckoFindInPageService(
-      tabId: ref.read(selectedTabProvider),
-    );
+    final tabId = ref.read(selectedTabProvider);
+    final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
-    state = FindInPageState(visible: true, searchText: text);
+    state = FindInPageState(visible: true, lastSearchText: text);
 
     return service.findAll(text);
   }
 
   Future<void> findNext({bool forward = true}) {
-    final service = GeckoFindInPageService(
-      tabId: ref.read(selectedTabProvider),
-    );
+    final tabId = ref.read(selectedTabProvider);
+    final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
     state = state.copyWith.visible(true);
 
@@ -38,9 +37,8 @@ class FindInPageController extends _$FindInPageController {
   }
 
   Future<void> clearMatches() {
-    final service = GeckoFindInPageService(
-      tabId: ref.read(selectedTabProvider),
-    );
+    final tabId = ref.read(selectedTabProvider);
+    final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
     return service.clearMatches();
   }
@@ -48,15 +46,15 @@ class FindInPageController extends _$FindInPageController {
   @override
   FindInPageState build() {
     ref.listen(selectedTabStateProvider, (previous, next) async {
-      if (state.visible && state.searchText.isNotEmpty) {
-        if (previous != null) {
+      if (state.visible && state.lastSearchText.isNotEmpty) {
+        if (previous != null && next != null) {
           final loadingOrReloading =
-              previous.isLoading == true && next?.isLoading == false;
-          final tabSwitch = previous.id != next?.id;
+              previous.isLoading == true && next.isLoading == false;
+          final tabSwitchWithoutResults =
+              previous.id != next.id && !next.findResultState.hasMatches;
 
-          if (loadingOrReloading || tabSwitch) {
-            await clearMatches();
-            await findAll(text: state.searchText!);
+          if (loadingOrReloading || tabSwitchWithoutResults) {
+            await findAll(text: state.lastSearchText!);
           }
         }
       }

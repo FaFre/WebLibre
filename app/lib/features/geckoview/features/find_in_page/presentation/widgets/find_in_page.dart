@@ -12,14 +12,17 @@ class FindInPageWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final findInPageState = ref.watch(findInPageControllerProvider);
+    final searchResult = ref.watch(
+      selectedTabStateProvider.select((state) => state?.findResultState),
+    );
 
     final textController = useTextEditingController(
-      text: findInPageState.searchText,
-      keys: [findInPageState.searchText],
+      text: searchResult?.lastSearchText ?? findInPageState.lastSearchText,
+      keys: [searchResult?.lastSearchText, findInPageState.lastSearchText],
     );
 
     return Visibility(
-      visible: findInPageState.visible,
+      visible: findInPageState.visible || searchResult?.hasMatches == true,
       child: Padding(
         padding: padding,
         child: Material(
@@ -48,51 +51,35 @@ class FindInPageWidget extends HookConsumerWidget {
                   },
                 ),
               ),
-              HookConsumer(
-                builder: (context, ref, child) {
-                  final searchResult = ref.watch(
-                    selectedTabStateProvider.select(
-                      (state) => state?.findResultState,
-                    ),
-                  );
-
-                  if (searchResult != null) {
-                    if (searchResult.numberOfMatches == 0) {
-                      return const Text('Not found');
-                    }
-
-                    return Text(
-                      '${searchResult.activeMatchOrdinal + 1} of ${searchResult.numberOfMatches}',
-                    );
-                  }
-
-                  return const SizedBox.shrink();
-                },
+              Text(
+                (searchResult != null && searchResult.hasMatches)
+                    ? '${searchResult.activeMatchOrdinal + 1} of ${searchResult.numberOfMatches}'
+                    : 'Not found',
               ),
               IconButton(
                 icon: const Icon(Icons.arrow_upward),
                 onPressed: () async {
-                  await ref
-                      .read(findInPageControllerProvider.notifier)
-                      .findNext(forward: false);
+                  if (searchResult?.hasMatches ?? false) {
+                    await ref
+                        .read(findInPageControllerProvider.notifier)
+                        .findNext(forward: false);
+                  }
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.arrow_downward),
                 onPressed: () async {
-                  await ref
-                      .read(findInPageControllerProvider.notifier)
-                      .findNext();
+                  if (searchResult?.hasMatches ?? false) {
+                    await ref
+                        .read(findInPageControllerProvider.notifier)
+                        .findNext();
+                  }
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: () async {
-                  ref.read(findInPageControllerProvider.notifier).hide();
-
-                  await ref
-                      .read(findInPageControllerProvider.notifier)
-                      .clearMatches();
+                  await ref.read(findInPageControllerProvider.notifier).hide();
                   textController.clear();
                 },
               ),
