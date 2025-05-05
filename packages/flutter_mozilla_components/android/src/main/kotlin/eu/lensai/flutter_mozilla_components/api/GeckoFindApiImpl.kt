@@ -2,6 +2,7 @@ package eu.lensai.flutter_mozilla_components.api
 
 import eu.lensai.flutter_mozilla_components.GlobalComponents
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoFindApi
+import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.concept.engine.EngineSession
@@ -34,7 +35,15 @@ class GeckoFindApiImpl : GeckoFindApi {
     }
 
     override fun clearMatches(tabId: String?) {
-        val engineSession = sessionByTabId(tabId)
+        val loadSessionId = tabId
+            ?: components.core.store.state.selectedTabId
+
+        if (loadSessionId == null) {
+            return
+        }
+
+        val engineSession = sessionByTabId(loadSessionId)
         engineSession?.clearFindMatches()
+        components.core.store.dispatch(ContentAction.ClearFindResultsAction(loadSessionId))
     }
 }

@@ -10,6 +10,7 @@ import eu.lensai.flutter_mozilla_components.ext.resize
 import eu.lensai.flutter_mozilla_components.ext.toWebPBytes
 import eu.lensai.flutter_mozilla_components.pigeons.AudioHitResult
 import eu.lensai.flutter_mozilla_components.pigeons.EmailHitResult
+import eu.lensai.flutter_mozilla_components.pigeons.FindResultState
 import eu.lensai.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.lensai.flutter_mozilla_components.pigeons.GeoHitResult
 import eu.lensai.flutter_mozilla_components.pigeons.ImageHitResult
@@ -105,6 +106,30 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                             is HitResult.UNKNOWN -> UnknownHitResult(result.src)
                             is HitResult.VIDEO -> VideoHitResult(result.src, result.title)
                         }
+                    ) { _ -> }
+                }
+            }
+            is ContentAction.AddFindResultAction -> {
+                runOnUiThread {
+                    flutterEvents.onFindResults(
+                        System.currentTimeMillis(),
+                        action.sessionId,
+                        listOf(
+                            FindResultState(
+                                activeMatchOrdinal = action.findResult.activeMatchOrdinal.toLong(),
+                                numberOfMatches = action.findResult.numberOfMatches.toLong(),
+                                isDoneCounting = action.findResult.isDoneCounting,
+                            )
+                        )
+                    ) { _ -> }
+                }
+            }
+            is ContentAction.ClearFindResultsAction -> {
+                runOnUiThread {
+                    flutterEvents.onFindResults(
+                        System.currentTimeMillis(),
+                        action.sessionId,
+                        listOf()
                     ) { _ -> }
                 }
             }

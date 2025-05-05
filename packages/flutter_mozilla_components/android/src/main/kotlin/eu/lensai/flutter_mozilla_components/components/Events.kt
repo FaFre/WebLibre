@@ -169,25 +169,5 @@ class Events(
                     ) { _ -> }
                 }
         }
-
-        stateFlow.flowScoped { flow ->
-            flow.mapNotNull { state -> state.tabs }
-                .filterChanged {
-                    it.content.findResults
-                }
-                .distinctUntilChanged()
-                .collect { tab ->
-                    tab.content.findResults
-                    flutterEvents.onFindResults(
-                        System.currentTimeMillis(),
-                        tab.id,
-                        tab.content.findResults.map { result -> FindResultState(
-                            activeMatchOrdinal = result.activeMatchOrdinal.toLong(),
-                            numberOfMatches = result.numberOfMatches.toLong(),
-                            isDoneCounting = result.isDoneCounting,
-                        ) }
-                    ) { _ -> }
-                }
-        }
     }
 }
