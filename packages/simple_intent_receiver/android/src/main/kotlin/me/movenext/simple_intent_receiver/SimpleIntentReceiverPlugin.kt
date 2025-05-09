@@ -2,6 +2,8 @@ package me.movenext.simple_intent_receiver
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
+import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -70,8 +72,43 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
 
     // Extract extras
     val extras = HashMap<String, Any?>()
-    intent.extras?.keySet()?.forEach { key ->
-      extras[key] = intent.extras?.get(key)
+    intent.extras?.let { bundle ->
+      for (key in bundle.keySet()) {
+        try {
+          when (val value = bundle.get(key)) {
+            // Handle Bundle objects specially
+            is Bundle -> {
+              // Convert nested Bundle to Map
+              val bundleMap = HashMap<String, Any?>()
+              for (bundleKey in value.keySet()) {
+                val bundleValue = value.get(bundleKey)
+                // Only add primitive types and strings that can be safely serialized
+                if (bundleValue == null || bundleValue is String ||
+                  bundleValue is Boolean || bundleValue is Int ||
+                  bundleValue is Long || bundleValue is Double ||
+                  bundleValue is Float) {
+                  bundleMap[bundleKey] = bundleValue
+                } else {
+                  bundleMap[bundleKey] = bundleValue.toString()
+                }
+              }
+              extras[key] = bundleMap
+            }
+            // Handle other types that Flutter can serialize
+            null, is String, is Boolean, is Int, is Long, is Double, is Float,
+            is ByteArray, is IntArray, is LongArray, is DoubleArray, is FloatArray -> {
+              extras[key] = value
+            }
+            // For any other types, convert to string
+            else -> {
+              extras[key] = value.toString()
+            }
+          }
+        } catch (e: Exception) {
+          Log.w("SimpleIntentReceiver", "Could not extract extra with key: $key", e)
+          extras["${key}_error"] = e.message ?: "Unknown error"
+        }
+      }
     }
 
     return PigeonIntent(
