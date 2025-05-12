@@ -1,6 +1,8 @@
 package eu.lensai.flutter_mozilla_components
 
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -17,6 +19,7 @@ import eu.lensai.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.lensai.flutter_mozilla_components.ext.getPreferenceKey
 import eu.lensai.flutter_mozilla_components.pip.PictureInPictureIntegration
 import eu.lensai.flutter_mozilla_components.services.DownloadService
+import io.flutter.Log
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
@@ -294,28 +297,50 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         )
     }
 
+    private fun restartApp(context: Context) {
+        val packageManager = context.packageManager
+        val intent = packageManager.getLaunchIntentForPackage(context.packageName)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+
+        if (context is Activity) {
+            context.finish()
+        }
+
+        Runtime.getRuntime().exit(0)
+    }
+
+    private fun createAndSetupEngine() {
+        try {
+            // Set layout parameters
+            val layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+
+            val engineView = createEngine(components)
+            val originalContext = ActivityContextWrapper.getOriginalContext(requireActivity())
+            val engineNativeView = engineView.asView()
+            engineNativeView.layoutParams = layoutParams
+
+            engineView.setActivityContext(originalContext)
+
+            binding.swipeToRefresh.addView(engineNativeView)
+
+            components.engineView = engineView
+        } catch (e: Exception) {
+            Log.e("EngineCreation", "Failed to create engine: ${e.message}", e)
+            context?.let { restartApp(it) }
+        }
+    }
+
     @CallSuper
     @Suppress("LongMethod")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentBrowserBinding.inflate(inflater, container, false)
 
-        // Set layout parameters
-        val layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        )
-
-        val originalContext = ActivityContextWrapper.getOriginalContext(requireActivity())
-
-        val engineView = createEngine(components)
-        components.engineView = engineView
-
-        val engineNativeView = engineView.asView()
-        engineNativeView.layoutParams = layoutParams
-
-        engineView.setActivityContext(originalContext)
-
-        binding.swipeToRefresh.addView(engineNativeView)
+        createAndSetupEngine()
 
         return binding.root
     }

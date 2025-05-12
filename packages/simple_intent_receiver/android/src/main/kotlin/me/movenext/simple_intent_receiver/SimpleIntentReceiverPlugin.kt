@@ -1,5 +1,6 @@
 package me.movenext.simple_intent_receiver
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -14,10 +15,10 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
   private lateinit var context: Context
   private var intentReceiver: IntentReceiver? = null
   private var handledInitialIntent = false
+  private var activity: Activity? = null
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     context = flutterPluginBinding.applicationContext
-
     intentReceiver = IntentReceiver(flutterPluginBinding.binaryMessenger)
   }
 
@@ -26,6 +27,7 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    activity = binding.activity
     binding.addOnNewIntentListener(this)
 
     // Process the initial intent if available
@@ -38,22 +40,31 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
-    // No implementation needed
+    activity = null
   }
 
   override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    activity = binding.activity
     binding.addOnNewIntentListener(this)
   }
 
   override fun onDetachedFromActivity() {
-    // No implementation needed
+    activity = null
   }
 
   override fun onNewIntent(intent: Intent): Boolean {
+    // Update the activity's intent to ensure proper state
+    activity?.setIntent(intent)
     return handleIntent(intent)
   }
 
   private fun handleIntent(intent: Intent): Boolean {
+    // Check if this intent is coming from a different task
+    if (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0) {
+      // Clear any existing tasks with this activity
+      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    }
+
     val pigeonIntent = convertToPigeonIntent(intent)
     intentReceiver?.sendIntent(System.currentTimeMillis(), pigeonIntent)
     return true

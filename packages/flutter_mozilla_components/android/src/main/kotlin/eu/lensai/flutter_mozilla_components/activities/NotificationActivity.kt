@@ -16,4 +16,9 @@ class NotificationActivity: AppCompatActivity() {
 
         finish()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        components.notificationsDelegate.unBindActivity(this)
+    }
 }
