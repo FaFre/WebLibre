@@ -8,6 +8,7 @@ import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 import 'package:lensai/presentation/widgets/url_icon.dart';
+import 'package:nullability/nullability.dart';
 
 class SearchField extends HookConsumerWidget {
   final TextEditingController textEditingController;
@@ -42,16 +43,27 @@ class SearchField extends HookConsumerWidget {
     );
 
     final suggestion = useState<String?>(null);
+    final lastText = useRef<String>(textEditingController.text);
 
     if (showSuggestions) {
       useListenableCallback(textEditingController, () async {
         if (textEditingController.text.isNotEmpty) {
-          final result = await ref
-              .read(engineSuggestionsProvider.notifier)
-              .getAutocompleteSuggestion(textEditingController.text);
+          if (suggestion.value.isNotEmpty &&
+              lastText.value.length > 1 &&
+              textEditingController.text ==
+                  lastText.value.substring(0, lastText.value.length - 1)) {
+            suggestion.value = null;
+            textEditingController.text = lastText.value;
+          } else if (textEditingController.text != lastText.value) {
+            final result = await ref
+                .read(engineSuggestionsProvider.notifier)
+                .getAutocompleteSuggestion(textEditingController.text);
 
-          suggestion.value = result;
+            suggestion.value = result;
+          }
         }
+
+        lastText.value = textEditingController.text;
       });
     }
 

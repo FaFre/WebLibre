@@ -8,6 +8,7 @@ import 'package:lensai/features/geckoview/features/search/domain/providers/engin
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:lensai/utils/uri_parser.dart' as uri_parser;
+import 'package:nullability/nullability.dart';
 
 class AddressWithSuggestionsField extends HookConsumerWidget {
   const AddressWithSuggestionsField({
@@ -27,15 +28,26 @@ class AddressWithSuggestionsField extends HookConsumerWidget {
     final addressTextFocusNode = useFocusNode();
 
     final suggestion = useState<String?>(null);
+    final lastText = useRef<String>(addressTextController.text);
 
     useListenableCallback(addressTextController, () async {
       if (addressTextController.text.isNotEmpty) {
-        final result = await ref
-            .read(engineSuggestionsProvider.notifier)
-            .getAutocompleteSuggestion(addressTextController.text);
+        if (suggestion.value.isNotEmpty &&
+            lastText.value.length > 1 &&
+            addressTextController.text ==
+                lastText.value.substring(0, lastText.value.length - 1)) {
+          suggestion.value = null;
+          addressTextController.text = lastText.value;
+        } else if (addressTextController.text != lastText.value) {
+          final result = await ref
+              .read(engineSuggestionsProvider.notifier)
+              .getAutocompleteSuggestion(addressTextController.text);
 
-        suggestion.value = result;
+          suggestion.value = result;
+        }
       }
+
+      lastText.value = addressTextController.text;
     });
 
     return AutoSuggestTextField(
