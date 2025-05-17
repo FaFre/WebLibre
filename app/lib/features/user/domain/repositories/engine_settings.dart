@@ -82,6 +82,10 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
                   DriftSqlType.string,
                   db.typeMapping,
                 ),
+            'userAgent': settings['userAgent']?.readAs(
+              DriftSqlType.string,
+              db.typeMapping,
+            ),
           });
         });
 

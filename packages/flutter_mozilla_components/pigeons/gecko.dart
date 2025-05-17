@@ -549,6 +549,7 @@ class GeckoEngineSettings {
   final bool? cookieBannerHandlingGlobalRules;
   final bool? cookieBannerHandlingGlobalRulesSubFrames;
   final WebContentIsolationStrategy? webContentIsolationStrategy;
+  final String? userAgent;
 
   GeckoEngineSettings(
     this.javascriptEnabled,
@@ -561,6 +562,7 @@ class GeckoEngineSettings {
     this.cookieBannerHandlingGlobalRules,
     this.cookieBannerHandlingGlobalRulesSubFrames,
     this.webContentIsolationStrategy,
+    this.userAgent,
   );
 }
 

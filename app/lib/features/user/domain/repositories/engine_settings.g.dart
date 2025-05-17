@@ -7,7 +7,7 @@ part of 'engine_settings.dart';
 // **************************************************************************
 
 String _$engineSettingsRepositoryHash() =>
-    r'bd255f91f7cee702d9cfcb10bfdf3cd013234901';
+    r'87e308c8bd4390d1d5c401532a0c35cd96f6176e';
 
 /// See also [EngineSettingsRepository].
 @ProviderFor(EngineSettingsRepository)

@@ -1790,6 +1790,7 @@ class GeckoEngineSettings {
     this.cookieBannerHandlingGlobalRules,
     this.cookieBannerHandlingGlobalRulesSubFrames,
     this.webContentIsolationStrategy,
+    this.userAgent,
   });
 
   bool? javascriptEnabled;
@@ -1812,6 +1813,8 @@ class GeckoEngineSettings {
 
   WebContentIsolationStrategy? webContentIsolationStrategy;
 
+  String? userAgent;
+
   List<Object?> _toList() {
     return <Object?>[
       javascriptEnabled,
@@ -1824,6 +1827,7 @@ class GeckoEngineSettings {
       cookieBannerHandlingGlobalRules,
       cookieBannerHandlingGlobalRulesSubFrames,
       webContentIsolationStrategy,
+      userAgent,
     ];
   }
 
@@ -1843,6 +1847,7 @@ class GeckoEngineSettings {
       cookieBannerHandlingGlobalRules: result[7] as bool?,
       cookieBannerHandlingGlobalRulesSubFrames: result[8] as bool?,
       webContentIsolationStrategy: result[9] as WebContentIsolationStrategy?,
+      userAgent: result[10] as String?,
     );
   }
 

@@ -46,6 +46,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.cookieBannerHandlingGlobalRules,
     required super.cookieBannerHandlingGlobalRulesSubFrames,
     required super.webContentIsolationStrategy,
+    required super.userAgent,
   });
 
   EngineSettings.withDefaults({
@@ -59,6 +60,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bool? cookieBannerHandlingGlobalRules,
     bool? cookieBannerHandlingGlobalRulesSubFrames,
     WebContentIsolationStrategy? webContentIsolationStrategy,
+    super.userAgent,
   }) : super(
          javascriptEnabled: javascriptEnabled ?? true,
          trackingProtectionPolicy:
@@ -97,5 +99,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.cookieBannerHandlingGlobalRules,
     super.cookieBannerHandlingGlobalRulesSubFrames,
     super.webContentIsolationStrategy,
+    super.userAgent,
   ];
 }

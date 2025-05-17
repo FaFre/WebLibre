@@ -1451,7 +1451,8 @@ data class GeckoEngineSettings (
   val cookieBannerHandlingModePrivateBrowsing: CookieBannerHandlingMode? = null,
   val cookieBannerHandlingGlobalRules: Boolean? = null,
   val cookieBannerHandlingGlobalRulesSubFrames: Boolean? = null,
-  val webContentIsolationStrategy: WebContentIsolationStrategy? = null
+  val webContentIsolationStrategy: WebContentIsolationStrategy? = null,
+  val userAgent: String? = null
 )
  {
   companion object {
@@ -1466,7 +1467,8 @@ data class GeckoEngineSettings (
       val cookieBannerHandlingGlobalRules = pigeonVar_list[7] as Boolean?
       val cookieBannerHandlingGlobalRulesSubFrames = pigeonVar_list[8] as Boolean?
       val webContentIsolationStrategy = pigeonVar_list[9] as WebContentIsolationStrategy?
-      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy)
+      val userAgent = pigeonVar_list[10] as String?
+      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent)
     }
   }
   fun toList(): List<Any?> {
@@ -1481,6 +1483,7 @@ data class GeckoEngineSettings (
       cookieBannerHandlingGlobalRules,
       cookieBannerHandlingGlobalRulesSubFrames,
       webContentIsolationStrategy,
+      userAgent,
     )
   }
   override fun equals(other: Any?): Boolean {

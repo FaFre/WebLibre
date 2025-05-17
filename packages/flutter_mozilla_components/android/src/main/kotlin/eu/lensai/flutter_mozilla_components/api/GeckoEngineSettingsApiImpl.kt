@@ -103,6 +103,9 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
                 WebContentIsolationStrategy.ISOLATE_HIGH_VALUE -> mozilla.components.concept.engine.fission.WebContentIsolationStrategy.ISOLATE_HIGH_VALUE
             }
         }
+        if(settings.userAgent != null) {
+            components.core.engineSettings.userAgentString = settings.userAgent;
+        }
     }
 
     override fun updateRuntimeSettings(settings: GeckoEngineSettings) {
@@ -148,6 +151,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         }
         if(settings.webContentIsolationStrategy != null) {
             components.core.engine.settings.webContentIsolationStrategy = components.core.engineSettings.webContentIsolationStrategy
+        }
+        if(settings.userAgent != null) {
+            components.core.engine.settings.userAgentString = components.core.engineSettings.userAgentString
+            reloadSession = true
         }
 
         if(reloadSession) {

@@ -1,7 +1,9 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
@@ -10,6 +12,7 @@ import 'package:lensai/features/user/data/models/engine_settings.dart';
 import 'package:lensai/features/user/data/models/general_settings.dart';
 import 'package:lensai/features/user/domain/repositories/engine_settings.dart';
 import 'package:lensai/features/user/domain/repositories/general_settings.dart';
+import 'package:universal_io/io.dart';
 
 class WebEngineSettingsScreen extends HookConsumerWidget {
   const WebEngineSettingsScreen();
@@ -18,6 +21,11 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final generalSettings = ref.watch(generalSettingsRepositoryProvider);
     final engineSettings = ref.watch(engineSettingsRepositoryProvider);
+
+    final userAgentTextController = useTextEditingController(
+      text: engineSettings.userAgent,
+      keys: [engineSettings.userAgent],
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Web Engine Settings')),
@@ -295,6 +303,56 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                       },
                     ),
                   ],
+                ),
+              ),
+              ListTile(
+                leading: const Icon(MdiIcons.cardAccountDetails),
+                title: TextField(
+                  controller: userAgentTextController,
+                  decoration: const InputDecoration(
+                    labelText: 'Custom User Agent',
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    hintText: 'Mozilla/5.0 …',
+                  ),
+                  onSubmitted: (value) async {
+                    await ref
+                        .read(saveEngineSettingsControllerProvider.notifier)
+                        .save(
+                          (currentSettings) =>
+                              currentSettings.copyWith.userAgent(value),
+                        );
+
+                    if (context.mounted) {
+                      final restart = await showDialog<bool>(
+                        context: context,
+                        builder:
+                            (context) => AlertDialog(
+                              title: const Text('User Agent Changed'),
+                              content: const Text(
+                                'The app needs to restart for the new user agent to take effect',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    context.pop(false);
+                                  },
+                                  child: const Text('Later'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    context.pop(true);
+                                  },
+                                  child: const Text('Restart Now'),
+                                ),
+                              ],
+                            ),
+                      );
+
+                      if (restart == true) {
+                        exit(0);
+                      }
+                    }
+                  },
                 ),
               ),
               ListTile(

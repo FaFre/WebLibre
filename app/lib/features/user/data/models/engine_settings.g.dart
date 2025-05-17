@@ -39,6 +39,8 @@ abstract class _$EngineSettingsCWProxy {
     WebContentIsolationStrategy? webContentIsolationStrategy,
   );
 
+  EngineSettings userAgent(String? userAgent);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -56,6 +58,7 @@ abstract class _$EngineSettingsCWProxy {
     bool? cookieBannerHandlingGlobalRules,
     bool? cookieBannerHandlingGlobalRulesSubFrames,
     WebContentIsolationStrategy? webContentIsolationStrategy,
+    String? userAgent,
   });
 }
 
@@ -119,6 +122,9 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   ) => this(webContentIsolationStrategy: webContentIsolationStrategy);
 
   @override
+  EngineSettings userAgent(String? userAgent) => this(userAgent: userAgent);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -138,6 +144,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? cookieBannerHandlingGlobalRulesSubFrames =
         const $CopyWithPlaceholder(),
     Object? webContentIsolationStrategy = const $CopyWithPlaceholder(),
+    Object? userAgent = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled:
@@ -193,6 +200,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
               ? _value.webContentIsolationStrategy
               // ignore: cast_nullable_to_non_nullable
               : webContentIsolationStrategy as WebContentIsolationStrategy?,
+      userAgent:
+          userAgent == const $CopyWithPlaceholder()
+              ? _value.userAgent
+              // ignore: cast_nullable_to_non_nullable
+              : userAgent as String?,
     );
   }
 }
@@ -239,11 +251,13 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
         _$WebContentIsolationStrategyEnumMap,
         json['webContentIsolationStrategy'],
       ),
+      userAgent: json['userAgent'] as String?,
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
   EngineSettings instance,
 ) => <String, dynamic>{
+  'userAgent': instance.userAgent,
   'javascriptEnabled': instance.javascriptEnabled,
   'trackingProtectionPolicy':
       _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,
