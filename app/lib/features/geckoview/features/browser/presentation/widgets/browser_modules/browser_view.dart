@@ -215,7 +215,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _timerPaused = false;
         }
 
-        if (_suggestionCountTime != null ||
+        if (_suggestionCountTime != null &&
             DateTime.now().difference(_suggestionCountTime!) >
                 widget.suggestionTimeout) {
           showSuggestNewTabMessage(
