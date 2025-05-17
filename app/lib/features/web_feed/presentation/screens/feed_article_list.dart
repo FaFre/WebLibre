@@ -2,7 +2,6 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/domain/providers.dart';
 import 'package:lensai/features/web_feed/domain/providers/article_filter.dart';
 import 'package:lensai/features/web_feed/presentation/controllers/fetch_articles.dart';
@@ -10,6 +9,7 @@ import 'package:lensai/features/web_feed/presentation/widgets/feed_article_card.
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
+import 'package:nullability/nullability.dart';
 
 class FeedArticleListScreen extends HookConsumerWidget {
   final Uri? feedId;

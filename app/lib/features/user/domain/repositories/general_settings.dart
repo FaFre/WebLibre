@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/user/data/models/general_settings.dart';
 import 'package:lensai/features/user/data/providers.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'general_settings.g.dart';

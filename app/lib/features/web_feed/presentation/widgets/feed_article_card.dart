@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/extensions/uri.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
@@ -14,6 +13,7 @@ import 'package:lensai/features/web_feed/extensions/feed_article.dart';
 import 'package:lensai/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:lensai/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
 import 'package:lensai/presentation/widgets/url_icon.dart';
+import 'package:nullability/nullability.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class FeedArticleCard extends HookConsumerWidget {

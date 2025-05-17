@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ShareLink extends HookConsumerWidget {

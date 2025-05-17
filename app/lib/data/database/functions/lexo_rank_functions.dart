@@ -1,6 +1,6 @@
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:lexo_rank/lexo_rank/lexo_rank_bucket.dart';
+import 'package:nullability/nullability.dart';
 import 'package:sqlite3/common.dart';
 
 String _nextRankOrMiddle(List<Object?> args) {

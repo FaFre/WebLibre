@@ -5,7 +5,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/providers/format.dart';
 import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/web_feed/data/models/feed_link.dart';
 import 'package:lensai/features/web_feed/domain/providers.dart';
@@ -16,6 +15,7 @@ import 'package:lensai/features/web_feed/presentation/widgets/tags_horizontal_li
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:lensai/utils/markdown/image_extractor.dart';
 import 'package:lensai/utils/ui_helper.dart';
+import 'package:nullability/nullability.dart';
 
 enum _Pages { summary, content }
 

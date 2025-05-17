@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/web_extension.dart';
+import 'package:nullability/nullability.dart';
 
 class ExtensionBadgeIcon extends StatelessWidget {
   final WebExtensionState state;

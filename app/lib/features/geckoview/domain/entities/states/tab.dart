@@ -2,12 +2,12 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/data/models/web_page_info.dart';
 import 'package:lensai/domain/entities/equatable_image.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/history.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/security.dart';
+import 'package:nullability/nullability.dart';
 
 part 'tab.g.dart';
 

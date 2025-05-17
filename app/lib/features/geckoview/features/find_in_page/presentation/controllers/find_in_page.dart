@@ -1,8 +1,8 @@
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
 import 'package:lensai/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:lensai/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'find_in_page.g.dart';

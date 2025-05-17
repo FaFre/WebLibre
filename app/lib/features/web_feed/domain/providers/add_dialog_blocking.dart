@@ -1,5 +1,5 @@
 import 'package:lensai/core/logger.dart';
-import 'package:lensai/extensions/nullable.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'add_dialog_blocking.g.dart';

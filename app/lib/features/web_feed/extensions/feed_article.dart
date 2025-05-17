@@ -1,7 +1,7 @@
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/models/feed_link.dart';
 import 'package:lensai/features/web_feed/extensions/atom.dart';
+import 'package:nullability/nullability.dart';
 
 extension FeedArticleX on FeedArticle {
   String get displayTitle =>

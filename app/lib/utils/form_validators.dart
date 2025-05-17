@@ -1,5 +1,5 @@
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/utils/uri_parser.dart' as uri_parser;
+import 'package:nullability/nullability.dart';
 
 String? validateUrl(
   String? value, {

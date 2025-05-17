@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:lensai/data/models/received_intent_parameter.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/app_widget/domain/services/home_widget.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
 import 'package:lensai/features/share_intent/domain/services/sharing_intent.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 

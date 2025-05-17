@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/domain/providers.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
+import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class SelectFeedDialog extends HookConsumerWidget {

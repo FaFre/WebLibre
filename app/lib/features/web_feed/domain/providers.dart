@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/database/database.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/models/feed_parse_result.dart';
@@ -8,6 +7,7 @@ import 'package:lensai/features/web_feed/data/providers.dart';
 import 'package:lensai/features/web_feed/domain/providers/article_filter.dart';
 import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dart';
 import 'package:lensai/features/web_feed/domain/services/feed_reader.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';

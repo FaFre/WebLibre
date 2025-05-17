@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/logger.dart';
 import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/browser_extension.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
@@ -27,6 +26,7 @@ import 'package:lensai/features/web_feed/domain/providers/add_dialog_blocking.da
 import 'package:lensai/features/web_feed/domain/services/article_content_processor.dart';
 import 'package:lensai/presentation/hooks/on_initialization.dart';
 import 'package:lensai/utils/ui_helper.dart';
+import 'package:nullability/nullability.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;

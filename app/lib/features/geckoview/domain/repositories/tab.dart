@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:lensai/core/logger.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
 import 'package:lensai/features/geckoview/domain/providers.dart';
@@ -19,6 +18,7 @@ import 'package:lensai/features/geckoview/features/tabs/domain/repositories/cont
 import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:lensai/features/share_intent/domain/entities/shared_content.dart';
 import 'package:lensai/utils/debouncer.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'tab.g.dart';

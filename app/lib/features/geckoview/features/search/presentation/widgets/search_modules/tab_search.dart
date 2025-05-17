@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
 import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
@@ -15,6 +14,7 @@ import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_
 import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/url_icon.dart';
+import 'package:nullability/nullability.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class TabSearch extends HookConsumerWidget {

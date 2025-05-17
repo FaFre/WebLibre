@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/history.dart';
 import 'package:lensai/features/geckoview/domain/entities/states/readerable.dart';
@@ -11,6 +10,7 @@ import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:lensai/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:lensai/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:lensai/features/geckoview/utils/image_helper.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';

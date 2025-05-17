@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/data/models/web_page_info.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/presentation/controllers/website_title.dart';
 import 'package:lensai/presentation/widgets/rounded_text.dart';
+import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class WebsiteFeedTile extends HookConsumerWidget {

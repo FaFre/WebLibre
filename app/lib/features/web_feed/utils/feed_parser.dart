@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/database/database.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article.dart';
 import 'package:lensai/features/web_feed/data/models/feed_author.dart';
 import 'package:lensai/features/web_feed/data/models/feed_link.dart';
 import 'package:lensai/features/web_feed/extensions/atom.dart';
 import 'package:lensai/features/web_feed/extensions/rss.dart';
+import 'package:nullability/nullability.dart';
 import 'package:rss_dart/dart_rss.dart';
 import 'package:rss_dart/domain/rss1_feed.dart';
 

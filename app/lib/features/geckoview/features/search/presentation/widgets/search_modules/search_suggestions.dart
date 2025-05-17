@@ -3,7 +3,6 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
@@ -11,6 +10,7 @@ import 'package:lensai/features/geckoview/features/browser/domain/providers.dart
 import 'package:lensai/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:lensai/features/geckoview/features/search/presentation/widgets/bang_chips.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
+import 'package:nullability/nullability.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class SearchTermSuggestions extends HookConsumerWidget {

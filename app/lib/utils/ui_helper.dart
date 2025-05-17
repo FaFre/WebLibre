@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lensai/extensions/nullable.dart';
+import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void showErrorMessage(BuildContext context, String message) {

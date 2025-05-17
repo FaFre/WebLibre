@@ -1,5 +1,5 @@
-import 'package:lensai/extensions/nullable.dart';
 import 'package:markdown/markdown.dart';
+import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
 
 List<Uri> extractImagesFromMarkdown(String markdownText) {

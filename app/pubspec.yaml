@@ -59,6 +59,7 @@ dependencies:
   logger: ^2.5.0
   markdown: ^7.3.0
   mime: ^2.0.0
+  nullability: ^1.0.0
   package_info_plus: ^8.3.0
   path: ^1.9.1
   path_provider: ^2.1.5

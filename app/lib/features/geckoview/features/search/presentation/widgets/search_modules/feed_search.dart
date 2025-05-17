@@ -4,7 +4,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/providers/format.dart';
 import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/extensions/uri.dart';
 import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
 import 'package:lensai/features/web_feed/data/models/feed_link.dart';
@@ -14,6 +13,7 @@ import 'package:lensai/features/web_feed/extensions/feed_article.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:lensai/presentation/widgets/url_icon.dart';
+import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 

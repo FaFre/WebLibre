@@ -1,7 +1,7 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/models/feed_category.dart';
+import 'package:nullability/nullability.dart';
 
 class TagsHorizontalList extends StatelessWidget {
   late final List<Widget> _tags;

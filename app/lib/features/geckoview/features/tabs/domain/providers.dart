@@ -1,8 +1,8 @@
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:lensai/features/search/util/tokenized_filter.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

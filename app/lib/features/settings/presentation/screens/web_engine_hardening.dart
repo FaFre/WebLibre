@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:lensai/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 import 'package:lensai/features/settings/presentation/widgets/hardening_group_icon.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
+import 'package:nullability/nullability.dart';
 
 class WebEngineHardeningScreen extends HookConsumerWidget {
   const WebEngineHardeningScreen();

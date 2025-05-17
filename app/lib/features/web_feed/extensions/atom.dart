@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
-import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/web_feed/data/models/feed_author.dart';
 import 'package:lensai/features/web_feed/data/models/feed_category.dart';
 import 'package:lensai/features/web_feed/data/models/feed_link.dart';
+import 'package:nullability/nullability.dart';
 import 'package:rss_dart/dart_rss.dart';
 
 extension ParseAtomLink on List<AtomLink> {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:lensai/extensions/nullable.dart';
+import 'package:nullability/nullability.dart';
 
 class AutoSuggestTextField extends HookWidget {
   final TextEditingController controller;
