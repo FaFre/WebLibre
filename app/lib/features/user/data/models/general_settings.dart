@@ -24,20 +24,28 @@ enum DeleteBrowsingDataType {
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
   final bool enableReadability;
+  final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
+  final String defaultSearchProvider;
 
   GeneralSettings({
     required this.themeMode,
     required this.enableReadability,
+    required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
+    required this.defaultSearchProvider,
   });
 
   GeneralSettings.withDefaults({
     ThemeMode? themeMode,
     bool? enableReadability,
+    bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
+    String? defaultSearchProvider,
   }) : themeMode = themeMode ?? ThemeMode.dark,
-       enableReadability = enableReadability ?? true;
+       enableReadability = enableReadability ?? true,
+       enforceReadability = enforceReadability ?? false,
+       defaultSearchProvider = defaultSearchProvider ?? 'lais';
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -48,6 +56,8 @@ class GeneralSettings with FastEquatable {
   List<Object?> get hashParameters => [
     themeMode,
     enableReadability,
+    enforceReadability,
     deleteBrowsingDataOnQuit,
+    defaultSearchProvider,
   ];
 }

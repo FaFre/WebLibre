@@ -32,9 +32,17 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'enforceReadability': settings['enforceReadability']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
       'deleteBrowsingDataOnQuit': settings['deleteBrowsingDataOnQuit']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
+      'defaultSearchProvider': settings['defaultSearchProvider']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 

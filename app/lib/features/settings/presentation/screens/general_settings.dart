@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/features/settings/presentation/controllers/save_settings.dart';
 import 'package:lensai/features/settings/presentation/widgets/custom_list_tile.dart';
+import 'package:lensai/features/settings/presentation/widgets/default_search_selector.dart';
 import 'package:lensai/features/user/data/models/general_settings.dart';
 import 'package:lensai/features/user/domain/providers.dart';
 import 'package:lensai/features/user/domain/repositories/cache.dart';
@@ -74,6 +75,24 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Text('Default Search Provider'),
+                      leading: Icon(MdiIcons.cloudSearch),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 40),
+                      child: DefaultSearchSelector(),
+                    ),
+                  ],
+                ),
+              ),
               SwitchListTile.adaptive(
                 title: const Text('Enable Reader Mode'),
                 subtitle: const Text(
@@ -89,6 +108,29 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                             currentSettings.copyWith.enableReadability(value),
                       );
                 },
+              ),
+              SwitchListTile.adaptive(
+                title: const Text('Enforce Reader Mode'),
+                subtitle: const Text(
+                  'Override readability probability of websites and always show Reader Mode capabilities even the site might not be compatible.',
+                ),
+                secondary: const Icon(MdiIcons.bookCheck),
+                value:
+                    generalSettings.enableReadability &&
+                    generalSettings.enforceReadability,
+                onChanged:
+                    generalSettings.enableReadability
+                        ? (value) async {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .enforceReadability(value),
+                              );
+                        }
+                        : null,
               ),
               Consumer(
                 builder: (context, ref, child) {

@@ -3,6 +3,7 @@ import 'package:lensai/features/bangs/data/models/bang_group.dart';
 import 'package:lensai/features/bangs/data/models/search_history_entry.dart';
 import 'package:lensai/features/bangs/domain/repositories/data.dart';
 import 'package:lensai/features/bangs/domain/repositories/sync.dart';
+import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,9 +11,14 @@ part 'bangs.g.dart';
 
 @Riverpod(keepAlive: true)
 Stream<BangData?> defaultSearchBangData(Ref ref) {
+  final trigger = ref.watch(
+    generalSettingsRepositoryProvider.select(
+      (value) => value.defaultSearchProvider,
+    ),
+  );
+
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  //TODO: Setting
-  return repository.watchBang('lai');
+  return repository.watchBang(trigger);
 }
 
 @Riverpod()

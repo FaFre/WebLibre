@@ -11,9 +11,13 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings enableReadability(bool enableReadability);
 
+  GeneralSettings enforceReadability(bool enforceReadability);
+
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   );
+
+  GeneralSettings defaultSearchProvider(String defaultSearchProvider);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -24,7 +28,9 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings call({
     ThemeMode themeMode,
     bool enableReadability,
+    bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
+    String defaultSearchProvider,
   });
 }
 
@@ -42,9 +48,17 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(enableReadability: enableReadability);
 
   @override
+  GeneralSettings enforceReadability(bool enforceReadability) =>
+      this(enforceReadability: enforceReadability);
+
+  @override
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   ) => this(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
+
+  @override
+  GeneralSettings defaultSearchProvider(String defaultSearchProvider) =>
+      this(defaultSearchProvider: defaultSearchProvider);
 
   @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -56,7 +70,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings call({
     Object? themeMode = const $CopyWithPlaceholder(),
     Object? enableReadability = const $CopyWithPlaceholder(),
+    Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
+    Object? defaultSearchProvider = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode:
@@ -69,11 +85,21 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
               ? _value.enableReadability
               // ignore: cast_nullable_to_non_nullable
               : enableReadability as bool,
+      enforceReadability:
+          enforceReadability == const $CopyWithPlaceholder()
+              ? _value.enforceReadability
+              // ignore: cast_nullable_to_non_nullable
+              : enforceReadability as bool,
       deleteBrowsingDataOnQuit:
           deleteBrowsingDataOnQuit == const $CopyWithPlaceholder()
               ? _value.deleteBrowsingDataOnQuit
               // ignore: cast_nullable_to_non_nullable
               : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
+      defaultSearchProvider:
+          defaultSearchProvider == const $CopyWithPlaceholder()
+              ? _value.defaultSearchProvider
+              // ignore: cast_nullable_to_non_nullable
+              : defaultSearchProvider as String,
     );
   }
 }
@@ -92,20 +118,24 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
     GeneralSettings.withDefaults(
       themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
       enableReadability: json['enableReadability'] as bool?,
+      enforceReadability: json['enforceReadability'] as bool?,
       deleteBrowsingDataOnQuit:
           (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
               .toSet(),
+      defaultSearchProvider: json['defaultSearchProvider'] as String?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
     <String, dynamic>{
       'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
       'enableReadability': instance.enableReadability,
+      'enforceReadability': instance.enforceReadability,
       'deleteBrowsingDataOnQuit':
           instance.deleteBrowsingDataOnQuit
               ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
               .toList(),
+      'defaultSearchProvider': instance.defaultSearchProvider,
     };
 
 const _$ThemeModeEnumMap = {

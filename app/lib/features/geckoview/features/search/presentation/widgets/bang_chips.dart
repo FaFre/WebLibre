@@ -4,6 +4,7 @@ import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/extensions/nullable.dart';
 import 'package:lensai/features/bangs/data/models/bang_data.dart';
 import 'package:lensai/features/bangs/domain/providers/search.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/presentation/hooks/listenable_callback.dart';
 import 'package:lensai/presentation/widgets/selectable_chips.dart';
 import 'package:lensai/presentation/widgets/url_icon.dart';
@@ -98,12 +99,18 @@ class BangChips extends HookConsumerWidget {
                   onPressed: () async {
                     final searchText = searchTextController?.text.trim();
 
-                    await BangSearchRoute(
+                    final trigger = await BangSearchRoute(
                       searchText:
                           (searchText.isEmpty)
                               ? BangSearchRoute.emptySearchText
                               : searchText!,
-                    ).push(context);
+                    ).push<String?>(context);
+
+                    if (trigger != null) {
+                      ref
+                          .read(selectedBangTriggerProvider().notifier)
+                          .setTrigger(trigger);
+                    }
                   },
                   icon: const Icon(Icons.chevron_right),
                 ),

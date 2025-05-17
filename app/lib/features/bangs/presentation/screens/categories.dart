@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lensai/core/routing/routes.dart';
 import 'package:lensai/features/bangs/domain/providers/bangs.dart';
+import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
 import 'package:lensai/presentation/widgets/failure_widget.dart';
 
 class BangCategoriesScreen extends HookConsumerWidget {
@@ -18,7 +19,15 @@ class BangCategoriesScreen extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              await const BangSearchRoute().push(context);
+              final trigger = await const BangSearchRoute().push<String?>(
+                context,
+              );
+
+              if (trigger != null) {
+                ref
+                    .read(selectedBangTriggerProvider().notifier)
+                    .setTrigger(trigger);
+              }
             },
             icon: const Icon(Icons.search),
           ),

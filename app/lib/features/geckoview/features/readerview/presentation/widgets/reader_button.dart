@@ -20,6 +20,12 @@ class ReaderButton extends HookConsumerWidget {
       ),
     );
 
+    final enforceReadability = ref.watch(
+      generalSettingsRepositoryProvider.select(
+        (value) => value.enforceReadability,
+      ),
+    );
+
     final readerabilityState = ref.watch(
       selectedTabStateProvider.select(
         (state) => state?.readerableState ?? ReaderableState.$default(),
@@ -39,29 +45,27 @@ class ReaderButton extends HookConsumerWidget {
 
     return Visibility(
       visible:
-          readerabilityState.readerable &&
-          (enableReadability || readerabilityState.active),
+          (readerabilityState.readerable &&
+              (enableReadability || readerabilityState.active)) ||
+          (enforceReadability && enableReadability),
       child: readerChanging.when(
         skipLoadingOnReload: true,
         data:
-            (_) => Visibility(
-              visible: readerabilityState.readerable,
-              child: InkWell(
-                onTap:
-                    readerChanging.isLoading
-                        ? null
-                        : () async {
-                          await ref
-                              .read(readerableScreenControllerProvider.notifier)
-                              .toggleReaderView(!readerabilityState.active);
-                        },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 15.0,
-                    horizontal: 8.0,
-                  ),
-                  child: icon,
+            (_) => InkWell(
+              onTap:
+                  readerChanging.isLoading
+                      ? null
+                      : () async {
+                        await ref
+                            .read(readerableScreenControllerProvider.notifier)
+                            .toggleReaderView(!readerabilityState.active);
+                      },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 15.0,
+                  horizontal: 8.0,
                 ),
+                child: icon,
               ),
             ),
         error: (error, stackTrace) => SizedBox.shrink(),
