@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 
 class ContainerMetadataConverter
     implements TypeConverter<ContainerMetadata, String> {

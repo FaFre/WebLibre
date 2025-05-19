@@ -729,9 +729,9 @@ class ShareInternetResourceState {
     dartOut: 'lib/src/pigeons/gecko.g.dart',
     dartOptions: DartOptions(),
     kotlinOut:
-        'android/src/main/kotlin/eu/lensai/flutter_mozilla_components/pigeons/Gecko.g.kt',
+        'android/src/main/kotlin/eu/weblibre/flutter_mozilla_components/pigeons/Gecko.g.kt',
     kotlinOptions: KotlinOptions(
-      package: 'eu.lensai.flutter_mozilla_components.pigeons',
+      package: 'eu.weblibre.flutter_mozilla_components.pigeons',
     ),
     dartPackageName: 'flutter_mozilla_components',
   ),

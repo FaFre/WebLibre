@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:exceptions/exceptions.dart';
-import 'package:lensai/core/providers/format.dart';
-import 'package:lensai/features/about/data/repositories/package_info_repository.dart';
-import 'package:lensai/features/bangs/data/models/bang_group.dart';
-import 'package:lensai/features/bangs/domain/repositories/sync.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/providers/format.dart';
+import 'package:weblibre/features/about/data/repositories/package_info_repository.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
 
 part 'app_initialization.g.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/geckoview/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/readerview/domain/providers/readerable.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/readerview/domain/providers/readerable.dart';
 
 part 'readerable.g.dart';
 

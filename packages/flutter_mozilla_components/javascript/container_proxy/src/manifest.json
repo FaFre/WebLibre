@@ -5,7 +5,7 @@
   "description": "Container Proxy",
   "browser_specific_settings": {
     "gecko": {
-      "id": "container-proxy@lensai.eu"
+      "id": "container-proxy@weblibre.eu"
     }
   },
   "permissions": [

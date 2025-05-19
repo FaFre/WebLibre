@@ -21,9 +21,9 @@ class Intent {
     dartOut: 'lib/src/pigeons/intent.g.dart',
     dartOptions: DartOptions(),
     kotlinOut:
-        'android/src/main/kotlin/me/movenext/simple_intent_receiver/pigeons/Intent.g.kt',
+        'android/src/main/kotlin/eu/weblibre/simple_intent_receiver/pigeons/Intent.g.kt',
     kotlinOptions: KotlinOptions(
-      package: 'me.movenext.simple_intent_receiver.pigeons',
+      package: 'eu.weblibre.simple_intent_receiver.pigeons',
     ),
     dartPackageName: 'simple_intent_receiver',
   ),

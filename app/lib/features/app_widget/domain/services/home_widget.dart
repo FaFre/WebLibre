@@ -1,8 +1,8 @@
 import 'package:home_widget/home_widget.dart';
-import 'package:lensai/data/models/received_intent_parameter.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/data/models/received_intent_parameter.dart';
 
 part 'home_widget.g.dart';
 

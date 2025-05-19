@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lensai/features/geckoview/domain/controllers/overlay.dart';
-import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
-import 'package:lensai/features/tor/presentation/widgets/tor_dialog.dart';
-import 'package:lensai/features/tor/presentation/widgets/tor_notification.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
+import 'package:weblibre/features/tor/presentation/widgets/tor_notification.dart';
 
 part 'start_tor_proxy.g.dart';
 

@@ -1,4 +1,4 @@
-package me.movenext.bang_navigator
+package eu.weblibre.browser
 
 import android.app.ActivityManager
 import android.app.Application

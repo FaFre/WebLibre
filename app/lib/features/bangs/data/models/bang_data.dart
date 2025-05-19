@@ -1,6 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:lensai/features/bangs/data/models/bang.dart';
-import 'package:lensai/features/geckoview/domain/entities/browser_icon.dart';
+import 'package:weblibre/features/bangs/data/models/bang.dart';
+import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 
 part 'bang_data.g.dart';
 

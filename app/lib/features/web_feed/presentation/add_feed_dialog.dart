@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/web_feed/domain/providers/add_dialog_blocking.dart';
-import 'package:lensai/utils/form_validators.dart';
-import 'package:lensai/utils/uri_parser.dart' as uri_parser;
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
+import 'package:weblibre/utils/form_validators.dart';
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class AddFeedDialog extends HookConsumerWidget {
   final Uri? initialUri;

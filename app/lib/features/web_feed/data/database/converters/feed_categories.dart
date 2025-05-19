@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/web_feed/data/models/feed_category.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
 
 class FeedCategoriesConverter
     extends TypeConverter<List<FeedCategory>, String> {

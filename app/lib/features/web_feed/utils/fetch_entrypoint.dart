@@ -1,8 +1,8 @@
 import 'package:background_fetch/background_fetch.dart';
-import 'package:lensai/core/error_observer.dart';
-import 'package:lensai/core/logger.dart';
-import 'package:lensai/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:weblibre/core/error_observer.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 
 @pragma('vm:entry-point')
 Future<void> backgroundFetch(HeadlessTask task) async {

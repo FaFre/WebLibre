@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:lensai/core/logger.dart';
-import 'package:lensai/data/models/received_intent_parameter.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/data/models/received_intent_parameter.dart';
 
 part 'sharing_intent.g.dart';
 

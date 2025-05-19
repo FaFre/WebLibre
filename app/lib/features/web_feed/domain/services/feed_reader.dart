@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:lensai/features/web_feed/data/models/feed_parse_result.dart';
-import 'package:lensai/features/web_feed/utils/feed_parser.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_parse_result.dart';
+import 'package:weblibre/features/web_feed/utils/feed_parser.dart';
 
 part 'feed_reader.g.dart';
 

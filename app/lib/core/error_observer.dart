@@ -1,5 +1,5 @@
-import 'package:lensai/core/logger.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 
 class ErrorObserver extends ProviderObserver {
   const ErrorObserver();

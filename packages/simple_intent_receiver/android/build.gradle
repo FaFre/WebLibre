@@ -1,4 +1,4 @@
-group = "me.movenext.simple_intent_receiver"
+group = "eu.weblibre.simple_intent_receiver"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -25,7 +25,7 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    namespace = "me.movenext.simple_intent_receiver"
+    namespace = "eu.weblibre.simple_intent_receiver"
 
     compileSdk = 35
 

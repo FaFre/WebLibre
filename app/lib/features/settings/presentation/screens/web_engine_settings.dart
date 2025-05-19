@@ -5,14 +5,14 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/settings/presentation/controllers/save_settings.dart';
-import 'package:lensai/features/user/data/models/engine_settings.dart';
-import 'package:lensai/features/user/data/models/general_settings.dart';
-import 'package:lensai/features/user/domain/repositories/engine_settings.dart';
-import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:nullability/nullability.dart';
 import 'package:universal_io/io.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 class WebEngineSettingsScreen extends HookConsumerWidget {
   const WebEngineSettingsScreen();

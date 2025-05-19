@@ -3,8 +3,8 @@ import 'dart:ui';
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/domain/entities/equatable_image.dart';
-import 'package:lensai/features/geckoview/utils/image_helper.dart';
+import 'package:weblibre/domain/entities/equatable_image.dart';
+import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 
 class BrowserIcon with FastEquatable {
   final EquatableImage image;

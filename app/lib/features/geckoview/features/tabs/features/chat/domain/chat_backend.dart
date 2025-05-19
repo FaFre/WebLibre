@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:exceptions/exceptions.dart';
-import 'package:lensai/features/chat/features/chat_store/data/models/chat_metadata.dart';
-import 'package:lensai/features/chat/features/chat_store/data/models/message_types.dart';
-import 'package:lensai/features/chat/features/chat_store/domain/providers.dart';
-import 'package:lensai/features/chat/features/chat_store/domain/repositories/chat_message.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/chat/services/qa_memory_chain.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/domain/repositories/document.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/models/chat_metadata.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/models/message_types.dart';
+import 'package:weblibre/features/chat/features/chat_store/domain/providers.dart';
+import 'package:weblibre/features/chat/features/chat_store/domain/repositories/chat_message.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/chat/services/qa_memory_chain.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/domain/repositories/document.dart';
 
 part 'chat_backend.g.dart';
 

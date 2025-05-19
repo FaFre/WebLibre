@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/controllers/overlay.dart';
-import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
-import 'package:lensai/presentation/icons/tor_icons.dart';
-import 'package:lensai/presentation/widgets/animate_gradient_shader.dart';
+import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/presentation/icons/tor_icons.dart';
+import 'package:weblibre/presentation/widgets/animate_gradient_shader.dart';
 
 class TorNotification extends HookConsumerWidget {
   @override

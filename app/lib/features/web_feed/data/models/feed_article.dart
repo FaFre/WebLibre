@@ -2,10 +2,10 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:drift/drift.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:lensai/features/web_feed/data/database/database.dart';
-import 'package:lensai/features/web_feed/data/models/feed_author.dart';
-import 'package:lensai/features/web_feed/data/models/feed_category.dart';
-import 'package:lensai/features/web_feed/data/models/feed_link.dart';
+import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_author.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 
 part 'feed_article.g.dart';
 

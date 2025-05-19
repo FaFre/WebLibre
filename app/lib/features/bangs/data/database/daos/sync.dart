@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/features/bangs/data/database/database.dart';
-import 'package:lensai/features/bangs/data/models/bang.dart';
-import 'package:lensai/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/database/database.dart';
+import 'package:weblibre/features/bangs/data/models/bang.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
 part 'sync.g.dart';
 

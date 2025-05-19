@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:langchain/langchain.dart';
-import 'package:lensai/core/uuid.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/utils/document_uuid.dart';
+import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/utils/document_uuid.dart';
 
 typedef DocumentParts = ({String mainDocumentId, List<Document> parts});
 

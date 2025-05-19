@@ -1,8 +1,8 @@
-import 'package:lensai/data/database/converters/color.dart';
-import 'package:lensai/data/database/converters/uri.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
+import 'package:weblibre/data/database/converters/color.dart';
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
 
 CREATE TABLE container (
   id TEXT PRIMARY KEY NOT NULL,

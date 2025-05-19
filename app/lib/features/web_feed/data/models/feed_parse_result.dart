@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:lensai/features/web_feed/data/database/converters/feed_data.dart';
-import 'package:lensai/features/web_feed/data/database/database.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_data.dart';
+import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
 
 part 'feed_parse_result.g.dart';
 

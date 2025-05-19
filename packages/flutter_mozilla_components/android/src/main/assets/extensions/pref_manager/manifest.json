@@ -5,7 +5,7 @@
   "description": "Manipulate GeckoView preferences",
   "browser_specific_settings": {
     "gecko": {
-      "id": "pref-manager@movenext.me"
+      "id": "pref-manager@weblibre.eu"
     }
   },
   "background": {

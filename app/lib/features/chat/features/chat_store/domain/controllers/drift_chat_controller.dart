@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
-import 'package:lensai/features/chat/features/chat_store/data/database/daos/messages.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/database/daos/messages.dart';
 
 class DriftChatController implements ChatController {
   final MessagesDao _dao;

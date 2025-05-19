@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 
 class ContainerListTile extends HookWidget {
   final ContainerData container;

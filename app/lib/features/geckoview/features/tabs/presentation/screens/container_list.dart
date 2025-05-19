@@ -2,15 +2,15 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/core/uuid.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
-import 'package:lensai/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
+import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
   const ContainerListScreen();

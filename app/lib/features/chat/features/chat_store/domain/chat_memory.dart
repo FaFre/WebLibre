@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:langchain/langchain.dart';
-import 'package:lensai/features/chat/features/chat_store/data/models/message_types.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/models/message_types.dart';
 
 class ChatMemory implements BaseMemory {
   final ChatController _controller;

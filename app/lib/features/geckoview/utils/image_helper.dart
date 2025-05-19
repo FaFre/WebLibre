@@ -2,8 +2,8 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:fast_equatable/hash.dart';
-import 'package:lensai/domain/entities/equatable_image.dart';
-import 'package:lensai/utils/lru_cache.dart';
+import 'package:weblibre/domain/entities/equatable_image.dart';
+import 'package:weblibre/utils/lru_cache.dart';
 
 final _cache = LRUCache<int, EquatableImage>(100);
 

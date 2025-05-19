@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/features/user/data/database/daos/cache.dart';
-import 'package:lensai/features/user/data/database/daos/setting.dart';
+import 'package:weblibre/features/user/data/database/daos/cache.dart';
+import 'package:weblibre/features/user/data/database/daos/setting.dart';
 
 part 'database.g.dart';
 

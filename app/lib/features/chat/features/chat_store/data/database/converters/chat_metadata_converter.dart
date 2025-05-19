@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/chat/features/chat_store/data/models/chat_metadata.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/models/chat_metadata.dart';
 
 class ChatMetadataConverter extends TypeConverter<ChatMetadata, String> {
   const ChatMetadataConverter();

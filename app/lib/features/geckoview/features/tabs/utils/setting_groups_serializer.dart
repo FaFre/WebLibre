@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_dynamic_calls wo know what we do
 
-import 'package:lensai/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
 
 enum PreferencePartition {
   user('user'),

@@ -1,9 +1,9 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
 
 part 'engine_suggestions.g.dart';
 

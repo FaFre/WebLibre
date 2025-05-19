@@ -1,16 +1,16 @@
 import 'package:drift/drift.dart';
 import 'package:flutter/widgets.dart' show Color;
-import 'package:lensai/data/database/converters/color.dart';
-import 'package:lensai/data/database/converters/uri.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/database/daos/container.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/database/daos/tab.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/database/daos/vector.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/database/migrator.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
-import 'package:lensai/features/search/domain/fts_tokenizer.dart';
+import 'package:weblibre/data/database/converters/color.dart';
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/database/daos/vector.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/database/migrator.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
+import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
 part 'database.g.dart';
 

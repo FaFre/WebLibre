@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:lensai/utils/sampled_value_notifier.dart';
+import 'package:weblibre/utils/sampled_value_notifier.dart';
 
 /// A custom hook that creates a sampled ValueNotifier from another ValueNotifier
 ValueNotifier<T> useSampledValueNotifier<T>({

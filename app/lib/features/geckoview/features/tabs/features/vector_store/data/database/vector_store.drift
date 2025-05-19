@@ -1,4 +1,4 @@
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
 
 CREATE TABLE document(
   document_id TEXT NOT NULL PRIMARY KEY,

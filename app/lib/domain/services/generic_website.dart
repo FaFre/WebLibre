@@ -7,15 +7,15 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
-import 'package:lensai/core/http_error_handler.dart';
-import 'package:lensai/data/models/web_page_info.dart';
-import 'package:lensai/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:lensai/features/user/domain/repositories/cache.dart';
-import 'package:lensai/features/web_feed/utils/feed_finder.dart';
-import 'package:lensai/presentation/controllers/website_title.dart';
-import 'package:lensai/utils/lru_cache.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/http_error_handler.dart';
+import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
+import 'package:weblibre/features/user/domain/repositories/cache.dart';
+import 'package:weblibre/features/web_feed/utils/feed_finder.dart';
+import 'package:weblibre/presentation/controllers/website_title.dart';
+import 'package:weblibre/utils/lru_cache.dart';
 
 part 'generic_website.g.dart';
 

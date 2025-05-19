@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/web_feed/domain/providers.dart';
-import 'package:lensai/features/web_feed/presentation/controllers/fetch_articles.dart';
-import 'package:lensai/features/web_feed/presentation/widgets/feed_card.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/web_feed/domain/providers.dart';
+import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
+import 'package:weblibre/features/web_feed/presentation/widgets/feed_card.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class FeedListScreen extends HookConsumerWidget {
   const FeedListScreen();

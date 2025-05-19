@@ -1,7 +1,7 @@
-import 'package:lensai/features/web_feed/data/models/feed_category.dart';
 import 'package:nullability/nullability.dart';
 import 'package:rss_dart/dart_rss.dart';
 import 'package:rss_dart/domain/dublin_core/dublin_core.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
 
 extension ParseDublinCategory on DublinCore {
   List<FeedCategory> toFeedCategories() {

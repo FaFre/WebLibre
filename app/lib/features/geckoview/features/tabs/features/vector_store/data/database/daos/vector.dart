@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:langchain/langchain.dart' as langchain;
-import 'package:lensai/core/uuid.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/utils/hash.dart';
-import 'package:lensai/utils/langchain_utils.dart';
+import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/utils/hash.dart';
+import 'package:weblibre/utils/langchain_utils.dart';
 
 part 'vector.g.dart';
 

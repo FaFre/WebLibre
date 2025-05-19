@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
-import 'package:lensai/presentation/widgets/url_icon.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class BangDetails extends HookConsumerWidget {
   final BangData bangData;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/data/models/web_page_info.dart';
-import 'package:lensai/presentation/controllers/website_title.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/presentation/controllers/website_title.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class WebsiteTitleTile extends HookConsumerWidget {
   final Uri url;

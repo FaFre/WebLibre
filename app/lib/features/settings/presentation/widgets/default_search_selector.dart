@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/domain/providers/bangs.dart';
-import 'package:lensai/features/settings/presentation/controllers/save_settings.dart';
-import 'package:lensai/features/user/data/models/general_settings.dart';
-import 'package:lensai/presentation/widgets/selectable_chips.dart';
-import 'package:lensai/presentation/widgets/url_icon.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/presentation/widgets/selectable_chips.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class DefaultSearchSelector extends HookConsumerWidget {
   const DefaultSearchSelector();

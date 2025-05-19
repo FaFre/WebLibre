@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:exceptions/exceptions.dart';
 import 'package:http/http.dart' as http;
-import 'package:lensai/core/http_error_handler.dart';
-import 'package:lensai/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/http_error_handler.dart';
+import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'kagi.g.dart';
 

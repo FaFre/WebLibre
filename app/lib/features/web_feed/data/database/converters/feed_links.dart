@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/web_feed/data/models/feed_link.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 
 class FeedLinksConverter extends TypeConverter<List<FeedLink>, String> {
   const FeedLinksConverter();

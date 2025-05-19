@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/core/logger.dart';
-import 'package:lensai/core/providers/router.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/domain/providers/bangs.dart';
-import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
-import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/router.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 
 part 'providers.g.dart';
 

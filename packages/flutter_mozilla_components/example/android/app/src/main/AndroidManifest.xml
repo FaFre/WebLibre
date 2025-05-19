@@ -41,7 +41,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
-        <activity android:name="eu.lensai.flutter_mozilla_components.activities.NotificationActivity" android:theme="@style/Theme.AppCompat.Translucent" />
+        <activity android:name="eu.weblibre.flutter_mozilla_components.activities.NotificationActivity" android:theme="@style/Theme.AppCompat.Translucent" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -68,45 +68,45 @@
 
         <activity
             android:theme="@style/Theme.AppCompat.Light"
-            android:name="eu.lensai.flutter_mozilla_components.addons.AddonsActivity"
+            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonsActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
         <activity
             android:theme="@style/Theme.AppCompat.Light"
-            android:name="eu.lensai.flutter_mozilla_components.addons.AddonDetailsActivity"
+            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonDetailsActivity"
             android:exported="false"
             android:label="@string/mozac_feature_addons_addons" />
 
-        <activity android:name="eu.lensai.flutter_mozilla_components.addons.InstalledAddonDetailsActivity"
+        <activity android:name="eu.weblibre.flutter_mozilla_components.addons.InstalledAddonDetailsActivity"
             android:label="@string/mozac_feature_addons_addons"
-            android:parentActivityName="eu.lensai.flutter_mozilla_components.addons.AddonsActivity"
+            android:parentActivityName="eu.weblibre.flutter_mozilla_components.addons.AddonsActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light" />
 
         <activity
-            android:name="eu.lensai.flutter_mozilla_components.addons.PermissionsDetailsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light" />
-
-        <activity
-            android:name="eu.lensai.flutter_mozilla_components.addons.AddonSettingsActivity"
+            android:name="eu.weblibre.flutter_mozilla_components.addons.PermissionsDetailsActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light" />
 
         <activity
-            android:name="eu.lensai.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
+            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonSettingsActivity"
+            android:label="@string/mozac_feature_addons_addons"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light" />
+
+        <activity
+            android:name="eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:theme="@style/Theme.AppCompat.Light"/>
 
         <service
-            android:name="eu.lensai.flutter_mozilla_components.services.DownloadService"
+            android:name="eu.weblibre.flutter_mozilla_components.services.DownloadService"
             android:foregroundServiceType="dataSync" />
 
-        <service android:name="eu.lensai.flutter_mozilla_components.services.MediaSessionService"
+        <service android:name="eu.weblibre.flutter_mozilla_components.services.MediaSessionService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
 

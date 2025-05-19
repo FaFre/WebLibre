@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:lensai/core/logger.dart';
-import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
 
 part 'browser_addon.g.dart';
 

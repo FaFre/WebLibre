@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
-import 'package:lensai/features/search/domain/entities/abstract/i_query_builder.dart';
-import 'package:lensai/features/search/domain/entities/bareword.dart';
-import 'package:lensai/features/search/domain/unix_tokenizer.dart';
+import 'package:weblibre/features/search/domain/entities/abstract/i_query_builder.dart';
+import 'package:weblibre/features/search/domain/entities/bareword.dart';
+import 'package:weblibre/features/search/domain/unix_tokenizer.dart';
 
 typedef _Phrase = List<Bareword>;
 

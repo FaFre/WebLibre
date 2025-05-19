@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/user/domain/repositories/engine_settings.dart';
-import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'engine_settings_replication.g.dart';
 

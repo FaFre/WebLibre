@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:lensai/core/uuid.dart';
 import 'package:uuid/data.dart';
 import 'package:uuid/parsing.dart';
 import 'package:uuid/rng.dart';
+import 'package:weblibre/core/uuid.dart';
 
 final _rng = CryptoRNG();
 

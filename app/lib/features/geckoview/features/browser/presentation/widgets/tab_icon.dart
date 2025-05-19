@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/domain/services/generic_website.dart';
-import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
-import 'package:lensai/presentation/hooks/cached_future.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/domain/services/generic_website.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class TabIcon extends HookConsumerWidget {
   final TabState state;

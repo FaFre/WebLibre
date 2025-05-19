@@ -1,11 +1,11 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/bangs/data/models/bang_group.dart';
-import 'package:lensai/features/bangs/domain/repositories/data.dart';
-import 'package:lensai/features/settings/presentation/widgets/bang_group_list_tile.dart';
-import 'package:lensai/features/settings/presentation/widgets/custom_list_tile.dart';
-import 'package:lensai/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/domain/repositories/data.dart';
+import 'package:weblibre/features/settings/presentation/widgets/bang_group_list_tile.dart';
+import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
+import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 
 class BangSettingsScreen extends HookConsumerWidget {
   const BangSettingsScreen({super.key});
@@ -51,7 +51,7 @@ class BangSettingsScreen extends HookConsumerWidget {
               ),
               const BangGroupListTile(
                 group: BangGroup.custom,
-                title: 'Lensai Bangs',
+                title: 'WebLibre Bangs',
                 subtitle: 'Automatically syncs every 7 days',
               ),
             ],

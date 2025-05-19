@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 
 class FindInPageWidget extends HookConsumerWidget {
   final EdgeInsetsGeometry padding;

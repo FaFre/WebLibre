@@ -1,7 +1,7 @@
-import 'package:lensai/features/web_feed/data/database/database.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article.dart';
-import 'package:lensai/features/web_feed/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
+import 'package:weblibre/features/web_feed/data/providers.dart';
 
 part 'feed_repository.g.dart';
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/domain/services/generic_website.dart';
-import 'package:lensai/presentation/hooks/cached_future.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/domain/services/generic_website.dart';
+import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class UrlIcon extends HookConsumerWidget {
   final double iconSize;

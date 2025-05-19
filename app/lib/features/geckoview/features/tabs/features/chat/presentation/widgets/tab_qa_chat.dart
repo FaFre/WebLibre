@@ -4,12 +4,12 @@ import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/chat/features/chat_store/data/models/message_types.dart';
-import 'package:lensai/features/chat/features/chat_store/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/chat/domain/chat_backend.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/chat/presentation/widgets/chat_text_message.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/chat/presentation/widgets/qa_chat_input.dart';
-import 'package:lensai/presentation/hooks/on_initialization.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/models/message_types.dart';
+import 'package:weblibre/features/chat/features/chat_store/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/chat/domain/chat_backend.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/chat/presentation/widgets/chat_text_message.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/chat/presentation/widgets/qa_chat_input.dart';
+import 'package:weblibre/presentation/hooks/on_initialization.dart';
 
 class TabQaChat extends HookConsumerWidget {
   final String chatId;

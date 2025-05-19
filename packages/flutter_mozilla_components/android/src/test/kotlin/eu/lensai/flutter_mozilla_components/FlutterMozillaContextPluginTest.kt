@@ -1,4 +1,4 @@
-package eu.lensai.flutter_mozilla_components
+package eu.weblibre.flutter_mozilla_components
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

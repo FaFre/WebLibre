@@ -1,15 +1,15 @@
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/domain/repositories/data.dart';
-import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
-import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
-import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/features/search/domain/entities/tab_preview.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/domain/repositories/data.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 
 part 'providers.g.dart';
 

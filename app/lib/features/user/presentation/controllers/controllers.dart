@@ -1,5 +1,5 @@
-import 'package:lensai/features/user/domain/repositories/auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/domain/repositories/auth.dart';
 
 part 'controllers.g.dart';
 

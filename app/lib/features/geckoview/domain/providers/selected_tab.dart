@@ -1,6 +1,6 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/geckoview/domain/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
 
 part 'selected_tab.g.dart';
 

@@ -1,16 +1,16 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/data/database/converters/uri.dart';
-import 'package:lensai/features/search/domain/fts_tokenizer.dart';
-import 'package:lensai/features/web_feed/data/database/converters/feed_authors.dart';
-import 'package:lensai/features/web_feed/data/database/converters/feed_categories.dart';
-import 'package:lensai/features/web_feed/data/database/converters/feed_links.dart';
-import 'package:lensai/features/web_feed/data/database/daos/article.dart';
-import 'package:lensai/features/web_feed/data/database/daos/feed.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
-import 'package:lensai/features/web_feed/data/models/feed_author.dart';
-import 'package:lensai/features/web_feed/data/models/feed_category.dart';
-import 'package:lensai/features/web_feed/data/models/feed_link.dart';
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_authors.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_categories.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_links.dart';
+import 'package:weblibre/features/web_feed/data/database/daos/article.dart';
+import 'package:weblibre/features/web_feed/data/database/daos/feed.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article_query_result.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_author.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 
 part 'database.g.dart';
 

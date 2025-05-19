@@ -1,4 +1,4 @@
-package me.movenext.bang_navigator
+package eu.weblibre.browser
 
 import android.content.Context
 import android.os.Bundle
@@ -8,7 +8,7 @@ import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterFragmentActivity() {
-    private val CHANNEL = "me.movenext.flutter_mozilla_components/trim_memory"
+    private val CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
     private lateinit var channel: MethodChannel
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

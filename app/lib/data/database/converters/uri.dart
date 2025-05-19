@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/utils/uri_parser.dart' as uri_parser;
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class UriConverter extends TypeConverter<Uri, String> {
   const UriConverter();

@@ -1,11 +1,11 @@
 import 'package:drift/isolate.dart';
 import 'package:exceptions/exceptions.dart';
-import 'package:lensai/features/bangs/data/database/database.dart';
-import 'package:lensai/features/bangs/data/models/bang_group.dart';
-import 'package:lensai/features/bangs/data/providers.dart';
-import 'package:lensai/features/bangs/data/services/data_source.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/bangs/data/database/database.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/providers.dart';
+import 'package:weblibre/features/bangs/data/services/data_source.dart';
 
 part 'sync.g.dart';
 

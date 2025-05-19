@@ -1,8 +1,8 @@
-import 'package:lensai/features/geckoview/features/search/domain/repositories/search_suggestions.dart';
-import 'package:lensai/features/search/domain/autosuggest/kagi.dart';
-import 'package:lensai/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/repositories/search_suggestions.dart';
+import 'package:weblibre/features/search/domain/autosuggest/kagi.dart';
+import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'search_suggestions.g.dart';
 

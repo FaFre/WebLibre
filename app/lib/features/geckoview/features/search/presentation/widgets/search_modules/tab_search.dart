@@ -4,18 +4,18 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
-import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:lensai/presentation/widgets/url_icon.dart';
 import 'package:nullability/nullability.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class TabSearch extends HookConsumerWidget {
   static const _matchPrefix = '***';

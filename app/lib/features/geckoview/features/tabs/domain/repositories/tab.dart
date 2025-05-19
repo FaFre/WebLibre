@@ -1,6 +1,6 @@
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 
 part 'tab.g.dart';
 

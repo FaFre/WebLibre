@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/about/data/repositories/package_info_repository.dart';
+import 'package:weblibre/features/about/data/repositories/package_info_repository.dart';
 
 class AboutDialogScreen extends HookConsumerWidget {
   const AboutDialogScreen();

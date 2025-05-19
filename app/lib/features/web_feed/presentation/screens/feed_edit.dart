@@ -4,17 +4,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/extensions/uri.dart';
-import 'package:lensai/features/web_feed/data/database/database.dart';
-import 'package:lensai/features/web_feed/data/models/feed_category.dart';
-import 'package:lensai/features/web_feed/domain/providers.dart';
-import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dart';
-import 'package:lensai/features/web_feed/presentation/widgets/tag_field.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
-import 'package:lensai/presentation/widgets/url_icon.dart';
-import 'package:lensai/utils/form_validators.dart';
-import 'package:lensai/utils/uri_parser.dart' as uri_parser;
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/extensions/uri.dart';
+import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
+import 'package:weblibre/features/web_feed/domain/providers.dart';
+import 'package:weblibre/features/web_feed/domain/repositories/feed_repository.dart';
+import 'package:weblibre/features/web_feed/presentation/widgets/tag_field.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/form_validators.dart';
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 enum _DialogMode { create, edit }
 

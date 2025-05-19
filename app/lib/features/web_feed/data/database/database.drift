@@ -1,9 +1,9 @@
-import 'package:lensai/data/database/converters/uri.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
-import 'package:lensai/features/web_feed/data/database/converters/feed_authors.dart';
-import 'package:lensai/features/web_feed/data/database/converters/feed_categories.dart';
-import 'package:lensai/features/web_feed/data/database/converters/feed_links.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article.dart';
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article_query_result.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_authors.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_categories.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_links.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
 
 CREATE TABLE feed (
   url TEXT PRIMARY KEY NOT NULL MAPPED BY `const UriConverter()`,

@@ -4,11 +4,11 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/geckoview/features/preferences/data/models/preference_setting.dart';
-import 'package:lensai/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 
 part 'preference_settings.g.dart';
 

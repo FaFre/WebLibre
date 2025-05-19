@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/data/providers.dart';
-import 'package:lensai/features/bangs/domain/providers/bangs.dart';
-import 'package:lensai/features/bangs/domain/repositories/data.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/providers.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 
 part 'search.g.dart';
 

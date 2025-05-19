@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:lensai/features/user/domain/providers.dart';
-import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:lensai/presentation/widgets/auto_suggest_text_field.dart';
-import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
-import 'package:lensai/presentation/widgets/url_icon.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
+import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class SearchField extends HookConsumerWidget {
   final TextEditingController textEditingController;

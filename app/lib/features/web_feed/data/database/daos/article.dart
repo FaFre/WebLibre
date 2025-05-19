@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/features/web_feed/data/database/database.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article_query_result.dart';
+import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article_query_result.dart';
 
 part 'article.g.dart';
 

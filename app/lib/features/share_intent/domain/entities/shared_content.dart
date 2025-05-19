@@ -1,5 +1,5 @@
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:lensai/utils/uri_parser.dart' as uri_parser;
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 sealed class SharedContent with FastEquatable {
   SharedContent();

@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/data/database/extensions/database_table_size.dart';
-import 'package:lensai/features/user/data/database/database.dart';
+import 'package:weblibre/data/database/extensions/database_table_size.dart';
+import 'package:weblibre/features/user/data/database/database.dart';
 
 part 'cache.g.dart';
 

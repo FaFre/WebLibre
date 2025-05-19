@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/database/database.dart';
 
 part 'feed.g.dart';
 

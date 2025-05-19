@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
-import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:text_scroll/text_scroll.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 
 class AppBarTitle extends StatelessWidget {
   final TabState tab;

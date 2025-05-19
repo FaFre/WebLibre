@@ -1,5 +1,5 @@
-import 'package:lensai/data/models/drag_data.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/data/models/drag_data.dart';
 
 part 'global_drop.g.dart';
 

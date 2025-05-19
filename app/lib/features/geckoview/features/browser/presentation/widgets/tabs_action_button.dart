@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/providers/tab_list.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 
 class TabsActionButton extends HookConsumerWidget {
   final bool isActive;

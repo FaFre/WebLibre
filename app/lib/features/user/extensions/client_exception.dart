@@ -1,5 +1,5 @@
-import 'package:lensai/extensions/string.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:weblibre/extensions/string.dart';
 
 extension ClientExceptionExtension on ClientException {
   String get errorMessage {

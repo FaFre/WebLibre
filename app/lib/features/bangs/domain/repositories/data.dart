@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/data/models/bang_group.dart';
-import 'package:lensai/features/bangs/data/models/search_history_entry.dart';
-import 'package:lensai/features/bangs/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
+import 'package:weblibre/features/bangs/data/providers.dart';
 
 part 'data.g.dart';
 

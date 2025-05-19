@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/domain/providers/bangs.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_details.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/providers.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangListScreen extends HookConsumerWidget {
   final String? category;

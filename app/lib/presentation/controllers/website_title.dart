@@ -1,7 +1,7 @@
-import 'package:lensai/data/models/web_page_info.dart';
-import 'package:lensai/domain/services/generic_website.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/domain/services/generic_website.dart';
 
 part 'website_title.g.dart';
 

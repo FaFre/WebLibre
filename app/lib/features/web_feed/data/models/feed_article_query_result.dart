@@ -1,4 +1,4 @@
-import 'package:lensai/features/web_feed/data/models/feed_article.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
 
 class FeedArticleQueryResult extends FeedArticle {
   final String? titleHighlight;

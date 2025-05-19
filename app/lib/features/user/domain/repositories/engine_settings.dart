@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/user/data/models/engine_settings.dart';
-import 'package:lensai/features/user/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 part 'engine_settings.g.dart';
 

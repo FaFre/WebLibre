@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
-import 'package:lensai/features/geckoview/domain/providers/tab_state.dart';
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
-import 'package:lensai/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 
 class TabPreview extends StatelessWidget {
   final TabState tab;

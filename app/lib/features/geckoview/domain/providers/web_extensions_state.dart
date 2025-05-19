@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/domain/entities/equatable_image.dart';
-import 'package:lensai/features/geckoview/domain/entities/states/web_extension.dart';
-import 'package:lensai/features/geckoview/domain/providers.dart';
-import 'package:lensai/features/geckoview/utils/image_helper.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/entities/equatable_image.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/web_extension.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 
 part 'web_extensions_state.g.dart';
 

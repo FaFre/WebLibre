@@ -3,12 +3,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/uuid.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
-import 'package:lensai/features/user/domain/services/local_authentication.dart';
-import 'package:lensai/presentation/icons/tor_icons.dart';
+import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
+import 'package:weblibre/features/user/domain/services/local_authentication.dart';
+import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 enum _DialogMode { create, edit }
 

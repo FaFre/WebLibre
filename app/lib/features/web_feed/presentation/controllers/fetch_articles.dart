@@ -1,7 +1,7 @@
-import 'package:lensai/core/logger.dart';
-import 'package:lensai/features/web_feed/domain/repositories/feed_repository.dart';
-import 'package:lensai/features/web_feed/domain/services/feed_reader.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/web_feed/domain/repositories/feed_repository.dart';
+import 'package:weblibre/features/web_feed/domain/services/feed_reader.dart';
 
 part 'fetch_articles.g.dart';
 

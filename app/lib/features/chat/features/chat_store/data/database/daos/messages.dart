@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
-import 'package:lensai/features/chat/features/chat_store/data/database/database.dart';
 import 'package:lexo_rank/lexo_rank.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/database/database.dart';
 
 part 'messages.g.dart';
 

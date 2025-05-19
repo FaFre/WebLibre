@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:lensai/features/geckoview/features/browser/domain/providers/lifecycle.dart';
-import 'package:lensai/features/tor/utils/tor_entrypoint.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
+import 'package:weblibre/features/tor/utils/tor_entrypoint.dart';
 
 part 'tor_proxy.g.dart';
 

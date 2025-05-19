@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:lensai/presentation/widgets/auto_suggest_text_field.dart';
-import 'package:lensai/utils/form_validators.dart';
-import 'package:lensai/utils/uri_parser.dart' as uri_parser;
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
+import 'package:weblibre/utils/form_validators.dart';
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class EditUrlDialog extends HookConsumerWidget {
   final Uri initialUrl;

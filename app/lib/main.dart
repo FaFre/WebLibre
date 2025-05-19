@@ -8,15 +8,15 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/error_observer.dart';
-import 'package:lensai/core/logger.dart';
-import 'package:lensai/core/providers/defaults.dart';
-import 'package:lensai/domain/services/app_initialization.dart';
-import 'package:lensai/features/user/domain/repositories/general_settings.dart';
-import 'package:lensai/features/web_feed/presentation/controllers/fetch_articles.dart';
-import 'package:lensai/features/web_feed/utils/fetch_entrypoint.dart';
-import 'package:lensai/presentation/hooks/on_initialization.dart';
-import 'package:lensai/presentation/main_app.dart';
+import 'package:weblibre/core/error_observer.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/defaults.dart';
+import 'package:weblibre/domain/services/app_initialization.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
+import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
+import 'package:weblibre/presentation/hooks/on_initialization.dart';
+import 'package:weblibre/presentation/main_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ void main() async {
 
   await BackgroundFetch.registerHeadlessTask(backgroundFetch);
 
-  await HomeWidget.setAppGroupId('bang_navigator');
+  await HomeWidget.setAppGroupId('weblibre');
 
   runApp(
     ProviderScope(

@@ -1,12 +1,12 @@
 <p align="center">
-  <img width="250" src="https://raw.githubusercontent.com/FaFre/lensai/main/app/assets/icon/icon.png" alt="Lensai Logo">
+  <img width="250" src="https://raw.githubusercontent.com/FaFre/WebLibre/main/app/assets/icon/icon.png" alt="WebLibre Logo">
 </p>
 
-# Lensai: The Privacy-Focused Browser
+# WebLibre: The Privacy-Focused Browser
 
 <a href="https://liberapay.com/FaFre/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 
-Lensai is an independent browser project built on the foundation of [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/).
+WebLibre is an independent browser project built on the foundation of [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/).
 
 - Contains **Zero Tracking or Telemetry**
 - Ad, tracker and malware blocking through [**uBlock Origin**](https://ublockorigin.com/) (opt out possible)
@@ -29,7 +29,7 @@ Lensai is an independent browser project built on the foundation of [Mozilla's G
 
 
 <p align="center">
-  <a href='https://play.google.com/store/apps/details?id=me.movenext.bang_navigator&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
+  <a href='https://play.google.com/store/apps/details?id=eu.weblibre.bang_navigator&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
     <img width="240" alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/>
   </a>
 </p>

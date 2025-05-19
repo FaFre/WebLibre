@@ -2,7 +2,7 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
+import 'package:weblibre/core/routing/routes.dart';
 
 class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({super.key});

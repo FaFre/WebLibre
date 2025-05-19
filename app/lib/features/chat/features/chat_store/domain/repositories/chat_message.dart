@@ -1,12 +1,12 @@
 import 'package:exceptions/exceptions.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:langchain/langchain.dart';
-import 'package:lensai/core/uuid.dart';
-import 'package:lensai/features/chat/features/chat_store/data/models/message_types.dart';
-import 'package:lensai/features/chat/features/chat_store/domain/controllers/drift_chat_controller.dart';
-import 'package:lensai/features/chat/features/chat_store/domain/providers.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/models/message_types.dart';
+import 'package:weblibre/features/chat/features/chat_store/domain/controllers/drift_chat_controller.dart';
+import 'package:weblibre/features/chat/features/chat_store/domain/providers.dart';
 
 part 'chat_message.g.dart';
 

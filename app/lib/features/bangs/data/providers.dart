@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:lensai/features/bangs/data/database/database.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:riverpod/riverpod.dart';
@@ -8,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import 'package:universal_io/io.dart';
+import 'package:weblibre/features/bangs/data/database/database.dart';
 
 part 'providers.g.dart';
 

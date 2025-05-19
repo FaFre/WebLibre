@@ -1,8 +1,8 @@
-import 'package:lensai/features/user/domain/entities/auth_exception.dart';
-import 'package:lensai/features/user/domain/providers.dart';
-import 'package:lensai/features/user/extensions/client_exception.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/domain/entities/auth_exception.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/features/user/extensions/client_exception.dart';
 
 part 'auth.g.dart';
 

@@ -1,9 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:lensai/features/user/data/providers.dart';
-import 'package:lensai/features/user/domain/repositories/general_settings.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
 

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:langchain/langchain.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/database/daos/vector.dart';
-import 'package:lensai/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/database/daos/vector.dart';
+import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
 
 class SqliteVectorStore extends VectorStore {
   final VectorDao _dao;

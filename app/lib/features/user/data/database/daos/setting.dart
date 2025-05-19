@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/user/data/database/database.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/user/data/database/database.dart';
 
 part 'setting.g.dart';
 

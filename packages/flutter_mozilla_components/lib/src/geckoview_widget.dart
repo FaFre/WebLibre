@@ -24,7 +24,7 @@ class GeckoView extends StatefulWidget {
 
 class _GeckoViewState extends State<GeckoView> {
   static const platform = MethodChannel(
-    'me.movenext.flutter_mozilla_components/trim_memory',
+    'eu.weblibre.flutter_mozilla_components/trim_memory',
   );
 
   final browserService = GeckoBrowserService();
@@ -69,7 +69,7 @@ class _GeckoViewState extends State<GeckoView> {
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(
-      viewType: 'eu.lensai/gecko',
+      viewType: 'eu.weblibre/gecko',
       surfaceFactory: (context, controller) {
         return AndroidViewSurface(
           controller: controller as AndroidViewController,
@@ -80,7 +80,7 @@ class _GeckoViewState extends State<GeckoView> {
       onCreatePlatformView: (PlatformViewCreationParams params) {
         return PlatformViewsService.initExpensiveAndroidView(
             id: params.id,
-            viewType: 'eu.lensai/gecko',
+            viewType: 'eu.weblibre/gecko',
             layoutDirection: TextDirection.ltr,
             creationParams: {},
             creationParamsCodec: const StandardMessageCodec(),

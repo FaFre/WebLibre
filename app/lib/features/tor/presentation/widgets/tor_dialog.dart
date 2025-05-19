@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lensai/presentation/icons/tor_icons.dart';
+import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 class TorDialog extends StatelessWidget {
   @override

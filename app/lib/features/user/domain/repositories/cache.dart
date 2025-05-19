@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:lensai/features/geckoview/domain/providers.dart';
-import 'package:lensai/features/user/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 part 'cache.g.dart';
 

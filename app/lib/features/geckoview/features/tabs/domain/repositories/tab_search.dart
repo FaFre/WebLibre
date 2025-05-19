@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 
 part 'tab_search.g.dart';
 

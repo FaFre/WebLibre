@@ -2,7 +2,7 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:lensai/features/geckoview/features/tabs/utils/color_palette.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
 
 class MaterialPicker extends StatefulWidget {
   const MaterialPicker({

@@ -1,4 +1,4 @@
-group = "eu.lensai.flutter_mozilla_components"
+group = "eu.weblibre.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -47,7 +47,7 @@ apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace = "eu.lensai.flutter_mozilla_components"
+        namespace = "eu.weblibre.flutter_mozilla_components"
     }
 
     compileSdk = 35

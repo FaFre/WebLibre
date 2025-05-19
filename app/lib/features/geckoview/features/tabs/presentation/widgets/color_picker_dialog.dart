@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:lensai/features/geckoview/features/tabs/presentation/widgets/material_color_picker.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/material_color_picker.dart';
 
 class ColorPickerDialog extends HookWidget {
   final Color initialColor;

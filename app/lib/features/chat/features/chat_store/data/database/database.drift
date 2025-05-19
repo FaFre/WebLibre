@@ -1,4 +1,4 @@
-import 'package:lensai/features/chat/features/chat_store/data/database/converters/chat_metadata_converter.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/database/converters/chat_metadata_converter.dart';
 
 CREATE TABLE chat_data (
   chat_id TEXT PRIMARY KEY NOT NULL,

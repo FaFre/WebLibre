@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/geckoview/features/contextmenu/domain/converters/hit_result_converter.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/domain/converters/hit_result_converter.dart';
 
 extension HitResultJson on HitResult {
   String toJson() {

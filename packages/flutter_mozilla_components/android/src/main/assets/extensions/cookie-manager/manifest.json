@@ -5,7 +5,7 @@
   "description": "Cookie manager",
   "browser_specific_settings": {
     "gecko": {
-      "id": "cookie-manager@lensai.eu"
+      "id": "cookie-manager@weblibre.eu"
     }
   },
   "background": {

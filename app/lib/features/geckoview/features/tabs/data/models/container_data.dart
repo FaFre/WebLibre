@@ -2,7 +2,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:lensai/data/database/converters/icon_data.dart';
+import 'package:weblibre/data/database/converters/icon_data.dart';
 
 part 'container_data.g.dart';
 

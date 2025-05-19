@@ -2,16 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/providers/global_drop.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/data/models/drag_data.dart';
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:lensai/presentation/widgets/selectable_chips.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/providers/global_drop.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/data/models/drag_data.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 class ContainerChips extends HookConsumerWidget {
   final bool displayMenu;

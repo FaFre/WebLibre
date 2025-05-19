@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/providers/format.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/geckoview/domain/repositories/tab.dart';
-import 'package:lensai/features/web_feed/data/models/feed_link.dart';
-import 'package:lensai/features/web_feed/domain/providers.dart';
-import 'package:lensai/features/web_feed/extensions/atom.dart';
-import 'package:lensai/features/web_feed/extensions/feed_article.dart';
-import 'package:lensai/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
-import 'package:lensai/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
-import 'package:lensai/utils/markdown/image_extractor.dart';
-import 'package:lensai/utils/ui_helper.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/providers/format.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
+import 'package:weblibre/features/web_feed/domain/providers.dart';
+import 'package:weblibre/features/web_feed/extensions/atom.dart';
+import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
+import 'package:weblibre/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
+import 'package:weblibre/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/utils/markdown/image_extractor.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 enum _Pages { summary, content }
 

@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/settings/presentation/controllers/save_settings.dart';
-import 'package:lensai/features/settings/presentation/widgets/custom_list_tile.dart';
-import 'package:lensai/features/settings/presentation/widgets/default_search_selector.dart';
-import 'package:lensai/features/user/data/models/general_settings.dart';
-import 'package:lensai/features/user/domain/providers.dart';
-import 'package:lensai/features/user/domain/repositories/cache.dart';
-import 'package:lensai/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
+import 'package:weblibre/features/settings/presentation/widgets/default_search_selector.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/cache.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 class GeneralSettingsScreen extends HookConsumerWidget {
   const GeneralSettingsScreen({super.key});

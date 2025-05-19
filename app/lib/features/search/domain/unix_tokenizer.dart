@@ -1,4 +1,4 @@
-import 'package:lensai/features/search/domain/entities/bareword.dart';
+import 'package:weblibre/features/search/domain/entities/bareword.dart';
 
 typedef _Phrase = List<Bareword>;
 

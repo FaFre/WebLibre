@@ -1,11 +1,11 @@
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/providers.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:lensai/features/geckoview/features/tabs/utils/color_palette.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
 
 part 'container.g.dart';
 

@@ -1,8 +1,8 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:lensai/features/tor/domain/services/tor_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
 part 'proxy_settings_replication.g.dart';
 

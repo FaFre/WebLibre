@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:lensai/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 
 part 'bottom_sheet.g.dart';
 

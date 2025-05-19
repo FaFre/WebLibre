@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:exceptions/exceptions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:lensai/core/http_error_handler.dart';
-import 'package:lensai/features/bangs/data/models/bang.dart';
-import 'package:lensai/features/bangs/data/models/bang_group.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/http_error_handler.dart';
+import 'package:weblibre/features/bangs/data/models/bang.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
 part 'data_source.g.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/features/user/data/models/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 part 'browser_data.g.dart';
 

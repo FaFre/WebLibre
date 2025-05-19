@@ -1,4 +1,4 @@
-package me.movenext.simple_intent_receiver
+package eu.weblibre.simple_intent_receiver
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

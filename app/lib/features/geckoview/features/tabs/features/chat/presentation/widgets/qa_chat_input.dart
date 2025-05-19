@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_core/flutter_chat_core.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:lensai/presentation/widgets/speech_to_text_button.dart';
 import 'package:provider/provider.dart';
+import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 
 typedef OnMessageTapCallback = void Function(Message message);
 typedef OnMessageSendCallback = void Function(String text);

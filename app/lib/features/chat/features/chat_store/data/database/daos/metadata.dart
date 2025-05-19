@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/features/chat/features/chat_store/data/database/database.dart';
-import 'package:lensai/features/chat/features/chat_store/data/models/chat_metadata.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/database/database.dart';
+import 'package:weblibre/features/chat/features/chat_store/data/models/chat_metadata.dart';
 
 part 'metadata.g.dart';
 

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
-import 'package:lensai/features/geckoview/domain/entities/states/tab.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:lensai/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 import 'package:lexo_rank/lexo_rank.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 
 part 'tab.g.dart';
 

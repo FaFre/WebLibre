@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:lensai/core/logger.dart';
-import 'package:lensai/features/web_feed/data/models/feed_article.dart';
-import 'package:lensai/features/web_feed/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
+import 'package:weblibre/features/web_feed/data/providers.dart';
 
 part 'article_content_processor.g.dart';
 
