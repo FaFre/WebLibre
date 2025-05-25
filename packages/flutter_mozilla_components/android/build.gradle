@@ -3,7 +3,7 @@ version = "1.0-SNAPSHOT"
 
 buildscript {
     ext.kotlin_version = "2.1.20"
-    ext.mozillaComponentsVersion = '139.0.20250417022706'
+    ext.mozillaComponentsVersion = '139.0b10'
 
     repositories {
         google()
@@ -20,23 +20,23 @@ rootProject.allprojects {
         google()
         mavenCentral()
 
-        maven {
-            name "Mozilla Nightly"
-            url "https://nightly.maven.mozilla.org/maven2"
+        // maven {
+        //     name "Mozilla Nightly"
+        //     url "https://nightly.maven.mozilla.org/maven2"
 
-            content {
-                // Always fetch components from the snapshots repository
-                includeGroup "org.mozilla.components"
-            }
-        }
+        //     content {
+        //         // Always fetch components from the snapshots repository
+        //         includeGroup "org.mozilla.components"
+        //     }
+        // }
 
         maven {
             name "Mozilla"
             url "https://maven.mozilla.org/maven2"
 
             content {
-                // Never fetch components from here. We always want to use snapshots.
-                excludeGroup "org.mozilla.components"
+                // Never fetch components from here. We always want to use snapshots when using nightly
+                // excludeGroup "org.mozilla.components"
             }
         }
     }
