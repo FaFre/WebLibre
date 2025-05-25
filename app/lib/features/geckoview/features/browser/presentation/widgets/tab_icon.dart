@@ -31,7 +31,9 @@ class TabIcon extends HookConsumerWidget {
           icon.connectionState != ConnectionState.done && icon.data == null,
       child: Skeleton.replace(
         replacement: Bone.icon(size: iconSize),
-        child: RawImage(image: icon.data, height: iconSize, width: iconSize),
+        child: RepaintBoundary(
+          child: RawImage(image: icon.data, height: iconSize, width: iconSize),
+        ),
       ),
     );
   }
