@@ -44,54 +44,6 @@ final iconCacheSizeMegabytesProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef IconCacheSizeMegabytesRef = AutoDisposeStreamProviderRef<double>;
-String _$authStoreHash() => r'766c001bbb8d7dc4e148eff3816c414d78e77f26';
-
-/// See also [authStore].
-@ProviderFor(authStore)
-final authStoreProvider = Provider<AsyncAuthStore>.internal(
-  authStore,
-  name: r'authStoreProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$authStoreHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AuthStoreRef = ProviderRef<AsyncAuthStore>;
-String _$authStateHash() => r'ffa411ae0abc5c7bb3e8a93e783bd8398ce7f666';
-
-/// See also [authState].
-@ProviderFor(authState)
-final authStateProvider = AutoDisposeStreamProvider<AuthStoreEvent>.internal(
-  authState,
-  name: r'authStateProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$authStateHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AuthStateRef = AutoDisposeStreamProviderRef<AuthStoreEvent>;
-String _$pocketBaseHash() => r'9e1dc8057e300bc7ca697da9f68ec61e70fdbaab';
-
-/// See also [pocketBase].
-@ProviderFor(pocketBase)
-final pocketBaseProvider = Provider<PocketBase>.internal(
-  pocketBase,
-  name: r'pocketBaseProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$pocketBaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PocketBaseRef = ProviderRef<PocketBase>;
 String _$incognitoModeEnabledHash() =>
     r'3968c2d4945be09a0bc08ce0d70b0390187c44e8';
 

@@ -48,7 +48,6 @@ dependencies:
   package_info_plus: ^8.3.0
   path: ^1.9.1
   path_provider: ^2.1.5
-  pocketbase: ^0.22.0
   riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
   rss_dart: ^1.0.12

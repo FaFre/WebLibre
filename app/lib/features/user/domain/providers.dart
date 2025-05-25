@@ -1,5 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:pocketbase/pocketbase.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -19,35 +18,6 @@ Future<String?> _storedAuthData(Ref ref) {
 Stream<double> iconCacheSizeMegabytes(Ref ref) {
   final repository = ref.watch(userDatabaseProvider);
   return repository.cacheDao.getIconCacheSize().watchSingle();
-}
-
-@Riverpod(keepAlive: true)
-AsyncAuthStore authStore(Ref ref) {
-  const secureStorage = FlutterSecureStorage();
-
-  final intial = ref.watch(
-    _storedAuthDataProvider.select((value) => value.valueOrNull),
-  );
-
-  return AsyncAuthStore(
-    initial: intial,
-    save: (data) async {
-      await secureStorage.write(key: _authKey, value: data);
-    },
-  );
-}
-
-@Riverpod()
-Stream<AuthStoreEvent> authState(Ref ref) {
-  final authStore = ref.watch(authStoreProvider);
-  return authStore.onChange;
-}
-
-@Riverpod(keepAlive: true)
-PocketBase pocketBase(Ref ref) {
-  final authStore = ref.watch(authStoreProvider);
-
-  return PocketBase('http://192.168.2.104:8090', authStore: authStore);
 }
 
 @Riverpod()

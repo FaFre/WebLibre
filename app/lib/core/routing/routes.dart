@@ -23,7 +23,6 @@ import 'package:weblibre/features/settings/presentation/screens/web_engine_harde
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_settings.dart';
 import 'package:weblibre/features/tor/presentation/screens/tor_proxy.dart';
-import 'package:weblibre/features/user/presentation/screens/auth.dart';
 import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article_list.dart';
@@ -42,13 +41,5 @@ class AboutRoute extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const AboutDialogScreen());
-  }
-}
-
-@TypedGoRoute<UserAuthRoute>(name: 'UserAuthRoute', path: '/userAuth')
-class UserAuthRoute extends GoRouteData {
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(builder: (_) => const UserAuthScreen());
   }
 }
