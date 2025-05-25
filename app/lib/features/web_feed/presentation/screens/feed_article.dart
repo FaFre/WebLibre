@@ -59,7 +59,9 @@ class FeedArticleScreen extends HookConsumerWidget {
               );
 
               final articleLink = useMemoized(
-                () => article.links?.getRelation(FeedLinkRelation.alternate),
+                () =>
+                    article.links?.getRelation(FeedLinkRelation.alternate) ??
+                    article.links?.getRelation(null),
                 [article],
               );
 

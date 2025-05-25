@@ -27,7 +27,7 @@ extension ParseAtomLink on List<AtomLink> {
 }
 
 extension SelectFeedLink on List<FeedLink> {
-  FeedLink? getRelation(FeedLinkRelation relation) {
+  FeedLink? getRelation(FeedLinkRelation? relation) {
     return firstWhereOrNull((link) => link.relation == relation);
   }
 }
