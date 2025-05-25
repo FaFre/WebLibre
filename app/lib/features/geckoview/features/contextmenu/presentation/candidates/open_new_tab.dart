@@ -40,8 +40,8 @@ class OpenInNewTab extends HookConsumerWidget {
 
           showTabSwitchMessage(
             context,
-            onSwitch: () {
-              repo.selectTab(tabId);
+            onSwitch: () async {
+              await repo.selectTab(tabId);
             },
           );
 

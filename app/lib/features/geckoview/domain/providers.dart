@@ -51,8 +51,10 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
           logger.e('No default search bang found');
         }
       }),
-      FindInPageAction((text) {
-        ref.read(findInPageControllerProvider.notifier).findAll(text: text);
+      FindInPageAction((text) async {
+        await ref
+            .read(findInPageControllerProvider.notifier)
+            .findAll(text: text);
       }),
       ShareAction((text) async {
         await SharePlus.instance.share(ShareParams(text: text));

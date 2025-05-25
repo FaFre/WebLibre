@@ -1,5 +1,10 @@
-# melos_managed_dependency_overrides: flutter_mozilla_components,simple_intent_receiver
+# melos_managed_dependency_overrides: flutter_mozilla_components,simple_intent_receiver,analyzer_plugin
 dependency_overrides:
+  analyzer_plugin:
+    git:
+      url: https://github.com/dart-lang/sdk.git
+      ref: 8c5e06206103f8b2fd7d434ece9248ce9ac31ba4
+      path: pkg/analyzer_plugin
   flutter_mozilla_components:
     path: ../packages/flutter_mozilla_components
   simple_intent_receiver:

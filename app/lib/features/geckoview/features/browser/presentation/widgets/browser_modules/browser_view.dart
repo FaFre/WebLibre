@@ -68,8 +68,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     useOnInitialization(() async {
       await ref.read(generalSettingsRepositoryProvider.notifier).fetch().then((
         settings,
-      ) {
-        ref
+      ) async {
+        await ref
             .read(browserDataServiceProvider.notifier)
             .deleteDataOnEngineStart(settings.deleteBrowsingDataOnQuit);
       });
