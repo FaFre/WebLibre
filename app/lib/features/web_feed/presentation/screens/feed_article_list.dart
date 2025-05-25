@@ -32,6 +32,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
                   ).select((value) => value.valueOrNull?.title.whenNotEmpty),
                 );
 
+                final focusNode = useFocusNode();
                 final searchTextController = useTextEditingController();
 
                 final hasText = useListenableSelector(
@@ -65,6 +66,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
                       child: Column(
                         children: [
                           TextField(
+                            focusNode: focusNode,
                             controller: searchTextController,
                             decoration: InputDecoration(
                               label: const Text('Search'),
@@ -73,6 +75,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
                                       ? IconButton(
                                         onPressed: () {
                                           searchTextController.clear();
+                                          focusNode.requestFocus();
                                         },
                                         icon: const Icon(Icons.clear),
                                       )

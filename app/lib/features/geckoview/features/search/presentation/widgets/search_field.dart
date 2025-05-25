@@ -42,6 +42,8 @@ class SearchField extends HookConsumerWidget {
       () => textEditingController.text.isNotEmpty,
     );
 
+    final safeFocusNode = focusNode ?? useFocusNode();
+
     final suggestion = useState<String?>(null);
     final lastText = useRef<String>(textEditingController.text);
 
@@ -71,7 +73,7 @@ class SearchField extends HookConsumerWidget {
       controller: textEditingController,
       suggestion: suggestion.value,
       enableIMEPersonalizedLearning: !incognitoEnabled,
-      focusNode: focusNode,
+      focusNode: safeFocusNode,
       autofocus: autofocus,
       decoration: InputDecoration(
         border: InputBorder.none,
@@ -101,12 +103,9 @@ class SearchField extends HookConsumerWidget {
                   },
                 ),
       ),
-      onTapOutside:
-          (focusNode != null)
-              ? (event) {
-                focusNode!.unfocus();
-              }
-              : null,
+      onTapOutside: (event) {
+        safeFocusNode.unfocus();
+      },
       onSubmitted: onSubmitted,
     );
   }

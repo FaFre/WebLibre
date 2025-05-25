@@ -16,6 +16,7 @@ class FindInPageWidget extends HookConsumerWidget {
       selectedTabStateProvider.select((state) => state?.findResultState),
     );
 
+    final focusNode = useFocusNode();
     final textController = useTextEditingController(
       text: searchResult?.lastSearchText ?? findInPageState.lastSearchText,
       keys: [searchResult?.lastSearchText, findInPageState.lastSearchText],
@@ -31,6 +32,7 @@ class FindInPageWidget extends HookConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
+                  focusNode: focusNode,
                   controller: textController,
                   autofocus: true,
                   autocorrect: false,
@@ -81,6 +83,7 @@ class FindInPageWidget extends HookConsumerWidget {
                 onPressed: () async {
                   await ref.read(findInPageControllerProvider.notifier).hide();
                   textController.clear();
+                  focusNode.requestFocus();
                 },
               ),
             ],

@@ -107,6 +107,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                         IconButton(
                           onPressed: () {
                             searchTextController.clear();
+                            searchTextFocus.requestFocus();
                             searchMode.value = false;
                           },
                           icon: const Icon(Icons.clear),

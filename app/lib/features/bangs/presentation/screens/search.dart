@@ -21,6 +21,7 @@ class BangSearchScreen extends HookConsumerWidget {
     final resultsAsync = ref.watch(bangSearchProvider);
     final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
+    final focusNode = useFocusNode();
     final textEditingController = useTextEditingController(
       text: initialSearchText,
     );
@@ -37,6 +38,7 @@ class BangSearchScreen extends HookConsumerWidget {
       appBar: AppBar(
         title: TextField(
           enableIMEPersonalizedLearning: !incognitoEnabled,
+          focusNode: focusNode,
           controller: textEditingController,
           autofocus: true,
           autocorrect: false,
@@ -49,6 +51,7 @@ class BangSearchScreen extends HookConsumerWidget {
                 context.pop();
               } else {
                 textEditingController.clear();
+                focusNode.requestFocus();
               }
             },
             icon: const Icon(Icons.clear),
