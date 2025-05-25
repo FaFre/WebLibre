@@ -10,7 +10,6 @@ dependencies:
   background_fetch: ^1.3.8
   collection: ^1.19.1
   copy_with_extension: ^6.0.1
-  crypto: ^3.0.6
   drift: ^2.26.1
   dynamic_color: ^1.7.0
   exceptions: ^0.6.1
@@ -20,10 +19,6 @@ dependencies:
     sdk: flutter
   flutter_auto_size_text: ^4.1.0
   flutter_background_service: ^5.1.0
-  flutter_chat_core: 
-    path: ../../flutter_chat_ui/packages/flutter_chat_core
-  flutter_chat_ui: 
-    path: ../../flutter_chat_ui/packages/flutter_chat_ui
   flutter_hooks: ^0.21.2
   flutter_markdown: ^0.7.7+1
   flutter_material_design_icons: ^1.1.7447
@@ -42,16 +37,6 @@ dependencies:
   http: ^1.4.0
   intl: ^0.19.0
   json_annotation: ^4.9.0
-  langchain:
-    git:
-      url: https://github.com/FaFre/langchain_dart.git
-      ref: static_objectbox
-      path: packages/langchain
-  langchain_openai: 
-    git:
-      url: https://github.com/FaFre/langchain_dart.git
-      ref: static_objectbox
-      path: packages/langchain_openai
   lexo_rank:
     git:
       url: https://github.com/FaFre/lexo_rank.git
@@ -64,7 +49,6 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.5
   pocketbase: ^0.22.0
-  provider: ^6.1.5
   riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
   rss_dart: ^1.0.12
@@ -77,10 +61,7 @@ dependencies:
   speech_to_text_google_dialog: 
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git
-  sqlite3: ^2.7.5
-  sqlite3_flutter_libs: ^0.5.32
-  sqlite3_vec:
-    git: https://github.com/FaFre/sqlite3_vec.git
+  sqlite3_flutter_libs: ^0.5.33
   text_scroll: ^0.2.0
   timeago: ^3.7.1
   tor:
@@ -93,22 +74,6 @@ dependencies:
       url: https://github.com/FaFre/uri-to-file.git
   url_launcher: ^6.3.1
   uuid: ^4.5.1
-
-dependency_overrides:
-  cross_cache: 
-      path: ../../flutter_chat_ui/packages/cross_cache
-  flutter_chat_core: 
-      path: ../../flutter_chat_ui/packages/flutter_chat_core
-  langchain_core:
-    git:
-      url: https://github.com/FaFre/langchain_dart.git
-      ref: static_objectbox
-      path: packages/langchain_core
-  tavily_dart:
-    git:
-      url: https://github.com/FaFre/langchain_dart.git
-      ref: static_objectbox
-      path: packages/tavily_dart
 
 dev_dependencies:
   build_runner: ^2.4.15

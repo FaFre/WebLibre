@@ -6,9 +6,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
-import 'package:sqlite3_vec/sqlite3_vec.dart';
 import 'package:universal_io/io.dart';
-import 'package:weblibre/core/providers/models.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 
@@ -16,8 +14,6 @@ part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 TabDatabase tabDatabase(Ref ref) {
-  final dimensions = ref.watch(embeddingDimensionsProvider);
-
   final db = TabDatabase(
     LazyDatabase(() async {
       // put the database file, called db.sqlite here, into the documents folder
@@ -37,8 +33,6 @@ TabDatabase tabDatabase(Ref ref) {
       // Explicitly tell it about the correct temporary directory.
       sqlite3.tempDirectory = cachebase;
 
-      Sqlite3Vec.ensureExtensionLoaded();
-
       return NativeDatabase.createInBackground(
         file,
         setup: (database) {
@@ -46,7 +40,6 @@ TabDatabase tabDatabase(Ref ref) {
         },
       );
     }),
-    embeddingDimensions: dimensions,
   );
 
   ref.onDispose(() async {

@@ -19,7 +19,6 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers/li
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
-import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/domain/repositories/document.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
@@ -154,7 +153,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     //Initialize and register dependencies
     ref.listenManual(tabRepositoryProvider, (previous, next) {});
-    ref.listenManual(documentRepositoryProvider, (previous, next) {});
 
     ref.listenManual(selectionActionServiceProvider, (previous, next) {});
 

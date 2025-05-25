@@ -7,20 +7,12 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/con
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/database/daos/vector.dart';
-import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/database/migrator.dart';
-import 'package:weblibre/features/geckoview/features/tabs/features/vector_store/data/models/vector_result.dart';
 import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(
-  include: {'database.drift'},
-  daos: [ContainerDao, TabDao, VectorDao],
-)
+@DriftDatabase(include: {'database.drift'}, daos: [ContainerDao, TabDao])
 class TabDatabase extends _$TabDatabase with TrigramQueryBuilderMixin {
-  final int embeddingDimensions;
-
   @override
   final int schemaVersion = 2;
 
@@ -31,23 +23,11 @@ class TabDatabase extends _$TabDatabase with TrigramQueryBuilderMixin {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async {
-      final migrator = VectorDatabaseMigrator(dimensions: embeddingDimensions);
-
-      await m.database.customStatement(migrator.vectorTableDefinition);
-
-      //instead of m.createAll(); we igoner vec0 table
-      for (final entity in allSchemaEntities.where(
-        (entity) => entity is! DocumentVec,
-      )) {
-        await m.create(entity);
-      }
-    },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON;');
       await optimizeFtsIndex();
     },
   );
 
-  TabDatabase(super.e, {required this.embeddingDimensions});
+  TabDatabase(super.e);
 }

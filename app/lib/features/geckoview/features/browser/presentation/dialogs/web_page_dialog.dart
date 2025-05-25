@@ -10,13 +10,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/site_search.dart';
-import 'package:weblibre/features/chat/features/chat_store/data/models/chat_metadata.dart';
-import 'package:weblibre/features/chat/features/chat_store/domain/repositories/chat_metadata.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -236,59 +231,6 @@ class WebPageDialog extends HookConsumerWidget {
                             }
                           },
                         ),
-                        const Divider(),
-                        ListTile(
-                          leading: const Icon(MdiIcons.brain),
-                          title: const Text('QA Chat'),
-                          onTap: () async {
-                            final selectedTabId =
-                                ref.read(selectedTabStateProvider)?.id;
-
-                            if (selectedTabId != null) {
-                              final updateResult = await ref
-                                  .read(
-                                    chatMetadataRepositoryProvider(
-                                      selectedTabId,
-                                    ).notifier,
-                                  )
-                                  .updateMetadata(
-                                    ChatMetadata(mainDocumentId: selectedTabId),
-                                  );
-
-                              updateResult.onSuccess((_) {
-                                ref
-                                    .read(
-                                      bottomSheetControllerProvider.notifier,
-                                    )
-                                    .show(
-                                      TabQaChatSheet(chatId: selectedTabId),
-                                    );
-                              });
-                            }
-
-                            if (context.mounted) {
-                              context.pop();
-                            }
-                          },
-                        ),
-                        // ListTile(
-                        //   leading: Icon(MdiIcons.text),
-                        //   title: const Text('Summarize'),
-                        //   onTap: () async {
-                        //     final summarizerUrl = uri_builder.summarizerUri(
-                        //       document: SharedUrl(url),
-                        //       mode: SummarizerMode.keyMoments,
-                        //     );
-
-                        //     await ref
-                        //         .read(tabRepositoryProvider.notifier)
-                        //         .addTab(url: summarizerUrl);
-
-                        //     if (context.mounted) {
-                        //       context.pop();
-                        //     }
-                        //   },
-                        // ),
                       ],
                     ),
                   );

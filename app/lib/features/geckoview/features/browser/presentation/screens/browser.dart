@@ -24,7 +24,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_appearance_button.dart';
-import 'package:weblibre/features/geckoview/features/tabs/features/chat/presentation/widgets/tab_qa_chat.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class BrowserScreen extends HookConsumerWidget {
@@ -369,12 +368,6 @@ class _QaSheet extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: TabQaChat(
-                  chatId: chatId,
-                  scrollController: scrollController,
                 ),
               ),
             ],
