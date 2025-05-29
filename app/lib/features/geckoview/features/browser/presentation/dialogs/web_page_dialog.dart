@@ -12,9 +12,11 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/site_search.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/share_tile.dart';
 import 'package:weblibre/presentation/widgets/website_feed_tile.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -180,9 +182,7 @@ class WebPageDialog extends HookConsumerWidget {
                             }
                           },
                         ),
-                        ListTile(
-                          leading: const Icon(Icons.share),
-                          title: const Text('Share link'),
+                        ShareTile(
                           onTap: () async {
                             await SharePlus.instance.share(
                               ShareParams(uri: url),
@@ -191,6 +191,9 @@ class WebPageDialog extends HookConsumerWidget {
                             if (context.mounted) {
                               context.pop();
                             }
+                          },
+                          onTapQr: () async {
+                            await showQrCode(context, url.toString());
                           },
                         ),
                         ListTile(

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/presentation/widgets/share_tile.dart';
 
 class ShareLink extends HookConsumerWidget {
   final HitResult hitResult;
@@ -17,11 +19,11 @@ class ShareLink extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListTile(
-      leading: const Icon(Icons.share),
-      title: const Text('Share link'),
+    final link = hitResult.tryGetLink();
+
+    return ShareTile(
       onTap: () async {
-        await hitResult.tryGetLink().mapNotNull(
+        await link.mapNotNull(
           (url) => SharePlus.instance.share(ShareParams(uri: url)),
         );
 
@@ -29,6 +31,11 @@ class ShareLink extends HookConsumerWidget {
           context.pop();
         }
       },
+      onTapQr: link.mapNotNull(
+        (url) => () async {
+          await showQrCode(context, url.toString());
+        },
+      ),
     );
   }
 }
