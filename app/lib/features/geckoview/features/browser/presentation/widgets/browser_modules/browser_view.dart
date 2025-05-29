@@ -216,12 +216,20 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         if (_suggestionCountTime != null &&
             DateTime.now().difference(_suggestionCountTime!) >
                 widget.suggestionTimeout) {
-          showSuggestNewTabMessage(
-            context,
-            onAdd: () async {
-              await const SearchRoute(tabType: TabType.regular).push(context);
-            },
-          );
+          //Don't do anything if a child route is active
+          if (GoRouterState.of(context).topRoute?.name == BrowserRoute.name) {
+            unawaited(
+              showSuggestNewTabMessage(
+                context,
+                onAdd: (searchText) async {
+                  await SearchRoute(
+                    tabType: TabType.regular,
+                    searchText: searchText ?? SearchRoute.emptySearchText,
+                  ).push(context);
+                },
+              ),
+            );
+          }
         }
 
         _suggestionCountTime = null;

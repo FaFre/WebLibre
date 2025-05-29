@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:weblibre/utils/form_validators.dart';
@@ -51,26 +52,32 @@ class EditUrlDialog extends HookConsumerWidget {
 
           return Form(
             key: formKey,
-            child: AutoSuggestTextField(
-              controller: addressTextController,
-              focusNode: addressTextFocusNode,
-              suggestion: suggestion.value,
-              // enableIMEPersonalizedLearning: !incognitoEnabled,
-              maxLines: null,
-              keyboardType: TextInputType.url,
-              decoration: const InputDecoration(hintText: 'Enter URL'),
-              onTap: () {
-                if (!addressTextFocusNode.hasFocus) {
-                  // Select all text when the field is tapped
-                  addressTextController.selection = TextSelection(
-                    baseOffset: 0,
-                    extentOffset: addressTextController.text.length,
-                  );
-                }
-              },
-              validator: (value) {
-                return validateUrl(value, requireAuthority: false);
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AutoSuggestTextField(
+                  controller: addressTextController,
+                  focusNode: addressTextFocusNode,
+                  suggestion: suggestion.value,
+                  // enableIMEPersonalizedLearning: !incognitoEnabled,
+                  maxLines: null,
+                  keyboardType: TextInputType.url,
+                  decoration: const InputDecoration(hintText: 'Enter URL'),
+                  onTap: () {
+                    if (!addressTextFocusNode.hasFocus) {
+                      // Select all text when the field is tapped
+                      addressTextController.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: addressTextController.text.length,
+                      );
+                    }
+                  },
+                  validator: (value) {
+                    return validateUrl(value, requireAuthority: false);
+                  },
+                ),
+                ClipboardFillLink(controller: addressTextController),
+              ],
             ),
           );
         },

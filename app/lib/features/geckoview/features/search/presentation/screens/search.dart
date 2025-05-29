@@ -10,6 +10,7 @@ import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
@@ -163,6 +164,9 @@ class SearchScreen extends HookConsumerWidget {
                   ),
                 ),
               ),
+            ),
+            SliverToBoxAdapter(
+              child: ClipboardFillLink(controller: searchTextController),
             ),
             const SliverToBoxAdapter(child: Divider()),
             SearchTermSuggestions(

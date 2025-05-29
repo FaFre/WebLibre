@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/utils/clipboard.dart';
 
 void showErrorMessage(BuildContext context, String message) {
   final snackBar = SnackBar(
@@ -52,18 +53,39 @@ void showTabOpenedMessage(
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
-void showSuggestNewTabMessage(
+Future<void> showSuggestNewTabMessage(
   BuildContext context, {
-  required void Function() onAdd,
+  required void Function(String? searchText) onAdd,
   Duration duration = const Duration(seconds: 2),
-}) {
-  final snackBar = SnackBar(
-    content: const Text('Want to open a new tab?'),
-    action: SnackBarAction(label: 'New Tab', onPressed: onAdd),
-    duration: duration,
-  );
+}) async {
+  final clipboardUrl = await tryGetUriFromClipboard();
 
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  final snackBar =
+      (clipboardUrl != null)
+          ? SnackBar(
+            content: const Text('Want to open link from clipboard?'),
+            action: SnackBarAction(
+              label: 'Open',
+              onPressed: () {
+                onAdd(clipboardUrl.toString());
+              },
+            ),
+            duration: duration,
+          )
+          : SnackBar(
+            content: const Text('Want to open a new tab?'),
+            action: SnackBarAction(
+              label: 'New Tab',
+              onPressed: () {
+                onAdd(null);
+              },
+            ),
+            duration: duration,
+          );
+
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 }
 
 void showTabSwitchMessage(
