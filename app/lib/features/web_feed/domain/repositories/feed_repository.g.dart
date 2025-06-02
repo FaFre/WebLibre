@@ -13,10 +13,9 @@ String _$feedRepositoryHash() => r'805cc26890b0d43576a1eab0ecb5851b6649d7b7';
 final feedRepositoryProvider = NotifierProvider<FeedRepository, void>.internal(
   FeedRepository.new,
   name: r'feedRepositoryProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$feedRepositoryHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$feedRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

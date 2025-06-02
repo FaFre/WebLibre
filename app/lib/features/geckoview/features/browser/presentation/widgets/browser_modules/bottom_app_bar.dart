@@ -86,14 +86,12 @@ class BrowserBottomAppBar extends HookConsumerWidget {
         child: AppBar(
           automaticallyImplyLeading: false,
           titleSpacing: 8.0,
-          backgroundColor:
-              (isPrivateTab && displayedSheet is! ViewTabsSheet)
-                  ? const Color(0x648000D7)
-                  : null,
-          title:
-              (selectedTabId != null && displayedSheet is! ViewTabsSheet)
-                  ? const AppBarTitle()
-                  : null,
+          backgroundColor: (isPrivateTab && displayedSheet is! ViewTabsSheet)
+              ? const Color(0x648000D7)
+              : null,
+          title: (selectedTabId != null && displayedSheet is! ViewTabsSheet)
+              ? const AppBarTitle()
+              : null,
           actions: [
             if (selectedTabId != null && displayedSheet is! ViewTabsSheet)
               ReaderButton(),
@@ -349,54 +347,50 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                       return Row(
                         children: [
                           Expanded(
-                            child:
-                                (history?.canGoBack == true || isLoading)
-                                    ? IconButton(
-                                      onPressed: () async {
-                                        final controller = ref.read(
-                                          tabSessionProvider(
-                                            tabId: selectedTabId,
-                                          ).notifier,
-                                        );
+                            child: (history?.canGoBack == true || isLoading)
+                                ? IconButton(
+                                    onPressed: () async {
+                                      final controller = ref.read(
+                                        tabSessionProvider(
+                                          tabId: selectedTabId,
+                                        ).notifier,
+                                      );
 
-                                        if (isLoading) {
-                                          await controller.stopLoading();
-                                        } else {
-                                          await controller.goBack();
-                                        }
+                                      if (isLoading) {
+                                        await controller.stopLoading();
+                                      } else {
+                                        await controller.goBack();
+                                      }
 
-                                        trippleDotMenuController.close();
-                                      },
-                                      icon: const Icon(Icons.arrow_back),
-                                    )
-                                    : IconButton(
-                                      onPressed: () async {
-                                        await ref
-                                            .read(
-                                              tabRepositoryProvider.notifier,
-                                            )
-                                            .closeTab(selectedTabId);
-                                        trippleDotMenuController.close();
-                                      },
-                                      icon: const Icon(Icons.close),
-                                    ),
+                                      trippleDotMenuController.close();
+                                    },
+                                    icon: const Icon(Icons.arrow_back),
+                                  )
+                                : IconButton(
+                                    onPressed: () async {
+                                      await ref
+                                          .read(tabRepositoryProvider.notifier)
+                                          .closeTab(selectedTabId);
+                                      trippleDotMenuController.close();
+                                    },
+                                    icon: const Icon(Icons.close),
+                                  ),
                           ),
                           const SizedBox(height: 48, child: VerticalDivider()),
                           Expanded(
                             child: IconButton(
-                              onPressed:
-                                  (history?.canGoForward == true)
-                                      ? () async {
-                                        final controller = ref.read(
-                                          tabSessionProvider(
-                                            tabId: selectedTabId,
-                                          ).notifier,
-                                        );
+                              onPressed: (history?.canGoForward == true)
+                                  ? () async {
+                                      final controller = ref.read(
+                                        tabSessionProvider(
+                                          tabId: selectedTabId,
+                                        ).notifier,
+                                      );
 
-                                        await controller.goForward();
-                                        trippleDotMenuController.close();
-                                      }
-                                      : null,
+                                      await controller.goForward();
+                                      trippleDotMenuController.close();
+                                    }
+                                  : null,
                               icon: const Icon(Icons.arrow_forward),
                             ),
                           ),

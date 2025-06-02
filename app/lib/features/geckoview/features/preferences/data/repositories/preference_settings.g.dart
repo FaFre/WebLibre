@@ -15,10 +15,9 @@ final _preferenceSettingContentProvider =
     FutureProvider<Map<String, dynamic>>.internal(
       _preferenceSettingContent,
       name: r'_preferenceSettingContentProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$preferenceSettingContentHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$preferenceSettingContentHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -99,10 +98,9 @@ class _PreferenceSettingGroupsProvider
         ),
         from: _preferenceSettingGroupsProvider,
         name: r'_preferenceSettingGroupsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$preferenceSettingGroupsHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$preferenceSettingGroupsHash,
         dependencies: _PreferenceSettingGroupsFamily._dependencies,
         allTransitiveDependencies:
             _PreferenceSettingGroupsFamily._allTransitiveDependencies,
@@ -238,10 +236,9 @@ class _PreferenceSettingGroupProvider
         ),
         from: _preferenceSettingGroupProvider,
         name: r'_preferenceSettingGroupProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$preferenceSettingGroupHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$preferenceSettingGroupHash,
         dependencies: _PreferenceSettingGroupFamily._dependencies,
         allTransitiveDependencies:
             _PreferenceSettingGroupFamily._allTransitiveDependencies,
@@ -334,19 +331,19 @@ String _$preferenceRepositoryHash() =>
 
 /// See also [_PreferenceRepository].
 @ProviderFor(_PreferenceRepository)
-final _preferenceRepositoryProvider = AutoDisposeNotifierProvider<
-  _PreferenceRepository,
-  Raw<Stream<Map<String, Object>>>
->.internal(
-  _PreferenceRepository.new,
-  name: r'_preferenceRepositoryProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
+final _preferenceRepositoryProvider =
+    AutoDisposeNotifierProvider<
+      _PreferenceRepository,
+      Raw<Stream<Map<String, Object>>>
+    >.internal(
+      _PreferenceRepository.new,
+      name: r'_preferenceRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
           : _$preferenceRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$PreferenceRepository =
     AutoDisposeNotifier<Raw<Stream<Map<String, Object>>>>;
@@ -418,14 +415,12 @@ class UnifiedPreferenceSettingsRepositoryProvider
         () => UnifiedPreferenceSettingsRepository()..partition = partition,
         from: unifiedPreferenceSettingsRepositoryProvider,
         name: r'unifiedPreferenceSettingsRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$unifiedPreferenceSettingsRepositoryHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$unifiedPreferenceSettingsRepositoryHash,
         dependencies: UnifiedPreferenceSettingsRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            UnifiedPreferenceSettingsRepositoryFamily
-                ._allTransitiveDependencies,
+        allTransitiveDependencies: UnifiedPreferenceSettingsRepositoryFamily
+            ._allTransitiveDependencies,
         partition: partition,
       );
 
@@ -580,16 +575,14 @@ class PreferenceSettingsGroupRepositoryProvider
     PreferencePartition partition,
     String groupName,
   ) : this._internal(
-        () =>
-            PreferenceSettingsGroupRepository()
-              ..partition = partition
-              ..groupName = groupName,
+        () => PreferenceSettingsGroupRepository()
+          ..partition = partition
+          ..groupName = groupName,
         from: preferenceSettingsGroupRepositoryProvider,
         name: r'preferenceSettingsGroupRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$preferenceSettingsGroupRepositoryHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$preferenceSettingsGroupRepositoryHash,
         dependencies: PreferenceSettingsGroupRepositoryFamily._dependencies,
         allTransitiveDependencies:
             PreferenceSettingsGroupRepositoryFamily._allTransitiveDependencies,
@@ -623,10 +616,9 @@ class PreferenceSettingsGroupRepositoryProvider
     return ProviderOverride(
       origin: this,
       override: PreferenceSettingsGroupRepositoryProvider._internal(
-        () =>
-            create()
-              ..partition = partition
-              ..groupName = groupName,
+        () => create()
+          ..partition = partition
+          ..groupName = groupName,
         from: from,
         name: null,
         dependencies: null,

@@ -8,7 +8,11 @@ import 'dart:typed_data' show Float64List, Int32List, Int64List, Uint8List;
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 import 'package:flutter/services.dart';
 
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse({
+  Object? result,
+  PlatformException? error,
+  bool empty = false,
+}) {
   if (empty) {
     return <Object?>[];
   }
@@ -17,20 +21,24 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
   }
   return <Object?>[error.code, error.message, error.details];
 }
+
 bool _deepEquals(Object? a, Object? b) {
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed
-        .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
   }
   if (a is Map && b is Map) {
-    return a.length == b.length && a.entries.every((MapEntry<Object?, Object?> entry) =>
-        (b as Map<Object?, Object?>).containsKey(entry.key) &&
-        _deepEquals(entry.value, b[entry.key]));
+    return a.length == b.length &&
+        a.entries.every(
+          (MapEntry<Object?, Object?> entry) =>
+              (b as Map<Object?, Object?>).containsKey(entry.key) &&
+              _deepEquals(entry.value, b[entry.key]),
+        );
   }
   return a == b;
 }
-
 
 class Intent {
   Intent({
@@ -52,17 +60,12 @@ class Intent {
   Map<String, Object?> extra;
 
   List<Object?> _toList() {
-    return <Object?>[
-      fromPackageName,
-      action,
-      data,
-      categories,
-      extra,
-    ];
+    return <Object?>[fromPackageName, action, data, categories, extra];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static Intent decode(Object result) {
     result as List<Object?>;
@@ -89,10 +92,8 @@ class Intent {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
-
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -101,7 +102,7 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is Intent) {
+    } else if (value is Intent) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
     } else {
@@ -112,7 +113,7 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129: 
+      case 129:
         return Intent.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -125,32 +126,49 @@ abstract class IntentEvents {
 
   void onIntentReceived(int timestamp, Intent intent);
 
-  static void setUp(IntentEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    IntentEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null, expected non-null int.',
+          );
           final Intent? arg_intent = (args[1] as Intent?);
-          assert(arg_intent != null,
-              'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null, expected non-null Intent.');
+          assert(
+            arg_intent != null,
+            'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null, expected non-null Intent.',
+          );
           try {
             api.onIntentReceived(arg_timestamp!, arg_intent!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }

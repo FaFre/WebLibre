@@ -147,64 +147,60 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? userAgent = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
-      javascriptEnabled:
-          javascriptEnabled == const $CopyWithPlaceholder()
-              ? _value.javascriptEnabled
-              // ignore: cast_nullable_to_non_nullable
-              : javascriptEnabled as bool?,
+      javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
+          ? _value.javascriptEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : javascriptEnabled as bool?,
       trackingProtectionPolicy:
           trackingProtectionPolicy == const $CopyWithPlaceholder()
-              ? _value.trackingProtectionPolicy
-              // ignore: cast_nullable_to_non_nullable
-              : trackingProtectionPolicy as TrackingProtectionPolicy?,
-      httpsOnlyMode:
-          httpsOnlyMode == const $CopyWithPlaceholder()
-              ? _value.httpsOnlyMode
-              // ignore: cast_nullable_to_non_nullable
-              : httpsOnlyMode as HttpsOnlyMode?,
+          ? _value.trackingProtectionPolicy
+          // ignore: cast_nullable_to_non_nullable
+          : trackingProtectionPolicy as TrackingProtectionPolicy?,
+      httpsOnlyMode: httpsOnlyMode == const $CopyWithPlaceholder()
+          ? _value.httpsOnlyMode
+          // ignore: cast_nullable_to_non_nullable
+          : httpsOnlyMode as HttpsOnlyMode?,
       globalPrivacyControlEnabled:
           globalPrivacyControlEnabled == const $CopyWithPlaceholder()
-              ? _value.globalPrivacyControlEnabled
-              // ignore: cast_nullable_to_non_nullable
-              : globalPrivacyControlEnabled as bool?,
-      preferredColorScheme:
-          preferredColorScheme == const $CopyWithPlaceholder()
-              ? _value.preferredColorScheme
-              // ignore: cast_nullable_to_non_nullable
-              : preferredColorScheme as ColorScheme?,
+          ? _value.globalPrivacyControlEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : globalPrivacyControlEnabled as bool?,
+      preferredColorScheme: preferredColorScheme == const $CopyWithPlaceholder()
+          ? _value.preferredColorScheme
+          // ignore: cast_nullable_to_non_nullable
+          : preferredColorScheme as ColorScheme?,
       cookieBannerHandlingMode:
           cookieBannerHandlingMode == const $CopyWithPlaceholder()
-              ? _value.cookieBannerHandlingMode
-              // ignore: cast_nullable_to_non_nullable
-              : cookieBannerHandlingMode as CookieBannerHandlingMode?,
+          ? _value.cookieBannerHandlingMode
+          // ignore: cast_nullable_to_non_nullable
+          : cookieBannerHandlingMode as CookieBannerHandlingMode?,
       cookieBannerHandlingModePrivateBrowsing:
           cookieBannerHandlingModePrivateBrowsing ==
-                  const $CopyWithPlaceholder()
-              ? _value.cookieBannerHandlingModePrivateBrowsing
-              // ignore: cast_nullable_to_non_nullable
-              : cookieBannerHandlingModePrivateBrowsing
-                  as CookieBannerHandlingMode?,
+              const $CopyWithPlaceholder()
+          ? _value.cookieBannerHandlingModePrivateBrowsing
+          // ignore: cast_nullable_to_non_nullable
+          : cookieBannerHandlingModePrivateBrowsing
+                as CookieBannerHandlingMode?,
       cookieBannerHandlingGlobalRules:
           cookieBannerHandlingGlobalRules == const $CopyWithPlaceholder()
-              ? _value.cookieBannerHandlingGlobalRules
-              // ignore: cast_nullable_to_non_nullable
-              : cookieBannerHandlingGlobalRules as bool?,
+          ? _value.cookieBannerHandlingGlobalRules
+          // ignore: cast_nullable_to_non_nullable
+          : cookieBannerHandlingGlobalRules as bool?,
       cookieBannerHandlingGlobalRulesSubFrames:
           cookieBannerHandlingGlobalRulesSubFrames ==
-                  const $CopyWithPlaceholder()
-              ? _value.cookieBannerHandlingGlobalRulesSubFrames
-              // ignore: cast_nullable_to_non_nullable
-              : cookieBannerHandlingGlobalRulesSubFrames as bool?,
+              const $CopyWithPlaceholder()
+          ? _value.cookieBannerHandlingGlobalRulesSubFrames
+          // ignore: cast_nullable_to_non_nullable
+          : cookieBannerHandlingGlobalRulesSubFrames as bool?,
       webContentIsolationStrategy:
           webContentIsolationStrategy == const $CopyWithPlaceholder()
-              ? _value.webContentIsolationStrategy
-              // ignore: cast_nullable_to_non_nullable
-              : webContentIsolationStrategy as WebContentIsolationStrategy?,
-      userAgent:
-          userAgent == const $CopyWithPlaceholder()
-              ? _value.userAgent
-              // ignore: cast_nullable_to_non_nullable
-              : userAgent as String?,
+          ? _value.webContentIsolationStrategy
+          // ignore: cast_nullable_to_non_nullable
+          : webContentIsolationStrategy as WebContentIsolationStrategy?,
+      userAgent: userAgent == const $CopyWithPlaceholder()
+          ? _value.userAgent
+          // ignore: cast_nullable_to_non_nullable
+          : userAgent as String?,
     );
   }
 }

@@ -10,8 +10,9 @@ class FetchArticlesController extends _$FetchArticlesController {
   Future<void> fetchAllArticles() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final feeds =
-          await ref.read(feedRepositoryProvider.notifier).getAllFeeds();
+      final feeds = await ref
+          .read(feedRepositoryProvider.notifier)
+          .getAllFeeds();
 
       await Future.wait(
         feeds.map((feed) async {

@@ -108,16 +108,18 @@ class FeedCard extends HookConsumerWidget {
                                 Icon(
                                   MdiIcons.newspaperVariantMultipleOutline,
                                   size: 18,
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   count.toString(),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary,
                                   ),
                                 ),
                               ],

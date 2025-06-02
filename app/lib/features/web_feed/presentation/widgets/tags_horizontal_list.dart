@@ -11,28 +11,26 @@ class TagsHorizontalList extends StatelessWidget {
     Set<String> selectedTags = const {},
     void Function(String tagId, bool value)? onTagSelected,
   }) {
-    _tags =
-        tags.map((tag) {
-          final label = Text(
-            '${tag.id} ${tag.title.mapNotNull((title) => '($title)') ?? ''}'
-                .trim(),
-          );
+    _tags = tags.map((tag) {
+      final label = Text(
+        '${tag.id} ${tag.title.mapNotNull((title) => '($title)') ?? ''}'.trim(),
+      );
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child:
-                onTagSelected.mapNotNull(
-                  (onTagSelected) => FilterChip(
-                    label: label,
-                    selected: selectedTags.contains(tag.id),
-                    onSelected: (value) {
-                      onTagSelected(tag.id, value);
-                    },
-                  ),
-                ) ??
-                Chip(label: label),
-          );
-        }).toList();
+      return Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child:
+            onTagSelected.mapNotNull(
+              (onTagSelected) => FilterChip(
+                label: label,
+                selected: selectedTags.contains(tag.id),
+                onSelected: (value) {
+                  onTagSelected(tag.id, value);
+                },
+              ),
+            ) ??
+            Chip(label: label),
+      );
+    }).toList();
   }
 
   @override

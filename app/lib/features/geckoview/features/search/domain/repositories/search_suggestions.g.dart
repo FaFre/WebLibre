@@ -94,10 +94,9 @@ class SearchSuggestionsRepositoryProvider
               ..suggestionsProvider = suggestionsProvider,
         from: searchSuggestionsRepositoryProvider,
         name: r'searchSuggestionsRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$searchSuggestionsRepositoryHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$searchSuggestionsRepositoryHash,
         dependencies: SearchSuggestionsRepositoryFamily._dependencies,
         allTransitiveDependencies:
             SearchSuggestionsRepositoryFamily._allTransitiveDependencies,

@@ -15,10 +15,9 @@ final selectedContainerDataProvider =
     AutoDisposeStreamProvider<ContainerData?>.internal(
       selectedContainerData,
       name: r'selectedContainerDataProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$selectedContainerDataHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$selectedContainerDataHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -34,10 +33,9 @@ final selectedContainerProvider =
     NotifierProvider<SelectedContainer, String?>.internal(
       SelectedContainer.new,
       name: r'selectedContainerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$selectedContainerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$selectedContainerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

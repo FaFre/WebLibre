@@ -80,17 +80,16 @@ class TokenizedFilter<T> {
   }) {
     final queryTokens = _tokenize(query);
 
-    final scoredItems =
-        items.map((item) {
-          final itemString = toString(item);
-          if (itemString == null || itemString.isEmpty) {
-            return (item, 0.0);
-          }
+    final scoredItems = items.map((item) {
+      final itemString = toString(item);
+      if (itemString == null || itemString.isEmpty) {
+        return (item, 0.0);
+      }
 
-          final itemTokens = _tokenize(itemString);
-          final score = _calculateScore(queryTokens, itemTokens);
-          return (item, score);
-        }).toList();
+      final itemTokens = _tokenize(itemString);
+      final score = _calculateScore(queryTokens, itemTokens);
+      return (item, score);
+    }).toList();
 
     // Sort by score in descending order
     scoredItems.sort((a, b) => b.$2.compareTo(a.$2));
@@ -108,16 +107,15 @@ class TokenizedFilter<T> {
   }) {
     final queryTokens = _tokenize(query);
 
-    final filtered =
-        items.where((item) {
-          final itemString = toString(item);
-          if (itemString == null || itemString.isEmpty) {
-            return false;
-          }
+    final filtered = items.where((item) {
+      final itemString = toString(item);
+      if (itemString == null || itemString.isEmpty) {
+        return false;
+      }
 
-          final itemTokens = _tokenize(itemString);
-          return _matchTokens(queryTokens, itemTokens);
-        }).toList();
+      final itemTokens = _tokenize(itemString);
+      return _matchTokens(queryTokens, itemTokens);
+    }).toList();
 
     return TokenizedFilter._(items, filtered);
   }

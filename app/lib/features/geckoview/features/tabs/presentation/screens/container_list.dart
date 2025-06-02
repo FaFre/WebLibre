@@ -28,127 +28,109 @@ class ContainerListScreen extends HookConsumerWidget {
             enabled: containersAsync.isLoading,
             child: containersAsync.when(
               skipLoadingOnReload: true,
-              data:
-                  (containers) => FadingScroll(
-                    fadingSize: 25,
-                    builder: (context, controller) {
-                      return ListView.builder(
-                        controller: controller,
-                        itemCount: containers.length,
-                        itemBuilder: (context, index) {
-                          final container = containers[index];
-                          return Slidable(
-                            key: ValueKey(container.id),
-                            startActionPane: ActionPane(
-                              motion: const ScrollMotion(),
-                              children: [
-                                if (container.id != selectedContainer)
-                                  SlidableAction(
-                                    onPressed: (context) async {
-                                      final result = await ref
-                                          .read(
-                                            selectedContainerProvider.notifier,
-                                          )
-                                          .setContainerId(container.id);
+              data: (containers) => FadingScroll(
+                fadingSize: 25,
+                builder: (context, controller) {
+                  return ListView.builder(
+                    controller: controller,
+                    itemCount: containers.length,
+                    itemBuilder: (context, index) {
+                      final container = containers[index];
+                      return Slidable(
+                        key: ValueKey(container.id),
+                        startActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          children: [
+                            if (container.id != selectedContainer)
+                              SlidableAction(
+                                onPressed: (context) async {
+                                  final result = await ref
+                                      .read(selectedContainerProvider.notifier)
+                                      .setContainerId(container.id);
 
-                                      if (context.mounted &&
-                                          result ==
-                                              SetContainerResult
-                                                  .successHasProxy) {
-                                        await ref
-                                            .read(
-                                              startProxyControllerProvider
-                                                  .notifier,
-                                            )
-                                            .maybeStartProxy(context);
-                                      }
-                                    },
-                                    foregroundColor:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryContainer,
-                                    backgroundColor:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.primaryContainer,
-                                    icon: Icons.check,
-                                    label: 'Select',
-                                  )
-                                else
-                                  SlidableAction(
-                                    onPressed: (context) {
-                                      ref
-                                          .read(
-                                            selectedContainerProvider.notifier,
-                                          )
-                                          .clearContainer();
-                                    },
-                                    foregroundColor:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryContainer,
-                                    backgroundColor:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.primaryContainer,
-                                    icon: Icons.close,
-                                    label: 'Unselect',
-                                  ),
-                              ],
-                            ),
-                            endActionPane: ActionPane(
-                              motion: const ScrollMotion(),
-                              children: [
-                                SlidableAction(
-                                  onPressed: (context) async {
+                                  if (context.mounted &&
+                                      result ==
+                                          SetContainerResult.successHasProxy) {
                                     await ref
                                         .read(
-                                          containerRepositoryProvider.notifier,
+                                          startProxyControllerProvider.notifier,
                                         )
-                                        .deleteContainer(container.id);
-                                  },
-                                  backgroundColor:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.errorContainer,
-                                  foregroundColor:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onErrorContainer,
-                                  icon: Icons.delete,
-                                  label: 'Delete',
-                                ),
-                              ],
+                                        .maybeStartProxy(context);
+                                  }
+                                },
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer,
+                                icon: Icons.check,
+                                label: 'Select',
+                              )
+                            else
+                              SlidableAction(
+                                onPressed: (context) {
+                                  ref
+                                      .read(selectedContainerProvider.notifier)
+                                      .clearContainer();
+                                },
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer,
+                                icon: Icons.close,
+                                label: 'Unselect',
+                              ),
+                          ],
+                        ),
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(),
+                          children: [
+                            SlidableAction(
+                              onPressed: (context) async {
+                                await ref
+                                    .read(containerRepositoryProvider.notifier)
+                                    .deleteContainer(container.id);
+                              },
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.errorContainer,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onErrorContainer,
+                              icon: Icons.delete,
+                              label: 'Delete',
                             ),
-                            child: ContainerListTile(
-                              container,
-                              isSelected: container.id == selectedContainer,
-                            ),
-                          );
-                        },
+                          ],
+                        ),
+                        child: ContainerListTile(
+                          container,
+                          isSelected: container.id == selectedContainer,
+                        ),
                       );
                     },
-                  ),
+                  );
+                },
+              ),
               error: (error, stackTrace) => SizedBox.shrink(),
-              loading:
-                  () => ListView.builder(
-                    itemCount: 3,
-                    itemBuilder:
-                        (context, index) => ContainerListTile(
-                          ContainerData(id: 'null', color: Colors.transparent),
-                          isSelected: false,
-                        ),
-                  ),
+              loading: () => ListView.builder(
+                itemCount: 3,
+                itemBuilder: (context, index) => ContainerListTile(
+                  ContainerData(id: 'null', color: Colors.transparent),
+                  isSelected: false,
+                ),
+              ),
             ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final initialColor =
-              await ref
-                  .read(containerRepositoryProvider.notifier)
-                  .unusedRandomContainerColor();
+          final initialColor = await ref
+              .read(containerRepositoryProvider.notifier)
+              .unusedRandomContainerColor();
 
           if (context.mounted) {
             final result = await ContainerCreateRoute(

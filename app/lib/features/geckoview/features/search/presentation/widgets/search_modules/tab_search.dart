@@ -33,19 +33,16 @@ class TabSearch extends HookConsumerWidget {
       ),
     );
 
-    final tabs =
-        ref
-            .watch(
-              seamlessFilteredTabPreviewsProvider(
-                TabSearchPartition.search,
-                (selectedContainer.value != null)
-                    ? ContainerFilterById(
-                      containerId: selectedContainer.value!.id,
-                    )
-                    : ContainerFilterDisabled(),
-              ),
-            )
-            .value;
+    final tabs = ref
+        .watch(
+          seamlessFilteredTabPreviewsProvider(
+            TabSearchPartition.search,
+            (selectedContainer.value != null)
+                ? ContainerFilterById(containerId: selectedContainer.value!.id)
+                : ContainerFilterDisabled(),
+          ),
+        )
+        .value;
 
     useListenableCallback(searchTextListenable, () async {
       await ref
@@ -118,30 +115,26 @@ class TabSearch extends HookConsumerWidget {
                   ),
                 ),
               ),
-              subtitle:
-                  (bodyHasMatch || urlHasMatch)
-                      ? MarkdownBody(
-                        data:
-                            bodyHasMatch
-                                ? result.content!
-                                : result.highlightedUrl!,
-                        styleSheet: MarkdownStyleSheet(
-                          p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          a: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                            decoration: TextDecoration.none,
-                          ),
+              subtitle: (bodyHasMatch || urlHasMatch)
+                  ? MarkdownBody(
+                      data: bodyHasMatch
+                          ? result.content!
+                          : result.highlightedUrl!,
+                      styleSheet: MarkdownStyleSheet(
+                        p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                      )
-                      : Text(
-                        result.url.toString(),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        a: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          decoration: TextDecoration.none,
+                        ),
                       ),
+                    )
+                  : Text(
+                      result.url.toString(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
               onTap: () async {
                 await ref
                     .read(tabRepositoryProvider.notifier)

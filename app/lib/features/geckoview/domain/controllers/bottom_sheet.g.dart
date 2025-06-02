@@ -15,10 +15,9 @@ final bottomSheetControllerProvider =
     AutoDisposeNotifierProvider<BottomSheetController, Sheet?>.internal(
       BottomSheetController.new,
       name: r'bottomSheetControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bottomSheetControllerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bottomSheetControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -32,10 +31,9 @@ final bottomSheetExtendProvider =
     StreamNotifierProvider<BottomSheetExtend, double>.internal(
       BottomSheetExtend.new,
       name: r'bottomSheetExtendProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bottomSheetExtendHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bottomSheetExtendHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

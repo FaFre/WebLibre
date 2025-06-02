@@ -13,8 +13,9 @@ String _$bangDatabaseHash() => r'e31cf4b499300aff65174a16fb74c7dd8ec3d6f0';
 final bangDatabaseProvider = Provider<BangDatabase>.internal(
   bangDatabase,
   name: r'bangDatabaseProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$bangDatabaseHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$bangDatabaseHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

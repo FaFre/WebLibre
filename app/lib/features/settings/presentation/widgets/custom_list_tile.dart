@@ -39,21 +39,19 @@ class CustomListTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style:
-                      enabled
-                          ? theme.textTheme.bodyLarge
-                          : theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.disabledColor,
-                          ),
+                  style: enabled
+                      ? theme.textTheme.bodyLarge
+                      : theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.disabledColor,
+                        ),
                 ),
                 Text(
                   subtitle,
-                  style:
-                      enabled
-                          ? subtitleTextTheme
-                          : theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.disabledColor,
-                          ),
+                  style: enabled
+                      ? subtitleTextTheme
+                      : theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.disabledColor,
+                        ),
                 ),
                 if (content != null) content!,
               ],

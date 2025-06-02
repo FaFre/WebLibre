@@ -52,8 +52,8 @@ class SelectedContainer extends _$SelectedContainer {
 
       if (passAuth) {
         if (container.metadata.useProxy) {
-          final proxyPluginHealthy =
-              await GeckoContainerProxyService().healthcheck();
+          final proxyPluginHealthy = await GeckoContainerProxyService()
+              .healthcheck();
 
           if (proxyPluginHealthy) {
             state = id;

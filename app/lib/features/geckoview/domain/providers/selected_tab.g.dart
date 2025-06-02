@@ -13,8 +13,9 @@ String _$selectedTabHash() => r'12b670dd76c3416e8d62bafd63bf69a83a603e3a';
 final selectedTabProvider = NotifierProvider<SelectedTab, String?>.internal(
   SelectedTab.new,
   name: r'selectedTabProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$selectedTabHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedTabHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

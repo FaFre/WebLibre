@@ -13,8 +13,9 @@ String _$feedReaderHash() => r'301e01fa831c58723dc0ab118496f4fb34c38610';
 final feedReaderProvider = NotifierProvider<FeedReader, void>.internal(
   FeedReader.new,
   name: r'feedReaderProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$feedReaderHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$feedReaderHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

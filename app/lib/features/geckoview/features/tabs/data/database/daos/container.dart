@@ -42,10 +42,9 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   }
 
   Selectable<Color> getDistinctColors() {
-    final query =
-        db.selectOnly(db.container, distinct: true)
-          ..addColumns([db.container.color])
-          ..where(db.container.color.isNotNull());
+    final query = db.selectOnly(db.container, distinct: true)
+      ..addColumns([db.container.color])
+      ..where(db.container.color.isNotNull());
 
     return query.map(
       (row) => row.readWithConverter<Color?, int>(db.container.color)!,
@@ -53,29 +52,26 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   }
 
   Selectable<String> getContainerTabIds(String? containerId) {
-    final query =
-        selectOnly(db.tab)
-          ..addColumns([db.tab.id])
-          ..where(
-            (containerId != null)
-                ? db.tab.containerId.equals(containerId)
-                : db.tab.containerId.isNull(),
-          )
-          ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(
+        (containerId != null)
+            ? db.tab.containerId.equals(containerId)
+            : db.tab.containerId.isNull(),
+      )
+      ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
 
     return query.map((row) => row.read(db.tab.id)!);
   }
 
   Selectable<TabData> getContainerTabsData(String? containerId) {
-    final query =
-        db.tab.select()
-          ..where(
-            (t) =>
-                (containerId != null)
-                    ? t.containerId.equals(containerId)
-                    : t.containerId.isNull(),
-          )
-          ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]);
+    final query = db.tab.select()
+      ..where(
+        (t) => (containerId != null)
+            ? t.containerId.equals(containerId)
+            : t.containerId.isNull(),
+      )
+      ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]);
 
     return query;
   }

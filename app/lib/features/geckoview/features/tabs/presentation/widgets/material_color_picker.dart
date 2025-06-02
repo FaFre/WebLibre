@@ -54,43 +54,38 @@ class _MaterialPickerState extends State<MaterialPicker> {
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
         child: Container(
-          margin:
-              isPortrait
-                  ? const EdgeInsets.only(right: 10)
-                  : const EdgeInsets.only(bottom: 10),
+          margin: isPortrait
+              ? const EdgeInsets.only(right: 10)
+              : const EdgeInsets.only(bottom: 10),
           width: isPortrait ? 60 : null,
           height: isPortrait ? null : 60,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             boxShadow: [
               BoxShadow(
-                color:
-                    (Theme.of(context).brightness == Brightness.light)
-                        ? (Theme.of(context).brightness == Brightness.light)
-                            ? Colors.grey[300]!
-                            : Colors.black38
-                        : Colors.black38,
+                color: (Theme.of(context).brightness == Brightness.light)
+                    ? (Theme.of(context).brightness == Brightness.light)
+                          ? Colors.grey[300]!
+                          : Colors.black38
+                    : Colors.black38,
                 blurRadius: 10,
               ),
             ],
-            border:
-                isPortrait
-                    ? Border(
-                      right: BorderSide(
-                        color:
-                            (Theme.of(context).brightness == Brightness.light)
-                                ? Colors.grey[300]!
-                                : Colors.black38,
-                      ),
-                    )
-                    : Border(
-                      top: BorderSide(
-                        color:
-                            (Theme.of(context).brightness == Brightness.light)
-                                ? Colors.grey[300]!
-                                : Colors.black38,
-                      ),
+            border: isPortrait
+                ? Border(
+                    right: BorderSide(
+                      color: (Theme.of(context).brightness == Brightness.light)
+                          ? Colors.grey[300]!
+                          : Colors.black38,
                     ),
+                  )
+                : Border(
+                    top: BorderSide(
+                      color: (Theme.of(context).brightness == Brightness.light)
+                          ? Colors.grey[300]!
+                          : Colors.black38,
+                    ),
+                  ),
           ),
           child: ScrollConfiguration(
             behavior: ScrollConfiguration.of(
@@ -118,10 +113,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                         },
                         child: Container(
                           color: const Color(0x00000000),
-                          padding:
-                              isPortrait
-                                  ? const EdgeInsets.fromLTRB(0, 7, 0, 7)
-                                  : const EdgeInsets.fromLTRB(7, 0, 7, 0),
+                          padding: isPortrait
+                              ? const EdgeInsets.fromLTRB(0, 7, 0, 7)
+                              : const EdgeInsets.fromLTRB(7, 0, 7, 0),
                           child: Align(
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
@@ -130,38 +124,34 @@ class _MaterialPickerState extends State<MaterialPicker> {
                               decoration: BoxDecoration(
                                 color: colorType,
                                 shape: BoxShape.circle,
-                                boxShadow:
-                                    _currentColorType == colors
-                                        ? [
-                                          if (colorType ==
-                                              Theme.of(context).cardColor)
-                                            BoxShadow(
-                                              color:
-                                                  (Theme.of(
-                                                            context,
-                                                          ).brightness ==
-                                                          Brightness.light)
-                                                      ? Colors.grey[300]!
-                                                      : Colors.black38,
-                                              blurRadius: 10,
-                                            )
-                                          else
-                                            BoxShadow(
-                                              color: colorType,
-                                              blurRadius: 10,
-                                            ),
-                                        ]
-                                        : null,
-                                border:
-                                    colorType == Theme.of(context).cardColor
-                                        ? Border.all(
-                                          color:
-                                              (Theme.of(context).brightness ==
-                                                      Brightness.light)
-                                                  ? Colors.grey[300]!
-                                                  : Colors.black38,
-                                        )
-                                        : null,
+                                boxShadow: _currentColorType == colors
+                                    ? [
+                                        if (colorType ==
+                                            Theme.of(context).cardColor)
+                                          BoxShadow(
+                                            color:
+                                                (Theme.of(context).brightness ==
+                                                    Brightness.light)
+                                                ? Colors.grey[300]!
+                                                : Colors.black38,
+                                            blurRadius: 10,
+                                          )
+                                        else
+                                          BoxShadow(
+                                            color: colorType,
+                                            blurRadius: 10,
+                                          ),
+                                      ]
+                                    : null,
+                                border: colorType == Theme.of(context).cardColor
+                                    ? Border.all(
+                                        color:
+                                            (Theme.of(context).brightness ==
+                                                Brightness.light)
+                                            ? Colors.grey[300]!
+                                            : Colors.black38,
+                                      )
+                                    : null,
                               ),
                             ),
                           ),
@@ -208,66 +198,60 @@ class _MaterialPickerState extends State<MaterialPicker> {
                     },
                     child: Container(
                       color: const Color(0x00000000),
-                      margin:
-                          isPortrait
-                              ? const EdgeInsets.only(right: 10)
-                              : const EdgeInsets.only(bottom: 10),
-                      padding:
-                          isPortrait
-                              ? const EdgeInsets.fromLTRB(0, 7, 0, 7)
-                              : const EdgeInsets.fromLTRB(7, 0, 7, 0),
+                      margin: isPortrait
+                          ? const EdgeInsets.only(right: 10)
+                          : const EdgeInsets.only(bottom: 10),
+                      padding: isPortrait
+                          ? const EdgeInsets.fromLTRB(0, 7, 0, 7)
+                          : const EdgeInsets.fromLTRB(7, 0, 7, 0),
                       child: Align(
                         child: AnimatedContainer(
                           curve: Curves.fastOutSlowIn,
                           duration: const Duration(milliseconds: 500),
-                          width:
-                              isPortrait
-                                  ? (_currentShading == color ? 250 : 230)
-                                  : (_currentShading == color ? 50 : 30),
+                          width: isPortrait
+                              ? (_currentShading == color ? 250 : 230)
+                              : (_currentShading == color ? 50 : 30),
                           height: isPortrait ? 50 : 220,
                           decoration: BoxDecoration(
                             color: color,
-                            boxShadow:
-                                _currentShading == color
-                                    ? [
-                                      if ((color == Colors.white) ||
-                                          (color == Colors.black))
-                                        BoxShadow(
-                                          color:
-                                              (Theme.of(context).brightness ==
-                                                      Brightness.light)
-                                                  ? Colors.grey[300]!
-                                                  : Colors.black38,
-                                          blurRadius: 10,
-                                        )
-                                      else
-                                        BoxShadow(color: color, blurRadius: 10),
-                                    ]
-                                    : null,
+                            boxShadow: _currentShading == color
+                                ? [
+                                    if ((color == Colors.white) ||
+                                        (color == Colors.black))
+                                      BoxShadow(
+                                        color:
+                                            (Theme.of(context).brightness ==
+                                                Brightness.light)
+                                            ? Colors.grey[300]!
+                                            : Colors.black38,
+                                        blurRadius: 10,
+                                      )
+                                    else
+                                      BoxShadow(color: color, blurRadius: 10),
+                                  ]
+                                : null,
                             border:
                                 (color == Colors.white) ||
-                                        (color == Colors.black)
-                                    ? Border.all(
-                                      color:
-                                          (Theme.of(context).brightness ==
-                                                  Brightness.light)
-                                              ? Colors.grey[300]!
-                                              : Colors.black38,
-                                    )
-                                    : null,
+                                    (color == Colors.black)
+                                ? Border.all(
+                                    color:
+                                        (Theme.of(context).brightness ==
+                                            Brightness.light)
+                                        ? Colors.grey[300]!
+                                        : Colors.black38,
+                                  )
+                                : null,
                           ),
-                          child:
-                              widget.enableLabel
-                                  ? isPortrait
-                                      ? Row(
+                          child: widget.enableLabel
+                              ? isPortrait
+                                    ? Row(
                                         children: [
                                           Text(
                                             '  ${colors.values.first}',
                                             style: TextStyle(
-                                              color:
-                                                  useWhiteForeground(color)
-                                                      ? Colors.white
-                                                      : Colors.black,
+                                              color: useWhiteForeground(color)
+                                                  ? Colors.white
+                                                  : Colors.black,
                                             ),
                                           ),
                                           Expanded(
@@ -278,8 +262,8 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                                 style: TextStyle(
                                                   color:
                                                       useWhiteForeground(color)
-                                                          ? Colors.white
-                                                          : Colors.black,
+                                                      ? Colors.white
+                                                      : Colors.black,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -287,12 +271,13 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           ),
                                         ],
                                       )
-                                      : AnimatedOpacity(
+                                    : AnimatedOpacity(
                                         duration: const Duration(
                                           milliseconds: 300,
                                         ),
-                                        opacity:
-                                            _currentShading == color ? 1 : 0,
+                                        opacity: _currentShading == color
+                                            ? 1
+                                            : 0,
                                         child: Container(
                                           padding: const EdgeInsets.only(
                                             top: 16,
@@ -301,10 +286,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           child: Text(
                                             colors.values.first,
                                             style: TextStyle(
-                                              color:
-                                                  useWhiteForeground(color)
-                                                      ? Colors.white
-                                                      : Colors.black,
+                                              color: useWhiteForeground(color)
+                                                  ? Colors.white
+                                                  : Colors.black,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 14,
                                             ),
@@ -312,7 +296,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           ),
                                         ),
                                       )
-                                  : const SizedBox(),
+                              : const SizedBox(),
                         ),
                       ),
                     ),

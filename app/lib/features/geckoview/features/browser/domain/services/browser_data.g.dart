@@ -15,10 +15,9 @@ final browserDataServiceProvider =
     NotifierProvider<BrowserDataService, void>.internal(
       BrowserDataService.new,
       name: r'browserDataServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$browserDataServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$browserDataServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

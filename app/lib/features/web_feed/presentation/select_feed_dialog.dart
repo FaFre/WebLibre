@@ -15,51 +15,44 @@ class SelectFeedDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SimpleDialog(
       title: const Text('Add Feed'),
-      children:
-          feedUris
-              .map(
-                (uri) => HookConsumer(
-                  builder: (context, ref, child) {
-                    final feedAsync = ref.watch(fetchWebFeedProvider(uri));
+      children: feedUris
+          .map(
+            (uri) => HookConsumer(
+              builder: (context, ref, child) {
+                final feedAsync = ref.watch(fetchWebFeedProvider(uri));
 
-                    return feedAsync.when(
-                      data: (data) {
-                        return ListTile(
-                          title: Text(
-                            data.feedData.title.whenNotEmpty ?? 'Unnamed Feed',
-                          ),
-                          subtitle: Text(uri.toString()),
-                          trailing: const Icon(Icons.add),
-                          onTap: () {
-                            FeedCreateRoute(
-                              feedId: uri,
-                            ).pushReplacement(context);
-                          },
-                        );
+                return feedAsync.when(
+                  data: (data) {
+                    return ListTile(
+                      title: Text(
+                        data.feedData.title.whenNotEmpty ?? 'Unnamed Feed',
+                      ),
+                      subtitle: Text(uri.toString()),
+                      trailing: const Icon(Icons.add),
+                      onTap: () {
+                        FeedCreateRoute(feedId: uri).pushReplacement(context);
                       },
-                      error:
-                          (error, stackTrace) => FailureWidget(
-                            title: 'Failed to fetch Feed',
-                            exception: error,
-                            onRetry: () {
-                              // ignore: unused_result
-                              ref.refresh(fetchWebFeedProvider(uri));
-                            },
-                          ),
-                      loading:
-                          () => Skeletonizer(
-                            child: ListTile(
-                              title: Text(BoneMock.title),
-                              subtitle: Skeleton.keep(
-                                child: Text(uri.toString()),
-                              ),
-                            ),
-                          ),
                     );
                   },
-                ),
-              )
-              .toList(),
+                  error: (error, stackTrace) => FailureWidget(
+                    title: 'Failed to fetch Feed',
+                    exception: error,
+                    onRetry: () {
+                      // ignore: unused_result
+                      ref.refresh(fetchWebFeedProvider(uri));
+                    },
+                  ),
+                  loading: () => Skeletonizer(
+                    child: ListTile(
+                      title: Text(BoneMock.title),
+                      subtitle: Skeleton.keep(child: Text(uri.toString())),
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
+          .toList(),
     );
   }
 }

@@ -15,10 +15,9 @@ final browserAddonServiceProvider =
     AutoDisposeNotifierProvider<BrowserAddonService, void>.internal(
       BrowserAddonService.new,
       name: r'browserAddonServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$browserAddonServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$browserAddonServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

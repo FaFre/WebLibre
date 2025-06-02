@@ -15,10 +15,9 @@ final proxySettingsReplicationProvider =
     NotifierProvider<ProxySettingsReplication, void>.internal(
       ProxySettingsReplication.new,
       name: r'proxySettingsReplicationProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$proxySettingsReplicationHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$proxySettingsReplicationHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

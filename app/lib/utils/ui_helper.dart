@@ -21,10 +21,9 @@ void showTabBackButtonMessage(
   Duration duration,
 ) {
   final snackbar = SnackBar(
-    content:
-        (tabCount > 1)
-            ? const Text('Navigate BACK again to close current tab')
-            : const Text('Navigate BACK again to exit app'),
+    content: (tabCount > 1)
+        ? const Text('Navigate BACK again to close current tab')
+        : const Text('Navigate BACK again to exit app'),
     duration: duration,
   );
 
@@ -60,28 +59,27 @@ Future<void> showSuggestNewTabMessage(
 }) async {
   final clipboardUrl = await tryGetUriFromClipboard();
 
-  final snackBar =
-      (clipboardUrl != null)
-          ? SnackBar(
-            content: const Text('Want to open link from clipboard?'),
-            action: SnackBarAction(
-              label: 'Open',
-              onPressed: () {
-                onAdd(clipboardUrl.toString());
-              },
-            ),
-            duration: duration,
-          )
-          : SnackBar(
-            content: const Text('Want to open a new tab?'),
-            action: SnackBarAction(
-              label: 'New Tab',
-              onPressed: () {
-                onAdd(null);
-              },
-            ),
-            duration: duration,
-          );
+  final snackBar = (clipboardUrl != null)
+      ? SnackBar(
+          content: const Text('Want to open link from clipboard?'),
+          action: SnackBarAction(
+            label: 'Open',
+            onPressed: () {
+              onAdd(clipboardUrl.toString());
+            },
+          ),
+          duration: duration,
+        )
+      : SnackBar(
+          content: const Text('Want to open a new tab?'),
+          action: SnackBarAction(
+            label: 'New Tab',
+            onPressed: () {
+              onAdd(null);
+            },
+          ),
+          duration: duration,
+        );
 
   if (context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);

@@ -81,10 +81,9 @@ class FindInPageRepositoryProvider
         () => FindInPageRepository()..tabId = tabId,
         from: findInPageRepositoryProvider,
         name: r'findInPageRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$findInPageRepositoryHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$findInPageRepositoryHash,
         dependencies: FindInPageRepositoryFamily._dependencies,
         allTransitiveDependencies:
             FindInPageRepositoryFamily._allTransitiveDependencies,

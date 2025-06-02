@@ -21,10 +21,9 @@ class FeedParser {
       RssVersion.rss1 => Rss1Feed.parse(xmlString),
       RssVersion.rss2 => RssFeed.parse(xmlString),
       RssVersion.atom => AtomFeed.parse(xmlString),
-      RssVersion.unknown =>
-        throw Error.safeToString(
-          'Invalid XML String? We cannot detect RSS/Atom version.',
-        ),
+      RssVersion.unknown => throw Error.safeToString(
+        'Invalid XML String? We cannot detect RSS/Atom version.',
+      ),
     };
 
     return FeedParser._(url, feed);
@@ -53,8 +52,9 @@ class FeedParser {
           siteLink: feed.link.mapNotNull(Uri.tryParse),
           authors: (feed.author.whenNotEmpty ?? feed.dc?.creator.whenNotEmpty)
               .mapNotNull((creator) => [FeedAuthor(name: creator)]),
-          tags:
-              categories.isNotEmpty ? categories : feed.dc?.toFeedCategories(),
+          tags: categories.isNotEmpty
+              ? categories
+              : feed.dc?.toFeedCategories(),
         );
       case final AtomFeed feed:
         final authors = feed.authors.toFeedAuthors();
@@ -64,11 +64,10 @@ class FeedParser {
           url: url,
           title: feed.title.whenNotEmpty,
           icon: feed.icon.mapNotNull(Uri.tryParse),
-          siteLink:
-              feed.links
-                  .toFeedLinks()
-                  .getRelation(FeedLinkRelation.alternate)
-                  ?.uri,
+          siteLink: feed.links
+              .toFeedLinks()
+              .getRelation(FeedLinkRelation.alternate)
+              ?.uri,
           description: feed.subtitle.whenNotEmpty,
           authors: authors.isNotEmpty ? authors : null,
           tags: tags,
@@ -150,10 +149,9 @@ class FeedParser {
                 FeedLink(uri: link, relation: FeedLinkRelation.alternate),
               ],
             ),
-            tags:
-                categories.isNotEmpty
-                    ? categories
-                    : item.dc?.toFeedCategories(),
+            tags: categories.isNotEmpty
+                ? categories
+                : item.dc?.toFeedCategories(),
             contentHtml: item.content?.value.whenNotEmpty,
           );
         }).toList();

@@ -49,8 +49,9 @@ class TabRepository extends _$TabRepository {
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
   }) async {
-    final selectedContainer =
-        await ref.read(selectedContainerProvider.notifier).fetchData();
+    final selectedContainer = await ref
+        .read(selectedContainerProvider.notifier)
+        .fetchData();
 
     return ref.read(tabDatabaseProvider).tabDao.upsertContainerTabTransactional(
       () {
@@ -124,8 +125,8 @@ class TabRepository extends _$TabRepository {
       }
 
       if (containerData.metadata.useProxy) {
-        final proxyPluginHealthy =
-            await GeckoContainerProxyService().healthcheck();
+        final proxyPluginHealthy = await GeckoContainerProxyService()
+            .healthcheck();
 
         if (!proxyPluginHealthy) {
           logger.w(
@@ -170,10 +171,9 @@ class TabRepository extends _$TabRepository {
     }
 
     //We only take containers without authentication!
-    final availableContainers =
-        await ref
-            .read(containerRepositoryProvider.notifier)
-            .getAllContainersWithCount();
+    final availableContainers = await ref
+        .read(containerRepositoryProvider.notifier)
+        .getAllContainersWithCount();
 
     final nextAvailableContainerUnauthenticated = availableContainers
         .firstWhereOrNull(

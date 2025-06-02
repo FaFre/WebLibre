@@ -61,26 +61,22 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
     Object? feeds = const $CopyWithPlaceholder(),
   }) {
     return WebPageInfo(
-      url:
-          url == const $CopyWithPlaceholder()
-              ? _value.url
-              // ignore: cast_nullable_to_non_nullable
-              : url as Uri,
-      title:
-          title == const $CopyWithPlaceholder()
-              ? _value.title
-              // ignore: cast_nullable_to_non_nullable
-              : title as String?,
-      favicon:
-          favicon == const $CopyWithPlaceholder()
-              ? _value.favicon
-              // ignore: cast_nullable_to_non_nullable
-              : favicon as BrowserIcon?,
-      feeds:
-          feeds == const $CopyWithPlaceholder()
-              ? _value.feeds
-              // ignore: cast_nullable_to_non_nullable
-              : feeds as Set<Uri>?,
+      url: url == const $CopyWithPlaceholder()
+          ? _value.url
+          // ignore: cast_nullable_to_non_nullable
+          : url as Uri,
+      title: title == const $CopyWithPlaceholder()
+          ? _value.title
+          // ignore: cast_nullable_to_non_nullable
+          : title as String?,
+      favicon: favicon == const $CopyWithPlaceholder()
+          ? _value.favicon
+          // ignore: cast_nullable_to_non_nullable
+          : favicon as BrowserIcon?,
+      feeds: feeds == const $CopyWithPlaceholder()
+          ? _value.feeds
+          // ignore: cast_nullable_to_non_nullable
+          : feeds as Set<Uri>?,
     );
   }
 }

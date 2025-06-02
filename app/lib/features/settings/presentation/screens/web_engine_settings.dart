@@ -46,12 +46,13 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   await ref
                       .read(saveGeneralSettingsControllerProvider.notifier)
                       .save(
-                        (currentSettings) =>
-                            value
-                                ? currentSettings.copyWith
-                                    .deleteBrowsingDataOnQuit({})
-                                : currentSettings.copyWith
-                                    .deleteBrowsingDataOnQuit(null),
+                        (currentSettings) => value
+                            ? currentSettings.copyWith.deleteBrowsingDataOnQuit(
+                                {},
+                              )
+                            : currentSettings.copyWith.deleteBrowsingDataOnQuit(
+                                null,
+                              ),
                       );
                 },
               ),
@@ -325,27 +326,26 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                     if (context.mounted) {
                       final restart = await showDialog<bool>(
                         context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: const Text('User Agent Changed'),
-                              content: const Text(
-                                'The app needs to restart for the new user agent to take effect',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    context.pop(false);
-                                  },
-                                  child: const Text('Later'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    context.pop(true);
-                                  },
-                                  child: const Text('Restart Now'),
-                                ),
-                              ],
+                        builder: (context) => AlertDialog(
+                          title: const Text('User Agent Changed'),
+                          content: const Text(
+                            'The app needs to restart for the new user agent to take effect',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                context.pop(false);
+                              },
+                              child: const Text('Later'),
                             ),
+                            TextButton(
+                              onPressed: () {
+                                context.pop(true);
+                              },
+                              child: const Text('Restart Now'),
+                            ),
+                          ],
+                        ),
                       );
 
                       if (restart == true) {

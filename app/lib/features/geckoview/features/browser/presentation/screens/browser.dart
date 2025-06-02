@@ -111,14 +111,13 @@ class BrowserScreen extends HookConsumerWidget {
                   return displayedOverlay!;
                 },
                 child: Listener(
-                  onPointerDown:
-                      (displayedSheet != null)
-                          ? (_) {
-                            ref
-                                .read(bottomSheetControllerProvider.notifier)
-                                .dismiss();
-                          }
-                          : null,
+                  onPointerDown: (displayedSheet != null)
+                      ? (_) {
+                          ref
+                              .read(bottomSheetControllerProvider.notifier)
+                              .dismiss();
+                        }
+                      : null,
                   child: BackButtonListener(
                     onBackButtonPressed: () async {
                       final tabState = ref.read(selectedTabStateProvider);
@@ -220,36 +219,35 @@ class BrowserScreen extends HookConsumerWidget {
             },
           ),
           floatingActionButton: ReaderAppearanceButton(),
-          bottomSheet:
-              (displayedSheet != null)
-                  ? NotificationListener<DraggableScrollableNotification>(
-                    onNotification: (notification) {
-                      if (notification.extent <= 0.1) {
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .dismiss();
-                        return true;
-                      } else {
-                        ref
-                            .read(bottomSheetExtendProvider.notifier)
-                            .add(notification.extent);
-                      }
+          bottomSheet: (displayedSheet != null)
+              ? NotificationListener<DraggableScrollableNotification>(
+                  onNotification: (notification) {
+                    if (notification.extent <= 0.1) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .dismiss();
+                      return true;
+                    } else {
+                      ref
+                          .read(bottomSheetExtendProvider.notifier)
+                          .add(notification.extent);
+                    }
 
-                      return false;
-                    },
-                    child: switch (displayedSheet) {
-                      ViewTabsSheet() => _ViewTabsSheet(
-                        key: ValueKey(displayedSheet),
-                        maxChildSize: MediaQuery.of(context).relativeSafeArea(),
-                      ),
-                      final TabQaChatSheet parameter => _QaSheet(
-                        key: ValueKey(displayedSheet),
-                        maxChildSize: MediaQuery.of(context).relativeSafeArea(),
-                        chatId: parameter.chatId,
-                      ),
-                    },
-                  )
-                  : null,
+                    return false;
+                  },
+                  child: switch (displayedSheet) {
+                    ViewTabsSheet() => _ViewTabsSheet(
+                      key: ValueKey(displayedSheet),
+                      maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                    ),
+                    final TabQaChatSheet parameter => _QaSheet(
+                      key: ValueKey(displayedSheet),
+                      maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                      chatId: parameter.chatId,
+                    ),
+                  },
+                )
+              : null,
         ),
       ),
     );
@@ -304,10 +302,10 @@ class _BrowserView extends StatelessWidget {
                         (state) => EdgeInsets.only(
                           bottom:
                               (state?.isLoading == true &&
-                                      state?.progress != null &&
-                                      state!.progress < 100)
-                                  ? 4.0
-                                  : 0.0,
+                                  state?.progress != null &&
+                                  state!.progress < 100)
+                              ? 4.0
+                              : 0.0,
                         ),
                       ),
                     );

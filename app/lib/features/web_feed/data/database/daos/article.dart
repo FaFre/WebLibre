@@ -44,9 +44,8 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
     return db.transaction(() async {
       await Future.wait(
         articles.map((newArticle) {
-          final statement =
-              db.article.update()
-                ..where((article) => article.id.equals(newArticle.id));
+          final statement = db.article.update()
+            ..where((article) => article.id.equals(newArticle.id));
 
           return statement.write(
             ArticleCompanion(
@@ -86,12 +85,11 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
                       updated: Value(article.updated),
                     );
                   },
-                  where:
-                      (old) =>
-                          old.updated.isNotNull() &
-                          old.updated.isSmallerThanValue(
-                            article.updated ?? DateTime(0),
-                          ),
+                  where: (old) =>
+                      old.updated.isNotNull() &
+                      old.updated.isSmallerThanValue(
+                        article.updated ?? DateTime(0),
+                      ),
                 ),
               ),
             )
@@ -101,8 +99,8 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
   }
 
   Future<int> updateArticleRead(String articleId, DateTime? read) {
-    final statement =
-        db.article.update()..where((article) => article.id.equals(articleId));
+    final statement = db.article.update()
+      ..where((article) => article.id.equals(articleId));
 
     return statement.write(ArticleCompanion(lastRead: Value(read)));
   }
@@ -110,15 +108,14 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
   Selectable<(String, int)> getUnreadArticleCount() {
     final count = countAll();
 
-    final countByFeed =
-        db.article.selectOnly()
-          ..addColumns([db.article.feedId, count])
-          ..where(
-            db.article.lastRead.isNull() |
-                (db.article.updated.isNotNull() &
-                    db.article.lastRead.isSmallerThan(db.article.lastRead)),
-          )
-          ..groupBy([db.article.feedId]);
+    final countByFeed = db.article.selectOnly()
+      ..addColumns([db.article.feedId, count])
+      ..where(
+        db.article.lastRead.isNull() |
+            (db.article.updated.isNotNull() &
+                db.article.lastRead.isSmallerThan(db.article.lastRead)),
+      )
+      ..groupBy([db.article.feedId]);
 
     return countByFeed.map(
       (result) => (result.read(db.article.feedId)!, result.read(count)!),

@@ -31,17 +31,16 @@ class TagField extends HookWidget {
         const SizedBox(height: 4),
         Wrap(
           spacing: 8.0,
-          children:
-              tags.value
-                  .map(
-                    (tag) => InputChip(
-                      label: Text(tag),
-                      onDeleted: () {
-                        tags.value = {...tags.value}..remove(tag);
-                      },
-                    ),
-                  )
-                  .toList(),
+          children: tags.value
+              .map(
+                (tag) => InputChip(
+                  label: Text(tag),
+                  onDeleted: () {
+                    tags.value = {...tags.value}..remove(tag);
+                  },
+                ),
+              )
+              .toList(),
         ),
         TextField(
           controller: textController,
@@ -68,12 +67,11 @@ class TagField extends HookWidget {
           },
           onSubmitted: (value) {
             if (value.isNotEmpty) {
-              final values =
-                  value
-                      .split(_tagSplitPatter)
-                      .map((str) => str.trim())
-                      .where((str) => str.isNotEmpty)
-                      .toList();
+              final values = value
+                  .split(_tagSplitPatter)
+                  .map((str) => str.trim())
+                  .where((str) => str.isNotEmpty)
+                  .toList();
 
               if (values.isNotEmpty) {
                 textController.clear();

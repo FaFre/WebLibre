@@ -10,10 +10,9 @@ class SyncDao extends DatabaseAccessor<BangDatabase> with _$SyncDaoMixin {
   SyncDao(super.db);
 
   SingleOrNullSelectable<DateTime?> getLastSyncOfGroup(BangGroup group) {
-    final query =
-        selectOnly(db.bangSync)
-          ..addColumns([db.bangSync.lastSync])
-          ..where(db.bangSync.group.equalsValue(group));
+    final query = selectOnly(db.bangSync)
+      ..addColumns([db.bangSync.lastSync])
+      ..where(db.bangSync.group.equalsValue(group));
 
     return query.map((row) => row.read(db.bangSync.lastSync));
   }

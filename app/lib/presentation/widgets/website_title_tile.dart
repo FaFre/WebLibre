@@ -36,28 +36,26 @@ class WebsiteTitleTile extends HookConsumerWidget {
         error: (error, stackTrace) {
           return FailureWidget(
             title: error.toString(),
-            onRetry:
-                () => ref.refresh(pageInfoProvider(url, isImageRequest: false)),
+            onRetry: () =>
+                ref.refresh(pageInfoProvider(url, isImageRequest: false)),
           );
         },
-        loading:
-            () =>
-                (precachedInfo != null)
-                    ? ListTile(
-                      leading: RawImage(
-                        image: precachedInfo!.favicon?.image.value,
-                        height: 24,
-                        width: 24,
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(precachedInfo!.title ?? 'Unknown Title'),
-                      subtitle: Text(url.authority),
-                    )
-                    : const ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Bone.text(),
-                      subtitle: Bone.text(),
-                    ),
+        loading: () => (precachedInfo != null)
+            ? ListTile(
+                leading: RawImage(
+                  image: precachedInfo!.favicon?.image.value,
+                  height: 24,
+                  width: 24,
+                ),
+                contentPadding: EdgeInsets.zero,
+                title: Text(precachedInfo!.title ?? 'Unknown Title'),
+                subtitle: Text(url.authority),
+              )
+            : const ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Bone.text(),
+                subtitle: Bone.text(),
+              ),
       ),
     );
   }

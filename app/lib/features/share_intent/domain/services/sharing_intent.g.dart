@@ -15,10 +15,9 @@ final sharingIntentStreamProvider =
     Provider<Raw<Stream<ReceivedIntentParameter>>>.internal(
       sharingIntentStream,
       name: r'sharingIntentStreamProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$sharingIntentStreamHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$sharingIntentStreamHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

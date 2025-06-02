@@ -15,10 +15,9 @@ final engineSettingsRepositoryProvider =
     NotifierProvider<EngineSettingsRepository, EngineSettings>.internal(
       EngineSettingsRepository.new,
       name: r'engineSettingsRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$engineSettingsRepositoryHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$engineSettingsRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

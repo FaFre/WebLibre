@@ -15,10 +15,9 @@ final browserViewLifecycleProvider =
     NotifierProvider<BrowserViewLifecycle, AppLifecycleState?>.internal(
       BrowserViewLifecycle.new,
       name: r'browserViewLifecycleProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$browserViewLifecycleHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$browserViewLifecycleHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

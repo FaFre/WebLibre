@@ -65,20 +65,16 @@ class Bang with FastEquatable implements Insertable<Bang> {
     return (format == null ||
             format!.contains(BangFormat.urlEncodePlaceholder) == true)
         ? (format == null ||
-                format?.contains(BangFormat.urlEncodeSpaceToPlus) == true)
-            ? Uri.encodeQueryComponent(input)
-            : Uri.encodeComponent(input)
+                  format?.contains(BangFormat.urlEncodeSpaceToPlus) == true)
+              ? Uri.encodeQueryComponent(input)
+              : Uri.encodeComponent(input)
         : input;
   }
 
   Uri getTemplateUrl(String? query) {
-    final url =
-        (query != null)
-            ? urlTemplate.replaceAll(
-              _templateQueryPlaceholder,
-              formatQuery(query),
-            )
-            : urlTemplate;
+    final url = (query != null)
+        ? urlTemplate.replaceAll(_templateQueryPlaceholder, formatQuery(query))
+        : urlTemplate;
 
     var template = Uri.parse(url);
     if (!template.hasScheme || template.origin.isEmpty) {

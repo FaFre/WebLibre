@@ -37,29 +37,27 @@ sealed class FtsQueryBuilder {
   }) {
     final matches = _tokenizePattern.allMatches(input);
 
-    final barewords =
-        matches
-            .map((match) {
-              if (match.group(1) != null) {
-                return EnclosedBareword(match.group(1)!);
-              } else if (_barewordPattern.hasMatch(match.group(2)!)) {
-                return SimpleBareword(match.group(2)!);
-              } else {
-                return EnclosedBareword(match.group(2)!);
-              }
-            })
-            .where((token) => token.word.isNotEmpty)
-            .whereNot(_isReservedBareword)
-            .toList();
+    final barewords = matches
+        .map((match) {
+          if (match.group(1) != null) {
+            return EnclosedBareword(match.group(1)!);
+          } else if (_barewordPattern.hasMatch(match.group(2)!)) {
+            return SimpleBareword(match.group(2)!);
+          } else {
+            return EnclosedBareword(match.group(2)!);
+          }
+        })
+        .where((token) => token.word.isNotEmpty)
+        .whereNot(_isReservedBareword)
+        .toList();
 
     //Merge short tokens
     _mergeShortBarewords(barewords, minTokenLength);
 
-    _tokens =
-        barewords
-            .where((bareword) => bareword.word.length >= minTokenLength)
-            .take(tokenLimit)
-            .toList();
+    _tokens = barewords
+        .where((bareword) => bareword.word.length >= minTokenLength)
+        .take(tokenLimit)
+        .toList();
   }
 
   static void _mergeShortBarewords(

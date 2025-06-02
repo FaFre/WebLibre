@@ -15,10 +15,9 @@ final bangDataSourceServiceProvider =
     AutoDisposeNotifierProvider<BangDataSourceService, void>.internal(
       BangDataSourceService.new,
       name: r'bangDataSourceServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bangDataSourceServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bangDataSourceServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

@@ -131,14 +131,12 @@ class _AnimateGradientShaderState extends State<AnimateGradientShader>
       animation: _animation!,
       builder: (BuildContext context, Widget? child) {
         final gradient = LinearGradient(
-          begin:
-              widget.animateAlignments
-                  ? begin.evaluate(_animation!)
-                  : widget.primaryBegin,
-          end:
-              widget.animateAlignments
-                  ? end.evaluate(_animation!)
-                  : widget.primaryEnd,
+          begin: widget.animateAlignments
+              ? begin.evaluate(_animation!)
+              : widget.primaryBegin,
+          end: widget.animateAlignments
+              ? end.evaluate(_animation!)
+              : widget.primaryEnd,
           colors: _evaluateColors(_animation!),
         );
 

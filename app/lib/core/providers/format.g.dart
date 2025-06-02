@@ -13,8 +13,9 @@ String _$formatHash() => r'fe7fcdd19b512784a36f3838c57701030475e429';
 final formatProvider = AsyncNotifierProvider<Format, void>.internal(
   Format.new,
   name: r'formatProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$formatHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$formatHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

@@ -15,10 +15,9 @@ final selectionActionServiceProvider =
     Provider<GeckoSelectionActionService>.internal(
       selectionActionService,
       name: r'selectionActionServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$selectionActionServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$selectionActionServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -33,8 +32,9 @@ String _$eventServiceHash() => r'166b01f636fbdd4355dbc55a18ca4f83e0006de8';
 final eventServiceProvider = Provider<GeckoEventService>.internal(
   eventService,
   name: r'eventServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$eventServiceHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$eventServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -49,8 +49,9 @@ String _$addonServiceHash() => r'c7aca09b99c3810908176f3464f5f90a185aa5e7';
 final addonServiceProvider = Provider<GeckoAddonService>.internal(
   addonService,
   name: r'addonServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$addonServiceHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$addonServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -65,10 +66,9 @@ String _$tabContentServiceHash() => r'd9a991add907ecc138c62790883e59d8e9aa9266';
 final tabContentServiceProvider = Provider<GeckoTabContentService>.internal(
   tabContentService,
   name: r'tabContentServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$tabContentServiceHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$tabContentServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -85,10 +85,9 @@ final engineSuggestionsServiceProvider =
     Provider<GeckoSuggestionsService>.internal(
       engineSuggestionsService,
       name: r'engineSuggestionsServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$engineSuggestionsServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$engineSuggestionsServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -104,10 +103,9 @@ final engineReadyStateProvider =
     NotifierProvider<EngineReadyState, bool>.internal(
       EngineReadyState.new,
       name: r'engineReadyStateProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$engineReadyStateHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$engineReadyStateHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

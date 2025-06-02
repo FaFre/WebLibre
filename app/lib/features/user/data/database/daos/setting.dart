@@ -30,9 +30,8 @@ class SettingDao extends DatabaseAccessor<UserDatabase> with _$SettingDaoMixin {
   Selectable<MapEntry<String, DriftAny?>> getAllSettingsOfPartitionKey(
     String? partitionKey,
   ) {
-    final query =
-        db.setting.select()
-          ..where((r) => r.partitionKey.equalsNullable(partitionKey));
+    final query = db.setting.select()
+      ..where((r) => r.partitionKey.equalsNullable(partitionKey));
 
     return query.map((row) => MapEntry(row.key, row.value));
   }

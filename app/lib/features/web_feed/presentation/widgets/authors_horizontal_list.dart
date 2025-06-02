@@ -11,26 +11,25 @@ class AuthorsHorizontalList extends StatelessWidget {
     Set<String> selectedTags = const {},
     void Function(String tagId, bool value)? onTagSelected,
   }) {
-    _authors =
-        authors.map((author) {
-          final label = Text(
-            '${author.name ?? ''} ${author.email.mapNotNull((email) => '($email)') ?? ''}'
-                .trim(),
-          );
+    _authors = authors.map((author) {
+      final label = Text(
+        '${author.name ?? ''} ${author.email.mapNotNull((email) => '($email)') ?? ''}'
+            .trim(),
+      );
 
-          return onTagSelected.mapNotNull(
-                (onTagSelected) => FilterChip(
-                  label: label,
-                  selected: selectedTags.contains(author.name),
-                  onSelected: (value) {
-                    if (author.name.isNotEmpty) {
-                      onTagSelected(author.name!, value);
-                    }
-                  },
-                ),
-              ) ??
-              Chip(label: label);
-        }).toList();
+      return onTagSelected.mapNotNull(
+            (onTagSelected) => FilterChip(
+              label: label,
+              selected: selectedTags.contains(author.name),
+              onSelected: (value) {
+                if (author.name.isNotEmpty) {
+                  onTagSelected(author.name!, value);
+                }
+              },
+            ),
+          ) ??
+          Chip(label: label);
+    }).toList();
   }
 
   @override

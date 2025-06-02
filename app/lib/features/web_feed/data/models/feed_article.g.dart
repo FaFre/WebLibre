@@ -165,96 +165,78 @@ class _$FeedArticleCWProxyImpl implements _$FeedArticleCWProxy {
     Object? siteLink = const $CopyWithPlaceholder(),
   }) {
     return FeedArticle(
-      id:
-          id == const $CopyWithPlaceholder()
-              ? _value.id
-              // ignore: cast_nullable_to_non_nullable
-              : id as String,
-      feedId:
-          feedId == const $CopyWithPlaceholder()
-              ? _value.feedId
-              // ignore: cast_nullable_to_non_nullable
-              : feedId as Uri,
-      fetched:
-          fetched == const $CopyWithPlaceholder()
-              ? _value.fetched
-              // ignore: cast_nullable_to_non_nullable
-              : fetched as DateTime,
-      created:
-          created == const $CopyWithPlaceholder()
-              ? _value.created
-              // ignore: cast_nullable_to_non_nullable
-              : created as DateTime?,
-      updated:
-          updated == const $CopyWithPlaceholder()
-              ? _value.updated
-              // ignore: cast_nullable_to_non_nullable
-              : updated as DateTime?,
-      lastRead:
-          lastRead == const $CopyWithPlaceholder()
-              ? _value.lastRead
-              // ignore: cast_nullable_to_non_nullable
-              : lastRead as DateTime?,
-      title:
-          title == const $CopyWithPlaceholder()
-              ? _value.title
-              // ignore: cast_nullable_to_non_nullable
-              : title as String?,
-      authors:
-          authors == const $CopyWithPlaceholder()
-              ? _value.authors
-              // ignore: cast_nullable_to_non_nullable
-              : authors as List<FeedAuthor>?,
-      tags:
-          tags == const $CopyWithPlaceholder()
-              ? _value.tags
-              // ignore: cast_nullable_to_non_nullable
-              : tags as List<FeedCategory>?,
-      links:
-          links == const $CopyWithPlaceholder()
-              ? _value.links
-              // ignore: cast_nullable_to_non_nullable
-              : links as List<FeedLink>?,
-      summaryHtml:
-          summaryHtml == const $CopyWithPlaceholder()
-              ? _value.summaryHtml
-              // ignore: cast_nullable_to_non_nullable
-              : summaryHtml as String?,
-      summaryMarkdown:
-          summaryMarkdown == const $CopyWithPlaceholder()
-              ? _value.summaryMarkdown
-              // ignore: cast_nullable_to_non_nullable
-              : summaryMarkdown as String?,
-      summaryPlain:
-          summaryPlain == const $CopyWithPlaceholder()
-              ? _value.summaryPlain
-              // ignore: cast_nullable_to_non_nullable
-              : summaryPlain as String?,
-      contentHtml:
-          contentHtml == const $CopyWithPlaceholder()
-              ? _value.contentHtml
-              // ignore: cast_nullable_to_non_nullable
-              : contentHtml as String?,
-      contentMarkdown:
-          contentMarkdown == const $CopyWithPlaceholder()
-              ? _value.contentMarkdown
-              // ignore: cast_nullable_to_non_nullable
-              : contentMarkdown as String?,
-      contentPlain:
-          contentPlain == const $CopyWithPlaceholder()
-              ? _value.contentPlain
-              // ignore: cast_nullable_to_non_nullable
-              : contentPlain as String?,
-      icon:
-          icon == const $CopyWithPlaceholder()
-              ? _value.icon
-              // ignore: cast_nullable_to_non_nullable
-              : icon as Uri?,
-      siteLink:
-          siteLink == const $CopyWithPlaceholder()
-              ? _value.siteLink
-              // ignore: cast_nullable_to_non_nullable
-              : siteLink as Uri?,
+      id: id == const $CopyWithPlaceholder()
+          ? _value.id
+          // ignore: cast_nullable_to_non_nullable
+          : id as String,
+      feedId: feedId == const $CopyWithPlaceholder()
+          ? _value.feedId
+          // ignore: cast_nullable_to_non_nullable
+          : feedId as Uri,
+      fetched: fetched == const $CopyWithPlaceholder()
+          ? _value.fetched
+          // ignore: cast_nullable_to_non_nullable
+          : fetched as DateTime,
+      created: created == const $CopyWithPlaceholder()
+          ? _value.created
+          // ignore: cast_nullable_to_non_nullable
+          : created as DateTime?,
+      updated: updated == const $CopyWithPlaceholder()
+          ? _value.updated
+          // ignore: cast_nullable_to_non_nullable
+          : updated as DateTime?,
+      lastRead: lastRead == const $CopyWithPlaceholder()
+          ? _value.lastRead
+          // ignore: cast_nullable_to_non_nullable
+          : lastRead as DateTime?,
+      title: title == const $CopyWithPlaceholder()
+          ? _value.title
+          // ignore: cast_nullable_to_non_nullable
+          : title as String?,
+      authors: authors == const $CopyWithPlaceholder()
+          ? _value.authors
+          // ignore: cast_nullable_to_non_nullable
+          : authors as List<FeedAuthor>?,
+      tags: tags == const $CopyWithPlaceholder()
+          ? _value.tags
+          // ignore: cast_nullable_to_non_nullable
+          : tags as List<FeedCategory>?,
+      links: links == const $CopyWithPlaceholder()
+          ? _value.links
+          // ignore: cast_nullable_to_non_nullable
+          : links as List<FeedLink>?,
+      summaryHtml: summaryHtml == const $CopyWithPlaceholder()
+          ? _value.summaryHtml
+          // ignore: cast_nullable_to_non_nullable
+          : summaryHtml as String?,
+      summaryMarkdown: summaryMarkdown == const $CopyWithPlaceholder()
+          ? _value.summaryMarkdown
+          // ignore: cast_nullable_to_non_nullable
+          : summaryMarkdown as String?,
+      summaryPlain: summaryPlain == const $CopyWithPlaceholder()
+          ? _value.summaryPlain
+          // ignore: cast_nullable_to_non_nullable
+          : summaryPlain as String?,
+      contentHtml: contentHtml == const $CopyWithPlaceholder()
+          ? _value.contentHtml
+          // ignore: cast_nullable_to_non_nullable
+          : contentHtml as String?,
+      contentMarkdown: contentMarkdown == const $CopyWithPlaceholder()
+          ? _value.contentMarkdown
+          // ignore: cast_nullable_to_non_nullable
+          : contentMarkdown as String?,
+      contentPlain: contentPlain == const $CopyWithPlaceholder()
+          ? _value.contentPlain
+          // ignore: cast_nullable_to_non_nullable
+          : contentPlain as String?,
+      icon: icon == const $CopyWithPlaceholder()
+          ? _value.icon
+          // ignore: cast_nullable_to_non_nullable
+          : icon as Uri?,
+      siteLink: siteLink == const $CopyWithPlaceholder()
+          ? _value.siteLink
+          // ignore: cast_nullable_to_non_nullable
+          : siteLink as Uri?,
     );
   }
 }
@@ -273,31 +255,25 @@ FeedArticle _$FeedArticleFromJson(Map<String, dynamic> json) => FeedArticle(
   id: json['id'] as String,
   feedId: Uri.parse(json['feedId'] as String),
   fetched: DateTime.parse(json['fetched'] as String),
-  created:
-      json['created'] == null
-          ? null
-          : DateTime.parse(json['created'] as String),
-  updated:
-      json['updated'] == null
-          ? null
-          : DateTime.parse(json['updated'] as String),
-  lastRead:
-      json['lastRead'] == null
-          ? null
-          : DateTime.parse(json['lastRead'] as String),
+  created: json['created'] == null
+      ? null
+      : DateTime.parse(json['created'] as String),
+  updated: json['updated'] == null
+      ? null
+      : DateTime.parse(json['updated'] as String),
+  lastRead: json['lastRead'] == null
+      ? null
+      : DateTime.parse(json['lastRead'] as String),
   title: json['title'] as String?,
-  authors:
-      (json['authors'] as List<dynamic>?)
-          ?.map((e) => FeedAuthor.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  tags:
-      (json['tags'] as List<dynamic>?)
-          ?.map((e) => FeedCategory.fromJson(e as Map<String, dynamic>))
-          .toList(),
-  links:
-      (json['links'] as List<dynamic>?)
-          ?.map((e) => FeedLink.fromJson(e as Map<String, dynamic>))
-          .toList(),
+  authors: (json['authors'] as List<dynamic>?)
+      ?.map((e) => FeedAuthor.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  tags: (json['tags'] as List<dynamic>?)
+      ?.map((e) => FeedCategory.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  links: (json['links'] as List<dynamic>?)
+      ?.map((e) => FeedLink.fromJson(e as Map<String, dynamic>))
+      .toList(),
   summaryHtml: json['summaryHtml'] as String?,
   summaryMarkdown: json['summaryMarkdown'] as String?,
   summaryPlain: json['summaryPlain'] as String?,
@@ -305,8 +281,9 @@ FeedArticle _$FeedArticleFromJson(Map<String, dynamic> json) => FeedArticle(
   contentMarkdown: json['contentMarkdown'] as String?,
   contentPlain: json['contentPlain'] as String?,
   icon: json['icon'] == null ? null : Uri.parse(json['icon'] as String),
-  siteLink:
-      json['siteLink'] == null ? null : Uri.parse(json['siteLink'] as String),
+  siteLink: json['siteLink'] == null
+      ? null
+      : Uri.parse(json['siteLink'] as String),
 );
 
 Map<String, dynamic> _$FeedArticleToJson(FeedArticle instance) =>

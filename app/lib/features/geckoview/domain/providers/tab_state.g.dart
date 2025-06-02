@@ -71,10 +71,9 @@ class TabStateProvider extends AutoDisposeProvider<TabState?> {
         (ref) => tabState(ref as TabStateRef, tabId),
         from: tabStateProvider,
         name: r'tabStateProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$tabStateHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tabStateHash,
         dependencies: TabStateFamily._dependencies,
         allTransitiveDependencies: TabStateFamily._allTransitiveDependencies,
         tabId: tabId,
@@ -149,10 +148,9 @@ String _$selectedTabStateHash() => r'dbd36af7af286bd9d079f30e8e11bbda23bf7728';
 final selectedTabStateProvider = AutoDisposeProvider<TabState?>.internal(
   selectedTabState,
   name: r'selectedTabStateProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$selectedTabStateHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedTabStateHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -168,10 +166,9 @@ final tabStatesProvider =
     NotifierProvider<TabStates, Map<String, TabState>>.internal(
       TabStates.new,
       name: r'tabStatesProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$tabStatesHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$tabStatesHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

@@ -13,8 +13,9 @@ String _$feedListHash() => r'0076186437354768c39fb1d7c8bcfcf7b94c7dd1';
 final feedListProvider = AutoDisposeStreamProvider<List<FeedData>>.internal(
   feedList,
   name: r'feedListProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$feedListHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$feedListHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -87,10 +88,9 @@ class FeedDataProvider extends AutoDisposeStreamProvider<FeedData?> {
         (ref) => feedData(ref as FeedDataRef, feedId),
         from: feedDataProvider,
         name: r'feedDataProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$feedDataHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$feedDataHash,
         dependencies: FeedDataFamily._dependencies,
         allTransitiveDependencies: FeedDataFamily._allTransitiveDependencies,
         feedId: feedId,
@@ -208,10 +208,9 @@ class FeedArticleListProvider
         (ref) => feedArticleList(ref as FeedArticleListRef, feedId),
         from: feedArticleListProvider,
         name: r'feedArticleListProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$feedArticleListHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$feedArticleListHash,
         dependencies: FeedArticleListFamily._dependencies,
         allTransitiveDependencies:
             FeedArticleListFamily._allTransitiveDependencies,
@@ -333,10 +332,9 @@ class FeedArticleProvider extends AutoDisposeStreamProvider<FeedArticle?> {
         ),
         from: feedArticleProvider,
         name: r'feedArticleProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$feedArticleHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$feedArticleHash,
         dependencies: FeedArticleFamily._dependencies,
         allTransitiveDependencies: FeedArticleFamily._allTransitiveDependencies,
         articleId: articleId,
@@ -428,10 +426,9 @@ final unreadArticleCountProvider =
     AutoDisposeProvider<Raw<Stream<Map<String, int>>>>.internal(
       unreadArticleCount,
       name: r'unreadArticleCountProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$unreadArticleCountHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$unreadArticleCountHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -488,10 +485,9 @@ class UnreadFeedArticleCountProvider extends AutoDisposeStreamProvider<int?> {
             unreadFeedArticleCount(ref as UnreadFeedArticleCountRef, feedId),
         from: unreadFeedArticleCountProvider,
         name: r'unreadFeedArticleCountProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$unreadFeedArticleCountHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$unreadFeedArticleCountHash,
         dependencies: UnreadFeedArticleCountFamily._dependencies,
         allTransitiveDependencies:
             UnreadFeedArticleCountFamily._allTransitiveDependencies,
@@ -609,10 +605,9 @@ class FetchWebFeedProvider extends AutoDisposeFutureProvider<FeedParseResult> {
         (ref) => fetchWebFeed(ref as FetchWebFeedRef, url),
         from: fetchWebFeedProvider,
         name: r'fetchWebFeedProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$fetchWebFeedHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$fetchWebFeedHash,
         dependencies: FetchWebFeedFamily._dependencies,
         allTransitiveDependencies:
             FetchWebFeedFamily._allTransitiveDependencies,
@@ -742,10 +737,9 @@ class ArticleSearchProvider
         () => ArticleSearch()..feedId = feedId,
         from: articleSearchProvider,
         name: r'articleSearchProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$articleSearchHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$articleSearchHash,
         dependencies: ArticleSearchFamily._dependencies,
         allTransitiveDependencies:
             ArticleSearchFamily._allTransitiveDependencies,
@@ -885,10 +879,9 @@ class FilteredArticleListProvider
         () => FilteredArticleList()..feedId = feedId,
         from: filteredArticleListProvider,
         name: r'filteredArticleListProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$filteredArticleListHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$filteredArticleListHash,
         dependencies: FilteredArticleListFamily._dependencies,
         allTransitiveDependencies:
             FilteredArticleListFamily._allTransitiveDependencies,

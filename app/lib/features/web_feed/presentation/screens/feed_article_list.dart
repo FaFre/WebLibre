@@ -70,21 +70,20 @@ class FeedArticleListScreen extends HookConsumerWidget {
                             controller: searchTextController,
                             decoration: InputDecoration(
                               label: const Text('Search'),
-                              suffixIcon:
-                                  hasText
-                                      ? IconButton(
-                                        onPressed: () {
-                                          searchTextController.clear();
-                                          focusNode.requestFocus();
-                                        },
-                                        icon: const Icon(Icons.clear),
-                                      )
-                                      : SpeechToTextButton(
-                                        onTextReceived: (data) {
-                                          searchTextController.text =
-                                              data.toString();
-                                        },
-                                      ),
+                              suffixIcon: hasText
+                                  ? IconButton(
+                                      onPressed: () {
+                                        searchTextController.clear();
+                                        focusNode.requestFocus();
+                                      },
+                                      icon: const Icon(Icons.clear),
+                                    )
+                                  : SpeechToTextButton(
+                                      onTextReceived: (data) {
+                                        searchTextController.text = data
+                                            .toString();
+                                      },
+                                    ),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -99,30 +98,29 @@ class FeedArticleListScreen extends HookConsumerWidget {
                                     controller: controller,
                                     shrinkWrap: true,
                                     scrollDirection: Axis.horizontal,
-                                    children:
-                                        tags
-                                            .map(
-                                              (tag) => Padding(
-                                                padding: const EdgeInsets.only(
-                                                  right: 8.0,
-                                                ),
-                                                child: FilterChip(
-                                                  label: Text(tag),
-                                                  showCheckmark: false,
-                                                  selected: true,
-                                                  onSelected: (value) {},
-                                                  onDeleted: () {
-                                                    ref
-                                                        .read(
-                                                          articleFilterProvider
-                                                              .notifier,
-                                                        )
-                                                        .removeTag(tag);
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                            .toList(),
+                                    children: tags
+                                        .map(
+                                          (tag) => Padding(
+                                            padding: const EdgeInsets.only(
+                                              right: 8.0,
+                                            ),
+                                            child: FilterChip(
+                                              label: Text(tag),
+                                              showCheckmark: false,
+                                              selected: true,
+                                              onSelected: (value) {},
+                                              onDeleted: () {
+                                                ref
+                                                    .read(
+                                                      articleFilterProvider
+                                                          .notifier,
+                                                    )
+                                                    .removeTag(tag);
+                                              },
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
                                   );
                                 },
                               ),
@@ -175,13 +173,12 @@ class FeedArticleListScreen extends HookConsumerWidget {
                   ),
                 );
               },
-              error:
-                  (error, stackTrace) => Center(
-                    child: FailureWidget(
-                      title: 'Failed to load Articles',
-                      exception: error,
-                    ),
-                  ),
+              error: (error, stackTrace) => Center(
+                child: FailureWidget(
+                  title: 'Failed to load Articles',
+                  exception: error,
+                ),
+              ),
               loading: () => const SizedBox.shrink(),
             );
           },

@@ -15,8 +15,8 @@ class UrlIcon extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final icon = useCachedFuture(
       () =>
-      // ignore: discarded_futures
-      ref.read(genericWebsiteServiceProvider.notifier).getUrlIcon(urlList),
+          // ignore: discarded_futures
+          ref.read(genericWebsiteServiceProvider.notifier).getUrlIcon(urlList),
       [urlList],
     );
 
@@ -24,17 +24,16 @@ class UrlIcon extends HookConsumerWidget {
       enabled: !icon.hasData,
       child: SizedBox.square(
         dimension: iconSize,
-        child:
-            (icon.data != null)
-                ? RepaintBoundary(
-                  child: RawImage(
-                    image: icon.data?.image.value,
-                    height: iconSize,
-                    width: iconSize,
-                    fit: BoxFit.fill,
-                  ),
-                )
-                : Icon(MdiIcons.web, size: iconSize),
+        child: (icon.data != null)
+            ? RepaintBoundary(
+                child: RawImage(
+                  image: icon.data?.image.value,
+                  height: iconSize,
+                  width: iconSize,
+                  fit: BoxFit.fill,
+                ),
+              )
+            : Icon(MdiIcons.web, size: iconSize),
       ),
     );
   }

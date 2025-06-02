@@ -68,17 +68,16 @@ class ContainerChips extends HookConsumerWidget {
                   child: SelectableChips(
                     deleteIcon: false,
                     itemId: (container) => container.id,
-                    itemAvatar:
-                        (container) => Container(
-                          width: 20.0,
-                          height: 20.0,
-                          decoration: BoxDecoration(
-                            color: container.color,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                    itemLabel:
-                        (container) => Text(container.name ?? 'New Container'),
+                    itemAvatar: (container) => Container(
+                      width: 20.0,
+                      height: 20.0,
+                      decoration: BoxDecoration(
+                        color: container.color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    itemLabel: (container) =>
+                        Text(container.name ?? 'New Container'),
                     itemBadgeCount: (container) => container.tabCount,
                     itemWrap: (child, container) {
                       return HookBuilder(
@@ -150,17 +149,16 @@ class ContainerChips extends HookConsumerWidget {
 
                               return OverlayPortal(
                                 controller: overlayController,
-                                overlayChildBuilder:
-                                    (context) => Positioned(
-                                      top: position.dy,
-                                      left: position.dx,
-                                      child: IgnorePointer(
-                                        child: Transform.scale(
-                                          scale: 1.1,
-                                          child: child,
-                                        ),
-                                      ),
+                                overlayChildBuilder: (context) => Positioned(
+                                  top: position.dy,
+                                  left: position.dx,
+                                  child: IgnorePointer(
+                                    child: Transform.scale(
+                                      scale: 1.1,
+                                      child: child,
                                     ),
+                                  ),
+                                ),
                                 child: HookBuilder(
                                   builder: (context) {
                                     final dragTabId = useValueListenable(

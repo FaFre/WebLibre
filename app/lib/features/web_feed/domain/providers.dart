@@ -104,21 +104,19 @@ class FilteredArticleList extends _$FilteredArticleList {
   AsyncValue<List<FeedArticle>> build(Uri? feedId) {
     final filterTags = ref.watch(articleFilterProvider);
 
-    final articlesAsync =
-        _hasSearch
-            ? ref.watch(articleSearchProvider(feedId))
-            : ref.watch(feedArticleListProvider(feedId));
+    final articlesAsync = _hasSearch
+        ? ref.watch(articleSearchProvider(feedId))
+        : ref.watch(feedArticleListProvider(feedId));
 
     return articlesAsync.whenData((articles) {
       if (filterTags.isNotEmpty) {
         return articles.where((article) {
           final tags = article.tags?.map((tag) => tag.id).toSet();
 
-          final authors =
-              article.authors
-                  ?.map((author) => author.name.whenNotEmpty)
-                  .nonNulls
-                  .toSet();
+          final authors = article.authors
+              ?.map((author) => author.name.whenNotEmpty)
+              .nonNulls
+              .toSet();
 
           return filterTags.every(
             (filter) =>

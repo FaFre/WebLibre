@@ -11,19 +11,19 @@ String _$fetchArticlesControllerHash() =>
 
 /// See also [FetchArticlesController].
 @ProviderFor(FetchArticlesController)
-final fetchArticlesControllerProvider = AutoDisposeNotifierProvider<
-  FetchArticlesController,
-  AsyncValue<void>
->.internal(
-  FetchArticlesController.new,
-  name: r'fetchArticlesControllerProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
+final fetchArticlesControllerProvider =
+    AutoDisposeNotifierProvider<
+      FetchArticlesController,
+      AsyncValue<void>
+    >.internal(
+      FetchArticlesController.new,
+      name: r'fetchArticlesControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
           : _$fetchArticlesControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$FetchArticlesController = AutoDisposeNotifier<AsyncValue<void>>;
 // ignore_for_file: type=lint

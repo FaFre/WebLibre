@@ -15,10 +15,9 @@ final engineHistorySuggestionsProvider =
     AutoDisposeProvider<AsyncValue<List<GeckoSuggestion>>>.internal(
       engineHistorySuggestions,
       name: r'engineHistorySuggestionsProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$engineHistorySuggestionsHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$engineHistorySuggestionsHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -31,19 +30,19 @@ String _$engineSuggestionsHash() => r'ba2c2d7f0a5e99fd9e639acd020b8cf3016c6126';
 
 /// See also [EngineSuggestions].
 @ProviderFor(EngineSuggestions)
-final engineSuggestionsProvider = AutoDisposeStreamNotifierProvider<
-  EngineSuggestions,
-  List<GeckoSuggestion>
->.internal(
-  EngineSuggestions.new,
-  name: r'engineSuggestionsProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
+final engineSuggestionsProvider =
+    AutoDisposeStreamNotifierProvider<
+      EngineSuggestions,
+      List<GeckoSuggestion>
+    >.internal(
+      EngineSuggestions.new,
+      name: r'engineSuggestionsProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
           : _$engineSuggestionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$EngineSuggestions = AutoDisposeStreamNotifier<List<GeckoSuggestion>>;
 // ignore_for_file: type=lint

@@ -21,12 +21,11 @@ class TabDataRepository extends _$TabDataRepository {
   }
 
   Future<void> closeAllTabsByContainer(String? containerId) async {
-    final tabIds =
-        await ref
-            .read(tabDatabaseProvider)
-            .containerDao
-            .getContainerTabIds(containerId)
-            .get();
+    final tabIds = await ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getContainerTabIds(containerId)
+        .get();
 
     if (tabIds.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
@@ -34,18 +33,16 @@ class TabDataRepository extends _$TabDataRepository {
   }
 
   Future<void> closeAllTabsByHost(String? containerId, String host) async {
-    final tabs =
-        await ref
-            .read(tabDatabaseProvider)
-            .containerDao
-            .getContainerTabsData(containerId)
-            .get();
+    final tabs = await ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getContainerTabsData(containerId)
+        .get();
 
-    final filtered =
-        tabs
-            .where((tab) => tab.url?.host == host)
-            .map((tab) => tab.id)
-            .toList();
+    final filtered = tabs
+        .where((tab) => tab.url?.host == host)
+        .map((tab) => tab.id)
+        .toList();
 
     if (filtered.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(filtered);

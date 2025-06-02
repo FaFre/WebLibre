@@ -15,10 +15,9 @@ final selectedTabSessionNotifierProvider =
     AutoDisposeProvider<Raw<TabSession>>.internal(
       selectedTabSessionNotifier,
       name: r'selectedTabSessionNotifierProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$selectedTabSessionNotifierHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$selectedTabSessionNotifierHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -100,10 +99,9 @@ class TabSessionProvider
         () => TabSession()..tabId = tabId,
         from: tabSessionProvider,
         name: r'tabSessionProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$tabSessionHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tabSessionHash,
         dependencies: TabSessionFamily._dependencies,
         allTransitiveDependencies: TabSessionFamily._allTransitiveDependencies,
         tabId: tabId,

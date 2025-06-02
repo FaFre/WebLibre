@@ -13,10 +13,9 @@ String _$storedAuthDataHash() => r'5f7e3ef6233a2036f7ce3728131901a46b1e548e';
 final _storedAuthDataProvider = AutoDisposeFutureProvider<String?>.internal(
   _storedAuthData,
   name: r'_storedAuthDataProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$storedAuthDataHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$storedAuthDataHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -33,10 +32,9 @@ final iconCacheSizeMegabytesProvider =
     AutoDisposeStreamProvider<double>.internal(
       iconCacheSizeMegabytes,
       name: r'iconCacheSizeMegabytesProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$iconCacheSizeMegabytesHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$iconCacheSizeMegabytesHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -52,10 +50,9 @@ String _$incognitoModeEnabledHash() =>
 final incognitoModeEnabledProvider = AutoDisposeProvider<bool>.internal(
   incognitoModeEnabled,
   name: r'incognitoModeEnabledProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$incognitoModeEnabledHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$incognitoModeEnabledHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

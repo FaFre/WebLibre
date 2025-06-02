@@ -15,7 +15,11 @@ PlatformException _createConnectionError(String channelName) {
   );
 }
 
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse({
+  Object? result,
+  PlatformException? error,
+  bool empty = false,
+}) {
   if (empty) {
     return <Object?>[];
   }
@@ -24,27 +28,33 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
   }
   return <Object?>[error.code, error.message, error.details];
 }
+
 bool _deepEquals(Object? a, Object? b) {
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed
-        .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
   }
   if (a is Map && b is Map) {
-    return a.length == b.length && a.entries.every((MapEntry<Object?, Object?> entry) =>
-        (b as Map<Object?, Object?>).containsKey(entry.key) &&
-        _deepEquals(entry.value, b[entry.key]));
+    return a.length == b.length &&
+        a.entries.every(
+          (MapEntry<Object?, Object?> entry) =>
+              (b as Map<Object?, Object?>).containsKey(entry.key) &&
+              _deepEquals(entry.value, b[entry.key]),
+        );
   }
   return a == b;
 }
-
 
 /// Indicates what location the tabs should be restored at
 enum RestoreLocation {
   /// Restore tabs at the beginning of the tab list
   beginning,
+
   /// Restore tabs at the end of the tab list
   end,
+
   /// Restore tabs at a specific index in the tab list
   atIndex,
 }
@@ -65,73 +75,41 @@ enum IconType {
 /// Supported sizes.
 ///
 /// We are trying to limit the supported sizes in order to optimize our caching strategy.
-enum IconSize {
-  defaultSize,
-  launcher,
-  launcherAdaptive,
-}
+enum IconSize { defaultSize, launcher, launcherAdaptive }
 
 /// The source of an [Icon].
 enum IconSource {
   /// This icon was generated.
   generator,
+
   /// This icon was downloaded.
   download,
+
   /// This icon was inlined in the document.
   inline,
+
   /// This icon was loaded from an in-memory cache.
   memory,
+
   /// This icon was loaded from a disk cache.
   disk,
 }
 
-enum CookieSameSiteStatus {
-  noRestriction,
-  lax,
-  strict,
-  unspecified,
-}
+enum CookieSameSiteStatus { noRestriction, lax, strict, unspecified }
 
-enum SelectionPattern {
-  phone,
-  email,
-}
+enum SelectionPattern { phone, email }
 
-enum WebExtensionActionType {
-  browser,
-  page,
-}
+enum WebExtensionActionType { browser, page }
 
-enum GeckoSuggestionType {
-  session,
-  clipboard,
-  history,
-}
+enum GeckoSuggestionType { session, clipboard, history }
 
-enum TrackingProtectionPolicy {
-  none,
-  recommended,
-  strict,
-  custom,
-}
+enum TrackingProtectionPolicy { none, recommended, strict, custom }
 
-enum HttpsOnlyMode {
-  disabled,
-  privateOnly,
-  enabled,
-}
+enum HttpsOnlyMode { disabled, privateOnly, enabled }
 
-enum ColorScheme {
-  system,
-  light,
-  dark,
-}
+enum ColorScheme { system, light, dark }
 
-enum CookieBannerHandlingMode {
-  disabled,
-  rejectAll,
-  rejectOrAcceptAll,
-}
+enum CookieBannerHandlingMode { disabled, rejectAll, rejectOrAcceptAll }
 
 enum WebContentIsolationStrategy {
   isolateNothing,
@@ -143,15 +121,20 @@ enum WebContentIsolationStrategy {
 enum DownloadStatus {
   /// Indicates that the download is in the first state after creation but not yet [DOWNLOADING].
   initiated,
+
   /// Indicates that an [INITIATED] download is now actively being downloaded.
   downloading,
+
   /// Indicates that the download that has been [DOWNLOADING] has been paused.
   paused,
+
   /// Indicates that the download that has been [DOWNLOADING] has been cancelled.
   cancelled,
+
   /// Indicates that the download that has been [DOWNLOADING] has moved to failed because
   /// something unexpected has happened.
   failed,
+
   /// Indicates that the [DOWNLOADING] download has been completed.
   completed,
 }
@@ -161,26 +144,21 @@ enum DownloadStatus {
 /// @property downloadModel If the necessary models should be downloaded on request. If false, then
 /// the translation will not complete and throw an exception if the models are not already available.
 class TranslationOptions {
-  TranslationOptions({
-    required this.downloadModel,
-  });
+  TranslationOptions({required this.downloadModel});
 
   bool downloadModel;
 
   List<Object?> _toList() {
-    return <Object?>[
-      downloadModel,
-    ];
+    return <Object?>[downloadModel];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static TranslationOptions decode(Object result) {
     result as List<Object?>;
-    return TranslationOptions(
-      downloadModel: result[0]! as bool,
-    );
+    return TranslationOptions(downloadModel: result[0]! as bool);
   }
 
   @override
@@ -197,8 +175,7 @@ class TranslationOptions {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Value type that represents the state of reader mode/view.
@@ -251,7 +228,8 @@ class ReaderState {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ReaderState decode(Object result) {
     result as List<Object?>;
@@ -280,8 +258,7 @@ class ReaderState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Details about the last playing media in this tab.
@@ -311,15 +288,12 @@ class LastMediaAccessState {
   bool mediaSessionActive;
 
   List<Object?> _toList() {
-    return <Object?>[
-      lastMediaUrl,
-      lastMediaAccess,
-      mediaSessionActive,
-    ];
+    return <Object?>[lastMediaUrl, lastMediaAccess, mediaSessionActive];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static LastMediaAccessState decode(Object result) {
     result as List<Object?>;
@@ -344,8 +318,7 @@ class LastMediaAccessState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Represents a set of history metadata values that uniquely identify a record. Note that
@@ -353,11 +326,7 @@ class LastMediaAccessState {
 /// created, depending on the de-bouncing logic of the underlying storage i.e. recording history
 /// metadata observations with the exact same values may be combined into a single record.
 class HistoryMetadataKey {
-  HistoryMetadataKey({
-    required this.url,
-    this.searchTerm,
-    this.referrerUrl,
-  });
+  HistoryMetadataKey({required this.url, this.searchTerm, this.referrerUrl});
 
   /// A url of the page.
   String url;
@@ -372,15 +341,12 @@ class HistoryMetadataKey {
   String? referrerUrl;
 
   List<Object?> _toList() {
-    return <Object?>[
-      url,
-      searchTerm,
-      referrerUrl,
-    ];
+    return <Object?>[url, searchTerm, referrerUrl];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static HistoryMetadataKey decode(Object result) {
     result as List<Object?>;
@@ -405,31 +371,25 @@ class HistoryMetadataKey {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class PackageCategoryValue {
-  PackageCategoryValue({
-    required this.value,
-  });
+  PackageCategoryValue({required this.value});
 
   int value;
 
   List<Object?> _toList() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static PackageCategoryValue decode(Object result) {
     result as List<Object?>;
-    return PackageCategoryValue(
-      value: result[0]! as int,
-    );
+    return PackageCategoryValue(value: result[0]! as int);
   }
 
   @override
@@ -446,16 +406,12 @@ class PackageCategoryValue {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Describes an external package.
 class ExternalPackage {
-  ExternalPackage({
-    required this.packageId,
-    required this.category,
-  });
+  ExternalPackage({required this.packageId, required this.category});
 
   /// An Android package id.
   String packageId;
@@ -464,14 +420,12 @@ class ExternalPackage {
   PackageCategoryValue category;
 
   List<Object?> _toList() {
-    return <Object?>[
-      packageId,
-      category,
-    ];
+    return <Object?>[packageId, category];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ExternalPackage decode(Object result) {
     result as List<Object?>;
@@ -495,31 +449,25 @@ class ExternalPackage {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class LoadUrlFlagsValue {
-  LoadUrlFlagsValue({
-    required this.value,
-  });
+  LoadUrlFlagsValue({required this.value});
 
   int value;
 
   List<Object?> _toList() {
-    return <Object?>[
-      value,
-    ];
+    return <Object?>[value];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static LoadUrlFlagsValue decode(Object result) {
     result as List<Object?>;
-    return LoadUrlFlagsValue(
-      value: result[0]! as int,
-    );
+    return LoadUrlFlagsValue(value: result[0]! as int);
   }
 
   @override
@@ -536,29 +484,23 @@ class LoadUrlFlagsValue {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class SourceValue {
-  SourceValue({
-    required this.id,
-    this.caller,
-  });
+  SourceValue({required this.id, this.caller});
 
   int id;
 
   ExternalPackage? caller;
 
   List<Object?> _toList() {
-    return <Object?>[
-      id,
-      caller,
-    ];
+    return <Object?>[id, caller];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SourceValue decode(Object result) {
     result as List<Object?>;
@@ -582,8 +524,7 @@ class SourceValue {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// A tab that is no longer open and in the list of tabs, but that can be restored (recovered) at
@@ -678,7 +619,8 @@ class TabState {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static TabState decode(Object result) {
     result as List<Object?>;
@@ -715,16 +657,12 @@ class TabState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// A recoverable version of [TabState].
 class RecoverableTab {
-  RecoverableTab({
-    this.engineSessionStateJson,
-    required this.state,
-  });
+  RecoverableTab({this.engineSessionStateJson, required this.state});
 
   /// The [EngineSessionState] needed for restoring the previous state of this tab.
   String? engineSessionStateJson;
@@ -733,14 +671,12 @@ class RecoverableTab {
   TabState state;
 
   List<Object?> _toList() {
-    return <Object?>[
-      engineSessionStateJson,
-      state,
-    ];
+    return <Object?>[engineSessionStateJson, state];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static RecoverableTab decode(Object result) {
     result as List<Object?>;
@@ -764,16 +700,12 @@ class RecoverableTab {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// A restored browser state, read from disk.
 class RecoverableBrowserState {
-  RecoverableBrowserState({
-    required this.tabs,
-    this.selectedTabId,
-  });
+  RecoverableBrowserState({required this.tabs, this.selectedTabId});
 
   /// The list of restored tabs.
   List<RecoverableTab?> tabs;
@@ -782,14 +714,12 @@ class RecoverableBrowserState {
   String? selectedTabId;
 
   List<Object?> _toList() {
-    return <Object?>[
-      tabs,
-      selectedTabId,
-    ];
+    return <Object?>[tabs, selectedTabId];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static RecoverableBrowserState decode(Object result) {
     result as List<Object?>;
@@ -813,8 +743,7 @@ class RecoverableBrowserState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// A request to load an [Icon].
@@ -841,18 +770,12 @@ class IconRequest {
   bool waitOnNetworkLoad;
 
   List<Object?> _toList() {
-    return <Object?>[
-      url,
-      size,
-      resources,
-      color,
-      isPrivate,
-      waitOnNetworkLoad,
-    ];
+    return <Object?>[url, size, resources, color, isPrivate, waitOnNetworkLoad];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static IconRequest decode(Object result) {
     result as List<Object?>;
@@ -880,36 +803,27 @@ class IconRequest {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class ResourceSize {
-  ResourceSize({
-    required this.height,
-    required this.width,
-  });
+  ResourceSize({required this.height, required this.width});
 
   int height;
 
   int width;
 
   List<Object?> _toList() {
-    return <Object?>[
-      height,
-      width,
-    ];
+    return <Object?>[height, width];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ResourceSize decode(Object result) {
     result as List<Object?>;
-    return ResourceSize(
-      height: result[0]! as int,
-      width: result[1]! as int,
-    );
+    return ResourceSize(height: result[0]! as int, width: result[1]! as int);
   }
 
   @override
@@ -926,8 +840,7 @@ class ResourceSize {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// An icon resource that can be loaded.
@@ -951,17 +864,12 @@ class Resource {
   bool maskable;
 
   List<Object?> _toList() {
-    return <Object?>[
-      url,
-      type,
-      sizes,
-      mimeType,
-      maskable,
-    ];
+    return <Object?>[url, type, sizes, mimeType, maskable];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static Resource decode(Object result) {
     result as List<Object?>;
@@ -988,8 +896,7 @@ class Resource {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// An [Icon] returned by [BrowserIcons] after processing an [IconRequest]
@@ -1014,16 +921,12 @@ class IconResult {
   bool maskable;
 
   List<Object?> _toList() {
-    return <Object?>[
-      image,
-      color,
-      source,
-      maskable,
-    ];
+    return <Object?>[image, color, source, maskable];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static IconResult decode(Object result) {
     result as List<Object?>;
@@ -1049,31 +952,25 @@ class IconResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class CookiePartitionKey {
-  CookiePartitionKey({
-    required this.topLevelSite,
-  });
+  CookiePartitionKey({required this.topLevelSite});
 
   String topLevelSite;
 
   List<Object?> _toList() {
-    return <Object?>[
-      topLevelSite,
-    ];
+    return <Object?>[topLevelSite];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static CookiePartitionKey decode(Object result) {
     result as List<Object?>;
-    return CookiePartitionKey(
-      topLevelSite: result[0]! as String,
-    );
+    return CookiePartitionKey(topLevelSite: result[0]! as String);
   }
 
   @override
@@ -1090,8 +987,7 @@ class CookiePartitionKey {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class Cookie {
@@ -1156,7 +1052,8 @@ class Cookie {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static Cookie decode(Object result) {
     result as List<Object?>;
@@ -1191,36 +1088,27 @@ class Cookie {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class HistoryItem {
-  HistoryItem({
-    required this.url,
-    required this.title,
-  });
+  HistoryItem({required this.url, required this.title});
 
   String url;
 
   String title;
 
   List<Object?> _toList() {
-    return <Object?>[
-      url,
-      title,
-    ];
+    return <Object?>[url, title];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static HistoryItem decode(Object result) {
     result as List<Object?>;
-    return HistoryItem(
-      url: result[0]! as String,
-      title: result[1]! as String,
-    );
+    return HistoryItem(url: result[0]! as String, title: result[1]! as String);
   }
 
   @override
@@ -1237,8 +1125,7 @@ class HistoryItem {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class HistoryState {
@@ -1258,16 +1145,12 @@ class HistoryState {
   bool canGoForward;
 
   List<Object?> _toList() {
-    return <Object?>[
-      items,
-      currentIndex,
-      canGoBack,
-      canGoForward,
-    ];
+    return <Object?>[items, currentIndex, canGoBack, canGoForward];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static HistoryState decode(Object result) {
     result as List<Object?>;
@@ -1293,15 +1176,11 @@ class HistoryState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class ReaderableState {
-  ReaderableState({
-    required this.readerable,
-    required this.active,
-  });
+  ReaderableState({required this.readerable, required this.active});
 
   /// Whether or not the current page can be transformed to
   /// be displayed in a reader view.
@@ -1311,14 +1190,12 @@ class ReaderableState {
   bool active;
 
   List<Object?> _toList() {
-    return <Object?>[
-      readerable,
-      active,
-    ];
+    return <Object?>[readerable, active];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ReaderableState decode(Object result) {
     result as List<Object?>;
@@ -1342,8 +1219,7 @@ class ReaderableState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class SecurityInfoState {
@@ -1360,15 +1236,12 @@ class SecurityInfoState {
   String issuer;
 
   List<Object?> _toList() {
-    return <Object?>[
-      secure,
-      host,
-      issuer,
-    ];
+    return <Object?>[secure, host, issuer];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SecurityInfoState decode(Object result) {
     result as List<Object?>;
@@ -1393,8 +1266,7 @@ class SecurityInfoState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class TabContentState {
@@ -1439,7 +1311,8 @@ class TabContentState {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static TabContentState decode(Object result) {
     result as List<Object?>;
@@ -1469,8 +1342,7 @@ class TabContentState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class FindResultState {
@@ -1487,15 +1359,12 @@ class FindResultState {
   bool isDoneCounting;
 
   List<Object?> _toList() {
-    return <Object?>[
-      activeMatchOrdinal,
-      numberOfMatches,
-      isDoneCounting,
-    ];
+    return <Object?>[activeMatchOrdinal, numberOfMatches, isDoneCounting];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static FindResultState decode(Object result) {
     result as List<Object?>;
@@ -1520,16 +1389,11 @@ class FindResultState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class CustomSelectionAction {
-  CustomSelectionAction({
-    required this.id,
-    required this.title,
-    this.pattern,
-  });
+  CustomSelectionAction({required this.id, required this.title, this.pattern});
 
   String id;
 
@@ -1538,15 +1402,12 @@ class CustomSelectionAction {
   SelectionPattern? pattern;
 
   List<Object?> _toList() {
-    return <Object?>[
-      id,
-      title,
-      pattern,
-    ];
+    return <Object?>[id, title, pattern];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static CustomSelectionAction decode(Object result) {
     result as List<Object?>;
@@ -1571,8 +1432,7 @@ class CustomSelectionAction {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class WebExtensionData {
@@ -1609,7 +1469,8 @@ class WebExtensionData {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static WebExtensionData decode(Object result) {
     result as List<Object?>;
@@ -1637,8 +1498,7 @@ class WebExtensionData {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class GeckoSuggestion {
@@ -1667,19 +1527,12 @@ class GeckoSuggestion {
   Uint8List? icon;
 
   List<Object?> _toList() {
-    return <Object?>[
-      id,
-      type,
-      score,
-      title,
-      description,
-      editSuggestion,
-      icon,
-    ];
+    return <Object?>[id, type, score, title, description, editSuggestion, icon];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static GeckoSuggestion decode(Object result) {
     result as List<Object?>;
@@ -1708,8 +1561,7 @@ class GeckoSuggestion {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class TabContent {
@@ -1746,7 +1598,8 @@ class TabContent {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static TabContent decode(Object result) {
     result as List<Object?>;
@@ -1774,8 +1627,7 @@ class TabContent {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class GeckoEngineSettings {
@@ -1832,7 +1684,8 @@ class GeckoEngineSettings {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static GeckoEngineSettings decode(Object result) {
     result as List<Object?>;
@@ -1843,7 +1696,8 @@ class GeckoEngineSettings {
       globalPrivacyControlEnabled: result[3] as bool?,
       preferredColorScheme: result[4] as ColorScheme?,
       cookieBannerHandlingMode: result[5] as CookieBannerHandlingMode?,
-      cookieBannerHandlingModePrivateBrowsing: result[6] as CookieBannerHandlingMode?,
+      cookieBannerHandlingModePrivateBrowsing:
+          result[6] as CookieBannerHandlingMode?,
       cookieBannerHandlingGlobalRules: result[7] as bool?,
       cookieBannerHandlingGlobalRulesSubFrames: result[8] as bool?,
       webContentIsolationStrategy: result[9] as WebContentIsolationStrategy?,
@@ -1865,8 +1719,7 @@ class GeckoEngineSettings {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class AutocompleteResult {
@@ -1889,17 +1742,12 @@ class AutocompleteResult {
   int totalItems;
 
   List<Object?> _toList() {
-    return <Object?>[
-      input,
-      text,
-      url,
-      source,
-      totalItems,
-    ];
+    return <Object?>[input, text, url, source, totalItems];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static AutocompleteResult decode(Object result) {
     result as List<Object?>;
@@ -1926,37 +1774,30 @@ class AutocompleteResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// Represents all the different supported types of data that can be found from long clicking
 /// an element.
-sealed class HitResult {
-}
+sealed class HitResult {}
 
 /// Default type if we're unable to match the type to anything. It may or may not have a src.
 class UnknownHitResult extends HitResult {
-  UnknownHitResult({
-    required this.src,
-  });
+  UnknownHitResult({required this.src});
 
   String src;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-    ];
+    return <Object?>[src];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static UnknownHitResult decode(Object result) {
     result as List<Object?>;
-    return UnknownHitResult(
-      src: result[0]! as String,
-    );
+    return UnknownHitResult(src: result[0]! as String);
   }
 
   @override
@@ -1973,30 +1814,24 @@ class UnknownHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// If the HTML element was of type 'HTMLImageElement'.
 class ImageHitResult extends HitResult {
-  ImageHitResult({
-    required this.src,
-    this.title,
-  });
+  ImageHitResult({required this.src, this.title});
 
   String src;
 
   String? title;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-      title,
-    ];
+    return <Object?>[src, title];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ImageHitResult decode(Object result) {
     result as List<Object?>;
@@ -2020,30 +1855,24 @@ class ImageHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// If the HTML element was of type 'HTMLVideoElement'.
 class VideoHitResult extends HitResult {
-  VideoHitResult({
-    required this.src,
-    this.title,
-  });
+  VideoHitResult({required this.src, this.title});
 
   String src;
 
   String? title;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-      title,
-    ];
+    return <Object?>[src, title];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static VideoHitResult decode(Object result) {
     result as List<Object?>;
@@ -2067,30 +1896,24 @@ class VideoHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// If the HTML element was of type 'HTMLAudioElement'.
 class AudioHitResult extends HitResult {
-  AudioHitResult({
-    required this.src,
-    this.title,
-  });
+  AudioHitResult({required this.src, this.title});
 
   String src;
 
   String? title;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-      title,
-    ];
+    return <Object?>[src, title];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static AudioHitResult decode(Object result) {
     result as List<Object?>;
@@ -2114,30 +1937,24 @@ class AudioHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// If the HTML element was of type 'HTMLImageElement' and contained a URI.
 class ImageSrcHitResult extends HitResult {
-  ImageSrcHitResult({
-    required this.src,
-    required this.uri,
-  });
+  ImageSrcHitResult({required this.src, required this.uri});
 
   String src;
 
   String uri;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-      uri,
-    ];
+    return <Object?>[src, uri];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ImageSrcHitResult decode(Object result) {
     result as List<Object?>;
@@ -2161,32 +1978,26 @@ class ImageSrcHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// The type used if the URI is prepended with 'tel:'.
 class PhoneHitResult extends HitResult {
-  PhoneHitResult({
-    required this.src,
-  });
+  PhoneHitResult({required this.src});
 
   String src;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-    ];
+    return <Object?>[src];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static PhoneHitResult decode(Object result) {
     result as List<Object?>;
-    return PhoneHitResult(
-      src: result[0]! as String,
-    );
+    return PhoneHitResult(src: result[0]! as String);
   }
 
   @override
@@ -2203,32 +2014,26 @@ class PhoneHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// The type used if the URI is prepended with 'mailto:'.
 class EmailHitResult extends HitResult {
-  EmailHitResult({
-    required this.src,
-  });
+  EmailHitResult({required this.src});
 
   String src;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-    ];
+    return <Object?>[src];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static EmailHitResult decode(Object result) {
     result as List<Object?>;
-    return EmailHitResult(
-      src: result[0]! as String,
-    );
+    return EmailHitResult(src: result[0]! as String);
   }
 
   @override
@@ -2245,32 +2050,26 @@ class EmailHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 /// The type used if the URI is prepended with 'geo:'.
 class GeoHitResult extends HitResult {
-  GeoHitResult({
-    required this.src,
-  });
+  GeoHitResult({required this.src});
 
   String src;
 
   List<Object?> _toList() {
-    return <Object?>[
-      src,
-    ];
+    return <Object?>[src];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static GeoHitResult decode(Object result) {
     result as List<Object?>;
-    return GeoHitResult(
-      src: result[0]! as String,
-    );
+    return GeoHitResult(src: result[0]! as String);
   }
 
   @override
@@ -2287,8 +2086,7 @@ class GeoHitResult extends HitResult {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class DownloadState {
@@ -2369,7 +2167,8 @@ class DownloadState {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static DownloadState decode(Object result) {
     result as List<Object?>;
@@ -2408,8 +2207,7 @@ class DownloadState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
 
 class ShareInternetResourceState {
@@ -2429,16 +2227,12 @@ class ShareInternetResourceState {
   String? referrerUrl;
 
   List<Object?> _toList() {
-    return <Object?>[
-      url,
-      contentType,
-      private,
-      referrerUrl,
-    ];
+    return <Object?>[url, contentType, private, referrerUrl];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ShareInternetResourceState decode(Object result) {
     result as List<Object?>;
@@ -2453,7 +2247,8 @@ class ShareInternetResourceState {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! ShareInternetResourceState || other.runtimeType != runtimeType) {
+    if (other is! ShareInternetResourceState ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -2464,10 +2259,8 @@ class ShareInternetResourceState {
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => Object.hashAll(_toList())
-;
+  int get hashCode => Object.hashAll(_toList());
 }
-
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -2476,163 +2269,163 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is RestoreLocation) {
+    } else if (value is RestoreLocation) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is IconType) {
+    } else if (value is IconType) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    }    else if (value is IconSize) {
+    } else if (value is IconSize) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    }    else if (value is IconSource) {
+    } else if (value is IconSource) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
-    }    else if (value is CookieSameSiteStatus) {
+    } else if (value is CookieSameSiteStatus) {
       buffer.putUint8(133);
       writeValue(buffer, value.index);
-    }    else if (value is SelectionPattern) {
+    } else if (value is SelectionPattern) {
       buffer.putUint8(134);
       writeValue(buffer, value.index);
-    }    else if (value is WebExtensionActionType) {
+    } else if (value is WebExtensionActionType) {
       buffer.putUint8(135);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoSuggestionType) {
+    } else if (value is GeckoSuggestionType) {
       buffer.putUint8(136);
       writeValue(buffer, value.index);
-    }    else if (value is TrackingProtectionPolicy) {
+    } else if (value is TrackingProtectionPolicy) {
       buffer.putUint8(137);
       writeValue(buffer, value.index);
-    }    else if (value is HttpsOnlyMode) {
+    } else if (value is HttpsOnlyMode) {
       buffer.putUint8(138);
       writeValue(buffer, value.index);
-    }    else if (value is ColorScheme) {
+    } else if (value is ColorScheme) {
       buffer.putUint8(139);
       writeValue(buffer, value.index);
-    }    else if (value is CookieBannerHandlingMode) {
+    } else if (value is CookieBannerHandlingMode) {
       buffer.putUint8(140);
       writeValue(buffer, value.index);
-    }    else if (value is WebContentIsolationStrategy) {
+    } else if (value is WebContentIsolationStrategy) {
       buffer.putUint8(141);
       writeValue(buffer, value.index);
-    }    else if (value is DownloadStatus) {
+    } else if (value is DownloadStatus) {
       buffer.putUint8(142);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    } else if (value is TranslationOptions) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+    } else if (value is ReaderState) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+    } else if (value is LastMediaAccessState) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+    } else if (value is HistoryMetadataKey) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    } else if (value is PackageCategoryValue) {
       buffer.putUint8(147);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    } else if (value is ExternalPackage) {
       buffer.putUint8(148);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    } else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(149);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    } else if (value is SourceValue) {
       buffer.putUint8(150);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    } else if (value is TabState) {
       buffer.putUint8(151);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    } else if (value is RecoverableTab) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableBrowserState) {
+    } else if (value is RecoverableBrowserState) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    } else if (value is IconRequest) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    } else if (value is ResourceSize) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    } else if (value is Resource) {
       buffer.putUint8(156);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    } else if (value is IconResult) {
       buffer.putUint8(157);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    } else if (value is CookiePartitionKey) {
       buffer.putUint8(158);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    } else if (value is Cookie) {
       buffer.putUint8(159);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    } else if (value is HistoryItem) {
       buffer.putUint8(160);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    } else if (value is HistoryState) {
       buffer.putUint8(161);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    } else if (value is ReaderableState) {
       buffer.putUint8(162);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    } else if (value is SecurityInfoState) {
       buffer.putUint8(163);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    } else if (value is TabContentState) {
       buffer.putUint8(164);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    } else if (value is FindResultState) {
       buffer.putUint8(165);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    } else if (value is CustomSelectionAction) {
       buffer.putUint8(166);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    } else if (value is WebExtensionData) {
       buffer.putUint8(167);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    } else if (value is GeckoSuggestion) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    } else if (value is TabContent) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    } else if (value is GeckoEngineSettings) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    } else if (value is AutocompleteResult) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    } else if (value is UnknownHitResult) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    } else if (value is ImageHitResult) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    } else if (value is VideoHitResult) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    } else if (value is AudioHitResult) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    } else if (value is ImageSrcHitResult) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    } else if (value is PhoneHitResult) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    } else if (value is EmailHitResult) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    } else if (value is GeoHitResult) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    } else if (value is DownloadState) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    } else if (value is ShareInternetResourceState) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
     } else {
@@ -2643,125 +2436,125 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129: 
+      case 129:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : RestoreLocation.values[value];
-      case 130: 
+      case 130:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : IconType.values[value];
-      case 131: 
+      case 131:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : IconSize.values[value];
-      case 132: 
+      case 132:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : IconSource.values[value];
-      case 133: 
+      case 133:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : CookieSameSiteStatus.values[value];
-      case 134: 
+      case 134:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : SelectionPattern.values[value];
-      case 135: 
+      case 135:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : WebExtensionActionType.values[value];
-      case 136: 
+      case 136:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : GeckoSuggestionType.values[value];
-      case 137: 
+      case 137:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : TrackingProtectionPolicy.values[value];
-      case 138: 
+      case 138:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : HttpsOnlyMode.values[value];
-      case 139: 
+      case 139:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : ColorScheme.values[value];
-      case 140: 
+      case 140:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : CookieBannerHandlingMode.values[value];
-      case 141: 
+      case 141:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : WebContentIsolationStrategy.values[value];
-      case 142: 
+      case 142:
         final int? value = readValue(buffer) as int?;
         return value == null ? null : DownloadStatus.values[value];
-      case 143: 
+      case 143:
         return TranslationOptions.decode(readValue(buffer)!);
-      case 144: 
+      case 144:
         return ReaderState.decode(readValue(buffer)!);
-      case 145: 
+      case 145:
         return LastMediaAccessState.decode(readValue(buffer)!);
-      case 146: 
+      case 146:
         return HistoryMetadataKey.decode(readValue(buffer)!);
-      case 147: 
+      case 147:
         return PackageCategoryValue.decode(readValue(buffer)!);
-      case 148: 
+      case 148:
         return ExternalPackage.decode(readValue(buffer)!);
-      case 149: 
+      case 149:
         return LoadUrlFlagsValue.decode(readValue(buffer)!);
-      case 150: 
+      case 150:
         return SourceValue.decode(readValue(buffer)!);
-      case 151: 
+      case 151:
         return TabState.decode(readValue(buffer)!);
-      case 152: 
+      case 152:
         return RecoverableTab.decode(readValue(buffer)!);
-      case 153: 
+      case 153:
         return RecoverableBrowserState.decode(readValue(buffer)!);
-      case 154: 
+      case 154:
         return IconRequest.decode(readValue(buffer)!);
-      case 155: 
+      case 155:
         return ResourceSize.decode(readValue(buffer)!);
-      case 156: 
+      case 156:
         return Resource.decode(readValue(buffer)!);
-      case 157: 
+      case 157:
         return IconResult.decode(readValue(buffer)!);
-      case 158: 
+      case 158:
         return CookiePartitionKey.decode(readValue(buffer)!);
-      case 159: 
+      case 159:
         return Cookie.decode(readValue(buffer)!);
-      case 160: 
+      case 160:
         return HistoryItem.decode(readValue(buffer)!);
-      case 161: 
+      case 161:
         return HistoryState.decode(readValue(buffer)!);
-      case 162: 
+      case 162:
         return ReaderableState.decode(readValue(buffer)!);
-      case 163: 
+      case 163:
         return SecurityInfoState.decode(readValue(buffer)!);
-      case 164: 
+      case 164:
         return TabContentState.decode(readValue(buffer)!);
-      case 165: 
+      case 165:
         return FindResultState.decode(readValue(buffer)!);
-      case 166: 
+      case 166:
         return CustomSelectionAction.decode(readValue(buffer)!);
-      case 167: 
+      case 167:
         return WebExtensionData.decode(readValue(buffer)!);
-      case 168: 
+      case 168:
         return GeckoSuggestion.decode(readValue(buffer)!);
-      case 169: 
+      case 169:
         return TabContent.decode(readValue(buffer)!);
-      case 170: 
+      case 170:
         return GeckoEngineSettings.decode(readValue(buffer)!);
-      case 171: 
+      case 171:
         return AutocompleteResult.decode(readValue(buffer)!);
-      case 172: 
+      case 172:
         return UnknownHitResult.decode(readValue(buffer)!);
-      case 173: 
+      case 173:
         return ImageHitResult.decode(readValue(buffer)!);
-      case 174: 
+      case 174:
         return VideoHitResult.decode(readValue(buffer)!);
-      case 175: 
+      case 175:
         return AudioHitResult.decode(readValue(buffer)!);
-      case 176: 
+      case 176:
         return ImageSrcHitResult.decode(readValue(buffer)!);
-      case 177: 
+      case 177:
         return PhoneHitResult.decode(readValue(buffer)!);
-      case 178: 
+      case 178:
         return EmailHitResult.decode(readValue(buffer)!);
-      case 179: 
+      case 179:
         return GeoHitResult.decode(readValue(buffer)!);
-      case 180: 
+      case 180:
         return DownloadState.decode(readValue(buffer)!);
-      case 181: 
+      case 181:
         return ShareInternetResourceState.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -2773,9 +2566,13 @@ class GeckoBrowserApi {
   /// Constructor for [GeckoBrowserApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoBrowserApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoBrowserApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -2783,12 +2580,14 @@ class GeckoBrowserApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> initialize() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -2806,12 +2605,14 @@ class GeckoBrowserApi {
   }
 
   Future<bool> showNativeFragment() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.showNativeFragment$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.showNativeFragment$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -2834,13 +2635,17 @@ class GeckoBrowserApi {
   }
 
   Future<void> onTrimMemory(int level) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.onTrimMemory$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.onTrimMemory$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[level],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[level]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -2861,9 +2666,13 @@ class GeckoEngineSettingsApi {
   /// Constructor for [GeckoEngineSettingsApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoEngineSettingsApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoEngineSettingsApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -2871,13 +2680,17 @@ class GeckoEngineSettingsApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> setDefaultSettings(GeckoEngineSettings settings) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setDefaultSettings$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setDefaultSettings$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[settings],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[settings]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -2894,13 +2707,17 @@ class GeckoEngineSettingsApi {
   }
 
   Future<void> updateRuntimeSettings(GeckoEngineSettings settings) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.updateRuntimeSettings$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.updateRuntimeSettings$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[settings],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[settings]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -2921,23 +2738,36 @@ class GeckoSessionApi {
   /// Constructor for [GeckoSessionApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoSessionApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoSessionApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> loadUrl({required String? tabId, required String url, required LoadUrlFlagsValue flags, required Map<String, String>? additionalHeaders, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.loadUrl$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> loadUrl({
+    required String? tabId,
+    required String url,
+    required LoadUrlFlagsValue flags,
+    required Map<String, String>? additionalHeaders,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.loadUrl$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, url, flags, additionalHeaders],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, url, flags, additionalHeaders]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -2953,14 +2783,23 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> loadData({required String? tabId, required String data, required String mimeType, required String encoding, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.loadData$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> loadData({
+    required String? tabId,
+    required String data,
+    required String mimeType,
+    required String encoding,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.loadData$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, data, mimeType, encoding],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, data, mimeType, encoding]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -2976,14 +2815,21 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> reload({required String? tabId, required LoadUrlFlagsValue flags}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.reload$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> reload({
+    required String? tabId,
+    required LoadUrlFlagsValue flags,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.reload$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, flags],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, flags]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3000,13 +2846,17 @@ class GeckoSessionApi {
   }
 
   Future<void> stopLoading({required String? tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.stopLoading$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.stopLoading$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3022,14 +2872,21 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> goBack({required String? tabId, required bool userInteraction}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.goBack$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> goBack({
+    required String? tabId,
+    required bool userInteraction,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.goBack$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, userInteraction],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, userInteraction]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3045,14 +2902,21 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> goForward({required String? tabId, required bool userInteraction}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.goForward$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> goForward({
+    required String? tabId,
+    required bool userInteraction,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.goForward$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, userInteraction],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, userInteraction]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3068,14 +2932,21 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> goToHistoryIndex({required int index, required String? tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.goToHistoryIndex$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> goToHistoryIndex({
+    required int index,
+    required String? tabId,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.goToHistoryIndex$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[index, tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[index, tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3091,14 +2962,21 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> requestDesktopSite({required String? tabId, required bool enable}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.requestDesktopSite$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> requestDesktopSite({
+    required String? tabId,
+    required bool enable,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.requestDesktopSite$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, enable],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, enable]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3115,13 +2993,17 @@ class GeckoSessionApi {
   }
 
   Future<void> exitFullscreen({required String? tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.exitFullscreen$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.exitFullscreen$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3138,13 +3020,17 @@ class GeckoSessionApi {
   }
 
   Future<void> saveToPdf({required String? tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.saveToPdf$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.saveToPdf$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3161,13 +3047,17 @@ class GeckoSessionApi {
   }
 
   Future<void> printContent({required String? tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.printContent$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.printContent$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3183,14 +3073,23 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> translate({required String? tabId, required String fromLanguage, required String toLanguage, required TranslationOptions? options, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.translate$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> translate({
+    required String? tabId,
+    required String fromLanguage,
+    required String toLanguage,
+    required TranslationOptions? options,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.translate$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, fromLanguage, toLanguage, options],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, fromLanguage, toLanguage, options]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3207,13 +3106,17 @@ class GeckoSessionApi {
   }
 
   Future<void> translateRestore({required String? tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.translateRestore$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.translateRestore$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3230,13 +3133,17 @@ class GeckoSessionApi {
   }
 
   Future<void> crashRecovery({required List<String>? tabIds}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.crashRecovery$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.crashRecovery$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabIds],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabIds]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3253,12 +3160,14 @@ class GeckoSessionApi {
   }
 
   Future<void> purgeHistory() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.purgeHistory$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.purgeHistory$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -3275,14 +3184,21 @@ class GeckoSessionApi {
     }
   }
 
-  Future<void> updateLastAccess({required String? tabId, required int? lastAccess}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.updateLastAccess$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> updateLastAccess({
+    required String? tabId,
+    required int? lastAccess,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.updateLastAccess$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, lastAccess],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, lastAccess]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3299,13 +3215,17 @@ class GeckoSessionApi {
   }
 
   Future<Uint8List?> requestScreenshot(bool sendBack) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.requestScreenshot$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.requestScreenshot$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[sendBack],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sendBack]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3326,23 +3246,50 @@ class GeckoTabsApi {
   /// Constructor for [GeckoTabsApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoTabsApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoTabsApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> syncEvents({required bool onSelectedTabChange, required bool onTabListChange, required bool onTabContentStateChange, required bool onIconChange, required bool onSecurityInfoStateChange, required bool onReaderableStateChange, required bool onHistoryStateChange, required bool onFindResults, required bool onThumbnailChange, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.syncEvents$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[onSelectedTabChange, onTabListChange, onTabContentStateChange, onIconChange, onSecurityInfoStateChange, onReaderableStateChange, onHistoryStateChange, onFindResults, onThumbnailChange]);
+  Future<void> syncEvents({
+    required bool onSelectedTabChange,
+    required bool onTabListChange,
+    required bool onTabContentStateChange,
+    required bool onIconChange,
+    required bool onSecurityInfoStateChange,
+    required bool onReaderableStateChange,
+    required bool onHistoryStateChange,
+    required bool onFindResults,
+    required bool onThumbnailChange,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.syncEvents$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel
+        .send(<Object?>[
+          onSelectedTabChange,
+          onTabListChange,
+          onTabContentStateChange,
+          onIconChange,
+          onSecurityInfoStateChange,
+          onReaderableStateChange,
+          onHistoryStateChange,
+          onFindResults,
+          onThumbnailChange,
+        ]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3359,13 +3306,17 @@ class GeckoTabsApi {
   }
 
   Future<void> selectTab({required String tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.selectTab$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.selectTab$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3382,13 +3333,17 @@ class GeckoTabsApi {
   }
 
   Future<void> removeTab({required String tabId}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeTab$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeTab$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3404,14 +3359,39 @@ class GeckoTabsApi {
     }
   }
 
-  Future<String> addTab({required String url, required bool selectTab, required bool startLoading, required String? parentId, required LoadUrlFlagsValue flags, required String? contextId, required SourceValue source, required bool private, required HistoryMetadataKey? historyMetadata, required Map<String, String>? additionalHeaders, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.addTab$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url, selectTab, startLoading, parentId, flags, contextId, source, private, historyMetadata, additionalHeaders]);
+  Future<String> addTab({
+    required String url,
+    required bool selectTab,
+    required bool startLoading,
+    required String? parentId,
+    required LoadUrlFlagsValue flags,
+    required String? contextId,
+    required SourceValue source,
+    required bool private,
+    required HistoryMetadataKey? historyMetadata,
+    required Map<String, String>? additionalHeaders,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.addTab$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel
+        .send(<Object?>[
+          url,
+          selectTab,
+          startLoading,
+          parentId,
+          flags,
+          contextId,
+          source,
+          private,
+          historyMetadata,
+          additionalHeaders,
+        ]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3433,13 +3413,17 @@ class GeckoTabsApi {
   }
 
   Future<void> removeAllTabs({required bool recoverable}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeAllTabs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeAllTabs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[recoverable],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[recoverable]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3456,13 +3440,17 @@ class GeckoTabsApi {
   }
 
   Future<void> removeTabs({required List<String> ids}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeTabs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeTabs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ids],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ids]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3479,12 +3467,14 @@ class GeckoTabsApi {
   }
 
   Future<void> removeNormalTabs() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeNormalTabs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeNormalTabs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -3502,12 +3492,14 @@ class GeckoTabsApi {
   }
 
   Future<void> removePrivateTabs() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removePrivateTabs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removePrivateTabs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -3525,12 +3517,14 @@ class GeckoTabsApi {
   }
 
   Future<void> undo() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.undo$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.undo$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -3547,14 +3541,22 @@ class GeckoTabsApi {
     }
   }
 
-  Future<void> restoreTabsByList({required List<RecoverableTab> tabs, required String? selectTabId, required RestoreLocation restoreLocation, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.restoreTabsByList$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> restoreTabsByList({
+    required List<RecoverableTab> tabs,
+    required String? selectTabId,
+    required RestoreLocation restoreLocation,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.restoreTabsByList$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabs, selectTabId, restoreLocation],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabs, selectTabId, restoreLocation]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3570,14 +3572,21 @@ class GeckoTabsApi {
     }
   }
 
-  Future<void> restoreTabsByBrowserState({required RecoverableBrowserState state, required RestoreLocation restoreLocation}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.restoreTabsByBrowserState$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> restoreTabsByBrowserState({
+    required RecoverableBrowserState state,
+    required RestoreLocation restoreLocation,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.restoreTabsByBrowserState$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[state, restoreLocation],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[state, restoreLocation]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3595,14 +3604,21 @@ class GeckoTabsApi {
 
   /// Selects an already existing tab with the matching [HistoryMetadataKey] or otherwise
   /// creates a new tab with the given [url].
-  Future<String> selectOrAddTabByHistory({required String url, required HistoryMetadataKey historyMetadata}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.selectOrAddTabByHistory$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<String> selectOrAddTabByHistory({
+    required String url,
+    required HistoryMetadataKey historyMetadata,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.selectOrAddTabByHistory$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[url, historyMetadata],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url, historyMetadata]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3624,14 +3640,24 @@ class GeckoTabsApi {
   }
 
   /// Selects an already existing tab displaying [url] or otherwise creates a new tab.
-  Future<String> selectOrAddTabByUrl({required String url, required bool private, required SourceValue source, required LoadUrlFlagsValue flags, required bool ignoreFragment, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.selectOrAddTabByUrl$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<String> selectOrAddTabByUrl({
+    required String url,
+    required bool private,
+    required SourceValue source,
+    required LoadUrlFlagsValue flags,
+    required bool ignoreFragment,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.selectOrAddTabByUrl$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[url, private, source, flags, ignoreFragment],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url, private, source, flags, ignoreFragment]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3652,14 +3678,22 @@ class GeckoTabsApi {
     }
   }
 
-  Future<String> duplicateTab({required String? selectTabId, required bool selectNewTab, required String? newContextId, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.duplicateTab$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<String> duplicateTab({
+    required String? selectTabId,
+    required bool selectNewTab,
+    required String? newContextId,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.duplicateTab$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[selectTabId, selectNewTab, newContextId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[selectTabId, selectNewTab, newContextId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3680,14 +3714,22 @@ class GeckoTabsApi {
     }
   }
 
-  Future<void> moveTabs({required List<String> tabIds, required String targetTabId, required bool placeAfter, }) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.moveTabs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> moveTabs({
+    required List<String> tabIds,
+    required String targetTabId,
+    required bool placeAfter,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.moveTabs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabIds, targetTabId, placeAfter],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabIds, targetTabId, placeAfter]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3703,14 +3745,21 @@ class GeckoTabsApi {
     }
   }
 
-  Future<String> migratePrivateTabUseCase({required String tabId, required String? alternativeUrl}) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.migratePrivateTabUseCase$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<String> migratePrivateTabUseCase({
+    required String tabId,
+    required String? alternativeUrl,
+  }) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.migratePrivateTabUseCase$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, alternativeUrl],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, alternativeUrl]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3736,9 +3785,13 @@ class GeckoFindApi {
   /// Constructor for [GeckoFindApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoFindApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoFindApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -3746,13 +3799,17 @@ class GeckoFindApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> findAll(String? tabId, String text) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoFindApi.findAll$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoFindApi.findAll$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, text],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, text]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3769,13 +3826,17 @@ class GeckoFindApi {
   }
 
   Future<void> findNext(String? tabId, bool forward) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoFindApi.findNext$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoFindApi.findNext$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, forward],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, forward]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3792,13 +3853,17 @@ class GeckoFindApi {
   }
 
   Future<void> clearMatches(String? tabId) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoFindApi.clearMatches$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoFindApi.clearMatches$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3819,9 +3884,13 @@ class GeckoIconsApi {
   /// Constructor for [GeckoIconsApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoIconsApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoIconsApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -3829,13 +3898,17 @@ class GeckoIconsApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<IconResult> loadIcon(IconRequest request) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoIconsApi.loadIcon$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoIconsApi.loadIcon$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[request],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3861,9 +3934,13 @@ class GeckoPrefApi {
   /// Constructor for [GeckoPrefApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoPrefApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoPrefApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -3871,13 +3948,17 @@ class GeckoPrefApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<Map<String, Object>> getPrefs(List<String>? preferenceFilter) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.getPrefs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.getPrefs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[preferenceFilter],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[preferenceFilter]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3894,18 +3975,23 @@ class GeckoPrefApi {
         message: 'Host platform returned null value for non-null return value.',
       );
     } else {
-      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!.cast<String, Object>();
+      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!
+          .cast<String, Object>();
     }
   }
 
   Future<Map<String, Object>> applyPrefs(String prefBuffer) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.applyPrefs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.applyPrefs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[prefBuffer],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[prefBuffer]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3922,18 +4008,23 @@ class GeckoPrefApi {
         message: 'Host platform returned null value for non-null return value.',
       );
     } else {
-      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!.cast<String, Object>();
+      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!
+          .cast<String, Object>();
     }
   }
 
   Future<void> resetPrefs(List<String>? preferenceNames) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.resetPrefs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.resetPrefs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[preferenceNames],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[preferenceNames]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3954,9 +4045,13 @@ class GeckoBrowserExtensionApi {
   /// Constructor for [GeckoBrowserExtensionApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoBrowserExtensionApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoBrowserExtensionApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -3964,13 +4059,17 @@ class GeckoBrowserExtensionApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<List<Object>> getMarkdown(List<String> htmlList) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserExtensionApi.getMarkdown$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserExtensionApi.getMarkdown$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[htmlList],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[htmlList]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3996,9 +4095,13 @@ class GeckoContainerProxyApi {
   /// Constructor for [GeckoContainerProxyApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoContainerProxyApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoContainerProxyApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -4006,13 +4109,17 @@ class GeckoContainerProxyApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> setProxyPort(int port) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setProxyPort$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setProxyPort$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[port],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[port]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4029,13 +4136,17 @@ class GeckoContainerProxyApi {
   }
 
   Future<void> addContainerProxy(String contextId) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.addContainerProxy$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.addContainerProxy$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[contextId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4052,13 +4163,17 @@ class GeckoContainerProxyApi {
   }
 
   Future<void> removeContainerProxy(String contextId) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.removeContainerProxy$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.removeContainerProxy$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[contextId],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextId]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4075,12 +4190,14 @@ class GeckoContainerProxyApi {
   }
 
   Future<bool> healthcheck() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.healthcheck$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.healthcheck$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -4107,23 +4224,37 @@ class GeckoCookieApi {
   /// Constructor for [GeckoCookieApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoCookieApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoCookieApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<Cookie> getCookie(String? firstPartyDomain, String name, CookiePartitionKey? partitionKey, String? storeId, String url) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.getCookie$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<Cookie> getCookie(
+    String? firstPartyDomain,
+    String name,
+    CookiePartitionKey? partitionKey,
+    String? storeId,
+    String url,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.getCookie$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[firstPartyDomain, name, partitionKey, storeId, url],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[firstPartyDomain, name, partitionKey, storeId, url]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4144,14 +4275,25 @@ class GeckoCookieApi {
     }
   }
 
-  Future<List<Cookie>> getAllCookies(String? domain, String? firstPartyDomain, String? name, CookiePartitionKey? partitionKey, String? storeId, String url) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.getAllCookies$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<List<Cookie>> getAllCookies(
+    String? domain,
+    String? firstPartyDomain,
+    String? name,
+    CookiePartitionKey? partitionKey,
+    String? storeId,
+    String url,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.getAllCookies$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[domain, firstPartyDomain, name, partitionKey, storeId, url],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[domain, firstPartyDomain, name, partitionKey, storeId, url]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4172,14 +4314,43 @@ class GeckoCookieApi {
     }
   }
 
-  Future<void> setCookie(String? domain, int? expirationDate, String? firstPartyDomain, bool? httpOnly, String? name, CookiePartitionKey? partitionKey, String? path, CookieSameSiteStatus? sameSite, bool? secure, String? storeId, String url, String? value) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.setCookie$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[domain, expirationDate, firstPartyDomain, httpOnly, name, partitionKey, path, sameSite, secure, storeId, url, value]);
+  Future<void> setCookie(
+    String? domain,
+    int? expirationDate,
+    String? firstPartyDomain,
+    bool? httpOnly,
+    String? name,
+    CookiePartitionKey? partitionKey,
+    String? path,
+    CookieSameSiteStatus? sameSite,
+    bool? secure,
+    String? storeId,
+    String url,
+    String? value,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.setCookie$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel
+        .send(<Object?>[
+          domain,
+          expirationDate,
+          firstPartyDomain,
+          httpOnly,
+          name,
+          partitionKey,
+          path,
+          sameSite,
+          secure,
+          storeId,
+          url,
+          value,
+        ]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4195,14 +4366,24 @@ class GeckoCookieApi {
     }
   }
 
-  Future<void> removeCookie(String? firstPartyDomain, String name, CookiePartitionKey? partitionKey, String? storeId, String url) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.removeCookie$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> removeCookie(
+    String? firstPartyDomain,
+    String name,
+    CookiePartitionKey? partitionKey,
+    String? storeId,
+    String url,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoCookieApi.removeCookie$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[firstPartyDomain, name, partitionKey, storeId, url],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[firstPartyDomain, name, partitionKey, storeId, url]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4240,7 +4421,11 @@ abstract class GeckoStateEvents {
 
   void onReaderableStateChange(int timestamp, String id, ReaderableState state);
 
-  void onSecurityInfoStateChange(int timestamp, String id, SecurityInfoState state);
+  void onSecurityInfoStateChange(
+    int timestamp,
+    String id,
+    SecurityInfoState state,
+  );
 
   void onIconChange(int timestamp, String id, Uint8List? bytes);
 
@@ -4250,414 +4435,586 @@ abstract class GeckoStateEvents {
 
   void onLongPress(int timestamp, String id, HitResult hitResult);
 
-  static void setUp(GeckoStateEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    GeckoStateEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null, expected non-null int.',
+          );
           final bool? arg_state = (args[1] as bool?);
-          assert(arg_state != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null, expected non-null bool.');
+          assert(
+            arg_state != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null, expected non-null bool.',
+          );
           try {
             api.onViewReadyStateChange(arg_timestamp!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null, expected non-null int.',
+          );
           final bool? arg_state = (args[1] as bool?);
-          assert(arg_state != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null, expected non-null bool.');
+          assert(
+            arg_state != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null, expected non-null bool.',
+          );
           try {
             api.onEngineReadyStateChange(arg_timestamp!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null int.',
+          );
           final String? arg_url = (args[1] as String?);
-          assert(arg_url != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null String.');
+          assert(
+            arg_url != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null String.',
+          );
           final Uint8List? arg_bytes = (args[2] as Uint8List?);
-          assert(arg_bytes != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null Uint8List.');
+          assert(
+            arg_bytes != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null Uint8List.',
+          );
           try {
             api.onIconUpdate(arg_timestamp!, arg_url!, arg_bytes!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null, expected non-null int.',
+          );
           final String? arg_tabId = (args[1] as String?);
-          assert(arg_tabId != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null, expected non-null String.');
+          assert(
+            arg_tabId != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null, expected non-null String.',
+          );
           try {
             api.onTabAdded(arg_timestamp!, arg_tabId!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null, expected non-null int.');
-          final List<String>? arg_tabIds = (args[1] as List<Object?>?)?.cast<String>();
-          assert(arg_tabIds != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null, expected non-null List<String>.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null, expected non-null int.',
+          );
+          final List<String>? arg_tabIds = (args[1] as List<Object?>?)
+              ?.cast<String>();
+          assert(
+            arg_tabIds != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null, expected non-null List<String>.',
+          );
           try {
             api.onTabListChange(arg_timestamp!, arg_tabIds!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
           try {
             api.onSelectedTabChange(arg_timestamp!, arg_id);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null, expected non-null int.',
+          );
           final TabContentState? arg_state = (args[1] as TabContentState?);
-          assert(arg_state != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null, expected non-null TabContentState.');
+          assert(
+            arg_state != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null, expected non-null TabContentState.',
+          );
           try {
             api.onTabContentStateChange(arg_timestamp!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null String.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null String.',
+          );
           final HistoryState? arg_state = (args[2] as HistoryState?);
-          assert(arg_state != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null HistoryState.');
+          assert(
+            arg_state != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null HistoryState.',
+          );
           try {
             api.onHistoryStateChange(arg_timestamp!, arg_id!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null String.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null String.',
+          );
           final ReaderableState? arg_state = (args[2] as ReaderableState?);
-          assert(arg_state != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null ReaderableState.');
+          assert(
+            arg_state != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null ReaderableState.',
+          );
           try {
             api.onReaderableStateChange(arg_timestamp!, arg_id!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null String.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null String.',
+          );
           final SecurityInfoState? arg_state = (args[2] as SecurityInfoState?);
-          assert(arg_state != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null SecurityInfoState.');
+          assert(
+            arg_state != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null SecurityInfoState.',
+          );
           try {
             api.onSecurityInfoStateChange(arg_timestamp!, arg_id!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null, expected non-null String.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null, expected non-null String.',
+          );
           final Uint8List? arg_bytes = (args[2] as Uint8List?);
           try {
             api.onIconChange(arg_timestamp!, arg_id!, arg_bytes);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null, expected non-null String.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null, expected non-null String.',
+          );
           final Uint8List? arg_bytes = (args[2] as Uint8List?);
           try {
             api.onThumbnailChange(arg_timestamp!, arg_id!, arg_bytes);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null String.');
-          final List<FindResultState>? arg_results = (args[2] as List<Object?>?)?.cast<FindResultState>();
-          assert(arg_results != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null List<FindResultState>.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null String.',
+          );
+          final List<FindResultState>? arg_results = (args[2] as List<Object?>?)
+              ?.cast<FindResultState>();
+          assert(
+            arg_results != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null List<FindResultState>.',
+          );
           try {
             api.onFindResults(arg_timestamp!, arg_id!, arg_results!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null int.',
+          );
           final String? arg_id = (args[1] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null String.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null String.',
+          );
           final HitResult? arg_hitResult = (args[2] as HitResult?);
-          assert(arg_hitResult != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null HitResult.');
+          assert(
+            arg_hitResult != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null HitResult.',
+          );
           try {
             api.onLongPress(arg_timestamp!, arg_id!, arg_hitResult!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
@@ -4669,9 +5026,13 @@ class ReaderViewEvents {
   /// Constructor for [ReaderViewEvents].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  ReaderViewEvents({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  ReaderViewEvents({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -4679,13 +5040,17 @@ class ReaderViewEvents {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> onToggleReaderView(bool enable) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewEvents.onToggleReaderView$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewEvents.onToggleReaderView$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[enable],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enable]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4702,12 +5067,14 @@ class ReaderViewEvents {
   }
 
   Future<void> onAppearanceButtonTap() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewEvents.onAppearanceButtonTap$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewEvents.onAppearanceButtonTap$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -4730,32 +5097,49 @@ abstract class ReaderViewController {
 
   void appearanceButtonVisibility(int timestamp, bool visible);
 
-  static void setUp(ReaderViewController? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    ReaderViewController? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null, expected non-null int.',
+          );
           final bool? arg_visible = (args[1] as bool?);
-          assert(arg_visible != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null, expected non-null bool.');
+          assert(
+            arg_visible != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null, expected non-null bool.',
+          );
           try {
             api.appearanceButtonVisibility(arg_timestamp!, arg_visible!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
@@ -4767,9 +5151,13 @@ class GeckoSelectionActionController {
   /// Constructor for [GeckoSelectionActionController].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoSelectionActionController({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoSelectionActionController({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -4777,13 +5165,17 @@ class GeckoSelectionActionController {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> setActions(List<CustomSelectionAction> actions) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionController.setActions$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionController.setActions$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[actions],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[actions]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4805,32 +5197,49 @@ abstract class GeckoSelectionActionEvents {
 
   void performSelectionAction(String id, String selectedText);
 
-  static void setUp(GeckoSelectionActionEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    GeckoSelectionActionEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final String? arg_id = (args[0] as String?);
-          assert(arg_id != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction was null, expected non-null String.');
+          assert(
+            arg_id != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction was null, expected non-null String.',
+          );
           final String? arg_selectedText = (args[1] as String?);
-          assert(arg_selectedText != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction was null, expected non-null String.');
+          assert(
+            arg_selectedText != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSelectionActionEvents.performSelectionAction was null, expected non-null String.',
+          );
           try {
             api.performSelectionAction(arg_id!, arg_selectedText!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
@@ -4842,9 +5251,13 @@ class GeckoAddonsApi {
   /// Constructor for [GeckoAddonsApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoAddonsApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoAddonsApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -4852,12 +5265,14 @@ class GeckoAddonsApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> startAddonManagerActivity() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.startAddonManagerActivity$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.startAddonManagerActivity$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -4874,14 +5289,21 @@ class GeckoAddonsApi {
     }
   }
 
-  Future<void> invokeAddonAction(String extensionId, WebExtensionActionType actionType) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.invokeAddonAction$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> invokeAddonAction(
+    String extensionId,
+    WebExtensionActionType actionType,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.invokeAddonAction$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[extensionId, actionType],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[extensionId, actionType]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4898,13 +5320,17 @@ class GeckoAddonsApi {
   }
 
   Future<void> installAddon(String url) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.installAddon$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.installAddon$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[url],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4924,109 +5350,190 @@ class GeckoAddonsApi {
 abstract class GeckoAddonEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onUpsertWebExtensionAction(int timestamp, String extensionId, WebExtensionActionType actionType, WebExtensionData extensionData);
+  void onUpsertWebExtensionAction(
+    int timestamp,
+    String extensionId,
+    WebExtensionActionType actionType,
+    WebExtensionData extensionData,
+  );
 
-  void onRemoveWebExtensionAction(int timestamp, String extensionId, WebExtensionActionType actionType);
+  void onRemoveWebExtensionAction(
+    int timestamp,
+    String extensionId,
+    WebExtensionActionType actionType,
+  );
 
-  void onUpdateWebExtensionIcon(int timestamp, String extensionId, WebExtensionActionType actionType, Uint8List icon);
+  void onUpdateWebExtensionIcon(
+    int timestamp,
+    String extensionId,
+    WebExtensionActionType actionType,
+    Uint8List icon,
+  );
 
-  static void setUp(GeckoAddonEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    GeckoAddonEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null int.',
+          );
           final String? arg_extensionId = (args[1] as String?);
-          assert(arg_extensionId != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null String.');
-          final WebExtensionActionType? arg_actionType = (args[2] as WebExtensionActionType?);
-          assert(arg_actionType != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null WebExtensionActionType.');
-          final WebExtensionData? arg_extensionData = (args[3] as WebExtensionData?);
-          assert(arg_extensionData != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null WebExtensionData.');
+          assert(
+            arg_extensionId != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null String.',
+          );
+          final WebExtensionActionType? arg_actionType =
+              (args[2] as WebExtensionActionType?);
+          assert(
+            arg_actionType != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null WebExtensionActionType.',
+          );
+          final WebExtensionData? arg_extensionData =
+              (args[3] as WebExtensionData?);
+          assert(
+            arg_extensionData != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null WebExtensionData.',
+          );
           try {
-            api.onUpsertWebExtensionAction(arg_timestamp!, arg_extensionId!, arg_actionType!, arg_extensionData!);
+            api.onUpsertWebExtensionAction(
+              arg_timestamp!,
+              arg_extensionId!,
+              arg_actionType!,
+              arg_extensionData!,
+            );
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null int.',
+          );
           final String? arg_extensionId = (args[1] as String?);
-          assert(arg_extensionId != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null String.');
-          final WebExtensionActionType? arg_actionType = (args[2] as WebExtensionActionType?);
-          assert(arg_actionType != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null WebExtensionActionType.');
+          assert(
+            arg_extensionId != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null String.',
+          );
+          final WebExtensionActionType? arg_actionType =
+              (args[2] as WebExtensionActionType?);
+          assert(
+            arg_actionType != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null WebExtensionActionType.',
+          );
           try {
-            api.onRemoveWebExtensionAction(arg_timestamp!, arg_extensionId!, arg_actionType!);
+            api.onRemoveWebExtensionAction(
+              arg_timestamp!,
+              arg_extensionId!,
+              arg_actionType!,
+            );
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null int.',
+          );
           final String? arg_extensionId = (args[1] as String?);
-          assert(arg_extensionId != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null String.');
-          final WebExtensionActionType? arg_actionType = (args[2] as WebExtensionActionType?);
-          assert(arg_actionType != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null WebExtensionActionType.');
+          assert(
+            arg_extensionId != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null String.',
+          );
+          final WebExtensionActionType? arg_actionType =
+              (args[2] as WebExtensionActionType?);
+          assert(
+            arg_actionType != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null WebExtensionActionType.',
+          );
           final Uint8List? arg_icon = (args[3] as Uint8List?);
-          assert(arg_icon != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null Uint8List.');
+          assert(
+            arg_icon != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null Uint8List.',
+          );
           try {
-            api.onUpdateWebExtensionIcon(arg_timestamp!, arg_extensionId!, arg_actionType!, arg_icon!);
+            api.onUpdateWebExtensionIcon(
+              arg_timestamp!,
+              arg_extensionId!,
+              arg_actionType!,
+              arg_icon!,
+            );
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
@@ -5038,9 +5545,13 @@ class GeckoSuggestionApi {
   /// Constructor for [GeckoSuggestionApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoSuggestionApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoSuggestionApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5048,13 +5559,17 @@ class GeckoSuggestionApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<AutocompleteResult?> getAutocompleteSuggestion(String query) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.getAutocompleteSuggestion$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.getAutocompleteSuggestion$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[query],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[query]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -5070,14 +5585,21 @@ class GeckoSuggestionApi {
     }
   }
 
-  Future<void> querySuggestions(String text, List<GeckoSuggestionType> providers) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.querySuggestions$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> querySuggestions(
+    String text,
+    List<GeckoSuggestionType> providers,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionApi.querySuggestions$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[text, providers],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[text, providers]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -5097,37 +5619,66 @@ class GeckoSuggestionApi {
 abstract class GeckoSuggestionEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onSuggestionResult(int timestamp, GeckoSuggestionType suggestionType, List<GeckoSuggestion> suggestions);
+  void onSuggestionResult(
+    int timestamp,
+    GeckoSuggestionType suggestionType,
+    List<GeckoSuggestion> suggestions,
+  );
 
-  static void setUp(GeckoSuggestionEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    GeckoSuggestionEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null int.');
-          final GeckoSuggestionType? arg_suggestionType = (args[1] as GeckoSuggestionType?);
-          assert(arg_suggestionType != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null GeckoSuggestionType.');
-          final List<GeckoSuggestion>? arg_suggestions = (args[2] as List<Object?>?)?.cast<GeckoSuggestion>();
-          assert(arg_suggestions != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null List<GeckoSuggestion>.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null int.',
+          );
+          final GeckoSuggestionType? arg_suggestionType =
+              (args[1] as GeckoSuggestionType?);
+          assert(
+            arg_suggestionType != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null GeckoSuggestionType.',
+          );
+          final List<GeckoSuggestion>? arg_suggestions =
+              (args[2] as List<Object?>?)?.cast<GeckoSuggestion>();
+          assert(
+            arg_suggestions != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null List<GeckoSuggestion>.',
+          );
           try {
-            api.onSuggestionResult(arg_timestamp!, arg_suggestionType!, arg_suggestions!);
+            api.onSuggestionResult(
+              arg_timestamp!,
+              arg_suggestionType!,
+              arg_suggestions!,
+            );
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
@@ -5140,32 +5691,49 @@ abstract class GeckoTabContentEvents {
 
   void onContentUpdate(int timestamp, TabContent content);
 
-  static void setUp(GeckoTabContentEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    GeckoTabContentEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null, expected non-null int.',
+          );
           final TabContent? arg_content = (args[1] as TabContent?);
-          assert(arg_content != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null, expected non-null TabContent.');
+          assert(
+            arg_content != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null, expected non-null TabContent.',
+          );
           try {
             api.onContentUpdate(arg_timestamp!, arg_content!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
@@ -5177,9 +5745,13 @@ class GeckoDeleteBrowsingDataController {
   /// Constructor for [GeckoDeleteBrowsingDataController].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoDeleteBrowsingDataController({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoDeleteBrowsingDataController({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5187,12 +5759,14 @@ class GeckoDeleteBrowsingDataController {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> deleteTabs() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteTabs$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteTabs$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -5210,12 +5784,14 @@ class GeckoDeleteBrowsingDataController {
   }
 
   Future<void> deleteBrowsingHistory() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteBrowsingHistory$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteBrowsingHistory$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -5233,12 +5809,14 @@ class GeckoDeleteBrowsingDataController {
   }
 
   Future<void> deleteCookiesAndSiteData() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteCookiesAndSiteData$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteCookiesAndSiteData$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -5256,12 +5834,14 @@ class GeckoDeleteBrowsingDataController {
   }
 
   Future<void> deleteCachedFiles() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteCachedFiles$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteCachedFiles$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -5279,12 +5859,14 @@ class GeckoDeleteBrowsingDataController {
   }
 
   Future<void> deleteSitePermissions() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteSitePermissions$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteSitePermissions$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -5302,12 +5884,14 @@ class GeckoDeleteBrowsingDataController {
   }
 
   Future<void> deleteDownloads() async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteDownloads$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteDownloads$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
@@ -5329,9 +5913,13 @@ class GeckoDownloadsApi {
   /// Constructor for [GeckoDownloadsApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  GeckoDownloadsApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  GeckoDownloadsApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -5339,13 +5927,17 @@ class GeckoDownloadsApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<void> requestDownload(String tabId, DownloadState state) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.requestDownload$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.requestDownload$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, state],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, state]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -5361,14 +5953,21 @@ class GeckoDownloadsApi {
     }
   }
 
-  Future<void> copyInternetResource(String tabId, ShareInternetResourceState state) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.copyInternetResource$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> copyInternetResource(
+    String tabId,
+    ShareInternetResourceState state,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.copyInternetResource$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, state],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, state]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -5384,14 +5983,21 @@ class GeckoDownloadsApi {
     }
   }
 
-  Future<void> shareInternetResource(String tabId, ShareInternetResourceState state) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.shareInternetResource$pigeonVar_messageChannelSuffix';
-    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
+  Future<void> shareInternetResource(
+    String tabId,
+    ShareInternetResourceState state,
+  ) async {
+    final String pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.shareInternetResource$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel =
+        BasicMessageChannel<Object?>(
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId, state],
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, state]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -5413,32 +6019,49 @@ abstract class BrowserExtensionEvents {
 
   void onFeedRequested(int timestamp, String url);
 
-  static void setUp(BrowserExtensionEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    BrowserExtensionEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
-      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
-          assert(message != null,
-          'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null.');
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null.',
+          );
           final List<Object?> args = (message as List<Object?>?)!;
           final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null int.');
+          assert(
+            arg_timestamp != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null int.',
+          );
           final String? arg_url = (args[1] as String?);
-          assert(arg_url != null,
-              'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null String.');
+          assert(
+            arg_url != null,
+            'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null String.',
+          );
           try {
             api.onFeedRequested(arg_timestamp!, arg_url!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }

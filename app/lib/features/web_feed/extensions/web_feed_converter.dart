@@ -15,13 +15,9 @@ extension WebFeedJson on WebFeed {
       title: json['title'] as String,
       description: json['description'] as String,
       links: (json['links'] as List).cast<String?>(),
-      items:
-          (json['items'] as List)
-              .map(
-                (item) =>
-                    WebFeedItemJson.fromJson(item as Map<String, dynamic>),
-              )
-              .toList(),
+      items: (json['items'] as List)
+          .map((item) => WebFeedItemJson.fromJson(item as Map<String, dynamic>))
+          .toList(),
     );
   }
 }
@@ -41,10 +37,9 @@ extension WebFeedItemJson on WebFeedItem {
       title: json['title'] as String,
       body: json['body'] as String,
       links: (json['links'] as List).cast<String?>(),
-      updated:
-          json['updated'] != null
-              ? DateTime.parse(json['updated'] as String)
-              : null,
+      updated: json['updated'] != null
+          ? DateTime.parse(json['updated'] as String)
+          : null,
     );
   }
 }

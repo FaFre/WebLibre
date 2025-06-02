@@ -60,39 +60,34 @@ class FeedEditScreen extends HookConsumerWidget {
 
         return _FeedEditContent(mode: _mode, initialFeed: initialFeed);
       },
-      error:
-          (error, stackTrace) => Scaffold(
-            key: const ValueKey('error'),
-            appBar: AppBar(),
-            body: Center(
-              child: FailureWidget(
-                title: 'Failed to load feed',
-                exception: error,
+      error: (error, stackTrace) => Scaffold(
+        key: const ValueKey('error'),
+        appBar: AppBar(),
+        body: Center(
+          child: FailureWidget(title: 'Failed to load feed', exception: error),
+        ),
+      ),
+      loading: () => Scaffold(
+        key: const ValueKey('loading'),
+        appBar: AppBar(
+          title: Text(switch (_mode) {
+            _DialogMode.create => 'New Feed',
+            _DialogMode.edit => 'Edit Feed',
+          }),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text('Fetching feed...'),
               ),
-            ),
+            ],
           ),
-      loading:
-          () => Scaffold(
-            key: const ValueKey('loading'),
-            appBar: AppBar(
-              title: Text(switch (_mode) {
-                _DialogMode.create => 'New Feed',
-                _DialogMode.edit => 'Edit Feed',
-              }),
-            ),
-            body: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Text('Fetching feed...'),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        ),
+      ),
     );
   }
 }
@@ -141,11 +136,10 @@ class _FeedEditContent extends HookConsumerWidget {
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
                 final feedData = FeedData(
-                  url:
-                      uri_parser.tryParseUrl(
-                        urlTextController.text,
-                        eagerParsing: true,
-                      )!,
+                  url: uri_parser.tryParseUrl(
+                    urlTextController.text,
+                    eagerParsing: true,
+                  )!,
                   authors: initialFeed.authors,
                   description: descriptionTextController.text.whenNotEmpty,
                   icon: uri_parser.tryParseUrl(

@@ -15,10 +15,9 @@ final articleContentProcessorServiceProvider =
     NotifierProvider<ArticleContentProcessorService, void>.internal(
       ArticleContentProcessorService.new,
       name: r'articleContentProcessorServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$articleContentProcessorServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$articleContentProcessorServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

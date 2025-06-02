@@ -118,19 +118,18 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                 value:
                     generalSettings.enableReadability &&
                     generalSettings.enforceReadability,
-                onChanged:
-                    generalSettings.enableReadability
-                        ? (value) async {
-                          await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .enforceReadability(value),
-                              );
-                        }
-                        : null,
+                onChanged: generalSettings.enableReadability
+                    ? (value) async {
+                        await ref
+                            .read(
+                              saveGeneralSettingsControllerProvider.notifier,
+                            )
+                            .save(
+                              (currentSettings) => currentSettings.copyWith
+                                  .enforceReadability(value),
+                            );
+                      }
+                    : null,
               ),
               Consumer(
                 builder: (context, ref, child) {

@@ -13,10 +13,9 @@ String _$widgetPinnableHash() => r'f91041f0f051ad0f00dd765cafea5571ca8c8088';
 final widgetPinnableProvider = FutureProvider<bool>.internal(
   widgetPinnable,
   name: r'widgetPinnableProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$widgetPinnableHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$widgetPinnableHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -33,10 +32,9 @@ final appWidgetLaunchStreamProvider =
     AutoDisposeProvider<Raw<Stream<ReceivedIntentParameter>>>.internal(
       appWidgetLaunchStream,
       name: r'appWidgetLaunchStreamProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$appWidgetLaunchStreamHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$appWidgetLaunchStreamHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

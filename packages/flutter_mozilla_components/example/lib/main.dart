@@ -21,13 +21,12 @@ class MyAppState extends State<MyApp> {
           title: const Text('Native Fragment Example'),
           actions: [
             MenuAnchor(
-              builder:
-                  (context, controller, child) => IconButton(
-                    onPressed: () {
-                      controller.open();
-                    },
-                    icon: const Icon(Icons.menu),
-                  ),
+              builder: (context, controller, child) => IconButton(
+                onPressed: () {
+                  controller.open();
+                },
+                icon: const Icon(Icons.menu),
+              ),
               menuChildren: [
                 MenuItemButton(
                   onPressed: () async {

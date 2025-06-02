@@ -26,12 +26,11 @@ AsyncValue<List<ContainerDataWithCount>> matchSortedContainersWithCount(
       }
 
       return value.whenData(
-        (cb) =>
-            TokenizedFilter.sort(
-              items: cb,
-              toString: (item) => item.name,
-              query: searchText!,
-            ).filtered,
+        (cb) => TokenizedFilter.sort(
+          items: cb,
+          toString: (item) => item.name,
+          query: searchText!,
+        ).filtered,
       );
     }),
   );

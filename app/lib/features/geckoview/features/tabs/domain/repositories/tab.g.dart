@@ -14,10 +14,9 @@ final tabDataRepositoryProvider =
     NotifierProvider<TabDataRepository, void>.internal(
       TabDataRepository.new,
       name: r'tabDataRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$tabDataRepositoryHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$tabDataRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

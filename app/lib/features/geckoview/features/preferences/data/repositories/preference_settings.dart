@@ -107,11 +107,10 @@ class UnifiedPreferenceSettingsRepository
       _preferenceSettingGroupsProvider(partition).future,
     );
 
-    final prefs =
-        _statelessGroups!.values
-            .map((group) => group.settings.keys)
-            .flattened
-            .toList();
+    final prefs = _statelessGroups!.values
+        .map((group) => group.settings.keys)
+        .flattened
+        .toList();
 
     await ref.read(_preferenceRepositoryProvider.notifier).resetPrefs(prefs);
   }

@@ -176,10 +176,9 @@ class AutoSuggestTextField extends HookWidget {
                             text: suggestion!.substring(text.length),
                             style: TextStyle(
                               height: 1.2,
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               backgroundColor:
                                   suggestionHighlightColor ??
                                   Theme.of(

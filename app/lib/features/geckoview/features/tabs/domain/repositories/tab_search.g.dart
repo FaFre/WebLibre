@@ -87,10 +87,9 @@ class TabSearchRepositoryProvider
         () => TabSearchRepository()..partition = partition,
         from: tabSearchRepositoryProvider,
         name: r'tabSearchRepositoryProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$tabSearchRepositoryHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tabSearchRepositoryHash,
         dependencies: TabSearchRepositoryFamily._dependencies,
         allTransitiveDependencies:
             TabSearchRepositoryFamily._allTransitiveDependencies,

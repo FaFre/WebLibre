@@ -92,16 +92,14 @@ EquatableValue<List<String>> seamlessFilteredTabIds(
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
 ) {
-  final tabSearchResults =
-      ref
-          .watch(
-            tabSearchRepositoryProvider(searchPartition).select(
-              (value) => EquatableValue(
-                value.valueOrNull?.map((tab) => tab.id).toList(),
-              ),
-            ),
-          )
-          .value;
+  final tabSearchResults = ref
+      .watch(
+        tabSearchRepositoryProvider(searchPartition).select(
+          (value) =>
+              EquatableValue(value.valueOrNull?.map((tab) => tab.id).toList()),
+        ),
+      )
+      .value;
 
   final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
 
@@ -120,14 +118,13 @@ EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
 ) {
-  final tabSearchResults =
-      ref
-          .watch(
-            tabSearchRepositoryProvider(
-              searchPartition,
-            ).select((value) => EquatableValue(value.valueOrNull)),
-          )
-          .value;
+  final tabSearchResults = ref
+      .watch(
+        tabSearchRepositoryProvider(
+          searchPartition,
+        ).select((value) => EquatableValue(value.valueOrNull)),
+      )
+      .value;
 
   final availableTabStates = ref.watch(
     availableTabStatesProvider(containerFilter),

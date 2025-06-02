@@ -14,10 +14,9 @@ final cacheRepositoryProvider =
     NotifierProvider<CacheRepository, void>.internal(
       CacheRepository.new,
       name: r'cacheRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$cacheRepositoryHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$cacheRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

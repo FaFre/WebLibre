@@ -70,11 +70,12 @@ class FeedArticleCard extends HookConsumerWidget {
                           MarkdownBody(
                             data: titleHighlight!,
                             styleSheet: MarkdownStyleSheet(
-                              p: Theme.of(
-                                context,
-                              ).textTheme.titleMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                              p: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                  ),
                             ),
                           ),
                         if (titleHighlight.isEmpty)
@@ -86,23 +87,19 @@ class FeedArticleCard extends HookConsumerWidget {
                           MarkdownBody(
                             data: searchSnippet!,
                             styleSheet: MarkdownStyleSheet(
-                              p: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.copyWith(
-                                color:
-                                    Theme.of(
+                              p: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
                                       context,
                                     ).colorScheme.onSurfaceVariant,
-                              ),
-                              a: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.copyWith(
-                                color:
-                                    Theme.of(
+                                  ),
+                              a: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
                                       context,
                                     ).colorScheme.onSurfaceVariant,
-                                decoration: TextDecoration.none,
-                              ),
+                                    decoration: TextDecoration.none,
+                                  ),
                             ),
                           ),
                         if (searchSnippet.isEmpty &&

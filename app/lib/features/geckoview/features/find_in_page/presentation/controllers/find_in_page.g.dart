@@ -15,10 +15,9 @@ final findInPageControllerProvider =
     AutoDisposeNotifierProvider<FindInPageController, FindInPageState>.internal(
       FindInPageController.new,
       name: r'findInPageControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$findInPageControllerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$findInPageControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

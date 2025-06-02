@@ -62,20 +62,19 @@ class TorProxyScreen extends HookConsumerWidget {
                       value: torProxyPort.valueOrNull != null,
                       title: const Text('Tor Proxy'),
                       secondary: const Icon(MdiIcons.power),
-                      onChanged:
-                          torProxyPort.isLoading
-                              ? null
-                              : (value) async {
-                                if (value) {
-                                  await ref
-                                      .read(torProxyServiceProvider.notifier)
-                                      .connect();
-                                } else {
-                                  await ref
-                                      .read(torProxyServiceProvider.notifier)
-                                      .disconnect();
-                                }
-                              },
+                      onChanged: torProxyPort.isLoading
+                          ? null
+                          : (value) async {
+                              if (value) {
+                                await ref
+                                    .read(torProxyServiceProvider.notifier)
+                                    .connect();
+                              } else {
+                                await ref
+                                    .read(torProxyServiceProvider.notifier)
+                                    .disconnect();
+                              }
+                            },
                     ),
                   ),
                 ],

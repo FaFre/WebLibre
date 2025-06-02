@@ -32,21 +32,20 @@ class BangChips extends HookConsumerWidget {
   ) {
     return showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Reset usage frequency of $triggerName?'),
-            content: const Text('This will remove the Bang from quick select.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Reset'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text('Reset usage frequency of $triggerName?'),
+        content: const Text('This will remove the Bang from quick select.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -71,9 +70,8 @@ class BangChips extends HookConsumerWidget {
                 Expanded(
                   child: SelectableChips(
                     itemId: (bang) => bang.trigger,
-                    itemAvatar:
-                        (bang) =>
-                            UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
+                    itemAvatar: (bang) =>
+                        UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
                     itemLabel: (bang) => Text(bang.websiteName),
                     availableItems: availableBangs,
                     selectedItem: activeBang,
@@ -100,10 +98,9 @@ class BangChips extends HookConsumerWidget {
                     final searchText = searchTextController?.text.trim();
 
                     final trigger = await BangSearchRoute(
-                      searchText:
-                          (searchText.isEmpty)
-                              ? BangSearchRoute.emptySearchText
-                              : searchText!,
+                      searchText: (searchText.isEmpty)
+                          ? BangSearchRoute.emptySearchText
+                          : searchText!,
                     ).push<String?>(context);
 
                     if (trigger != null) {

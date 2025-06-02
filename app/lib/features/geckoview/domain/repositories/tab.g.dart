@@ -13,10 +13,9 @@ String _$tabRepositoryHash() => r'9b7ef03bec41f149b3cb456b73d7ee0e1b2804df';
 final tabRepositoryProvider = NotifierProvider<TabRepository, void>.internal(
   TabRepository.new,
   name: r'tabRepositoryProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$tabRepositoryHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$tabRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

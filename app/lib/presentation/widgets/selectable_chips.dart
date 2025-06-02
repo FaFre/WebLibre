@@ -85,12 +85,11 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                       onDeleted?.call(item);
                     }
                   },
-                  onDeleted:
-                      deleteIcon
-                          ? () {
-                            onDeleted?.call(item);
-                          }
-                          : null,
+                  onDeleted: deleteIcon
+                      ? () {
+                          onDeleted?.call(item);
+                        }
+                      : null,
                   label: itemLabel.call(item),
                   avatar: itemAvatar?.call(item),
                 ),

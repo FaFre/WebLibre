@@ -11,19 +11,19 @@ String _$engineBoundIntentStreamHash() =>
 
 /// See also [EngineBoundIntentStream].
 @ProviderFor(EngineBoundIntentStream)
-final engineBoundIntentStreamProvider = AutoDisposeStreamNotifierProvider<
-  EngineBoundIntentStream,
-  SharedContent
->.internal(
-  EngineBoundIntentStream.new,
-  name: r'engineBoundIntentStreamProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
+final engineBoundIntentStreamProvider =
+    AutoDisposeStreamNotifierProvider<
+      EngineBoundIntentStream,
+      SharedContent
+    >.internal(
+      EngineBoundIntentStream.new,
+      name: r'engineBoundIntentStreamProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
           : _$engineBoundIntentStreamHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$EngineBoundIntentStream = AutoDisposeStreamNotifier<SharedContent>;
 // ignore_for_file: type=lint

@@ -64,112 +64,104 @@ class FeedSearch extends HookConsumerWidget {
         SliverSkeletonizer(
           enabled: articlesAsync.isLoading,
           child: articlesAsync.when(
-            data:
-                (articles) => SliverList.builder(
-                  itemCount: articles.length,
-                  itemBuilder: (context, index) {
-                    final article = articles[index];
+            data: (articles) => SliverList.builder(
+              itemCount: articles.length,
+              itemBuilder: (context, index) {
+                final article = articles[index];
 
-                    final titleHighlight = switch (article) {
-                      final FeedArticleQueryResult result =>
-                        result.titleHighlight.whenNotEmpty,
-                      _ => null,
-                    };
+                final titleHighlight = switch (article) {
+                  final FeedArticleQueryResult result =>
+                    result.titleHighlight.whenNotEmpty,
+                  _ => null,
+                };
 
-                    final searchSnippet = switch (article) {
-                      final FeedArticleQueryResult result =>
-                        result.summarySnippet.whenNotEmpty ??
-                            result.contentSnippet.whenNotEmpty,
-                      _ => null,
-                    };
+                final searchSnippet = switch (article) {
+                  final FeedArticleQueryResult result =>
+                    result.summarySnippet.whenNotEmpty ??
+                        result.contentSnippet.whenNotEmpty,
+                  _ => null,
+                };
 
-                    final articleDate = article.updated ?? article.created;
+                final articleDate = article.updated ?? article.created;
 
-                    return ListTile(
-                      leading: RepaintBoundary(
-                        child: UrlIcon([
-                          article.icon ??
-                              article.links
-                                  ?.getRelation(FeedLinkRelation.alternate)
-                                  ?.uri ??
-                              article.siteLink ??
-                              article.feedId.base,
-                        ], iconSize: 24.0),
-                      ),
-                      title:
-                          (titleHighlight.isNotEmpty)
-                              ? MarkdownBody(
-                                data: titleHighlight!,
-                                styleSheet: MarkdownStyleSheet(
-                                  p: Theme.of(
+                return ListTile(
+                  leading: RepaintBoundary(
+                    child: UrlIcon([
+                      article.icon ??
+                          article.links
+                              ?.getRelation(FeedLinkRelation.alternate)
+                              ?.uri ??
+                          article.siteLink ??
+                          article.feedId.base,
+                    ], iconSize: 24.0),
+                  ),
+                  title: (titleHighlight.isNotEmpty)
+                      ? MarkdownBody(
+                          data: titleHighlight!,
+                          styleSheet: MarkdownStyleSheet(
+                            p: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Theme.of(
                                     context,
-                                  ).textTheme.titleMedium?.copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                  ),
+                                  ).colorScheme.onSurface,
                                 ),
-                              )
-                              : Text(
-                                article.displayTitle,
-                                style: theme.textTheme.titleMedium,
-                              ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (searchSnippet.isNotEmpty)
-                            MarkdownBody(
-                              data: searchSnippet!,
-                              styleSheet: MarkdownStyleSheet(
-                                p: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.copyWith(
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                ),
-                                a: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.copyWith(
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                            )
-                          else
-                            (article.summaryPlain != null)
-                                ? Text(
-                                  article.summaryPlain!,
-                                  style: theme.textTheme.bodySmall,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                )
-                                : const SizedBox.shrink(),
-                          if (articleDate != null)
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: Text(
-                                ref
-                                    .read(formatProvider.notifier)
-                                    .fullDateTimeWithTimezone(articleDate),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
+                          ),
+                        )
+                      : Text(
+                          article.displayTitle,
+                          style: theme.textTheme.titleMedium,
+                        ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (searchSnippet.isNotEmpty)
+                        MarkdownBody(
+                          data: searchSnippet!,
+                          styleSheet: MarkdownStyleSheet(
+                            p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
-                        ],
-                      ),
-                      onTap: () {
-                        FeedArticleRoute(
-                          articleId: article.id,
-                        ).pushReplacement(context);
-                      },
-                    );
+                            a: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        )
+                      else
+                        (article.summaryPlain != null)
+                            ? Text(
+                                article.summaryPlain!,
+                                style: theme.textTheme.bodySmall,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : const SizedBox.shrink(),
+                      if (articleDate != null)
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Text(
+                            ref
+                                .read(formatProvider.notifier)
+                                .fullDateTimeWithTimezone(articleDate),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  onTap: () {
+                    FeedArticleRoute(
+                      articleId: article.id,
+                    ).pushReplacement(context);
                   },
-                ),
+                );
+              },
+            ),
             error: (error, stackTrace) {
               return SliverToBoxAdapter(
                 child: FailureWidget(
@@ -178,13 +170,12 @@ class FeedSearch extends HookConsumerWidget {
                 ),
               );
             },
-            loading:
-                () => SliverList.builder(
-                  itemCount: articlesAsync.valueOrNull?.length ?? 3,
-                  itemBuilder: (context, index) {
-                    return const ListTile(title: Bone.text());
-                  },
-                ),
+            loading: () => SliverList.builder(
+              itemCount: articlesAsync.valueOrNull?.length ?? 3,
+              itemBuilder: (context, index) {
+                return const ListTile(title: Bone.text());
+              },
+            ),
           ),
         ),
       ],

@@ -15,10 +15,9 @@ final kagiAutosuggestServiceProvider =
     NotifierProvider<KagiAutosuggestService, void>.internal(
       KagiAutosuggestService.new,
       name: r'kagiAutosuggestServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$kagiAutosuggestServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$kagiAutosuggestServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

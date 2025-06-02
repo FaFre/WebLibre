@@ -30,16 +30,15 @@ class BangDataSourceService extends _$BangDataSourceService {
           client.close();
         }
       }, [url.toString()]).then(
-        (json) =>
-            json.map((e) {
-              var bang = Bang.fromJson(e as Map<String, dynamic>);
+        (json) => json.map((e) {
+          var bang = Bang.fromJson(e as Map<String, dynamic>);
 
-              if (group != null) {
-                bang = bang.copyWith.group(group);
-              }
+          if (group != null) {
+            bang = bang.copyWith.group(group);
+          }
 
-              return bang;
-            }).toList(),
+          return bang;
+        }).toList(),
       );
     }, exceptionHandler: handleHttpError);
   }

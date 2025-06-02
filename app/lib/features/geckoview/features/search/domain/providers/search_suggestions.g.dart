@@ -15,10 +15,9 @@ final defaultSearchSuggestionsProvider =
     Provider<ISearchSuggestionProvider>.internal(
       defaultSearchSuggestions,
       name: r'defaultSearchSuggestionsProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$defaultSearchSuggestionsHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$defaultSearchSuggestionsHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -104,10 +103,9 @@ class SearchSuggestionsProvider
         () => SearchSuggestions()..suggestionsProvider = suggestionsProvider,
         from: searchSuggestionsProvider,
         name: r'searchSuggestionsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$searchSuggestionsHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$searchSuggestionsHash,
         dependencies: SearchSuggestionsFamily._dependencies,
         allTransitiveDependencies:
             SearchSuggestionsFamily._allTransitiveDependencies,

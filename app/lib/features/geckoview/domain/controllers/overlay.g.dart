@@ -14,10 +14,9 @@ final overlayControllerProvider =
     AutoDisposeNotifierProvider<OverlayController, Widget?>.internal(
       OverlayController.new,
       name: r'overlayControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$overlayControllerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$overlayControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

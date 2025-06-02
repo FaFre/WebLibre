@@ -15,10 +15,9 @@ final generalSettingsRepositoryProvider =
     NotifierProvider<GeneralSettingsRepository, GeneralSettings>.internal(
       GeneralSettingsRepository.new,
       name: r'generalSettingsRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$generalSettingsRepositoryHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$generalSettingsRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

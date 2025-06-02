@@ -72,10 +72,9 @@ class SearchRoute extends GoRouteData {
   Widget build(BuildContext context, GoRouterState state) {
     return SearchScreen(
       tabType: tabType,
-      initialSearchText:
-          (searchText.isEmpty || searchText == emptySearchText)
-              ? null
-              : searchText,
+      initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
+          ? null
+          : searchText,
     );
   }
 }
@@ -124,8 +123,8 @@ class ContextMenuRoute extends GoRouteData {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(
-      builder:
-          (_) => ContextMenuDialog(hitResult: HitResultJson.fromJson($extra)),
+      builder: (_) =>
+          ContextMenuDialog(hitResult: HitResultJson.fromJson($extra)),
     );
   }
 }

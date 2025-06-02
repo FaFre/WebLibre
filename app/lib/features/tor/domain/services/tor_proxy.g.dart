@@ -14,10 +14,9 @@ final torProxyServiceProvider =
     AsyncNotifierProvider<TorProxyService, int?>.internal(
       TorProxyService.new,
       name: r'torProxyServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$torProxyServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$torProxyServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

@@ -122,13 +122,12 @@ class HistorySuggestions extends HookConsumerWidget {
                 ),
               );
             },
-            loading:
-                () => SliverList.builder(
-                  itemCount: historySuggestionsAsync.valueOrNull?.length ?? 3,
-                  itemBuilder: (context, index) {
-                    return const ListTile(title: Bone.text());
-                  },
-                ),
+            loading: () => SliverList.builder(
+              itemCount: historySuggestionsAsync.valueOrNull?.length ?? 3,
+              itemBuilder: (context, index) {
+                return const ListTile(title: Bone.text());
+              },
+            ),
           ),
         ),
       ],

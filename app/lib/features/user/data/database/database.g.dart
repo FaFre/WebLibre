@@ -45,11 +45,10 @@ class Setting extends Table with TableInfo<Setting, SettingData> {
   SettingData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SettingData(
-      key:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}key'],
-          )!,
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
       partitionKey: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}partition_key'],
@@ -123,10 +122,9 @@ class SettingData extends DataClass implements Insertable<SettingData> {
   SettingData copyWithCompanion(SettingCompanion data) {
     return SettingData(
       key: data.key.present ? data.key.value : this.key,
-      partitionKey:
-          data.partitionKey.present
-              ? data.partitionKey.value
-              : this.partitionKey,
+      partitionKey: data.partitionKey.present
+          ? data.partitionKey.value
+          : this.partitionKey,
       value: data.value.present ? data.value.value : this.value,
     );
   }
@@ -269,21 +267,18 @@ class IconCache extends Table with TableInfo<IconCache, IconCacheData> {
   IconCacheData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return IconCacheData(
-      origin:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}origin'],
-          )!,
-      iconData:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}icon_data'],
-          )!,
-      fetchDate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}fetch_date'],
-          )!,
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
+      iconData: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}icon_data'],
+      )!,
+      fetchDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetch_date'],
+      )!,
     );
   }
 
@@ -577,12 +572,12 @@ class $SettingTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SettingFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SettingOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SettingAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $SettingFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SettingOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SettingAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> key = const Value.absent(),
@@ -607,16 +602,9 @@ class $SettingTableManager
                 value: value,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -740,12 +728,12 @@ class $IconCacheTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $IconCacheFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $IconCacheOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $IconCacheAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $IconCacheFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $IconCacheOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $IconCacheAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> origin = const Value.absent(),
@@ -770,16 +758,9 @@ class $IconCacheTableManager
                 fetchDate: fetchDate,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

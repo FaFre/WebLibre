@@ -22,23 +22,21 @@ class FailureWidget extends StatelessWidget {
         children: [
           ListTile(
             title: Text(title ?? 'Something went wrong'),
-            subtitle:
-                exception != null
-                    ? switch (exception) {
-                      final String string => Text(string),
-                      _ => Text(exception.runtimeType.toString()),
-                    }
-                    : null,
-            trailing:
-                compact && onRetry != null
-                    ? IconButton.outlined(
-                      onPressed: onRetry,
-                      style: IconButton.styleFrom(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      icon: const Icon(Icons.refresh_outlined),
-                    )
-                    : null,
+            subtitle: exception != null
+                ? switch (exception) {
+                    final String string => Text(string),
+                    _ => Text(exception.runtimeType.toString()),
+                  }
+                : null,
+            trailing: compact && onRetry != null
+                ? IconButton.outlined(
+                    onPressed: onRetry,
+                    style: IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: const Icon(Icons.refresh_outlined),
+                  )
+                : null,
             textColor: Theme.of(context).colorScheme.error,
           ),
           if (!compact && onRetry != null)

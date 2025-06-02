@@ -45,16 +45,14 @@ class _$FindInPageStateCWProxyImpl implements _$FindInPageStateCWProxy {
     Object? lastSearchText = const $CopyWithPlaceholder(),
   }) {
     return FindInPageState(
-      visible:
-          visible == const $CopyWithPlaceholder()
-              ? _value.visible
-              // ignore: cast_nullable_to_non_nullable
-              : visible as bool,
-      lastSearchText:
-          lastSearchText == const $CopyWithPlaceholder()
-              ? _value.lastSearchText
-              // ignore: cast_nullable_to_non_nullable
-              : lastSearchText as String?,
+      visible: visible == const $CopyWithPlaceholder()
+          ? _value.visible
+          // ignore: cast_nullable_to_non_nullable
+          : visible as bool,
+      lastSearchText: lastSearchText == const $CopyWithPlaceholder()
+          ? _value.lastSearchText
+          // ignore: cast_nullable_to_non_nullable
+          : lastSearchText as String?,
     );
   }
 }

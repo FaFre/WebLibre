@@ -37,18 +37,17 @@ AsyncValue<List<GeckoSuggestion>> engineHistorySuggestions(Ref ref) {
   return ref.watch(
     engineSuggestionsProvider.select(
       (suggestions) => suggestions.whenData(
-        (suggestions) =>
-            suggestions
-                .where(
-                  (suggestion) =>
-                      suggestion.type == GeckoSuggestionType.history &&
-                      (suggestion.title.isNotEmpty) &&
-                      (suggestion.description.mapNotNull(
-                            (url) => Uri.tryParse(url),
-                          ) !=
-                          null),
-                )
-                .toList(),
+        (suggestions) => suggestions
+            .where(
+              (suggestion) =>
+                  suggestion.type == GeckoSuggestionType.history &&
+                  (suggestion.title.isNotEmpty) &&
+                  (suggestion.description.mapNotNull(
+                        (url) => Uri.tryParse(url),
+                      ) !=
+                      null),
+            )
+            .toList(),
       ),
     ),
   );

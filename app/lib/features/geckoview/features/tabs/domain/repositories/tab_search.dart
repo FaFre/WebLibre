@@ -19,18 +19,17 @@ class TabSearchRepository extends _$TabSearchRepository {
   }) async {
     if (input.isNotEmpty) {
       state = await AsyncValue.guard(
-        () =>
-            ref
-                .read(tabDatabaseProvider)
-                .tabDao
-                .queryTabs(
-                  matchPrefix: matchPrefix,
-                  matchSuffix: matchSuffix,
-                  ellipsis: ellipsis,
-                  snippetLength: snippetLength,
-                  searchString: input,
-                )
-                .get(),
+        () => ref
+            .read(tabDatabaseProvider)
+            .tabDao
+            .queryTabs(
+              matchPrefix: matchPrefix,
+              matchSuffix: matchSuffix,
+              ellipsis: ellipsis,
+              snippetLength: snippetLength,
+              searchString: input,
+            )
+            .get(),
       );
     } else {
       state = const AsyncValue.data(null);

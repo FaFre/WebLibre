@@ -22,7 +22,10 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
 
   SingleSelectable<int> getBangCount({Iterable<BangGroup>? groups}) {
     return db.bang.count(
-      where: groups.mapNotNull((groups) => (t) => t.group.isInValues(groups)),
+      where: groups.mapNotNull(
+        (groups) =>
+            (t) => t.group.isInValues(groups),
+      ),
     );
   }
 

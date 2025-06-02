@@ -15,10 +15,9 @@ final readerableScreenControllerProvider =
     AsyncNotifierProvider<ReaderableScreenController, void>.internal(
       ReaderableScreenController.new,
       name: r'readerableScreenControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$readerableScreenControllerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$readerableScreenControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

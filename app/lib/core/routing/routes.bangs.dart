@@ -64,10 +64,9 @@ class BangSearchRoute extends GoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return BangSearchScreen(
-      initialSearchText:
-          (searchText.isEmpty || searchText == emptySearchText)
-              ? null
-              : searchText,
+      initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
+          ? null
+          : searchText,
     );
   }
 }

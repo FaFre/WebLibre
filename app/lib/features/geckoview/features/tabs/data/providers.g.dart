@@ -13,8 +13,9 @@ String _$tabDatabaseHash() => r'422bd4789296dc271fabbd5906f2e2ab16bccaa3';
 final tabDatabaseProvider = Provider<TabDatabase>.internal(
   tabDatabase,
   name: r'tabDatabaseProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$tabDatabaseHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$tabDatabaseHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

@@ -60,19 +60,17 @@ class _$ContainerAuthSettingsCWProxyImpl
     return ContainerAuthSettings(
       authenticationRequired:
           authenticationRequired == const $CopyWithPlaceholder()
-              ? _value.authenticationRequired
-              // ignore: cast_nullable_to_non_nullable
-              : authenticationRequired as bool,
-      lockOnAppBackground:
-          lockOnAppBackground == const $CopyWithPlaceholder()
-              ? _value.lockOnAppBackground
-              // ignore: cast_nullable_to_non_nullable
-              : lockOnAppBackground as bool,
-      lockTimeout:
-          lockTimeout == const $CopyWithPlaceholder()
-              ? _value.lockTimeout
-              // ignore: cast_nullable_to_non_nullable
-              : lockTimeout as Duration?,
+          ? _value.authenticationRequired
+          // ignore: cast_nullable_to_non_nullable
+          : authenticationRequired as bool,
+      lockOnAppBackground: lockOnAppBackground == const $CopyWithPlaceholder()
+          ? _value.lockOnAppBackground
+          // ignore: cast_nullable_to_non_nullable
+          : lockOnAppBackground as bool,
+      lockTimeout: lockTimeout == const $CopyWithPlaceholder()
+          ? _value.lockTimeout
+          // ignore: cast_nullable_to_non_nullable
+          : lockTimeout as Duration?,
     );
   }
 }
@@ -141,26 +139,22 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? useProxy = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
-      iconData:
-          iconData == const $CopyWithPlaceholder()
-              ? _value.iconData
-              // ignore: cast_nullable_to_non_nullable
-              : iconData as IconData?,
-      contextualIdentity:
-          contextualIdentity == const $CopyWithPlaceholder()
-              ? _value.contextualIdentity
-              // ignore: cast_nullable_to_non_nullable
-              : contextualIdentity as String?,
-      authSettings:
-          authSettings == const $CopyWithPlaceholder()
-              ? _value.authSettings
-              // ignore: cast_nullable_to_non_nullable
-              : authSettings as ContainerAuthSettings,
-      useProxy:
-          useProxy == const $CopyWithPlaceholder()
-              ? _value.useProxy
-              // ignore: cast_nullable_to_non_nullable
-              : useProxy as bool,
+      iconData: iconData == const $CopyWithPlaceholder()
+          ? _value.iconData
+          // ignore: cast_nullable_to_non_nullable
+          : iconData as IconData?,
+      contextualIdentity: contextualIdentity == const $CopyWithPlaceholder()
+          ? _value.contextualIdentity
+          // ignore: cast_nullable_to_non_nullable
+          : contextualIdentity as String?,
+      authSettings: authSettings == const $CopyWithPlaceholder()
+          ? _value.authSettings
+          // ignore: cast_nullable_to_non_nullable
+          : authSettings as ContainerAuthSettings,
+      useProxy: useProxy == const $CopyWithPlaceholder()
+          ? _value.useProxy
+          // ignore: cast_nullable_to_non_nullable
+          : useProxy as bool,
     );
   }
 }
@@ -228,26 +222,22 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
     Object? metadata = const $CopyWithPlaceholder(),
   }) {
     return ContainerData(
-      id:
-          id == const $CopyWithPlaceholder()
-              ? _value.id
-              // ignore: cast_nullable_to_non_nullable
-              : id as String,
-      name:
-          name == const $CopyWithPlaceholder()
-              ? _value.name
-              // ignore: cast_nullable_to_non_nullable
-              : name as String?,
-      color:
-          color == const $CopyWithPlaceholder()
-              ? _value.color
-              // ignore: cast_nullable_to_non_nullable
-              : color as Color,
-      metadata:
-          metadata == const $CopyWithPlaceholder()
-              ? _value.metadata
-              // ignore: cast_nullable_to_non_nullable
-              : metadata as ContainerMetadata?,
+      id: id == const $CopyWithPlaceholder()
+          ? _value.id
+          // ignore: cast_nullable_to_non_nullable
+          : id as String,
+      name: name == const $CopyWithPlaceholder()
+          ? _value.name
+          // ignore: cast_nullable_to_non_nullable
+          : name as String?,
+      color: color == const $CopyWithPlaceholder()
+          ? _value.color
+          // ignore: cast_nullable_to_non_nullable
+          : color as Color,
+      metadata: metadata == const $CopyWithPlaceholder()
+          ? _value.metadata
+          // ignore: cast_nullable_to_non_nullable
+          : metadata as ContainerMetadata?,
     );
   }
 }
@@ -267,10 +257,9 @@ ContainerAuthSettings _$ContainerAuthSettingsFromJson(
 ) => ContainerAuthSettings(
   authenticationRequired: json['authenticationRequired'] as bool,
   lockOnAppBackground: json['lockOnAppBackground'] as bool,
-  lockTimeout:
-      json['lockTimeout'] == null
-          ? null
-          : Duration(microseconds: (json['lockTimeout'] as num).toInt()),
+  lockTimeout: json['lockTimeout'] == null
+      ? null
+      : Duration(microseconds: (json['lockTimeout'] as num).toInt()),
 );
 
 Map<String, dynamic> _$ContainerAuthSettingsToJson(
@@ -288,12 +277,11 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
         const IconDataJsonConverter().fromJson,
       ),
       contextualIdentity: json['contextualIdentity'] as String?,
-      authSettings:
-          json['authSettings'] == null
-              ? null
-              : ContainerAuthSettings.fromJson(
-                json['authSettings'] as Map<String, dynamic>,
-              ),
+      authSettings: json['authSettings'] == null
+          ? null
+          : ContainerAuthSettings.fromJson(
+              json['authSettings'] as Map<String, dynamic>,
+            ),
       useProxy: json['useProxy'] as bool? ?? false,
     );
 

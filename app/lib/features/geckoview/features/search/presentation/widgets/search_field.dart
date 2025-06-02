@@ -77,31 +77,29 @@ class SearchField extends HookConsumerWidget {
       autofocus: autofocus,
       decoration: InputDecoration(
         border: InputBorder.none,
-        prefixIcon:
-            (showBangIcon && activeBang != null)
-                ? Padding(
-                  padding: const EdgeInsetsDirectional.all(12.0),
-                  child: UrlIcon([
-                    activeBang!.getTemplateUrl(''),
-                  ], iconSize: 24.0),
-                )
-                : null,
+        prefixIcon: (showBangIcon && activeBang != null)
+            ? Padding(
+                padding: const EdgeInsetsDirectional.all(12.0),
+                child: UrlIcon([
+                  activeBang!.getTemplateUrl(''),
+                ], iconSize: 24.0),
+              )
+            : null,
         label: label ?? const Text('Search'),
         // hintText: 'Ask anything...',
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon:
-            hasText
-                ? IconButton(
-                  onPressed: () {
-                    textEditingController.clear();
-                  },
-                  icon: const Icon(Icons.clear),
-                )
-                : SpeechToTextButton(
-                  onTextReceived: (data) {
-                    textEditingController.text = data.toString();
-                  },
-                ),
+        suffixIcon: hasText
+            ? IconButton(
+                onPressed: () {
+                  textEditingController.clear();
+                },
+                icon: const Icon(Icons.clear),
+              )
+            : SpeechToTextButton(
+                onTextReceived: (data) {
+                  textEditingController.text = data.toString();
+                },
+              ),
       ),
       onTapOutside: (event) {
         safeFocusNode.unfocus();

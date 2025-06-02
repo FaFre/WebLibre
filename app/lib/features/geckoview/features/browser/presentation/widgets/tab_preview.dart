@@ -43,10 +43,9 @@ class TabPreview extends HookWidget {
         borderRadius: const BorderRadius.all(Radius.circular(16.0)),
       ),
       child: Material(
-        color:
-            tab.isPrivate
-                ? const Color(0xFF25003E)
-                : colorScheme.surfaceContainerHighest,
+        color: tab.isPrivate
+            ? const Color(0xFF25003E)
+            : colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(14.0)),
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(14.0)),
@@ -63,10 +62,9 @@ class TabPreview extends HookWidget {
                         overflow: TextOverflow.ellipsis,
                         tab.title,
                         maxLines: 2,
-                        style:
-                            tab.isPrivate
-                                ? const TextStyle(color: Colors.white)
-                                : null,
+                        style: tab.isPrivate
+                            ? const TextStyle(color: Colors.white)
+                            : null,
                       ),
                     ),
                   ),

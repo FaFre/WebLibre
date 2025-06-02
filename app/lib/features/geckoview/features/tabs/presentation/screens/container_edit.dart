@@ -149,9 +149,8 @@ class ContainerEditScreen extends HookConsumerWidget {
                       onPressed: () async {
                         final color = await showDialog<Color?>(
                           context: context,
-                          builder:
-                              (context) =>
-                                  ColorPickerDialog(selectedColor.value),
+                          builder: (context) =>
+                              ColorPickerDialog(selectedColor.value),
                         );
 
                         if (color != null) {
@@ -164,22 +163,20 @@ class ContainerEditScreen extends HookConsumerWidget {
                       title: const Text('Cookie Isolation'),
                       secondary: const Icon(MdiIcons.cookieLock),
                       contentPadding: EdgeInsets.zero,
-                      onChanged:
-                          (_mode == _DialogMode.create)
-                              ? (value) {
-                                contextualIdentity.value =
-                                    value
-                                        ? initialContainer
-                                                .metadata
-                                                .contextualIdentity ??
-                                            uuid.v4()
-                                        : null;
+                      onChanged: (_mode == _DialogMode.create)
+                          ? (value) {
+                              contextualIdentity.value = value
+                                  ? initialContainer
+                                            .metadata
+                                            .contextualIdentity ??
+                                        uuid.v4()
+                                  : null;
 
-                                if (!value && useProxy.value) {
-                                  useProxy.value = false;
-                                }
+                              if (!value && useProxy.value) {
+                                useProxy.value = false;
                               }
-                              : null,
+                            }
+                          : null,
                     ),
                     SwitchListTile.adaptive(
                       value: useProxy.value,
@@ -199,8 +196,8 @@ class ContainerEditScreen extends HookConsumerWidget {
                         _DialogMode.edit =>
                           (contextualIdentity.value != null)
                               ? (value) {
-                                useProxy.value = value;
-                              }
+                                  useProxy.value = value;
+                                }
                               : null,
                       },
                     ),
@@ -230,8 +227,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                         title: const Text('Timeout'),
                         controlAffinity: ListTileControlAffinity.leading,
                         onChanged: (value) {
-                          final newValue =
-                              value! ? _timeoutOptions[1].value : null;
+                          final newValue = value!
+                              ? _timeoutOptions[1].value
+                              : null;
 
                           authSettings.value = authSettings.value.copyWith
                               .lockTimeout(newValue);

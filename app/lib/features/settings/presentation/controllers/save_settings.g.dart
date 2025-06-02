@@ -15,10 +15,9 @@ final saveGeneralSettingsControllerProvider =
     AsyncNotifierProvider<SaveGeneralSettingsController, void>.internal(
       SaveGeneralSettingsController.new,
       name: r'saveGeneralSettingsControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$saveGeneralSettingsControllerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$saveGeneralSettingsControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -33,10 +32,9 @@ final saveEngineSettingsControllerProvider =
     AsyncNotifierProvider<SaveEngineSettingsController, void>.internal(
       SaveEngineSettingsController.new,
       name: r'saveEngineSettingsControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$saveEngineSettingsControllerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$saveEngineSettingsControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

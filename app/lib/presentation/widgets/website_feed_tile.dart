@@ -61,13 +61,12 @@ class WebsiteFeedTile extends HookConsumerWidget {
           //   onRetry: () => ref.refresh(pageInfoProvider(url)),
           // );
         },
-        loading:
-            () => const ListTile(
-              leading: Icon(Icons.rss_feed),
-              contentPadding: EdgeInsets.zero,
-              title: Text('Available Web Feeds'),
-              trailing: Bone.icon(),
-            ),
+        loading: () => const ListTile(
+          leading: Icon(Icons.rss_feed),
+          contentPadding: EdgeInsets.zero,
+          title: Text('Available Web Feeds'),
+          trailing: Bone.icon(),
+        ),
       ),
     );
   }

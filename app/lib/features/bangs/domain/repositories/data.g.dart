@@ -15,10 +15,9 @@ final bangDataRepositoryProvider =
     NotifierProvider<BangDataRepository, void>.internal(
       BangDataRepository.new,
       name: r'bangDataRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bangDataRepositoryHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bangDataRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

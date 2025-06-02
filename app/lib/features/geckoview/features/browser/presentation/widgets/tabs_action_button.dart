@@ -34,10 +34,9 @@ class TabsActionButton extends HookConsumerWidget {
           decoration: BoxDecoration(
             border: Border.all(
               width: 2.0,
-              color:
-                  isActive
-                      ? theme.colorScheme.primary
-                      : DefaultTextStyle.of(context).style.color!,
+              color: isActive
+                  ? theme.colorScheme.primary
+                  : DefaultTextStyle.of(context).style.color!,
             ),
             borderRadius: BorderRadius.circular(5.0),
           ),

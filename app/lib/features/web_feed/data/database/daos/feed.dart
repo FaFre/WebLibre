@@ -16,8 +16,8 @@ class FeedDao extends DatabaseAccessor<FeedDatabase> with _$FeedDaoMixin {
   }
 
   Future<int> updateFeedFetched(Uri feedId, DateTime fetched) {
-    final statement =
-        db.feed.update()..where((feed) => feed.url.equalsValue(feedId));
+    final statement = db.feed.update()
+      ..where((feed) => feed.url.equalsValue(feedId));
 
     return statement.write(FeedCompanion(lastFetched: Value(fetched)));
   }

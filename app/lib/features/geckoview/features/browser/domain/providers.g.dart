@@ -74,10 +74,9 @@ class AvailableTabIdsProvider
         (ref) => availableTabIds(ref as AvailableTabIdsRef, containerFilter),
         from: availableTabIdsProvider,
         name: r'availableTabIdsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$availableTabIdsHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$availableTabIdsHash,
         dependencies: AvailableTabIdsFamily._dependencies,
         allTransitiveDependencies:
             AvailableTabIdsFamily._allTransitiveDependencies,
@@ -202,10 +201,9 @@ class AvailableTabStatesProvider
             availableTabStates(ref as AvailableTabStatesRef, containerFilter),
         from: availableTabStatesProvider,
         name: r'availableTabStatesProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$availableTabStatesHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$availableTabStatesHash,
         dependencies: AvailableTabStatesFamily._dependencies,
         allTransitiveDependencies:
             AvailableTabStatesFamily._allTransitiveDependencies,
@@ -342,10 +340,9 @@ class SeamlessFilteredTabIdsProvider
         ),
         from: seamlessFilteredTabIdsProvider,
         name: r'seamlessFilteredTabIdsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$seamlessFilteredTabIdsHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$seamlessFilteredTabIdsHash,
         dependencies: SeamlessFilteredTabIdsFamily._dependencies,
         allTransitiveDependencies:
             SeamlessFilteredTabIdsFamily._allTransitiveDependencies,
@@ -494,10 +491,9 @@ class SeamlessFilteredTabPreviewsProvider
         ),
         from: seamlessFilteredTabPreviewsProvider,
         name: r'seamlessFilteredTabPreviewsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$seamlessFilteredTabPreviewsHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$seamlessFilteredTabPreviewsHash,
         dependencies: SeamlessFilteredTabPreviewsFamily._dependencies,
         allTransitiveDependencies:
             SeamlessFilteredTabPreviewsFamily._allTransitiveDependencies,
@@ -641,10 +637,9 @@ class SelectedBangTriggerProvider
         () => SelectedBangTrigger()..domain = domain,
         from: selectedBangTriggerProvider,
         name: r'selectedBangTriggerProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$selectedBangTriggerHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$selectedBangTriggerHash,
         dependencies: SelectedBangTriggerFamily._dependencies,
         allTransitiveDependencies:
             SelectedBangTriggerFamily._allTransitiveDependencies,
@@ -773,10 +768,9 @@ class SelectedBangDataProvider
         () => SelectedBangData()..domain = domain,
         from: selectedBangDataProvider,
         name: r'selectedBangDataProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$selectedBangDataHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$selectedBangDataHash,
         dependencies: SelectedBangDataFamily._dependencies,
         allTransitiveDependencies:
             SelectedBangDataFamily._allTransitiveDependencies,

@@ -15,10 +15,9 @@ final genericWebsiteServiceProvider =
     NotifierProvider<GenericWebsiteService, void>.internal(
       GenericWebsiteService.new,
       name: r'genericWebsiteServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$genericWebsiteServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$genericWebsiteServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

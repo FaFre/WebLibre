@@ -21,19 +21,17 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
       db.tab.select()..where((t) => t.id.equals(id));
 
   Selectable<String> getAllTabIds() {
-    final query =
-        selectOnly(db.tab)
-          ..addColumns([db.tab.id])
-          ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
 
     return query.map((row) => row.read(db.tab.id)!);
   }
 
   SingleOrNullSelectable<String?> getTabContainerId(String tabId) {
-    final query =
-        selectOnly(db.tab)
-          ..addColumns([db.tab.containerId])
-          ..where(db.tab.id.equals(tabId));
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.containerId])
+      ..where(db.tab.id.equals(tabId));
 
     return query.map((row) => row.read(db.tab.containerId));
   }
@@ -154,14 +152,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
           batch.update(
             db.tab,
             TabCompanion(
-              url:
-                  (previousState?.url != state.url)
-                      ? Value(state.url)
-                      : const Value.absent(),
-              title:
-                  (previousState?.title != state.title)
-                      ? Value(state.title)
-                      : const Value.absent(),
+              url: (previousState?.url != state.url)
+                  ? Value(state.url)
+                  : const Value.absent(),
+              title: (previousState?.title != state.title)
+                  ? Value(state.title)
+                  : const Value.absent(),
             ),
             where: (t) => t.id.equals(state.id),
           );
@@ -174,8 +170,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return db.transaction(() async {
       await (db.tab.delete()..where((t) => t.id.isNotIn(retainTabIds))).go();
 
-      var currentOrderKey =
-          await db.containerDao.generateLeadingOrderKey(null).getSingle();
+      var currentOrderKey = await db.containerDao
+          .generateLeadingOrderKey(null)
+          .getSingle();
 
       await db.tab.insertAll(
         retainTabIds.map((id) {

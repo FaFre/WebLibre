@@ -273,14 +273,16 @@ class FeedData extends DataClass implements Insertable<FeedData> {
     return FeedData(
       url: data.url.present ? data.url.value : this.url,
       title: data.title.present ? data.title.value : this.title,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       icon: data.icon.present ? data.icon.value : this.icon,
       siteLink: data.siteLink.present ? data.siteLink.value : this.siteLink,
       authors: data.authors.present ? data.authors.value : this.authors,
       tags: data.tags.present ? data.tags.value : this.tags,
-      lastFetched:
-          data.lastFetched.present ? data.lastFetched.value : this.lastFetched,
+      lastFetched: data.lastFetched.present
+          ? data.lastFetched.value
+          : this.lastFetched,
     );
   }
 
@@ -625,22 +627,20 @@ class Article extends Table with TableInfo<Article, FeedArticle> {
   FeedArticle map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return FeedArticle(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
       feedId: Article.$converterfeedId.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}feed_id'],
         )!,
       ),
-      fetched:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}fetched'],
-          )!,
+      fetched: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched'],
+      )!,
       created: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created'],
@@ -992,22 +992,20 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
   FeedArticle map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return FeedArticle(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
       feedId: Article.$converterfeedId.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}feed_id'],
         )!,
       ),
-      fetched:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}fetched'],
-          )!,
+      fetched: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched'],
+      )!,
       created: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created'],
@@ -1251,21 +1249,18 @@ class ArticleFts extends Table
   ArticleFt map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ArticleFt(
-      title:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}title'],
-          )!,
-      summaryPlain:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}summaryPlain'],
-          )!,
-      contentPlain:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}contentPlain'],
-          )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      summaryPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summaryPlain'],
+      )!,
+      contentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contentPlain'],
+      )!,
     );
   }
 
@@ -1332,14 +1327,12 @@ class ArticleFt extends DataClass implements Insertable<ArticleFt> {
   ArticleFt copyWithCompanion(ArticleFtsCompanion data) {
     return ArticleFt(
       title: data.title.present ? data.title.value : this.title,
-      summaryPlain:
-          data.summaryPlain.present
-              ? data.summaryPlain.value
-              : this.summaryPlain,
-      contentPlain:
-          data.contentPlain.present
-              ? data.contentPlain.value
-              : this.contentPlain,
+      summaryPlain: data.summaryPlain.present
+          ? data.summaryPlain.value
+          : this.summaryPlain,
+      contentPlain: data.contentPlain.present
+          ? data.contentPlain.value
+          : this.contentPlain,
     );
   }
 
@@ -1886,12 +1879,12 @@ class $FeedTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $FeedFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $FeedOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $FeedAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $FeedFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $FeedOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $FeedAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<Uri> url = const Value.absent(),
@@ -1936,16 +1929,9 @@ class $FeedTableManager
                 lastFetched: lastFetched,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          $FeedReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), $FeedReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: ({articleRefs = false}) {
             return PrefetchHooks(
               db: db,
@@ -1957,12 +1943,10 @@ class $FeedTableManager
                     await $_getPrefetchedData<FeedData, Feed, FeedArticle>(
                       currentTable: table,
                       referencedTable: $FeedReferences._articleRefsTable(db),
-                      managerFromTypedResult:
-                          (p0) => $FeedReferences(db, table, p0).articleRefs,
-                      referencedItemsForCurrentItem:
-                          (item, referencedItems) => referencedItems.where(
-                            (e) => e.feedId == item.url,
-                          ),
+                      managerFromTypedResult: (p0) =>
+                          $FeedReferences(db, table, p0).articleRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.feedId == item.url),
                       typedResults: items,
                     ),
                 ];
@@ -2380,12 +2364,12 @@ class $ArticleTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ArticleFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ArticleOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $ArticleAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ArticleFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ArticleOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ArticleAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -2462,51 +2446,47 @@ class $ArticleTableManager
                 contentPlain: contentPlain,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          $ArticleReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (e.readTable(table), $ArticleReferences(db, table, e)),
+              )
+              .toList(),
           prefetchHooksCallback: ({feedId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins: <
-                T extends TableManagerState<
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic
-                >
-              >(state) {
-                if (feedId) {
-                  state =
-                      state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.feedId,
-                            referencedTable: $ArticleReferences._feedIdTable(
-                              db,
-                            ),
-                            referencedColumn:
-                                $ArticleReferences._feedIdTable(db).url,
-                          )
-                          as T;
-                }
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (feedId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.feedId,
+                                referencedTable: $ArticleReferences
+                                    ._feedIdTable(db),
+                                referencedColumn: $ArticleReferences
+                                    ._feedIdTable(db)
+                                    .url,
+                              )
+                              as T;
+                    }
 
-                return state;
-              },
+                    return state;
+                  },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -2636,12 +2616,12 @@ class $ArticleFtsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ArticleFtsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ArticleFtsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $ArticleFtsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ArticleFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ArticleFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ArticleFtsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> title = const Value.absent(),
@@ -2666,16 +2646,9 @@ class $ArticleFtsTableManager
                 contentPlain: contentPlain,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

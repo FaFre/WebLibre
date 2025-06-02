@@ -12,17 +12,16 @@ class GeckoPrefService {
   }
 
   Future<Map<String, Object>> applyPrefs(Map<String, Object> prefs) {
-    final buffer =
-        prefs.entries.map((pref) {
-          final value = switch (pref.value) {
-            final bool x => '$x',
-            final int x => '$x',
-            final String x => '"$x"',
-            _ => throw Exception('Unknow pref type'),
-          };
+    final buffer = prefs.entries.map((pref) {
+      final value = switch (pref.value) {
+        final bool x => '$x',
+        final int x => '$x',
+        final String x => '"$x"',
+        _ => throw Exception('Unknow pref type'),
+      };
 
-          return 'user_pref("${pref.key}", $value);';
-        }).join();
+      return 'user_pref("${pref.key}", $value);';
+    }).join();
 
     return _apiInstance.applyPrefs(buffer);
   }

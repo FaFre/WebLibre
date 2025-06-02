@@ -15,10 +15,9 @@ final startProxyControllerProvider =
     AutoDisposeNotifierProvider<StartProxyController, void>.internal(
       StartProxyController.new,
       name: r'startProxyControllerProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$startProxyControllerHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$startProxyControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

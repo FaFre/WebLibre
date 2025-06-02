@@ -22,12 +22,9 @@ class SearchSuggestions extends _$SearchSuggestions {
     final defaultProvider = ref.watch(defaultSearchSuggestionsProvider);
     final resolvedProvider = suggestionsProvider ?? defaultProvider;
 
-    _addQueryBinding =
-        ref
-            .watch(
-              searchSuggestionsRepositoryProvider(resolvedProvider).notifier,
-            )
-            .addQuery;
+    _addQueryBinding = ref
+        .watch(searchSuggestionsRepositoryProvider(resolvedProvider).notifier)
+        .addQuery;
 
     return ref.watch(searchSuggestionsRepositoryProvider(resolvedProvider));
   }

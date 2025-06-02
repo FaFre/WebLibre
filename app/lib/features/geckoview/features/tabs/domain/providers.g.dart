@@ -15,10 +15,9 @@ final containersWithCountProvider =
     AutoDisposeStreamProvider<List<ContainerDataWithCount>>.internal(
       containersWithCount,
       name: r'containersWithCountProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$containersWithCountHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$containersWithCountHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -101,10 +100,9 @@ class MatchSortedContainersWithCountProvider
         ),
         from: matchSortedContainersWithCountProvider,
         name: r'matchSortedContainersWithCountProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$matchSortedContainersWithCountHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$matchSortedContainersWithCountHash,
         dependencies: MatchSortedContainersWithCountFamily._dependencies,
         allTransitiveDependencies:
             MatchSortedContainersWithCountFamily._allTransitiveDependencies,
@@ -229,10 +227,9 @@ class ContainerTabIdsProvider extends AutoDisposeStreamProvider<List<String>> {
         (ref) => containerTabIds(ref as ContainerTabIdsRef, containerFilter),
         from: containerTabIdsProvider,
         name: r'containerTabIdsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$containerTabIdsHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$containerTabIdsHash,
         dependencies: ContainerTabIdsFamily._dependencies,
         allTransitiveDependencies:
             ContainerTabIdsFamily._allTransitiveDependencies,

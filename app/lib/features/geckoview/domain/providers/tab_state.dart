@@ -26,10 +26,9 @@ class TabStates extends _$TabStates {
       ..[contentState.id] = current.copyWith(
         contextId: contentState.contextId,
         url: Uri.parse(contentState.url),
-        title:
-            (contentState.title.isNotEmpty)
-                ? contentState.title
-                : current.title,
+        title: (contentState.title.isNotEmpty)
+            ? contentState.title
+            : current.title,
         progress: contentState.progress,
         isPrivate: contentState.isPrivate,
         isFullScreen: contentState.isFullScreen,
@@ -76,15 +75,12 @@ class TabStates extends _$TabStates {
     state = {...state}
       ..[tabId] = current.copyWith.historyState(
         HistoryState(
-          items:
-              history.items.nonNulls
-                  .map(
-                    (item) => HistoryItem(
-                      url: Uri.parse(item.url),
-                      title: item.title,
-                    ),
-                  )
-                  .toList(),
+          items: history.items.nonNulls
+              .map(
+                (item) =>
+                    HistoryItem(url: Uri.parse(item.url), title: item.title),
+              )
+              .toList(),
           currentIndex: history.currentIndex,
           canGoBack: history.canGoBack,
           canGoForward: history.canGoForward,

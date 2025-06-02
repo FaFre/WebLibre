@@ -32,17 +32,16 @@ class FeedListScreen extends HookConsumerWidget {
             ),
           );
         },
-        error:
-            (error, stackTrace) => Center(
-              child: FailureWidget(
-                title: 'Failed to load Feeds',
-                exception: error,
-                onRetry: () {
-                  // ignore: unused_result
-                  ref.refresh(feedListProvider);
-                },
-              ),
-            ),
+        error: (error, stackTrace) => Center(
+          child: FailureWidget(
+            title: 'Failed to load Feeds',
+            exception: error,
+            onRetry: () {
+              // ignore: unused_result
+              ref.refresh(feedListProvider);
+            },
+          ),
+        ),
         loading: () => const SizedBox.shrink(),
       ),
       floatingActionButton: FloatingActionButton.extended(

@@ -14,10 +14,9 @@ String _$lightSeedColorFallbackHash() =>
 final lightSeedColorFallbackProvider = Provider<Color>.internal(
   lightSeedColorFallback,
   name: r'lightSeedColorFallbackProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$lightSeedColorFallbackHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$lightSeedColorFallbackHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -33,10 +32,9 @@ String _$darkSeedColorFallbackHash() =>
 final darkSeedColorFallbackProvider = Provider<Color>.internal(
   darkSeedColorFallback,
   name: r'darkSeedColorFallbackProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$darkSeedColorFallbackHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$darkSeedColorFallbackHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

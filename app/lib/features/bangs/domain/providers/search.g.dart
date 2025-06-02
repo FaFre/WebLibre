@@ -14,10 +14,9 @@ final bangSearchProvider =
     AutoDisposeStreamNotifierProvider<BangSearch, List<BangData>>.internal(
       BangSearch.new,
       name: r'bangSearchProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bangSearchHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bangSearchHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -27,17 +26,19 @@ String _$seamlessBangHash() => r'8bd7a2cbe4c302ae08f85167290666a7437f8b9b';
 
 /// See also [SeamlessBang].
 @ProviderFor(SeamlessBang)
-final seamlessBangProvider = AutoDisposeNotifierProvider<
-  SeamlessBang,
-  AsyncValue<List<BangData>>
->.internal(
-  SeamlessBang.new,
-  name: r'seamlessBangProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$seamlessBangHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final seamlessBangProvider =
+    AutoDisposeNotifierProvider<
+      SeamlessBang,
+      AsyncValue<List<BangData>>
+    >.internal(
+      SeamlessBang.new,
+      name: r'seamlessBangProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$seamlessBangHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$SeamlessBang = AutoDisposeNotifier<AsyncValue<List<BangData>>>;
 // ignore_for_file: type=lint

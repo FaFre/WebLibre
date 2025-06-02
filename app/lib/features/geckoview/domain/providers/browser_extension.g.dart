@@ -15,10 +15,9 @@ final browserExtensionServiceProvider =
     Provider<GeckoBrowserExtensionService>.internal(
       browserExtensionService,
       name: r'browserExtensionServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$browserExtensionServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$browserExtensionServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -33,10 +32,9 @@ String _$feedRequestedHash() => r'4f179d0878072a77a87422ff6afdac53a3d57c04';
 final feedRequestedProvider = AutoDisposeStreamProvider<String>.internal(
   feedRequested,
   name: r'feedRequestedProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$feedRequestedHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$feedRequestedHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

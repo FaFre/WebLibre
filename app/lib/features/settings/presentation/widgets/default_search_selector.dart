@@ -34,9 +34,8 @@ class DefaultSearchSelector extends HookConsumerWidget {
               Expanded(
                 child: SelectableChips(
                   itemId: (bang) => bang.trigger,
-                  itemAvatar:
-                      (bang) =>
-                          UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
+                  itemAvatar: (bang) =>
+                      UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
                   itemLabel: (bang) => Text(bang.websiteName),
                   availableItems: availableBangs,
                   selectedItem: activeBang,

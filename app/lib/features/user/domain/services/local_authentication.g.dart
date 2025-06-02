@@ -15,10 +15,9 @@ final localAuthenticationServiceProvider =
     AsyncNotifierProvider<LocalAuthenticationService, bool>.internal(
       LocalAuthenticationService.new,
       name: r'localAuthenticationServiceProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$localAuthenticationServiceHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$localAuthenticationServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

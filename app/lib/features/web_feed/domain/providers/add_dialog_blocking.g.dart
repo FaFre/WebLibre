@@ -15,10 +15,9 @@ final addFeedDialogBlockingProvider =
     NotifierProvider<AddFeedDialogBlocking, void>.internal(
       AddFeedDialogBlocking.new,
       name: r'addFeedDialogBlockingProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$addFeedDialogBlockingHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$addFeedDialogBlockingHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

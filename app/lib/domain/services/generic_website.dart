@@ -37,8 +37,10 @@ const _typeMap = {
 
 Iterable<ResourceSize> sizesToList(String? sizes) sync* {
   if (sizes != null) {
-    final splitted =
-        sizes.split(' ').where((size) => size.contains('x')).toList();
+    final splitted = sizes
+        .split(' ')
+        .where((size) => size.contains('x'))
+        .toList();
 
     for (final size in splitted) {
       final dimensions = size.split('x');
@@ -87,10 +89,9 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       url: resource['url'] as String,
       type: resource['type'] as IconType,
       mimeType: resource['mimeType'] as String?,
-      sizes:
-          (resource['sizes'] as List<List<int>>)
-              .map((s) => ResourceSize(height: s[0], width: s[1]))
-              .toList(),
+      sizes: (resource['sizes'] as List<List<int>>)
+          .map((s) => ResourceSize(height: s[0], width: s[1]))
+          .toList(),
       maskable: resource['maskable'] as bool,
     );
   }
@@ -211,8 +212,10 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
           final title = document.querySelector('title')?.text;
           final resources = _extractIcons(baseUri, document);
-          final feeds =
-              await FeedFinder(url: baseUri, document: document).parse();
+          final feeds = await FeedFinder(
+            url: baseUri,
+            document: document,
+          ).parse();
 
           return {
             'title': title,
@@ -235,10 +238,9 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         );
       }
 
-      final resources =
-          (result['resources']! as List<Map<String, dynamic>>)
-              .map(_deserializeResource)
-              .toList();
+      final resources = (result['resources']! as List<Map<String, dynamic>>)
+          .map(_deserializeResource)
+          .toList();
 
       final favicon =
           await getCachedIcon(url) ??

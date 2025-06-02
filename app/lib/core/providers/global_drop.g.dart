@@ -14,10 +14,9 @@ final willAcceptDropProvider =
     AutoDisposeNotifierProvider<WillAcceptDrop, DropTargetData?>.internal(
       WillAcceptDrop.new,
       name: r'willAcceptDropProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$willAcceptDropHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$willAcceptDropHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

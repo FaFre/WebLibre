@@ -54,40 +54,35 @@ class BangCategoriesScreen extends HookConsumerWidget {
                           expanded.value = {...expanded.value}..remove(key);
                         }
                       },
-                      children:
-                          categories.entries
-                              .map(
-                                (category) => ExpansionPanel(
-                                  canTapOnHeader: true,
-                                  isExpanded: expanded.value.contains(
-                                    category.key,
-                                  ),
-                                  headerBuilder:
-                                      (context, isExpanded) =>
-                                          ListTile(title: Text(category.key)),
-                                  body: Padding(
-                                    padding: const EdgeInsets.only(left: 16.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children:
-                                          category.value
-                                              .map(
-                                                (subCategory) => ListTile(
-                                                  title: Text(subCategory),
-                                                  onTap: () async {
-                                                    await BangSubCategoryRoute(
-                                                      category: category.key,
-                                                      subCategory: subCategory,
-                                                    ).push(context);
-                                                  },
-                                                ),
-                                              )
-                                              .toList(),
-                                    ),
-                                  ),
+                      children: categories.entries
+                          .map(
+                            (category) => ExpansionPanel(
+                              canTapOnHeader: true,
+                              isExpanded: expanded.value.contains(category.key),
+                              headerBuilder: (context, isExpanded) =>
+                                  ListTile(title: Text(category.key)),
+                              body: Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: category.value
+                                      .map(
+                                        (subCategory) => ListTile(
+                                          title: Text(subCategory),
+                                          onTap: () async {
+                                            await BangSubCategoryRoute(
+                                              category: category.key,
+                                              subCategory: subCategory,
+                                            ).push(context);
+                                          },
+                                        ),
+                                      )
+                                      .toList(),
                                 ),
-                              )
-                              .toList(),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                 ),
@@ -95,13 +90,12 @@ class BangCategoriesScreen extends HookConsumerWidget {
             },
           );
         },
-        error:
-            (error, stackTrace) => Center(
-              child: FailureWidget(
-                title: 'Failed to load Bang Categories',
-                exception: error,
-              ),
-            ),
+        error: (error, stackTrace) => Center(
+          child: FailureWidget(
+            title: 'Failed to load Bang Categories',
+            exception: error,
+          ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );

@@ -91,121 +91,118 @@ class FeedArticleScreen extends HookConsumerWidget {
               }, [article]);
 
               return NestedScrollView(
-                headerSliverBuilder:
-                    (context, innerBoxIsScrolled) => [
-                      SliverAppBar.large(
-                        pinned: false,
-                        flexibleSpace: FlexibleSpaceBar(
-                          centerTitle: false,
-                          titlePadding: EdgeInsetsDirectional.only(
-                            start: 72,
-                            end: 72,
-                            bottom: bottomHeight + 16,
-                          ),
-                          title: Text(
-                            article.displayTitle,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          background: articleImages?.firstOrNull.mapNotNull(
-                            (img) => Image.network(
-                              img.toString(),
-                              fit: BoxFit.cover,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surface.withAlpha(200),
-                              colorBlendMode: BlendMode.darken,
-                            ),
-                          ),
-                        ),
-                        bottom: PreferredSize(
-                          preferredSize: Size(double.infinity, bottomHeight),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Divider(),
-                                Text(
-                                  'Published: ${hasArticleCreated ? ref.read(formatProvider.notifier).fullDateTimeWithTimezone(article.created!) : 'N/A'}',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(fontStyle: FontStyle.italic),
-                                ),
-                                if (hasArticleUpdated)
-                                  Text(
-                                    'Updated: ${ref.read(formatProvider.notifier).fullDateTimeWithTimezone(article.updated!)}',
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(fontStyle: FontStyle.italic),
-                                  ),
-                                if (hasAuthors)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Row(
-                                      children: [
-                                        const Text('Authors:'),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: AuthorsHorizontalList(
-                                            authors: article.authors!,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                if (hasTags)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Row(
-                                      children: [
-                                        const Text('Tags:'),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: TagsHorizontalList(
-                                            tags: article.tags!,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        actions: [
-                          if (articleLink != null)
-                            IconButton(
-                              onPressed: () async {
-                                await ref
-                                    .read(tabRepositoryProvider.notifier)
-                                    .addTab(url: articleLink.uri);
-
-                                if (context.mounted) {
-                                  BrowserRoute().go(context);
-                                }
-                              },
-                              icon: const Icon(Icons.open_in_browser),
-                            ),
-                        ],
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  SliverAppBar.large(
+                    pinned: false,
+                    flexibleSpace: FlexibleSpaceBar(
+                      centerTitle: false,
+                      titlePadding: EdgeInsetsDirectional.only(
+                        start: 72,
+                        end: 72,
+                        bottom: bottomHeight + 16,
                       ),
-                      // SliverToBoxAdapter(
-                      //   child: Padding(
-                      //     padding: const EdgeInsets.all(8.0),
-                      //     child: TabBar(
-                      //       controller: tabController,
-                      //       tabs: [
-                      //         ...tabs.map(
-                      //           (tab) => switch (tab) {
-                      //             _Pages.summary => const Tab(text: 'Summary'),
-                      //             _Pages.content => const Tab(text: 'Article'),
-                      //           },
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
+                      title: Text(
+                        article.displayTitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      background: articleImages?.firstOrNull.mapNotNull(
+                        (img) => Image.network(
+                          img.toString(),
+                          fit: BoxFit.cover,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surface.withAlpha(200),
+                          colorBlendMode: BlendMode.darken,
+                        ),
+                      ),
+                    ),
+                    bottom: PreferredSize(
+                      preferredSize: Size(double.infinity, bottomHeight),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Divider(),
+                            Text(
+                              'Published: ${hasArticleCreated ? ref.read(formatProvider.notifier).fullDateTimeWithTimezone(article.created!) : 'N/A'}',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontStyle: FontStyle.italic),
+                            ),
+                            if (hasArticleUpdated)
+                              Text(
+                                'Updated: ${ref.read(formatProvider.notifier).fullDateTimeWithTimezone(article.updated!)}',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(fontStyle: FontStyle.italic),
+                              ),
+                            if (hasAuthors)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
+                                  children: [
+                                    const Text('Authors:'),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: AuthorsHorizontalList(
+                                        authors: article.authors!,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (hasTags)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
+                                  children: [
+                                    const Text('Tags:'),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: TagsHorizontalList(
+                                        tags: article.tags!,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    actions: [
+                      if (articleLink != null)
+                        IconButton(
+                          onPressed: () async {
+                            await ref
+                                .read(tabRepositoryProvider.notifier)
+                                .addTab(url: articleLink.uri);
+
+                            if (context.mounted) {
+                              BrowserRoute().go(context);
+                            }
+                          },
+                          icon: const Icon(Icons.open_in_browser),
+                        ),
                     ],
+                  ),
+                  // SliverToBoxAdapter(
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(8.0),
+                  //     child: TabBar(
+                  //       controller: tabController,
+                  //       tabs: [
+                  //         ...tabs.map(
+                  //           (tab) => switch (tab) {
+                  //             _Pages.summary => const Tab(text: 'Summary'),
+                  //             _Pages.content => const Tab(text: 'Article'),
+                  //           },
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                ],
                 body: TabBarView(
                   controller: tabController,
                   children: [
@@ -230,17 +227,17 @@ class FeedArticleScreen extends HookConsumerWidget {
                             }
                           }
                         },
-                        styleSheet: MarkdownStyleSheet.fromTheme(
-                          Theme.of(context),
-                        ).copyWith(
-                          blockquoteDecoration: BoxDecoration(
-                            color:
-                                Theme.of(
+                        styleSheet:
+                            MarkdownStyleSheet.fromTheme(
+                              Theme.of(context),
+                            ).copyWith(
+                              blockquoteDecoration: BoxDecoration(
+                                color: Theme.of(
                                   context,
                                 ).colorScheme.secondaryContainer,
-                            borderRadius: BorderRadius.circular(2.0),
-                          ),
-                        ),
+                                borderRadius: BorderRadius.circular(2.0),
+                              ),
+                            ),
                         data: switch (tab) {
                           _Pages.summary => article.summaryMarkdown!,
                           _Pages.content => article.contentMarkdown!,
@@ -253,13 +250,12 @@ class FeedArticleScreen extends HookConsumerWidget {
             },
           );
         },
-        error:
-            (error, stackTrace) => Center(
-              child: FailureWidget(
-                title: 'Failed reading article',
-                exception: error,
-              ),
-            ),
+        error: (error, stackTrace) => Center(
+          child: FailureWidget(
+            title: 'Failed reading article',
+            exception: error,
+          ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );

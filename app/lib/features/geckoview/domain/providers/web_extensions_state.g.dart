@@ -86,10 +86,9 @@ class WebExtensionsStateProvider
         () => WebExtensionsState()..actionType = actionType,
         from: webExtensionsStateProvider,
         name: r'webExtensionsStateProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$webExtensionsStateHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$webExtensionsStateHash,
         dependencies: WebExtensionsStateFamily._dependencies,
         allTransitiveDependencies:
             WebExtensionsStateFamily._allTransitiveDependencies,

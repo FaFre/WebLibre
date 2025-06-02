@@ -15,10 +15,9 @@ final containerRepositoryProvider =
     NotifierProvider<ContainerRepository, void>.internal(
       ContainerRepository.new,
       name: r'containerRepositoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$containerRepositoryHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$containerRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

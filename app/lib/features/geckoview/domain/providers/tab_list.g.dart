@@ -14,8 +14,9 @@ final tabListProvider =
     NotifierProvider<TabList, EquatableValue<List<String>>>.internal(
       TabList.new,
       name: r'tabListProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product') ? null : _$tabListHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$tabListHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

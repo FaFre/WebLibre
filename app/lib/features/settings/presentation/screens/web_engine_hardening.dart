@@ -69,47 +69,44 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
               ),
               Expanded(
                 child: ListView(
-                  children:
-                      data.entries.map((group) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: ListTile(
-                                title: Text(group.key),
-                                subtitle: group.value.description.mapNotNull(
-                                  (description) => Text(description),
-                                ),
-                                leading: HardeningGroupIcon(
-                                  isActive: group.value.isActive,
-                                  isPartlyActive: group.value.isPartlyActive,
-                                ),
-                                trailing: const Icon(Icons.chevron_right),
-                                onTap: () async {
-                                  await WebEngineHardeningGroupRoute(
-                                    group: group.key,
-                                  ).push(context);
-                                },
-                              ),
+                  children: data.entries.map((group) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: ListTile(
+                            title: Text(group.key),
+                            subtitle: group.value.description.mapNotNull(
+                              (description) => Text(description),
                             ),
-                          ],
-                        );
-                      }).toList(),
+                            leading: HardeningGroupIcon(
+                              isActive: group.value.isActive,
+                              isPartlyActive: group.value.isPartlyActive,
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () async {
+                              await WebEngineHardeningGroupRoute(
+                                group: group.key,
+                              ).push(context);
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
             ],
           );
         },
-        error:
-            (error, stackTrace) => FailureWidget(
-              title: 'Could not load preference settings',
-              exception: error,
-              onRetry:
-                  () => ref.refresh(
-                    unifiedPreferenceSettingsRepositoryProvider(
-                      PreferencePartition.user,
-                    ),
-                  ),
+        error: (error, stackTrace) => FailureWidget(
+          title: 'Could not load preference settings',
+          exception: error,
+          onRetry: () => ref.refresh(
+            unifiedPreferenceSettingsRepositoryProvider(
+              PreferencePartition.user,
             ),
+          ),
+        ),
         loading: () => const SizedBox.shrink(),
       ),
     );

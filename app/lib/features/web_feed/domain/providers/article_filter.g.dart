@@ -14,10 +14,9 @@ final articleFilterProvider =
     NotifierProvider<ArticleFilter, Set<String>>.internal(
       ArticleFilter.new,
       name: r'articleFilterProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$articleFilterHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$articleFilterHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );

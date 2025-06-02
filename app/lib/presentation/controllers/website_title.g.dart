@@ -72,10 +72,9 @@ class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
             pageInfo(ref as PageInfoRef, url, isImageRequest: isImageRequest),
         from: pageInfoProvider,
         name: r'pageInfoProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$pageInfoHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$pageInfoHash,
         dependencies: PageInfoFamily._dependencies,
         allTransitiveDependencies: PageInfoFamily._allTransitiveDependencies,
         url: url,
@@ -214,16 +213,14 @@ class CompletePageInfoProvider
   /// See also [CompletePageInfo].
   CompletePageInfoProvider(Uri url, WebPageInfo? cached)
     : this._internal(
-        () =>
-            CompletePageInfo()
-              ..url = url
-              ..cached = cached,
+        () => CompletePageInfo()
+          ..url = url
+          ..cached = cached,
         from: completePageInfoProvider,
         name: r'completePageInfoProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$completePageInfoHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$completePageInfoHash,
         dependencies: CompletePageInfoFamily._dependencies,
         allTransitiveDependencies:
             CompletePageInfoFamily._allTransitiveDependencies,
@@ -257,10 +254,9 @@ class CompletePageInfoProvider
     return ProviderOverride(
       origin: this,
       override: CompletePageInfoProvider._internal(
-        () =>
-            create()
-              ..url = url
-              ..cached = cached,
+        () => create()
+          ..url = url
+          ..cached = cached,
         from: from,
         name: null,
         dependencies: null,

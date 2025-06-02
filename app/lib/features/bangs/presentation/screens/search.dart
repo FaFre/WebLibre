@@ -60,32 +60,27 @@ class BangSearchScreen extends HookConsumerWidget {
       ),
       body: resultsAsync.when(
         skipLoadingOnReload: true,
-        data:
-            (bangs) => FadingScroll(
-              fadingSize: 25,
-              builder: (context, controller) {
-                return ListView.builder(
-                  controller: controller,
-                  itemCount: bangs.length,
-                  itemBuilder: (context, index) {
-                    final bang = bangs[index];
-                    return BangDetails(
-                      bang,
-                      onTap: () {
-                        context.pop(bang.trigger);
-                      },
-                    );
+        data: (bangs) => FadingScroll(
+          fadingSize: 25,
+          builder: (context, controller) {
+            return ListView.builder(
+              controller: controller,
+              itemCount: bangs.length,
+              itemBuilder: (context, index) {
+                final bang = bangs[index];
+                return BangDetails(
+                  bang,
+                  onTap: () {
+                    context.pop(bang.trigger);
                   },
                 );
               },
-            ),
-        error:
-            (error, stackTrace) => Center(
-              child: FailureWidget(
-                title: 'Bang Search failed',
-                exception: error,
-              ),
-            ),
+            );
+          },
+        ),
+        error: (error, stackTrace) => Center(
+          child: FailureWidget(title: 'Bang Search failed', exception: error),
+        ),
         loading: () => const SizedBox.shrink(),
       ),
     );

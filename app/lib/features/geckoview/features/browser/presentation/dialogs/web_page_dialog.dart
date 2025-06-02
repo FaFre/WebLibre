@@ -89,23 +89,21 @@ class WebPageDialog extends HookConsumerWidget {
                                 searchInNewTab: false,
                               );
                             },
-                            error:
-                                (error, stackTrace) => FailureWidget(
-                                  title: 'Could not load bangs',
-                                  exception: error,
-                                ),
-                            loading:
-                                () => SiteSearch(
-                                  domain: url.host,
-                                  availableBangs: const [
-                                    // BangData(
-                                    //   websiteName: 'websiteName',
-                                    //   domain: 'domain',
-                                    //   trigger: 'trigger',
-                                    //   urlTemplate: 'urlTemplate',
-                                    // ),
-                                  ],
-                                ),
+                            error: (error, stackTrace) => FailureWidget(
+                              title: 'Could not load bangs',
+                              exception: error,
+                            ),
+                            loading: () => SiteSearch(
+                              domain: url.host,
+                              availableBangs: const [
+                                // BangData(
+                                //   websiteName: 'websiteName',
+                                //   domain: 'domain',
+                                //   trigger: 'trigger',
+                                //   urlTemplate: 'urlTemplate',
+                                // ),
+                              ],
+                            ),
                           ),
                         ),
                         if (availableBangsAsync.isLoading ||
@@ -200,10 +198,9 @@ class WebPageDialog extends HookConsumerWidget {
                           leading: const Icon(Icons.mobile_screen_share),
                           title: const Text('Share screenshot'),
                           onTap: () async {
-                            final screenshot =
-                                await ref
-                                    .read(selectedTabSessionNotifierProvider)
-                                    .requestScreenshot();
+                            final screenshot = await ref
+                                .read(selectedTabSessionNotifierProvider)
+                                .requestScreenshot();
 
                             if (screenshot != null) {
                               ui.decodeImageFromList(screenshot, (

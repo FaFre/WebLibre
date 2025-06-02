@@ -32,16 +32,12 @@ class ReaderButton extends HookConsumerWidget {
       ),
     );
 
-    final icon =
-        readerabilityState.active
-            ? Icon(
-              MdiIcons.bookOpen,
-              color: Theme.of(context).colorScheme.primary,
-            )
-            : Icon(
-              MdiIcons.bookOpenOutline,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+    final icon = readerabilityState.active
+        ? Icon(MdiIcons.bookOpen, color: Theme.of(context).colorScheme.primary)
+        : Icon(
+            MdiIcons.bookOpenOutline,
+            color: Theme.of(context).colorScheme.onSurface,
+          );
 
     return Visibility(
       visible:
@@ -50,46 +46,40 @@ class ReaderButton extends HookConsumerWidget {
           (enforceReadability && enableReadability),
       child: readerChanging.when(
         skipLoadingOnReload: true,
-        data:
-            (_) => InkWell(
-              onTap:
-                  readerChanging.isLoading
-                      ? null
-                      : () async {
-                        await ref
-                            .read(readerableScreenControllerProvider.notifier)
-                            .toggleReaderView(!readerabilityState.active);
-                      },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 15.0,
-                  horizontal: 8.0,
-                ),
-                child: icon,
-              ),
+        data: (_) => InkWell(
+          onTap: readerChanging.isLoading
+              ? null
+              : () async {
+                  await ref
+                      .read(readerableScreenControllerProvider.notifier)
+                      .toggleReaderView(!readerabilityState.active);
+                },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 15.0,
+              horizontal: 8.0,
             ),
+            child: icon,
+          ),
+        ),
         error: (error, stackTrace) => SizedBox.shrink(),
-        loading:
-            () => AnimateGradientShader(
-              duration: const Duration(milliseconds: 500),
-              primaryEnd: Alignment.bottomLeft,
-              secondaryEnd: Alignment.topRight,
-              primaryColors: [
-                colorScheme.primary,
-                colorScheme.primaryContainer,
-              ],
-              secondaryColors: [
-                colorScheme.secondary,
-                colorScheme.secondaryContainer,
-              ],
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 15.0,
-                  horizontal: 8.0,
-                ),
-                child: icon,
-              ),
+        loading: () => AnimateGradientShader(
+          duration: const Duration(milliseconds: 500),
+          primaryEnd: Alignment.bottomLeft,
+          secondaryEnd: Alignment.topRight,
+          primaryColors: [colorScheme.primary, colorScheme.primaryContainer],
+          secondaryColors: [
+            colorScheme.secondary,
+            colorScheme.secondaryContainer,
+          ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 15.0,
+              horizontal: 8.0,
             ),
+            child: icon,
+          ),
+        ),
       ),
     );
   }

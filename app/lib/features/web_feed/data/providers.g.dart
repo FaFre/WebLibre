@@ -13,8 +13,9 @@ String _$feedDatabaseHash() => r'c3b20e867da5af6e92d1e8c1efa96b79988837a1';
 final feedDatabaseProvider = Provider<FeedDatabase>.internal(
   feedDatabase,
   name: r'feedDatabaseProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$feedDatabaseHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$feedDatabaseHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

@@ -96,26 +96,22 @@ class BangTable extends Table with TableInfo<BangTable, Bang> {
   Bang map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Bang(
-      websiteName:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}website_name'],
-          )!,
-      domain:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}domain'],
-          )!,
-      trigger:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}trigger'],
-          )!,
-      urlTemplate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}url_template'],
-          )!,
+      websiteName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}website_name'],
+      )!,
+      domain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}domain'],
+      )!,
+      trigger: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trigger'],
+      )!,
+      urlTemplate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url_template'],
+      )!,
       group: BangTable.$convertergroup.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -331,11 +327,10 @@ class BangSync extends Table with TableInfo<BangSync, BangSyncData> {
           data['${effectivePrefix}group'],
         )!,
       ),
-      lastSync:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}last_sync'],
-          )!,
+      lastSync: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_sync'],
+      )!,
     );
   }
 
@@ -512,21 +507,18 @@ class BangFrequency extends Table
   BangFrequencyData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangFrequencyData(
-      trigger:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}trigger'],
-          )!,
-      frequency:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}frequency'],
-          )!,
-      lastUsed:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}last_used'],
-          )!,
+      trigger: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trigger'],
+      )!,
+      frequency: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}frequency'],
+      )!,
+      lastUsed: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_used'],
+      )!,
     );
   }
 
@@ -736,21 +728,18 @@ class BangHistory extends Table with TableInfo<BangHistory, BangHistoryData> {
   BangHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangHistoryData(
-      searchQuery:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}search_query'],
-          )!,
-      trigger:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}trigger'],
-          )!,
-      searchDate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}search_date'],
-          )!,
+      searchQuery: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}search_query'],
+      )!,
+      trigger: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trigger'],
+      )!,
+      searchDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}search_date'],
+      )!,
     );
   }
 
@@ -813,11 +802,13 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
   );
   BangHistoryData copyWithCompanion(BangHistoryCompanion data) {
     return BangHistoryData(
-      searchQuery:
-          data.searchQuery.present ? data.searchQuery.value : this.searchQuery,
+      searchQuery: data.searchQuery.present
+          ? data.searchQuery.value
+          : this.searchQuery,
       trigger: data.trigger.present ? data.trigger.value : this.trigger,
-      searchDate:
-          data.searchDate.present ? data.searchDate.value : this.searchDate,
+      searchDate: data.searchDate.present
+          ? data.searchDate.value
+          : this.searchDate,
     );
   }
 
@@ -954,16 +945,14 @@ class BangFts extends Table
   BangFt map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangFt(
-      trigger:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}trigger'],
-          )!,
-      websiteName:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}website_name'],
-          )!,
+      trigger: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trigger'],
+      )!,
+      websiteName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}website_name'],
+      )!,
     );
   }
 
@@ -1017,8 +1006,9 @@ class BangFt extends DataClass implements Insertable<BangFt> {
   BangFt copyWithCompanion(BangFtsCompanion data) {
     return BangFt(
       trigger: data.trigger.present ? data.trigger.value : this.trigger,
-      websiteName:
-          data.websiteName.present ? data.websiteName.value : this.websiteName,
+      websiteName: data.websiteName.present
+          ? data.websiteName.value
+          : this.websiteName,
     );
   }
 
@@ -1140,26 +1130,22 @@ class BangDataView extends ViewInfo<BangDataView, BangData>
   BangData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return BangData(
-      websiteName:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}website_name'],
-          )!,
-      domain:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}domain'],
-          )!,
-      trigger:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}trigger'],
-          )!,
-      urlTemplate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}url_template'],
-          )!,
+      websiteName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}website_name'],
+      )!,
+      domain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}domain'],
+      )!,
+      trigger: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trigger'],
+      )!,
+      urlTemplate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url_template'],
+      )!,
       category: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}category'],
@@ -1735,12 +1721,12 @@ class $BangTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $BangTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $BangTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $BangTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $BangTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $BangTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $BangTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> trigger = const Value.absent(),
@@ -1785,73 +1771,66 @@ class $BangTableTableManager
                 format: format,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          $BangTableReferences(db, table, e),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (e.readTable(table), $BangTableReferences(db, table, e)),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({bangFrequencyRefs = false, bangHistoryRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (bangFrequencyRefs) db.bangFrequency,
+                    if (bangHistoryRefs) db.bangHistory,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (bangFrequencyRefs)
+                        await $_getPrefetchedData<
+                          Bang,
+                          BangTable,
+                          BangFrequencyData
+                        >(
+                          currentTable: table,
+                          referencedTable: $BangTableReferences
+                              ._bangFrequencyRefsTable(db),
+                          managerFromTypedResult: (p0) => $BangTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).bangFrequencyRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.trigger == item.trigger,
+                              ),
+                          typedResults: items,
                         ),
-                      )
-                      .toList(),
-          prefetchHooksCallback: ({
-            bangFrequencyRefs = false,
-            bangHistoryRefs = false,
-          }) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (bangFrequencyRefs) db.bangFrequency,
-                if (bangHistoryRefs) db.bangHistory,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (bangFrequencyRefs)
-                    await $_getPrefetchedData<
-                      Bang,
-                      BangTable,
-                      BangFrequencyData
-                    >(
-                      currentTable: table,
-                      referencedTable: $BangTableReferences
-                          ._bangFrequencyRefsTable(db),
-                      managerFromTypedResult:
-                          (p0) =>
-                              $BangTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).bangFrequencyRefs,
-                      referencedItemsForCurrentItem:
-                          (item, referencedItems) => referencedItems.where(
-                            (e) => e.trigger == item.trigger,
-                          ),
-                      typedResults: items,
-                    ),
-                  if (bangHistoryRefs)
-                    await $_getPrefetchedData<Bang, BangTable, BangHistoryData>(
-                      currentTable: table,
-                      referencedTable: $BangTableReferences
-                          ._bangHistoryRefsTable(db),
-                      managerFromTypedResult:
-                          (p0) =>
-                              $BangTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).bangHistoryRefs,
-                      referencedItemsForCurrentItem:
-                          (item, referencedItems) => referencedItems.where(
-                            (e) => e.trigger == item.trigger,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+                      if (bangHistoryRefs)
+                        await $_getPrefetchedData<
+                          Bang,
+                          BangTable,
+                          BangHistoryData
+                        >(
+                          currentTable: table,
+                          referencedTable: $BangTableReferences
+                              ._bangHistoryRefsTable(db),
+                          managerFromTypedResult: (p0) => $BangTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).bangHistoryRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.trigger == item.trigger,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -1958,12 +1937,12 @@ class $BangSyncTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $BangSyncFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $BangSyncOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $BangSyncAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $BangSyncFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $BangSyncOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $BangSyncAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<BangGroup> group = const Value.absent(),
@@ -1974,16 +1953,9 @@ class $BangSyncTableManager
                 Value<BangGroup> group = const Value.absent(),
                 required DateTime lastSync,
               }) => BangSyncCompanion.insert(group: group, lastSync: lastSync),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -2186,12 +2158,12 @@ class $BangFrequencyTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $BangFrequencyFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $BangFrequencyOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $BangFrequencyAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $BangFrequencyFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $BangFrequencyOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $BangFrequencyAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> trigger = const Value.absent(),
@@ -2216,52 +2188,50 @@ class $BangFrequencyTableManager
                 lastUsed: lastUsed,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          $BangFrequencyReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $BangFrequencyReferences(db, table, e),
+                ),
+              )
+              .toList(),
           prefetchHooksCallback: ({trigger = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins: <
-                T extends TableManagerState<
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic
-                >
-              >(state) {
-                if (trigger) {
-                  state =
-                      state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.trigger,
-                            referencedTable: $BangFrequencyReferences
-                                ._triggerTable(db),
-                            referencedColumn:
-                                $BangFrequencyReferences
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (trigger) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.trigger,
+                                referencedTable: $BangFrequencyReferences
+                                    ._triggerTable(db),
+                                referencedColumn: $BangFrequencyReferences
                                     ._triggerTable(db)
                                     .trigger,
-                          )
-                          as T;
-                }
+                              )
+                              as T;
+                    }
 
-                return state;
-              },
+                    return state;
+                  },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -2471,12 +2441,12 @@ class $BangHistoryTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $BangHistoryFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $BangHistoryOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $BangHistoryAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $BangHistoryFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $BangHistoryOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $BangHistoryAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> searchQuery = const Value.absent(),
@@ -2501,52 +2471,48 @@ class $BangHistoryTableManager
                 searchDate: searchDate,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          $BangHistoryReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) =>
+                    (e.readTable(table), $BangHistoryReferences(db, table, e)),
+              )
+              .toList(),
           prefetchHooksCallback: ({trigger = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins: <
-                T extends TableManagerState<
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic
-                >
-              >(state) {
-                if (trigger) {
-                  state =
-                      state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.trigger,
-                            referencedTable: $BangHistoryReferences
-                                ._triggerTable(db),
-                            referencedColumn:
-                                $BangHistoryReferences
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (trigger) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.trigger,
+                                referencedTable: $BangHistoryReferences
+                                    ._triggerTable(db),
+                                referencedColumn: $BangHistoryReferences
                                     ._triggerTable(db)
                                     .trigger,
-                          )
-                          as T;
-                }
+                              )
+                              as T;
+                    }
 
-                return state;
-              },
+                    return state;
+                  },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -2658,12 +2624,12 @@ class $BangFtsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $BangFtsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $BangFtsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $BangFtsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $BangFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $BangFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $BangFtsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> trigger = const Value.absent(),
@@ -2684,16 +2650,9 @@ class $BangFtsTableManager
                 websiteName: websiteName,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

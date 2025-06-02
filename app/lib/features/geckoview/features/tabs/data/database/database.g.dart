@@ -55,11 +55,10 @@ class Container extends Table with TableInfo<Container, ContainerData> {
   ContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ContainerData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -306,20 +305,18 @@ class Tab extends Table with TableInfo<Tab, TabData> {
   TabData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TabData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
       containerId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}container_id'],
       ),
-      orderKey:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}order_key'],
-          )!,
+      orderKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_key'],
+      )!,
       url: Tab.$converterurln.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -350,11 +347,10 @@ class Tab extends Table with TableInfo<Tab, TabData> {
         DriftSqlType.string,
         data['${effectivePrefix}full_content_plain'],
       ),
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.dateTime,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
     );
   }
 
@@ -499,56 +495,47 @@ class TabData extends DataClass implements Insertable<TabData> {
     orderKey: orderKey ?? this.orderKey,
     url: url.present ? url.value : this.url,
     title: title.present ? title.value : this.title,
-    isProbablyReaderable:
-        isProbablyReaderable.present
-            ? isProbablyReaderable.value
-            : this.isProbablyReaderable,
-    extractedContentMarkdown:
-        extractedContentMarkdown.present
-            ? extractedContentMarkdown.value
-            : this.extractedContentMarkdown,
-    extractedContentPlain:
-        extractedContentPlain.present
-            ? extractedContentPlain.value
-            : this.extractedContentPlain,
-    fullContentMarkdown:
-        fullContentMarkdown.present
-            ? fullContentMarkdown.value
-            : this.fullContentMarkdown,
-    fullContentPlain:
-        fullContentPlain.present
-            ? fullContentPlain.value
-            : this.fullContentPlain,
+    isProbablyReaderable: isProbablyReaderable.present
+        ? isProbablyReaderable.value
+        : this.isProbablyReaderable,
+    extractedContentMarkdown: extractedContentMarkdown.present
+        ? extractedContentMarkdown.value
+        : this.extractedContentMarkdown,
+    extractedContentPlain: extractedContentPlain.present
+        ? extractedContentPlain.value
+        : this.extractedContentPlain,
+    fullContentMarkdown: fullContentMarkdown.present
+        ? fullContentMarkdown.value
+        : this.fullContentMarkdown,
+    fullContentPlain: fullContentPlain.present
+        ? fullContentPlain.value
+        : this.fullContentPlain,
     timestamp: timestamp ?? this.timestamp,
   );
   TabData copyWithCompanion(TabCompanion data) {
     return TabData(
       id: data.id.present ? data.id.value : this.id,
-      containerId:
-          data.containerId.present ? data.containerId.value : this.containerId,
+      containerId: data.containerId.present
+          ? data.containerId.value
+          : this.containerId,
       orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
       url: data.url.present ? data.url.value : this.url,
       title: data.title.present ? data.title.value : this.title,
-      isProbablyReaderable:
-          data.isProbablyReaderable.present
-              ? data.isProbablyReaderable.value
-              : this.isProbablyReaderable,
-      extractedContentMarkdown:
-          data.extractedContentMarkdown.present
-              ? data.extractedContentMarkdown.value
-              : this.extractedContentMarkdown,
-      extractedContentPlain:
-          data.extractedContentPlain.present
-              ? data.extractedContentPlain.value
-              : this.extractedContentPlain,
-      fullContentMarkdown:
-          data.fullContentMarkdown.present
-              ? data.fullContentMarkdown.value
-              : this.fullContentMarkdown,
-      fullContentPlain:
-          data.fullContentPlain.present
-              ? data.fullContentPlain.value
-              : this.fullContentPlain,
+      isProbablyReaderable: data.isProbablyReaderable.present
+          ? data.isProbablyReaderable.value
+          : this.isProbablyReaderable,
+      extractedContentMarkdown: data.extractedContentMarkdown.present
+          ? data.extractedContentMarkdown.value
+          : this.extractedContentMarkdown,
+      extractedContentPlain: data.extractedContentPlain.present
+          ? data.extractedContentPlain.value
+          : this.extractedContentPlain,
+      fullContentMarkdown: data.fullContentMarkdown.present
+          ? data.fullContentMarkdown.value
+          : this.fullContentMarkdown,
+      fullContentPlain: data.fullContentPlain.present
+          ? data.fullContentPlain.value
+          : this.fullContentPlain,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
     );
   }
@@ -838,26 +825,22 @@ class TabFts extends Table
   TabFt map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TabFt(
-      title:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}title'],
-          )!,
-      url:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}url'],
-          )!,
-      extractedContentPlain:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}extracted_content_plain'],
-          )!,
-      fullContentPlain:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}full_content_plain'],
-          )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      extractedContentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}extracted_content_plain'],
+      )!,
+      fullContentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_content_plain'],
+      )!,
     );
   }
 
@@ -936,14 +919,12 @@ class TabFt extends DataClass implements Insertable<TabFt> {
     return TabFt(
       title: data.title.present ? data.title.value : this.title,
       url: data.url.present ? data.url.value : this.url,
-      extractedContentPlain:
-          data.extractedContentPlain.present
-              ? data.extractedContentPlain.value
-              : this.extractedContentPlain,
-      fullContentPlain:
-          data.fullContentPlain.present
-              ? data.fullContentPlain.value
-              : this.fullContentPlain,
+      extractedContentPlain: data.extractedContentPlain.present
+          ? data.extractedContentPlain.value
+          : this.extractedContentPlain,
+      fullContentPlain: data.fullContentPlain.present
+          ? data.fullContentPlain.value
+          : this.fullContentPlain,
     );
   }
 
@@ -1431,12 +1412,12 @@ class $ContainerTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ContainerFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ContainerOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $ContainerAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ContainerFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ContainerOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ContainerAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -1465,16 +1446,11 @@ class $ContainerTableManager
                 metadata: metadata,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          $ContainerReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (e.readTable(table), $ContainerReferences(db, table, e)),
+              )
+              .toList(),
           prefetchHooksCallback: ({tabRefs = false}) {
             return PrefetchHooks(
               db: db,
@@ -1490,10 +1466,10 @@ class $ContainerTableManager
                     >(
                       currentTable: table,
                       referencedTable: $ContainerReferences._tabRefsTable(db),
-                      managerFromTypedResult:
-                          (p0) => $ContainerReferences(db, table, p0).tabRefs,
-                      referencedItemsForCurrentItem:
-                          (item, referencedItems) => referencedItems.where(
+                      managerFromTypedResult: (p0) =>
+                          $ContainerReferences(db, table, p0).tabRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
                             (e) => e.containerId == item.id,
                           ),
                       typedResults: items,
@@ -1829,12 +1805,12 @@ class $TabTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $TabFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $TabOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $TabAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $TabFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $TabOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $TabAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
@@ -1891,51 +1867,45 @@ class $TabTableManager
                 timestamp: timestamp,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          $TabReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), $TabReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: ({containerId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins: <
-                T extends TableManagerState<
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic,
-                  dynamic
-                >
-              >(state) {
-                if (containerId) {
-                  state =
-                      state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.containerId,
-                            referencedTable: $TabReferences._containerIdTable(
-                              db,
-                            ),
-                            referencedColumn:
-                                $TabReferences._containerIdTable(db).id,
-                          )
-                          as T;
-                }
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (containerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.containerId,
+                                referencedTable: $TabReferences
+                                    ._containerIdTable(db),
+                                referencedColumn: $TabReferences
+                                    ._containerIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
 
-                return state;
-              },
+                    return state;
+                  },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -2079,12 +2049,12 @@ class $TabFtsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $TabFtsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $TabFtsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $TabFtsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $TabFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $TabFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $TabFtsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> title = const Value.absent(),
@@ -2113,16 +2083,9 @@ class $TabFtsTableManager
                 fullContentPlain: fullContentPlain,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

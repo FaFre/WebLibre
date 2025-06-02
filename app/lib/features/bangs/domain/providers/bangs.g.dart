@@ -14,10 +14,9 @@ String _$defaultSearchBangDataHash() =>
 final defaultSearchBangDataProvider = StreamProvider<BangData?>.internal(
   defaultSearchBangData,
   name: r'defaultSearchBangDataProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$defaultSearchBangDataHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$defaultSearchBangDataHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
@@ -33,10 +32,9 @@ final bangCategoriesProvider =
     AutoDisposeStreamProvider<Map<String, List<String>>>.internal(
       bangCategories,
       name: r'bangCategoriesProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$bangCategoriesHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bangCategoriesHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -135,10 +133,9 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
          ),
          from: bangListProvider,
          name: r'bangListProvider',
-         debugGetCreateSourceHash:
-             const bool.fromEnvironment('dart.vm.product')
-                 ? null
-                 : _$bangListHash,
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$bangListHash,
          dependencies: BangListFamily._dependencies,
          allTransitiveDependencies: BangListFamily._allTransitiveDependencies,
          groups: groups,
@@ -253,10 +250,9 @@ final frequentBangListProvider =
     AutoDisposeStreamProvider<List<BangData>>.internal(
       frequentBangList,
       name: r'frequentBangListProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$frequentBangListHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$frequentBangListHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -272,10 +268,9 @@ final searchHistoryProvider =
     AutoDisposeStreamProvider<List<SearchHistoryEntry>>.internal(
       searchHistory,
       name: r'searchHistoryProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$searchHistoryHash,
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$searchHistoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
@@ -330,10 +325,9 @@ class LastSyncOfGroupProvider extends AutoDisposeStreamProvider<DateTime?> {
         (ref) => lastSyncOfGroup(ref as LastSyncOfGroupRef, group),
         from: lastSyncOfGroupProvider,
         name: r'lastSyncOfGroupProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$lastSyncOfGroupHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$lastSyncOfGroupHash,
         dependencies: LastSyncOfGroupFamily._dependencies,
         allTransitiveDependencies:
             LastSyncOfGroupFamily._allTransitiveDependencies,
@@ -451,10 +445,9 @@ class BangCountOfGroupProvider extends AutoDisposeStreamProvider<int> {
         (ref) => bangCountOfGroup(ref as BangCountOfGroupRef, group),
         from: bangCountOfGroupProvider,
         name: r'bangCountOfGroupProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$bangCountOfGroupHash,
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$bangCountOfGroupHash,
         dependencies: BangCountOfGroupFamily._dependencies,
         allTransitiveDependencies:
             BangCountOfGroupFamily._allTransitiveDependencies,

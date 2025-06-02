@@ -75,31 +75,28 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
-      themeMode:
-          themeMode == const $CopyWithPlaceholder()
-              ? _value.themeMode
-              // ignore: cast_nullable_to_non_nullable
-              : themeMode as ThemeMode,
-      enableReadability:
-          enableReadability == const $CopyWithPlaceholder()
-              ? _value.enableReadability
-              // ignore: cast_nullable_to_non_nullable
-              : enableReadability as bool,
-      enforceReadability:
-          enforceReadability == const $CopyWithPlaceholder()
-              ? _value.enforceReadability
-              // ignore: cast_nullable_to_non_nullable
-              : enforceReadability as bool,
+      themeMode: themeMode == const $CopyWithPlaceholder()
+          ? _value.themeMode
+          // ignore: cast_nullable_to_non_nullable
+          : themeMode as ThemeMode,
+      enableReadability: enableReadability == const $CopyWithPlaceholder()
+          ? _value.enableReadability
+          // ignore: cast_nullable_to_non_nullable
+          : enableReadability as bool,
+      enforceReadability: enforceReadability == const $CopyWithPlaceholder()
+          ? _value.enforceReadability
+          // ignore: cast_nullable_to_non_nullable
+          : enforceReadability as bool,
       deleteBrowsingDataOnQuit:
           deleteBrowsingDataOnQuit == const $CopyWithPlaceholder()
-              ? _value.deleteBrowsingDataOnQuit
-              // ignore: cast_nullable_to_non_nullable
-              : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
+          ? _value.deleteBrowsingDataOnQuit
+          // ignore: cast_nullable_to_non_nullable
+          : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
       defaultSearchProvider:
           defaultSearchProvider == const $CopyWithPlaceholder()
-              ? _value.defaultSearchProvider
-              // ignore: cast_nullable_to_non_nullable
-              : defaultSearchProvider as String,
+          ? _value.defaultSearchProvider
+          // ignore: cast_nullable_to_non_nullable
+          : defaultSearchProvider as String,
     );
   }
 }
@@ -131,10 +128,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
       'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
       'enableReadability': instance.enableReadability,
       'enforceReadability': instance.enforceReadability,
-      'deleteBrowsingDataOnQuit':
-          instance.deleteBrowsingDataOnQuit
-              ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
-              .toList(),
+      'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
+          ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
+          .toList(),
       'defaultSearchProvider': instance.defaultSearchProvider,
     };
 

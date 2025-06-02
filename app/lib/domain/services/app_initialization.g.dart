@@ -11,19 +11,19 @@ String _$appInitializationServiceHash() =>
 
 /// See also [AppInitializationService].
 @ProviderFor(AppInitializationService)
-final appInitializationServiceProvider = NotifierProvider<
-  AppInitializationService,
-  Result<({bool initialized, String? stage, List<ErrorMessage> errors})>
->.internal(
-  AppInitializationService.new,
-  name: r'appInitializationServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product')
+final appInitializationServiceProvider =
+    NotifierProvider<
+      AppInitializationService,
+      Result<({bool initialized, String? stage, List<ErrorMessage> errors})>
+    >.internal(
+      AppInitializationService.new,
+      name: r'appInitializationServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
           : _$appInitializationServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$AppInitializationService =
     Notifier<
