@@ -43,7 +43,9 @@ class ContainerRepository extends _$ContainerRepository {
   }
 
   Future<void> deleteContainer(String id) async {
-    await ref.read(tabDataRepositoryProvider.notifier).closeAllTabs(id);
+    await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .closeAllTabsByContainer(id);
 
     return ref.read(tabDatabaseProvider).containerDao.deleteContainer(id);
   }

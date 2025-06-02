@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
-class TabPreview extends StatelessWidget {
+class TabPreview extends HookWidget {
   final TabState tab;
   final bool isActive;
 
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final VoidCallback? onDelete;
+  final void Function(String host)? onDeleteAll;
 
   const TabPreview({
     required this.tab,
@@ -20,11 +25,14 @@ class TabPreview extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onDelete,
+    this.onDeleteAll,
     super.key,
   });
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final extendedDeleteMenuController = useMenuController();
 
     return Container(
       decoration: BoxDecoration(
@@ -62,13 +70,37 @@ class TabPreview extends StatelessWidget {
                       ),
                     ),
                   ),
-                  IconButton(
-                    visualDensity: const VisualDensity(
-                      horizontal: -4.0,
-                      vertical: -4.0,
+                  MenuAnchor(
+                    controller: extendedDeleteMenuController,
+                    builder: (context, controller, child) {
+                      return child!;
+                    },
+                    menuChildren: [
+                      MenuItemButton(
+                        onPressed: onDeleteAll.mapNotNull(
+                          (p0) => () {
+                            p0(tab.url.host);
+                          },
+                        ),
+                        leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
+                        child: Text('Close all from ${tab.url.host}'),
+                      ),
+                    ],
+                    child: IconButton(
+                      visualDensity: const VisualDensity(
+                        horizontal: -4.0,
+                        vertical: -4.0,
+                      ),
+                      onPressed: onDelete,
+                      onLongPress: () {
+                        if (extendedDeleteMenuController.isOpen) {
+                          extendedDeleteMenuController.close();
+                        } else {
+                          extendedDeleteMenuController.open();
+                        }
+                      },
+                      icon: const Icon(Icons.close),
                     ),
-                    onPressed: onDelete,
-                    icon: const Icon(Icons.close),
                   ),
                 ],
               ),
@@ -165,6 +197,15 @@ class TabPreviewDraggable extends HookConsumerWidget {
         } else {
           onClose();
         }
+      },
+      onDeleteAll: (host) async {
+        final containerId = await ref
+            .read(tabDataRepositoryProvider.notifier)
+            .containerTabId(tab.id);
+
+        await ref
+            .read(tabDataRepositoryProvider.notifier)
+            .closeAllTabsByHost(containerId, host);
       },
       // onDoubleTap: () {
       //   ref.read(overlayDialogControllerProvider.notifier).show(

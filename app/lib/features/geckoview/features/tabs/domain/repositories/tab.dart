@@ -20,7 +20,7 @@ class TabDataRepository extends _$TabDataRepository {
         .assignOrderKey(tabId, orderKey: orderKey);
   }
 
-  Future<void> closeAllTabs(String? containerId) async {
+  Future<void> closeAllTabsByContainer(String? containerId) async {
     final tabIds =
         await ref
             .read(tabDatabaseProvider)
@@ -30,6 +30,25 @@ class TabDataRepository extends _$TabDataRepository {
 
     if (tabIds.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
+    }
+  }
+
+  Future<void> closeAllTabsByHost(String? containerId, String host) async {
+    final tabs =
+        await ref
+            .read(tabDatabaseProvider)
+            .containerDao
+            .getContainerTabsData(containerId)
+            .get();
+
+    final filtered =
+        tabs
+            .where((tab) => tab.url?.host == host)
+            .map((tab) => tab.id)
+            .toList();
+
+    if (filtered.isNotEmpty) {
+      await ref.read(tabRepositoryProvider.notifier).closeTabs(filtered);
     }
   }
 

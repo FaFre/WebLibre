@@ -76,11 +76,11 @@ class _TabSheetHeader extends HookConsumerWidget {
                         final container = ref.read(selectedContainerProvider);
                         await ref
                             .read(tabDataRepositoryProvider.notifier)
-                            .closeAllTabs(container);
+                            .closeAllTabsByContainer(container);
 
                         onClose();
                       },
-                      icon: const Icon(Icons.delete),
+                      icon: const Icon(MdiIcons.closeBoxMultiple),
                       label: const Text('Close All'),
                     ),
                   ],

@@ -66,6 +66,20 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return query.map((row) => row.read(db.tab.id)!);
   }
 
+  Selectable<TabData> getContainerTabsData(String? containerId) {
+    final query =
+        db.tab.select()
+          ..where(
+            (t) =>
+                (containerId != null)
+                    ? t.containerId.equals(containerId)
+                    : t.containerId.isNull(),
+          )
+          ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]);
+
+    return query;
+  }
+
   SingleSelectable<String> generateLeadingOrderKey(
     String? containerId, {
     int bucket = 0,
