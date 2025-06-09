@@ -27,42 +27,44 @@ part of 'routes.dart';
     ),
   ],
 )
-class SettingsRoute extends GoRouteData {
+class SettingsRoute extends GoRouteData with _$SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SettingsScreen();
   }
 }
 
-class GeneralSettingsRoute extends GoRouteData {
+class GeneralSettingsRoute extends GoRouteData with _$GeneralSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const GeneralSettingsScreen();
   }
 }
 
-class BangSettingsRoute extends GoRouteData {
+class BangSettingsRoute extends GoRouteData with _$BangSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BangSettingsScreen();
   }
 }
 
-class WebEngineSettingsRoute extends GoRouteData {
+class WebEngineSettingsRoute extends GoRouteData with _$WebEngineSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const WebEngineSettingsScreen();
   }
 }
 
-class WebEngineHardeningRoute extends GoRouteData {
+class WebEngineHardeningRoute extends GoRouteData
+    with _$WebEngineHardeningRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const WebEngineHardeningScreen();
   }
 }
 
-class WebEngineHardeningGroupRoute extends GoRouteData {
+class WebEngineHardeningGroupRoute extends GoRouteData
+    with _$WebEngineHardeningGroupRoute {
   final String group;
 
   const WebEngineHardeningGroupRoute({required this.group});

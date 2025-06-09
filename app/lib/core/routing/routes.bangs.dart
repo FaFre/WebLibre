@@ -20,14 +20,14 @@ part of 'routes.dart';
     ),
   ],
 )
-class BangCategoriesRoute extends GoRouteData {
+class BangCategoriesRoute extends GoRouteData with _$BangCategoriesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BangCategoriesScreen();
   }
 }
 
-class BangCategoryRoute extends GoRouteData {
+class BangCategoryRoute extends GoRouteData with _$BangCategoryRoute {
   final String category;
 
   const BangCategoryRoute({required this.category});
@@ -38,7 +38,7 @@ class BangCategoryRoute extends GoRouteData {
   }
 }
 
-class BangSubCategoryRoute extends GoRouteData {
+class BangSubCategoryRoute extends GoRouteData with _$BangSubCategoryRoute {
   final String category;
   final String subCategory;
 
@@ -53,7 +53,7 @@ class BangSubCategoryRoute extends GoRouteData {
   }
 }
 
-class BangSearchRoute extends GoRouteData {
+class BangSearchRoute extends GoRouteData with _$BangSearchRoute {
   static const String emptySearchText = ' ';
 
   //This should be nullable but isnt allowed by go_router

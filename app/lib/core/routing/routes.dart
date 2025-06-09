@@ -37,7 +37,7 @@ part 'routes.bangs.dart';
 part 'routes.feeds.dart';
 
 @TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
-class AboutRoute extends GoRouteData {
+class AboutRoute extends GoRouteData with _$AboutRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const AboutDialogScreen());

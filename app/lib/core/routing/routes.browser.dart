@@ -30,7 +30,7 @@ part of 'routes.dart';
     ),
   ],
 )
-class BrowserRoute extends GoRouteData {
+class BrowserRoute extends GoRouteData with _$BrowserRoute {
   static const name = 'BrowserRoute';
 
   @override
@@ -39,7 +39,7 @@ class BrowserRoute extends GoRouteData {
   }
 }
 
-class WebPageRoute extends GoRouteData {
+class WebPageRoute extends GoRouteData with _$WebPageRoute {
   final String url;
   final WebPageInfo? $extra;
 
@@ -55,7 +55,7 @@ class WebPageRoute extends GoRouteData {
 
 enum TabType { regular, private }
 
-class SearchRoute extends GoRouteData {
+class SearchRoute extends GoRouteData with _$SearchRoute {
   static const String emptySearchText = ' ';
 
   final TabType tabType;
@@ -79,21 +79,21 @@ class SearchRoute extends GoRouteData {
   }
 }
 
-class TorProxyRoute extends GoRouteData {
+class TorProxyRoute extends GoRouteData with _$TorProxyRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const TorProxyScreen();
   }
 }
 
-class ContainerListRoute extends GoRouteData {
+class ContainerListRoute extends GoRouteData with _$ContainerListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ContainerListScreen();
   }
 }
 
-class ContainerEditRoute extends GoRouteData {
+class ContainerEditRoute extends GoRouteData with _$ContainerEditRoute {
   final ContainerData $extra;
 
   ContainerEditRoute(this.$extra);
@@ -104,7 +104,7 @@ class ContainerEditRoute extends GoRouteData {
   }
 }
 
-class ContainerCreateRoute extends GoRouteData {
+class ContainerCreateRoute extends GoRouteData with _$ContainerCreateRoute {
   final ContainerData $extra;
 
   ContainerCreateRoute(this.$extra);
@@ -115,7 +115,7 @@ class ContainerCreateRoute extends GoRouteData {
   }
 }
 
-class ContextMenuRoute extends GoRouteData {
+class ContextMenuRoute extends GoRouteData with _$ContextMenuRoute {
   final String $extra;
 
   const ContextMenuRoute(this.$extra);

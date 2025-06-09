@@ -24,14 +24,14 @@ part of 'routes.dart';
     TypedGoRoute<FeedEditRoute>(name: 'FeedEditRoute', path: 'edit/:feedId'),
   ],
 )
-class FeedListRoute extends GoRouteData {
+class FeedListRoute extends GoRouteData with _$FeedListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const FeedListScreen();
   }
 }
 
-class FeedCreateRoute extends GoRouteData {
+class FeedCreateRoute extends GoRouteData with _$FeedCreateRoute {
   final Uri feedId;
 
   FeedCreateRoute({required this.feedId});
@@ -42,7 +42,7 @@ class FeedCreateRoute extends GoRouteData {
   }
 }
 
-class SelectFeedDialogRoute extends GoRouteData {
+class SelectFeedDialogRoute extends GoRouteData with _$SelectFeedDialogRoute {
   final String feedsJson;
 
   const SelectFeedDialogRoute({required this.feedsJson});
@@ -59,7 +59,7 @@ class SelectFeedDialogRoute extends GoRouteData {
   }
 }
 
-class FeedEditRoute extends GoRouteData {
+class FeedEditRoute extends GoRouteData with _$FeedEditRoute {
   final Uri feedId;
 
   const FeedEditRoute({required this.feedId});
@@ -70,7 +70,7 @@ class FeedEditRoute extends GoRouteData {
   }
 }
 
-class FeedAddRoute extends GoRouteData {
+class FeedAddRoute extends GoRouteData with _$FeedAddRoute {
   final Uri? $extra;
 
   static const name = 'FeedAddRoute';
@@ -83,7 +83,7 @@ class FeedAddRoute extends GoRouteData {
   }
 }
 
-class FeedArticleListRoute extends GoRouteData {
+class FeedArticleListRoute extends GoRouteData with _$FeedArticleListRoute {
   final Uri feedId;
 
   FeedArticleListRoute({required this.feedId});
@@ -94,7 +94,7 @@ class FeedArticleListRoute extends GoRouteData {
   }
 }
 
-class FeedArticleRoute extends GoRouteData {
+class FeedArticleRoute extends GoRouteData with _$FeedArticleRoute {
   final String articleId;
 
   FeedArticleRoute({required this.articleId});
