@@ -28,7 +28,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0-beta.4
   flutter_slidable: ^4.0.0
   flutter_svg: ^2.1.0
-  go_router: ^15.1.3
+  go_router: ^15.2.0
   google_fonts: ^6.2.1
   home_widget: ^0.8.0
   hooks_riverpod: ^2.6.1
@@ -61,7 +61,7 @@ dependencies:
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git
   sqlite3: ^2.7.6
-  sqlite3_flutter_libs: ^0.5.33
+  sqlite3_flutter_libs: ^0.5.34
   text_scroll: ^0.2.0
   timeago: ^3.7.1
   tor:
@@ -91,7 +91,7 @@ dev_dependencies:
   dependency_validator: ^5.0.2
   drift_dev: ^2.26.1
   fast_equatable_lint: ^0.3.2
-  flutter_launcher_icons: ^0.14.3
+  flutter_launcher_icons: ^0.14.4
   go_router_builder: ^3.0.0
   json_serializable: ^6.9.5
   lint: ^2.8.0
