@@ -1,4 +1,4 @@
-package eu.weblibre.browser
+package eu.weblibre.gecko
 
 import android.app.ActivityManager
 import android.app.Application

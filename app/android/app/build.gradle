@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "eu.weblibre.browser"
+    namespace = "eu.weblibre.gecko"
     compileSdk = 35
     //Temporary fix
     ndkVersion = "27.0.12077973" //flutter.ndkVersion
@@ -40,7 +40,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "eu.weblibre.browser"
+        applicationId = "eu.weblibre.gecko"
         // https://api.flutter.dev/flutter/widgets/AndroidView-class.html
         //https://inappwebview.dev/docs/intro/#setup-android
         minSdk = 23

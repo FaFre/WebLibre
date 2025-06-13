@@ -1,4 +1,4 @@
-package eu.weblibre.browser
+package eu.weblibre.gecko
 
 import android.content.Context
 import android.os.Bundle
