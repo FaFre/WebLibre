@@ -57,6 +57,7 @@ dependencies:
     path: ../packages/simple_intent_receiver
   skeletonizer: ^2.0.1
   sliver_tools: ^0.2.12
+  smooth_page_indicator: ^1.2.1
   speech_to_text_google_dialog: 
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git

@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'data.dart';
+part of 'onboarding.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bangDataRepositoryHash() =>
-    r'095708cfffe8d0fb604dc02f69e77ae1c050a893';
+String _$onboardingRepositoryHash() =>
+    r'37b76aa313ae6dfed6ab5695b4df8c4a0cfe0483';
 
-/// See also [BangDataRepository].
-@ProviderFor(BangDataRepository)
-final bangDataRepositoryProvider =
-    NotifierProvider<BangDataRepository, void>.internal(
-      BangDataRepository.new,
-      name: r'bangDataRepositoryProvider',
+/// See also [OnboardingRepository].
+@ProviderFor(OnboardingRepository)
+final onboardingRepositoryProvider =
+    NotifierProvider<OnboardingRepository, void>.internal(
+      OnboardingRepository.new,
+      name: r'onboardingRepositoryProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$bangDataRepositoryHash,
+          : _$onboardingRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$BangDataRepository = Notifier<void>;
+typedef _$OnboardingRepository = Notifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

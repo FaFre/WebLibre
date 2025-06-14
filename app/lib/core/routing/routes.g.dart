@@ -8,6 +8,7 @@ part of 'routes.dart';
 
 List<RouteBase> get $appRoutes => [
   $aboutRoute,
+  $onboardingRoute,
   $settingsRoute,
   $browserRoute,
   $bangCategoriesRoute,
@@ -26,6 +27,40 @@ mixin _$AboutRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/about');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $onboardingRoute => GoRouteData.$route(
+  path: '/onboarding/:currentRevision/:targetRevision',
+  name: 'OnboardingRoute',
+
+  factory: _$OnboardingRoute._fromState,
+);
+
+mixin _$OnboardingRoute on GoRouteData {
+  static OnboardingRoute _fromState(GoRouterState state) => OnboardingRoute(
+    currentRevision: int.parse(state.pathParameters['currentRevision']!)!,
+    targetRevision: int.parse(state.pathParameters['targetRevision']!)!,
+  );
+
+  OnboardingRoute get _self => this as OnboardingRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/onboarding/${Uri.encodeComponent(_self.currentRevision.toString())}/${Uri.encodeComponent(_self.targetRevision.toString())}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

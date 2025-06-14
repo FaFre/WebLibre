@@ -16,6 +16,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/screens
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_list.dart';
+import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
@@ -41,5 +42,27 @@ class AboutRoute extends GoRouteData with _$AboutRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const AboutDialogScreen());
+  }
+}
+
+@TypedGoRoute<OnboardingRoute>(
+  name: 'OnboardingRoute',
+  path: '/onboarding/:currentRevision/:targetRevision',
+)
+class OnboardingRoute extends GoRouteData with _$OnboardingRoute {
+  final int currentRevision;
+  final int targetRevision;
+
+  const OnboardingRoute({
+    required this.currentRevision,
+    required this.targetRevision,
+  });
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return OnboardingScreen(
+      currentRevision: currentRevision,
+      targetRevision: targetRevision,
+    );
   }
 }

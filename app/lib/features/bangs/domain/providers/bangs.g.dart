@@ -43,7 +43,7 @@ final bangCategoriesProvider =
 // ignore: unused_element
 typedef BangCategoriesRef =
     AutoDisposeStreamProviderRef<Map<String, List<String>>>;
-String _$bangListHash() => r'dc168bd1246bea3e5f8015dd52fbf41c5f98ca13';
+String _$bangListHash() => r'd1e0bb9fa4f523ce516e075c0d149bf7803ebb2b';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -77,12 +77,14 @@ class BangListFamily extends Family<AsyncValue<List<BangData>>> {
 
   /// See also [bangList].
   BangListProvider call({
+    List<String>? triggers,
     List<BangGroup>? groups,
     String? domain,
     ({String category, String? subCategory})? categoryFilter,
     bool? orderMostFrequentFirst,
   }) {
     return BangListProvider(
+      triggers: triggers,
       groups: groups,
       domain: domain,
       categoryFilter: categoryFilter,
@@ -93,6 +95,7 @@ class BangListFamily extends Family<AsyncValue<List<BangData>>> {
   @override
   BangListProvider getProviderOverride(covariant BangListProvider provider) {
     return call(
+      triggers: provider.triggers,
       groups: provider.groups,
       domain: provider.domain,
       categoryFilter: provider.categoryFilter,
@@ -119,6 +122,7 @@ class BangListFamily extends Family<AsyncValue<List<BangData>>> {
 class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
   /// See also [bangList].
   BangListProvider({
+    List<String>? triggers,
     List<BangGroup>? groups,
     String? domain,
     ({String category, String? subCategory})? categoryFilter,
@@ -126,6 +130,7 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
   }) : this._internal(
          (ref) => bangList(
            ref as BangListRef,
+           triggers: triggers,
            groups: groups,
            domain: domain,
            categoryFilter: categoryFilter,
@@ -138,6 +143,7 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
              : _$bangListHash,
          dependencies: BangListFamily._dependencies,
          allTransitiveDependencies: BangListFamily._allTransitiveDependencies,
+         triggers: triggers,
          groups: groups,
          domain: domain,
          categoryFilter: categoryFilter,
@@ -151,12 +157,14 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
+    required this.triggers,
     required this.groups,
     required this.domain,
     required this.categoryFilter,
     required this.orderMostFrequentFirst,
   }) : super.internal();
 
+  final List<String>? triggers;
   final List<BangGroup>? groups;
   final String? domain;
   final ({String category, String? subCategory})? categoryFilter;
@@ -175,6 +183,7 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
+        triggers: triggers,
         groups: groups,
         domain: domain,
         categoryFilter: categoryFilter,
@@ -191,6 +200,7 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
   @override
   bool operator ==(Object other) {
     return other is BangListProvider &&
+        other.triggers == triggers &&
         other.groups == groups &&
         other.domain == domain &&
         other.categoryFilter == categoryFilter &&
@@ -200,6 +210,7 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, triggers.hashCode);
     hash = _SystemHash.combine(hash, groups.hashCode);
     hash = _SystemHash.combine(hash, domain.hashCode);
     hash = _SystemHash.combine(hash, categoryFilter.hashCode);
@@ -212,6 +223,9 @@ class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin BangListRef on AutoDisposeStreamProviderRef<List<BangData>> {
+  /// The parameter `triggers` of this provider.
+  List<String>? get triggers;
+
   /// The parameter `groups` of this provider.
   List<BangGroup>? get groups;
 
@@ -230,6 +244,8 @@ class _BangListProviderElement
     with BangListRef {
   _BangListProviderElement(super.provider);
 
+  @override
+  List<String>? get triggers => (origin as BangListProvider).triggers;
   @override
   List<BangGroup>? get groups => (origin as BangListProvider).groups;
   @override

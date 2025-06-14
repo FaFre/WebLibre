@@ -46,6 +46,7 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<List<BangData>> watchBangs({
+    Iterable<String>? triggers,
     Iterable<BangGroup>? groups,
     String? domain,
     ({String category, String? subCategory})? categoryFilter,
@@ -55,6 +56,7 @@ class BangDataRepository extends _$BangDataRepository {
         .read(bangDatabaseProvider)
         .bangDao
         .getBangDataList(
+          triggers: triggers,
           groups: groups,
           domain: domain,
           category: categoryFilter?.category,

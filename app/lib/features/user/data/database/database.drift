@@ -10,6 +10,11 @@ CREATE TABLE icon_cache (
   fetch_date DATETIME NOT NULL
 );
 
+CREATE TABLE onboarding (
+  revision INTEGER NOT NULL,
+  completion_date DATETIME NOT NULL
+);
+
 evictCacheEntries:
   DELETE FROM icon_cache 
   WHERE rowid IN (

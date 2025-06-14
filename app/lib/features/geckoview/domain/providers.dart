@@ -22,7 +22,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
   unawaited(
     service.setActions([
       SearchAction((text) async {
-        final router = ref.read(routerProvider);
+        final router = await ref.read(routerProvider.future);
         final isCurrentPrivate =
             ref.read(selectedTabStateProvider)?.isPrivate ?? false;
         final route = SearchRoute(

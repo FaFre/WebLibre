@@ -446,13 +446,199 @@ class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
   }
 }
 
+class Onboarding extends Table with TableInfo<Onboarding, OnboardingData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Onboarding(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<DateTime> completionDate =
+      GeneratedColumn<DateTime>(
+        'completion_date',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<GeneratedColumn> get $columns => [revision, completionDate];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'onboarding';
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  OnboardingData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OnboardingData(
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      completionDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completion_date'],
+      )!,
+    );
+  }
+
+  @override
+  Onboarding createAlias(String alias) {
+    return Onboarding(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class OnboardingData extends DataClass implements Insertable<OnboardingData> {
+  final int revision;
+  final DateTime completionDate;
+  const OnboardingData({required this.revision, required this.completionDate});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['revision'] = Variable<int>(revision);
+    map['completion_date'] = Variable<DateTime>(completionDate);
+    return map;
+  }
+
+  factory OnboardingData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OnboardingData(
+      revision: serializer.fromJson<int>(json['revision']),
+      completionDate: serializer.fromJson<DateTime>(json['completion_date']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'revision': serializer.toJson<int>(revision),
+      'completion_date': serializer.toJson<DateTime>(completionDate),
+    };
+  }
+
+  OnboardingData copyWith({int? revision, DateTime? completionDate}) =>
+      OnboardingData(
+        revision: revision ?? this.revision,
+        completionDate: completionDate ?? this.completionDate,
+      );
+  OnboardingData copyWithCompanion(OnboardingCompanion data) {
+    return OnboardingData(
+      revision: data.revision.present ? data.revision.value : this.revision,
+      completionDate: data.completionDate.present
+          ? data.completionDate.value
+          : this.completionDate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OnboardingData(')
+          ..write('revision: $revision, ')
+          ..write('completionDate: $completionDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(revision, completionDate);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OnboardingData &&
+          other.revision == this.revision &&
+          other.completionDate == this.completionDate);
+}
+
+class OnboardingCompanion extends UpdateCompanion<OnboardingData> {
+  final Value<int> revision;
+  final Value<DateTime> completionDate;
+  final Value<int> rowid;
+  const OnboardingCompanion({
+    this.revision = const Value.absent(),
+    this.completionDate = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OnboardingCompanion.insert({
+    required int revision,
+    required DateTime completionDate,
+    this.rowid = const Value.absent(),
+  }) : revision = Value(revision),
+       completionDate = Value(completionDate);
+  static Insertable<OnboardingData> custom({
+    Expression<int>? revision,
+    Expression<DateTime>? completionDate,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (revision != null) 'revision': revision,
+      if (completionDate != null) 'completion_date': completionDate,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OnboardingCompanion copyWith({
+    Value<int>? revision,
+    Value<DateTime>? completionDate,
+    Value<int>? rowid,
+  }) {
+    return OnboardingCompanion(
+      revision: revision ?? this.revision,
+      completionDate: completionDate ?? this.completionDate,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (completionDate.present) {
+      map['completion_date'] = Variable<DateTime>(completionDate.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OnboardingCompanion(')
+          ..write('revision: $revision, ')
+          ..write('completionDate: $completionDate, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$UserDatabase extends GeneratedDatabase {
   _$UserDatabase(QueryExecutor e) : super(e);
   $UserDatabaseManager get managers => $UserDatabaseManager(this);
   late final Setting setting = Setting(this);
   late final IconCache iconCache = IconCache(this);
+  late final Onboarding onboarding = Onboarding(this);
   late final SettingDao settingDao = SettingDao(this as UserDatabase);
   late final CacheDao cacheDao = CacheDao(this as UserDatabase);
+  late final OnboardingDao onboardingDao = OnboardingDao(this as UserDatabase);
   Future<int> evictCacheEntries({required int limit}) {
     return customUpdate(
       'DELETE FROM icon_cache WHERE "rowid" IN (SELECT "rowid" FROM icon_cache ORDER BY fetch_date DESC LIMIT -1 OFFSET ?1)',
@@ -466,7 +652,11 @@ abstract class _$UserDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [setting, iconCache];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    setting,
+    iconCache,
+    onboarding,
+  ];
 }
 
 typedef $SettingCreateCompanionBuilder =
@@ -780,6 +970,149 @@ typedef $IconCacheProcessedTableManager =
       IconCacheData,
       PrefetchHooks Function()
     >;
+typedef $OnboardingCreateCompanionBuilder =
+    OnboardingCompanion Function({
+      required int revision,
+      required DateTime completionDate,
+      Value<int> rowid,
+    });
+typedef $OnboardingUpdateCompanionBuilder =
+    OnboardingCompanion Function({
+      Value<int> revision,
+      Value<DateTime> completionDate,
+      Value<int> rowid,
+    });
+
+class $OnboardingFilterComposer extends Composer<_$UserDatabase, Onboarding> {
+  $OnboardingFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completionDate => $composableBuilder(
+    column: $table.completionDate,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $OnboardingOrderingComposer extends Composer<_$UserDatabase, Onboarding> {
+  $OnboardingOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completionDate => $composableBuilder(
+    column: $table.completionDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $OnboardingAnnotationComposer
+    extends Composer<_$UserDatabase, Onboarding> {
+  $OnboardingAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get completionDate => $composableBuilder(
+    column: $table.completionDate,
+    builder: (column) => column,
+  );
+}
+
+class $OnboardingTableManager
+    extends
+        RootTableManager<
+          _$UserDatabase,
+          Onboarding,
+          OnboardingData,
+          $OnboardingFilterComposer,
+          $OnboardingOrderingComposer,
+          $OnboardingAnnotationComposer,
+          $OnboardingCreateCompanionBuilder,
+          $OnboardingUpdateCompanionBuilder,
+          (
+            OnboardingData,
+            BaseReferences<_$UserDatabase, Onboarding, OnboardingData>,
+          ),
+          OnboardingData,
+          PrefetchHooks Function()
+        > {
+  $OnboardingTableManager(_$UserDatabase db, Onboarding table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $OnboardingFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $OnboardingOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $OnboardingAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> revision = const Value.absent(),
+                Value<DateTime> completionDate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OnboardingCompanion(
+                revision: revision,
+                completionDate: completionDate,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int revision,
+                required DateTime completionDate,
+                Value<int> rowid = const Value.absent(),
+              }) => OnboardingCompanion.insert(
+                revision: revision,
+                completionDate: completionDate,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $OnboardingProcessedTableManager =
+    ProcessedTableManager<
+      _$UserDatabase,
+      Onboarding,
+      OnboardingData,
+      $OnboardingFilterComposer,
+      $OnboardingOrderingComposer,
+      $OnboardingAnnotationComposer,
+      $OnboardingCreateCompanionBuilder,
+      $OnboardingUpdateCompanionBuilder,
+      (
+        OnboardingData,
+        BaseReferences<_$UserDatabase, Onboarding, OnboardingData>,
+      ),
+      OnboardingData,
+      PrefetchHooks Function()
+    >;
 
 class $UserDatabaseManager {
   final _$UserDatabase _db;
@@ -787,4 +1120,6 @@ class $UserDatabaseManager {
   $SettingTableManager get setting => $SettingTableManager(_db, _db.setting);
   $IconCacheTableManager get iconCache =>
       $IconCacheTableManager(_db, _db.iconCache);
+  $OnboardingTableManager get onboarding =>
+      $OnboardingTableManager(_db, _db.onboarding);
 }

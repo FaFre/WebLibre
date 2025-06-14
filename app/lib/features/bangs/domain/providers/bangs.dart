@@ -30,6 +30,7 @@ Stream<Map<String, List<String>>> bangCategories(Ref ref) {
 @Riverpod()
 Stream<List<BangData>> bangList(
   Ref ref, {
+  List<String>? triggers,
   List<BangGroup>? groups,
   String? domain,
   ({String category, String? subCategory})? categoryFilter,
@@ -37,6 +38,7 @@ Stream<List<BangData>> bangList(
 }) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchBangs(
+    triggers: triggers,
     groups: groups,
     domain: domain,
     categoryFilter: categoryFilter,

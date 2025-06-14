@@ -34,6 +34,7 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
   }
 
   Selectable<BangData> getBangDataList({
+    Iterable<String>? triggers,
     Iterable<BangGroup>? groups,
     String? domain,
     String? category,
@@ -41,6 +42,9 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
     bool? orderMostFrequentFirst,
   }) {
     final selectable = select(db.bangDataView);
+    if (triggers != null) {
+      selectable.where((t) => t.trigger.isIn(triggers));
+    }
     if (groups != null) {
       selectable.where((t) => t.group.isInValues(groups));
     }
