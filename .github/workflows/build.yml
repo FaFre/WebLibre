@@ -29,9 +29,10 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.32.4
-      - run: flutter pub get
+      - run: dart pub global activate melos
+      - run: melos bs
       # - run: flutter test
-      - run: flutter build apk --release --split-per-abi
+      - run: flutter build apk --release --split-per-abi --no-tree-shake-icons
       - run: flutter build appbundle
       - name: Create github artifact release # disable this to save storage
         uses: ncipollo/release-action@v1
