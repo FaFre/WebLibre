@@ -24,6 +24,14 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build container proxy
+        working-directory: packages/flutter_mozilla_components/javascript/container_proxy
+        run: |
+          npm i
+          npx webpack
       - name: Create key file
         run: echo $KEY_JKS | base64 -di > $KEY_PATH
       - uses: subosito/flutter-action@v2
