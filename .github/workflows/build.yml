@@ -1,4 +1,4 @@
-name: Flutter CICD # action name
+name: Flutter CICD
 
 on:
   push:
@@ -6,9 +6,9 @@ on:
       - "v*"
 
 jobs:
-  build: # job's name
-    runs-on: ubuntu-latest # container os
-    env: # ADD environment variables
+  build:
+    runs-on: ubuntu-latest
+    env:
       KEY_JKS: ${{ secrets.KEY_JKS }}
       KEY_PATH: ${{ github.workspace }}/key.jks
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -23,8 +23,8 @@ jobs:
           java-version: '17'
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4' # Not needed with a .ruby-version, .tool-versions or mise.toml
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+          ruby-version: '3.4'
+          bundler-cache: true
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -52,14 +52,13 @@ jobs:
       - name: Bootstrap melos
         working-directory: app
         run: melos bs
-      # - run: flutter test
       - name: Build APK
         working-directory: app
         run: flutter build apk --verbose --release --split-per-abi --no-tree-shake-icons
       - name: Build App Bundle
         working-directory: app
         run: flutter build appbundle
-      - name: Create github artifact release # disable this to save storage
+      - name: Create github artifact release
         uses: ncipollo/release-action@v1
         with:
           artifacts: "app/build/app/outputs/apk/release/*.apk,app/build/app/outputs/bundle/release/app-release.aab"
@@ -69,6 +68,7 @@ jobs:
           name: appbundle
           path: app/build/app/outputs/bundle/release/app-release.aab
       - name: Release to Google Play (alpha)
+        working-directory: app
         env:
           SUPPLY_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
           SUPPLY_JSON_KEY_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
