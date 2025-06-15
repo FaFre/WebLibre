@@ -36,6 +36,7 @@ jobs:
         run: echo $KEY_JKS | base64 -di > $KEY_PATH
       - uses: subosito/flutter-action@v2
         with:
+          channel: stable
           flutter-version: 3.32.4
       - run: dart pub global activate melos
       - run: melos bs
