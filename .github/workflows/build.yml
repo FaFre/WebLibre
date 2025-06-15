@@ -33,7 +33,7 @@ jobs:
           java-version: '17'
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '3.3'
           bundler-cache: true
       - uses: actions/setup-node@v4
         with:
@@ -41,7 +41,6 @@ jobs:
       - name: Download bundle dependencies
         run: |
           gem install bundler
-          gem install abbrev
           bundle config path vendor/bundle
           bundle install
       - name: Build container proxy
