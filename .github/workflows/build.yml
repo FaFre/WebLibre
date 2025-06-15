@@ -13,9 +13,6 @@ jobs:
       KEY_PATH: ${{ github.workspace }}/key.jks
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-    defaults:
-      run:
-        working-directory: app
     permissions:
       contents: write
     steps:
@@ -24,25 +21,44 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4' # Not needed with a .ruby-version, .tool-versions or mise.toml
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Download bundle dependencies
+        run: |
+          gem install bundler
+          gem install abbrev
+          bundle config path vendor/bundle
+          bundle install
       - name: Build container proxy
         working-directory: packages/flutter_mozilla_components/javascript/container_proxy
         run: |
           npm i
           npx webpack
       - name: Create key file
+        working-directory: app
         run: echo $KEY_JKS | base64 -di > $KEY_PATH
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: 3.32.4
-      - run: dart pub global activate melos
-      - run: melos bs
+      - name: Activate melos
+        working-directory: app
+        run: dart pub global activate melos
+      - name: Bootstrap melos
+        working-directory: app
+        run: melos bs
       # - run: flutter test
-      - run: flutter build apk --release --split-per-abi --no-tree-shake-icons
-      - run: flutter build appbundle
+      - name: Build APK
+        working-directory: app
+        run: flutter build apk --verbose --release --split-per-abi --no-tree-shake-icons
+      - name: Build App Bundle
+        working-directory: app
+        run: flutter build appbundle
       - name: Create github artifact release # disable this to save storage
         uses: ncipollo/release-action@v1
         with:
@@ -52,3 +68,11 @@ jobs:
         with:
           name: appbundle
           path: app/build/app/outputs/bundle/release/app-release.aab
+      - name: Release to Google Play (alpha)
+        env:
+          SUPPLY_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
+          SUPPLY_JSON_KEY_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          bundle exec fastlane supply \
+          --aab build/app/outputs/bundle/release/app-release.aab \
+          --track alpha
