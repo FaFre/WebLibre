@@ -26,6 +26,8 @@ void main() async {
     logger.d('VM: ${serviceProtocolInfo.serverUri}');
   }
 
+  //Ensure everything is ready
+  await Future.delayed(Duration.zero);
   await GeckoBrowserService().initialize();
 
   await BackgroundFetch.registerHeadlessTask(backgroundFetch);
