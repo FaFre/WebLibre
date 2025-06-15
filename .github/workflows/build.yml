@@ -57,7 +57,7 @@ jobs:
         run: flutter build apk --verbose --release --split-per-abi --no-tree-shake-icons
       - name: Build App Bundle
         working-directory: app
-        run: flutter build appbundle
+        run: flutter build appbundle --verbose --no-tree-shake-icons
       - name: Create github artifact release
         uses: ncipollo/release-action@v1
         with:
