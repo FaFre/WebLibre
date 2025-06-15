@@ -16,6 +16,7 @@ class EngineSettingsReplicationService
     var initialSettingsSent = false;
 
     ref.listen(
+      fireImmediately: true,
       generalSettingsRepositoryProvider.select(
         (settings) => settings.themeMode,
       ),
@@ -30,7 +31,10 @@ class EngineSettingsReplicationService
       },
     );
 
-    ref.listen(engineSettingsRepositoryProvider, (previous, next) async {
+    ref.listen(fireImmediately: true, engineSettingsRepositoryProvider, (
+      previous,
+      next,
+    ) async {
       if (initialSettingsSent && previous != null) {
         if (previous.javascriptEnabled != next.javascriptEnabled) {
           await _service.javascriptEnabled(next.javascriptEnabled);

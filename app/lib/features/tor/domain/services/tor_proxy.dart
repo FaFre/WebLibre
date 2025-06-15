@@ -108,7 +108,10 @@ class TorProxyService extends _$TorProxyService {
 
     await _tor.initializeService();
 
-    ref.listen(browserViewLifecycleProvider, (previous, next) {
+    ref.listen(fireImmediately: true, browserViewLifecycleProvider, (
+      previous,
+      next,
+    ) {
       switch (next) {
         case AppLifecycleState.resumed:
           if (_timerPaused) {

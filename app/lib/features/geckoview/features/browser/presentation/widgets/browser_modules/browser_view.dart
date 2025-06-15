@@ -152,30 +152,50 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     WidgetsBinding.instance.addObserver(this);
 
     //Initialize and register dependencies
-    ref.listenManual(tabRepositoryProvider, (previous, next) {});
-
-    ref.listenManual(selectionActionServiceProvider, (previous, next) {});
+    ref.listenManual(
+      fireImmediately: true,
+      tabRepositoryProvider,
+      (previous, next) {},
+    );
 
     ref.listenManual(
+      fireImmediately: true,
+      selectionActionServiceProvider,
+      (previous, next) {},
+    );
+
+    ref.listenManual(
+      fireImmediately: true,
       webExtensionsStateProvider(WebExtensionActionType.browser),
       (previous, next) {},
     );
 
     ref.listenManual(
+      fireImmediately: true,
       webExtensionsStateProvider(WebExtensionActionType.page),
       (previous, next) {},
     );
 
-    ref.listenManual(cacheRepositoryProvider, (previous, next) {});
+    ref.listenManual(
+      fireImmediately: true,
+      cacheRepositoryProvider,
+      (previous, next) {},
+    );
 
     ref.listenManual(
+      fireImmediately: true,
       engineSettingsReplicationServiceProvider,
       (previous, next) {},
     );
 
-    ref.listenManual(proxySettingsReplicationProvider, (previous, next) {});
+    ref.listenManual(
+      fireImmediately: true,
+      proxySettingsReplicationProvider,
+      (previous, next) {},
+    );
 
     ref.listenManual(
+      fireImmediately: true,
       articleContentProcessorServiceProvider,
       (previous, next) {},
     );

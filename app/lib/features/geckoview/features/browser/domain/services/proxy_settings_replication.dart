@@ -12,16 +12,18 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
   @override
   void build() {
-    ref.listen(torProxyServiceProvider.select((data) => data.valueOrNull), (
-      previous,
-      next,
-    ) async {
-      if (next != null) {
-        await _service.setProxyPort(next);
-      }
-    });
+    ref.listen(
+      fireImmediately: true,
+      torProxyServiceProvider.select((data) => data.valueOrNull),
+      (previous, next) async {
+        if (next != null) {
+          await _service.setProxyPort(next);
+        }
+      },
+    );
 
     ref.listen(
+      fireImmediately: true,
       containersWithCountProvider.select(
         (value) => EquatableValue(
           value.valueOrNull

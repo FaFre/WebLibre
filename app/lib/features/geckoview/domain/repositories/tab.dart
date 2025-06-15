@@ -244,7 +244,10 @@ class TabRepository extends _$TabRepository {
       );
     });
 
-    ref.listen(selectedTabProvider, (previous, tabId) async {
+    ref.listen(fireImmediately: true, selectedTabProvider, (
+      previous,
+      tabId,
+    ) async {
       if (tabId != null) {
         _previousTabId = previous;
         await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
