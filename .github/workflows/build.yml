@@ -77,7 +77,7 @@ jobs:
         with:
           name: appbundle
           path: app/build/app/outputs/bundle/release/app-release.aab
-      - name: Release to Google Play (alpha)
+      - name: Release to Google Play (internal)
         working-directory: app
         env:
           SUPPLY_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
@@ -85,4 +85,4 @@ jobs:
         run: |
           bundle exec fastlane supply \
           --aab build/app/outputs/bundle/release/app-release.aab \
-          --track alpha
+          --track internal
