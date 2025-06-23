@@ -28,11 +28,18 @@ class _GeckoViewState extends State<GeckoView> {
   );
 
   final browserService = GeckoBrowserService();
+  late final AppLifecycleListener _listener;
 
   @override
   void initState() {
     super.initState();
     _setupMethodCallHandler();
+    _listener = AppLifecycleListener(
+      onResume: () async {
+        //Make sure fragment visible after rsuming the app in case native resources have been disposed
+        await _showNativeFragment();
+      },
+    );
   }
 
   void _setupMethodCallHandler() {
@@ -64,6 +71,14 @@ class _GeckoViewState extends State<GeckoView> {
 
     debugPrint('Fragment FAILED after $maxRetries tries');
     return false;
+  }
+
+  @override
+  void dispose() {
+    platform.setMethodCallHandler(null);
+    _listener.dispose();
+
+    super.dispose();
   }
 
   @override
