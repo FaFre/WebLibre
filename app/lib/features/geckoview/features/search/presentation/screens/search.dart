@@ -108,6 +108,10 @@ class SearchScreen extends HookConsumerWidget {
                     selected: {selectedTabType.value},
                     onSelectionChanged: (value) {
                       selectedTabType.value = value.first;
+                      // Restore focus to search field after segment change
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        searchFocusNode.requestFocus();
+                      });
                     },
                     style: switch (selectedTabType.value) {
                       TabType.regular => null,
