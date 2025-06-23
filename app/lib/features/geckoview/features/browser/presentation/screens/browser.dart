@@ -17,6 +17,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tree_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
@@ -385,6 +386,8 @@ class _ViewTabsSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draggableScrollableController = useDraggableScrollableController();
 
+    final treeModeEnabled = ref.watch(treeViewControllerProvider);
+
     return DraggableScrollableSheet(
       controller: draggableScrollableController,
       expand: false,
@@ -396,13 +399,20 @@ class _ViewTabsSheet extends HookConsumerWidget {
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
           ),
-          child: ViewTabsSheetWidget(
-            sheetScrollController: scrollController,
-            draggableScrollableController: draggableScrollableController,
-            onClose: () {
-              ref.read(bottomSheetControllerProvider.notifier).dismiss();
-            },
-          ),
+          child: treeModeEnabled
+              ? ViewTabTreesSheetWidget(
+                  sheetScrollController: scrollController,
+                  onClose: () {
+                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  },
+                )
+              : ViewTabsSheetWidget(
+                  sheetScrollController: scrollController,
+                  draggableScrollableController: draggableScrollableController,
+                  onClose: () {
+                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  },
+                ),
         );
       },
     );

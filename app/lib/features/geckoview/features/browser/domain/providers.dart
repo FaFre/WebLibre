@@ -8,6 +8,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 
@@ -87,23 +88,62 @@ EquatableValue<Map<String, TabState>> availableTabStates(
 }
 
 @Riverpod()
-EquatableValue<List<String>> seamlessFilteredTabIds(
-  Ref ref,
-  TabSearchPartition searchPartition,
-  ContainerFilter containerFilter,
-) {
+EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
+  Ref ref, {
+  required TabSearchPartition searchPartition,
+  required ContainerFilter containerFilter,
+  required bool groupTrees,
+}) {
   final tabSearchResults = ref
       .watch(
         tabSearchRepositoryProvider(searchPartition).select(
-          (value) =>
-              EquatableValue(value.valueOrNull?.map((tab) => tab.id).toList()),
+          (value) => EquatableValue(
+            value.valueOrNull
+                ?.map((tab) => SingleTabEntity(tabId: tab.id))
+                .toList(),
+          ),
         ),
       )
       .value;
 
-  final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
+  final availableTabs = ref.watch(
+    availableTabIdsProvider(containerFilter).select(
+      (value) => EquatableValue(
+        value.value.map((tab) => SingleTabEntity(tabId: tab)).toList(),
+      ),
+    ),
+  );
 
   if (tabSearchResults == null) {
+    if (groupTrees) {
+      final trees = ref.watch(
+        tabTreesProvider.select(
+          (value) => EquatableValue(
+            value.valueOrNull
+                    ?.map(
+                      (tree) => TabTreeEntity(
+                        tabId: tree.latestTabId,
+                        rootId: tree.rootTabId,
+                        totalTabs: tree.totalTabs,
+                      ),
+                    )
+                    .toList() ??
+                [],
+          ),
+        ),
+      );
+
+      return EquatableValue(
+        trees.value
+            .where(
+              (tree) => availableTabs.value.any(
+                (available) => available.tabId == tree.tabId,
+              ),
+            )
+            .toList(),
+      );
+    }
+
     return availableTabs;
   }
 

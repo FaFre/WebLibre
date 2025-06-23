@@ -185,6 +185,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                         System.currentTimeMillis(),
                         TabContentState(
                             id = tab.id,
+                            parentId = tab.parentId,
                             contextId = tab.contextId,
                             url = tab.content.url,
                             title = tab.content.title,

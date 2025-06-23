@@ -1,6 +1,7 @@
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
@@ -46,4 +47,20 @@ Stream<List<String>> containerTabIds(Ref ref, ContainerFilter containerFilter) {
     case ContainerFilterDisabled():
       return db.tabDao.getAllTabIds().watch();
   }
+}
+
+@Riverpod()
+Stream<List<TabTreesResult>> tabTrees(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabTrees().watch();
+}
+
+@Riverpod()
+Stream<Map<String, String?>> tabDescendants(Ref ref, String tabId) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.unorderedTabDescendants(tabId: tabId).watch().map((results) {
+    return Map.fromEntries(
+      results.map((pair) => MapEntry(pair.id, pair.parentId)),
+    );
+  });
 }

@@ -419,6 +419,7 @@ class SecurityInfoState {
 
 class TabContentState {
   final String id;
+  final String? parentId;
   final String? contextId;
 
   final String url;
@@ -432,6 +433,7 @@ class TabContentState {
 
   TabContentState(
     this.id,
+    this.parentId,
     this.contextId,
     this.url,
     this.title,

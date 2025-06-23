@@ -13,9 +13,11 @@ import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tree_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -28,9 +30,10 @@ import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 class _TabSheetHeader extends HookConsumerWidget {
   static const headerSize = 124.0;
 
+  final bool treeViewEnabled;
   final VoidCallback onClose;
 
-  const _TabSheetHeader({required this.onClose});
+  const _TabSheetHeader({required this.onClose, required this.treeViewEnabled});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,13 +66,31 @@ class _TabSheetHeader extends HookConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextButton.icon(
-                      icon: const Icon(MdiIcons.tabSearch),
-                      label: const Text('Search'),
-                      onPressed: () {
-                        searchMode.value = true;
-                        searchTextFocus.requestFocus();
-                      },
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(MdiIcons.tabSearch),
+                          iconSize: 18,
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            searchMode.value = true;
+                            searchTextFocus.requestFocus();
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(MdiIcons.graph),
+                          selectedIcon: const Icon(MdiIcons.table),
+                          isSelected: treeViewEnabled,
+                          iconSize: 18,
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            ref
+                                .read(treeViewControllerProvider.notifier)
+                                .toggle();
+                          },
+                        ),
+                      ],
                     ),
                     TextButton.icon(
                       onPressed: () async {
@@ -116,39 +137,40 @@ class _TabSheetHeader extends HookConsumerWidget {
                     ),
                   ),
                 ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, top: 12),
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final selectedContainer = ref.watch(
-                      selectedContainerDataProvider.select(
-                        (value) => value.valueOrNull,
-                      ),
-                    );
+              if (!treeViewEnabled)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0, top: 12),
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final selectedContainer = ref.watch(
+                        selectedContainerDataProvider.select(
+                          (value) => value.valueOrNull,
+                        ),
+                      );
 
-                    return ContainerChips(
-                      selectedContainer: selectedContainer,
-                      onSelected: (container) async {
-                        final result = await ref
-                            .read(selectedContainerProvider.notifier)
-                            .setContainerId(container.id);
+                      return ContainerChips(
+                        selectedContainer: selectedContainer,
+                        onSelected: (container) async {
+                          final result = await ref
+                              .read(selectedContainerProvider.notifier)
+                              .setContainerId(container.id);
 
-                        if (context.mounted &&
-                            result == SetContainerResult.successHasProxy) {
-                          await ref
-                              .read(startProxyControllerProvider.notifier)
-                              .maybeStartProxy(context);
-                        }
-                      },
-                      onDeleted: (container) {
-                        ref
-                            .read(selectedContainerProvider.notifier)
-                            .clearContainer();
-                      },
-                    );
-                  },
+                          if (context.mounted &&
+                              result == SetContainerResult.successHasProxy) {
+                            await ref
+                                .read(startProxyControllerProvider.notifier)
+                                .maybeStartProxy(context);
+                          }
+                        },
+                        onDeleted: (container) {
+                          ref
+                              .read(selectedContainerProvider.notifier)
+                              .clearContainer();
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
               const SizedBox(height: 8),
             ],
           ),
@@ -212,7 +234,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           children: [
             DraggableScrollableHeader(
               controller: draggableScrollableController,
-              child: _TabSheetHeader(onClose: onClose),
+              child: _TabSheetHeader(onClose: onClose, treeViewEnabled: false),
             ),
             Expanded(
               child: HookConsumer(
@@ -220,11 +242,14 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   final container = ref.watch(selectedContainerProvider);
 
                   final filteredTabIds = ref.watch(
-                    seamlessFilteredTabIdsProvider(
-                      TabSearchPartition.preview,
+                    seamlessFilteredTabEntitiesProvider(
+                      searchPartition: TabSearchPartition.preview,
                       // ignore: document_ignores using fast equatable
                       // ignore: provider_parameters
-                      ContainerFilterById(containerId: container),
+                      containerFilter: ContainerFilterById(
+                        containerId: container,
+                      ),
+                      groupTrees: false,
                     ),
                   );
 
@@ -263,7 +288,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                   useEffect(() {
                     final index = filteredTabIds.value.indexWhere(
-                      (webView) => webView == activeTab,
+                      (entity) => entity.tabId == activeTab,
                     );
 
                     if (index > -1) {
@@ -285,53 +310,58 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                   final tabs = useMemoized(() {
                     return filteredTabIds.value
-                        .mapIndexed(
-                          (index, tabId) => CustomDraggable(
-                            key: Key(tabId),
-                            data: TabDragData(tabId),
-                            child: Consumer(
-                              child: TabPreviewDraggable(
-                                tabId: tabId,
-                                activeTabId: activeTab,
-                                onClose: onClose,
-                              ),
-                              builder: (context, ref, child) {
-                                final dragData = ref.watch(
-                                  willAcceptDropProvider.select((value) {
-                                    final dragTabId = switch (value) {
-                                      ContainerDropData() => value.tabId,
-                                      DeleteDropData() => value.tabId,
-                                      null => null,
-                                    };
-
-                                    return (dragTabId == tabId) ? value : null;
-                                  }),
-                                );
-
-                                return switch (dragData) {
-                                  ContainerDropData() => Opacity(
-                                    opacity: 0.3,
-                                    child: Transform.scale(
-                                      scale: 0.9,
-                                      child: child,
-                                    ),
-                                  ),
-                                  DeleteDropData() => Opacity(
-                                    opacity: 0.3,
-                                    child: ColorFiltered(
-                                      colorFilter: const ColorFilter.mode(
-                                        Colors.red,
-                                        BlendMode.modulate,
-                                      ),
-                                      child: child,
-                                    ),
-                                  ),
-                                  null => child!,
-                                };
-                              },
+                        .whereType<SingleTabEntity>()
+                        .mapIndexed((index, entity) {
+                          final child = Consumer(
+                            child: SingleTabPreview(
+                              tabId: entity.tabId,
+                              activeTabId: activeTab,
+                              onClose: onClose,
                             ),
-                          ),
-                        )
+                            builder: (context, ref, child) {
+                              final dragData = ref.watch(
+                                willAcceptDropProvider.select((value) {
+                                  final dragTabId = switch (value) {
+                                    ContainerDropData() => value.tabId,
+                                    DeleteDropData() => value.tabId,
+                                    null => null,
+                                  };
+
+                                  return (dragTabId == entity.tabId)
+                                      ? value
+                                      : null;
+                                }),
+                              );
+
+                              return switch (dragData) {
+                                ContainerDropData() => Opacity(
+                                  opacity: 0.3,
+                                  child: Transform.scale(
+                                    scale: 0.9,
+                                    child: child,
+                                  ),
+                                ),
+                                DeleteDropData() => Opacity(
+                                  opacity: 0.3,
+                                  child: ColorFiltered(
+                                    colorFilter: const ColorFilter.mode(
+                                      Colors.red,
+                                      BlendMode.modulate,
+                                    ),
+                                    child: child,
+                                  ),
+                                ),
+                                null => child!,
+                              };
+                            },
+                          );
+
+                          return CustomDraggable(
+                            key: Key(entity.tabId),
+                            data: TabDragData(entity.tabId),
+                            child: child,
+                          );
+                        })
                         .toList();
                   }, [filteredTabIds, activeTab]);
 
@@ -341,7 +371,6 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                       //Rebuild when cross axis count changes
                       key: ValueKey(crossAxisCount),
                       scrollController: sheetScrollController,
-                      children: tabs,
                       onDragStarted: (index) {
                         ref.read(willAcceptDropProvider.notifier).clear();
                       },
@@ -358,7 +387,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           containerRepositoryProvider.notifier,
                         );
 
-                        final tabId = filteredTabIds.value[oldIndex];
+                        final tabId = filteredTabIds.value[oldIndex].tabId;
                         final containerId = await ref
                             .read(tabDataRepositoryProvider.notifier)
                             .containerTabId(tabId);
@@ -376,7 +405,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                         } else {
                           final orderAfterIndex = newIndex;
                           key = await containerRepository.getOrderKeyAfterTab(
-                            filteredTabIds.value[orderAfterIndex],
+                            filteredTabIds.value[orderAfterIndex].tabId,
                             containerId,
                           );
                         }
@@ -399,6 +428,182 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           itemBuilder: (context, index) => children[index],
                         );
                       },
+                      children: tabs,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: _TabSheetHeader.headerSize + 4,
+            right: 4,
+          ),
+          child: FloatingActionButton.small(
+            onPressed: () async {
+              final isCurrentPrivate =
+                  ref.read(selectedTabStateProvider)?.isPrivate ?? false;
+              await SearchRoute(
+                tabType: isCurrentPrivate ? TabType.private : TabType.regular,
+              ).push(context);
+
+              onClose();
+            },
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ViewTabTreesSheetWidget extends HookConsumerWidget {
+  final ScrollController sheetScrollController;
+  final VoidCallback onClose;
+
+  const ViewTabTreesSheetWidget({
+    required this.onClose,
+    required this.sheetScrollController,
+    super.key,
+  });
+
+  int _calculateCrossAxisItemCount({
+    required double screenWidth,
+    required double horizontalPadding,
+    required double crossAxisSpacing,
+  }) {
+    final totalHorizontalPadding = horizontalPadding * 2;
+    final availableWidth =
+        screenWidth - totalHorizontalPadding - crossAxisSpacing;
+
+    final crossAxisCount = availableWidth ~/ 180.0;
+
+    return crossAxisCount;
+  }
+
+  Size _calculateItemSize({
+    required double screenWidth,
+    required double childAspectRatio,
+    required double horizontalPadding,
+    required double crossAxisSpacing,
+    required int crossAxisCount,
+  }) {
+    final totalHorizontalPadding = horizontalPadding * 2;
+    final totalCrossAxisSpacing = crossAxisSpacing * (crossAxisCount - 1);
+    final availableWidth =
+        screenWidth - totalHorizontalPadding - totalCrossAxisSpacing;
+    final itemWidth = availableWidth / crossAxisCount;
+    final itemHeight = itemWidth / childAspectRatio;
+
+    return Size(itemWidth, itemHeight);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        Column(
+          children: [
+            _TabSheetHeader(onClose: onClose, treeViewEnabled: true),
+            Expanded(
+              child: HookConsumer(
+                builder: (context, ref, child) {
+                  final filteredTabIds = ref.watch(
+                    seamlessFilteredTabEntitiesProvider(
+                      searchPartition: TabSearchPartition.preview,
+                      // ignore: document_ignores using fast equatable
+                      // ignore: provider_parameters
+                      containerFilter: ContainerFilterDisabled(),
+                      groupTrees: true,
+                    ),
+                  );
+
+                  final activeTab = ref.watch(selectedTabProvider);
+
+                  final crossAxisCount = useMemoized(
+                    () {
+                      final calculatedCount = _calculateCrossAxisItemCount(
+                        screenWidth: MediaQuery.of(context).size.width,
+                        horizontalPadding: 4.0,
+                        crossAxisSpacing: 8.0,
+                      );
+
+                      return math.max(
+                        math.min(calculatedCount, filteredTabIds.value.length),
+                        2,
+                      );
+                    },
+                    [
+                      MediaQuery.of(context).size.width,
+                      filteredTabIds.value.length,
+                    ],
+                  );
+
+                  final itemSize = useMemoized(
+                    () =>
+                        _calculateItemSize(
+                          screenWidth: MediaQuery.of(context).size.width,
+                          childAspectRatio: 0.75,
+                          horizontalPadding: 4.0,
+                          crossAxisSpacing: 8.0,
+                          crossAxisCount: crossAxisCount,
+                        ) +
+                        //mainAxisSpacing
+                        const Offset(0, 8.0),
+                    [MediaQuery.of(context).size.width, crossAxisCount],
+                  );
+
+                  useEffect(() {
+                    final index = filteredTabIds.value.indexWhere(
+                      (entity) => entity.tabId == activeTab,
+                    );
+
+                    if (index > -1) {
+                      final offset = (index ~/ 2) * itemSize.height;
+
+                      if (offset != sheetScrollController.offset) {
+                        unawaited(
+                          sheetScrollController.animateTo(
+                            offset,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                          ),
+                        );
+                      }
+                    }
+
+                    return null;
+                  }, [filteredTabIds, activeTab]);
+
+                  final tabs = useMemoized(() {
+                    return filteredTabIds.value.whereType<TabTreeEntity>().map((
+                      entity,
+                    ) {
+                      return TabTreePreview(
+                        entity: entity,
+                        activeTabId: activeTab,
+                        onClose: onClose,
+                        stackPadding: const Offset(8, 8),
+                      );
+                    }).toList();
+                  }, [filteredTabIds, activeTab]);
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: GridView.builder(
+                      controller: sheetScrollController,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        //Sync values for itemHeight calculation _calculateItemHeight
+                        childAspectRatio: 0.75,
+                        mainAxisSpacing: 8.0,
+                        crossAxisSpacing: 8.0,
+                        crossAxisCount: crossAxisCount,
+                      ),
+                      itemCount: tabs.length,
+                      itemBuilder: (context, index) => tabs[index],
                     ),
                   );
                 },

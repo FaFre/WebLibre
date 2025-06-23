@@ -11,8 +11,9 @@ CREATE TABLE container (
   metadata TEXT MAPPED BY `const ContainerMetadataConverter()`
 ) WITH ContainerData;
 
-CREATE TABLE tab ( 
+CREATE TABLE tab( 
   id TEXT PRIMARY KEY NOT NULL,
+  parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
   container_id TEXT REFERENCES container (id) ON DELETE CASCADE,
   order_key TEXT NOT NULL,
   url TEXT MAPPED BY `const UriConverter()`,
@@ -34,6 +35,14 @@ CREATE VIRTUAL TABLE tab_fts
     content=tab,
     tokenize="trigram"
   );
+
+-- Create trigger to handle parent deletion
+CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN
+  -- Update all children of the deleted row to point to its parent
+  UPDATE tab 
+  SET parent_id = OLD.parent_id 
+  WHERE parent_id = OLD.id;
+END;
 
 -- Triggers to keep the FTS index up to date.
 CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN
@@ -160,3 +169,63 @@ queryTabsFullContent WITH TabQueryResult:
     ORDER BY 
       weighted_rank ASC,
       t.timestamp DESC;
+
+tabTrees:
+  WITH RECURSIVE descendants AS (
+    -- Base case: all root tabs (no parent)
+    SELECT 
+      id, 
+      parent_id, 
+      timestamp, 
+      id AS root_id
+    FROM tab 
+    WHERE parent_id IS NULL
+
+    UNION ALL
+
+    -- Recursive case: find all descendants
+    SELECT 
+      t.id, 
+      t.parent_id, 
+      t.timestamp, 
+      d.root_id
+    FROM tab t
+    JOIN descendants d ON t.parent_id = d.id
+),
+root_stats AS (
+    -- Calculate stats for each root
+    SELECT 
+        root_id,
+        MAX(timestamp) AS max_timestamp,
+        COUNT(*) AS total_children
+    FROM descendants
+    GROUP BY root_id
+)
+-- Get the actual tab records with latest timestamp per root
+SELECT 
+    d.root_id AS root_tab_id, 
+    d.id AS latest_tab_id, 
+    d.timestamp AS latest_timestamp,
+    rs.total_children AS total_tabs
+FROM descendants d
+JOIN root_stats rs 
+ON 
+  d.root_id = rs.root_id AND 
+  d.timestamp = rs.max_timestamp
+ORDER BY d.timestamp DESC;
+
+unorderedTabDescendants:
+  WITH RECURSIVE descendants AS (
+      SELECT id, parent_id
+      FROM tab 
+      WHERE id = :tab_id
+
+      UNION ALL
+
+      -- Recursive case: find all descendants
+      SELECT t.id, t.parent_id
+      FROM tab t
+      JOIN descendants d ON t.parent_id = d.id
+  )
+  SELECT id, parent_id
+  FROM descendants;

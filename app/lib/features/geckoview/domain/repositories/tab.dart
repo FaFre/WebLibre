@@ -53,23 +53,27 @@ class TabRepository extends _$TabRepository {
         .read(selectedContainerProvider.notifier)
         .fetchData();
 
-    return ref.read(tabDatabaseProvider).tabDao.upsertContainerTabTransactional(
-      () {
-        return _tabsService.addTab(
-          url: url,
-          selectTab: selectTab,
-          startLoading: startLoading,
-          parentId: parentId,
-          flags: flags,
-          contextId: selectedContainer?.metadata.contextualIdentity,
-          source: source,
-          private: private,
-          historyMetadata: historyMetadata,
-          additionalHeaders: additionalHeaders,
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .upsertContainerTabTransactional(
+          () {
+            return _tabsService.addTab(
+              url: url,
+              selectTab: selectTab,
+              startLoading: startLoading,
+              parentId: parentId,
+              flags: flags,
+              contextId: selectedContainer?.metadata.contextualIdentity,
+              source: source,
+              private: private,
+              historyMetadata: historyMetadata,
+              additionalHeaders: additionalHeaders,
+            );
+          },
+          parentId: Value(parentId),
+          containerId: Value(selectedContainer?.id),
         );
-      },
-      containerId: Value(selectedContainer?.id),
-    );
   }
 
   Future<String> duplicateTab({
@@ -83,16 +87,20 @@ class TabRepository extends _$TabRepository {
           .getContainerData(containerId),
     );
 
-    return ref.read(tabDatabaseProvider).tabDao.upsertContainerTabTransactional(
-      () {
-        return _tabsService.duplicateTab(
-          selectTabId: selectTabId,
-          newContextId: containerData?.metadata.contextualIdentity,
-          selectNewTab: selectTab,
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .upsertContainerTabTransactional(
+          () {
+            return _tabsService.duplicateTab(
+              selectTabId: selectTabId,
+              newContextId: containerData?.metadata.contextualIdentity,
+              selectNewTab: selectTab,
+            );
+          },
+          parentId: const Value.absent(),
+          containerId: Value(containerData?.id),
         );
-      },
-      containerId: Value(containerData?.id),
-    );
   }
 
   Future<bool> selectPreviousTab() async {
@@ -227,6 +235,7 @@ class TabRepository extends _$TabRepository {
       final containerId = ref.read(selectedContainerProvider);
       await db.tabDao.upsertUnassignedTab(
         tabId,
+        parentId: const Value.absent(),
         containerId: Value(containerId),
       );
     });

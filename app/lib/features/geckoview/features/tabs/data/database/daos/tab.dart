@@ -38,6 +38,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
 
   Future<String> upsertContainerTabTransactional(
     Future<String> Function() createTab, {
+    required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
   }) {
@@ -53,12 +54,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
       await db.tab.insertOne(
         TabCompanion.insert(
           id: tabId,
+          parentId: parentId,
           timestamp: DateTime.now(),
           containerId: containerId,
           orderKey: currentOrderKey,
         ),
         onConflict: DoUpdate(
           (old) => TabCompanion(
+            parentId: parentId,
             containerId: containerId,
             orderKey: Value.absentIfNull(orderKey.value),
           ),
@@ -72,6 +75,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
   //Upsert an tab only if there is no container assigned yet
   Future<String> upsertUnassignedTab(
     String tabId, {
+    required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
   }) {
@@ -85,12 +89,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
       await db.tab.insertOne(
         TabCompanion.insert(
           id: tabId,
+          parentId: parentId,
           timestamp: DateTime.now(),
           containerId: containerId,
           orderKey: currentOrderKey,
         ),
         onConflict: DoUpdate(
           (old) => TabCompanion(
+            parentId: parentId,
             containerId: containerId,
             orderKey: Value.absentIfNull(orderKey.value),
           ),
@@ -152,6 +158,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
           batch.update(
             db.tab,
             TabCompanion(
+              parentId: (previousState?.parentId != state.parentId)
+                  ? Value(state.parentId)
+                  : const Value.absent(),
               url: (previousState?.url != state.url)
                   ? Value(state.url)
                   : const Value.absent(),

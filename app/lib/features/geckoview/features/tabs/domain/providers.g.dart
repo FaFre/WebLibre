@@ -303,5 +303,144 @@ class _ContainerTabIdsProviderElement
       (origin as ContainerTabIdsProvider).containerFilter;
 }
 
+String _$tabTreesHash() => r'b7b7f7136827207dd01a7894a915be3d17b1ae63';
+
+/// See also [tabTrees].
+@ProviderFor(tabTrees)
+final tabTreesProvider =
+    AutoDisposeStreamProvider<List<TabTreesResult>>.internal(
+      tabTrees,
+      name: r'tabTreesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$tabTreesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TabTreesRef = AutoDisposeStreamProviderRef<List<TabTreesResult>>;
+String _$tabDescendantsHash() => r'93e19df9896e4876dc911370c02bf10f1ee9a9e6';
+
+/// See also [tabDescendants].
+@ProviderFor(tabDescendants)
+const tabDescendantsProvider = TabDescendantsFamily();
+
+/// See also [tabDescendants].
+class TabDescendantsFamily extends Family<AsyncValue<Map<String, String?>>> {
+  /// See also [tabDescendants].
+  const TabDescendantsFamily();
+
+  /// See also [tabDescendants].
+  TabDescendantsProvider call(String tabId) {
+    return TabDescendantsProvider(tabId);
+  }
+
+  @override
+  TabDescendantsProvider getProviderOverride(
+    covariant TabDescendantsProvider provider,
+  ) {
+    return call(provider.tabId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'tabDescendantsProvider';
+}
+
+/// See also [tabDescendants].
+class TabDescendantsProvider
+    extends AutoDisposeStreamProvider<Map<String, String?>> {
+  /// See also [tabDescendants].
+  TabDescendantsProvider(String tabId)
+    : this._internal(
+        (ref) => tabDescendants(ref as TabDescendantsRef, tabId),
+        from: tabDescendantsProvider,
+        name: r'tabDescendantsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$tabDescendantsHash,
+        dependencies: TabDescendantsFamily._dependencies,
+        allTransitiveDependencies:
+            TabDescendantsFamily._allTransitiveDependencies,
+        tabId: tabId,
+      );
+
+  TabDescendantsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.tabId,
+  }) : super.internal();
+
+  final String tabId;
+
+  @override
+  Override overrideWith(
+    Stream<Map<String, String?>> Function(TabDescendantsRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: TabDescendantsProvider._internal(
+        (ref) => create(ref as TabDescendantsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        tabId: tabId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<Map<String, String?>> createElement() {
+    return _TabDescendantsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TabDescendantsProvider && other.tabId == tabId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, tabId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin TabDescendantsRef on AutoDisposeStreamProviderRef<Map<String, String?>> {
+  /// The parameter `tabId` of this provider.
+  String get tabId;
+}
+
+class _TabDescendantsProviderElement
+    extends AutoDisposeStreamProviderElement<Map<String, String?>>
+    with TabDescendantsRef {
+  _TabDescendantsProviderElement(super.provider);
+
+  @override
+  String get tabId => (origin as TabDescendantsProvider).tabId;
+}
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

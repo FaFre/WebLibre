@@ -300,6 +300,12 @@ RouteBase get $browserRoute => GoRouteData.$route(
         ),
       ],
     ),
+    GoRouteData.$route(
+      path: 'tab_tree/:rootTabId',
+      name: 'TabTreeRoute',
+
+      factory: _$TabTreeRoute._fromState,
+    ),
   ],
 );
 
@@ -498,6 +504,31 @@ mixin _$ContainerEditRoute on GoRouteData {
   @override
   void replace(BuildContext context) =>
       context.replace(location, extra: _self.$extra);
+}
+
+mixin _$TabTreeRoute on GoRouteData {
+  static TabTreeRoute _fromState(GoRouterState state) =>
+      TabTreeRoute(state.pathParameters['rootTabId']!);
+
+  TabTreeRoute get _self => this as TabTreeRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/tab_tree/${Uri.encodeComponent(_self.rootTabId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
 }
 
 extension<T extends Enum> on Map<T, String> {

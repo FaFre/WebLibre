@@ -24,6 +24,7 @@ class TabStates extends _$TabStates {
         state[contentState.id] ?? TabState.$default(contentState.id);
     state = {...state}
       ..[contentState.id] = current.copyWith(
+        parentId: contentState.parentId,
         contextId: contentState.contextId,
         url: Uri.parse(contentState.url),
         title: (contentState.title.isNotEmpty)

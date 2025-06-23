@@ -28,6 +28,10 @@ part of 'routes.dart';
         ),
       ],
     ),
+    TypedGoRoute<TabTreeRoute>(
+      name: 'TabTreeRoute',
+      path: 'tab_tree/:rootTabId',
+    ),
   ],
 )
 class BrowserRoute extends GoRouteData with _$BrowserRoute {
@@ -126,5 +130,16 @@ class ContextMenuRoute extends GoRouteData with _$ContextMenuRoute {
       builder: (_) =>
           ContextMenuDialog(hitResult: HitResultJson.fromJson($extra)),
     );
+  }
+}
+
+class TabTreeRoute extends GoRouteData with _$TabTreeRoute {
+  final String rootTabId;
+
+  const TabTreeRoute(this.rootTabId);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(builder: (_) => TabTreeDialog(rootTabId));
   }
 }

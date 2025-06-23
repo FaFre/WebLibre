@@ -196,6 +196,14 @@ class Tab extends Table with TableInfo<Tab, TabData> {
     requiredDuringInsert: true,
     $customConstraints: 'PRIMARY KEY NOT NULL',
   );
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
+    'parent_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'REFERENCES tab(id)ON DELETE SET NULL',
+  );
   late final GeneratedColumn<String> containerId = GeneratedColumn<String>(
     'container_id',
     aliasedName,
@@ -283,6 +291,7 @@ class Tab extends Table with TableInfo<Tab, TabData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    parentId,
     containerId,
     orderKey,
     url,
@@ -309,6 +318,10 @@ class Tab extends Table with TableInfo<Tab, TabData> {
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      parentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_id'],
+      ),
       containerId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}container_id'],
@@ -368,6 +381,7 @@ class Tab extends Table with TableInfo<Tab, TabData> {
 
 class TabData extends DataClass implements Insertable<TabData> {
   final String id;
+  final String? parentId;
   final String? containerId;
   final String orderKey;
   final Uri? url;
@@ -380,6 +394,7 @@ class TabData extends DataClass implements Insertable<TabData> {
   final DateTime timestamp;
   const TabData({
     required this.id,
+    this.parentId,
     this.containerId,
     required this.orderKey,
     this.url,
@@ -395,6 +410,9 @@ class TabData extends DataClass implements Insertable<TabData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
     if (!nullToAbsent || containerId != null) {
       map['container_id'] = Variable<String>(containerId);
     }
@@ -433,6 +451,7 @@ class TabData extends DataClass implements Insertable<TabData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TabData(
       id: serializer.fromJson<String>(json['id']),
+      parentId: serializer.fromJson<String?>(json['parent_id']),
       containerId: serializer.fromJson<String?>(json['container_id']),
       orderKey: serializer.fromJson<String>(json['order_key']),
       url: serializer.fromJson<Uri?>(json['url']),
@@ -460,6 +479,7 @@ class TabData extends DataClass implements Insertable<TabData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'parent_id': serializer.toJson<String?>(parentId),
       'container_id': serializer.toJson<String?>(containerId),
       'order_key': serializer.toJson<String>(orderKey),
       'url': serializer.toJson<Uri?>(url),
@@ -479,6 +499,7 @@ class TabData extends DataClass implements Insertable<TabData> {
 
   TabData copyWith({
     String? id,
+    Value<String?> parentId = const Value.absent(),
     Value<String?> containerId = const Value.absent(),
     String? orderKey,
     Value<Uri?> url = const Value.absent(),
@@ -491,6 +512,7 @@ class TabData extends DataClass implements Insertable<TabData> {
     DateTime? timestamp,
   }) => TabData(
     id: id ?? this.id,
+    parentId: parentId.present ? parentId.value : this.parentId,
     containerId: containerId.present ? containerId.value : this.containerId,
     orderKey: orderKey ?? this.orderKey,
     url: url.present ? url.value : this.url,
@@ -515,6 +537,7 @@ class TabData extends DataClass implements Insertable<TabData> {
   TabData copyWithCompanion(TabCompanion data) {
     return TabData(
       id: data.id.present ? data.id.value : this.id,
+      parentId: data.parentId.present ? data.parentId.value : this.parentId,
       containerId: data.containerId.present
           ? data.containerId.value
           : this.containerId,
@@ -544,6 +567,7 @@ class TabData extends DataClass implements Insertable<TabData> {
   String toString() {
     return (StringBuffer('TabData(')
           ..write('id: $id, ')
+          ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
@@ -561,6 +585,7 @@ class TabData extends DataClass implements Insertable<TabData> {
   @override
   int get hashCode => Object.hash(
     id,
+    parentId,
     containerId,
     orderKey,
     url,
@@ -577,6 +602,7 @@ class TabData extends DataClass implements Insertable<TabData> {
       identical(this, other) ||
       (other is TabData &&
           other.id == this.id &&
+          other.parentId == this.parentId &&
           other.containerId == this.containerId &&
           other.orderKey == this.orderKey &&
           other.url == this.url &&
@@ -591,6 +617,7 @@ class TabData extends DataClass implements Insertable<TabData> {
 
 class TabCompanion extends UpdateCompanion<TabData> {
   final Value<String> id;
+  final Value<String?> parentId;
   final Value<String?> containerId;
   final Value<String> orderKey;
   final Value<Uri?> url;
@@ -604,6 +631,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
   final Value<int> rowid;
   const TabCompanion({
     this.id = const Value.absent(),
+    this.parentId = const Value.absent(),
     this.containerId = const Value.absent(),
     this.orderKey = const Value.absent(),
     this.url = const Value.absent(),
@@ -618,6 +646,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
   });
   TabCompanion.insert({
     required String id,
+    this.parentId = const Value.absent(),
     this.containerId = const Value.absent(),
     required String orderKey,
     this.url = const Value.absent(),
@@ -634,6 +663,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
        timestamp = Value(timestamp);
   static Insertable<TabData> custom({
     Expression<String>? id,
+    Expression<String>? parentId,
     Expression<String>? containerId,
     Expression<String>? orderKey,
     Expression<String>? url,
@@ -648,6 +678,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (parentId != null) 'parent_id': parentId,
       if (containerId != null) 'container_id': containerId,
       if (orderKey != null) 'order_key': orderKey,
       if (url != null) 'url': url,
@@ -668,6 +699,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
 
   TabCompanion copyWith({
     Value<String>? id,
+    Value<String?>? parentId,
     Value<String?>? containerId,
     Value<String>? orderKey,
     Value<Uri?>? url,
@@ -682,6 +714,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
   }) {
     return TabCompanion(
       id: id ?? this.id,
+      parentId: parentId ?? this.parentId,
       containerId: containerId ?? this.containerId,
       orderKey: orderKey ?? this.orderKey,
       url: url ?? this.url,
@@ -703,6 +736,9 @@ class TabCompanion extends UpdateCompanion<TabData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
     }
     if (containerId.present) {
       map['container_id'] = Variable<String>(containerId.value);
@@ -752,6 +788,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
   String toString() {
     return (StringBuffer('TabCompanion(')
           ..write('id: $id, ')
+          ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
@@ -1051,6 +1088,10 @@ abstract class _$TabDatabase extends GeneratedDatabase {
   late final Container container = Container(this);
   late final Tab tab = Tab(this);
   late final TabFts tabFts = TabFts(this);
+  late final Trigger tabMaintainParentChainOnDelete = Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = OLD.parent_id WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
   late final Trigger tabAfterInsert = Trigger(
     'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
     'tab_after_insert',
@@ -1177,6 +1218,36 @@ abstract class _$TabDatabase extends GeneratedDatabase {
     );
   }
 
+  Selectable<TabTreesResult> tabTrees() {
+    return customSelect(
+      'WITH RECURSIVE descendants AS (SELECT id, parent_id, timestamp, id AS root_id FROM tab WHERE parent_id IS NULL UNION ALL SELECT t.id, t.parent_id, t.timestamp, d.root_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id), root_stats AS (SELECT root_id, MAX(timestamp) AS max_timestamp, COUNT(*) AS total_children FROM descendants GROUP BY root_id) SELECT d.root_id AS root_tab_id, d.id AS latest_tab_id, d.timestamp AS latest_timestamp, rs.total_children AS total_tabs FROM descendants AS d JOIN root_stats AS rs ON d.root_id = rs.root_id AND d.timestamp = rs.max_timestamp ORDER BY d.timestamp DESC',
+      variables: [],
+      readsFrom: {tab},
+    ).map(
+      (QueryRow row) => TabTreesResult(
+        rootTabId: row.read<String>('root_tab_id'),
+        latestTabId: row.read<String>('latest_tab_id'),
+        latestTimestamp: row.read<DateTime>('latest_timestamp'),
+        totalTabs: row.read<int>('total_tabs'),
+      ),
+    );
+  }
+
+  Selectable<UnorderedTabDescendantsResult> unorderedTabDescendants({
+    required String tabId,
+  }) {
+    return customSelect(
+      'WITH RECURSIVE descendants AS (SELECT id, parent_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.parent_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id) SELECT id, parent_id FROM descendants',
+      variables: [Variable<String>(tabId)],
+      readsFrom: {tab},
+    ).map(
+      (QueryRow row) => UnorderedTabDescendantsResult(
+        id: row.read<String>('id'),
+        parentId: row.readNullable<String>('parent_id'),
+      ),
+    );
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1185,6 +1256,7 @@ abstract class _$TabDatabase extends GeneratedDatabase {
     container,
     tab,
     tabFts,
+    tabMaintainParentChainOnDelete,
     tabAfterInsert,
     tabAfterDelete,
     tabAfterUpdate,
@@ -1197,6 +1269,13 @@ abstract class _$TabDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('tab', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('tab', kind: UpdateKind.update)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -1499,6 +1578,7 @@ typedef $ContainerProcessedTableManager =
 typedef $TabCreateCompanionBuilder =
     TabCompanion Function({
       required String id,
+      Value<String?> parentId,
       Value<String?> containerId,
       required String orderKey,
       Value<Uri?> url,
@@ -1514,6 +1594,7 @@ typedef $TabCreateCompanionBuilder =
 typedef $TabUpdateCompanionBuilder =
     TabCompanion Function({
       Value<String> id,
+      Value<String?> parentId,
       Value<String?> containerId,
       Value<String> orderKey,
       Value<Uri?> url,
@@ -1558,6 +1639,11 @@ class $TabFilterComposer extends Composer<_$TabDatabase, Tab> {
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentId => $composableBuilder(
+    column: $table.parentId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1644,6 +1730,11 @@ class $TabOrderingComposer extends Composer<_$TabDatabase, Tab> {
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get parentId => $composableBuilder(
+    column: $table.parentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get orderKey => $composableBuilder(
     column: $table.orderKey,
     builder: (column) => ColumnOrderings(column),
@@ -1723,6 +1814,9 @@ class $TabAnnotationComposer extends Composer<_$TabDatabase, Tab> {
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get parentId =>
+      $composableBuilder(column: $table.parentId, builder: (column) => column);
 
   GeneratedColumn<String> get orderKey =>
       $composableBuilder(column: $table.orderKey, builder: (column) => column);
@@ -1814,6 +1908,7 @@ class $TabTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> parentId = const Value.absent(),
                 Value<String?> containerId = const Value.absent(),
                 Value<String> orderKey = const Value.absent(),
                 Value<Uri?> url = const Value.absent(),
@@ -1827,6 +1922,7 @@ class $TabTableManager
                 Value<int> rowid = const Value.absent(),
               }) => TabCompanion(
                 id: id,
+                parentId: parentId,
                 containerId: containerId,
                 orderKey: orderKey,
                 url: url,
@@ -1842,6 +1938,7 @@ class $TabTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> parentId = const Value.absent(),
                 Value<String?> containerId = const Value.absent(),
                 required String orderKey,
                 Value<Uri?> url = const Value.absent(),
@@ -1855,6 +1952,7 @@ class $TabTableManager
                 Value<int> rowid = const Value.absent(),
               }) => TabCompanion.insert(
                 id: id,
+                parentId: parentId,
                 containerId: containerId,
                 orderKey: orderKey,
                 url: url,
@@ -2113,4 +2211,23 @@ class $TabDatabaseManager {
       $ContainerTableManager(_db, _db.container);
   $TabTableManager get tab => $TabTableManager(_db, _db.tab);
   $TabFtsTableManager get tabFts => $TabFtsTableManager(_db, _db.tabFts);
+}
+
+class TabTreesResult {
+  final String rootTabId;
+  final String latestTabId;
+  final DateTime latestTimestamp;
+  final int totalTabs;
+  TabTreesResult({
+    required this.rootTabId,
+    required this.latestTabId,
+    required this.latestTimestamp,
+    required this.totalTabs,
+  });
+}
+
+class UnorderedTabDescendantsResult {
+  final String id;
+  final String? parentId;
+  UnorderedTabDescendantsResult({required this.id, this.parentId});
 }

@@ -282,32 +282,41 @@ class _AvailableTabStatesProviderElement
       (origin as AvailableTabStatesProvider).containerFilter;
 }
 
-String _$seamlessFilteredTabIdsHash() =>
-    r'171e0b942735066e25894dc2c1d99c367bf0d01a';
+String _$seamlessFilteredTabEntitiesHash() =>
+    r'0ef5c14f3fa018e3417e097759817bc871be3e0d';
 
-/// See also [seamlessFilteredTabIds].
-@ProviderFor(seamlessFilteredTabIds)
-const seamlessFilteredTabIdsProvider = SeamlessFilteredTabIdsFamily();
+/// See also [seamlessFilteredTabEntities].
+@ProviderFor(seamlessFilteredTabEntities)
+const seamlessFilteredTabEntitiesProvider = SeamlessFilteredTabEntitiesFamily();
 
-/// See also [seamlessFilteredTabIds].
-class SeamlessFilteredTabIdsFamily
-    extends Family<EquatableValue<List<String>>> {
-  /// See also [seamlessFilteredTabIds].
-  const SeamlessFilteredTabIdsFamily();
+/// See also [seamlessFilteredTabEntities].
+class SeamlessFilteredTabEntitiesFamily
+    extends Family<EquatableValue<List<TabEntity>>> {
+  /// See also [seamlessFilteredTabEntities].
+  const SeamlessFilteredTabEntitiesFamily();
 
-  /// See also [seamlessFilteredTabIds].
-  SeamlessFilteredTabIdsProvider call(
-    TabSearchPartition searchPartition,
-    ContainerFilter containerFilter,
-  ) {
-    return SeamlessFilteredTabIdsProvider(searchPartition, containerFilter);
+  /// See also [seamlessFilteredTabEntities].
+  SeamlessFilteredTabEntitiesProvider call({
+    required TabSearchPartition searchPartition,
+    required ContainerFilter containerFilter,
+    required bool groupTrees,
+  }) {
+    return SeamlessFilteredTabEntitiesProvider(
+      searchPartition: searchPartition,
+      containerFilter: containerFilter,
+      groupTrees: groupTrees,
+    );
   }
 
   @override
-  SeamlessFilteredTabIdsProvider getProviderOverride(
-    covariant SeamlessFilteredTabIdsProvider provider,
+  SeamlessFilteredTabEntitiesProvider getProviderOverride(
+    covariant SeamlessFilteredTabEntitiesProvider provider,
   ) {
-    return call(provider.searchPartition, provider.containerFilter);
+    return call(
+      searchPartition: provider.searchPartition,
+      containerFilter: provider.containerFilter,
+      groupTrees: provider.groupTrees,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -322,35 +331,38 @@ class SeamlessFilteredTabIdsFamily
       _allTransitiveDependencies;
 
   @override
-  String? get name => r'seamlessFilteredTabIdsProvider';
+  String? get name => r'seamlessFilteredTabEntitiesProvider';
 }
 
-/// See also [seamlessFilteredTabIds].
-class SeamlessFilteredTabIdsProvider
-    extends AutoDisposeProvider<EquatableValue<List<String>>> {
-  /// See also [seamlessFilteredTabIds].
-  SeamlessFilteredTabIdsProvider(
-    TabSearchPartition searchPartition,
-    ContainerFilter containerFilter,
-  ) : this._internal(
-        (ref) => seamlessFilteredTabIds(
-          ref as SeamlessFilteredTabIdsRef,
-          searchPartition,
-          containerFilter,
-        ),
-        from: seamlessFilteredTabIdsProvider,
-        name: r'seamlessFilteredTabIdsProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$seamlessFilteredTabIdsHash,
-        dependencies: SeamlessFilteredTabIdsFamily._dependencies,
-        allTransitiveDependencies:
-            SeamlessFilteredTabIdsFamily._allTransitiveDependencies,
-        searchPartition: searchPartition,
-        containerFilter: containerFilter,
-      );
+/// See also [seamlessFilteredTabEntities].
+class SeamlessFilteredTabEntitiesProvider
+    extends AutoDisposeProvider<EquatableValue<List<TabEntity>>> {
+  /// See also [seamlessFilteredTabEntities].
+  SeamlessFilteredTabEntitiesProvider({
+    required TabSearchPartition searchPartition,
+    required ContainerFilter containerFilter,
+    required bool groupTrees,
+  }) : this._internal(
+         (ref) => seamlessFilteredTabEntities(
+           ref as SeamlessFilteredTabEntitiesRef,
+           searchPartition: searchPartition,
+           containerFilter: containerFilter,
+           groupTrees: groupTrees,
+         ),
+         from: seamlessFilteredTabEntitiesProvider,
+         name: r'seamlessFilteredTabEntitiesProvider',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$seamlessFilteredTabEntitiesHash,
+         dependencies: SeamlessFilteredTabEntitiesFamily._dependencies,
+         allTransitiveDependencies:
+             SeamlessFilteredTabEntitiesFamily._allTransitiveDependencies,
+         searchPartition: searchPartition,
+         containerFilter: containerFilter,
+         groupTrees: groupTrees,
+       );
 
-  SeamlessFilteredTabIdsProvider._internal(
+  SeamlessFilteredTabEntitiesProvider._internal(
     super._createNotifier, {
     required super.name,
     required super.dependencies,
@@ -359,20 +371,24 @@ class SeamlessFilteredTabIdsProvider
     required super.from,
     required this.searchPartition,
     required this.containerFilter,
+    required this.groupTrees,
   }) : super.internal();
 
   final TabSearchPartition searchPartition;
   final ContainerFilter containerFilter;
+  final bool groupTrees;
 
   @override
   Override overrideWith(
-    EquatableValue<List<String>> Function(SeamlessFilteredTabIdsRef provider)
+    EquatableValue<List<TabEntity>> Function(
+      SeamlessFilteredTabEntitiesRef provider,
+    )
     create,
   ) {
     return ProviderOverride(
       origin: this,
-      override: SeamlessFilteredTabIdsProvider._internal(
-        (ref) => create(ref as SeamlessFilteredTabIdsRef),
+      override: SeamlessFilteredTabEntitiesProvider._internal(
+        (ref) => create(ref as SeamlessFilteredTabEntitiesRef),
         from: from,
         name: null,
         dependencies: null,
@@ -380,20 +396,22 @@ class SeamlessFilteredTabIdsProvider
         debugGetCreateSourceHash: null,
         searchPartition: searchPartition,
         containerFilter: containerFilter,
+        groupTrees: groupTrees,
       ),
     );
   }
 
   @override
-  AutoDisposeProviderElement<EquatableValue<List<String>>> createElement() {
-    return _SeamlessFilteredTabIdsProviderElement(this);
+  AutoDisposeProviderElement<EquatableValue<List<TabEntity>>> createElement() {
+    return _SeamlessFilteredTabEntitiesProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SeamlessFilteredTabIdsProvider &&
+    return other is SeamlessFilteredTabEntitiesProvider &&
         other.searchPartition == searchPartition &&
-        other.containerFilter == containerFilter;
+        other.containerFilter == containerFilter &&
+        other.groupTrees == groupTrees;
   }
 
   @override
@@ -401,6 +419,7 @@ class SeamlessFilteredTabIdsProvider
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, searchPartition.hashCode);
     hash = _SystemHash.combine(hash, containerFilter.hashCode);
+    hash = _SystemHash.combine(hash, groupTrees.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -408,26 +427,32 @@ class SeamlessFilteredTabIdsProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SeamlessFilteredTabIdsRef
-    on AutoDisposeProviderRef<EquatableValue<List<String>>> {
+mixin SeamlessFilteredTabEntitiesRef
+    on AutoDisposeProviderRef<EquatableValue<List<TabEntity>>> {
   /// The parameter `searchPartition` of this provider.
   TabSearchPartition get searchPartition;
 
   /// The parameter `containerFilter` of this provider.
   ContainerFilter get containerFilter;
+
+  /// The parameter `groupTrees` of this provider.
+  bool get groupTrees;
 }
 
-class _SeamlessFilteredTabIdsProviderElement
-    extends AutoDisposeProviderElement<EquatableValue<List<String>>>
-    with SeamlessFilteredTabIdsRef {
-  _SeamlessFilteredTabIdsProviderElement(super.provider);
+class _SeamlessFilteredTabEntitiesProviderElement
+    extends AutoDisposeProviderElement<EquatableValue<List<TabEntity>>>
+    with SeamlessFilteredTabEntitiesRef {
+  _SeamlessFilteredTabEntitiesProviderElement(super.provider);
 
   @override
   TabSearchPartition get searchPartition =>
-      (origin as SeamlessFilteredTabIdsProvider).searchPartition;
+      (origin as SeamlessFilteredTabEntitiesProvider).searchPartition;
   @override
   ContainerFilter get containerFilter =>
-      (origin as SeamlessFilteredTabIdsProvider).containerFilter;
+      (origin as SeamlessFilteredTabEntitiesProvider).containerFilter;
+  @override
+  bool get groupTrees =>
+      (origin as SeamlessFilteredTabEntitiesProvider).groupTrees;
 }
 
 String _$seamlessFilteredTabPreviewsHash() =>
