@@ -253,62 +253,102 @@ class TabRepository extends _$TabRepository {
       );
     });
 
-    ref.listen(fireImmediately: true, selectedTabProvider, (
-      previous,
-      tabId,
-    ) async {
-      if (tabId != null) {
-        _previousTabId = previous;
-        await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
-      }
-    });
+    ref.listen(
+      fireImmediately: true,
+      selectedTabProvider,
+      (previous, tabId) async {
+        if (tabId != null) {
+          _previousTabId = previous;
+          await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to selectedTabProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
-    ref.listen(tabListProvider, (previous, next) async {
-      //Only sync tabs if there has been a previous value or is not empty
-      final syncTabs =
-          next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
+    ref.listen(
+      tabListProvider,
+      (previous, next) async {
+        //Only sync tabs if there has been a previous value or is not empty
+        final syncTabs =
+            next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
 
-      if (_previousTabId != null && !next.value.contains(_previousTabId)) {
-        _previousTabId = null;
-      }
+        if (_previousTabId != null && !next.value.contains(_previousTabId)) {
+          _previousTabId = null;
+        }
 
-      if (syncTabs) {
-        await db.tabDao.syncTabs(retainTabIds: next.value);
-      }
-    });
+        if (syncTabs) {
+          await db.tabDao.syncTabs(retainTabIds: next.value);
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to tabListProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
     final tabStateDebouncer = Debouncer(const Duration(seconds: 3));
     Map<String, TabState>? debounceStartValue;
 
-    ref.listen(tabStatesProvider, (previous, next) {
-      //Since state changes occure pretty often and our map always contains
-      //the latest state, we cache the value before starting debouncing and
-      //later diff to that, to avoid frequent database writes
-      if (!tabStateDebouncer.isDebouncing) {
-        debounceStartValue = previous;
-      }
-
-      tabStateDebouncer.eventOccured(() async {
-        await db.tabDao.updateTabs(debounceStartValue, next);
-      });
-    });
-
-    ref.listen(engineBoundIntentStreamProvider, (previous, next) {
-      next.whenData((value) async {
-        switch (value) {
-          case SharedUrl():
-            _tabFromIntent.add(await addTab(url: value.url));
-          case SharedText():
-            final defaultSearchBang =
-                ref.read(selectedBangDataProvider()) ??
-                await ref.read(defaultSearchBangDataProvider.future);
-
-            _tabFromIntent.add(
-              await addTab(url: defaultSearchBang?.getTemplateUrl(value.text)),
-            );
+    ref.listen(
+      tabStatesProvider,
+      (previous, next) {
+        //Since state changes occure pretty often and our map always contains
+        //the latest state, we cache the value before starting debouncing and
+        //later diff to that, to avoid frequent database writes
+        if (!tabStateDebouncer.isDebouncing) {
+          debounceStartValue = previous;
         }
-      });
-    });
+
+        tabStateDebouncer.eventOccured(() async {
+          await db.tabDao.updateTabs(debounceStartValue, next);
+        });
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to tabStatesProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      engineBoundIntentStreamProvider,
+      (previous, next) {
+        next.whenData((value) async {
+          switch (value) {
+            case SharedUrl():
+              _tabFromIntent.add(await addTab(url: value.url));
+            case SharedText():
+              final defaultSearchBang =
+                  ref.read(selectedBangDataProvider()) ??
+                  await ref.read(defaultSearchBangDataProvider.future);
+
+              _tabFromIntent.add(
+                await addTab(
+                  url: defaultSearchBang?.getTemplateUrl(value.text),
+                ),
+              );
+          }
+        });
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to engineBoundIntentStreamProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
     ref.onDispose(() async {
       tabStateDebouncer.dispose();

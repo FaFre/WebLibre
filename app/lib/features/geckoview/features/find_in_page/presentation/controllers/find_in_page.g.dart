@@ -7,7 +7,7 @@ part of 'find_in_page.dart';
 // **************************************************************************
 
 String _$findInPageControllerHash() =>
-    r'b75a1edb4c25246bf2a5f5c9a807d6151b23856e';
+    r'de69a752c0472b5e3803fb0410fb8caee2c3ff7e';
 
 /// See also [FindInPageController].
 @ProviderFor(FindInPageController)

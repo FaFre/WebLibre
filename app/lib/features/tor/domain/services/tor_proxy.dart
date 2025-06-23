@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:weblibre/features/tor/utils/tor_entrypoint.dart';
 
@@ -108,26 +109,34 @@ class TorProxyService extends _$TorProxyService {
 
     await _tor.initializeService();
 
-    ref.listen(fireImmediately: true, browserViewLifecycleProvider, (
-      previous,
-      next,
-    ) {
-      switch (next) {
-        case AppLifecycleState.resumed:
-          if (_timerPaused) {
-            _enableHeartbeatTimer();
-          }
-        case AppLifecycleState.detached:
-        case AppLifecycleState.inactive:
-        case AppLifecycleState.hidden:
-        case AppLifecycleState.paused:
-        case null:
-          if (_heartbeatUpdate?.isActive == true) {
-            _heartbeatUpdate?.cancel();
-            _timerPaused = true;
-          }
-      }
-    });
+    ref.listen(
+      fireImmediately: true,
+      browserViewLifecycleProvider,
+      (previous, next) {
+        switch (next) {
+          case AppLifecycleState.resumed:
+            if (_timerPaused) {
+              _enableHeartbeatTimer();
+            }
+          case AppLifecycleState.detached:
+          case AppLifecycleState.inactive:
+          case AppLifecycleState.hidden:
+          case AppLifecycleState.paused:
+          case null:
+            if (_heartbeatUpdate?.isActive == true) {
+              _heartbeatUpdate?.cancel();
+              _timerPaused = true;
+            }
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to browserViewLifecycleProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
     ref.onDispose(() async {
       _heartbeatUpdate?.cancel();

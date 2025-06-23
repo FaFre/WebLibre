@@ -1,5 +1,6 @@
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
@@ -45,20 +46,30 @@ class FindInPageController extends _$FindInPageController {
 
   @override
   FindInPageState build() {
-    ref.listen(selectedTabStateProvider, (previous, next) async {
-      if (state.visible && state.lastSearchText.isNotEmpty) {
-        if (previous != null && next != null) {
-          final loadingOrReloading =
-              previous.isLoading == true && next.isLoading == false;
-          final tabSwitchWithoutResults =
-              previous.id != next.id && !next.findResultState.hasMatches;
+    ref.listen(
+      selectedTabStateProvider,
+      (previous, next) async {
+        if (state.visible && state.lastSearchText.isNotEmpty) {
+          if (previous != null && next != null) {
+            final loadingOrReloading =
+                previous.isLoading == true && next.isLoading == false;
+            final tabSwitchWithoutResults =
+                previous.id != next.id && !next.findResultState.hasMatches;
 
-          if (loadingOrReloading || tabSwitchWithoutResults) {
-            await findAll(text: state.lastSearchText!);
+            if (loadingOrReloading || tabSwitchWithoutResults) {
+              await findAll(text: state.lastSearchText!);
+            }
           }
         }
-      }
-    });
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to selectedTabStateProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
     return FindInPageState.hidden();
   }

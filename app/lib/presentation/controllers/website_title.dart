@@ -1,5 +1,6 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 
@@ -30,6 +31,13 @@ class CompletePageInfo extends _$CompletePageInfo {
         } else {
           state = next;
         }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to pageInfoProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
       },
     );
 

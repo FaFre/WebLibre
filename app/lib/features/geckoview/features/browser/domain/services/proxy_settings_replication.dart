@@ -2,6 +2,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -21,6 +22,13 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
         if (next != null) {
           await _service.setProxyPort(next);
         }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to torProxyServiceProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
       },
     );
 
@@ -46,6 +54,13 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
           }
         }
       },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to containersWithCountProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listen(
@@ -59,6 +74,13 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
         } else {
           await _service.removeContainerProxy('private');
         }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to generalSettingsRepositoryProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
       },
     );
   }

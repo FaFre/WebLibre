@@ -156,48 +156,104 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       fireImmediately: true,
       tabRepositoryProvider,
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to tabRepositoryProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listenManual(
       fireImmediately: true,
       selectionActionServiceProvider,
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to selectionActionServiceProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listenManual(
       fireImmediately: true,
       webExtensionsStateProvider(WebExtensionActionType.browser),
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to webExtensionsStateProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listenManual(
       fireImmediately: true,
       webExtensionsStateProvider(WebExtensionActionType.page),
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to webExtensionsStateProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listenManual(
       fireImmediately: true,
       cacheRepositoryProvider,
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to cacheRepositoryProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listenManual(
       fireImmediately: true,
       engineSettingsReplicationServiceProvider,
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to engineSettingsReplicationServiceProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listenManual(
       fireImmediately: true,
       proxySettingsReplicationProvider,
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to proxySettingsReplicationProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
 
     ref.listenManual(
       fireImmediately: true,
       articleContentProcessorServiceProvider,
       (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to articleContentProcessorServiceProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
     );
   }
 

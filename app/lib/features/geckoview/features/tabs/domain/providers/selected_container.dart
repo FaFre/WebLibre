@@ -1,6 +1,7 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
@@ -75,29 +76,50 @@ class SelectedContainer extends _$SelectedContainer {
 
   @override
   String? build() {
-    ref.listen(containersWithCountProvider, (previous, next) {
-      if (state != null && next.valueOrNull != null) {
-        if (!next.value!.any((container) => container.id == state)) {
-          clearContainer();
-        }
-      }
-    });
-
-    ref.listen(selectedTabProvider, (previous, next) async {
-      if (next != null) {
-        final tabContainerId = await ref
-            .read(tabDataRepositoryProvider.notifier)
-            .containerTabId(next);
-
-        if (tabContainerId != stateOrNull) {
-          if (tabContainerId != null) {
-            await setContainerId(tabContainerId);
-          } else {
+    ref.listen(
+      containersWithCountProvider,
+      (previous, next) {
+        if (state != null && next.valueOrNull != null) {
+          if (!next.value!.any((container) => container.id == state)) {
             clearContainer();
           }
         }
-      }
-    }, fireImmediately: true);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to containersWithCountProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      selectedTabProvider,
+      (previous, next) async {
+        if (next != null) {
+          final tabContainerId = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .containerTabId(next);
+
+          if (tabContainerId != stateOrNull) {
+            if (tabContainerId != null) {
+              await setContainerId(tabContainerId);
+            } else {
+              clearContainer();
+            }
+          }
+        }
+      },
+      fireImmediately: true,
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to selectedTabProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
     return null;
   }

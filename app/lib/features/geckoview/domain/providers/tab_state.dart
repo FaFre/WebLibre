@@ -5,6 +5,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
@@ -155,21 +156,29 @@ class TabStates extends _$TabStates {
           }),
     ];
 
-    ref.listen(fireImmediately: true, engineReadyStateProvider, (
-      previous,
-      next,
-    ) async {
-      if (next) {
-        await GeckoTabService().syncEvents(
-          onTabContentStateChange: true,
-          onIconChange: true,
-          onThumbnailChange: true,
-          onSecurityInfoStateChange: true,
-          onHistoryStateChange: true,
-          onFindResults: true,
+    ref.listen(
+      fireImmediately: true,
+      engineReadyStateProvider,
+      (previous, next) async {
+        if (next) {
+          await GeckoTabService().syncEvents(
+            onTabContentStateChange: true,
+            onIconChange: true,
+            onThumbnailChange: true,
+            onSecurityInfoStateChange: true,
+            onHistoryStateChange: true,
+            onFindResults: true,
+          );
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to engineReadyStateProvider',
+          error: error,
+          stackTrace: stackTrace,
         );
-      }
-    });
+      },
+    );
 
     ref.onDispose(() async {
       for (final sub in subscriptions) {

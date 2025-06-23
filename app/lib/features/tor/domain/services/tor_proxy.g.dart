@@ -6,7 +6,7 @@ part of 'tor_proxy.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$torProxyServiceHash() => r'95cabaa03ea777a2a6cfb46629be334cde3f7a7e';
+String _$torProxyServiceHash() => r'f991652e4e228d3e7fdc09a6088b6c5427d6231c';
 
 /// See also [TorProxyService].
 @ProviderFor(TorProxyService)
