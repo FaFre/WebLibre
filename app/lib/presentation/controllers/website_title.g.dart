@@ -157,7 +157,7 @@ class _PageInfoProviderElement
   bool get isImageRequest => (origin as PageInfoProvider).isImageRequest;
 }
 
-String _$completePageInfoHash() => r'18d196f4fb9323cdcb8dfa1bde4a70bf25f10e2b';
+String _$completePageInfoHash() => r'483e134d5191679804574ee853a367c3e9f4baf8';
 
 abstract class _$CompletePageInfo
     extends BuildlessAutoDisposeNotifier<AsyncValue<WebPageInfo>> {

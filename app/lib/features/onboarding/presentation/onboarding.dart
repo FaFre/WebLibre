@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:weblibre/core/providers/router.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/default_search.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ublock_opt_in.dart';

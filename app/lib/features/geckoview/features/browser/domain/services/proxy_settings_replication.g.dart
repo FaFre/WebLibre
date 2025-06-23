@@ -7,7 +7,7 @@ part of 'proxy_settings_replication.dart';
 // **************************************************************************
 
 String _$proxySettingsReplicationHash() =>
-    r'1982923eeb0bcd6d606683fde70835ec7aff601b';
+    r'9571d178534f68ad3104f1168665ffb57711c6cc';
 
 /// See also [ProxySettingsReplication].
 @ProviderFor(ProxySettingsReplication)
