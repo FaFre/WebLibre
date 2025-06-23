@@ -77,6 +77,7 @@ class SelectedContainer extends _$SelectedContainer {
   @override
   String? build() {
     ref.listen(
+      fireImmediately: true,
       containersWithCountProvider,
       (previous, next) {
         if (state != null && next.valueOrNull != null) {
@@ -95,6 +96,7 @@ class SelectedContainer extends _$SelectedContainer {
     );
 
     ref.listen(
+      fireImmediately: true,
       selectedTabProvider,
       (previous, next) async {
         if (next != null) {
@@ -111,7 +113,6 @@ class SelectedContainer extends _$SelectedContainer {
           }
         }
       },
-      fireImmediately: true,
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to selectedTabProvider',

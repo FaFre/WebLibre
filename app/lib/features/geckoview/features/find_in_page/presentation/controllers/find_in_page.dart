@@ -47,6 +47,7 @@ class FindInPageController extends _$FindInPageController {
   @override
   FindInPageState build() {
     ref.listen(
+      fireImmediately: true,
       selectedTabStateProvider,
       (previous, next) async {
         if (state.visible && state.lastSearchText.isNotEmpty) {

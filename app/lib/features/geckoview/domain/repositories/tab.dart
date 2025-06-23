@@ -322,6 +322,7 @@ class TabRepository extends _$TabRepository {
     );
 
     ref.listen(
+      fireImmediately: true,
       engineBoundIntentStreamProvider,
       (previous, next) {
         next.whenData((value) async {
