@@ -28,13 +28,20 @@ class FindInPageController extends _$FindInPageController {
     return service.findAll(text);
   }
 
-  Future<void> findNext({bool forward = true}) {
+  Future<void> findNext({required String fallbackText, bool forward = true}) {
     final tabId = ref.read(selectedTabProvider);
     final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
+    final hasMatches =
+        ref.read(selectedTabStateProvider)?.findResultState.hasMatches == true;
+
     state = state.copyWith.visible(true);
 
-    return service.findNext(forward);
+    if (hasMatches) {
+      return service.findNext(forward);
+    } else {
+      return service.findAll(fallbackText);
+    }
   }
 
   Future<void> clearMatches() {

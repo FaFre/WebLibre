@@ -61,21 +61,20 @@ class FindInPageWidget extends HookConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.arrow_upward),
                 onPressed: () async {
-                  if (searchResult?.hasMatches ?? false) {
-                    await ref
-                        .read(findInPageControllerProvider.notifier)
-                        .findNext(forward: false);
-                  }
+                  await ref
+                      .read(findInPageControllerProvider.notifier)
+                      .findNext(
+                        forward: false,
+                        fallbackText: textController.text,
+                      );
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.arrow_downward),
                 onPressed: () async {
-                  if (searchResult?.hasMatches ?? false) {
-                    await ref
-                        .read(findInPageControllerProvider.notifier)
-                        .findNext();
-                  }
+                  await ref
+                      .read(findInPageControllerProvider.notifier)
+                      .findNext(fallbackText: textController.text);
                 },
               ),
               IconButton(
