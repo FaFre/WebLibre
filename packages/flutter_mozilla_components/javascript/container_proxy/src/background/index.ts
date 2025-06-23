@@ -35,6 +35,7 @@ port.onMessage.addListener((raw: unknown): void => {
             break
         case "removeContainerProxy":
             store.removeContainerProxyRelation(message.args, "tor")
+            console.log('removed container relation ' + message.args)
             break
         case "healthcheck":
             port.postMessage({

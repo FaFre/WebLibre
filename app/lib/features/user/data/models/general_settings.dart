@@ -28,12 +28,15 @@ class GeneralSettings with FastEquatable {
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
   final String defaultSearchProvider;
 
+  final bool proxyPrivateTabsTor;
+
   GeneralSettings({
     required this.themeMode,
     required this.enableReadability,
     required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
     required this.defaultSearchProvider,
+    required this.proxyPrivateTabsTor,
   });
 
   GeneralSettings.withDefaults({
@@ -42,10 +45,12 @@ class GeneralSettings with FastEquatable {
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
     String? defaultSearchProvider,
+    bool? proxyPrivateTabsTor,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
-       defaultSearchProvider = defaultSearchProvider ?? 'lais';
+       defaultSearchProvider = defaultSearchProvider ?? 'lais',
+       proxyPrivateTabsTor = proxyPrivateTabsTor ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -59,5 +64,6 @@ class GeneralSettings with FastEquatable {
     enforceReadability,
     deleteBrowsingDataOnQuit,
     defaultSearchProvider,
+    proxyPrivateTabsTor,
   ];
 }

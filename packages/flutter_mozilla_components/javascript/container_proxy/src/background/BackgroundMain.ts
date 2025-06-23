@@ -9,6 +9,7 @@ import _OnRequestDetails = browser.proxy._OnRequestDetails
 const localhosts = new Set(['localhost', '127.0.0.1', '[::1]'])
 
 const containerIdentifier = 'firefox-container-'
+const privateIdentifier = 'firefox-private'
 
 type DoNotProxy = never[]
 export const doNotProxy: DoNotProxy = []
@@ -59,9 +60,16 @@ export default class BackgroundMain {
     if (requestDetails.tabId > -1) {
       const tab = (await browser.tabs.get(requestDetails.tabId))
 
-      if (tab.cookieStoreId?.startsWith(containerIdentifier) === true) {
+      if (tab.cookieStoreId?.startsWith(containerIdentifier) === true || tab.cookieStoreId === privateIdentifier) {
         try {
-          const cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
+          let cookieStoreId: string
+
+          if (tab.cookieStoreId.startsWith(containerIdentifier)) {
+            cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
+          } else {
+            // Handle private tabs - use 'private' as identifier
+            cookieStoreId = 'private'
+          }
 
           const proxies = await this.store.getProxiesForContainer(cookieStoreId)
 

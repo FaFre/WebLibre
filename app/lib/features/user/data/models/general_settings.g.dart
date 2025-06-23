@@ -19,6 +19,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings defaultSearchProvider(String defaultSearchProvider);
 
+  GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -31,6 +33,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     String defaultSearchProvider,
+    bool proxyPrivateTabsTor,
   });
 }
 
@@ -61,6 +64,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(defaultSearchProvider: defaultSearchProvider);
 
   @override
+  GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor) =>
+      this(proxyPrivateTabsTor: proxyPrivateTabsTor);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -73,6 +80,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
+    Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder()
@@ -97,6 +105,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultSearchProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchProvider as String,
+      proxyPrivateTabsTor: proxyPrivateTabsTor == const $CopyWithPlaceholder()
+          ? _value.proxyPrivateTabsTor
+          // ignore: cast_nullable_to_non_nullable
+          : proxyPrivateTabsTor as bool,
     );
   }
 }
@@ -121,6 +133,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
               ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
               .toSet(),
       defaultSearchProvider: json['defaultSearchProvider'] as String?,
+      proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
@@ -132,6 +145,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
           ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
           .toList(),
       'defaultSearchProvider': instance.defaultSearchProvider,
+      'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
     };
 
 const _$ThemeModeEnumMap = {
