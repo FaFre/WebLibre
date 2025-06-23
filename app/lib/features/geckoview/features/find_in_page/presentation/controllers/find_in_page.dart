@@ -50,15 +50,18 @@ class FindInPageController extends _$FindInPageController {
       fireImmediately: true,
       selectedTabStateProvider,
       (previous, next) async {
-        if (state.visible && state.lastSearchText.isNotEmpty) {
-          if (previous != null && next != null) {
-            final loadingOrReloading =
-                previous.isLoading == true && next.isLoading == false;
-            final tabSwitchWithoutResults =
-                previous.id != next.id && !next.findResultState.hasMatches;
+        //Ensure state is already initialized
+        if (stateOrNull != null) {
+          if (state.visible && state.lastSearchText.isNotEmpty) {
+            if (previous != null && next != null) {
+              final loadingOrReloading =
+                  previous.isLoading == true && next.isLoading == false;
+              final tabSwitchWithoutResults =
+                  previous.id != next.id && !next.findResultState.hasMatches;
 
-            if (loadingOrReloading || tabSwitchWithoutResults) {
-              await findAll(text: state.lastSearchText!);
+              if (loadingOrReloading || tabSwitchWithoutResults) {
+                await findAll(text: state.lastSearchText!);
+              }
             }
           }
         }
