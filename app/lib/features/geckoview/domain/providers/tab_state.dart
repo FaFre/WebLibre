@@ -6,6 +6,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
@@ -203,4 +204,15 @@ TabState? tabState(Ref ref, String? tabId) {
 TabState? selectedTabState(Ref ref) {
   final tabId = ref.watch(selectedTabProvider);
   return ref.watch(tabStateProvider(tabId));
+}
+
+@Riverpod()
+TabType? selectedTabType(Ref ref) {
+  final isPrivate = ref.watch(
+    selectedTabStateProvider.select((value) => value?.isPrivate),
+  );
+
+  return isPrivate.mapNotNull(
+    (isCurrentPrivate) => isCurrentPrivate ? TabType.private : TabType.regular,
+  );
 }

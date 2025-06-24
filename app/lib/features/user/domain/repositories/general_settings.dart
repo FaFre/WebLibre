@@ -43,6 +43,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'createChildTabsOption': settings['createChildTabsOption']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
       'proxyPrivateTabsTor': settings['proxyPrivateTabsTor']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

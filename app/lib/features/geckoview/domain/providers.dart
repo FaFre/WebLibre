@@ -23,10 +23,8 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
     service.setActions([
       SearchAction((text) async {
         final router = await ref.read(routerProvider.future);
-        final isCurrentPrivate =
-            ref.read(selectedTabStateProvider)?.isPrivate ?? false;
         final route = SearchRoute(
-          tabType: isCurrentPrivate ? TabType.private : TabType.regular,
+          tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
           searchText: text,
         );
 

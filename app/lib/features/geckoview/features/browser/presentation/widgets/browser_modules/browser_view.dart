@@ -299,7 +299,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 context,
                 onAdd: (searchText) async {
                   await SearchRoute(
-                    tabType: TabType.regular,
+                    tabType:
+                        ref.read(selectedTabTypeProvider) ?? TabType.regular,
                     searchText: searchText ?? SearchRoute.emptySearchText,
                   ).push(context);
                 },

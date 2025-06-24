@@ -57,7 +57,7 @@ class WebPageRoute extends GoRouteData with _$WebPageRoute {
   }
 }
 
-enum TabType { regular, private }
+enum TabType { regular, private, child }
 
 class SearchRoute extends GoRouteData with _$SearchRoute {
   static const String emptySearchText = ' ';

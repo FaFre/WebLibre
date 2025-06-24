@@ -8,6 +8,8 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
@@ -16,6 +18,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -29,8 +32,20 @@ class SearchScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
+    final createChildTabsOption = ref.watch(
+      generalSettingsRepositoryProvider.select(
+        (value) => value.createChildTabsOption,
+      ),
+    );
+
     final selectedTabType = useState(tabType);
-    final isPrivate = selectedTabType.value == TabType.private;
+    final currentTabTabType = ref.watch(selectedTabTypeProvider);
+
+    final privateTabMode = switch (selectedTabType.value) {
+      TabType.regular => false,
+      TabType.private => true,
+      TabType.child => currentTabTabType == TabType.private,
+    };
 
     final searchTextController = useTextEditingController(
       text: initialSearchText,
@@ -61,7 +76,7 @@ class SearchScreen extends HookConsumerWidget {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
         final searchUri = activeBang.getTemplateUrl(query);
 
-        if (!isPrivate) {
+        if (!privateTabMode) {
           await ref
               .read(bangSearchProvider.notifier)
               .triggerBangSearch(activeBang, query);
@@ -69,7 +84,13 @@ class SearchScreen extends HookConsumerWidget {
 
         await ref
             .read(tabRepositoryProvider.notifier)
-            .addTab(url: searchUri, private: isPrivate);
+            .addTab(
+              url: searchUri,
+              private: privateTabMode,
+              parentId: (selectedTabType.value == TabType.child)
+                  ? ref.read(selectedTabProvider)
+                  : null,
+            );
 
         if (context.mounted) {
           ref.read(bottomSheetControllerProvider.notifier).dismiss();
@@ -93,17 +114,23 @@ class SearchScreen extends HookConsumerWidget {
                   canRequestFocus: false,
                   child: SegmentedButton(
                     showSelectedIcon: false,
-                    segments: const [
-                      ButtonSegment(
+                    segments: [
+                      const ButtonSegment(
                         value: TabType.regular,
                         label: Text('Regular'),
                         icon: Icon(MdiIcons.tab),
                       ),
-                      ButtonSegment(
+                      const ButtonSegment(
                         value: TabType.private,
                         label: Text('Private'),
                         icon: Icon(MdiIcons.tabUnselected),
                       ),
+                      if (createChildTabsOption)
+                        const ButtonSegment(
+                          value: TabType.child,
+                          label: Text('Child'),
+                          icon: Icon(MdiIcons.fileTree),
+                        ),
                     ],
                     selected: {selectedTabType.value},
                     onSelectionChanged: (value) {
@@ -118,6 +145,14 @@ class SearchScreen extends HookConsumerWidget {
                       TabType.private => SegmentedButton.styleFrom(
                         selectedBackgroundColor: const Color(0x648000D7),
                       ),
+                      TabType.child =>
+                        (currentTabTabType == TabType.private)
+                            ? SegmentedButton.styleFrom(
+                                selectedBackgroundColor: const Color(
+                                  0x648000D7,
+                                ),
+                              )
+                            : null,
                     },
                   ),
                 ),
@@ -151,7 +186,14 @@ class SearchScreen extends HookConsumerWidget {
                         if (newUrl != null) {
                           await ref
                               .read(tabRepositoryProvider.notifier)
-                              .addTab(url: newUrl, private: isPrivate);
+                              .addTab(
+                                url: newUrl,
+                                private: privateTabMode,
+                                parentId:
+                                    (selectedTabType.value == TabType.child)
+                                    ? ref.read(selectedTabProvider)
+                                    : null,
+                              );
 
                           if (context.mounted) {
                             ref
@@ -181,7 +223,7 @@ class SearchScreen extends HookConsumerWidget {
             TabSearch(searchTextListenable: sampledSearchText),
             FeedSearch(searchTextNotifier: sampledSearchText),
             HistorySuggestions(
-              isPrivate: isPrivate,
+              isPrivate: privateTabMode,
               searchTextListenable: sampledSearchText,
             ),
           ],

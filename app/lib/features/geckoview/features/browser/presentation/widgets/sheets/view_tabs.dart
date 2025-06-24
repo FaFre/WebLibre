@@ -79,7 +79,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                           },
                         ),
                         IconButton(
-                          icon: const Icon(MdiIcons.graph),
+                          icon: const Icon(MdiIcons.familyTree),
                           selectedIcon: const Icon(MdiIcons.table),
                           isSelected: treeViewEnabled,
                           iconSize: 18,
@@ -443,10 +443,8 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              final isCurrentPrivate =
-                  ref.read(selectedTabStateProvider)?.isPrivate ?? false;
               await SearchRoute(
-                tabType: isCurrentPrivate ? TabType.private : TabType.regular,
+                tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
               ).push(context);
 
               onClose();
@@ -618,10 +616,8 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              final isCurrentPrivate =
-                  ref.read(selectedTabStateProvider)?.isPrivate ?? false;
               await SearchRoute(
-                tabType: isCurrentPrivate ? TabType.private : TabType.regular,
+                tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
               ).push(context);
 
               onClose();

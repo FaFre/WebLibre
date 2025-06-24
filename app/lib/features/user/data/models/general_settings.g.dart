@@ -19,6 +19,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings defaultSearchProvider(String defaultSearchProvider);
 
+  GeneralSettings createChildTabsOption(bool createChildTabsOption);
+
   GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -33,6 +35,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     String defaultSearchProvider,
+    bool createChildTabsOption,
     bool proxyPrivateTabsTor,
   });
 }
@@ -64,6 +67,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(defaultSearchProvider: defaultSearchProvider);
 
   @override
+  GeneralSettings createChildTabsOption(bool createChildTabsOption) =>
+      this(createChildTabsOption: createChildTabsOption);
+
+  @override
   GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor) =>
       this(proxyPrivateTabsTor: proxyPrivateTabsTor);
 
@@ -80,6 +87,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
+    Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
@@ -105,6 +113,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultSearchProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchProvider as String,
+      createChildTabsOption:
+          createChildTabsOption == const $CopyWithPlaceholder()
+          ? _value.createChildTabsOption
+          // ignore: cast_nullable_to_non_nullable
+          : createChildTabsOption as bool,
       proxyPrivateTabsTor: proxyPrivateTabsTor == const $CopyWithPlaceholder()
           ? _value.proxyPrivateTabsTor
           // ignore: cast_nullable_to_non_nullable
@@ -133,6 +146,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
               ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
               .toSet(),
       defaultSearchProvider: json['defaultSearchProvider'] as String?,
+      createChildTabsOption: json['createChildTabsOption'] as bool?,
       proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
     );
 
@@ -145,6 +159,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
           ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
           .toList(),
       'defaultSearchProvider': instance.defaultSearchProvider,
+      'createChildTabsOption': instance.createChildTabsOption,
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
     };
 

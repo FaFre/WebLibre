@@ -17,6 +17,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/she
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/edit_url_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
@@ -95,43 +96,9 @@ class BrowserBottomAppBar extends HookConsumerWidget {
           actions: [
             if (selectedTabId != null && displayedSheet is! ViewTabsSheet)
               ReaderButton(),
-            MenuAnchor(
+            TabCreationMenu(
               controller: tabMenuController,
-              builder: (context, controller, child) {
-                return child!;
-              },
-              menuChildren: [
-                if (selectedTabId != null) ...[
-                  MenuItemButton(
-                    onPressed: () async {
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .closeTab(selectedTabId);
-                    },
-                    leadingIcon: const Icon(Icons.close),
-                    child: const Text('Close Tab'),
-                  ),
-                  const Divider(),
-                ],
-                MenuItemButton(
-                  onPressed: () async {
-                    await const SearchRoute(
-                      tabType: TabType.private,
-                    ).push(context);
-                  },
-                  leadingIcon: const Icon(MdiIcons.tabUnselected),
-                  child: const Text('Add Private Tab'),
-                ),
-                MenuItemButton(
-                  onPressed: () async {
-                    await const SearchRoute(
-                      tabType: TabType.regular,
-                    ).push(context);
-                  },
-                  leadingIcon: const Icon(MdiIcons.tabPlus),
-                  child: const Text('Add Tab'),
-                ),
-              ],
+              selectedTabId: selectedTabId,
               child: TabsActionButton(
                 isActive: displayedSheet is ViewTabsSheet,
                 onTap: () {

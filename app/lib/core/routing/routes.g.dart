@@ -388,6 +388,7 @@ mixin _$SearchRoute on GoRouteData {
 const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
+  TabType.child: 'child',
 };
 
 mixin _$TorProxyRoute on GoRouteData {

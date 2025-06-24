@@ -131,6 +131,22 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                       }
                     : null,
               ),
+              SwitchListTile.adaptive(
+                title: const Text('Create Child Tabs'),
+                subtitle: const Text(
+                  'Display a button to create a child tab under the current tab (tree view only)',
+                ),
+                secondary: const Icon(MdiIcons.fileTree),
+                value: generalSettings.createChildTabsOption,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) => currentSettings.copyWith
+                            .createChildTabsOption(value),
+                      );
+                },
+              ),
               Consumer(
                 builder: (context, ref, child) {
                   final size = ref.watch(
