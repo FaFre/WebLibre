@@ -13,6 +13,8 @@ class DefaultSearchPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
     final bangs = ref.watch(bangListProvider(triggers: defaultBangs));
 
     final activeBang = ref.watch(defaultSearchBangDataProvider).valueOrNull;
@@ -26,67 +28,77 @@ class DefaultSearchPage extends HookConsumerWidget {
           );
     }
 
-    return bangs.when(
-      skipLoadingOnReload: true,
-      data: (availableBangs) {
-        return ListView(
-          children: [
-            SizedBox(
-              height: 48,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Default Search:'),
-                  if (activeBang != null)
-                    FilterChip(
-                      showCheckmark: false,
-                      label: Text(activeBang.websiteName),
-                      avatar: UrlIcon([
-                        activeBang.getTemplateUrl(''),
-                      ], iconSize: 20),
-                      selected: true,
-                      onSelected: (value) {},
-                    ),
-                ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: bangs.when(
+        skipLoadingOnReload: true,
+        data: (availableBangs) {
+          return ListView(
+            children: [
+              const SizedBox(height: 24),
+              Center(
+                child: Text(
+                  'Default Search Provider',
+                  style: theme.textTheme.headlineMedium,
+                ),
               ),
-            ),
-            const Divider(),
-            Wrap(
-              spacing: 8.0,
-              children: [
-                ...availableBangs.map(
-                  (bang) => FilterChip(
-                    showCheckmark: false,
-                    label: Text(bang.websiteName),
-                    avatar: UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
-                    selected: activeBang?.trigger == bang.trigger,
-                    onSelected: (selected) async {
-                      if (selected) {
-                        await updateSearchProvider(bang.trigger);
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 48,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Selected Provider'),
+                    if (activeBang != null)
+                      FilterChip(
+                        showCheckmark: false,
+                        label: Text(activeBang.websiteName),
+                        avatar: UrlIcon([
+                          activeBang.getTemplateUrl(''),
+                        ], iconSize: 20),
+                        selected: true,
+                        onSelected: (value) {},
+                      ),
+                  ],
+                ),
+              ),
+              const Divider(),
+              Wrap(
+                spacing: 8.0,
+                children: [
+                  ...availableBangs.map(
+                    (bang) => FilterChip(
+                      showCheckmark: false,
+                      label: Text(bang.websiteName),
+                      avatar: UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
+                      selected: activeBang?.trigger == bang.trigger,
+                      onSelected: (selected) async {
+                        if (selected) {
+                          await updateSearchProvider(bang.trigger);
+                        }
+                      },
+                    ),
+                  ),
+                  ActionChip(
+                    label: const Text('Search more'),
+                    avatar: const Icon(Icons.search),
+                    onPressed: () async {
+                      final trigger = await const BangSearchRoute()
+                          .push<String?>(context);
+
+                      if (trigger != null) {
+                        await updateSearchProvider(trigger);
                       }
                     },
                   ),
-                ),
-                ActionChip(
-                  label: const Text('Search more'),
-                  avatar: const Icon(Icons.search),
-                  onPressed: () async {
-                    final trigger = await const BangSearchRoute().push<String?>(
-                      context,
-                    );
-
-                    if (trigger != null) {
-                      await updateSearchProvider(trigger);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-      error: (error, stackTrace) => const SizedBox.shrink(),
-      loading: () => const SizedBox(height: 48, width: double.infinity),
+                ],
+              ),
+            ],
+          );
+        },
+        error: (error, stackTrace) => const SizedBox.shrink(),
+        loading: () => const SizedBox(height: 48, width: double.infinity),
+      ),
     );
   }
 }

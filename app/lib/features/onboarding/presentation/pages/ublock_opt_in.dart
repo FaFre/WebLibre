@@ -21,10 +21,11 @@ class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
       key: formKey,
       child: ListView(
         children: [
+          const SizedBox(height: 24),
           SvgPicture.asset('assets/images/ublock.svg'),
           const SizedBox(height: 8),
           Center(
-            child: Text('uBlock Origin', style: theme.textTheme.headlineLarge),
+            child: Text('uBlock Origin', style: theme.textTheme.headlineMedium),
           ),
           const SizedBox(height: 24),
           const Padding(

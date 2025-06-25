@@ -7,6 +7,7 @@ import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/default_search.dart';
+import 'package:weblibre/features/onboarding/presentation/pages/permissions.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ublock_opt_in.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/welcome.dart';
 import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
@@ -32,6 +33,7 @@ class OnboardingScreen extends HookConsumerWidget {
         const WelcomePage(),
         const DefaultSearchPage(),
         UBlockOptInPage(formKey: GlobalKey<FormState>()),
+        PermissionsPage(formKey: GlobalKey<FormState>()),
       ];
     }, [currentRevision, targetRevision]);
 
