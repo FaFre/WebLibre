@@ -5,6 +5,8 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'general_settings.g.dart';
 
+const _fallbackSearchProvider = 'ddg';
+
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
   history('Browsing history'),
@@ -52,7 +54,7 @@ class GeneralSettings with FastEquatable {
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
-       defaultSearchProvider = defaultSearchProvider ?? 'lais',
+       defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
        createChildTabsOption = createChildTabsOption ?? false,
        proxyPrivateTabsTor = proxyPrivateTabsTor ?? false;
 
