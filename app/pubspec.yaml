@@ -1,7 +1,7 @@
 name: weblibre
 description: "The Privacy-Focused & AI-Powered Research Browser"
 publish_to: 'none'
-version: 0.9.4+7
+version: 0.9.5+8
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
