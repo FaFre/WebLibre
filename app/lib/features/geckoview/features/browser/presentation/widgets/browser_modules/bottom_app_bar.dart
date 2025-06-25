@@ -5,6 +5,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -176,6 +177,15 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   },
                   leadingIcon: const Icon(Icons.info),
                   child: const Text('About'),
+                ),
+                MenuItemButton(
+                  onPressed: () async {
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .addTab(url: ref.read(docsUriProvider));
+                  },
+                  leadingIcon: const Icon(Icons.help),
+                  child: const Text('Help and feedback'),
                 ),
                 const Divider(),
                 MenuItemButton(
