@@ -73,6 +73,7 @@ class BangChips extends HookConsumerWidget {
                     itemAvatar: (bang) =>
                         UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
                     itemLabel: (bang) => Text(bang.websiteName),
+                    itemTooltip: (bang) => bang.trigger,
                     availableItems: availableBangs,
                     selectedItem: activeBang,
                     onSelected: onSelected,

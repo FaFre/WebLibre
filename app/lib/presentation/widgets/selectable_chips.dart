@@ -22,6 +22,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final K Function(S item) itemId;
   final Widget Function(T item) itemLabel;
   final Widget? Function(T item)? itemAvatar;
+  final String? Function(T item)? itemTooltip;
   final int? Function(T item)? itemBadgeCount;
 
   final Widget Function(Widget child, S item)? itemWrap;
@@ -35,6 +36,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.itemAvatar,
     this.itemBadgeCount,
     this.itemWrap,
+    this.itemTooltip,
     required this.availableItems,
     this.selectedItem,
     this.maxCount = 25,
@@ -92,6 +94,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                       : null,
                   label: itemLabel.call(item),
                   avatar: itemAvatar?.call(item),
+                  tooltip: itemTooltip?.call(item),
                 ),
               ),
             );

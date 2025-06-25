@@ -86,6 +86,7 @@ class SiteSearch extends HookConsumerWidget {
               itemAvatar: (bang) =>
                   UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
               itemLabel: (bang) => Text(bang.websiteName),
+              itemTooltip: (bang) => bang.trigger,
               availableItems: availableBangs,
               selectedItem: selectedBang,
               onSelected: (bang) {
