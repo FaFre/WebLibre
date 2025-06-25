@@ -9,7 +9,14 @@ class _BadgeWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return count != null ? Badge.count(count: count!, child: child) : child;
+    return count != null
+        ? Badge.count(
+            count: count!,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            textColor: Theme.of(context).colorScheme.onPrimaryContainer,
+            child: child,
+          )
+        : child;
   }
 }
 

@@ -113,7 +113,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                   // enableIMEPersonalizedLearning: !incognitoEnabled,
                   decoration: InputDecoration(
                     // border: InputBorder.none,
-                    prefixIcon: const Icon(MdiIcons.tabSearch),
+                    prefixIcon: const Icon(MdiIcons.tabSearch, size: 18),
                     hintText: 'Search inside tabs...',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     suffixIcon: Row(
