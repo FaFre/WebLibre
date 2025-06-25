@@ -11,6 +11,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
@@ -342,9 +343,44 @@ class TabTreePreview extends HookConsumerWidget {
               //         ),
               //       );
               // },
-              // onDelete: () async {
-              //   await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
-              // },
+              onDelete: () async {
+                final result = (entity.totalTabs > 1)
+                    ? await showDialog<bool?>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Close Tab Tree'),
+                            content: Text(
+                              'Are you sure you want to close the entire tree containing ${entity.totalTabs} tabs?',
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, false);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, true);
+                                },
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          );
+                        },
+                      )
+                    : true;
+
+                if (result == true) {
+                  final tabs = await ref.read(
+                    tabDescendantsProvider(entity.rootId).future,
+                  );
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .closeTabs(tabs.keys.toList());
+                }
+              },
             ),
           ),
         ),
