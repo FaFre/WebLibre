@@ -1,1 +1,1 @@
-WebLibre: The Privacy-Focused Browser
+Browse privately, search locally. Organize tabs, block tracking, and use Tor.

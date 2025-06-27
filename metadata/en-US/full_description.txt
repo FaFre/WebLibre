@@ -1,1 +1,29 @@
-WebLibre: The Privacy-Focused Browser
+<b>WebLibre is a privacy-first browser that puts you in control.</b>
+
+Built on Mozilla’s Gecko engine, WebLibre combines powerful privacy features with advanced tab management and a personal local search engine—so your data stays on your device, not in the cloud.
+
+- <b>Personal Local Search Engine</b>
+  Instantly search across open tabs, browsing history, and your favorite web feeds—all indexed privately on your device. No third-party search engine required.
+
+- <b>Bangs: Direct Site Search</b>
+  Use thousands of “bangs” to search directly on popular websites, bypassing external search engines for faster, more private results.
+
+- <b>Tab Containers for Privacy & Organization</b>
+  Separate your browsing into containers for work, shopping, or personal use. Each container has its own cookies, settings, and can be locked with biometric authentication.
+
+- <b>Integrated Tor Proxy</b>
+  Route selected tabs or containers through the Tor network for enhanced anonymity and to bypass censorship—without leaving your browser.
+
+- <b>Tree View Tab Navigation</b>
+  Visualize and manage complex browsing sessions with hierarchical tab organization. Never lose track of your research or workflow.
+
+- <b>No Tracking, No Cloud Storage</b>
+  WebLibre never tracks you. All your data—searches, history, and feeds—remains on your device for maximum privacy.
+
+Additional Highlights
+
+- <b>Biometric Authentication</b>: Lock sensitive tabs or containers with your fingerprint or face.
+- <b>Efficient Resource Use</b>: Lightweight tabs and persistent sessions for seamless multitasking.
+- <b>Open Source Foundations</b>: Built using trusted Mozilla components.
+
+<b>Take back control of your browsing. Download WebLibre and experience privacy, speed, and organization—your way.</b>
