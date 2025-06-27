@@ -16,7 +16,7 @@ class GeckoPrefService {
       final value = switch (pref.value) {
         final bool x => '$x',
         final int x => '$x',
-        final String x => '"$x"',
+        final String x => "'$x'", //Use single ticks to allow json
         _ => throw Exception('Unknow pref type'),
       };
 
