@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/default_search_selector.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -89,6 +91,65 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                     Padding(
                       padding: EdgeInsets.only(left: 40),
                       child: DefaultSearchSelector(),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('Default Autocomplete Provider'),
+                      leading: Icon(MdiIcons.weatherCloudyArrowRight),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 40),
+                      child: DropdownMenu<SearchSuggestionProviders>(
+                        initialSelection:
+                            generalSettings.defaultSearchSuggestionsProvider,
+                        inputDecorationTheme: InputDecorationTheme(
+                          prefixIconConstraints: BoxConstraints.tight(
+                            const Size.square(24),
+                          ),
+                        ),
+                        width: double.infinity,
+                        leadingIcon: BangIcon(
+                          trigger: generalSettings
+                              .defaultSearchSuggestionsProvider
+                              .relatedBang,
+                        ),
+                        dropdownMenuEntries: SearchSuggestionProviders.values
+                            .map((provider) {
+                              return DropdownMenuEntry(
+                                value: provider,
+                                label: provider.label,
+                                leadingIcon: BangIcon(
+                                  trigger: provider.relatedBang,
+                                ),
+                              );
+                            })
+                            .toList(),
+                        onSelected: (value) async {
+                          if (value != null) {
+                            await ref
+                                .read(
+                                  saveGeneralSettingsControllerProvider
+                                      .notifier,
+                                )
+                                .save(
+                                  (currentSettings) => currentSettings.copyWith
+                                      .defaultSearchSuggestionsProvider(value),
+                                );
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),

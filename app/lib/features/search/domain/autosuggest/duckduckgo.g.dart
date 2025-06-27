@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'general_settings.dart';
+part of 'duckduckgo.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$generalSettingsRepositoryHash() =>
-    r'5335acea5fb175b665b80b2241ce463ae8ad9f89';
+String _$duckDuckGoAutosuggestServiceHash() =>
+    r'1679e6d9bce7cb380b1ee60c768abe2fddb79478';
 
-/// See also [GeneralSettingsRepository].
-@ProviderFor(GeneralSettingsRepository)
-final generalSettingsRepositoryProvider =
-    NotifierProvider<GeneralSettingsRepository, GeneralSettings>.internal(
-      GeneralSettingsRepository.new,
-      name: r'generalSettingsRepositoryProvider',
+/// See also [DuckDuckGoAutosuggestService].
+@ProviderFor(DuckDuckGoAutosuggestService)
+final duckDuckGoAutosuggestServiceProvider =
+    NotifierProvider<DuckDuckGoAutosuggestService, void>.internal(
+      DuckDuckGoAutosuggestService.new,
+      name: r'duckDuckGoAutosuggestServiceProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$generalSettingsRepositoryHash,
+          : _$duckDuckGoAutosuggestServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$GeneralSettingsRepository = Notifier<GeneralSettings>;
+typedef _$DuckDuckGoAutosuggestService = Notifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

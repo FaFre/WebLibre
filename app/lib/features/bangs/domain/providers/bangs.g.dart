@@ -24,26 +24,7 @@ final defaultSearchBangDataProvider = StreamProvider<BangData?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DefaultSearchBangDataRef = StreamProviderRef<BangData?>;
-String _$bangCategoriesHash() => r'947fcfd2dffcc7f585c6ed7379d319f4fe72293a';
-
-/// See also [bangCategories].
-@ProviderFor(bangCategories)
-final bangCategoriesProvider =
-    AutoDisposeStreamProvider<Map<String, List<String>>>.internal(
-      bangCategories,
-      name: r'bangCategoriesProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$bangCategoriesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BangCategoriesRef =
-    AutoDisposeStreamProviderRef<Map<String, List<String>>>;
-String _$bangListHash() => r'd1e0bb9fa4f523ce516e075c0d149bf7803ebb2b';
+String _$bangDataHash() => r'b10d3a74e19d30fc372b9ecbf7146bccd9fdf83b';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -65,6 +46,142 @@ class _SystemHash {
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
 }
+
+/// See also [bangData].
+@ProviderFor(bangData)
+const bangDataProvider = BangDataFamily();
+
+/// See also [bangData].
+class BangDataFamily extends Family<AsyncValue<BangData?>> {
+  /// See also [bangData].
+  const BangDataFamily();
+
+  /// See also [bangData].
+  BangDataProvider call(String trigger) {
+    return BangDataProvider(trigger);
+  }
+
+  @override
+  BangDataProvider getProviderOverride(covariant BangDataProvider provider) {
+    return call(provider.trigger);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'bangDataProvider';
+}
+
+/// See also [bangData].
+class BangDataProvider extends AutoDisposeStreamProvider<BangData?> {
+  /// See also [bangData].
+  BangDataProvider(String trigger)
+    : this._internal(
+        (ref) => bangData(ref as BangDataRef, trigger),
+        from: bangDataProvider,
+        name: r'bangDataProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$bangDataHash,
+        dependencies: BangDataFamily._dependencies,
+        allTransitiveDependencies: BangDataFamily._allTransitiveDependencies,
+        trigger: trigger,
+      );
+
+  BangDataProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.trigger,
+  }) : super.internal();
+
+  final String trigger;
+
+  @override
+  Override overrideWith(
+    Stream<BangData?> Function(BangDataRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: BangDataProvider._internal(
+        (ref) => create(ref as BangDataRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        trigger: trigger,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<BangData?> createElement() {
+    return _BangDataProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BangDataProvider && other.trigger == trigger;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, trigger.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin BangDataRef on AutoDisposeStreamProviderRef<BangData?> {
+  /// The parameter `trigger` of this provider.
+  String get trigger;
+}
+
+class _BangDataProviderElement
+    extends AutoDisposeStreamProviderElement<BangData?>
+    with BangDataRef {
+  _BangDataProviderElement(super.provider);
+
+  @override
+  String get trigger => (origin as BangDataProvider).trigger;
+}
+
+String _$bangCategoriesHash() => r'947fcfd2dffcc7f585c6ed7379d319f4fe72293a';
+
+/// See also [bangCategories].
+@ProviderFor(bangCategories)
+final bangCategoriesProvider =
+    AutoDisposeStreamProvider<Map<String, List<String>>>.internal(
+      bangCategories,
+      name: r'bangCategoriesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bangCategoriesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef BangCategoriesRef =
+    AutoDisposeStreamProviderRef<Map<String, List<String>>>;
+String _$bangListHash() => r'd1e0bb9fa4f523ce516e075c0d149bf7803ebb2b';
 
 /// See also [bangList].
 @ProviderFor(bangList)

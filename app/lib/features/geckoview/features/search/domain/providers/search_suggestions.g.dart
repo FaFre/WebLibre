@@ -7,7 +7,7 @@ part of 'search_suggestions.dart';
 // **************************************************************************
 
 String _$defaultSearchSuggestionsHash() =>
-    r'56514064baa64acf0a28ec34cfad957dd863538b';
+    r'e503757071dd29988cd25e360b56a5a646800d5b';
 
 /// See also [defaultSearchSuggestions].
 @ProviderFor(defaultSearchSuggestions)

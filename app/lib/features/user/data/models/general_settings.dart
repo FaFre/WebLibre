@@ -2,10 +2,12 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'general_settings.g.dart';
 
 const _fallbackSearchProvider = 'ddg';
+const _fallbackAutocompleteProvider = SearchSuggestionProviders.ddg;
 
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
@@ -29,6 +31,7 @@ class GeneralSettings with FastEquatable {
   final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
   final String defaultSearchProvider;
+  final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool createChildTabsOption;
 
   final bool proxyPrivateTabsTor;
@@ -39,6 +42,7 @@ class GeneralSettings with FastEquatable {
     required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
     required this.defaultSearchProvider,
+    required this.defaultSearchSuggestionsProvider,
     required this.createChildTabsOption,
     required this.proxyPrivateTabsTor,
   });
@@ -49,12 +53,15 @@ class GeneralSettings with FastEquatable {
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
     String? defaultSearchProvider,
+    SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? createChildTabsOption,
     bool? proxyPrivateTabsTor,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
+       defaultSearchSuggestionsProvider =
+           defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        createChildTabsOption = createChildTabsOption ?? false,
        proxyPrivateTabsTor = proxyPrivateTabsTor ?? false;
 
@@ -70,6 +77,7 @@ class GeneralSettings with FastEquatable {
     enforceReadability,
     deleteBrowsingDataOnQuit,
     defaultSearchProvider,
+    defaultSearchSuggestionsProvider,
     createChildTabsOption,
     proxyPrivateTabsTor,
   ];

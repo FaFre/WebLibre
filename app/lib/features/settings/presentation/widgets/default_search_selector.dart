@@ -12,7 +12,9 @@ class DefaultSearchSelector extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activeBang = ref.watch(defaultSearchBangDataProvider).valueOrNull;
+    final activeBang = ref.watch(
+      defaultSearchBangDataProvider.select((value) => value.valueOrNull),
+    );
     final availableBangs = ref.watch(frequentBangListProvider);
 
     Future<void> updateSearchProvider(String trigger) async {

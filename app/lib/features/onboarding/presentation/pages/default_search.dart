@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 const defaultBangs = ['ddg', 'brave', 'startpage', 'qwant'];
@@ -17,7 +21,14 @@ class DefaultSearchPage extends HookConsumerWidget {
 
     final bangs = ref.watch(bangListProvider(triggers: defaultBangs));
 
-    final activeBang = ref.watch(defaultSearchBangDataProvider).valueOrNull;
+    final activeBang = ref.watch(
+      defaultSearchBangDataProvider.select((value) => value.valueOrNull),
+    );
+    final activeAutosuggest = ref.watch(
+      generalSettingsRepositoryProvider.select(
+        (value) => value.defaultSearchSuggestionsProvider,
+      ),
+    );
 
     Future<void> updateSearchProvider(String trigger) async {
       await ref
@@ -37,31 +48,27 @@ class DefaultSearchPage extends HookConsumerWidget {
             children: [
               const SizedBox(height: 24),
               Center(
-                child: Text(
-                  'Default Search Provider',
-                  style: theme.textTheme.headlineMedium,
-                ),
+                child: Text('Search', style: theme.textTheme.headlineMedium),
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                height: 48,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Selected Provider'),
-                    if (activeBang != null)
-                      FilterChip(
-                        showCheckmark: false,
-                        label: Text(activeBang.websiteName),
-                        avatar: UrlIcon([
-                          activeBang.getTemplateUrl(''),
-                        ], iconSize: 20),
-                        selected: true,
-                        onSelected: (value) {},
-                      ),
-                  ],
-                ),
+              const ListTile(
+                title: Text('Default Search Provider'),
+                leading: Icon(MdiIcons.cloudSearch),
+                contentPadding: EdgeInsets.zero,
               ),
+              if (activeBang != null)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: FilterChip(
+                    showCheckmark: false,
+                    label: Text(activeBang.websiteName),
+                    avatar: UrlIcon([
+                      activeBang.getTemplateUrl(''),
+                    ], iconSize: 20),
+                    selected: true,
+                    onSelected: (value) {},
+                  ),
+                ),
               const Divider(),
               Wrap(
                 spacing: 8.0,
@@ -92,6 +99,41 @@ class DefaultSearchPage extends HookConsumerWidget {
                     },
                   ),
                 ],
+              ),
+              const SizedBox(height: 24),
+              const ListTile(
+                title: Text('Default Autocomplete Provider'),
+                leading: Icon(MdiIcons.weatherCloudyArrowRight),
+                contentPadding: EdgeInsets.zero,
+              ),
+              DropdownMenu<SearchSuggestionProviders>(
+                initialSelection: activeAutosuggest,
+                inputDecorationTheme: InputDecorationTheme(
+                  prefixIconConstraints: BoxConstraints.tight(
+                    const Size.square(24),
+                  ),
+                ),
+                width: double.infinity,
+                leadingIcon: BangIcon(trigger: activeAutosuggest.relatedBang),
+                dropdownMenuEntries: SearchSuggestionProviders.values.map((
+                  provider,
+                ) {
+                  return DropdownMenuEntry(
+                    value: provider,
+                    label: provider.label,
+                    leadingIcon: BangIcon(trigger: provider.relatedBang),
+                  );
+                }).toList(),
+                onSelected: (value) async {
+                  if (value != null) {
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (currentSettings) => currentSettings.copyWith
+                              .defaultSearchSuggestionsProvider(value),
+                        );
+                  }
+                },
               ),
             ],
           );

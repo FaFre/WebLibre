@@ -22,6 +22,12 @@ Stream<BangData?> defaultSearchBangData(Ref ref) {
 }
 
 @Riverpod()
+Stream<BangData?> bangData(Ref ref, String trigger) {
+  final repository = ref.watch(bangDataRepositoryProvider.notifier);
+  return repository.watchBang(trigger);
+}
+
+@Riverpod()
 Stream<Map<String, List<String>>> bangCategories(Ref ref) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchCategories();

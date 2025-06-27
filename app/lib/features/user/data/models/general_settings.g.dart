@@ -19,6 +19,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings defaultSearchProvider(String defaultSearchProvider);
 
+  GeneralSettings defaultSearchSuggestionsProvider(
+    SearchSuggestionProviders defaultSearchSuggestionsProvider,
+  );
+
   GeneralSettings createChildTabsOption(bool createChildTabsOption);
 
   GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor);
@@ -35,6 +39,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     String defaultSearchProvider,
+    SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
     bool proxyPrivateTabsTor,
   });
@@ -67,6 +72,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(defaultSearchProvider: defaultSearchProvider);
 
   @override
+  GeneralSettings defaultSearchSuggestionsProvider(
+    SearchSuggestionProviders defaultSearchSuggestionsProvider,
+  ) => this(defaultSearchSuggestionsProvider: defaultSearchSuggestionsProvider);
+
+  @override
   GeneralSettings createChildTabsOption(bool createChildTabsOption) =>
       this(createChildTabsOption: createChildTabsOption);
 
@@ -87,6 +97,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
+    Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
   }) {
@@ -113,6 +124,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultSearchProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchProvider as String,
+      defaultSearchSuggestionsProvider:
+          defaultSearchSuggestionsProvider == const $CopyWithPlaceholder()
+          ? _value.defaultSearchSuggestionsProvider
+          // ignore: cast_nullable_to_non_nullable
+          : defaultSearchSuggestionsProvider as SearchSuggestionProviders,
       createChildTabsOption:
           createChildTabsOption == const $CopyWithPlaceholder()
           ? _value.createChildTabsOption
@@ -146,6 +162,10 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
               ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
               .toSet(),
       defaultSearchProvider: json['defaultSearchProvider'] as String?,
+      defaultSearchSuggestionsProvider: $enumDecodeNullable(
+        _$SearchSuggestionProvidersEnumMap,
+        json['defaultSearchSuggestionsProvider'],
+      ),
       createChildTabsOption: json['createChildTabsOption'] as bool?,
       proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
     );
@@ -159,6 +179,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
           ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
           .toList(),
       'defaultSearchProvider': instance.defaultSearchProvider,
+      'defaultSearchSuggestionsProvider':
+          _$SearchSuggestionProvidersEnumMap[instance
+              .defaultSearchSuggestionsProvider]!,
       'createChildTabsOption': instance.createChildTabsOption,
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
     };
@@ -176,4 +199,11 @@ const _$DeleteBrowsingDataTypeEnumMap = {
   DeleteBrowsingDataType.cache: 'cache',
   DeleteBrowsingDataType.permissions: 'permissions',
   DeleteBrowsingDataType.downloads: 'downloads',
+};
+
+const _$SearchSuggestionProvidersEnumMap = {
+  SearchSuggestionProviders.brave: 'brave',
+  SearchSuggestionProviders.ddg: 'ddg',
+  SearchSuggestionProviders.kagi: 'kagi',
+  SearchSuggestionProviders.qwant: 'qwant',
 };
