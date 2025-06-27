@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/repositories/search_suggestions.dart';
 import 'package:weblibre/features/search/domain/autosuggest/brave.dart';
 import 'package:weblibre/features/search/domain/autosuggest/duckduckgo.dart';
+import 'package:weblibre/features/search/domain/autosuggest/empty.dart';
 import 'package:weblibre/features/search/domain/autosuggest/kagi.dart';
 import 'package:weblibre/features/search/domain/autosuggest/qwant.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
@@ -19,6 +20,9 @@ ISearchSuggestionProvider defaultSearchSuggestions(Ref ref) {
   );
 
   return switch (provider) {
+    SearchSuggestionProviders.none => ref.watch(
+      emptyAutosuggestServiceProvider.notifier,
+    ),
     SearchSuggestionProviders.brave => ref.watch(
       braveAutosuggestServiceProvider.notifier,
     ),

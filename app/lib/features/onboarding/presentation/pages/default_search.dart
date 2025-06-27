@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
@@ -114,14 +115,18 @@ class DefaultSearchPage extends HookConsumerWidget {
                   ),
                 ),
                 width: double.infinity,
-                leadingIcon: BangIcon(trigger: activeAutosuggest.relatedBang),
+                leadingIcon: activeAutosuggest.relatedBang.mapNotNull(
+                  (trigger) => BangIcon(trigger: trigger),
+                ),
                 dropdownMenuEntries: SearchSuggestionProviders.values.map((
                   provider,
                 ) {
                   return DropdownMenuEntry(
                     value: provider,
                     label: provider.label,
-                    leadingIcon: BangIcon(trigger: provider.relatedBang),
+                    leadingIcon: provider.relatedBang.mapNotNull(
+                      (trigger) => BangIcon(trigger: trigger),
+                    ),
                   );
                 }).toList(),
                 onSelected: (value) async {

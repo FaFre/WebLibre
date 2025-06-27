@@ -1,13 +1,14 @@
 import 'package:exceptions/exceptions.dart';
 
 enum SearchSuggestionProviders {
+  none('Disabled', null),
   brave('Brave', 'brave'),
   ddg('DuckDuckGo', 'ddg'),
   kagi('Kagi', 'kagi'),
   qwant('Qwant', 'qwant');
 
   final String label;
-  final String relatedBang;
+  final String? relatedBang;
 
   const SearchSuggestionProviders(this.label, this.relatedBang);
 }

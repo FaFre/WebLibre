@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
@@ -120,18 +121,19 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                           ),
                         ),
                         width: double.infinity,
-                        leadingIcon: BangIcon(
-                          trigger: generalSettings
-                              .defaultSearchSuggestionsProvider
-                              .relatedBang,
-                        ),
+                        leadingIcon: generalSettings
+                            .defaultSearchSuggestionsProvider
+                            .relatedBang
+                            .mapNotNull(
+                              (trigger) => BangIcon(trigger: trigger),
+                            ),
                         dropdownMenuEntries: SearchSuggestionProviders.values
                             .map((provider) {
                               return DropdownMenuEntry(
                                 value: provider,
                                 label: provider.label,
-                                leadingIcon: BangIcon(
-                                  trigger: provider.relatedBang,
+                                leadingIcon: provider.relatedBang.mapNotNull(
+                                  (trigger) => BangIcon(trigger: trigger),
                                 ),
                               );
                             })

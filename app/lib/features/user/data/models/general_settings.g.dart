@@ -202,6 +202,7 @@ const _$DeleteBrowsingDataTypeEnumMap = {
 };
 
 const _$SearchSuggestionProvidersEnumMap = {
+  SearchSuggestionProviders.none: 'none',
   SearchSuggestionProviders.brave: 'brave',
   SearchSuggestionProviders.ddg: 'ddg',
   SearchSuggestionProviders.kagi: 'kagi',
