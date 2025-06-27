@@ -11,11 +11,14 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
 part 'website_title.g.dart';
 
+const _supportedFetchSchemes = {'http', 'https'};
+
 @Riverpod()
 class CompletePageInfo extends _$CompletePageInfo {
   @override
   AsyncValue<WebPageInfo> build(Uri url, WebPageInfo? cached) {
-    if (cached?.isPageInfoComplete == true) {
+    if (cached?.isPageInfoComplete == true ||
+        !_supportedFetchSchemes.contains(url.scheme)) {
       return AsyncData(cached!);
     }
 
