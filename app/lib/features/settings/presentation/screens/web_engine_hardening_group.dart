@@ -71,53 +71,61 @@ class WebEngineHardeningGroupScreen extends HookConsumerWidget {
               Expanded(
                 child: ListView(
                   children: group.settings.entries.map((setting) {
-                    return Row(
-                      children: [
-                        if (!setting.value.shouldBeDefault ||
-                            !setting.value.isActive)
-                          Expanded(
-                            child: SwitchListTile(
-                              value: setting.value.isActive,
-                              title: Text(setting.value.title ?? setting.key),
-                              subtitle: setting.value.description.mapNotNull(
-                                (description) => Text(description),
-                              ),
-                              secondary: HardeningGroupIcon(
-                                isActive: setting.value.isActive,
-                              ),
-                              onChanged: (value) async {
-                                final notifier = ref.read(
-                                  preferenceSettingsGroupRepositoryProvider(
-                                    PreferencePartition.user,
-                                    groupName,
-                                  ).notifier,
-                                );
+                    var value = setting.value.value.toString();
+                    if (value.length > 160) {
+                      value = '${value.substring(0, 160)}…';
+                    }
 
-                                if (value) {
-                                  await notifier.apply(filter: [setting.key]);
-                                } else {
-                                  await notifier.reset(filter: [setting.key]);
-                                }
-                              },
+                    return Tooltip(
+                      message: '${setting.key}: $value',
+                      child: Row(
+                        children: [
+                          if (!setting.value.shouldBeDefault ||
+                              !setting.value.isActive)
+                            Expanded(
+                              child: SwitchListTile(
+                                value: setting.value.isActive,
+                                title: Text(setting.value.title ?? setting.key),
+                                subtitle: setting.value.description.mapNotNull(
+                                  (description) => Text(description),
+                                ),
+                                secondary: HardeningGroupIcon(
+                                  isActive: setting.value.isActive,
+                                ),
+                                onChanged: (value) async {
+                                  final notifier = ref.read(
+                                    preferenceSettingsGroupRepositoryProvider(
+                                      PreferencePartition.user,
+                                      groupName,
+                                    ).notifier,
+                                  );
+
+                                  if (value) {
+                                    await notifier.apply(filter: [setting.key]);
+                                  } else {
+                                    await notifier.reset(filter: [setting.key]);
+                                  }
+                                },
+                              ),
+                            )
+                          else
+                            Expanded(
+                              child: ListTile(
+                                title: Text(setting.value.title ?? setting.key),
+                                subtitle: setting.value.description.mapNotNull(
+                                  (description) => Text(description),
+                                ),
+                                leading: HardeningGroupIcon(
+                                  isActive: setting.value.isActive,
+                                ),
+                                trailing: const Padding(
+                                  padding: EdgeInsets.only(right: 18.0),
+                                  child: Icon(Icons.check),
+                                ),
+                              ),
                             ),
-                          )
-                        else
-                          Expanded(
-                            child: ListTile(
-                              title: Text(setting.value.title ?? setting.key),
-                              subtitle: setting.value.description.mapNotNull(
-                                (description) => Text(description),
-                              ),
-                              leading: HardeningGroupIcon(
-                                isActive: setting.value.isActive,
-                              ),
-                              trailing: const Padding(
-                                padding: EdgeInsets.only(right: 18.0),
-                                child: Icon(Icons.check),
-                              ),
-                            ),
-                          ),
-                      ],
+                        ],
+                      ),
                     );
                   }).toList(),
                 ),
