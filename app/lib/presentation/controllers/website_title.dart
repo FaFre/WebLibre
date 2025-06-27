@@ -1,8 +1,13 @@
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
 part 'website_title.g.dart';
 
@@ -51,9 +56,36 @@ Future<WebPageInfo> pageInfo(
   Uri url, {
   required bool isImageRequest,
 }) async {
-  final websiteService = ref.watch(genericWebsiteServiceProvider.notifier);
+  final tabId = ref.read(selectedTabProvider);
 
-  final result = await websiteService.fetchPageInfo(url, isImageRequest);
+  int? proxyPort;
+  if (tabId != null) {
+    final containerId = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .containerTabId(tabId);
+
+    final containerData = await containerId.mapNotNull(
+      (containerId) => ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainerData(containerId),
+    );
+
+    if (containerData?.metadata.useProxy == true) {
+      proxyPort = await ref.read(torProxyServiceProvider.future);
+
+      if (proxyPort == null) {
+        throw Exception('Could not proxy request');
+      }
+    }
+  }
+
+  final result = await ref
+      .watch(genericWebsiteServiceProvider.notifier)
+      .fetchPageInfo(
+        url: url,
+        isImageRequest: isImageRequest,
+        proxyPort: proxyPort,
+      );
 
   if (result.isSuccess) {
     ref.keepAlive();

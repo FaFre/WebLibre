@@ -60,6 +60,10 @@ dependencies:
   skeletonizer: ^2.0.1
   sliver_tools: ^0.2.12
   smooth_page_indicator: ^1.2.1
+  socks5_proxy:
+    git:
+      url: https://github.com/sylvieon/socks_dart.git
+      ref: 04550bc08f42cc1a35f1e870f651b93a4f9aceab
   speech_to_text_google_dialog: 
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git

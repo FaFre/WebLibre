@@ -6,9 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
-import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:socks5_proxy/socks_client.dart';
+import 'package:universal_io/io.dart';
 import 'package:weblibre/core/http_error_handler.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
@@ -186,12 +188,23 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     return icons;
   }
 
-  Future<Result<WebPageInfo>> fetchPageInfo(Uri url, bool isImageRequest) {
+  Future<Result<WebPageInfo>> fetchPageInfo({
+    required Uri url,
+    required bool isImageRequest,
+    required int? proxyPort,
+  }) {
     return Result.fromAsync(() async {
       final result = await compute((args) async {
-        final [String urlString, bool isImageRequest] = args;
+        final [String urlString, bool isImageRequest, int? proxyPort] = args;
 
-        final client = http.Client();
+        final httpClient = HttpClient();
+        if (proxyPort != null) {
+          SocksTCPClient.assignToHttpClient(httpClient, [
+            ProxySettings(InternetAddress.loopbackIPv4, proxyPort),
+          ]);
+        }
+
+        final client = IOClient(httpClient);
         try {
           final baseUri = Uri.parse(urlString);
           final response = await client
@@ -225,7 +238,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         } finally {
           client.close();
         }
-      }, <dynamic>[url.toString(), isImageRequest]);
+      }, <dynamic>[url.toString(), isImageRequest, proxyPort]);
 
       if (result['imageBytes'] case final Uint8List imageBytes) {
         return WebPageInfo(
