@@ -41,6 +41,8 @@ class _TorService {
         onStart: onStart,
         isForegroundMode: true,
         autoStartOnBoot: false,
+        initialNotificationTitle: 'Tor Service',
+        initialNotificationContent: 'Running in background',
       ),
     );
 
