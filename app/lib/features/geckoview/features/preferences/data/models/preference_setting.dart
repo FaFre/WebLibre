@@ -10,11 +10,15 @@ class PreferenceSettingGroup with FastEquatable {
 
   final Map<String, PreferenceSetting> settings;
 
-  bool get isActive => settings.values.every(
+  bool get isActiveOrOptional => settings.values.every(
     (setting) => setting.requireUserOptIn || setting.isActive,
   );
 
   bool get isPartlyActive => settings.values.any((setting) => setting.isActive);
+
+  bool get hasInactiveOptional => settings.values.any(
+    (setting) => !setting.isActive && setting.requireUserOptIn,
+  );
 
   PreferenceSettingGroup({required this.description, required this.settings});
 

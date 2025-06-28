@@ -21,7 +21,7 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
     final allGroupsActive = useMemoized(
       () =>
           preferenceGroups.valueOrNull?.values.every(
-            (element) => element.isActive,
+            (element) => element.isActiveOrOptional,
           ) ??
           false,
       [EquatableValue(preferenceGroups.valueOrNull)],
@@ -78,9 +78,12 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
                             subtitle: group.value.description.mapNotNull(
                               (description) => Text(description),
                             ),
-                            leading: HardeningGroupIcon(
-                              isActive: group.value.isActive,
-                              isPartlyActive: group.value.isPartlyActive,
+                            leading: Badge(
+                              isLabelVisible: group.value.hasInactiveOptional,
+                              child: HardeningGroupIcon(
+                                isActive: group.value.isActiveOrOptional,
+                                isPartlyActive: group.value.isPartlyActive,
+                              ),
                             ),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () async {

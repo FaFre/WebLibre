@@ -35,7 +35,7 @@ class WebEngineHardeningGroupScreen extends HookConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SwitchListTile(
-                      value: group.isActive,
+                      value: group.isActiveOrOptional,
                       title: Text(
                         groupName,
                         style: TextStyle(
@@ -86,8 +86,42 @@ class WebEngineHardeningGroupScreen extends HookConsumerWidget {
                               child: SwitchListTile(
                                 value: setting.value.isActive,
                                 title: Text(setting.value.title ?? setting.key),
-                                subtitle: setting.value.description.mapNotNull(
-                                  (description) => Text(description),
+                                subtitle: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      if (setting.value.requireUserOptIn)
+                                        WidgetSpan(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            margin: const EdgeInsets.only(
+                                              right: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: theme.colorScheme.error,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              'Optional',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                                color:
+                                                    theme.colorScheme.onError,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      if (setting.value.description != null)
+                                        TextSpan(
+                                          text: setting.value.description,
+                                          // style: theme.textTheme.bodyMedium,
+                                        ),
+                                    ],
+                                  ),
                                 ),
                                 secondary: HardeningGroupIcon(
                                   isActive: setting.value.isActive,
