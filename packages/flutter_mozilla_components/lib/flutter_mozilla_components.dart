@@ -1,4 +1,9 @@
-//export 'src/domain/services/gecko_browser.dart';
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 export 'src/data/models/load_url_flags.dart';
 export 'src/data/models/source.dart';
 export 'src/domain/entities/default_selection_actions.dart';

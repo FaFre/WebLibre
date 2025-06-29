@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 // ignore_for_file: constant_identifier_names, non_constant_identifier_names copied from kotlin
 
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
