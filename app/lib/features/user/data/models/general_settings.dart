@@ -6,8 +6,8 @@ import 'package:weblibre/features/search/domain/entities/abstract/i_search_sugge
 
 part 'general_settings.g.dart';
 
-const _fallbackSearchProvider = 'ddg';
-const _fallbackAutocompleteProvider = SearchSuggestionProviders.ddg;
+const _fallbackSearchProvider = 'wikipedia';
+const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
