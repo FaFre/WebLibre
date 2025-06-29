@@ -9,8 +9,8 @@ CREATE TABLE feed (
   url TEXT PRIMARY KEY NOT NULL MAPPED BY `const UriConverter()`,
   title TEXT,
   description TEXT,
-  icon TEXT MAPPED BY `const UriConverter()`,
-  site_link TEXT MAPPED BY `const UriConverter()`,
+  icon TEXT MAPPED BY `const UriConverterNullable()`,
+  site_link TEXT MAPPED BY `const UriConverterNullable()`,
   authors TEXT MAPPED BY `const FeedAuthorsConverter()`,
   tags TEXT MAPPED BY `const FeedCategoriesConverter()`,
   last_fetched DATETIME

@@ -16,7 +16,7 @@ CREATE TABLE tab(
   parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
   container_id TEXT REFERENCES container (id) ON DELETE CASCADE,
   order_key TEXT NOT NULL,
-  url TEXT MAPPED BY `const UriConverter()`,
+  url TEXT MAPPED BY `const UriConverterNullable()`,
   title TEXT,
   is_probably_readerable BOOL,
   extracted_content_markdown TEXT,

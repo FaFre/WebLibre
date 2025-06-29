@@ -228,7 +228,7 @@ class Tab extends Table with TableInfo<Tab, TabData> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
         $customConstraints: '',
-      ).withConverter<Uri?>(Tab.$converterurln);
+      ).withConverter<Uri?>(Tab.$converterurl);
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
     'title',
     aliasedName,
@@ -330,7 +330,7 @@ class Tab extends Table with TableInfo<Tab, TabData> {
         DriftSqlType.string,
         data['${effectivePrefix}order_key'],
       )!,
-      url: Tab.$converterurln.fromSql(
+      url: Tab.$converterurl.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}url'],
@@ -372,9 +372,8 @@ class Tab extends Table with TableInfo<Tab, TabData> {
     return Tab(attachedDatabase, alias);
   }
 
-  static TypeConverter<Uri, String> $converterurl = const UriConverter();
-  static TypeConverter<Uri?, String?> $converterurln =
-      NullAwareTypeConverter.wrap($converterurl);
+  static TypeConverter<Uri?, String?> $converterurl =
+      const UriConverterNullable();
   @override
   bool get dontWriteConstraints => true;
 }
@@ -418,7 +417,7 @@ class TabData extends DataClass implements Insertable<TabData> {
     }
     map['order_key'] = Variable<String>(orderKey);
     if (!nullToAbsent || url != null) {
-      map['url'] = Variable<String>(Tab.$converterurln.toSql(url));
+      map['url'] = Variable<String>(Tab.$converterurl.toSql(url));
     }
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
@@ -747,7 +746,7 @@ class TabCompanion extends UpdateCompanion<TabData> {
       map['order_key'] = Variable<String>(orderKey.value);
     }
     if (url.present) {
-      map['url'] = Variable<String>(Tab.$converterurln.toSql(url.value));
+      map['url'] = Variable<String>(Tab.$converterurl.toSql(url.value));
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -1176,8 +1175,7 @@ abstract class _$TabDatabase extends GeneratedDatabase {
         id: row.read<String>('id'),
         title: row.readNullable<String>('title'),
         url: row.readNullable<String>('url'),
-        cleanUrl: NullAwareTypeConverter.wrapFromSql(
-          Tab.$converterurl,
+        cleanUrl: Tab.$converterurl.fromSql(
           row.readNullable<String>('clean_url'),
         ),
         weightedRank: row.read<double>('weighted_rank'),
@@ -1207,8 +1205,7 @@ abstract class _$TabDatabase extends GeneratedDatabase {
         id: row.read<String>('id'),
         title: row.readNullable<String>('title'),
         url: row.readNullable<String>('url'),
-        cleanUrl: NullAwareTypeConverter.wrapFromSql(
-          Tab.$converterurl,
+        cleanUrl: Tab.$converterurl.fromSql(
           row.readNullable<String>('clean_url'),
         ),
         extractedContent: row.readNullable<String>('extracted_content'),

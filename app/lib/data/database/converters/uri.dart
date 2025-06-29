@@ -14,3 +14,17 @@ class UriConverter extends TypeConverter<Uri, String> {
     return value.toString();
   }
 }
+
+class UriConverterNullable extends TypeConverter<Uri?, String?> {
+  const UriConverterNullable();
+
+  @override
+  Uri? fromSql(String? fromDb) {
+    return uri_parser.tryParseUrl(fromDb, eagerParsing: true);
+  }
+
+  @override
+  String? toSql(Uri? value) {
+    return value?.toString();
+  }
+}

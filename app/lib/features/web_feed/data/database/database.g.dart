@@ -41,7 +41,7 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
         $customConstraints: '',
-      ).withConverter<Uri?>(Feed.$convertericonn);
+      ).withConverter<Uri?>(Feed.$convertericon);
   late final GeneratedColumnWithTypeConverter<Uri?, String> siteLink =
       GeneratedColumn<String>(
         'site_link',
@@ -50,7 +50,7 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
         $customConstraints: '',
-      ).withConverter<Uri?>(Feed.$convertersiteLinkn);
+      ).withConverter<Uri?>(Feed.$convertersiteLink);
   late final GeneratedColumnWithTypeConverter<List<FeedAuthor>?, String>
   authors = GeneratedColumn<String>(
     'authors',
@@ -113,13 +113,13 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
-      icon: Feed.$convertericonn.fromSql(
+      icon: Feed.$convertericon.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}icon'],
         ),
       ),
-      siteLink: Feed.$convertersiteLinkn.fromSql(
+      siteLink: Feed.$convertersiteLink.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}site_link'],
@@ -150,12 +150,10 @@ class Feed extends Table with TableInfo<Feed, FeedData> {
   }
 
   static TypeConverter<Uri, String> $converterurl = const UriConverter();
-  static TypeConverter<Uri, String> $convertericon = const UriConverter();
-  static TypeConverter<Uri?, String?> $convertericonn =
-      NullAwareTypeConverter.wrap($convertericon);
-  static TypeConverter<Uri, String> $convertersiteLink = const UriConverter();
-  static TypeConverter<Uri?, String?> $convertersiteLinkn =
-      NullAwareTypeConverter.wrap($convertersiteLink);
+  static TypeConverter<Uri?, String?> $convertericon =
+      const UriConverterNullable();
+  static TypeConverter<Uri?, String?> $convertersiteLink =
+      const UriConverterNullable();
   static TypeConverter<List<FeedAuthor>, String> $converterauthors =
       const FeedAuthorsConverter();
   static TypeConverter<List<FeedAuthor>?, String?> $converterauthorsn =
@@ -200,11 +198,11 @@ class FeedData extends DataClass implements Insertable<FeedData> {
       map['description'] = Variable<String>(description);
     }
     if (!nullToAbsent || icon != null) {
-      map['icon'] = Variable<String>(Feed.$convertericonn.toSql(icon));
+      map['icon'] = Variable<String>(Feed.$convertericon.toSql(icon));
     }
     if (!nullToAbsent || siteLink != null) {
       map['site_link'] = Variable<String>(
-        Feed.$convertersiteLinkn.toSql(siteLink),
+        Feed.$convertersiteLink.toSql(siteLink),
       );
     }
     if (!nullToAbsent || authors != null) {
@@ -419,11 +417,11 @@ class FeedCompanion extends UpdateCompanion<FeedData> {
       map['description'] = Variable<String>(description.value);
     }
     if (icon.present) {
-      map['icon'] = Variable<String>(Feed.$convertericonn.toSql(icon.value));
+      map['icon'] = Variable<String>(Feed.$convertericon.toSql(icon.value));
     }
     if (siteLink.present) {
       map['site_link'] = Variable<String>(
-        Feed.$convertersiteLinkn.toSql(siteLink.value),
+        Feed.$convertersiteLink.toSql(siteLink.value),
       );
     }
     if (authors.present) {
@@ -1064,13 +1062,13 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
         DriftSqlType.string,
         data['${effectivePrefix}contentPlain'],
       ),
-      icon: Feed.$convertericonn.fromSql(
+      icon: Feed.$convertericon.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}icon'],
         ),
       ),
-      siteLink: Feed.$convertersiteLinkn.fromSql(
+      siteLink: Feed.$convertersiteLink.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}site_link'],
@@ -1185,14 +1183,14 @@ class ArticleView extends ViewInfo<ArticleView, FeedArticle>
         aliasedName,
         true,
         type: DriftSqlType.string,
-      ).withConverter<Uri?>(Feed.$convertericonn);
+      ).withConverter<Uri?>(Feed.$convertericon);
   late final GeneratedColumnWithTypeConverter<Uri?, String> siteLink =
       GeneratedColumn<String>(
         'site_link',
         aliasedName,
         true,
         type: DriftSqlType.string,
-      ).withConverter<Uri?>(Feed.$convertersiteLinkn);
+      ).withConverter<Uri?>(Feed.$convertersiteLink);
   @override
   ArticleView createAlias(String alias) {
     return ArticleView(attachedDatabase, alias);
@@ -1503,10 +1501,7 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
         contentHtml: row.readNullable<String>('contentHtml'),
         contentMarkdown: row.readNullable<String>('contentMarkdown'),
         contentPlain: row.readNullable<String>('contentPlain'),
-        icon: NullAwareTypeConverter.wrapFromSql(
-          Feed.$convertericon,
-          row.readNullable<String>('icon'),
-        ),
+        icon: Feed.$convertericon.fromSql(row.readNullable<String>('icon')),
       ),
     );
   }
@@ -1558,10 +1553,7 @@ abstract class _$FeedDatabase extends GeneratedDatabase {
         contentHtml: row.readNullable<String>('contentHtml'),
         contentMarkdown: row.readNullable<String>('contentMarkdown'),
         contentPlain: row.readNullable<String>('contentPlain'),
-        icon: NullAwareTypeConverter.wrapFromSql(
-          Feed.$convertericon,
-          row.readNullable<String>('icon'),
-        ),
+        icon: Feed.$convertericon.fromSql(row.readNullable<String>('icon')),
         titleHighlight: row.readNullable<String>('title_highlight'),
         summarySnippet: row.readNullable<String>('summary_snippet'),
         contentSnippet: row.readNullable<String>('content_snippet'),
