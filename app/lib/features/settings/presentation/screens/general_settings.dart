@@ -1,9 +1,11 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
@@ -13,6 +15,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class GeneralSettingsScreen extends HookConsumerWidget {
   const GeneralSettingsScreen({super.key});
@@ -259,6 +262,35 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                     ),
                   );
                 },
+              ),
+              CustomListTile(
+                title: 'Error Logs',
+                subtitle: 'Copy logs for issue reporting',
+                prefix: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(
+                    Icons.bug_report,
+                    size: 24,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                suffix: FilledButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text: loggerMemory.buffer
+                            .map((e) => e.lines.join('\n'))
+                            .join('\n\n'),
+                      ),
+                    );
+
+                    if (context.mounted) {
+                      showInfoMessage(context, 'Logs copied');
+                    }
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Copy'),
+                ),
               ),
             ],
           );

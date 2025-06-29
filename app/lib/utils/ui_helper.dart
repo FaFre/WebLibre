@@ -15,6 +15,12 @@ void showErrorMessage(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
+void showInfoMessage(BuildContext context, String message) {
+  final snackBar = SnackBar(content: Text(message));
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
 void showTabBackButtonMessage(
   BuildContext context,
   int tabCount,

@@ -21,6 +21,15 @@ import 'package:weblibre/presentation/main_app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  FlutterError.onError = (e) {
+    logger.e(e.toString(), error: e.exception, stackTrace: e.stack);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    logger.e('Unhandled Error', error: error, stackTrace: stack);
+    return true;
+  };
+
   if (kDebugMode) {
     final serviceProtocolInfo = await Service.getInfo();
     logger.d('VM: ${serviceProtocolInfo.serverUri}');
