@@ -101,14 +101,15 @@ class TabPreview extends HookWidget {
                       return child!;
                     },
                     menuChildren: [
-                      MenuItemButton(
-                        onPressed: onDeleteAll.mapNotNull(
-                          (p0) => () {
+                      ?onDeleteAll.mapNotNull(
+                        (p0) => MenuItemButton(
+                          onPressed: () {
                             p0(tab.url.host);
                           },
+
+                          leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
+                          child: Text('Close all from ${tab.url.host}'),
                         ),
-                        leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                        child: Text('Close all from ${tab.url.host}'),
                       ),
                     ],
                     child: IconButton(
