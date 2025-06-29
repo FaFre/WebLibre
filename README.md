@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="250" src="https://raw.githubusercontent.com/FaFre/WebLibre/main/app/assets/icon/icon.png" alt="WebLibre Logo">
+  <img width="250" src="app/assets/icon/icon.png" alt="WebLibre Logo">
 </p>
 
 # WebLibre: The Privacy-Focused Browser
@@ -8,32 +8,53 @@
 
 WebLibre is an independent browser project built on the foundation of [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/).
 
-- Contains **Zero Tracking or Telemetry**
-- Ad, tracker and malware blocking through [**uBlock Origin**](https://ublockorigin.com/) (opt out possible)
-- **Local on-device Search Engine** for contents of Tabs, History and Feed Articles
-- **Tab Container** support with [**Contextual Identities** (Cookie isolation)](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/contextualIdentities), [**Tor** anonymity network](https://en.wikipedia.org/wiki/The_Tor_Project) tunneling and biometric authentication
-- **Enhanced Tracking Protection** by default, blocking the following out of the box:
-  - Social media trackers
-  - Cross-site cookies in all tabs
-  - Tracking content in all tabs
-  - Cryptominers
-  - Known and suspected fingerprinters
-- Contains **50+** controllable **Web Engine Hardening Settings**, to improve:
-  - Security of Connections (SSL/TLS / OCSP / CERTS / HPKP)
-  - DNS and Proxy/SOCKS security
-  - General Privacy while browsing
-  - Advanced [Fingerprinting](https://en.wikipedia.org/wiki/Canvas_fingerprinting) protection
-  - Attack Surface Reduction
-- **Over 14.000+ search providers** (aka "bangs") included with on-site-search
-- Supports the installation of all compatible **Firefox Extensions** through the official Mozilla Store
+## Features
 
+### Privacy & Security
+- **No Tracking:** WebLibre does not track or monitor your browsing.
+- **Local Data Storage:** All your data stays on your device.
+- **Tor integration:** Route container or private tab traffic through the Tor network for greater anonymity.
+- **uBlock Origin integration:** Optional content blocker during onboarding
+- **Web Engine Hardening**: Comprehensive and easy to use presets. `about:config` access is available for expert users.
+- **Container Isolation:** Organize tabs into containers, each with its own cookie context and network settings.
+- **Biometric Authentication:** Restrict access to sensitive containers using fingerprint or face recognition.
+
+### Personal Local Search Engine
+
+- **Unified Search:** Instantly search across:
+    - **Open Tabs:** By title, address, and full page content (no size limits).
+    - **Web Feeds:** Aggregate and search your favorite news sites and blogs, with full content indexing.
+    - **Browsing History:** Quickly find previously visited sites by title or address.
+    - **Bangs:** Use custom shortcuts for direct on-site search.
+- **Local-First Search:** All indexing and search operations happen on your device—your data never leaves your control.
+
+### Improved Tab System
+
+- **Tab Containers:** Organize tabs into isolated containers for privacy and workflow management.
+    - **Container Cookie Contexts:** Separate “cookie jars” for each container.
+    - **Tor Proxy:** Route container traffic through the Tor Network.
+    - **Biometric Authentication:** Restrict access to containers with fingerprint or face recognition.
+- **Tree View Navigation:** Visualize and manage complex tab hierarchies, making it easy to track your browsing context.
+
+### Bangs
+
+- **Direct On-Site Search:** Use thousands of powerful shortcuts (“bangs”) to search directly on popular websites—no third-party search engine required.
+
+---
+
+## Getting Started
+
+1. **Download & Install** WebLibre on your device.
+2. **Organize Tabs:** Use containers for work, personal, or research contexts.
+3. **Enable Tor Proxy:** For sensitive browsing, assign Tor to containers or private tabs.
+4. **Add Web Feeds:** Aggregate your favorite sites for unified, private search.
+5. **Try Bangs:** Search directly on your favorite websites with custom shortcuts.
 
 <p align="center">
-  <a href='https://play.google.com/store/apps/details?id=eu.weblibre.bang_navigator&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
-    <img width="240" alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/>
+  <a href='https://play.google.com/store/apps/details?id=eu.weblibre.gecko'>
+    <img height="100" alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/>
+  </a>
+  <a href='https://play.google.com/store/apps/details?id=eu.weblibre.gecko'>
+    <img height="100" alt='Get it on GitHub' src='https://github.com/machiav3lli/oandbackupx/raw/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png'/>
   </a>
 </p>
-
-## Getting started
-
-Head over to the [wiki](./wiki/Quickstart-Guide) to learn how to set up the app and explore its features.
