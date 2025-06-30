@@ -3,7 +3,7 @@
     <item android:width="24dp"
         android:height="24dp">
         <bitmap
-            android:src="@drawable/launcher_icon"
+            android:src="@mipmap/launcher_icon"
             android:width="24dp"
             android:height="24dp"/>
     </item>

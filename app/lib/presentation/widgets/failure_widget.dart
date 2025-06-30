@@ -25,7 +25,7 @@ class FailureWidget extends StatelessWidget {
             subtitle: exception != null
                 ? switch (exception) {
                     final String string => Text(string),
-                    _ => Text(exception.runtimeType.toString())
+                    _ => Text(exception.runtimeType.toString()),
                   }
                 : null,
             trailing: compact && onRetry != null
@@ -41,8 +41,10 @@ class FailureWidget extends StatelessWidget {
           ),
           if (!compact && onRetry != null)
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8.0,
+              ),
               child: SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(

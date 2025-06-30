@@ -1,40 +1,29 @@
-Lensai: The Privacy-Focused & AI-Powered Research Browser with Kagi integration.
+<b>WebLibre is a privacy-first browser that puts you in control.</b>
 
-Lensai enhances your mobile research experience while keeping your personal data and identity secure. 
-Powered by advanced AI tools and browser extensions, Lensai offers modern features designed to elevate your browsing experience.
+Built on Mozilla’s Gecko engine, WebLibre combines powerful privacy features with advanced tab management and a personal local search engine—so your data stays on your device, not in the cloud.
 
-<b>• Privacy by Default</b>
-Incognito mode is enabled by default to keep your searches and browsing history private.
+- <b>Personal Local Search Engine</b>
+  Instantly search across open tabs, browsing history, and your favorite web feeds—all indexed privately on your device. No third-party search engine required.
 
-<b>• Kagi Integration</b>
-Seamlessly integrates Kagi's search, assistant, and summarizer tools within a user-friendly interface.
+- <b>Bangs: Direct Site Search</b>
+  Use thousands of “bangs” to search directly on popular websites, bypassing external search engines for faster, more private results.
 
-<b>• Easy Sharing</b>
-Share URLs or text from any app directly into Lensai without the need to copy and paste, for direct use with summarizer/assistant.
+- <b>Tab Containers for Privacy & Organization</b>
+  Separate your browsing into containers for work, shopping, or personal use. Each container has its own cookies, settings, and can be locked with biometric authentication.
 
-<b>• Quick Summarization</b>
-Long press any link on a website to get a summary via Kagi's summarizer.
+- <b>Integrated Tor Proxy</b>
+  Route selected tabs or containers through the Tor network for enhanced anonymity and to bypass censorship—without leaving your browser.
 
-<b>• Content Blocking</b>
-A powerful content blocker is enabled by default to filter out ads, malware, and tracking sites.
+- <b>Tree View Tab Navigation</b>
+  Visualize and manage complex browsing sessions with hierarchical tab organization. Never lose track of your research or workflow.
 
-<b>• Home Widgets</b>
-Includes home screen widgets in three different sizes for quick actions, enhancing productivity.
+- <b>No Tracking, No Cloud Storage</b>
+  WebLibre never tracks you. All your data—searches, history, and feeds—remains on your device for maximum privacy.
 
-<b>• PDF processing</b>
-Open and directly summarize/prompt PDF documents.
+Additional Highlights
 
-<b>• Reader Mode</b>
-Extract and simplify web pages, enhancing readability by removing ads, sidebars, and other non-essential elements.
+- <b>Biometric Authentication</b>: Lock sensitive tabs or containers with your fingerprint or face.
+- <b>Efficient Resource Use</b>: Lightweight tabs and persistent sessions for seamless multitasking.
+- <b>Open Source Foundations</b>: Built using trusted Mozilla components.
 
-<b>• Chat Archive</b>
-Easily archive conversations with the Kagi assistant on your device and search through them locally.
-
-<b>• Bang Repository</b>
-Automatically synchronizes all official Kagi Bangs from the official Repository and makes them available through a convenient interface.
-
-<b>• Enhanced Text Interaction</b>
-Custom context menu allows for easy passage of marked text to Kagi's search or assistant tools.
-
-<b>• Speech Input</b>
-Supports voice commands for hands-free operation and accessibility.
+<b>Take back control of your browsing. Download WebLibre and experience privacy, speed, and organization—your way.</b>

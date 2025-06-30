@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/domain/providers.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_details.dart';
-import 'package:lensai/features/search_browser/domain/entities/modes.dart';
-import 'package:lensai/features/search_browser/domain/entities/sheet.dart';
-import 'package:lensai/features/search_browser/domain/providers.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
+import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangListScreen extends HookConsumerWidget {
   final String? category;
@@ -18,14 +17,9 @@ class BangListScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bangsAsync = ref.watch(
-      bangDataListProvider(
-        filter: (
-          categoryFilter: (category != null)
-              ? (category: category!, subCategory: subCategory)
-              : null,
-          domain: null,
-          groups: null,
-          orderMostFrequentFirst: null,
+      bangListProvider(
+        categoryFilter: category.mapNotNull(
+          (category) => (category: category, subCategory: subCategory),
         ),
       ),
     );
@@ -33,10 +27,9 @@ class BangListScreen extends HookConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.medium(
-            title: Text('$category: $subCategory'),
-          ),
+          SliverAppBar.medium(title: Text('$category: $subCategory')),
           bangsAsync.when(
+            skipLoadingOnReload: true,
             data: (bangs) {
               return SliverList.builder(
                 itemCount: bangs.length,
@@ -49,15 +42,11 @@ class BangListScreen extends HookConsumerWidget {
                           .read(selectedBangTriggerProvider().notifier)
                           .setTrigger(bang.trigger);
 
-                      if (ref.read(bottomSheetProvider) is! CreateTab) {
-                        ref.read(bottomSheetProvider.notifier).show(
-                              CreateTab(
-                                preferredTool: KagiTool.search,
-                              ),
-                            );
-                      }
-
-                      context.go(KagiRoute().location);
+                      SearchRoute(
+                        tabType:
+                            ref.read(selectedTabTypeProvider) ??
+                            TabType.regular,
+                      ).go(context);
                     },
                   );
                 },

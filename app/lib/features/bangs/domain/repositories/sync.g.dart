@@ -7,21 +7,21 @@ part of 'sync.dart';
 // **************************************************************************
 
 String _$bangSyncRepositoryHash() =>
-    r'86933b05d01629c67ed0443df91e991c40136423';
+    r'122dd04da82d4124e7c6be5234831bd62242845e';
 
 /// See also [BangSyncRepository].
 @ProviderFor(BangSyncRepository)
 final bangSyncRepositoryProvider =
     NotifierProvider<BangSyncRepository, void>.internal(
-  BangSyncRepository.new,
-  name: r'bangSyncRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$bangSyncRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      BangSyncRepository.new,
+      name: r'bangSyncRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$bangSyncRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$BangSyncRepository = Notifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

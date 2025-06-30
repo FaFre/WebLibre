@@ -1,160 +1,69 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lensai/core/routing/dialog_page.dart';
-import 'package:lensai/features/about/presentation/screens/about.dart';
-import 'package:lensai/features/bangs/presentation/screens/categories.dart';
-import 'package:lensai/features/bangs/presentation/screens/list.dart';
-import 'package:lensai/features/bangs/presentation/screens/search.dart';
-import 'package:lensai/features/chat_archive/presentation/screens/detail.dart';
-import 'package:lensai/features/chat_archive/presentation/screens/list.dart';
-import 'package:lensai/features/chat_archive/presentation/screens/search.dart';
-import 'package:lensai/features/search_browser/presentation/screens/browser.dart';
-import 'package:lensai/features/settings/presentation/screens/settings.dart';
-import 'package:lensai/features/topics/presentation/screens/topic_list.dart';
+import 'package:weblibre/core/routing/widgets/dialog_page.dart';
+import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/features/about/presentation/screens/about.dart';
+import 'package:weblibre/features/bangs/presentation/screens/categories.dart';
+import 'package:weblibre/features/bangs/presentation/screens/list.dart';
+import 'package:weblibre/features/bangs/presentation/screens/search.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/tab_tree.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/web_page_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/screens/browser.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/context_menu_dialog.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/screens/search.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_list.dart';
+import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
+import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';
+import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
+import 'package:weblibre/features/settings/presentation/screens/web_engine_settings.dart';
+import 'package:weblibre/features/tor/presentation/screens/tor_proxy.dart';
+import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
+import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';
+import 'package:weblibre/features/web_feed/presentation/screens/feed_article_list.dart';
+import 'package:weblibre/features/web_feed/presentation/screens/feed_edit.dart';
+import 'package:weblibre/features/web_feed/presentation/screens/feed_list.dart';
+import 'package:weblibre/features/web_feed/presentation/select_feed_dialog.dart';
 
 part 'routes.g.dart';
+part 'routes.settings.dart';
+part 'routes.browser.dart';
+part 'routes.bangs.dart';
+part 'routes.feeds.dart';
 
-@TypedGoRoute<KagiRoute>(
-  name: 'KagiRoute',
-  path: '/',
-  routes: [
-    TypedGoRoute<AboutRoute>(
-      name: 'AboutRoute',
-      path: 'about',
-    ),
-    TypedGoRoute<BangCategoriesRoute>(
-      name: 'BangRoute',
-      path: 'bangs',
-      routes: [
-        TypedGoRoute<BangSearchRoute>(
-          name: 'BangSearchRoute',
-          path: 'search',
-        ),
-        TypedGoRoute<BangCategoryRoute>(
-          name: 'BangCategoryRoute',
-          path: 'category/:category',
-          routes: [
-            TypedGoRoute<BangSubCategoryRoute>(
-              name: 'BangSubCategoryRoute',
-              path: ':subCategory',
-            ),
-          ],
-        ),
-      ],
-    ),
-    TypedGoRoute<TopicListRoute>(
-      name: 'TopicsRoute',
-      path: 'topics',
-    ),
-  ],
-)
-class KagiRoute extends GoRouteData {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const KagiScreen();
-  }
-}
-
-class AboutRoute extends GoRouteData {
+@TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
+class AboutRoute extends GoRouteData with _$AboutRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const AboutDialogScreen());
   }
 }
 
-class BangCategoriesRoute extends GoRouteData {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const BangCategoriesScreen();
-  }
-}
+@TypedGoRoute<OnboardingRoute>(
+  name: 'OnboardingRoute',
+  path: '/onboarding/:currentRevision/:targetRevision',
+)
+class OnboardingRoute extends GoRouteData with _$OnboardingRoute {
+  final int currentRevision;
+  final int targetRevision;
 
-class BangCategoryRoute extends GoRouteData {
-  final String category;
-
-  const BangCategoryRoute({required this.category});
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return BangListScreen(category: category);
-  }
-}
-
-class BangSubCategoryRoute extends GoRouteData {
-  final String category;
-  final String subCategory;
-
-  const BangSubCategoryRoute({
-    required this.category,
-    required this.subCategory,
+  const OnboardingRoute({
+    required this.currentRevision,
+    required this.targetRevision,
   });
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BangListScreen(category: category, subCategory: subCategory);
-  }
-}
-
-class BangSearchRoute extends GoRouteData {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const BangSearchScreen();
-  }
-}
-
-class TopicListRoute extends GoRouteData {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const TopicListScreen();
-  }
-}
-
-@TypedGoRoute<SettingsRoute>(
-  name: 'SettingsRoute',
-  path: '/settings',
-)
-class SettingsRoute extends GoRouteData {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const SettingsScreen();
-  }
-}
-
-@TypedGoRoute<ChatArchiveListRoute>(
-  name: 'ChatArchiveListRoute',
-  path: '/chat_archive',
-  routes: [
-    TypedGoRoute<ChatArchiveSearchRoute>(
-      name: 'ChatArchiveSearchRoute',
-      path: 'search',
-    ),
-    TypedGoRoute<ChatArchiveDetailRoute>(
-      name: 'ChatArchiveDetailRoute',
-      path: 'detail/:fileName',
-    ),
-  ],
-)
-class ChatArchiveListRoute extends GoRouteData {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ChatArchiveListScreen();
-  }
-}
-
-class ChatArchiveSearchRoute extends GoRouteData {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ChatArchiveSearchScreen();
-  }
-}
-
-class ChatArchiveDetailRoute extends GoRouteData {
-  final String fileName;
-
-  const ChatArchiveDetailRoute({required this.fileName});
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return ChatArchiveDetailScreen(fileName);
+    return OnboardingScreen(
+      currentRevision: currentRevision,
+      targetRevision: targetRevision,
+    );
   }
 }

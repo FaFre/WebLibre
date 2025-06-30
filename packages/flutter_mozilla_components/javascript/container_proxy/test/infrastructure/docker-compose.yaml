@@ -1,0 +1,10 @@
+version: "3"
+services:
+  socks:
+    build: ./socks
+    ports:
+      - "1080:1080"
+  http:
+    build: ./http
+    ports:
+      - "3128:3128"

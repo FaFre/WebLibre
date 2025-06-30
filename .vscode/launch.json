@@ -9,7 +9,10 @@
             "cwd": "app",
             "request": "launch",
             "type": "dart",
-            "args": ["--device-user", "0"]
+            "args": [
+                "--device-user",
+                "0"
+            ]
         },
         {
             "name": "app (profile mode)",
@@ -17,7 +20,10 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
-            "args": ["--device-user", "0"]
+            "args": [
+                "--device-user",
+                "0"
+            ]
         },
         {
             "name": "app (release mode)",
@@ -25,7 +31,30 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",
-            "args": ["--device-user", "0"]
-        }
+            "args": [
+                "--device-user",
+                "0"
+            ]
+        },
+        {
+            "name": "flutter_mozilla_components",
+            "cwd": "packages/flutter_mozilla_components/example",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--device-user",
+                "0"
+            ]
+        },
+        {
+            "name": "simple_intent_receiver",
+            "cwd": "packages/simple_intent_receiver/example",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--device-user",
+                "0"
+            ]
+        },
     ]
 }

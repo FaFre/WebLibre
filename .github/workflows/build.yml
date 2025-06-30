@@ -1,4 +1,4 @@
-name: Flutter CICD # action name
+name: Flutter CICD
 
 on:
   push:
@@ -6,39 +6,83 @@ on:
       - "v*"
 
 jobs:
-  build: # job's name
-    runs-on: ubuntu-latest # container os
-    env: # ADD environment variables
+  build:
+    runs-on: ubuntu-latest
+    env:
       KEY_JKS: ${{ secrets.KEY_JKS }}
       KEY_PATH: ${{ github.workspace }}/key.jks
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-    defaults:
-      run:
-        working-directory: app
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v2 # cd to current dir
-      - uses: actions/setup-java@v2
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
         with:
-          distribution: 'adopt' # See 'Supported distributions' for available options
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
           java-version: '17'
-      - name: Create key file
-        run: echo $KEY_JKS | base64 -di > $KEY_PATH
-      - uses: subosito/flutter-action@v1
+      - uses: ruby/setup-ruby@v1
         with:
-          flutter-version: 3.24.0
-      - run: flutter pub get
-      # - run: flutter test
-      - run: flutter build apk --release --split-per-abi
-      - run: flutter build appbundle
-      - name: Create github artifact release # disable this to save storage
+          ruby-version: '3.3'
+          bundler-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Download bundle dependencies
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install
+      - name: Build container proxy
+        working-directory: packages/flutter_mozilla_components/javascript/container_proxy
+        run: |
+          npm i
+          npx webpack
+      - name: Create key file
+        working-directory: app
+        run: echo $KEY_JKS | base64 -di > $KEY_PATH
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.32.4
+          cache: true
+      - name: Activate melos
+        working-directory: app
+        run: dart pub global activate melos
+      - name: Bootstrap melos
+        working-directory: app
+        run: melos bs
+      - name: Build APK
+        working-directory: app
+        run: flutter build apk --verbose --release --split-per-abi --no-tree-shake-icons
+      - name: Build App Bundle
+        working-directory: app
+        run: flutter build appbundle --verbose --no-tree-shake-icons
+      - name: Create github artifact release
         uses: ncipollo/release-action@v1
         with:
           artifacts: "app/build/app/outputs/apk/release/*.apk,app/build/app/outputs/bundle/release/app-release.aab"
       - name: Upload app bundle artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: appbundle
           path: app/build/app/outputs/bundle/release/app-release.aab
+      - name: Release to Google Play (internal)
+        working-directory: app
+        env:
+          SUPPLY_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
+          SUPPLY_JSON_KEY_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          bundle exec fastlane supply \
+          --aab build/app/outputs/bundle/release/app-release.aab \
+          --track internal

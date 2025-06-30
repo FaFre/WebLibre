@@ -16,13 +16,17 @@
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
 
-    <style name="Widget.LensaiWidget.AppWidget.Container" parent="android:Widget">
+    <style name="Widget.WebLibreWidget.AppWidget.Container" parent="android:Widget">
         <item name="android:id">@android:id/background</item>
         <item name="android:background">?android:attr/colorBackground</item>
     </style>
 
-    <style name="Widget.LensaiWidget.AppWidget.InnerView" parent="android:Widget">
+    <style name="Widget.WebLibreWidget.AppWidget.InnerView" parent="android:Widget">
         <item name="android:background">?android:attr/colorBackground</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="AddonsActivityTheme" parent="Theme.AppCompat.Light">
+        <item name="mozac_primary_text_color">@color/photonDarkGrey90</item>
     </style>
 </resources>

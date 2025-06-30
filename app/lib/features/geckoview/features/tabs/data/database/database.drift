@@ -1,0 +1,231 @@
+import 'package:weblibre/data/database/converters/color.dart';
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
+
+CREATE TABLE container (
+  id TEXT PRIMARY KEY NOT NULL,
+  name TEXT,
+  color INTEGER NOT NULL MAPPED BY `const ColorConverter()`,
+  metadata TEXT MAPPED BY `const ContainerMetadataConverter()`
+) WITH ContainerData;
+
+CREATE TABLE tab( 
+  id TEXT PRIMARY KEY NOT NULL,
+  parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
+  container_id TEXT REFERENCES container (id) ON DELETE CASCADE,
+  order_key TEXT NOT NULL,
+  url TEXT MAPPED BY `const UriConverterNullable()`,
+  title TEXT,
+  is_probably_readerable BOOL,
+  extracted_content_markdown TEXT,
+  extracted_content_plain TEXT,
+  full_content_markdown TEXT,
+  full_content_plain TEXT,
+  timestamp DATETIME NOT NULL
+);
+
+CREATE VIRTUAL TABLE tab_fts 
+  USING fts5(
+    title,
+    url,
+    extracted_content_plain,
+    full_content_plain,
+    content=tab,
+    tokenize="trigram"
+  );
+
+-- Create trigger to handle parent deletion
+CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN
+  -- Update all children of the deleted row to point to its parent
+  UPDATE tab 
+  SET parent_id = OLD.parent_id 
+  WHERE parent_id = OLD.id;
+END;
+
+-- Triggers to keep the FTS index up to date.
+CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN
+  INSERT INTO 
+    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain) 
+    VALUES (new.rowid, new.title, new.url, new.extracted_content_plain, new.full_content_plain);
+END;
+CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN
+  INSERT INTO 
+    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain) 
+    VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);
+END;
+CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN
+  INSERT INTO 
+    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain) 
+    VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);
+  INSERT INTO 
+    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain) 
+    VALUES (new.rowid, new.title, new.url, new.extracted_content_plain, new.full_content_plain);
+END;
+
+optimizeFtsIndex:
+  INSERT INTO tab_fts(tab_fts) VALUES ('optimize');
+
+containersWithCount WITH ContainerDataWithCount:
+  SELECT 
+    container.*, 
+    tab_agg.tab_count
+  FROM container
+  LEFT JOIN (
+    SELECT 
+      container_id, 
+      COUNT(*) AS tab_count, 
+      MAX(timestamp) AS last_updated
+    FROM tab
+    GROUP BY container_id
+  ) AS tab_agg ON container.id = tab_agg.container_id
+  ORDER BY tab_agg.last_updated DESC NULLS LAST;
+
+leadingOrderKey(:container_id AS TEXT OR NULL, :bucket AS INTEGER):
+  SELECT lexo_rank_previous(
+    :bucket, 
+    (
+      SELECT order_key 
+      FROM tab 
+      WHERE container_id IS :container_id 
+      ORDER BY order_key 
+      LIMIT 1
+    )
+  );
+
+trailingOrderKey(:container_id AS TEXT OR NULL, :bucket AS INTEGER):
+  SELECT lexo_rank_next(
+    :bucket, 
+    (
+      SELECT order_key 
+      FROM tab 
+      WHERE container_id IS :container_id 
+      ORDER BY order_key DESC 
+      LIMIT 1
+    )
+  );
+
+orderKeyAfterTab(:tab_id AS TEXT, :container_id AS TEXT OR NULL):
+  WITH ordered_table AS (
+    SELECT id,
+          order_key,
+          LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
+    FROM tab 
+    WHERE container_id IS :container_id 
+  )
+  SELECT lexo_rank_reorder_after(order_key, next_order_key)
+  FROM ordered_table
+  WHERE id = :tab_id;
+
+queryTabsBasic WITH TabQueryResult:
+  WITH weights AS (
+    SELECT 
+      -- Customize these weights (higher = more important)
+      10.0 as title_weight,       -- Title matches are most important
+      5.0 as url_weight           -- URL matches are quite important
+  )
+  SELECT 
+    t.id,
+    t.title,
+    CAST(t.url AS TEXT) AS url,
+    t.url AS clean_url,
+    bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank
+  FROM tab_fts fts
+  INNER JOIN
+    tab t ON t.rowid = fts.rowid 
+  CROSS JOIN weights
+  WHERE 
+  	fts.title LIKE :query OR
+  	fts.url LIKE :query
+  ORDER BY 
+  	weighted_rank ASC,
+  	t.timestamp DESC;
+
+queryTabsFullContent WITH TabQueryResult:
+  WITH weights AS (
+  SELECT 
+    -- Customize these weights (higher = more important)
+    10.0 as title_weight,     -- Title matches are most important
+    5.0 as url_weight,        -- URL matches are quite important
+    3.0 as extracted_weight,  -- Extracted content matches
+    1.0 as full_weight       -- Full content matches less important
+  )
+  SELECT 
+      t.id,
+      highlight(tab_fts, 0, :beforeMatch, :afterMatch) AS title,
+      highlight(tab_fts, 1, :beforeMatch, :afterMatch) AS url,
+      snippet(tab_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS extracted_content,
+      snippet(tab_fts, 3, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS full_content,
+      t.url AS clean_url,
+      (
+        bm25(tab_fts, weights.title_weight, weights.url_weight, 
+            weights.extracted_weight, weights.full_weight)
+      ) AS weighted_rank
+    FROM tab_fts(:query) fts
+    INNER JOIN
+      tab t ON t.rowid = fts.rowid
+    CROSS JOIN weights
+    ORDER BY 
+      weighted_rank ASC,
+      t.timestamp DESC;
+
+tabTrees:
+  WITH RECURSIVE descendants AS (
+    -- Base case: all root tabs (no parent)
+    SELECT 
+      id, 
+      parent_id, 
+      timestamp, 
+      id AS root_id
+    FROM tab 
+    WHERE parent_id IS NULL
+
+    UNION ALL
+
+    -- Recursive case: find all descendants
+    SELECT 
+      t.id, 
+      t.parent_id, 
+      t.timestamp, 
+      d.root_id
+    FROM tab t
+    JOIN descendants d ON t.parent_id = d.id
+),
+root_stats AS (
+    -- Calculate stats for each root
+    SELECT 
+        root_id,
+        MAX(timestamp) AS max_timestamp,
+        COUNT(*) AS total_children
+    FROM descendants
+    GROUP BY root_id
+)
+-- Get the actual tab records with latest timestamp per root
+SELECT 
+    d.root_id AS root_tab_id, 
+    d.id AS latest_tab_id, 
+    d.timestamp AS latest_timestamp,
+    rs.total_children AS total_tabs
+FROM descendants d
+JOIN root_stats rs 
+ON 
+  d.root_id = rs.root_id AND 
+  d.timestamp = rs.max_timestamp
+ORDER BY d.timestamp DESC;
+
+unorderedTabDescendants:
+  WITH RECURSIVE descendants AS (
+      SELECT id, parent_id
+      FROM tab 
+      WHERE id = :tab_id
+
+      UNION ALL
+
+      -- Recursive case: find all descendants
+      SELECT t.id, t.parent_id
+      FROM tab t
+      JOIN descendants d ON t.parent_id = d.id
+  )
+  SELECT id, parent_id
+  FROM descendants;

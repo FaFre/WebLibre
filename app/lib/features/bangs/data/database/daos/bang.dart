@@ -1,7 +1,9 @@
 import 'package:drift/drift.dart';
-import 'package:lensai/features/bangs/data/database/database.dart';
-import 'package:lensai/features/bangs/data/models/bang.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
+import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/bangs/data/database/database.dart';
+import 'package:weblibre/features/bangs/data/models/bang.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
 part 'bang.g.dart';
 
@@ -20,7 +22,10 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
 
   SingleSelectable<int> getBangCount({Iterable<BangGroup>? groups}) {
     return db.bang.count(
-      where: (groups != null) ? (t) => t.group.isInValues(groups) : null,
+      where: groups.mapNotNull(
+        (groups) =>
+            (t) => t.group.isInValues(groups),
+      ),
     );
   }
 
@@ -29,6 +34,7 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
   }
 
   Selectable<BangData> getBangDataList({
+    Iterable<String>? triggers,
     Iterable<BangGroup>? groups,
     String? domain,
     String? category,
@@ -36,6 +42,9 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
     bool? orderMostFrequentFirst,
   }) {
     final selectable = select(db.bangDataView);
+    if (triggers != null) {
+      selectable.where((t) => t.trigger.isIn(triggers));
+    }
     if (groups != null) {
       selectable.where((t) => t.group.isInValues(groups));
     }
@@ -91,17 +100,33 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
   }
 
   Selectable<BangData> queryBangs(String searchString) {
-    return db.bangQuery(query: db.buildQuery(searchString));
+    final ftsQuery = db.buildFtsQuery(searchString);
+
+    if (ftsQuery.isNotEmpty) {
+      return db.queryBangs(query: ftsQuery);
+    } else {
+      return db.queryBangsBasic(query: db.buildLikeQuery(searchString));
+    }
   }
 
-  Future<int> upsertBangIcon(String trigger, Uint8List iconData) {
-    return db.bangIcon.insertOne(
-      BangIconCompanion.insert(
+  Future<int> addSearchEntry(String trigger, String searchQuery) {
+    return db.bangHistory.insertOne(
+      BangHistoryCompanion.insert(
+        searchQuery: searchQuery,
         trigger: trigger,
-        iconData: iconData,
-        fetchDate: DateTime.now(),
+        searchDate: DateTime.now(),
       ),
-      mode: InsertMode.insertOrReplace,
+      onConflict: DoUpdate(
+        target: [db.bangHistory.searchQuery],
+        (old) => BangHistoryCompanion(
+          trigger: Value(trigger),
+          searchDate: Value(DateTime.now()),
+        ),
+      ),
     );
+  }
+
+  Future<int> removeSearchEntry(String searchQuery) {
+    return db.bangHistory.deleteWhere((t) => t.searchQuery.equals(searchQuery));
   }
 }

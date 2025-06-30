@@ -1,37 +1,35 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:exceptions/exceptions.dart';
-import 'package:lensai/domain/services/generic_website.dart';
-import 'package:lensai/extensions/database_table_size.dart';
-import 'package:lensai/features/bangs/data/database/database.dart';
-import 'package:lensai/features/bangs/data/models/bang.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/data/providers.dart';
-import 'package:lensai/utils/image_helper.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
+import 'package:weblibre/features/bangs/data/providers.dart';
 
 part 'data.g.dart';
 
 @Riverpod(keepAlive: true)
 class BangDataRepository extends _$BangDataRepository {
-  late BangDatabase _db;
-
   @override
-  void build() {
-    _db = ref.watch(bangDatabaseProvider);
-  }
+  void build() {}
 
   Stream<BangData?> watchBang(String? trigger) {
     if (trigger != null) {
-      return _db.bangDao.getBangData(trigger).watchSingleOrNull();
+      return ref
+          .read(bangDatabaseProvider)
+          .bangDao
+          .getBangData(trigger)
+          .watchSingleOrNull();
     } else {
       return Stream.value(null);
     }
   }
 
   Stream<Map<String, List<String>>> watchCategories() {
-    return _db.categoriesJson().watchSingle().map((json) {
+    return ref.read(bangDatabaseProvider).categoriesJson().watchSingle().map((
+      json,
+    ) {
       final decoded = jsonDecode(json) as Map<String, dynamic>;
       return decoded.map(
         (key, value) => MapEntry(key, (value as List<dynamic>).cast()),
@@ -40,17 +38,25 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<int> watchBangCount(BangGroup group) {
-    return _db.bangDao.getBangCount(groups: [group]).watchSingle();
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .getBangCount(groups: [group])
+        .watchSingle();
   }
 
   Stream<List<BangData>> watchBangs({
+    Iterable<String>? triggers,
     Iterable<BangGroup>? groups,
     String? domain,
     ({String category, String? subCategory})? categoryFilter,
     bool? orderMostFrequentFirst,
   }) {
-    return _db.bangDao
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
         .getBangDataList(
+          triggers: triggers,
           groups: groups,
           domain: domain,
           category: categoryFilter?.category,
@@ -61,47 +67,55 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<List<BangData>> watchFrequentBangs({Iterable<BangGroup>? groups}) {
-    return _db.bangDao.getFrequentBangDataList(groups: groups).watch();
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .getFrequentBangDataList(groups: groups)
+        .watch();
+  }
+
+  Stream<List<SearchHistoryEntry>> watchSearchHistory({required int limit}) {
+    return ref
+        .read(bangDatabaseProvider)
+        .searchHistoryEntries(limit: limit)
+        .watch();
   }
 
   Future<void> increaseFrequency(String trigger) {
-    return _db.bangDao.increaseBangFrequency(trigger);
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .increaseBangFrequency(trigger);
   }
 
-  Future<Result<BangData>> ensureIconAvailable(BangData bang) async {
-    if (bang.iconData != null) {
-      return Result.success(bang);
-    }
-
-    final result = await ref
-        .read(genericWebsiteServiceProvider.notifier)
-        .getFaviconBytes(Uri.parse(bang.getUrl('').origin));
-
-    return result.flatMapAsync(
-      (faviconBytes) async {
-        if (faviconBytes != null && await isImageValid(faviconBytes)) {
-          await _db.bangDao.upsertBangIcon(bang.trigger, faviconBytes);
-          return bang.copyWith.iconData(faviconBytes);
-        }
-
-        return bang;
-      },
-    );
+  Future<void> addSearchEntry(
+    String trigger,
+    String searchQuery, {
+    required int maxEntryCount,
+  }) {
+    final db = ref.read(bangDatabaseProvider);
+    //Pack in a transaction to bundle rebuilds of watch() queries
+    return db.transaction(() async {
+      await db.bangDao.addSearchEntry(trigger, searchQuery);
+      await db.evictHistoryEntries(limit: maxEntryCount);
+    });
   }
 
-  Stream<double> watchIconCacheSize() {
-    return _db.tableSize(_db.bangIcon).watchSingle();
-  }
-
-  Future<int> clearIconData() {
-    return _db.bangIcon.deleteAll();
+  Future<void> removeSearchEntry(String searchQuery) {
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .removeSearchEntry(searchQuery);
   }
 
   Future<int> resetFrequencies() {
-    return _db.bangFrequency.deleteAll();
+    return ref.read(bangDatabaseProvider).bangFrequency.deleteAll();
   }
 
   Future<int> resetFrequency(String trigger) {
-    return _db.bangFrequency.deleteWhere((t) => t.trigger.equals(trigger));
+    return ref
+        .read(bangDatabaseProvider)
+        .bangFrequency
+        .deleteWhere((t) => t.trigger.equals(trigger));
   }
 }

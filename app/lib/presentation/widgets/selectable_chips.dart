@@ -12,6 +12,8 @@ class _BadgeWrapper extends StatelessWidget {
     return count != null
         ? Badge.count(
             count: count!,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            textColor: Theme.of(context).colorScheme.onPrimaryContainer,
             child: child,
           )
         : child;
@@ -27,7 +29,10 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final K Function(S item) itemId;
   final Widget Function(T item) itemLabel;
   final Widget? Function(T item)? itemAvatar;
+  final String? Function(T item)? itemTooltip;
   final int? Function(T item)? itemBadgeCount;
+
+  final Widget Function(Widget child, S item)? itemWrap;
 
   final void Function(T item)? onSelected;
   final void Function(T item)? onDeleted;
@@ -37,6 +42,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     required this.itemLabel,
     this.itemAvatar,
     this.itemBadgeCount,
+    this.itemWrap,
+    this.itemTooltip,
     required this.availableItems,
     this.selectedItem,
     this.maxCount = 25,
@@ -54,15 +61,9 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
         (item) => itemId(item) == itemId(selectedItem),
       );
       if (selectedIndex < 0) {
-        items = [
-          selectedItem,
-          ...items,
-        ];
+        items = [selectedItem, ...items];
       } else {
-        items = [
-          items.removeAt(selectedIndex),
-          ...items,
-        ];
+        items = [items.removeAt(selectedIndex), ...items];
       }
     }
 
@@ -71,17 +72,19 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
       builder: (context, controller) {
         return ListView.builder(
           controller: controller,
+          //Improve list performance by not rendering outside screen at all
+          cacheExtent: 0,
           scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
           itemCount: items.length,
           itemBuilder: (context, index) {
             final item = items[index];
-            return Padding(
+            final child = Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: _BadgeWrapper(
                 count: itemBadgeCount?.call(item),
                 child: FilterChip(
-                  selected: selectedItem != null &&
+                  selected:
+                      selectedItem != null &&
                       itemId(item) == itemId(selectedItem as S),
                   showCheckmark: false,
                   onSelected: (value) {
@@ -98,9 +101,12 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                       : null,
                   label: itemLabel.call(item),
                   avatar: itemAvatar?.call(item),
+                  tooltip: itemTooltip?.call(item),
                 ),
               ),
             );
+
+            return (itemWrap != null) ? itemWrap!(child, item) : child;
           },
         );
       },

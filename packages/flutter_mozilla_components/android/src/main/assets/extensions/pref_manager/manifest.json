@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+  "name": "Pref Manager",
+  "version": "1.0",
+  "description": "Manipulate GeckoView preferences",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pref-manager@weblibre.eu"
+    }
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "experiment_apis": {
+    "prefmanager": {
+      "schema": "schema.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "paths": [
+          [
+            "experiments",
+            "prefmanager"
+          ]
+        ],
+        "script": "api.js"
+      }
+    }
+  },
+  "permissions": [
+    "nativeMessaging",
+    "nativeMessagingFromContent",
+    "geckoViewAddons",
+    "<all_urls>"
+  ]
+}

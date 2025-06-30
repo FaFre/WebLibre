@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<resources>
+    <string name="pref_key_autofill" translatable="false">pref_key_autofill</string>
+    <string name="pref_key_sign_in" translatable="false">pref_key_sign_in</string>
+    <string name="pref_key_pair_sign_in" translatable="false">pref_key_pair_sign_in</string>
+    <string name="pref_key_sign_out" translatable="false">pref_key_sign_out</string>
+    <string name="pref_key_sync_now" translatable="false">pref_key_sync_now</string>
+    <string name="pref_key_sync_manage_account" translatable="false">pref_key_sync_manage_account</string>
+    <string name="pref_key_firefox_account" translatable="false">pref_key_firefox_account</string>
+    <string name="pref_key_telemetry" translatable="false">pref_key_telemetry</string>
+    <string name="pref_key_make_default_browser" translatable="false">pref_key_make_default_browser</string>
+    <string name="pref_key_sync_history" translatable="false">pref_key_sync_history</string>
+    <string name="pref_key_sync_tabs" translatable="false">pref_key_sync_tabs</string>
+    <string name="pref_key_sync_passwords" translatable="false">pref_key_sync_passwords</string>
+    <string name="pref_key_remote_debugging" translatable="false">pref_key_remote_debugging</string>
+    <string name="pref_key_testing_mode" translatable="false">pref_key_testing_mode</string>
+    <string name="pref_key_about_page" translatable="false">pref_key_about_page</string>
+    <string name="pref_key_privacy" translatable="false">pref_key_privacy</string>
+    <string name="pref_key_tracking_protection_normal" translatable="false">pref_key_tracking_protection_normal</string>
+    <string name="pref_key_tracking_protection_private" translatable="false">pref_key_tracking_protection_private</string>
+    <string name="pref_key_global_privacy_control" translatable="false">pref_key_global_privacy_control</string>
+    <string name="pref_key_fingerprinting_protection" translatable="false">pref_key_fingerprinting_protection</string>
+    <string name="pref_key_enterprise_roots_enabled" translatable="false">pref_key_enterprise_roots_enabled</string>
+    <string name="pref_key_launch_external_app" translatable="false">pref_key_launch_external_app</string>
+    <string name="pref_key_override_amo_collection" translatable="false">pref_key_override_amo_collection</string>
+    <string name="pref_key_override_amo_user" translatable="false">pref_key_override_amo_user</string>
+    <string name="pref_key_compose_ui" translatable="false">pref_key_compose_ui</string>
+</resources>

@@ -1,11 +1,11 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/domain/providers.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangCategoriesScreen extends HookConsumerWidget {
   const BangCategoriesScreen({super.key});
@@ -19,13 +19,22 @@ class BangCategoriesScreen extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              await context.push(BangSearchRoute().location);
+              final trigger = await const BangSearchRoute().push<String?>(
+                context,
+              );
+
+              if (trigger != null) {
+                ref
+                    .read(selectedBangTriggerProvider().notifier)
+                    .setTrigger(trigger);
+              }
             },
             icon: const Icon(Icons.search),
           ),
         ],
       ),
       body: categoriesAsync.when(
+        skipLoadingOnReload: true,
         data: (categories) {
           return FadingScroll(
             fadingSize: 25,
@@ -50,9 +59,8 @@ class BangCategoriesScreen extends HookConsumerWidget {
                             (category) => ExpansionPanel(
                               canTapOnHeader: true,
                               isExpanded: expanded.value.contains(category.key),
-                              headerBuilder: (context, isExpanded) => ListTile(
-                                title: Text(category.key),
-                              ),
+                              headerBuilder: (context, isExpanded) =>
+                                  ListTile(title: Text(category.key)),
                               body: Padding(
                                 padding: const EdgeInsets.only(left: 16.0),
                                 child: Column(
@@ -62,12 +70,10 @@ class BangCategoriesScreen extends HookConsumerWidget {
                                         (subCategory) => ListTile(
                                           title: Text(subCategory),
                                           onTap: () async {
-                                            await context.push(
-                                              BangSubCategoryRoute(
-                                                category: category.key,
-                                                subCategory: subCategory,
-                                              ).location,
-                                            );
+                                            await BangSubCategoryRoute(
+                                              category: category.key,
+                                              subCategory: subCategory,
+                                            ).push(context);
                                           },
                                         ),
                                       )

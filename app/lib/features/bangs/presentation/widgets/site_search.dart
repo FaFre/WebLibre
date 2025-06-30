@@ -1,49 +1,75 @@
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/domain/repositories/data.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
-import 'package:lensai/features/bangs/presentation/widgets/search_field.dart';
-import 'package:lensai/features/search_browser/domain/providers.dart';
-import 'package:lensai/features/web_view/presentation/controllers/switch_new_tab.dart';
-import 'package:lensai/presentation/widgets/selectable_chips.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/domain/providers/search.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
+import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/widgets/selectable_chips.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class SiteSearch extends HookConsumerWidget {
   final String domain;
   final List<BangData> availableBangs;
+  final bool searchInNewTab;
 
   const SiteSearch({
     required this.domain,
     required this.availableBangs,
     super.key,
+    this.searchInNewTab = true,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
-    final selectedBang = ref.watch(
-      selectedBangDataProvider(domain: domain)
-          .select((value) => value.valueOrNull),
-    );
+    final searchTextController = useTextEditingController();
+
+    useListenableCallback(searchTextController, () {
+      ref
+          .read(searchSuggestionsProvider().notifier)
+          .addQuery(searchTextController.text);
+    });
+
+    final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));
 
     final activeBang = selectedBang ?? availableBangs.firstOrNull;
 
-    final textController = useTextEditingController();
-
-    Future<void> submitSearch() async {
+    Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
-        await ref
-            .read(bangDataRepositoryProvider.notifier)
-            .increaseFrequency(activeBang.trigger);
+        final isPrivate =
+            ref.read(selectedTabStateProvider)?.isPrivate ?? false;
 
-        await ref
-            .read(switchNewTabControllerProvider.notifier)
-            .add(activeBang.getUrl(textController.text));
+        final searchUri = activeBang.getTemplateUrl(query);
 
-        ref.read(overlayDialogProvider.notifier).dismiss();
+        if (!isPrivate) {
+          await ref
+              .read(bangSearchProvider.notifier)
+              .triggerBangSearch(activeBang, query);
+        }
+
+        if (searchInNewTab) {
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(url: searchUri, private: isPrivate);
+        } else {
+          await ref
+              .read(tabSessionProvider(tabId: null).notifier)
+              .loadUrl(url: searchUri);
+        }
+
+        if (context.mounted) {
+          context.pop();
+        }
       }
     }
 
@@ -57,21 +83,19 @@ class SiteSearch extends HookConsumerWidget {
             width: double.maxFinite,
             child: SelectableChips(
               itemId: (bang) => bang.trigger,
-              itemAvatar: (bang) => BangIcon(bang, iconSize: 20),
+              itemAvatar: (bang) =>
+                  UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
               itemLabel: (bang) => Text(bang.websiteName),
+              itemTooltip: (bang) => bang.trigger,
               availableItems: availableBangs,
               selectedItem: selectedBang,
               onSelected: (bang) {
                 ref
-                    .read(
-                      selectedBangTriggerProvider(domain: domain).notifier,
-                    )
+                    .read(selectedBangTriggerProvider(domain: domain).notifier)
                     .setTrigger(bang.trigger);
               },
               onDeleted: (bang) {
-                if (ref.read(
-                      selectedBangTriggerProvider(domain: domain),
-                    ) ==
+                if (ref.read(selectedBangTriggerProvider(domain: domain)) ==
                     bang.trigger) {
                   ref
                       .read(
@@ -83,21 +107,32 @@ class SiteSearch extends HookConsumerWidget {
             ),
           ),
           SearchField(
-            textController: textController,
+            textEditingController: searchTextController,
             activeBang: activeBang,
-            onFieldSubmitted: (_) async {
-              await submitSearch();
+            onSubmitted: (_) async {
+              await submitSearch(searchTextController.text);
             },
+            showSuggestions: false,
           ),
-          const SizedBox(
-            height: 12,
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: submitSearch,
-              label: const Text('Search on Site'),
-              icon: const Icon(MdiIcons.cloudSearch),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 150),
+            child: FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return CustomScrollView(
+                  shrinkWrap: true,
+                  controller: controller,
+                  slivers: [
+                    SearchTermSuggestions(
+                      searchTextController: searchTextController,
+                      activeBang: activeBang,
+                      submitSearch: submitSearch,
+                      showHistory: false,
+                      showChips: false,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],

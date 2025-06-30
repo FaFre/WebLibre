@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/domain/entities/web_page_info.dart';
-import 'package:lensai/features/web_view/presentation/widgets/favicon.dart';
-import 'package:lensai/presentation/controllers/website_title.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/presentation/controllers/website_title.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class WebsiteTitleTile extends HookConsumerWidget {
   final Uri url;
@@ -14,17 +13,20 @@ class WebsiteTitleTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pageInfoAsync = ref.watch(pageInfoProvider(url));
+    final pageInfoAsync = ref.watch(
+      completePageInfoProvider(url, precachedInfo),
+    );
 
     return Skeletonizer(
       enabled: pageInfoAsync.isLoading && precachedInfo == null,
       child: pageInfoAsync.when(
+        skipLoadingOnReload: true,
         data: (info) {
           return ListTile(
-            leading: FaviconImage(
-              favicon: info.favicon,
-              url: info.url,
-              size: 24,
+            leading: RawImage(
+              image: info.favicon?.image.value,
+              height: 24,
+              width: 24,
             ),
             contentPadding: EdgeInsets.zero,
             title: Text(info.title ?? 'Unknown Title'),
@@ -34,15 +36,16 @@ class WebsiteTitleTile extends HookConsumerWidget {
         error: (error, stackTrace) {
           return FailureWidget(
             title: error.toString(),
-            onRetry: () => ref.refresh(pageInfoProvider(url)),
+            onRetry: () =>
+                ref.refresh(pageInfoProvider(url, isImageRequest: false)),
           );
         },
         loading: () => (precachedInfo != null)
             ? ListTile(
-                leading: FaviconImage(
-                  favicon: precachedInfo!.favicon,
-                  url: precachedInfo!.url,
-                  size: 24,
+                leading: RawImage(
+                  image: precachedInfo!.favicon?.image.value,
+                  height: 24,
+                  width: 24,
                 ),
                 contentPadding: EdgeInsets.zero,
                 title: Text(precachedInfo!.title ?? 'Unknown Title'),

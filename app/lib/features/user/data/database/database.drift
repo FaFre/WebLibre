@@ -1,0 +1,25 @@
+CREATE TABLE setting (
+  "key" TEXT PRIMARY KEY NOT NULL,
+  partition_key TEXT,
+  "value" ANY
+) STRICT;
+
+CREATE TABLE icon_cache (
+  origin TEXT PRIMARY KEY NOT NULL,
+  icon_data BLOB NOT NULL,
+  fetch_date DATETIME NOT NULL
+);
+
+CREATE TABLE onboarding (
+  revision INTEGER NOT NULL,
+  completion_date DATETIME NOT NULL
+);
+
+evictCacheEntries:
+  DELETE FROM icon_cache 
+  WHERE rowid IN (
+      SELECT rowid 
+      FROM icon_cache 
+      ORDER BY fetch_date DESC 
+      LIMIT -1 OFFSET :limit
+  );

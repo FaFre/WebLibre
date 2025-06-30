@@ -18,17 +18,12 @@ class SyncDetailsTable extends StatelessWidget {
         columnWidths: const {0: FixedColumnWidth(100)},
         children: [
           TableRow(
-            children: [
-              const Text('Entries'),
-              Text(count?.toString() ?? 'N/A'),
-            ],
+            children: [const Text('Entries'), Text(count?.toString() ?? 'N/A')],
           ),
           TableRow(
             children: [
               const Text('Last Sync'),
-              Text(
-                (lastSync != null) ? timeago.format(lastSync!) : 'N/A',
-              ),
+              Text((lastSync != null) ? timeago.format(lastSync!) : 'N/A'),
             ],
           ),
         ],

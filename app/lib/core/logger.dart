@@ -1,3 +1,15 @@
 import 'package:logger/logger.dart';
 
-final logger = Logger();
+class _DebugLogFilter extends LogFilter {
+  @override
+  bool shouldLog(LogEvent event) {
+    //Log all events
+    return true;
+  }
+}
+
+final loggerMemory = MemoryOutput(
+  bufferSize: 255,
+  secondOutput: ConsoleOutput(),
+);
+final logger = Logger(filter: _DebugLogFilter(), output: loggerMemory);

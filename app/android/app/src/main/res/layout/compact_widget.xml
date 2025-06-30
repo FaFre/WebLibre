@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.LensaiWidget.AppWidget.Container"
+    style="@style/Widget.WebLibreWidget.AppWidget.Container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="16dp"
-    android:theme="@style/Theme.LensaiWidget.AppWidgetContainer"
+    android:theme="@style/Theme.WebLibreWidget.AppWidgetContainer"
     android:gravity="center_vertical">
 
     <Button

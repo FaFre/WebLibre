@@ -30,10 +30,10 @@ abstract class _$BangCWProxy {
   /// Bang(...).copyWith(id: 12, name: "My name")
   /// ````
   Bang call({
-    String? websiteName,
-    String? domain,
-    String? trigger,
-    String? urlTemplate,
+    String websiteName,
+    String domain,
+    String trigger,
+    String urlTemplate,
     BangGroup? group,
     String? category,
     String? subCategory,
@@ -72,7 +72,6 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
   Bang format(Set<BangFormat>? format) => this(format: format);
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Bang(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -90,24 +89,22 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
     Object? format = const $CopyWithPlaceholder(),
   }) {
     return Bang(
-      websiteName:
-          websiteName == const $CopyWithPlaceholder() || websiteName == null
-              ? _value.websiteName
-              // ignore: cast_nullable_to_non_nullable
-              : websiteName as String,
-      domain: domain == const $CopyWithPlaceholder() || domain == null
+      websiteName: websiteName == const $CopyWithPlaceholder()
+          ? _value.websiteName
+          // ignore: cast_nullable_to_non_nullable
+          : websiteName as String,
+      domain: domain == const $CopyWithPlaceholder()
           ? _value.domain
           // ignore: cast_nullable_to_non_nullable
           : domain as String,
-      trigger: trigger == const $CopyWithPlaceholder() || trigger == null
+      trigger: trigger == const $CopyWithPlaceholder()
           ? _value.trigger
           // ignore: cast_nullable_to_non_nullable
           : trigger as String,
-      urlTemplate:
-          urlTemplate == const $CopyWithPlaceholder() || urlTemplate == null
-              ? _value.urlTemplate
-              // ignore: cast_nullable_to_non_nullable
-              : urlTemplate as String,
+      urlTemplate: urlTemplate == const $CopyWithPlaceholder()
+          ? _value.urlTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : urlTemplate as String,
       group: group == const $CopyWithPlaceholder()
           ? _value.group
           // ignore: cast_nullable_to_non_nullable
@@ -139,26 +136,26 @@ extension $BangCopyWith on Bang {
 // **************************************************************************
 
 Bang _$BangFromJson(Map<String, dynamic> json) => Bang(
-      websiteName: json['s'] as String,
-      domain: json['d'] as String,
-      trigger: json['t'] as String,
-      urlTemplate: json['u'] as String,
-      category: json['c'] as String?,
-      subCategory: json['sc'] as String?,
-      format: (json['fmt'] as List<dynamic>?)
-          ?.map((e) => $enumDecode(_$BangFormatEnumMap, e))
-          .toSet(),
-    );
+  websiteName: json['s'] as String,
+  domain: json['d'] as String,
+  trigger: json['t'] as String,
+  urlTemplate: json['u'] as String,
+  category: json['c'] as String?,
+  subCategory: json['sc'] as String?,
+  format: (json['fmt'] as List<dynamic>?)
+      ?.map((e) => $enumDecode(_$BangFormatEnumMap, e))
+      .toSet(),
+);
 
 Map<String, dynamic> _$BangToJson(Bang instance) => <String, dynamic>{
-      's': instance.websiteName,
-      'd': instance.domain,
-      't': instance.trigger,
-      'u': instance.urlTemplate,
-      'c': instance.category,
-      'sc': instance.subCategory,
-      'fmt': instance.format?.map((e) => _$BangFormatEnumMap[e]!).toList(),
-    };
+  's': instance.websiteName,
+  'd': instance.domain,
+  't': instance.trigger,
+  'u': instance.urlTemplate,
+  'c': instance.category,
+  'sc': instance.subCategory,
+  'fmt': instance.format?.map((e) => _$BangFormatEnumMap[e]!).toList(),
+};
 
 const _$BangFormatEnumMap = {
   BangFormat.openBasePath: 'open_base_path',

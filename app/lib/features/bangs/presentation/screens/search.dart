@@ -5,32 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/domain/repositories/search.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_details.dart';
-import 'package:lensai/features/search_browser/domain/entities/modes.dart';
-import 'package:lensai/features/search_browser/domain/entities/sheet.dart';
-import 'package:lensai/features/search_browser/domain/providers.dart';
-import 'package:lensai/features/settings/data/models/settings.dart';
-import 'package:lensai/features/settings/data/repositories/settings_repository.dart';
-import 'package:lensai/presentation/hooks/listenable_callback.dart';
-import 'package:lensai/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/features/bangs/domain/providers/search.dart';
+import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangSearchScreen extends HookConsumerWidget {
-  const BangSearchScreen({super.key});
+  final String? initialSearchText;
+
+  const BangSearchScreen({super.key, this.initialSearchText});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resultsAsync = ref.watch(bangSearchProvider);
-    final incognitoEnabled = ref.watch(
-      settingsRepositoryProvider.select(
-        (value) => (value.valueOrNull ?? Settings.withDefaults()).incognitoMode,
-      ),
+    final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
+
+    final focusNode = useFocusNode();
+    final textEditingController = useTextEditingController(
+      text: initialSearchText,
     );
 
-    final textEditingController = useTextEditingController();
-
-    useListenableCallback(textEditingController, () async {
+    useListenableCallback(textEditingController, () {
       unawaited(
         ref
             .read(bangSearchProvider.notifier)
@@ -42,6 +38,7 @@ class BangSearchScreen extends HookConsumerWidget {
       appBar: AppBar(
         title: TextField(
           enableIMEPersonalizedLearning: !incognitoEnabled,
+          focusNode: focusNode,
           controller: textEditingController,
           autofocus: true,
           autocorrect: false,
@@ -54,6 +51,7 @@ class BangSearchScreen extends HookConsumerWidget {
                 context.pop();
               } else {
                 textEditingController.clear();
+                focusNode.requestFocus();
               }
             },
             icon: const Icon(Icons.clear),
@@ -73,17 +71,7 @@ class BangSearchScreen extends HookConsumerWidget {
                 return BangDetails(
                   bang,
                   onTap: () {
-                    ref
-                        .read(selectedBangTriggerProvider().notifier)
-                        .setTrigger(bang.trigger);
-
-                    if (ref.read(bottomSheetProvider) is! CreateTab) {
-                      ref.read(bottomSheetProvider.notifier).show(
-                            CreateTab(preferredTool: KagiTool.search),
-                          );
-                    }
-
-                    context.go(KagiRoute().location);
+                    context.pop(bang.trigger);
                   },
                 );
               },
@@ -91,10 +79,7 @@ class BangSearchScreen extends HookConsumerWidget {
           },
         ),
         error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Bang Search failed',
-            exception: error,
-          ),
+          child: FailureWidget(title: 'Bang Search failed', exception: error),
         ),
         loading: () => const SizedBox.shrink(),
       ),

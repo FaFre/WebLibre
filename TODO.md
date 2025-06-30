@@ -1,0 +1,1 @@
+* check al sqlite IS with and conditions to match values with and where both params are optional

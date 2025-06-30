@@ -1,0 +1,148 @@
+group = "eu.weblibre.flutter_mozilla_components"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "2.1.20"
+    ext.mozillaComponentsVersion = '141.0b3'
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+
+        // maven {
+        //     name "Mozilla Nightly"
+        //     url "https://nightly.maven.mozilla.org/maven2"
+
+        //     content {
+        //         // Always fetch components from the snapshots repository
+        //         includeGroup "org.mozilla.components"
+        //     }
+        // }
+
+        maven {
+            name "Mozilla"
+            url "https://maven.mozilla.org/maven2"
+
+            content {
+                // Never fetch components from here. We always want to use snapshots when using nightly
+                // excludeGroup "org.mozilla.components"
+            }
+        }
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+    if (project.android.hasProperty("namespace")) {
+        namespace = "eu.weblibre.flutter_mozilla_components"
+    }
+
+    compileSdk = 35
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 21
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
+    }
+}
+
+configurations.configureEach {
+    exclude group: "org.mozilla.telemetry", module: "glean-native"
+}
+
+// Select the Glean from GeckoView.
+// `service-sync-logins` requires Glean, which pulls in glean-native,
+// but that's also provided by geckoview-omni, so now we need to select which one to use.
+project.configurations.configureEach {
+    resolutionStrategy.capabilitiesResolution.withCapability("org.mozilla.telemetry:glean-native") {
+        def toBeSelected = candidates.find { it.id instanceof ModuleComponentIdentifier && it.id.module.contains('geckoview') }
+        if (toBeSelected != null) {
+            select(toBeSelected)
+        }
+        because 'use GeckoView Glean instead of standalone Glean'
+    }
+}
+
+dependencies {
+    implementation "org.mozilla.components:support-utils:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:support-ktx:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:support-webextensions:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:support-locale:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:concept-engine:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:concept-fetch:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:concept-toolbar:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:concept-awesomebar:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:browser-engine-gecko:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:browser-state:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:browser-session-storage:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:browser-storage-sync:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:browser-icons:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:browser-thumbnails:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-addons:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-app-links:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-awesomebar:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-customtabs:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-downloads:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-media:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-tabs:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-prompts:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-session:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-readerview:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-privatemode:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-sitepermissions:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-webcompat:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-webnotifications:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:ui-widgets:$mozillaComponentsVersion"
+
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.3.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'com.google.android.material:material:1.12.0'
+    //https://stackoverflow.com/questions/73782320/onbackinvokedcallback-is-not-enabled-for-the-application-in-set-androidenableo
+    implementation 'androidx.activity:activity-ktx:1.10.1'
+    implementation 'androidx.paging:paging-runtime-ktx:3.3.6'
+
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.mockito:mockito-core:5.15.2")
+}

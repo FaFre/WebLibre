@@ -1,0 +1,135 @@
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article_query_result.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_authors.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_categories.dart';
+import 'package:weblibre/features/web_feed/data/database/converters/feed_links.dart';
+import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
+
+CREATE TABLE feed (
+  url TEXT PRIMARY KEY NOT NULL MAPPED BY `const UriConverter()`,
+  title TEXT,
+  description TEXT,
+  icon TEXT MAPPED BY `const UriConverterNullable()`,
+  site_link TEXT MAPPED BY `const UriConverterNullable()`,
+  authors TEXT MAPPED BY `const FeedAuthorsConverter()`,
+  tags TEXT MAPPED BY `const FeedCategoriesConverter()`,
+  last_fetched DATETIME
+);
+
+CREATE TABLE article (
+  id TEXT PRIMARY KEY NOT NULL,
+  feed_id TEXT NOT NULL MAPPED BY `const UriConverter()` REFERENCES feed ("url") ON DELETE CASCADE,
+  fetched DATETIME NOT NULL,
+  created DATETIME,
+  updated DATETIME,
+  last_read DATETIME, 
+  title TEXT,
+  authors TEXT MAPPED BY `const FeedAuthorsConverter()`,
+  tags TEXT MAPPED BY `const FeedCategoriesConverter()`,
+  links TEXT MAPPED BY `const FeedLinksConverter()`,
+  summaryHtml TEXT,
+  summaryMarkdown TEXT,
+  summaryPlain TEXT,
+  contentHtml TEXT,
+  contentMarkdown TEXT,
+  contentPlain TEXT
+) WITH FeedArticle;
+
+CREATE VIEW article_view WITH FeedArticle AS
+  SELECT 
+    a.*,
+    f.icon,
+    f.site_link
+  FROM
+    article a
+  INNER JOIN
+    feed f on f.url = a.feed_id;
+
+CREATE INDEX article_feed_id ON article (feed_id);
+
+CREATE VIRTUAL TABLE article_fts 
+  USING fts5(
+    title,
+    summaryPlain,
+    contentPlain,
+    content=article,
+    tokenize="trigram"
+  );
+
+-- Triggers to keep the FTS index up to date.
+CREATE TRIGGER article_after_insert AFTER INSERT ON article BEGIN
+  INSERT INTO 
+    article_fts(rowid, title, summaryPlain, contentPlain) 
+    VALUES (new.rowid, new.title, new.summaryPlain, new.contentPlain);
+END;
+CREATE TRIGGER article_after_delete AFTER DELETE ON article BEGIN
+  INSERT INTO 
+    article_fts(article_fts, rowid, title, summaryPlain, contentPlain) 
+    VALUES('delete', old.rowid, old.title, old.summaryPlain, old.contentPlain);
+END;
+CREATE TRIGGER article_after_update AFTER UPDATE ON article BEGIN
+  INSERT INTO 
+    article_fts(article_fts, rowid, title, summaryPlain, contentPlain) 
+    VALUES('delete', old.rowid, old.title, old.summaryPlain, old.contentPlain);
+  INSERT INTO 
+    article_fts(rowid, title, summaryPlain, contentPlain) 
+    VALUES (new.rowid, new.title, new.summaryPlain, new.contentPlain);
+END;
+
+optimizeFtsIndex:
+  INSERT INTO article_fts(article_fts) VALUES ('optimize');
+
+queryArticlesBasic(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
+  WITH weights AS (
+  SELECT 
+    -- Customize these weights (higher = more important)
+    1.0 as title_weight    -- Title matches are most important
+  )
+  SELECT 
+      a.*,
+      f.icon,
+      (
+        bm25(article_fts, weights.title_weight)
+      ) AS weighted_rank
+    FROM article_fts fts
+    INNER JOIN
+      article a ON a.rowid = fts.rowid
+    INNER JOIN
+      feed f ON f.url = a.feed_id
+    CROSS JOIN weights
+    WHERE
+      fts.title LIKE :query AND
+      (:feed_id IS NULL OR a.feed_id = :feed_id)
+    ORDER BY 
+      weighted_rank ASC,
+      a.created DESC NULLS LAST;
+
+queryArticlesFullContent(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
+  WITH weights AS (
+  SELECT 
+    -- Customize these weights (higher = more important)
+    10.0 as title_weight,    -- Title matches are most important
+    3.0 as summary_weight,  -- Summary matches are quite important
+    1.0 as content_weight   -- Content matches are basic
+  )
+  SELECT 
+      a.*,
+      f.icon,
+      highlight(article_fts, 0, :beforeMatch, :afterMatch) AS title_highlight,
+      snippet(article_fts, 1, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS summary_snippet,
+      snippet(article_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS content_snippet,
+      (
+        bm25(article_fts, weights.title_weight, weights.summary_weight, 
+            weights.content_weight)
+      ) AS weighted_rank
+    FROM article_fts(:query) fts
+    INNER JOIN
+      article a ON a.rowid = fts.rowid
+    INNER JOIN
+      feed f ON f.url = a.feed_id
+    CROSS JOIN weights
+    WHERE
+      :feed_id IS NULL OR a.feed_id = :feed_id
+    ORDER BY 
+      weighted_rank ASC,
+      a.created DESC NULLS LAST;

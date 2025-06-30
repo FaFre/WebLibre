@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: flutter_mozilla_components,simple_intent_receiver
+dependency_overrides:
+  flutter_mozilla_components:
+    path: ../packages/flutter_mozilla_components
+  simple_intent_receiver:
+    path: ../packages/simple_intent_receiver

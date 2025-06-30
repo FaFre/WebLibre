@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:lensai/core/routing/routes.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/presentation/widgets/bang_icon.dart';
-import 'package:lensai/features/settings/data/models/settings.dart';
-import 'package:lensai/features/settings/data/repositories/settings_repository.dart';
-import 'package:lensai/features/web_view/presentation/controllers/switch_new_tab.dart';
-import 'package:lensai/utils/ui_helper.dart' as ui_helper;
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class BangDetails extends HookConsumerWidget {
   final BangData bangData;
@@ -41,7 +37,7 @@ class BangDetails extends HookConsumerWidget {
             children: [
               Row(
                 children: [
-                  BangIcon(bangData),
+                  UrlIcon([bangData.getTemplateUrl('')], iconSize: 34.0),
                   const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(
@@ -66,37 +62,24 @@ class BangDetails extends HookConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FilledButton.tonalIcon(
-                    style:
-                        const ButtonStyle(visualDensity: VisualDensity.compact),
+                    style: const ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                    ),
                     onPressed: () async {
-                      final url = Uri.parse(bangData.getUrl('').origin);
+                      final url = Uri.parse(bangData.getTemplateUrl('').origin);
 
-                      final launchExternal = ref.read(
-                        settingsRepositoryProvider.select(
-                          (value) =>
-                              (value.valueOrNull ?? Settings.withDefaults())
-                                  .launchUrlExternal,
-                        ),
-                      );
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(url: url);
 
-                      if (launchExternal) {
-                        await ui_helper.launchUrlFeedback(context, url);
-                      } else {
-                        await ref
-                            .read(switchNewTabControllerProvider.notifier)
-                            .add(url);
-
-                        if (context.mounted) {
-                          context.go(KagiRoute().location);
-                        }
+                      if (context.mounted) {
+                        BrowserRoute().go(context);
                       }
                     },
                     label: Text(bangData.domain),
                     icon: const Icon(Icons.open_in_new),
                   ),
-                  const SizedBox(
-                    width: 8,
-                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '!${bangData.trigger}',

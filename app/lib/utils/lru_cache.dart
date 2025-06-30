@@ -10,10 +10,10 @@ class LRUCache<K, V> {
     int Function(K)? hashCode,
     bool Function(dynamic)? isValidKey,
   }) : _cache = LinkedHashMap<K, V>(
-          equals: equals,
-          hashCode: hashCode,
-          isValidKey: isValidKey,
-        );
+         equals: equals,
+         hashCode: hashCode,
+         isValidKey: isValidKey,
+       );
 
   void resize(int capacity) {
     if (_capacity > capacity) {
@@ -21,6 +21,10 @@ class LRUCache<K, V> {
     }
 
     _capacity = capacity;
+  }
+
+  bool contains(K key) {
+    return _cache.containsKey(key);
   }
 
   V? get(K key) {
@@ -34,7 +38,7 @@ class LRUCache<K, V> {
     return value;
   }
 
-  void set(K key, V value) {
+  V set(K key, V value) {
     if (_cache.containsKey(key)) {
       _cache.remove(key); // Remove the existing item before updating.
     } else if (_cache.length == _capacity) {
@@ -43,6 +47,6 @@ class LRUCache<K, V> {
       ); // Explicitly remove the least recently used item if at capacity.
     }
 
-    _cache[key] = value; // Inserting or updating the item.
+    return _cache[key] = value; // Inserting or updating the item.
   }
 }

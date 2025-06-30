@@ -1,11 +1,19 @@
+//Required by background_fetch build
+ext {
+    compileSdkVersion   = 35
+    targetSdkVersion    = 35
+}
+
 buildscript {
-    ext.kotlin_version = '1.9.22'
+    ext.kotlin_version = '2.1.20'
 }
 
 allprojects {
     repositories {
         google()
         mavenCentral()
+        //Required by background_fetch build
+        maven { url "${project(':background_fetch').projectDir}/libs" }
     }
 }
 

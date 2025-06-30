@@ -1,6 +1,8 @@
-import 'package:lensai/features/bangs/data/database/drift/converters/bang_format.dart';
-import 'package:lensai/features/bangs/data/models/bang_data.dart';
-import 'package:lensai/features/bangs/data/models/bang.dart';
+import 'package:weblibre/features/bangs/data/database/drift/converters/bang_format.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang.dart';
+import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
 
 CREATE TABLE bang (
   "trigger" TEXT PRIMARY KEY NOT NULL,
@@ -24,10 +26,10 @@ CREATE TABLE bang_frequency (
   last_used DATETIME NOT NULL
 );
 
-CREATE TABLE bang_icon (
-  "trigger" TEXT PRIMARY KEY NOT NULL REFERENCES bang ("trigger") ON DELETE CASCADE,
-  icon_data BLOB NOT NULL,
-  fetch_date DATETIME NOT NULL
+CREATE TABLE bang_history (
+  search_query TEXT UNIQUE NOT NULL,
+  "trigger" TEXT NOT NULL REFERENCES bang ("trigger"),
+  search_date DATETIME NOT NULL
 );
 
 CREATE VIRTUAL TABLE bang_fts 
@@ -42,14 +44,11 @@ CREATE VIEW bang_data_view WITH BangData AS
   SELECT
     b.*,
     bf.frequency,
-    bf.last_used,
-    bi.icon_data
+    bf.last_used
   FROM
     bang b
   LEFT JOIN
-    bang_frequency bf ON b."trigger" = bf."trigger"
-  LEFT JOIN
-    bang_icon bi ON b."trigger" = bi."trigger";
+    bang_frequency bf ON b."trigger" = bf."trigger";
 
 -- Triggers to keep the FTS index up to date.
 CREATE TRIGGER bang_after_insert AFTER INSERT ON bang BEGIN
@@ -74,23 +73,56 @@ END;
 optimizeFtsIndex:
   INSERT INTO bang_fts(bang_fts) VALUES ('optimize');
 
-bangQuery WITH BangData:
-  SELECT
+queryBangs WITH BangData:
+  WITH weights AS (
+    SELECT 
+      -- Customize these weights (higher = more important)
+      10.0 AS "trigger",       -- Title matches are most important
+      5.0 AS website_name           -- URL matches are quite important
+  )
+  SELECT 
     b.*,
     bf.frequency,
     bf.last_used,
-    bi.icon_data
-  FROM
+    bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
+  FROM 
     bang_fts(:query) fts
   INNER JOIN
     bang b ON b.rowid = fts.rowid
   LEFT JOIN
     bang_frequency bf ON b."trigger" = bf."trigger"
+  CROSS JOIN 
+    weights
+  ORDER BY 
+  	weighted_rank ASC,
+  	bf.frequency NULLS LAST;
+
+queryBangsBasic WITH BangData:
+  WITH weights AS (
+    SELECT 
+      -- Customize these weights (higher = more important)
+      10.0 AS "trigger",       -- Title matches are most important
+      5.0 AS website_name           -- URL matches are quite important
+  )
+  SELECT 
+    b.*,
+    bf.frequency,
+    bf.last_used,
+    bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
+  FROM 
+    bang_fts fts
+  INNER JOIN
+    bang b ON b.rowid = fts.rowid
   LEFT JOIN
-    bang_icon bi ON b."trigger" = bi."trigger"
-  ORDER BY
-    RANK,
-    bf.frequency NULLS LAST;
+    bang_frequency bf ON b."trigger" = bf."trigger"
+  CROSS JOIN 
+    weights
+  WHERE 
+  	fts."trigger" LIKE :query OR
+  	fts.website_name LIKE :query
+  ORDER BY 
+  	weighted_rank ASC,
+  	bf.frequency NULLS LAST;
 
 categoriesJson:
   WITH categories AS (
@@ -114,3 +146,18 @@ categoriesJson:
       json(c.sub_categories)
     ) AS categories_json
   FROM categories c;
+
+searchHistoryEntries WITH SearchHistoryEntry:
+  SELECT *
+  FROM bang_history 
+  ORDER BY search_date DESC
+  LIMIT :limit;  
+
+evictHistoryEntries:
+  DELETE FROM bang_history 
+  WHERE rowid IN (
+      SELECT rowid 
+      FROM bang_history 
+      ORDER BY search_date DESC 
+      LIMIT -1 OFFSET :limit
+  );

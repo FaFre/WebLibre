@@ -2,26 +2,11 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:drift/drift.dart' show Expression, Insertable, Value;
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:lensai/features/bangs/data/database/database.dart'
+import 'package:weblibre/features/bangs/data/database/database.dart'
     show BangCompanion;
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
 part 'bang.g.dart';
-
-enum BangGroup {
-  general(
-    'https://raw.githubusercontent.com/kagisearch/bangs/main/data/bangs.json',
-  ),
-  assistant(
-    'https://raw.githubusercontent.com/kagisearch/bangs/main/data/assistant_bangs.json',
-  ),
-  kagi(
-    'https://raw.githubusercontent.com/kagisearch/bangs/main/data/kagi_bangs.json',
-  );
-
-  final String url;
-
-  const BangGroup(this.url);
-}
 
 enum BangFormat {
   ///When the bang is invoked with no query, opens the base path of the URL (/)
@@ -80,23 +65,22 @@ class Bang with FastEquatable implements Insertable<Bang> {
     return (format == null ||
             format!.contains(BangFormat.urlEncodePlaceholder) == true)
         ? (format == null ||
-                format?.contains(BangFormat.urlEncodeSpaceToPlus) == true)
-            ? Uri.encodeQueryComponent(input)
-            : Uri.encodeComponent(input)
+                  format?.contains(BangFormat.urlEncodeSpaceToPlus) == true)
+              ? Uri.encodeQueryComponent(input)
+              : Uri.encodeComponent(input)
         : input;
   }
 
-  Uri getUrl(String? query) {
+  Uri getTemplateUrl(String? query) {
     final url = (query != null)
         ? urlTemplate.replaceAll(_templateQueryPlaceholder, formatQuery(query))
         : urlTemplate;
 
     var template = Uri.parse(url);
     if (!template.hasScheme || template.origin.isEmpty) {
-      template = Uri.https(domain).replace(
-        path: template.path,
-        query: template.query,
-      );
+      template = Uri.https(
+        domain,
+      ).replace(path: template.path, query: template.query);
     }
 
     return template;
@@ -126,19 +110,16 @@ class Bang with FastEquatable implements Insertable<Bang> {
   Map<String, dynamic> toJson() => _$BangToJson(this);
 
   @override
-  bool get cacheHash => true;
-
-  @override
   List<Object?> get hashParameters => [
-        group,
-        websiteName,
-        domain,
-        trigger,
-        urlTemplate,
-        category,
-        subCategory,
-        format,
-      ];
+    group,
+    websiteName,
+    domain,
+    trigger,
+    urlTemplate,
+    category,
+    subCategory,
+    format,
+  ];
 
   @override
   Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
