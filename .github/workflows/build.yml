@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       KEY_JKS: ${{ secrets.KEY_JKS }}
-      KEY_PATH: ${{ github.workspace }}/key.jks
+      KEY_PATH: ${{ github.workspace }}/app/key.jks
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
     permissions:
@@ -35,6 +35,7 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
+          working-directory: app
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -46,22 +47,26 @@ jobs:
       - name: Build container proxy
         working-directory: packages/flutter_mozilla_components/javascript/container_proxy
         run: |
-          npm i
+          npm ci
           npx webpack
+
       - name: Create key file
         working-directory: app
-        run: echo $KEY_JKS | base64 -di > $KEY_PATH
+        run: |
+          echo $KEY_JKS | base64 -d > key.jks
+          chmod 600 key.jks
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.32.4
+          flutter-version: 3.32.5
           cache: true
-      - name: Activate melos
+      - name: Setup Flutter dependencies
         working-directory: app
-        run: dart pub global activate melos
-      - name: Bootstrap melos
-        working-directory: app
-        run: melos bs
+        run: |
+          dart pub global activate melos
+          melos bootstrap
+
       - name: Build APK
         working-directory: app
         run: flutter build apk --verbose --release --split-per-abi --no-tree-shake-icons
@@ -69,7 +74,7 @@ jobs:
         working-directory: app
         run: flutter build appbundle --verbose --no-tree-shake-icons
       - name: Create github artifact release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.17.0
         with:
           artifacts: "app/build/app/outputs/apk/release/*.apk,app/build/app/outputs/bundle/release/app-release.aab"
       - name: Upload app bundle artifact
@@ -86,3 +91,8 @@ jobs:
           bundle exec fastlane supply \
           --aab build/app/outputs/bundle/release/app-release.aab \
           --track internal
+
+      - name: Cleanup
+        if: always()
+        working-directory: app
+        run: rm -f key.jks
