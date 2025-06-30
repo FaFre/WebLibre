@@ -53,7 +53,7 @@ jobs:
       - name: Create key file
         working-directory: app
         run: |
-          echo $KEY_JKS | base64 -d > key.jks
+          echo $KEY_JKS | base64 -di > key.jks
           chmod 600 key.jks
 
       - uses: subosito/flutter-action@v2
