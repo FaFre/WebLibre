@@ -7,7 +7,7 @@ part of 'tree_view.dart';
 // **************************************************************************
 
 String _$treeViewControllerHash() =>
-    r'53da9cc3cc89eab2fee4a3aaf4feccc5ecbfeb20';
+    r'1fac2a133d369e3bd3f8f75cdd2d0c862a6ab942';
 
 /// See also [TreeViewController].
 @ProviderFor(TreeViewController)

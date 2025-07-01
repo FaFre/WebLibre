@@ -12,6 +12,7 @@ import 'package:weblibre/extensions/media_query.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -311,7 +312,12 @@ class _BrowserView extends StatelessWidget {
                       ),
                     );
 
-                    return FindInPageWidget(padding: value);
+                    final tabId = ref.watch(selectedTabProvider);
+                    if (tabId == null) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return FindInPageWidget(tabId: tabId, padding: value);
                   },
                 ),
               ),

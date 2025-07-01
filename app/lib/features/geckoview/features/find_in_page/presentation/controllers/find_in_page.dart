@@ -1,14 +1,13 @@
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 
 part 'find_in_page.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class FindInPageController extends _$FindInPageController {
   void show() {
     state = state.copyWith.visible(true);
@@ -20,7 +19,6 @@ class FindInPageController extends _$FindInPageController {
   }
 
   Future<void> findAll({required String text}) {
-    final tabId = ref.read(selectedTabProvider);
     final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
     state = FindInPageState(visible: true, lastSearchText: text);
@@ -29,7 +27,6 @@ class FindInPageController extends _$FindInPageController {
   }
 
   Future<void> findNext({required String fallbackText, bool forward = true}) {
-    final tabId = ref.read(selectedTabProvider);
     final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
     final hasMatches =
@@ -45,17 +42,16 @@ class FindInPageController extends _$FindInPageController {
   }
 
   Future<void> clearMatches() {
-    final tabId = ref.read(selectedTabProvider);
     final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
     return service.clearMatches();
   }
 
   @override
-  FindInPageState build() {
+  FindInPageState build(String tabId) {
     ref.listen(
       fireImmediately: true,
-      selectedTabStateProvider,
+      tabStateProvider(tabId),
       (previous, next) async {
         //Ensure state is already initialized
         if (stateOrNull != null) {
@@ -63,10 +59,8 @@ class FindInPageController extends _$FindInPageController {
             if (previous != null && next != null) {
               final loadingOrReloading =
                   previous.isLoading == true && next.isLoading == false;
-              final tabSwitchWithoutResults =
-                  previous.id != next.id && !next.findResultState.hasMatches;
 
-              if (loadingOrReloading || tabSwitchWithoutResults) {
+              if (loadingOrReloading) {
                 await findAll(text: state.lastSearchText!);
               }
             }

@@ -172,6 +172,7 @@ class TabTreeDialog extends HookConsumerWidget {
                             .read(bottomSheetControllerProvider.notifier)
                             .dismiss();
                       },
+                      sourceSearchQuery: null,
                     ),
                   );
                 },

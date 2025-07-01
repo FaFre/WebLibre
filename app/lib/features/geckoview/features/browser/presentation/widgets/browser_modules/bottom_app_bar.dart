@@ -286,7 +286,12 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 if (selectedTabId != null)
                   MenuItemButton(
                     onPressed: () {
-                      ref.read(findInPageControllerProvider.notifier).show();
+                      final tabId = ref.read(selectedTabProvider);
+                      if (tabId != null) {
+                        ref
+                            .read(findInPageControllerProvider(tabId).notifier)
+                            .show();
+                      }
                     },
                     leadingIcon: const Icon(Icons.search),
                     child: const Text('Find in page'),

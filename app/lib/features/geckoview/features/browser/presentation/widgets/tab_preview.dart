@@ -10,6 +10,8 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -194,6 +196,7 @@ class TabPreview extends HookWidget {
 class SingleTabPreview extends HookConsumerWidget {
   final String tabId;
   final String? activeTabId;
+  final String? sourceSearchQuery;
 
   final void Function() onClose;
 
@@ -201,6 +204,7 @@ class SingleTabPreview extends HookConsumerWidget {
     required this.tabId,
     required this.activeTabId,
     required this.onClose,
+    required this.sourceSearchQuery,
   }) : super(key: ValueKey(tabId));
 
   @override
@@ -219,6 +223,13 @@ class SingleTabPreview extends HookConsumerWidget {
           //Close first to avoid rebuilds
           onClose();
           await ref.read(tabRepositoryProvider.notifier).selectTab(tab.id);
+          if (sourceSearchQuery.isNotEmpty &&
+              ref.read(findInPageControllerProvider(tabId)) ==
+                  FindInPageState.hidden()) {
+            await ref
+                .read(findInPageControllerProvider(tabId).notifier)
+                .findAll(text: sourceSearchQuery!);
+          }
         } else {
           onClose();
         }

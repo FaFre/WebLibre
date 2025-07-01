@@ -18,26 +18,31 @@ class TabSearchRepository extends _$TabSearchRepository {
     String ellipsis = '…',
   }) async {
     if (input.isNotEmpty) {
-      state = await AsyncValue.guard(
-        () => ref
-            .read(tabDatabaseProvider)
-            .tabDao
-            .queryTabs(
-              matchPrefix: matchPrefix,
-              matchSuffix: matchSuffix,
-              ellipsis: ellipsis,
-              snippetLength: snippetLength,
-              searchString: input,
-            )
-            .get(),
-      );
+      state = await AsyncValue.guard(() async {
+        return (
+          query: input,
+          results: await ref
+              .read(tabDatabaseProvider)
+              .tabDao
+              .queryTabs(
+                matchPrefix: matchPrefix,
+                matchSuffix: matchSuffix,
+                ellipsis: ellipsis,
+                snippetLength: snippetLength,
+                searchString: input,
+              )
+              .get(),
+        );
+      });
     } else {
       state = const AsyncValue.data(null);
     }
   }
 
   @override
-  Future<List<TabQueryResult>?> build(TabSearchPartition partition) {
+  Future<({String query, List<TabQueryResult> results})?> build(
+    TabSearchPartition partition,
+  ) {
     return Future.value();
   }
 }

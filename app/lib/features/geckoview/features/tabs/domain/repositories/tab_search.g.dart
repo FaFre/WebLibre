@@ -7,7 +7,7 @@ part of 'tab_search.dart';
 // **************************************************************************
 
 String _$tabSearchRepositoryHash() =>
-    r'd442c384a5a867f4ff28465f524a6ef67521d5ae';
+    r'ac2381c692b9caf93f26f302d15e0160c098917a';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -31,10 +31,15 @@ class _SystemHash {
 }
 
 abstract class _$TabSearchRepository
-    extends BuildlessAutoDisposeAsyncNotifier<List<TabQueryResult>?> {
+    extends
+        BuildlessAutoDisposeAsyncNotifier<
+          ({String query, List<TabQueryResult> results})?
+        > {
   late final TabSearchPartition partition;
 
-  FutureOr<List<TabQueryResult>?> build(TabSearchPartition partition);
+  FutureOr<({String query, List<TabQueryResult> results})?> build(
+    TabSearchPartition partition,
+  );
 }
 
 /// See also [TabSearchRepository].
@@ -43,7 +48,8 @@ const tabSearchRepositoryProvider = TabSearchRepositoryFamily();
 
 /// See also [TabSearchRepository].
 class TabSearchRepositoryFamily
-    extends Family<AsyncValue<List<TabQueryResult>?>> {
+    extends
+        Family<AsyncValue<({String query, List<TabQueryResult> results})?>> {
   /// See also [TabSearchRepository].
   const TabSearchRepositoryFamily();
 
@@ -79,7 +85,7 @@ class TabSearchRepositoryProvider
     extends
         AutoDisposeAsyncNotifierProviderImpl<
           TabSearchRepository,
-          List<TabQueryResult>?
+          ({String query, List<TabQueryResult> results})?
         > {
   /// See also [TabSearchRepository].
   TabSearchRepositoryProvider(TabSearchPartition partition)
@@ -109,7 +115,7 @@ class TabSearchRepositoryProvider
   final TabSearchPartition partition;
 
   @override
-  FutureOr<List<TabQueryResult>?> runNotifierBuild(
+  FutureOr<({String query, List<TabQueryResult> results})?> runNotifierBuild(
     covariant TabSearchRepository notifier,
   ) {
     return notifier.build(partition);
@@ -134,7 +140,7 @@ class TabSearchRepositoryProvider
   @override
   AutoDisposeAsyncNotifierProviderElement<
     TabSearchRepository,
-    List<TabQueryResult>?
+    ({String query, List<TabQueryResult> results})?
   >
   createElement() {
     return _TabSearchRepositoryProviderElement(this);
@@ -157,7 +163,10 @@ class TabSearchRepositoryProvider
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 mixin TabSearchRepositoryRef
-    on AutoDisposeAsyncNotifierProviderRef<List<TabQueryResult>?> {
+    on
+        AutoDisposeAsyncNotifierProviderRef<
+          ({String query, List<TabQueryResult> results})?
+        > {
   /// The parameter `partition` of this provider.
   TabSearchPartition get partition;
 }
@@ -166,7 +175,7 @@ class _TabSearchRepositoryProviderElement
     extends
         AutoDisposeAsyncNotifierProviderElement<
           TabSearchRepository,
-          List<TabQueryResult>?
+          ({String query, List<TabQueryResult> results})?
         >
     with TabSearchRepositoryRef {
   _TabSearchRepositoryProviderElement(super.provider);

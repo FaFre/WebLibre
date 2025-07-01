@@ -12,6 +12,8 @@ class TabPreview with FastEquatable {
 
   final String? content;
 
+  final String? sourceSearchQuery;
+
   TabPreview({
     required this.id,
     required this.title,
@@ -19,6 +21,7 @@ class TabPreview with FastEquatable {
     required this.url,
     required this.highlightedUrl,
     required this.content,
+    required this.sourceSearchQuery,
   });
 
   @override
@@ -29,5 +32,6 @@ class TabPreview with FastEquatable {
     url,
     highlightedUrl,
     content,
+    sourceSearchQuery,
   ];
 }

@@ -314,13 +314,18 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                   final tabs = useMemoized(() {
                     return filteredTabIds.value
-                        .whereType<SingleTabEntity>()
+                        .where((entity) => entity is! TabTreeEntity)
                         .mapIndexed((index, entity) {
                           final child = Consumer(
                             child: SingleTabPreview(
                               tabId: entity.tabId,
                               activeTabId: activeTab,
                               onClose: onClose,
+                              sourceSearchQuery: switch (entity) {
+                                DefaultTabEntity() => null,
+                                SearchResultTabEntity() => entity.searchQuery,
+                                TabTreeEntity() => throw UnimplementedError(),
+                              },
                             ),
                             builder: (context, ref, child) {
                               final dragData = ref.watch(

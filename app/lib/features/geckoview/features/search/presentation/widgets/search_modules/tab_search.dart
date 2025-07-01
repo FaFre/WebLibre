@@ -9,6 +9,8 @@ import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -139,6 +141,13 @@ class TabSearch extends HookConsumerWidget {
                 await ref
                     .read(tabRepositoryProvider.notifier)
                     .selectTab(result.id);
+                if (result.sourceSearchQuery.isNotEmpty &&
+                    ref.read(findInPageControllerProvider(result.id)) ==
+                        FindInPageState.hidden()) {
+                  await ref
+                      .read(findInPageControllerProvider(result.id).notifier)
+                      .findAll(text: result.sourceSearchQuery!);
+                }
 
                 if (context.mounted) {
                   ref.read(bottomSheetControllerProvider.notifier).dismiss();

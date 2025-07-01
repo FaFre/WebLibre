@@ -1,4 +1,5 @@
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
@@ -98,9 +99,16 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       .watch(
         tabSearchRepositoryProvider(searchPartition).select(
           (value) => EquatableValue(
-            value.valueOrNull
-                ?.map((tab) => SingleTabEntity(tabId: tab.id))
-                .toList(),
+            value.valueOrNull.mapNotNull(
+              (result) => result.results
+                  .map(
+                    (tab) => SearchResultTabEntity(
+                      tabId: tab.id,
+                      searchQuery: result.query,
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
         ),
       )
@@ -109,7 +117,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   final availableTabs = ref.watch(
     availableTabIdsProvider(containerFilter).select(
       (value) => EquatableValue(
-        value.value.map((tab) => SingleTabEntity(tabId: tab)).toList(),
+        value.value.map((tab) => DefaultTabEntity(tabId: tab)).toList(),
       ),
     ),
   );
@@ -148,7 +156,13 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   }
 
   return EquatableValue(
-    tabSearchResults.where((tab) => availableTabs.value.contains(tab)).toList(),
+    tabSearchResults
+        .where(
+          (tab) => availableTabs.value.any(
+            (available) => available.tabId == tab.tabId,
+          ),
+        )
+        .toList(),
   );
 }
 
@@ -181,6 +195,7 @@ EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
               url: state.url,
               highlightedUrl: null,
               content: null,
+              sourceSearchQuery: null,
             ),
           )
           .toList(),
@@ -188,7 +203,7 @@ EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
   }
 
   return EquatableValue(
-    tabSearchResults
+    tabSearchResults.results
         .where((tab) => availableTabStates.value.containsKey(tab.id))
         .map((tab) {
           return TabPreview(
@@ -198,6 +213,7 @@ EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
             url: tab.cleanUrl ?? availableTabStates.value[tab.id]!.url,
             highlightedUrl: tab.url,
             content: tab.extractedContent ?? tab.fullContent,
+            sourceSearchQuery: tabSearchResults.query,
           );
         })
         .whereType<TabPreview>()

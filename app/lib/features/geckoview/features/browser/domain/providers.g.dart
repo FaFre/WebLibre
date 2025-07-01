@@ -283,7 +283,7 @@ class _AvailableTabStatesProviderElement
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'0ef5c14f3fa018e3417e097759817bc871be3e0d';
+    r'2cd698d4e7c9d9cda9e17abbf9a99e512425e4cd';
 
 /// See also [seamlessFilteredTabEntities].
 @ProviderFor(seamlessFilteredTabEntities)
@@ -456,7 +456,7 @@ class _SeamlessFilteredTabEntitiesProviderElement
 }
 
 String _$seamlessFilteredTabPreviewsHash() =>
-    r'c59c2819eda4f132e1a0f5f7784ddb3b5ceec817';
+    r'c50a2d0f9f3ba2bc3db7c96e74d9acdcac2e84e4';
 
 /// See also [seamlessFilteredTabPreviews].
 @ProviderFor(seamlessFilteredTabPreviews)
