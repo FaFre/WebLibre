@@ -1,9 +1,3 @@
-## 0.9.11
-
 * Trigger automatic find-in-page when coming from local search results
 * Upgraded gecko
 * Upgraded GoRouter
-
-## 0.9.10
-
-* Initial public release
