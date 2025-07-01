@@ -74,6 +74,10 @@ class _TabSheetHeader extends HookConsumerWidget {
                           iconSize: 18,
                           padding: EdgeInsets.zero,
                           onPressed: () {
+                            ref
+                                .read(treeViewControllerProvider.notifier)
+                                .hide();
+
                             searchMode.value = true;
                             searchTextFocus.requestFocus();
                           },

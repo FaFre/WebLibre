@@ -8,6 +8,12 @@ class TreeViewController extends _$TreeViewController {
     state = !state;
   }
 
+  void hide() {
+    if (state) {
+      state = false;
+    }
+  }
+
   @override
   bool build() {
     return false;
