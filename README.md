@@ -8,6 +8,9 @@
 
 WebLibre is an independent browser project built on the foundation of [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/).
 
+> **⚠️ Alpha Release Notice**  
+> WebLibre is currently in alpha phase. Expect frequent updates, potential bugs, and breaking changes. Please report issues on [GitHub](https://github.com/FaFre/WebLibre/issues).
+
 ## Features
 
 ### Privacy & Security
