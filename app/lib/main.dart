@@ -30,6 +30,8 @@ void main() async {
     return true;
   };
 
+  await BackgroundFetch.registerHeadlessTask(backgroundFetch);
+
   if (kDebugMode) {
     final serviceProtocolInfo = await Service.getInfo();
     logger.d('VM: ${serviceProtocolInfo.serverUri}');
@@ -38,8 +40,6 @@ void main() async {
   //Ensure everything is ready
   await Future.delayed(Duration.zero);
   await GeckoBrowserService().initialize();
-
-  await BackgroundFetch.registerHeadlessTask(backgroundFetch);
 
   await HomeWidget.setAppGroupId('weblibre');
 
