@@ -225,62 +225,62 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const ListTile(
-                      title: Text('Cookie Banner Blocker'),
-                      leading: Icon(MdiIcons.cookieSettings),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    CheckboxListTile.adaptive(
-                      value:
-                          engineSettings.cookieBannerHandlingMode ==
-                          CookieBannerHandlingMode.rejectAll,
-                      title: const Text('In normal browsing'),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      onChanged: (value) async {
-                        await ref
-                            .read(saveEngineSettingsControllerProvider.notifier)
-                            .save(
-                              (currentSettings) => currentSettings.copyWith
-                                  .cookieBannerHandlingMode(
-                                    value!
-                                        ? CookieBannerHandlingMode.rejectAll
-                                        : CookieBannerHandlingMode.disabled,
-                                  ),
-                            );
-                      },
-                    ),
-                    CheckboxListTile.adaptive(
-                      value:
-                          engineSettings
-                              .cookieBannerHandlingModePrivateBrowsing ==
-                          CookieBannerHandlingMode.rejectAll,
-                      title: const Text('In private browsing'),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      onChanged: (value) async {
-                        await ref
-                            .read(saveEngineSettingsControllerProvider.notifier)
-                            .save(
-                              (currentSettings) => currentSettings.copyWith
-                                  .cookieBannerHandlingModePrivateBrowsing(
-                                    value!
-                                        ? CookieBannerHandlingMode.rejectAll
-                                        : CookieBannerHandlingMode.disabled,
-                                  ),
-                            );
-                      },
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(
+              //     horizontal: 16.0,
+              //     vertical: 8,
+              //   ),
+              //   child: Column(
+              //     mainAxisSize: MainAxisSize.min,
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       const ListTile(
+              //         title: Text('Cookie Banner Blocker'),
+              //         leading: Icon(MdiIcons.cookieSettings),
+              //         contentPadding: EdgeInsets.zero,
+              //       ),
+              //       CheckboxListTile.adaptive(
+              //         value:
+              //             engineSettings.cookieBannerHandlingMode ==
+              //             CookieBannerHandlingMode.rejectAll,
+              //         title: const Text('In normal browsing'),
+              //         controlAffinity: ListTileControlAffinity.leading,
+              //         onChanged: (value) async {
+              //           await ref
+              //               .read(saveEngineSettingsControllerProvider.notifier)
+              //               .save(
+              //                 (currentSettings) => currentSettings.copyWith
+              //                     .cookieBannerHandlingMode(
+              //                       value!
+              //                           ? CookieBannerHandlingMode.rejectAll
+              //                           : CookieBannerHandlingMode.disabled,
+              //                     ),
+              //               );
+              //         },
+              //       ),
+              //       CheckboxListTile.adaptive(
+              //         value:
+              //             engineSettings
+              //                 .cookieBannerHandlingModePrivateBrowsing ==
+              //             CookieBannerHandlingMode.rejectAll,
+              //         title: const Text('In private browsing'),
+              //         controlAffinity: ListTileControlAffinity.leading,
+              //         onChanged: (value) async {
+              //           await ref
+              //               .read(saveEngineSettingsControllerProvider.notifier)
+              //               .save(
+              //                 (currentSettings) => currentSettings.copyWith
+              //                     .cookieBannerHandlingModePrivateBrowsing(
+              //                       value!
+              //                           ? CookieBannerHandlingMode.rejectAll
+              //                           : CookieBannerHandlingMode.disabled,
+              //                     ),
+              //               );
+              //         },
+              //       ),
+              //     ],
+              //   ),
+              // ),
               ListTile(
                 title: const Text('Web Engine Hardening'),
                 contentPadding: const EdgeInsets.symmetric(
