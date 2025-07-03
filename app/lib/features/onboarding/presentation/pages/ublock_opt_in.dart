@@ -42,7 +42,7 @@ There are many other lists available to block even more.
           ),
           const SizedBox(height: 24),
           FormField(
-            initialValue: true,
+            initialValue: false,
             onSaved: (newValue) {
               if (newValue == true) {
                 unawaited(
