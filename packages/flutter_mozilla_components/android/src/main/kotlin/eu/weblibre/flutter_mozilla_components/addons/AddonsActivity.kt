@@ -5,6 +5,7 @@
 package eu.weblibre.flutter_mozilla_components.addons
 
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import eu.weblibre.flutter_mozilla_components.R
 
@@ -15,6 +16,10 @@ class AddonsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_on_main)
+
+        onBackPressedDispatcher.addCallback(this) {
+            finishAndRemoveTask()
+        }
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().apply {
