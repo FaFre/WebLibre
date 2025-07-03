@@ -116,6 +116,12 @@ RouteBase get $settingsRoute => GoRouteData.$route(
         ),
       ],
     ),
+    GoRouteData.$route(
+      path: 'developer',
+      name: 'DeveloperSettingsRoute',
+
+      factory: _$DeveloperSettingsRoute._fromState,
+    ),
   ],
 );
 
@@ -235,6 +241,27 @@ mixin _$WebEngineHardeningGroupRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/settings/web_engine/hardening/group/${Uri.encodeComponent(_self.group)}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$DeveloperSettingsRoute on GoRouteData {
+  static DeveloperSettingsRoute _fromState(GoRouterState state) =>
+      DeveloperSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/developer');
 
   @override
   void go(BuildContext context) => context.go(location);

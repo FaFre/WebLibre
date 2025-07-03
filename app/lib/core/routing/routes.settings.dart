@@ -25,6 +25,10 @@ part of 'routes.dart';
         ),
       ],
     ),
+    TypedGoRoute<DeveloperSettingsRoute>(
+      name: 'DeveloperSettingsRoute',
+      path: 'developer',
+    ),
   ],
 )
 class SettingsRoute extends GoRouteData with _$SettingsRoute {
@@ -52,6 +56,13 @@ class WebEngineSettingsRoute extends GoRouteData with _$WebEngineSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const WebEngineSettingsScreen();
+  }
+}
+
+class DeveloperSettingsRoute extends GoRouteData with _$DeveloperSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DeveloperSettingsScreen();
   }
 }
 

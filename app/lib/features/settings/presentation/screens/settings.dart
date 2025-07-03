@@ -68,6 +68,23 @@ class SettingsScreen extends HookConsumerWidget {
                   },
                 ),
               ),
+              const SizedBox(height: 8),
+              Card(
+                color: Theme.of(context).highlightColor,
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  title: const Text('Developer'),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 8.0,
+                    horizontal: 16.0,
+                  ),
+                  leading: const Icon(Icons.developer_mode),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    await DeveloperSettingsRoute().push(context);
+                  },
+                ),
+              ),
             ],
           );
         },
