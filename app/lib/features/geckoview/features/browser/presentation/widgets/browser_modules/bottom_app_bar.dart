@@ -196,8 +196,8 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   child: const Text('Settings'),
                 ),
                 Consumer(
-                  builder: (context, ref, child) {
-                    final browserExtensions = ref.watch(
+                  builder: (context, childRef, child) {
+                    final browserExtensions = childRef.watch(
                       webExtensionsStateProvider(
                         WebExtensionActionType.browser,
                       ).select((value) => value.values.toList()),
@@ -223,11 +223,22 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                             await addonService.startAddonManagerActivity();
                           },
                           leadingIcon: const Icon(MdiIcons.puzzleEdit),
-                          child: const Text('Addon Manager'),
+                          child: const Text('Manage Extension'),
+                        ),
+                        MenuItemButton(
+                          onPressed: () async {
+                            await ref
+                                .read(tabRepositoryProvider.notifier)
+                                .addTab(
+                                  url: Uri.parse('https://addons.mozilla.org'),
+                                );
+                          },
+                          leadingIcon: const Icon(MdiIcons.puzzlePlus),
+                          child: const Text('Get Extensions'),
                         ),
                       ],
                       leadingIcon: const Icon(MdiIcons.puzzle),
-                      child: const Text('Addons'),
+                      child: const Text('Extensions'),
                     );
                   },
                 ),
