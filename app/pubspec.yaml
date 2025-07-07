@@ -48,7 +48,7 @@ dependencies:
   package_info_plus: ^8.3.0
   path: ^1.9.1
   path_provider: ^2.1.5
-  permission_handler: ^12.0.0+1
+  permission_handler: ^12.0.1
   pretty_qr_code: ^3.4.0
   riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
@@ -57,7 +57,7 @@ dependencies:
   share_plus: ^11.0.0
   simple_intent_receiver:
     path: ../packages/simple_intent_receiver
-  skeletonizer: ^2.0.1
+  skeletonizer: ^2.1.0+1
   sliver_tools: ^0.2.12
   smooth_page_indicator: ^1.2.1
   socks5_proxy:
