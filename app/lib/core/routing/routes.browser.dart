@@ -28,6 +28,10 @@ part of 'routes.dart';
         ),
       ],
     ),
+    TypedGoRoute<ContainerSelectionRoute>(
+      name: 'ContainerSelectionRoute',
+      path: 'select_container',
+    ),
     TypedGoRoute<TabTreeRoute>(
       name: 'TabTreeRoute',
       path: 'tab_tree/:rootTabId',
@@ -94,6 +98,14 @@ class ContainerListRoute extends GoRouteData with _$ContainerListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ContainerListScreen();
+  }
+}
+
+class ContainerSelectionRoute extends GoRouteData
+    with _$ContainerSelectionRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ContainerSelectionScreen();
   }
 }
 

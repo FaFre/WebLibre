@@ -7,13 +7,17 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/site_search.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/share_tile.dart';
@@ -110,7 +114,6 @@ class WebPageDialog extends HookConsumerWidget {
                             availableBangCount == null ||
                             availableBangCount > 0)
                           const Divider(),
-                        WebsiteFeedTile(url, precachedInfo: precachedInfo),
                         ListTile(
                           leading: const Icon(MdiIcons.contentCopy),
                           title: const Text('Copy address'),
@@ -180,6 +183,34 @@ class WebPageDialog extends HookConsumerWidget {
                             }
                           },
                         ),
+                        ListTile(
+                          leading: const Icon(MdiIcons.folderArrowUpDown),
+                          title: const Text('Assign container'),
+                          onTap: () async {
+                            final selectedTabId = ref.read(selectedTabProvider);
+                            if (selectedTabId != null) {
+                              final targetContainerId =
+                                  await ContainerSelectionRoute().push<String?>(
+                                    context,
+                                  );
+
+                              if (targetContainerId != null) {
+                                final containerData = await ref
+                                    .read(containerRepositoryProvider.notifier)
+                                    .getContainerData(targetContainerId);
+
+                                if (containerData != null) {
+                                  await ref
+                                      .read(tabDataRepositoryProvider.notifier)
+                                      .assignContainer(
+                                        selectedTabId,
+                                        containerData,
+                                      );
+                                }
+                              }
+                            }
+                          },
+                        ),
                         ShareTile(
                           onTap: () async {
                             await SharePlus.instance.share(
@@ -231,6 +262,7 @@ class WebPageDialog extends HookConsumerWidget {
                             }
                           },
                         ),
+                        WebsiteFeedTile(url, precachedInfo: precachedInfo),
                       ],
                     ),
                   );

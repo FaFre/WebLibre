@@ -328,6 +328,12 @@ RouteBase get $browserRoute => GoRouteData.$route(
       ],
     ),
     GoRouteData.$route(
+      path: 'select_container',
+      name: 'ContainerSelectionRoute',
+
+      factory: _$ContainerSelectionRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'tab_tree/:rootTabId',
       name: 'TabTreeRoute',
 
@@ -532,6 +538,27 @@ mixin _$ContainerEditRoute on GoRouteData {
   @override
   void replace(BuildContext context) =>
       context.replace(location, extra: _self.$extra);
+}
+
+mixin _$ContainerSelectionRoute on GoRouteData {
+  static ContainerSelectionRoute _fromState(GoRouterState state) =>
+      ContainerSelectionRoute();
+
+  @override
+  String get location => GoRouteData.$location('/select_container');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
 }
 
 mixin _$TabTreeRoute on GoRouteData {
