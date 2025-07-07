@@ -31,6 +31,8 @@ Future<void> showQrCode(BuildContext context, String data) {
                       image: AssetImage('assets/icon/icon.png'),
                     ),
                   ),
+                  //Increase level to mitigate image cutout
+                  errorCorrectLevel: QrErrorCorrectLevel.H,
                 ),
               ),
               const SizedBox(height: 20),
