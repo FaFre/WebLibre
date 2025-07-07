@@ -6,10 +6,8 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
@@ -103,39 +101,12 @@ class ContainerChips extends HookConsumerWidget {
                               overlayController.hide();
                             },
                             onAcceptWithDetails: (details) async {
-                              final containerId = await ref
+                              await ref
                                   .read(tabDataRepositoryProvider.notifier)
-                                  .containerTabId(details.data.tabId);
-
-                              final containerData = await containerId
-                                  .mapNotNull(
-                                    (containerId) => ref
-                                        .read(
-                                          containerRepositoryProvider.notifier,
-                                        )
-                                        .getContainerData(containerId),
+                                  .assignContainer(
+                                    details.data.tabId,
+                                    container,
                                   );
-
-                              if (container.metadata.contextualIdentity ==
-                                  containerData?.metadata.contextualIdentity) {
-                                await ref
-                                    .read(tabDataRepositoryProvider.notifier)
-                                    .assignContainer(
-                                      details.data.tabId,
-                                      container.id,
-                                    );
-                              } else {
-                                await ref
-                                    .read(tabRepositoryProvider.notifier)
-                                    .duplicateTab(
-                                      selectTabId: details.data.tabId,
-                                      containerId: container.id,
-                                    );
-
-                                await ref
-                                    .read(tabRepositoryProvider.notifier)
-                                    .closeTab(details.data.tabId);
-                              }
 
                               dragTargetTabId.value = null;
                               overlayController.hide();

@@ -108,6 +108,9 @@ class ContainerListScreen extends HookConsumerWidget {
                         child: ContainerListTile(
                           container,
                           isSelected: container.id == selectedContainer,
+                          onTap: () async {
+                            await ContainerEditRoute(container).push(context);
+                          },
                         ),
                       );
                     },
@@ -119,6 +122,7 @@ class ContainerListScreen extends HookConsumerWidget {
                 itemCount: 3,
                 itemBuilder: (context, index) => ContainerListTile(
                   ContainerData(id: 'null', color: Colors.transparent),
+                  onTap: null,
                   isSelected: false,
                 ),
               ),

@@ -1,16 +1,41 @@
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 
 part 'tab.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabDataRepository extends _$TabDataRepository {
-  Future<void> assignContainer(String tabId, String? containerId) {
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .assignContainer(tabId, containerId: containerId);
+  Future<void> assignContainer(
+    String tabId,
+    ContainerData targetContainer,
+  ) async {
+    final currentContainerId = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .containerTabId(tabId);
+
+    final currentContainerData = await currentContainerId.mapNotNull(
+      (containerId) => ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainerData(containerId),
+    );
+
+    if (targetContainer.metadata.contextualIdentity ==
+        currentContainerData?.metadata.contextualIdentity) {
+      await ref
+          .read(tabDatabaseProvider)
+          .tabDao
+          .assignContainer(tabId, containerId: targetContainer.id);
+    } else {
+      await ref
+          .read(tabRepositoryProvider.notifier)
+          .duplicateTab(selectTabId: tabId, containerId: targetContainer.id);
+
+      await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+    }
   }
 
   Future<void> assignOrderKey(String tabId, String orderKey) {
