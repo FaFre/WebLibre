@@ -10,6 +10,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +23,6 @@ import androidx.fragment.app.Fragment
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
-import eu.weblibre.flutter_mozilla_components.pip.PictureInPictureIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
 import mozilla.components.browser.state.selector.selectedTab
@@ -35,6 +35,7 @@ import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
 import mozilla.components.feature.prompts.PromptFeature
 import mozilla.components.feature.session.FullScreenFeature
+import mozilla.components.feature.session.PictureInPictureFeature
 import mozilla.components.feature.session.SessionFeature
 import mozilla.components.feature.session.SwipeRefreshFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
@@ -61,13 +62,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val appLinksFeature = ViewBoundFeatureWrapper<AppLinksFeature>()
     private val promptFeature = ViewBoundFeatureWrapper<PromptFeature>()
     private val webExtensionPromptFeature = ViewBoundFeatureWrapper<WebExtensionPromptFeature>()
-    private val pictureInPictureIntegration = ViewBoundFeatureWrapper<PictureInPictureIntegration>()
     private val sitePermissionsFeature = ViewBoundFeatureWrapper<SitePermissionsFeature>()
     private val swipeRefreshFeature = ViewBoundFeatureWrapper<SwipeRefreshFeature>()
     private val secureWindowFeature = ViewBoundFeatureWrapper<SecureWindowFeature>()
     private val fullScreenFeature = ViewBoundFeatureWrapper<FullScreenFeature>()
     private val mediaSessionFullscreenFeature =
         ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
+
+    private var pictureInPictureFeature: PictureInPictureFeature? = null
 
     private val sessionId: String?
         get() = arguments?.getString(SESSION_ID_KEY)
@@ -266,6 +268,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 sessionUseCases = components.useCases.sessionUseCases,
                 tabId = sessionId,
                 fullScreenChanged = ::fullScreenChanged,
+                viewportFitChanged = ::viewportFitChanged
             ),
             owner = this,
             view = binding.root,
@@ -281,14 +284,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             view = binding.root,
         )
 
-        pictureInPictureIntegration.set(
-            feature = PictureInPictureIntegration(
-                components.core.store,
-                requireActivity(),
-                sessionId,
-            ),
-            owner = this,
-            view = view,
+        pictureInPictureFeature = PictureInPictureFeature(
+            store = components.core.store,
+            activity = requireActivity(),
+            tabId = sessionId,
         )
 
         secureWindowFeature.set(
@@ -358,23 +357,23 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         }
     }
 
+    private fun viewportFitChanged(viewportFit: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            activity?.window?.attributes?.layoutInDisplayCutoutMode = viewportFit
+        }
+    }
+
     @CallSuper
     override fun onBackPressed(): Boolean {
         return backButtonHandler.any { it.onBackPressed() }
     }
 
-    final override fun onPause() {
-        pictureInPictureIntegration.get()?.onHomePressed() ?: false
-        super.onPause()
-    }
+    final override fun onHomePressed(): Boolean =pictureInPictureFeature?.onHomePressed() ?: false
 
-    final override fun onPictureInPictureModeChanged(enabled: Boolean) {
-        val session = components.core.store.state.selectedTab
-        val fullScreenMode = session?.content?.fullScreen ?: false
-        // If we're exiting PIP mode and we're in fullscreen mode, then we should exit fullscreen mode as well.
-        if (!enabled && fullScreenMode) {
+    override fun onPictureInPictureModeChanged(enabled: Boolean) {
+        pictureInPictureFeature?.onPictureInPictureModeChanged(enabled)
+        if (lifecycle.currentState == androidx.lifecycle.Lifecycle.State.CREATED) {
             onBackPressed()
-            fullScreenChanged(false)
         }
     }
 
