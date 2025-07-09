@@ -18,10 +18,12 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/she
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/edit_url_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -36,11 +38,18 @@ class BrowserBottomAppBar extends HookConsumerWidget {
     final addonService = ref.watch(addonServiceProvider);
 
     final tabMenuController = useMenuController();
+    final extensionMenuController = useMenuController();
     final trippleDotMenuController = useMenuController();
 
     final selectedTabId = ref.watch(selectedTabProvider);
     final isPrivateTab = ref.watch(
       selectedTabStateProvider.select((state) => state?.isPrivate ?? false),
+    );
+
+    final showExtensionShortcut = ref.watch(
+      generalSettingsRepositoryProvider.select(
+        (value) => value.showExtensionShortcut,
+      ),
     );
 
     final dragStartPosition = useRef(Offset.zero);
@@ -97,6 +106,20 @@ class BrowserBottomAppBar extends HookConsumerWidget {
           actions: [
             if (selectedTabId != null && displayedSheet is! ViewTabsSheet)
               ReaderButton(),
+            if (showExtensionShortcut)
+              ExtensionShortcutMenu(
+                controller: extensionMenuController,
+                child: IconButton(
+                  onPressed: () {
+                    if (extensionMenuController.isOpen) {
+                      extensionMenuController.close();
+                    } else {
+                      extensionMenuController.open();
+                    }
+                  },
+                  icon: const Icon(MdiIcons.puzzle),
+                ),
+              ),
             TabCreationMenu(
               controller: tabMenuController,
               selectedTabId: selectedTabId,

@@ -27,6 +27,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor);
 
+  GeneralSettings showExtensionShortcut(bool showExtensionShortcut);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -42,6 +44,7 @@ abstract class _$GeneralSettingsCWProxy {
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
     bool proxyPrivateTabsTor,
+    bool showExtensionShortcut,
   });
 }
 
@@ -85,6 +88,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(proxyPrivateTabsTor: proxyPrivateTabsTor);
 
   @override
+  GeneralSettings showExtensionShortcut(bool showExtensionShortcut) =>
+      this(showExtensionShortcut: showExtensionShortcut);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -100,6 +107,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
+    Object? showExtensionShortcut = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder()
@@ -138,6 +146,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.proxyPrivateTabsTor
           // ignore: cast_nullable_to_non_nullable
           : proxyPrivateTabsTor as bool,
+      showExtensionShortcut:
+          showExtensionShortcut == const $CopyWithPlaceholder()
+          ? _value.showExtensionShortcut
+          // ignore: cast_nullable_to_non_nullable
+          : showExtensionShortcut as bool,
     );
   }
 }
@@ -168,6 +181,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
       ),
       createChildTabsOption: json['createChildTabsOption'] as bool?,
       proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
+      showExtensionShortcut: json['showExtensionShortcut'] as bool?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
@@ -183,6 +197,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
           _$SearchSuggestionProvidersEnumMap[instance
               .defaultSearchSuggestionsProvider]!,
       'createChildTabsOption': instance.createChildTabsOption,
+      'showExtensionShortcut': instance.showExtensionShortcut,
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
     };
 

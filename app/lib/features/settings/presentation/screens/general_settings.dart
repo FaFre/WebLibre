@@ -210,6 +210,22 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                       );
                 },
               ),
+              SwitchListTile.adaptive(
+                title: const Text('Show Extension Shortcut'),
+                subtitle: const Text(
+                  'Display an extension menu directly on the tab bar',
+                ),
+                secondary: const Icon(MdiIcons.puzzleHeart),
+                value: generalSettings.showExtensionShortcut,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) => currentSettings.copyWith
+                            .showExtensionShortcut(value),
+                      );
+                },
+              ),
               Consumer(
                 builder: (context, ref, child) {
                   final size = ref.watch(
