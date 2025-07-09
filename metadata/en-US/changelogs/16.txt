@@ -1,0 +1,5 @@
+* Added option to show extensions in tab bar (through "Show Extension Shortcut" setting)
+* Added tab menu action to assign tab to container
+* Fixed QR code generation issues
+* Switched to Mozilla stable builds
+* Fixed issues with PiP and fullscreen mode
