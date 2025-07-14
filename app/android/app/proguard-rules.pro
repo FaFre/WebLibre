@@ -1,111 +1,18 @@
-# We do not want to obfuscate - It's just painful to debug without the right mapping file.
-# If we update this, we'll have to update our Sentry config to upload ProGuard mappings.
 -dontobfuscate
 
-
-##### Default proguard settings:
-
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in /Users/sebastian/Library/Android/sdk/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
-
 ####################################################################################################
-# Adjust
-####################################################################################################
-
--keep public class com.adjust.sdk.** { *; }
--keep class com.google.android.gms.common.ConnectionResult {
-    int SUCCESS;
-}
--keep class com.google.android.gms.ads.identifier.AdvertisingIdClient {
-    com.google.android.gms.ads.identifier.AdvertisingIdClient$Info getAdvertisingIdInfo(android.content.Context);
-}
--keep class com.google.android.gms.ads.identifier.AdvertisingIdClient$Info {
-    java.lang.String getId();
-    boolean isLimitAdTrackingEnabled();
-}
--keep class dalvik.system.VMRuntime {
-    java.lang.String getRuntime();
-}
--keep class android.os.Build {
-    java.lang.String[] SUPPORTED_ABIS;
-    java.lang.String CPU_ABI;
-}
--keep class android.content.res.Configuration {
-    android.os.LocaledList getLocales();
-    java.util.Locale locale;
-}
--keep class android.os.LocaledList {
-    java.util.Locale get(int);
-}
-
-####################################################################################################
-# Okhttp
-####################################################################################################
-
-# JSR 305 annotations are for embedding nullability information.
--dontwarn javax.annotation.**
-
-# A resource is loaded with a relative path so the package of this class must be preserved.
--keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
-
-# Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
--dontwarn org.codehaus.mojo.animal_sniffer.*
-
-# OkHttp platform used only on JVM and when Conscrypt dependency is available.
--dontwarn okhttp3.internal.platform.ConscryptPlatform
-
-####################################################################################################
-# Android architecture components
+# Android and GeckoView built-ins
 ####################################################################################################
 
 -dontwarn android.**
 -dontwarn androidx.**
 -dontwarn com.google.**
 -dontwarn org.mozilla.geckoview.**
--dontwarn mozilla.components.**
 
-# https://developer.android.com/topic/libraries/architecture/release-notes.html
-# According to the docs this won't be needed when 1.0 of the library is released.
--keep class * implements android.arch.lifecycle.GeneratedAdapter {<init>(...);}
-
-# Temporary fix until we can use androidx
--dontwarn mozilla.components.service.fretboard.scheduler.workmanager.**
-
-# Fix for ViewModels
--keep class * extends androidx.lifecycle.ViewModel {
-    <init>();
-}
--keep class * extends androidx.lifecycle.AndroidViewModel {
-    <init>(android.app.Application);
-}
-
-####################################################################################################
-# Mozilla Application Services
-####################################################################################################
-
--keep class mozilla.appservices.** { *; }
-
-####################################################################################################
-# Kotlinx
-####################################################################################################
-
--dontwarn kotlinx.atomicfu.**
-
-####################################################################################################
-# snakeyaml
-####################################################################################################
-
--dontwarn java.beans.PropertyDescriptor
--dontwarn java.beans.Introspector
--dontwarn java.beans.BeanInfo
--dontwarn java.beans.IntrospectionException
--dontwarn java.beans.FeatureDescriptor
+# Raptor now writes a *-config.yaml file to specify Gecko runtime settings (e.g. the profile dir). This
+# file gets deserialized into a DebugConfig object, which is why we need to keep this class
+# and its members.
+-keep class org.mozilla.gecko.util.DebugConfig { *; }
 
 ####################################################################################################
 # kotlinx.coroutines: use the fast service loader to init MainDispatcherLoader by including a rule
@@ -123,3 +30,42 @@
 -assumenosideeffects class kotlinx.coroutines.internal.MainDispatcherLoader {
     boolean FAST_SERVICE_LOADER_ENABLED return true;
 }
+
+####################################################################################################
+# Remove debug logs from release builds
+####################################################################################################
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+}
+
+####################################################################################################
+# Mozilla Application Services
+####################################################################################################
+
+-keep class mozilla.appservices.** { *; }
+
+####################################################################################################
+# ViewModels
+####################################################################################################
+
+-keep class org.mozilla.fenix.**ViewModel { *; }
+
+# Keep Android Lifecycle methods
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1596302
+-keep class androidx.lifecycle.** { *; }
+
+-dontwarn java.beans.BeanInfo
+-dontwarn java.beans.FeatureDescriptor
+-dontwarn java.beans.IntrospectionException
+-dontwarn java.beans.Introspector
+-dontwarn java.beans.PropertyDescriptor
+
+####################################################################################################
+# Checker Framework
+####################################################################################################
+
+-dontwarn org.checkerframework.checker.nullness.qual.EnsuresNonNull
+-dontwarn org.checkerframework.checker.nullness.qual.EnsuresNonNullIf
+-dontwarn org.checkerframework.checker.nullness.qual.RequiresNonNull
