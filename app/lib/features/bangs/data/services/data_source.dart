@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:exceptions/exceptions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/http_error_handler.dart';
@@ -15,7 +16,7 @@ class BangDataSourceService extends _$BangDataSourceService {
   @override
   void build() {}
 
-  Future<Result<List<Bang>>> getBangs(Uri url, BangGroup? group) {
+  Future<Result<List<Bang>>> fetchRemoteBangs(Uri url, BangGroup? group) {
     return Result.fromAsync(() async {
       return await compute((args) async {
         final client = http.Client();
@@ -41,5 +42,27 @@ class BangDataSourceService extends _$BangDataSourceService {
         }).toList(),
       );
     }, exceptionHandler: handleHttpError);
+  }
+
+  Future<DateTime> getBundledBangDate(String path) async {
+    final content = await rootBundle.loadString(path);
+    return DateTime.parse(content.trim()).toLocal();
+  }
+
+  Future<Result<List<Bang>>> getBundledBangs(String path, BangGroup? group) {
+    return Result.fromAsync(() async {
+      final content = await rootBundle.loadString(path);
+      final json = jsonDecode(content) as List;
+
+      return json.map((e) {
+        var bang = Bang.fromJson(e as Map<String, dynamic>);
+
+        if (group != null) {
+          bang = bang.copyWith.group(group);
+        }
+
+        return bang;
+      }).toList();
+    });
   }
 }

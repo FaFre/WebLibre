@@ -1,0 +1,3609 @@
+[
+  {
+    "s": "Kagi Search",
+    "d": "kagi.com",
+    "t": "k",
+    "u": "/search?q={{{s}}}"
+  },
+  {
+    "s": "Kagi Search",
+    "d": "kagi.com",
+    "t": "kagi",
+    "u": "/search?q={{{s}}}"
+  },
+  {
+    "s": "Kagi News",
+    "d": "kagi.com",
+    "t": "n",
+    "u": "/news?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi News",
+    "d": "kagi.com",
+    "t": "news",
+    "u": "/news?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Videos",
+    "d": "kagi.com",
+    "t": "v",
+    "u": "/videos?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Videos",
+    "d": "kagi.com",
+    "t": "video",
+    "u": "/videos?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Videos",
+    "d": "kagi.com",
+    "t": "videos",
+    "u": "/videos?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Videos",
+    "d": "kagi.com",
+    "t": "vids",
+    "u": "/videos?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Maps",
+    "d": "kagi.com",
+    "t": "m",
+    "u": "/maps?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Maps",
+    "d": "kagi.com",
+    "t": "map",
+    "u": "/maps?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Maps",
+    "d": "kagi.com",
+    "t": "maps",
+    "u": "/maps?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Translate",
+    "d": "translate.kagi.com",
+    "t": "kt",
+    "u": "https://translate.kagi.com/?text={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Translate",
+    "d": "translate.kagi.com",
+    "t": "translate",
+    "u": "https://translate.kagi.com/?text={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Translate",
+    "d": "translate.kagi.com",
+    "t": "tr",
+    "u": "https://translate.kagi.com/?text={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Translate (Proofread)",
+    "d": "translate.kagi.com",
+    "t": "proofread",
+    "u": "https://translate.kagi.com/proofread?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images",
+    "d": "kagi.com",
+    "t": "i",
+    "u": "/images?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images",
+    "d": "kagi.com",
+    "t": "image",
+    "u": "/images?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images",
+    "d": "kagi.com",
+    "t": "images",
+    "u": "/images?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images",
+    "d": "kagi.com",
+    "t": "img",
+    "u": "/images?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images",
+    "d": "kagi.com",
+    "t": "imgs",
+    "u": "/images?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images",
+    "d": "kagi.com",
+    "t": "pics",
+    "u": "/images?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images",
+    "d": "kagi.com",
+    "t": "pictures",
+    "u": "/images?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Images (GIF)",
+    "d": "kagi.com",
+    "t": "gif",
+    "u": "/images?q={{{s}}}&image_type=animatedGifHttps",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Podcasts",
+    "d": "kagi.com",
+    "t": "p",
+    "u": "/podcasts?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Podcasts",
+    "d": "kagi.com",
+    "t": "podcast",
+    "u": "/podcasts?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Podcasts",
+    "d": "kagi.com",
+    "t": "podcasts",
+    "u": "/podcasts?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Search (verbatim)",
+    "d": "kagi.com",
+    "t": "vrb",
+    "u": "/search?q={{{s}}}&verbatim=1"
+  },
+  {
+    "s": "Kagi Search (verbatim)",
+    "d": "kagi.com",
+    "t": "verbatim",
+    "u": "/search?q={{{s}}}&verbatim=1"
+  },
+  {
+    "s": "Kagi Discussion",
+    "d": "kagi.com",
+    "t": "discussdoc",
+    "u": "/discussdoc?url={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi FastGPT",
+    "d": "kagi.com",
+    "t": "fast",
+    "u": "/fastgpt?query={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi FastGPT",
+    "d": "kagi.com",
+    "t": "fgpt",
+    "u": "/fastgpt?query={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Quick Answer",
+    "d": "kagi.com",
+    "t": "q",
+    "u": "/search?q={{{s}}}&qa=true"
+  },
+  {
+    "s": "Kagi Quick Answer",
+    "d": "kagi.com",
+    "t": "quick",
+    "u": "/search?q={{{s}}}&qa=true"
+  },
+  {
+    "s": "Kagi Universal Summarizer",
+    "d": "kagi.com",
+    "t": "sum",
+    "u": "https://kagi.com/summarizer?url={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer",
+    "d": "kagi.com",
+    "t": "summarize",
+    "u": "https://kagi.com/summarizer?url={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer",
+    "d": "kagi.com",
+    "t": "summarise",
+    "u": "https://kagi.com/summarizer?url={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer (Key Moments)",
+    "d": "kagi.com",
+    "t": "sumt",
+    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer (Key Moments)",
+    "d": "kagi.com",
+    "t": "sumk",
+    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer (Key Moments)",
+    "d": "kagi.com",
+    "t": "sumkey",
+    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer (Key Moments)",
+    "d": "kagi.com",
+    "t": "summarizekey",
+    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer (Key Moments)",
+    "d": "kagi.com",
+    "t": "summarisekey",
+    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Universal Summarizer (Summary)",
+    "d": "kagi.com",
+    "t": "summ",
+    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=summary",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Search in International",
+    "d": "kagi.com",
+    "t": "int",
+    "u": "/search?q={{{s}}}&r=no_region",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Belarus",
+    "d": "kagi.com",
+    "t": "by",
+    "u": "/search?q={{{s}}}&r=by",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Belize",
+    "d": "kagi.com",
+    "t": "bz",
+    "u": "/search?q={{{s}}}&r=bz",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Benin",
+    "d": "kagi.com",
+    "t": "bj",
+    "u": "/search?q={{{s}}}&r=bj",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Cayman Islands",
+    "d": "kagi.com",
+    "t": "ky",
+    "u": "/search?q={{{s}}}&r=ky",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Central African Republic",
+    "d": "kagi.com",
+    "t": "cf",
+    "u": "/search?q={{{s}}}&r=cf",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Christmas Island",
+    "d": "kagi.com",
+    "t": "cx",
+    "u": "/search?q={{{s}}}&r=cx",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Colombia",
+    "d": "kagi.com",
+    "t": "co",
+    "u": "/search?q={{{s}}}&r=co",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Czechia",
+    "d": "kagi.com",
+    "t": "cz",
+    "u": "/search?q={{{s}}}&r=cz",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Croatia",
+    "d": "kagi.com",
+    "t": "hr",
+    "u": "/search?q={{{s}}}&r=hr",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Cyprus",
+    "d": "kagi.com",
+    "t": "cy",
+    "u": "/search?q={{{s}}}&r=cy",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Iran",
+    "d": "kagi.com",
+    "t": "ir",
+    "u": "/search?q={{{s}}}&r=ir",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Indonesia",
+    "d": "kagi.com",
+    "t": "id",
+    "u": "/search?q={{{s}}}&r=id",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Iraq",
+    "d": "kagi.com",
+    "t": "iq",
+    "u": "/search?q={{{s}}}&r=iq",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Isle of Man",
+    "d": "kagi.com",
+    "t": "im",
+    "u": "/search?q={{{s}}}&r=im",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Kazakhstan",
+    "d": "kagi.com",
+    "t": "kz",
+    "u": "/search?q={{{s}}}&r=kz",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Kenya",
+    "d": "kagi.com",
+    "t": "ke",
+    "u": "/search?q={{{s}}}&r=ke",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Kuwait",
+    "d": "kagi.com",
+    "t": "kw",
+    "u": "/search?q={{{s}}}&r=kw",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Liberia",
+    "d": "kagi.com",
+    "t": "lr",
+    "u": "/search?q={{{s}}}&r=lr",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Libya",
+    "d": "kagi.com",
+    "t": "ly",
+    "u": "/search?q={{{s}}}&r=ly",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Madagascar",
+    "d": "kagi.com",
+    "t": "mg",
+    "u": "/search?q={{{s}}}&r=mg",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Malaysia",
+    "d": "kagi.com",
+    "t": "my",
+    "u": "/search?q={{{s}}}&r=my",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in New Zealand",
+    "d": "kagi.com",
+    "t": "nz",
+    "u": "/search?q={{{s}}}&r=nz",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Norway",
+    "d": "kagi.com",
+    "t": "no",
+    "u": "/search?q={{{s}}}&r=no",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Oman",
+    "d": "kagi.com",
+    "t": "om",
+    "u": "/search?q={{{s}}}&r=om",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Qatar",
+    "d": "kagi.com",
+    "t": "qa",
+    "u": "/search?q={{{s}}}&r=qa",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Réunion",
+    "d": "kagi.com",
+    "t": "re",
+    "u": "/search?q={{{s}}}&r=re",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in South Africa",
+    "d": "kagi.com",
+    "t": "za",
+    "u": "/search?q={{{s}}}&r=za",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Taiwan",
+    "d": "kagi.com",
+    "t": "tw",
+    "u": "/search?q={{{s}}}&r=tw",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Thailand",
+    "d": "kagi.com",
+    "t": "th",
+    "u": "/search?q={{{s}}}&r=th",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Togo",
+    "d": "kagi.com",
+    "t": "tg",
+    "u": "/search?q={{{s}}}&r=tg",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Tokelau",
+    "d": "kagi.com",
+    "t": "tk",
+    "u": "/search?q={{{s}}}&r=tk",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Turkey",
+    "d": "kagi.com",
+    "t": "tur",
+    "u": "/search?q={{{s}}}&r=tr",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Tonga",
+    "d": "kagi.com",
+    "t": "to",
+    "u": "/search?q={{{s}}}&r=to",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in U.S. Virgin Islands",
+    "d": "kagi.com",
+    "t": "vi",
+    "u": "/search?q={{{s}}}&r=vi",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Ukraine",
+    "d": "kagi.com",
+    "t": "ua",
+    "u": "/search?q={{{s}}}&r=ua",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Uruguay",
+    "d": "kagi.com",
+    "t": "uy",
+    "u": "/search?q={{{s}}}&r=uy",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Uzbekistan",
+    "d": "kagi.com",
+    "t": "uz",
+    "u": "/search?q={{{s}}}&r=uz",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Vanuatu",
+    "d": "kagi.com",
+    "t": "vu",
+    "u": "/search?q={{{s}}}&r=vu",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Vietnam",
+    "d": "kagi.com",
+    "t": "vn",
+    "u": "/search?q={{{s}}}&r=vn",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Yemen",
+    "d": "kagi.com",
+    "t": "ye",
+    "u": "/search?q={{{s}}}&r=ye",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Zambia",
+    "d": "kagi.com",
+    "t": "zm",
+    "u": "/search?q={{{s}}}&r=zm",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Australia",
+    "d": "kagi.com",
+    "t": "au",
+    "u": "/search?q={{{s}}}&r=au",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Argentina",
+    "d": "kagi.com",
+    "t": "ar",
+    "u": "/search?q={{{s}}}&r=ar",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Austria",
+    "d": "kagi.com",
+    "t": "at",
+    "u": "/search?q={{{s}}}&r=at",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Belgium (nl)",
+    "d": "kagi.com",
+    "t": "be",
+    "u": "/search?q={{{s}}}&r=be",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Belgium (fr)",
+    "d": "kagi.com",
+    "t": "be_fr",
+    "u": "/search?q={{{s}}}&r=be_fr",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Canada (en)",
+    "d": "kagi.com",
+    "t": "ca",
+    "u": "/search?q={{{s}}}&r=ca",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Canada (fr)",
+    "d": "kagi.com",
+    "t": "ca_fr",
+    "u": "/search?q={{{s}}}&r=ca_fr",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Switzerland (de)",
+    "d": "kagi.com",
+    "t": "ch",
+    "u": "/search?q={{{s}}}&r=ch",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Switzerland (fr)",
+    "d": "kagi.com",
+    "t": "ch_fr",
+    "u": "/search?q={{{s}}}&r=ch_fr",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in China",
+    "d": "kagi.com",
+    "t": "cn",
+    "u": "/search?q={{{s}}}&r=cn",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Germany",
+    "d": "kagi.com",
+    "t": "de",
+    "u": "/search?q={{{s}}}&r=de",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Denmark",
+    "d": "kagi.com",
+    "t": "dk",
+    "u": "/search?q={{{s}}}&r=dk",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Estonia (ee)",
+    "d": "kagi.com",
+    "t": "ee",
+    "u": "/search?q={{{s}}}&r=ee",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Spain (es)",
+    "d": "kagi.com",
+    "t": "es",
+    "u": "/search?q={{{s}}}&r=es",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Span (ca)",
+    "d": "kagi.com",
+    "t": "es_ca",
+    "u": "/search?q={{{s}}}&r=es_ca",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in France",
+    "d": "kagi.com",
+    "t": "fr",
+    "u": "/search?q={{{s}}}&r=fr",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in United Kingdom",
+    "d": "kagi.com",
+    "t": "gb",
+    "u": "/search?q={{{s}}}&r=gb",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Hungary",
+    "d": "kagi.com",
+    "t": "hu",
+    "u": "/search?q={{{s}}}&r=hu",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Italy",
+    "d": "kagi.com",
+    "t": "it",
+    "u": "/search?q={{{s}}}&r=it",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Israel",
+    "d": "kagi.com",
+    "t": "il",
+    "u": "/search?q={{{s}}}&r=il",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in India",
+    "d": "kagi.com",
+    "t": "in",
+    "u": "/search?q={{{s}}}&r=in",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Japan",
+    "d": "kagi.com",
+    "t": "jp",
+    "u": "/search?q={{{s}}}&r=jp",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Netherlands",
+    "d": "kagi.com",
+    "t": "nl",
+    "u": "/search?q={{{s}}}&r=nl",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Poland",
+    "d": "kagi.com",
+    "t": "pl",
+    "u": "/search?q={{{s}}}&r=pl",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Portugal",
+    "d": "kagi.com",
+    "t": "pt",
+    "u": "/search?q={{{s}}}&r=pt",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Serbia",
+    "d": "kagi.com",
+    "t": "rs",
+    "u": "/search?q={{{s}}}&r=rs",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in United States",
+    "d": "kagi.com",
+    "t": "us",
+    "u": "/search?q={{{s}}}&r=us",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Slovenia",
+    "d": "kagi.com",
+    "t": "si",
+    "u": "/search?q={{{s}}}&r=si",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Sweden",
+    "d": "kagi.com",
+    "t": "se",
+    "u": "/search?q={{{s}}}&r=se",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Brazil",
+    "d": "kagi.com",
+    "t": "br",
+    "u": "/search?q={{{s}}}&r=br",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in South Korea",
+    "d": "kagi.com",
+    "t": "kr",
+    "u": "/search?q={{{s}}}&r=kr",
+    "c": "Region search"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "recent",
+    "u": "/search?q={{{s}}}&dr=1"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "day",
+    "u": "/search?q={{{s}}}&dr=1"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "24",
+    "u": "/search?q={{{s}}}&dr=1"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "week",
+    "u": "/search?q={{{s}}}&dr=2"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "month",
+    "u": "/search?q={{{s}}}&dr=3"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "year",
+    "u": "/search?q={{{s}}}&dr=4"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "calc",
+    "u": "/search?q=calc+{{{s}}}"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "calculator",
+    "u": "/search?q=calc+{{{s}}}"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "tim",
+    "u": "/search?q=timer+{{{s}}}"
+  },
+  {
+    "s": "Kagi",
+    "d": "kagi.com",
+    "t": "timer",
+    "u": "/search?q=timer+{{{s}}}"
+  },
+  {
+    "s": "Region search",
+    "d": "kagi.com",
+    "t": "reg",
+    "u": "/search?q={{{s}}}&r=detected"
+  },
+  {
+    "s": "PDFs",
+    "d": "kagi.com",
+    "t": "pdf",
+    "u": "/search?q={{{s}}}+filetype:pdf",
+    "c": "Online Services",
+    "sc": "Search"
+  },
+  {
+    "s": "Kagi Knowledgebase",
+    "d": "help.kagi.com",
+    "t": "help",
+    "u": "https://help.kagi.com/kagi?search={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Orion Knowledgebase",
+    "d": "help.kagi.com",
+    "t": "orion",
+    "u": "https://help.kagi.com/orion?search={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Knowledgebase - Search API",
+    "d": "help.kagi.com",
+    "t": "api",
+    "u": "https://help.kagi.com/kagi/api/search.html#{{{s}}}"
+  },
+  {
+    "s": "Kagi Feedback",
+    "d": "kagifeedback.org",
+    "t": "kf",
+    "u": "https://kagifeedback.org/?q={{{s}}}",
+    "fmt": [
+      "open_base_path",
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Feedback (Discussions)",
+    "d": "kagifeedback.org",
+    "t": "kfd",
+    "u": "https://kagifeedback.org/?q={{{s}}}",
+    "ad": "kagifeedback.org/d",
+    "fmt": [
+      "open_base_path",
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in International",
+    "d": "kagi.com",
+    "t": "knint",
+    "u": "/news?q={{{s}}}&r=no_region",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Albania (AL)",
+    "d": "kagi.com",
+    "t": "knal",
+    "u": "/news?q={{{s}}}&r=al",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Afghanistan (AF)",
+    "d": "kagi.com",
+    "t": "knaf",
+    "u": "/news?q={{{s}}}&r=af",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Algeria (DZ)",
+    "d": "kagi.com",
+    "t": "kndz",
+    "u": "/news?q={{{s}}}&r=dz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in American Samoa (AS)",
+    "d": "kagi.com",
+    "t": "knas",
+    "u": "/news?q={{{s}}}&r=as",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Andorra (AD)",
+    "d": "kagi.com",
+    "t": "knad",
+    "u": "/news?q={{{s}}}&r=ad",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Angola (AO)",
+    "d": "kagi.com",
+    "t": "knao",
+    "u": "/news?q={{{s}}}&r=ao",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Anguilla (AI)",
+    "d": "kagi.com",
+    "t": "knai",
+    "u": "/news?q={{{s}}}&r=ai",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Antarctica (AQ)",
+    "d": "kagi.com",
+    "t": "knaq",
+    "u": "/news?q={{{s}}}&r=aq",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Antigua and Barbuda (AG)",
+    "d": "kagi.com",
+    "t": "knag",
+    "u": "/news?q={{{s}}}&r=ag",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Argentina (AR)",
+    "d": "kagi.com",
+    "t": "knar",
+    "u": "/news?q={{{s}}}&r=ar",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Armenia (AM)",
+    "d": "kagi.com",
+    "t": "knam",
+    "u": "/news?q={{{s}}}&r=am",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Aruba (AW)",
+    "d": "kagi.com",
+    "t": "knaw",
+    "u": "/news?q={{{s}}}&r=aw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Ascension Island (AC)",
+    "d": "kagi.com",
+    "t": "knac",
+    "u": "/news?q={{{s}}}&r=ac",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Australia (AU)",
+    "d": "kagi.com",
+    "t": "knau",
+    "u": "/news?q={{{s}}}&r=au",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Austria (AT)",
+    "d": "kagi.com",
+    "t": "knat",
+    "u": "/news?q={{{s}}}&r=at",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Azerbaijan (AZ)",
+    "d": "kagi.com",
+    "t": "knaz",
+    "u": "/news?q={{{s}}}&r=az",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bahamas (BS)",
+    "d": "kagi.com",
+    "t": "knbs",
+    "u": "/news?q={{{s}}}&r=bs",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bahrain (BH)",
+    "d": "kagi.com",
+    "t": "knbh",
+    "u": "/news?q={{{s}}}&r=bh",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bangladesh (BD)",
+    "d": "kagi.com",
+    "t": "knbd",
+    "u": "/news?q={{{s}}}&r=bd",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Barbados (BB)",
+    "d": "kagi.com",
+    "t": "knbb",
+    "u": "/news?q={{{s}}}&r=bb",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Belarus (BY)",
+    "d": "kagi.com",
+    "t": "knby",
+    "u": "/news?q={{{s}}}&r=by",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Belgium (BE - nl)",
+    "d": "kagi.com",
+    "t": "knbe",
+    "u": "/news?q={{{s}}}&r=be",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Belgium (BE - fr)",
+    "d": "kagi.com",
+    "t": "knbe_fr",
+    "u": "/news?q={{{s}}}&r=be_fr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Belize (BZ)",
+    "d": "kagi.com",
+    "t": "knbz",
+    "u": "/news?q={{{s}}}&r=bz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Benin (BJ)",
+    "d": "kagi.com",
+    "t": "knbj",
+    "u": "/news?q={{{s}}}&r=bj",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bermuda (BM)",
+    "d": "kagi.com",
+    "t": "knbm",
+    "u": "/news?q={{{s}}}&r=bm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bhutan (BT)",
+    "d": "kagi.com",
+    "t": "knbt",
+    "u": "/news?q={{{s}}}&r=bt",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bolivia (BO)",
+    "d": "kagi.com",
+    "t": "knbo",
+    "u": "/news?q={{{s}}}&r=bo",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bonaire, Sint Eustatius and Saba (BQ)",
+    "d": "kagi.com",
+    "t": "knbq",
+    "u": "/news?q={{{s}}}&r=bq",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bosnia and Herzegovina (BA)",
+    "d": "kagi.com",
+    "t": "knba",
+    "u": "/news?q={{{s}}}&r=ba",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Botswana (BW)",
+    "d": "kagi.com",
+    "t": "knbw",
+    "u": "/news?q={{{s}}}&r=bw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bouvet Island (BV)",
+    "d": "kagi.com",
+    "t": "knbv",
+    "u": "/news?q={{{s}}}&r=bv",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Brazil (BR)",
+    "d": "kagi.com",
+    "t": "knbr",
+    "u": "/news?q={{{s}}}&r=br",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in British Indian Ocean Territory (IO)",
+    "d": "kagi.com",
+    "t": "knio",
+    "u": "/news?q={{{s}}}&r=io",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in British Virgin Islands (VG)",
+    "d": "kagi.com",
+    "t": "knvg",
+    "u": "/news?q={{{s}}}&r=vg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Brunei (BN)",
+    "d": "kagi.com",
+    "t": "knbn",
+    "u": "/news?q={{{s}}}&r=bn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Bulgaria (BG)",
+    "d": "kagi.com",
+    "t": "knbg",
+    "u": "/news?q={{{s}}}&r=bg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Burkina Faso (BF)",
+    "d": "kagi.com",
+    "t": "knbf",
+    "u": "/news?q={{{s}}}&r=bf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Burundi (BI)",
+    "d": "kagi.com",
+    "t": "knbi",
+    "u": "/news?q={{{s}}}&r=bi",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cabo Verde (CV)",
+    "d": "kagi.com",
+    "t": "kncv",
+    "u": "/news?q={{{s}}}&r=cv",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cambodia (KH)",
+    "d": "kagi.com",
+    "t": "knkh",
+    "u": "/news?q={{{s}}}&r=kh",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cameroon (CM)",
+    "d": "kagi.com",
+    "t": "kncm",
+    "u": "/news?q={{{s}}}&r=cm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Canada (CA - en)",
+    "d": "kagi.com",
+    "t": "knca",
+    "u": "/news?q={{{s}}}&r=ca",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Canada (CA - fr)",
+    "d": "kagi.com",
+    "t": "knca_fr",
+    "u": "/news?q={{{s}}}&r=ca_fr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cayman Islands (KY)",
+    "d": "kagi.com",
+    "t": "knky",
+    "u": "/news?q={{{s}}}&r=ky",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Central African Republic (CF)",
+    "d": "kagi.com",
+    "t": "kncf",
+    "u": "/news?q={{{s}}}&r=cf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Chad (TD)",
+    "d": "kagi.com",
+    "t": "kntd",
+    "u": "/news?q={{{s}}}&r=td",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Chile (CL)",
+    "d": "kagi.com",
+    "t": "kncl",
+    "u": "/news?q={{{s}}}&r=cl",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in China (CN)",
+    "d": "kagi.com",
+    "t": "kncn",
+    "u": "/news?q={{{s}}}&r=cn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Christmas Island (CX)",
+    "d": "kagi.com",
+    "t": "kncx",
+    "u": "/news?q={{{s}}}&r=cx",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cocos (Keeling) Islands (CC)",
+    "d": "kagi.com",
+    "t": "kncc",
+    "u": "/news?q={{{s}}}&r=cc",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Colombia (CO)",
+    "d": "kagi.com",
+    "t": "knco",
+    "u": "/news?q={{{s}}}&r=co",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Comoros (KM)",
+    "d": "kagi.com",
+    "t": "knkm",
+    "u": "/news?q={{{s}}}&r=km",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Congo (CG)",
+    "d": "kagi.com",
+    "t": "kncg",
+    "u": "/news?q={{{s}}}&r=cg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Congo, Democratic Republic of the (CD)",
+    "d": "kagi.com",
+    "t": "kncd",
+    "u": "/news?q={{{s}}}&r=cd",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cook Islands (CK)",
+    "d": "kagi.com",
+    "t": "knck",
+    "u": "/news?q={{{s}}}&r=ck",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Costa Rica (CR)",
+    "d": "kagi.com",
+    "t": "kncr",
+    "u": "/news?q={{{s}}}&r=cr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Croatia (HR)",
+    "d": "kagi.com",
+    "t": "knhr",
+    "u": "/news?q={{{s}}}&r=hr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cuba (CU)",
+    "d": "kagi.com",
+    "t": "kncu",
+    "u": "/news?q={{{s}}}&r=cu",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Curaçao (CW)",
+    "d": "kagi.com",
+    "t": "kncw",
+    "u": "/news?q={{{s}}}&r=cw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Cyprus (CY)",
+    "d": "kagi.com",
+    "t": "kncy",
+    "u": "/news?q={{{s}}}&r=cy",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Czechia (CZ)",
+    "d": "kagi.com",
+    "t": "kncz",
+    "u": "/news?q={{{s}}}&r=cz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Côte d'Ivoire (CI)",
+    "d": "kagi.com",
+    "t": "knci",
+    "u": "/news?q={{{s}}}&r=ci",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Denmark (DK)",
+    "d": "kagi.com",
+    "t": "kndk",
+    "u": "/news?q={{{s}}}&r=dk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Djibouti (DJ)",
+    "d": "kagi.com",
+    "t": "kndj",
+    "u": "/news?q={{{s}}}&r=dj",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Dominica (DM)",
+    "d": "kagi.com",
+    "t": "kndm",
+    "u": "/news?q={{{s}}}&r=dm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Dominican Republic (DO)",
+    "d": "kagi.com",
+    "t": "kndo",
+    "u": "/news?q={{{s}}}&r=do",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Ecuador (EC)",
+    "d": "kagi.com",
+    "t": "knec",
+    "u": "/news?q={{{s}}}&r=ec",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Egypt (EG)",
+    "d": "kagi.com",
+    "t": "kneg",
+    "u": "/news?q={{{s}}}&r=eg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in El Salvador (SV)",
+    "d": "kagi.com",
+    "t": "knsv",
+    "u": "/news?q={{{s}}}&r=sv",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Equatorial Guinea (GQ)",
+    "d": "kagi.com",
+    "t": "kngq",
+    "u": "/news?q={{{s}}}&r=gq",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Eritrea (ER)",
+    "d": "kagi.com",
+    "t": "kner",
+    "u": "/news?q={{{s}}}&r=er",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Estonia (EE)",
+    "d": "kagi.com",
+    "t": "knee",
+    "u": "/news?q={{{s}}}&r=ee",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Eswatini (SZ)",
+    "d": "kagi.com",
+    "t": "knsz",
+    "u": "/news?q={{{s}}}&r=sz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Ethiopia (ET)",
+    "d": "kagi.com",
+    "t": "knet",
+    "u": "/news?q={{{s}}}&r=et",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Falkland Islands (FK)",
+    "d": "kagi.com",
+    "t": "knfk",
+    "u": "/news?q={{{s}}}&r=fk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Faroe Islands (FO)",
+    "d": "kagi.com",
+    "t": "knfo",
+    "u": "/news?q={{{s}}}&r=fo",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Fiji (FJ)",
+    "d": "kagi.com",
+    "t": "knfj",
+    "u": "/news?q={{{s}}}&r=fj",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Finland (FI)",
+    "d": "kagi.com",
+    "t": "knfi",
+    "u": "/news?q={{{s}}}&r=fi",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in France (FR)",
+    "d": "kagi.com",
+    "t": "knfr",
+    "u": "/news?q={{{s}}}&r=fr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in French Guiana (GF)",
+    "d": "kagi.com",
+    "t": "kngf",
+    "u": "/news?q={{{s}}}&r=gf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in French Polynesia (PF)",
+    "d": "kagi.com",
+    "t": "knpf",
+    "u": "/news?q={{{s}}}&r=pf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in French Southern Territories (TF)",
+    "d": "kagi.com",
+    "t": "kntf",
+    "u": "/news?q={{{s}}}&r=tf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Gabon (GA)",
+    "d": "kagi.com",
+    "t": "knga",
+    "u": "/news?q={{{s}}}&r=ga",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Gambia (GM)",
+    "d": "kagi.com",
+    "t": "kngm",
+    "u": "/news?q={{{s}}}&r=gm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Georgia (GE)",
+    "d": "kagi.com",
+    "t": "knge",
+    "u": "/news?q={{{s}}}&r=ge",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Germany (DE)",
+    "d": "kagi.com",
+    "t": "knde",
+    "u": "/news?q={{{s}}}&r=de",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Ghana (GH)",
+    "d": "kagi.com",
+    "t": "kngh",
+    "u": "/news?q={{{s}}}&r=gh",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Gibraltar (GI)",
+    "d": "kagi.com",
+    "t": "kngi",
+    "u": "/news?q={{{s}}}&r=gi",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Greece (GR)",
+    "d": "kagi.com",
+    "t": "kngr",
+    "u": "/news?q={{{s}}}&r=gr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Greenland (GL)",
+    "d": "kagi.com",
+    "t": "kngl",
+    "u": "/news?q={{{s}}}&r=gl",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Grenada (GD)",
+    "d": "kagi.com",
+    "t": "kngd",
+    "u": "/news?q={{{s}}}&r=gd",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Guadeloupe (GP)",
+    "d": "kagi.com",
+    "t": "kngp",
+    "u": "/news?q={{{s}}}&r=gp",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Guam (GU)",
+    "d": "kagi.com",
+    "t": "kngu",
+    "u": "/news?q={{{s}}}&r=gu",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Guatemala (GT)",
+    "d": "kagi.com",
+    "t": "kngt",
+    "u": "/news?q={{{s}}}&r=gt",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Guernsey (GG)",
+    "d": "kagi.com",
+    "t": "kngg",
+    "u": "/news?q={{{s}}}&r=gg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Guinea (GN)",
+    "d": "kagi.com",
+    "t": "kngn",
+    "u": "/news?q={{{s}}}&r=gn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Guinea-Bissau (GW)",
+    "d": "kagi.com",
+    "t": "kngw",
+    "u": "/news?q={{{s}}}&r=gw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Guyana (GY)",
+    "d": "kagi.com",
+    "t": "kngy",
+    "u": "/news?q={{{s}}}&r=gy",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Haiti (HT)",
+    "d": "kagi.com",
+    "t": "knht",
+    "u": "/news?q={{{s}}}&r=ht",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Heard Island and McDonald Islands (HM)",
+    "d": "kagi.com",
+    "t": "knhm",
+    "u": "/news?q={{{s}}}&r=hm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Honduras (HN)",
+    "d": "kagi.com",
+    "t": "knhn",
+    "u": "/news?q={{{s}}}&r=hn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Hong Kong (HK)",
+    "d": "kagi.com",
+    "t": "knhk",
+    "u": "/news?q={{{s}}}&r=hk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Hungary (HU)",
+    "d": "kagi.com",
+    "t": "knhu",
+    "u": "/news?q={{{s}}}&r=hu",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Iceland (IS)",
+    "d": "kagi.com",
+    "t": "knis",
+    "u": "/news?q={{{s}}}&r=is",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in India (IN)",
+    "d": "kagi.com",
+    "t": "knin",
+    "u": "/news?q={{{s}}}&r=in",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Indonesia (ID)",
+    "d": "kagi.com",
+    "t": "knid",
+    "u": "/news?q={{{s}}}&r=id",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Iran (IR)",
+    "d": "kagi.com",
+    "t": "knir",
+    "u": "/news?q={{{s}}}&r=ir",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Iraq (IQ)",
+    "d": "kagi.com",
+    "t": "kniq",
+    "u": "/news?q={{{s}}}&r=iq",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Ireland (IE)",
+    "d": "kagi.com",
+    "t": "knie",
+    "u": "/news?q={{{s}}}&r=ie",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Isle of Man (IM)",
+    "d": "kagi.com",
+    "t": "knim",
+    "u": "/news?q={{{s}}}&r=im",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Israel (IL)",
+    "d": "kagi.com",
+    "t": "knil",
+    "u": "/news?q={{{s}}}&r=il",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Italy (IT)",
+    "d": "kagi.com",
+    "t": "knit",
+    "u": "/news?q={{{s}}}&r=it",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Jamaica (JM)",
+    "d": "kagi.com",
+    "t": "knjm",
+    "u": "/news?q={{{s}}}&r=jm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Japan (JP)",
+    "d": "kagi.com",
+    "t": "knjp",
+    "u": "/news?q={{{s}}}&r=jp",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Jersey (JE)",
+    "d": "kagi.com",
+    "t": "knje",
+    "u": "/news?q={{{s}}}&r=je",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Jordan (JO)",
+    "d": "kagi.com",
+    "t": "knjo",
+    "u": "/news?q={{{s}}}&r=jo",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Kazakhstan (KZ)",
+    "d": "kagi.com",
+    "t": "knkz",
+    "u": "/news?q={{{s}}}&r=kz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Kenya (KE)",
+    "d": "kagi.com",
+    "t": "knke",
+    "u": "/news?q={{{s}}}&r=ke",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Kiribati (KI)",
+    "d": "kagi.com",
+    "t": "knki",
+    "u": "/news?q={{{s}}}&r=ki",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Kosovo (XK)",
+    "d": "kagi.com",
+    "t": "knxk",
+    "u": "/news?q={{{s}}}&r=xk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Kuwait (KW)",
+    "d": "kagi.com",
+    "t": "knkw",
+    "u": "/news?q={{{s}}}&r=kw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Kyrgyzstan (KG)",
+    "d": "kagi.com",
+    "t": "knkg",
+    "u": "/news?q={{{s}}}&r=kg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Laos (LA)",
+    "d": "kagi.com",
+    "t": "knla",
+    "u": "/news?q={{{s}}}&r=la",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Latvia (LV)",
+    "d": "kagi.com",
+    "t": "knlv",
+    "u": "/news?q={{{s}}}&r=lv",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Lebanon (LB)",
+    "d": "kagi.com",
+    "t": "knlb",
+    "u": "/news?q={{{s}}}&r=lb",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Lesotho (LS)",
+    "d": "kagi.com",
+    "t": "knls",
+    "u": "/news?q={{{s}}}&r=ls",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Liberia (LR)",
+    "d": "kagi.com",
+    "t": "knlr",
+    "u": "/news?q={{{s}}}&r=lr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Libya (LY)",
+    "d": "kagi.com",
+    "t": "knly",
+    "u": "/news?q={{{s}}}&r=ly",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Liechtenstein (LI)",
+    "d": "kagi.com",
+    "t": "knli",
+    "u": "/news?q={{{s}}}&r=li",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Lithuania (LT)",
+    "d": "kagi.com",
+    "t": "knlt",
+    "u": "/news?q={{{s}}}&r=lt",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Luxembourg (LU)",
+    "d": "kagi.com",
+    "t": "knlu",
+    "u": "/news?q={{{s}}}&r=lu",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Macao (MO)",
+    "d": "kagi.com",
+    "t": "knmo",
+    "u": "/news?q={{{s}}}&r=mo",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Madagascar (MG)",
+    "d": "kagi.com",
+    "t": "knmg",
+    "u": "/news?q={{{s}}}&r=mg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Malawi (MW)",
+    "d": "kagi.com",
+    "t": "knmw",
+    "u": "/news?q={{{s}}}&r=mw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Malaysia (MY)",
+    "d": "kagi.com",
+    "t": "knmy",
+    "u": "/news?q={{{s}}}&r=my",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Maldives (MV)",
+    "d": "kagi.com",
+    "t": "knmv",
+    "u": "/news?q={{{s}}}&r=mv",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Mali (ML)",
+    "d": "kagi.com",
+    "t": "knml",
+    "u": "/news?q={{{s}}}&r=ml",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Malta (MT)",
+    "d": "kagi.com",
+    "t": "knmt",
+    "u": "/news?q={{{s}}}&r=mt",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Marshall Islands (MH)",
+    "d": "kagi.com",
+    "t": "knmh",
+    "u": "/news?q={{{s}}}&r=mh",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Martinique (MQ)",
+    "d": "kagi.com",
+    "t": "knmq",
+    "u": "/news?q={{{s}}}&r=mq",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Mauritania (MR)",
+    "d": "kagi.com",
+    "t": "knmr",
+    "u": "/news?q={{{s}}}&r=mr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Mauritius (MU)",
+    "d": "kagi.com",
+    "t": "knmu",
+    "u": "/news?q={{{s}}}&r=mu",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Mayotte (YT)",
+    "d": "kagi.com",
+    "t": "knyt",
+    "u": "/news?q={{{s}}}&r=yt",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Mexico (MX)",
+    "d": "kagi.com",
+    "t": "knmx",
+    "u": "/news?q={{{s}}}&r=mx",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Micronesia (Federated States of) (FM)",
+    "d": "kagi.com",
+    "t": "knfm",
+    "u": "/news?q={{{s}}}&r=fm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Moldova (MD)",
+    "d": "kagi.com",
+    "t": "knmd",
+    "u": "/news?q={{{s}}}&r=md",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Monaco (MC)",
+    "d": "kagi.com",
+    "t": "knmc",
+    "u": "/news?q={{{s}}}&r=mc",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Mongolia (MN)",
+    "d": "kagi.com",
+    "t": "knmn",
+    "u": "/news?q={{{s}}}&r=mn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Montenegro (ME)",
+    "d": "kagi.com",
+    "t": "knme",
+    "u": "/news?q={{{s}}}&r=me",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Montserrat (MS)",
+    "d": "kagi.com",
+    "t": "knms",
+    "u": "/news?q={{{s}}}&r=ms",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Morocco (MA)",
+    "d": "kagi.com",
+    "t": "knma",
+    "u": "/news?q={{{s}}}&r=ma",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Mozambique (MZ)",
+    "d": "kagi.com",
+    "t": "knmz",
+    "u": "/news?q={{{s}}}&r=mz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Myanmar (MM)",
+    "d": "kagi.com",
+    "t": "knmm",
+    "u": "/news?q={{{s}}}&r=mm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Namibia (NA)",
+    "d": "kagi.com",
+    "t": "knna",
+    "u": "/news?q={{{s}}}&r=na",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Nauru (NR)",
+    "d": "kagi.com",
+    "t": "knnr",
+    "u": "/news?q={{{s}}}&r=nr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Nepal (NP)",
+    "d": "kagi.com",
+    "t": "knnp",
+    "u": "/news?q={{{s}}}&r=np",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Netherlands (NL)",
+    "d": "kagi.com",
+    "t": "knnl",
+    "u": "/news?q={{{s}}}&r=nl",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in New Caledonia (NC)",
+    "d": "kagi.com",
+    "t": "knnc",
+    "u": "/news?q={{{s}}}&r=nc",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in New Zealand (NZ)",
+    "d": "kagi.com",
+    "t": "knnz",
+    "u": "/news?q={{{s}}}&r=nz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Nicaragua (NI)",
+    "d": "kagi.com",
+    "t": "knni",
+    "u": "/news?q={{{s}}}&r=ni",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Niger (NE)",
+    "d": "kagi.com",
+    "t": "knne",
+    "u": "/news?q={{{s}}}&r=ne",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Nigeria (NG)",
+    "d": "kagi.com",
+    "t": "knng",
+    "u": "/news?q={{{s}}}&r=ng",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Niue (NU)",
+    "d": "kagi.com",
+    "t": "knnu",
+    "u": "/news?q={{{s}}}&r=nu",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Norfolk Island (NF)",
+    "d": "kagi.com",
+    "t": "knnf",
+    "u": "/news?q={{{s}}}&r=nf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in North Korea (KP)",
+    "d": "kagi.com",
+    "t": "knkp",
+    "u": "/news?q={{{s}}}&r=kp",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in North Macedonia (MK)",
+    "d": "kagi.com",
+    "t": "knmk",
+    "u": "/news?q={{{s}}}&r=mk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Northern Mariana Islands (MP)",
+    "d": "kagi.com",
+    "t": "knmp",
+    "u": "/news?q={{{s}}}&r=mp",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Norway (NO)",
+    "d": "kagi.com",
+    "t": "knno",
+    "u": "/news?q={{{s}}}&r=no",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Oman (OM)",
+    "d": "kagi.com",
+    "t": "knom",
+    "u": "/news?q={{{s}}}&r=om",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Pakistan (PK)",
+    "d": "kagi.com",
+    "t": "knpk",
+    "u": "/news?q={{{s}}}&r=pk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Palau (PW)",
+    "d": "kagi.com",
+    "t": "knpw",
+    "u": "/news?q={{{s}}}&r=pw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Palestine (PS)",
+    "d": "kagi.com",
+    "t": "knps",
+    "u": "/news?q={{{s}}}&r=ps",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Panama (PA)",
+    "d": "kagi.com",
+    "t": "knpa",
+    "u": "/news?q={{{s}}}&r=pa",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Papua New Guinea (PG)",
+    "d": "kagi.com",
+    "t": "knpg",
+    "u": "/news?q={{{s}}}&r=pg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Paraguay (PY)",
+    "d": "kagi.com",
+    "t": "knpy",
+    "u": "/news?q={{{s}}}&r=py",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Peru (PE)",
+    "d": "kagi.com",
+    "t": "knpe",
+    "u": "/news?q={{{s}}}&r=pe",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Philippines (PH)",
+    "d": "kagi.com",
+    "t": "knph",
+    "u": "/news?q={{{s}}}&r=ph",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Pitcairn (PN)",
+    "d": "kagi.com",
+    "t": "knpn",
+    "u": "/news?q={{{s}}}&r=pn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Poland (PL)",
+    "d": "kagi.com",
+    "t": "knpl",
+    "u": "/news?q={{{s}}}&r=pl",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Portugal (PT)",
+    "d": "kagi.com",
+    "t": "knpt",
+    "u": "/news?q={{{s}}}&r=pt",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Puerto Rico (PR)",
+    "d": "kagi.com",
+    "t": "knpr",
+    "u": "/news?q={{{s}}}&r=pr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Qatar (QA)",
+    "d": "kagi.com",
+    "t": "knqa",
+    "u": "/news?q={{{s}}}&r=qa",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Romania (RO)",
+    "d": "kagi.com",
+    "t": "knro",
+    "u": "/news?q={{{s}}}&r=ro",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Russia (RU)",
+    "d": "kagi.com",
+    "t": "knru",
+    "u": "/news?q={{{s}}}&r=ru",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Rwanda (RW)",
+    "d": "kagi.com",
+    "t": "knrw",
+    "u": "/news?q={{{s}}}&r=rw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Réunion (RE)",
+    "d": "kagi.com",
+    "t": "knre",
+    "u": "/news?q={{{s}}}&r=re",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saint Barthélemy (BL)",
+    "d": "kagi.com",
+    "t": "knbl",
+    "u": "/news?q={{{s}}}&r=bl",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saint Helena, Ascension and Tristan da Cunha (SH)",
+    "d": "kagi.com",
+    "t": "knsh",
+    "u": "/news?q={{{s}}}&r=sh",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saint Kitts and Nevis (KN)",
+    "d": "kagi.com",
+    "t": "knkn",
+    "u": "/news?q={{{s}}}&r=kn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saint Lucia (LC)",
+    "d": "kagi.com",
+    "t": "knlc",
+    "u": "/news?q={{{s}}}&r=lc",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saint Martin (MF)",
+    "d": "kagi.com",
+    "t": "knmf",
+    "u": "/news?q={{{s}}}&r=mf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saint Pierre and Miquelon (PM)",
+    "d": "kagi.com",
+    "t": "knpm",
+    "u": "/news?q={{{s}}}&r=pm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saint Vincent and the Grenadines (VC)",
+    "d": "kagi.com",
+    "t": "knvc",
+    "u": "/news?q={{{s}}}&r=vc",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Samoa (WS)",
+    "d": "kagi.com",
+    "t": "knws",
+    "u": "/news?q={{{s}}}&r=ws",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in San Marino (SM)",
+    "d": "kagi.com",
+    "t": "knsm",
+    "u": "/news?q={{{s}}}&r=sm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Sao Tome and Principe (ST)",
+    "d": "kagi.com",
+    "t": "knst",
+    "u": "/news?q={{{s}}}&r=st",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Saudi Arabia (SA)",
+    "d": "kagi.com",
+    "t": "knsa",
+    "u": "/news?q={{{s}}}&r=sa",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Senegal (SN)",
+    "d": "kagi.com",
+    "t": "knsn",
+    "u": "/news?q={{{s}}}&r=sn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Serbia (RS)",
+    "d": "kagi.com",
+    "t": "knrs",
+    "u": "/news?q={{{s}}}&r=rs",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Seychelles (SC)",
+    "d": "kagi.com",
+    "t": "knsc",
+    "u": "/news?q={{{s}}}&r=sc",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Sierra Leone (SL)",
+    "d": "kagi.com",
+    "t": "knsl",
+    "u": "/news?q={{{s}}}&r=sl",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Singapore (SG)",
+    "d": "kagi.com",
+    "t": "knsg",
+    "u": "/news?q={{{s}}}&r=sg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Sint Maarten (SX)",
+    "d": "kagi.com",
+    "t": "knsx",
+    "u": "/news?q={{{s}}}&r=sx",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Slovakia (SK)",
+    "d": "kagi.com",
+    "t": "knsk",
+    "u": "/news?q={{{s}}}&r=sk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Slovenia (SI)",
+    "d": "kagi.com",
+    "t": "knsi",
+    "u": "/news?q={{{s}}}&r=si",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Solomon Islands (SB)",
+    "d": "kagi.com",
+    "t": "knsb",
+    "u": "/news?q={{{s}}}&r=sb",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Somalia (SO)",
+    "d": "kagi.com",
+    "t": "knso",
+    "u": "/news?q={{{s}}}&r=so",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in South Africa (ZA)",
+    "d": "kagi.com",
+    "t": "knza",
+    "u": "/news?q={{{s}}}&r=za",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in South Georgia and the South Sandwich Islands (GS)",
+    "d": "kagi.com",
+    "t": "kngs",
+    "u": "/news?q={{{s}}}&r=gs",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in South Korea (KR)",
+    "d": "kagi.com",
+    "t": "knkr",
+    "u": "/news?q={{{s}}}&r=kr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in South Sudan (SS)",
+    "d": "kagi.com",
+    "t": "knss",
+    "u": "/news?q={{{s}}}&r=ss",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Spain (ES - ca)",
+    "d": "kagi.com",
+    "t": "knes_ca",
+    "u": "/news?q={{{s}}}&r=es_ca",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Spain (ES - es)",
+    "d": "kagi.com",
+    "t": "knes",
+    "u": "/news?q={{{s}}}&r=es",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Sri Lanka (LK)",
+    "d": "kagi.com",
+    "t": "knlk",
+    "u": "/news?q={{{s}}}&r=lk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Sudan (SD)",
+    "d": "kagi.com",
+    "t": "knsd",
+    "u": "/news?q={{{s}}}&r=sd",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Suriname (SR)",
+    "d": "kagi.com",
+    "t": "knsr",
+    "u": "/news?q={{{s}}}&r=sr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Svalbard and Jan Mayen (SJ)",
+    "d": "kagi.com",
+    "t": "knsj",
+    "u": "/news?q={{{s}}}&r=sj",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Sweden (SE)",
+    "d": "kagi.com",
+    "t": "knse",
+    "u": "/news?q={{{s}}}&r=se",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Switzerland (CH - de)",
+    "d": "kagi.com",
+    "t": "knch",
+    "u": "/news?q={{{s}}}&r=ch",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Switzerland (CH - fr)",
+    "d": "kagi.com",
+    "t": "knch_fr",
+    "u": "/news?q={{{s}}}&r=ch_fr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Syria (SY)",
+    "d": "kagi.com",
+    "t": "knsy",
+    "u": "/news?q={{{s}}}&r=sy",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Taiwan (TW)",
+    "d": "kagi.com",
+    "t": "kntw",
+    "u": "/news?q={{{s}}}&r=tw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Tajikistan (TJ)",
+    "d": "kagi.com",
+    "t": "kntj",
+    "u": "/news?q={{{s}}}&r=tj",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Tanzania (TZ)",
+    "d": "kagi.com",
+    "t": "kntz",
+    "u": "/news?q={{{s}}}&r=tz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Thailand (TH)",
+    "d": "kagi.com",
+    "t": "knth",
+    "u": "/news?q={{{s}}}&r=th",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Timor-Leste (TL)",
+    "d": "kagi.com",
+    "t": "kntl",
+    "u": "/news?q={{{s}}}&r=tl",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Togo (TG)",
+    "d": "kagi.com",
+    "t": "kntg",
+    "u": "/news?q={{{s}}}&r=tg",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Tokelau (TK)",
+    "d": "kagi.com",
+    "t": "kntk",
+    "u": "/news?q={{{s}}}&r=tk",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Tonga (TO)",
+    "d": "kagi.com",
+    "t": "knto",
+    "u": "/news?q={{{s}}}&r=to",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Trinidad and Tobago (TT)",
+    "d": "kagi.com",
+    "t": "kntt",
+    "u": "/news?q={{{s}}}&r=tt",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Tristan da Cunha (TA)",
+    "d": "kagi.com",
+    "t": "knta",
+    "u": "/news?q={{{s}}}&r=ta",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Tunisia (TN)",
+    "d": "kagi.com",
+    "t": "kntn",
+    "u": "/news?q={{{s}}}&r=tn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Turkey (TR)",
+    "d": "kagi.com",
+    "t": "kntr",
+    "u": "/news?q={{{s}}}&r=tr",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Turkmenistan (TM)",
+    "d": "kagi.com",
+    "t": "kntm",
+    "u": "/news?q={{{s}}}&r=tm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Turks and Caicos Islands (TC)",
+    "d": "kagi.com",
+    "t": "kntc",
+    "u": "/news?q={{{s}}}&r=tc",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Tuvalu (TV)",
+    "d": "kagi.com",
+    "t": "kntv",
+    "u": "/news?q={{{s}}}&r=tv",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Uganda (UG)",
+    "d": "kagi.com",
+    "t": "knug",
+    "u": "/news?q={{{s}}}&r=ug",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Ukraine (UA)",
+    "d": "kagi.com",
+    "t": "knua",
+    "u": "/news?q={{{s}}}&r=ua",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in United Arab Emirates (AE)",
+    "d": "kagi.com",
+    "t": "knae",
+    "u": "/news?q={{{s}}}&r=ae",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in United Kingdom (GB)",
+    "d": "kagi.com",
+    "t": "kngb",
+    "u": "/news?q={{{s}}}&r=gb",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in United States (US)",
+    "d": "kagi.com",
+    "t": "knus",
+    "u": "/news?q={{{s}}}&r=us",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in United States Minor Outlying Islands (UM)",
+    "d": "kagi.com",
+    "t": "knum",
+    "u": "/news?q={{{s}}}&r=um",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in United States Virgin Islands (VI)",
+    "d": "kagi.com",
+    "t": "knvi",
+    "u": "/news?q={{{s}}}&r=vi",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Uruguay (UY)",
+    "d": "kagi.com",
+    "t": "knuy",
+    "u": "/news?q={{{s}}}&r=uy",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Uzbekistan (UZ)",
+    "d": "kagi.com",
+    "t": "knuz",
+    "u": "/news?q={{{s}}}&r=uz",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Vanuatu (VU)",
+    "d": "kagi.com",
+    "t": "knvu",
+    "u": "/news?q={{{s}}}&r=vu",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Vatican City (VA)",
+    "d": "kagi.com",
+    "t": "knva",
+    "u": "/news?q={{{s}}}&r=va",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Venezuela (VE)",
+    "d": "kagi.com",
+    "t": "knve",
+    "u": "/news?q={{{s}}}&r=ve",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Vietnam (VN)",
+    "d": "kagi.com",
+    "t": "knvn",
+    "u": "/news?q={{{s}}}&r=vn",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Wallis and Futuna (WF)",
+    "d": "kagi.com",
+    "t": "knwf",
+    "u": "/news?q={{{s}}}&r=wf",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Western Sahara (EH)",
+    "d": "kagi.com",
+    "t": "kneh",
+    "u": "/news?q={{{s}}}&r=eh",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Yemen (YE)",
+    "d": "kagi.com",
+    "t": "knye",
+    "u": "/news?q={{{s}}}&r=ye",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Zambia (ZM)",
+    "d": "kagi.com",
+    "t": "knzm",
+    "u": "/news?q={{{s}}}&r=zm",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Zimbabwe (ZW)",
+    "d": "kagi.com",
+    "t": "knzw",
+    "u": "/news?q={{{s}}}&r=zw",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "News in Åland Islands (AX)",
+    "d": "kagi.com",
+    "t": "knax",
+    "u": "/news?q={{{s}}}&r=ax",
+    "fmt": [
+      "url_encode_placeholder"
+    ]
+  },
+  {
+    "s": "Kagi Assistant (claude-3-haiku)",
+    "d": "kagi.com",
+    "t": "claude-3-haiku",
+    "u": "/assistant?profile=claude-3-haiku&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-3-haiku)",
+    "d": "kagi.com",
+    "t": "haiku",
+    "u": "/assistant?profile=claude-3-haiku&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-4-sonnet)",
+    "d": "kagi.com",
+    "t": "claude-4-sonnet",
+    "u": "/assistant?profile=claude-4-sonnet&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-4-sonnet)",
+    "d": "kagi.com",
+    "t": "sonnet",
+    "u": "/assistant?profile=claude-4-sonnet&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-4-opus)",
+    "d": "kagi.com",
+    "t": "claude-4-opus",
+    "u": "/assistant?profile=claude-4-opus&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-4-opus)",
+    "d": "kagi.com",
+    "t": "opus",
+    "u": "/assistant?profile=claude-4-opus&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-4-sonnet-thinking)",
+    "d": "kagi.com",
+    "t": "claude-4-sonnet-thinking",
+    "u": "/assistant?profile=claude-4-sonnet-thinking&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-4-sonnet-thinking)",
+    "d": "kagi.com",
+    "t": "sonnett",
+    "u": "/assistant?profile=claude-4-sonnet-thinking&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (claude-4-opus-thinking)",
+    "d": "kagi.com",
+    "t": "opust",
+    "u": "/assistant?profile=claude-4-opus-thinking&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4-1)",
+    "d": "kagi.com",
+    "t": "gpt-4-1",
+    "u": "/assistant?profile=gpt-4-1&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (o4-mini)",
+    "d": "kagi.com",
+    "t": "o4-mini",
+    "u": "/assistant?profile=o4-mini&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (o3)",
+    "d": "kagi.com",
+    "t": "o3",
+    "u": "/assistant?profile=o3&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (o3-pro)",
+    "d": "kagi.com",
+    "t": "o3-pro",
+    "u": "/assistant?profile=o3-pro&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4o)",
+    "d": "kagi.com",
+    "t": "gpt-4o",
+    "u": "/assistant?profile=gpt-4o&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4o)",
+    "d": "kagi.com",
+    "t": "4o",
+    "u": "/assistant?profile=gpt-4o&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (chatgpt-4o)",
+    "d": "kagi.com",
+    "t": "chatgpt-4o",
+    "u": "/assistant?profile=chatgpt-4o&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4o-mini)",
+    "d": "kagi.com",
+    "t": "gpt-4o-mini",
+    "u": "/assistant?profile=gpt-4o-mini&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4o-mini)",
+    "d": "kagi.com",
+    "t": "4om",
+    "u": "/assistant?profile=gpt-4o-mini&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4-1-mini)",
+    "d": "kagi.com",
+    "t": "gpt-4-1-mini",
+    "u": "/assistant?profile=gpt-4-1-mini&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4-1-mini)",
+    "d": "kagi.com",
+    "t": "41m",
+    "u": "/assistant?profile=gpt-4-1-mini&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4-1-nano)",
+    "d": "kagi.com",
+    "t": "gpt-4-1-nano",
+    "u": "/assistant?profile=gpt-4-1-nano&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gpt-4-1-nano)",
+    "d": "kagi.com",
+    "t": "41n",
+    "u": "/assistant?profile=gpt-4-1-nano&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (mistral-medium)",
+    "d": "kagi.com",
+    "t": "mistral-medium",
+    "u": "/assistant?profile=mistral-medium&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (mistral-small)",
+    "d": "kagi.com",
+    "t": "mistral-small",
+    "u": "/assistant?profile=mistral-small&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (mistral-large)",
+    "d": "kagi.com",
+    "t": "mistral-large",
+    "u": "/assistant?profile=mistral-large&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (magistral-medium)",
+    "d": "kagi.com",
+    "t": "magistral-medium",
+    "u": "/assistant?profile=magistral-medium&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (magistral-small)",
+    "d": "kagi.com",
+    "t": "magistral-small",
+    "u": "/assistant?profile=magistral-small&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gemini-flash)",
+    "d": "kagi.com",
+    "t": "gemini-flash",
+    "u": "/assistant?profile=gemini-flash&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gemini-2-5-flash)",
+    "d": "kagi.com",
+    "t": "gemini-2-5-flash",
+    "u": "/assistant?profile=gemini-2-5-flash&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gemini-2-5-flash-thinking)",
+    "d": "kagi.com",
+    "t": "gemini-2-5-flash-thinking",
+    "u": "/assistant?profile=gemini-2-5-flash-thinking&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gemini-2-5-pro)",
+    "d": "kagi.com",
+    "t": "gemini-2-5-pro",
+    "u": "/assistant?profile=gemini-2-5-pro&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gemini-2-5-pro)",
+    "d": "kagi.com",
+    "t": "gemini-pro",
+    "u": "/assistant?profile=gemini-2-5-pro&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (gemma-3-27b)",
+    "d": "kagi.com",
+    "t": "gemma-3-27b",
+    "u": "/assistant?profile=gemma-3-27b&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (llama-4-maverick)",
+    "d": "kagi.com",
+    "t": "llama-4-maverick",
+    "u": "/assistant?profile=llama-4-maverick&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (llama-4-scout)",
+    "d": "kagi.com",
+    "t": "llama-4-scout",
+    "u": "/assistant?profile=llama-4-scout&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (llama-4-scout)",
+    "d": "kagi.com",
+    "t": "llama",
+    "u": "/assistant?profile=llama-4-scout&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (qwen-3-235b-a22b-thinking)",
+    "d": "kagi.com",
+    "t": "qwen-3-235b-a22b-thinking",
+    "u": "/assistant?profile=qwen-3-235b-a22b-thinking&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (qwen-3-235b-a22b)",
+    "d": "kagi.com",
+    "t": "qwen-3-235b-a22b",
+    "u": "/assistant?profile=qwen-3-235b-a22b&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (qwen-3-32b-thinking)",
+    "d": "kagi.com",
+    "t": "qwen-3-32b-thinking",
+    "u": "/assistant?profile=qwen-3-32b-thinking&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (qwen-3-32b-thinking)",
+    "d": "kagi.com",
+    "t": "qwent",
+    "u": "/assistant?profile=qwen-3-32b-thinking&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (qwen-3-32b)",
+    "d": "kagi.com",
+    "t": "qwen-3-32b",
+    "u": "/assistant?profile=qwen-3-32b&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (qwen-3-32b)",
+    "d": "kagi.com",
+    "t": "qwen",
+    "u": "/assistant?profile=qwen-3-32b&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (deepseek)",
+    "d": "kagi.com",
+    "t": "deepseek",
+    "u": "/assistant?profile=deepseek&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (deepseek-r1)",
+    "d": "kagi.com",
+    "t": "deepseek-r1",
+    "u": "/assistant?profile=deepseek-r1&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (deepseek-r1)",
+    "d": "kagi.com",
+    "t": "r1",
+    "u": "/assistant?profile=deepseek-r1&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (deepseek-r1-distill-llama-70b)",
+    "d": "kagi.com",
+    "t": "deepseek-r1-distill-llama-70b",
+    "u": "/assistant?profile=deepseek-r1-distill-llama-70b&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (deepseek-r1-distill-llama-70b)",
+    "d": "kagi.com",
+    "t": "r1-llama",
+    "u": "/assistant?profile=deepseek-r1-distill-llama-70b&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (grok-3-mini)",
+    "d": "kagi.com",
+    "t": "grok-3-mini",
+    "u": "/assistant?profile=grok-3-mini&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (grok-3)",
+    "d": "kagi.com",
+    "t": "grok-3",
+    "u": "/assistant?profile=grok-3&q={{{s}}}"
+  },
+  {
+    "s": "Kagi Assistant (Ki)",
+    "d": "kagi.com",
+    "t": "ki",
+    "u": "/assistant?q={{{s}}}&profile=ki",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  }
+]

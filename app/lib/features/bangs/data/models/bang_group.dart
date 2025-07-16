@@ -1,16 +1,27 @@
 enum BangGroup {
-  general('https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json'),
+  general(
+    remote:
+        'https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json',
+    bundled: 'assets/bangs/bangs.json',
+  ),
   assistant(
-    'https://raw.githubusercontent.com/FaFre/bangs/main/data/assistant_bangs.json',
+    remote:
+        'https://raw.githubusercontent.com/FaFre/bangs/main/data/assistant_bangs.json',
+    bundled: 'assets/bangs/assistant_bangs.json',
   ),
   kagi(
-    'https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json',
+    remote:
+        'https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json',
+    bundled: 'assets/bangs/kagi_bangs.json',
   ),
   custom(
-    'https://raw.githubusercontent.com/FaFre/bangs/refs/heads/custom/data/custom.json',
+    remote:
+        'https://raw.githubusercontent.com/FaFre/bangs/refs/heads/custom/data/custom.json',
+    bundled: 'assets/bangs/custom.json',
   );
 
-  final String url;
+  final String bundled;
+  final String remote;
 
-  const BangGroup(this.url);
+  const BangGroup({required this.bundled, required this.remote});
 }

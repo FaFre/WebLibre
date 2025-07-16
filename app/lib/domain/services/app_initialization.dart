@@ -37,7 +37,7 @@ class AppInitializationService extends _$AppInitializationService {
 
     return ref
         .read(bangSyncRepositoryProvider.notifier)
-        .syncBangGroups(syncInterval: const Duration(days: 7));
+        .syncBundledBangGroups();
   }
 
   Future<void> initialize() async {

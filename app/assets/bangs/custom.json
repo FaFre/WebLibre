@@ -1,0 +1,32 @@
+[
+  {
+    "s": "Lensai",
+    "d": "search.lensai.eu",
+    "t": "lai",
+    "u": "https://search.lensai.eu/?q={{{s}}}",
+    "c": "Online Services",
+    "sc": "Search"
+  },
+  {
+    "s": "Lensai Search",
+    "d": "research.lensai.eu",
+    "t": "lais",
+    "u": "https://research.lensai.eu/#/s/search/{{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ],
+    "c": "Online Services",
+    "sc": "Search"
+  },
+  {
+    "s": "Lensai Answer",
+    "d": "research.lensai.eu",
+    "t": "laia",
+    "u": "https://research.lensai.eu/#/s/answer/{{{s}}}",
+    "fmt": [
+      "url_encode_placeholder"
+    ],
+    "c": "Online Services",
+    "sc": "Search"
+  }
+]

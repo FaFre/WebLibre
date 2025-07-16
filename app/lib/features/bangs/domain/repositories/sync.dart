@@ -11,7 +11,7 @@ part 'sync.g.dart';
 
 @Riverpod(keepAlive: true)
 class BangSyncRepository extends _$BangSyncRepository {
-  static Future<Result<void>> _fetchAndSync({
+  static Future<Result<void>> _fetchAndSyncRemote({
     required BangDataSourceService sourceService,
     required BangDatabase db,
     required Uri url,
@@ -29,7 +29,7 @@ class BangSyncRepository extends _$BangSyncRepository {
       }
     }
 
-    final result = await sourceService.getBangs(url, group);
+    final result = await sourceService.fetchRemoteBangs(url, group);
     return result.flatMapAsync((remoteBangs) async {
       await db.syncDao.syncBangs(
         group: group,
@@ -40,7 +40,37 @@ class BangSyncRepository extends _$BangSyncRepository {
     });
   }
 
-  Future<Result<void>> syncBangGroup(
+  static Future<Result<void>> _fetchAndSyncBundled({
+    required BangDataSourceService sourceService,
+    required BangDatabase db,
+    required BangGroup group,
+  }) async {
+    final lastSync = await db.syncDao
+        .getLastSyncOfGroup(group)
+        .getSingleOrNull();
+
+    final sourceDate = await sourceService.getBundledBangDate(
+      'assets/bangs/last_sync.txt',
+    );
+
+    if (lastSync != null &&
+        (sourceDate == lastSync ||
+            sourceDate.difference(lastSync).isNegative)) {
+      return Result.success(null);
+    }
+
+    final result = await sourceService.getBundledBangs(group.bundled, group);
+    return result.flatMapAsync((remoteBangs) async {
+      await db.syncDao.syncBangs(
+        group: group,
+        remoteBangs: remoteBangs,
+        syncTime: sourceDate,
+      );
+      await db.optimizeFtsIndex();
+    });
+  }
+
+  Future<Result<void>> syncRemoteBangGroup(
     BangGroup group,
     Duration? syncInterval,
   ) async {
@@ -52,12 +82,12 @@ class BangSyncRepository extends _$BangSyncRepository {
               connect: BangDatabase.new,
               computation: (db) async {
                 final ref = ProviderContainer();
-                final result = await _fetchAndSync(
+                final result = await _fetchAndSyncRemote(
                   sourceService: ref.read(
                     bangDataSourceServiceProvider.notifier,
                   ),
                   db: db,
-                  url: Uri.parse(group.url),
+                  url: Uri.parse(group.remote),
                   group: group,
                   syncInterval: syncInterval,
                 );
@@ -78,6 +108,29 @@ class BangSyncRepository extends _$BangSyncRepository {
     }
   }
 
+  Future<Result<void>> syncBundledBangGroup(BangGroup group) async {
+    try {
+      final db = ref.read(bangDatabaseProvider);
+
+      final result = await _fetchAndSyncBundled(
+        sourceService: ref.read(bangDataSourceServiceProvider.notifier),
+        db: db,
+        group: group,
+      );
+
+      //Throw if necessary
+      return result;
+    } catch (e) {
+      return Result.failure(
+        ErrorMessage(
+          message: "Failed to sync Bangs (${group.name})",
+          source: 'BangSync',
+          details: e,
+        ),
+      );
+    }
+  }
+
   Stream<DateTime?> watchLastSyncOfGroup(BangGroup group) {
     return ref
         .read(bangDatabaseProvider)
@@ -86,18 +139,16 @@ class BangSyncRepository extends _$BangSyncRepository {
         .watchSingleOrNull();
   }
 
-  Future<Map<BangGroup, Result<void>>> syncBangGroups({
+  Future<Map<BangGroup, Result<void>>> syncBundledBangGroups({
     Set<BangGroup>? groups,
-    Duration? syncInterval,
   }) async {
     //Default to all sources
     groups ??= BangGroup.values.toSet();
 
     //Run isolated operations
     final futures = groups.map(
-      (source) => syncBangGroup(
+      (source) => syncBundledBangGroup(
         source,
-        syncInterval,
       ).then((result) => MapEntry(source, result)),
     );
 

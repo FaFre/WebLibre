@@ -40,7 +40,7 @@ class BangGroupListTile extends HookConsumerWidget {
         onPressed: () async {
           await ref
               .read(bangSyncRepositoryProvider.notifier)
-              .syncBangGroup(group, null);
+              .syncRemoteBangGroup(group, null);
         },
         icon: const Icon(Icons.sync),
         label: const Text('Sync'),

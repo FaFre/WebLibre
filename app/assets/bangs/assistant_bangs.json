@@ -1,0 +1,122 @@
+[
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "ai",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "as",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "assistant",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "research",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "answer",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "discuss",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "expert",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "llm",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant - Chat",
+    "d": "kagi.com",
+    "t": "chat",
+    "u": "/assistant?q={{{s}}}&internet_access=off",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant - Code",
+    "d": "kagi.com",
+    "t": "code",
+    "u": "/assistant?q={{{s}}}&profile=code",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "custom",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant",
+    "d": "kagi.com",
+    "t": "asst",
+    "u": "/assistant?q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  }
+]
