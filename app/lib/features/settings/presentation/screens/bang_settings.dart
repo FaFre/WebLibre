@@ -37,22 +37,22 @@ class BangSettingsScreen extends HookConsumerWidget {
               const BangGroupListTile(
                 group: BangGroup.general,
                 title: 'General Bangs',
-                subtitle: 'Automatically syncs every 7 days',
+                subtitle: 'Sync on demand from GitHub',
               ),
               const BangGroupListTile(
                 group: BangGroup.assistant,
                 title: 'Assistant Bangs',
-                subtitle: 'Automatically syncs every 7 days',
+                subtitle: 'Sync on-demand from GitHub',
               ),
               const BangGroupListTile(
                 group: BangGroup.kagi,
                 title: 'Kagi Bangs',
-                subtitle: 'Automatically syncs every 7 days',
+                subtitle: 'Sync on-demand from GitHub',
               ),
               const BangGroupListTile(
                 group: BangGroup.custom,
                 title: 'WebLibre Bangs',
-                subtitle: 'Automatically syncs every 7 days',
+                subtitle: 'Sync on-demand from GitHub',
               ),
             ],
           );
