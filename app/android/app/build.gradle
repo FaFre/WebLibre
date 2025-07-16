@@ -70,6 +70,10 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.release
 
+            // Enabling minify and shrinking will lead to SIGSEGV during start 
+            minifyEnabled false
+            shrinkResources false
+
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
