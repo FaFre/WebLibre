@@ -37,7 +37,9 @@ object EngineProvider {
             builder.aboutConfigEnabled(true)
             builder.extensionsProcessEnabled(true)
             builder.extensionsWebAPIEnabled(true)
-            builder.consoleOutput(true)
+
+            // Disable output for now to improve performance
+            //builder.consoleOutput(true)
 
             runtime = GeckoRuntime.create(context, builder.build())
         }
