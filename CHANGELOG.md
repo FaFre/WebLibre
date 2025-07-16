@@ -1,3 +1,10 @@
+## 0.9.14
+
+* Bundle bangs and disable auto fetch (sync from repo still possible via settings)
+* Fix flickering after returning from home
+* Fix UI website title overflow
+* Optimize build
+
 ## 0.9.13
 
 * Added option to show extensions in tab bar (through "Show Extension Shortcut" setting)

@@ -1,0 +1,4 @@
+* Bundle bangs and disable auto fetch (sync from repo still possible via settings)
+* Fix flickering after returning from home
+* Fix UI website title overflow
+* Optimize build
