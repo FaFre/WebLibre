@@ -29,7 +29,11 @@ class WebsiteTitleTile extends HookConsumerWidget {
               width: 24,
             ),
             contentPadding: EdgeInsets.zero,
-            title: Text(info.title ?? 'Unknown Title'),
+            title: Text(
+              info.title ?? 'Unknown Title',
+              maxLines: 6,
+              overflow: TextOverflow.ellipsis,
+            ),
             subtitle: Text(url.authority),
           );
         },
