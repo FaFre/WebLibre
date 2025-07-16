@@ -190,8 +190,16 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             return false
         }
 
-        val nativeFragment = BrowserFragment.create()
         val fm = fragmentActivity.supportFragmentManager
+
+        // Check if fragment already exists in the container
+        val existingFragment = fm.findFragmentById(FRAGMENT_CONTAINER_ID)
+        if (existingFragment is BrowserFragment) {
+            // Fragment already replaced, no need to do it again
+            return true
+        }
+
+        val nativeFragment = BrowserFragment.create()
         fm.beginTransaction()
             .replace(FRAGMENT_CONTAINER_ID, nativeFragment)
             .commitAllowingStateLoss()
