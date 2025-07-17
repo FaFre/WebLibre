@@ -352,22 +352,27 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                     [MediaQuery.of(context).size.width, crossAxisCount],
                   );
 
+                  final lastScroll = useRef<String?>(null);
                   useEffect(() {
-                    final index = filteredTabEntities.value.indexWhere(
-                      (entity) => entity.tabId == activeTab,
-                    );
+                    if (lastScroll.value != activeTab) {
+                      final index = filteredTabEntities.value.indexWhere(
+                        (entity) => entity.tabId == activeTab,
+                      );
 
-                    if (index > -1) {
-                      final offset = (index ~/ 2) * itemHeight;
+                      if (index > -1) {
+                        final offset = (index ~/ 2) * itemHeight;
 
-                      if (offset != sheetScrollController.offset) {
-                        unawaited(
-                          sheetScrollController.animateTo(
-                            offset,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                          ),
-                        );
+                        if (offset != sheetScrollController.offset) {
+                          lastScroll.value = activeTab;
+
+                          unawaited(
+                            sheetScrollController.animateTo(
+                              offset,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            ),
+                          );
+                        }
                       }
                     }
 
@@ -540,7 +545,7 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
             Expanded(
               child: HookConsumer(
                 builder: (context, ref, child) {
-                  final filteredTabIds = ref.watch(
+                  final filteredTabEntities = ref.watch(
                     seamlessFilteredTabEntitiesProvider(
                       searchPartition: TabSearchPartition.preview,
                       // ignore: document_ignores using fast equatable
@@ -561,13 +566,16 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
                       );
 
                       return math.max(
-                        math.min(calculatedCount, filteredTabIds.value.length),
+                        math.min(
+                          calculatedCount,
+                          filteredTabEntities.value.length,
+                        ),
                         2,
                       );
                     },
                     [
                       MediaQuery.of(context).size.width,
-                      filteredTabIds.value.length,
+                      filteredTabEntities.value.length,
                     ],
                   );
 
@@ -586,7 +594,7 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
                   );
 
                   useEffect(() {
-                    final index = filteredTabIds.value.indexWhere(
+                    final index = filteredTabEntities.value.indexWhere(
                       (entity) => entity.tabId == activeTab,
                     );
 
@@ -605,20 +613,21 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
                     }
 
                     return null;
-                  }, [filteredTabIds, activeTab]);
+                  }, [filteredTabEntities, activeTab]);
 
                   final tabs = useMemoized(() {
-                    return filteredTabIds.value.whereType<TabTreeEntity>().map((
-                      entity,
-                    ) {
-                      return TabTreePreview(
-                        entity: entity,
-                        activeTabId: activeTab,
-                        onClose: onClose,
-                        stackPadding: const Offset(8, 8),
-                      );
-                    }).toList();
-                  }, [filteredTabIds, activeTab]);
+                    return filteredTabEntities.value
+                        .whereType<TabTreeEntity>()
+                        .map((entity) {
+                          return TabTreePreview(
+                            entity: entity,
+                            activeTabId: activeTab,
+                            onClose: onClose,
+                            stackPadding: const Offset(8, 8),
+                          );
+                        })
+                        .toList();
+                  }, [filteredTabEntities, activeTab]);
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
