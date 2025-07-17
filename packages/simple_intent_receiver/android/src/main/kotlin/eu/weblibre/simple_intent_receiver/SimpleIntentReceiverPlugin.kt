@@ -14,7 +14,7 @@ import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
 class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.NewIntentListener {
   private lateinit var context: Context
   private var intentReceiver: IntentReceiver? = null
-  private var handledInitialIntent = false
+  private var lastHandledIntent: String? = null
   private var activity: Activity? = null
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -32,9 +32,11 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
 
     // Process the initial intent if available
     binding.activity.intent?.let { intent ->
-      if (!handledInitialIntent) {
+      val uri = intent.toUri(0);
+
+      if (lastHandledIntent != uri) {
         handleIntent(intent)
-        handledInitialIntent = true
+        lastHandledIntent = uri
       }
     }
   }
