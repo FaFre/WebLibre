@@ -270,7 +270,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                     await TorProxyRoute().push(context);
                   },
                   leadingIcon: const Icon(TorIcons.onionAlt),
-                  child: const Text('Tor'),
+                  child: const Text('Tor™ Proxy'),
                 ),
                 const Divider(),
                 MenuItemButton(
