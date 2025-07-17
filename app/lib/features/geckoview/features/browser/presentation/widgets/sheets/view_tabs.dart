@@ -300,6 +300,8 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
             Expanded(
               child: HookConsumer(
                 builder: (context, ref, child) {
+                  final gridViewKey = useMemoized(() => GlobalKey());
+
                   final container = ref.watch(selectedContainerProvider);
 
                   final filteredTabEntities = ref.watch(
@@ -387,10 +389,11 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: ReorderableBuilder(
+                    child: ReorderableBuilder.builder(
                       //Rebuild when cross axis count changes
                       key: ValueKey(crossAxisCount),
                       scrollController: sheetScrollController,
+                      itemCount: tabs.length,
                       onDragStarted: (index) {
                         ref.read(willAcceptDropProvider.notifier).clear();
                       },
@@ -423,19 +426,27 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             containerId,
                           );
                         } else {
-                          final orderAfterIndex = newIndex;
-                          key = await containerRepository.getOrderKeyAfterTab(
-                            filteredTabEntities.value[orderAfterIndex].tabId,
-                            containerId,
-                          );
+                          if (newIndex < oldIndex) {
+                            key = await containerRepository.getOrderKeyAfterTab(
+                              filteredTabEntities.value[newIndex - 1].tabId,
+                              containerId,
+                            );
+                          } else {
+                            key = await containerRepository
+                                .getOrderKeyBeforeTab(
+                                  filteredTabEntities.value[newIndex + 1].tabId,
+                                  containerId,
+                                );
+                          }
                         }
 
                         await ref
                             .read(tabDataRepositoryProvider.notifier)
                             .assignOrderKey(tabId, key);
                       },
-                      builder: (children) {
+                      childBuilder: (itemBuilder) {
                         return GridView.builder(
+                          key: gridViewKey,
                           controller: sheetScrollController,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             //Sync values for itemHeight calculation _calculateItemHeight
@@ -444,11 +455,11 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             crossAxisSpacing: 8.0,
                             crossAxisCount: crossAxisCount,
                           ),
-                          itemCount: children.length,
-                          itemBuilder: (context, index) => children[index],
+                          itemCount: tabs.length,
+                          itemBuilder: (context, index) =>
+                              itemBuilder(tabs[index], index),
                         );
                       },
-                      children: tabs,
                     ),
                   );
                 },

@@ -40,6 +40,19 @@ String _reorderAfter(List<Object?> args) {
   }
 }
 
+String _reorderBefore(List<Object?> args) {
+  final first = args[0].mapNotNull((arg) => LexoRank.parse(arg as String));
+  final last = args[1].mapNotNull((arg) => LexoRank.parse(arg as String));
+
+  if (first == null) {
+    throw Exception('Tab not found');
+  } else if (last == null) {
+    return first.genPrev().value;
+  } else {
+    return last.genBetween(first).value;
+  }
+}
+
 void registerLexorankFunctions(CommonDatabase database) {
   database.createFunction(
     functionName: 'lexo_rank_next',
@@ -55,5 +68,10 @@ void registerLexorankFunctions(CommonDatabase database) {
     functionName: 'lexo_rank_reorder_after',
     argumentCount: const AllowedArgumentCount(2),
     function: _reorderAfter,
+  );
+  database.createFunction(
+    functionName: 'lexo_rank_reorder_before',
+    argumentCount: const AllowedArgumentCount(2),
+    function: _reorderBefore,
   );
 }

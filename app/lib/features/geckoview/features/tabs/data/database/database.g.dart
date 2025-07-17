@@ -1165,6 +1165,17 @@ abstract class _$TabDatabase extends GeneratedDatabase {
     ).map((QueryRow row) => row.read<String>('_c0'));
   }
 
+  Selectable<String> orderKeyBeforeTab({
+    String? containerId,
+    required String tabId,
+  }) {
+    return customSelect(
+      'WITH ordered_table AS (SELECT id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM tab WHERE container_id IS ?1) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE id = ?2',
+      variables: [Variable<String>(containerId), Variable<String>(tabId)],
+      readsFrom: {tab},
+    ).map((QueryRow row) => row.read<String>('_c0'));
+  }
+
   Selectable<TabQueryResult> queryTabsBasic({required String query}) {
     return customSelect(
       'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC',

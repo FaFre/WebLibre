@@ -83,6 +83,14 @@ class ContainerRepository extends _$ContainerRepository {
         .getSingle();
   }
 
+  Future<String> getOrderKeyBeforeTab(String tabId, String? containerId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .generateOrderKeyBeforeTabId(containerId, tabId)
+        .getSingle();
+  }
+
   Future<Color> unusedRandomContainerColor() async {
     final allColors = colorTypes.flattened.toList();
     final usedColors = await getDistinctColors();

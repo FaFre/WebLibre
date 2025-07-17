@@ -15,6 +15,7 @@ targets:
                 lexo_rank_next: "text (int, text null)"
                 lexo_rank_previous: "text (int, text null)"
                 lexo_rank_reorder_after: "text (text null, text null)"
+                lexo_rank_reorder_before: "text (text null, text null)"
               modules:
                 - json1
                 - fts5

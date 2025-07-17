@@ -96,4 +96,11 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   ) {
     return db.orderKeyAfterTab(containerId: containerId, tabId: tabId);
   }
+
+  SingleSelectable<String> generateOrderKeyBeforeTabId(
+    String? containerId,
+    String tabId,
+  ) {
+    return db.orderKeyBeforeTab(containerId: containerId, tabId: tabId);
+  }
 }

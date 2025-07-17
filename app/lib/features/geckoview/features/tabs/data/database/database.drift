@@ -118,6 +118,18 @@ orderKeyAfterTab(:tab_id AS TEXT, :container_id AS TEXT OR NULL):
   FROM ordered_table
   WHERE id = :tab_id;
 
+orderKeyBeforeTab(:tab_id AS TEXT, :container_id AS TEXT OR NULL):
+  WITH ordered_table AS (
+    SELECT id,
+          order_key,
+          LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
+    FROM tab 
+    WHERE container_id IS :container_id 
+  )
+  SELECT lexo_rank_reorder_before(order_key, prev_order_key)
+  FROM ordered_table
+  WHERE id = :tab_id;
+
 queryTabsBasic WITH TabQueryResult:
   WITH weights AS (
     SELECT 
