@@ -177,22 +177,22 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             return false
         }
 
-        if (activity == null || activity !is FragmentActivity) {
+        val fragmentActivity = activity as? FragmentActivity ?: return false
+
+        // Check if activity is in valid state
+        if (fragmentActivity.isFinishing || fragmentActivity.isDestroyed) {
             return false
         }
 
-        val fragmentActivity = activity as FragmentActivity
-
-        // Check if the container view exists in the view hierarchy
-        val container = fragmentActivity.findViewById<View>(FRAGMENT_CONTAINER_ID)
-        if (container == null) {
-            // Container doesn't exist yet, retry later
-            return false
-        }
+        val container = fragmentActivity.findViewById<View>(FRAGMENT_CONTAINER_ID) ?: return false
 
         val fm = fragmentActivity.supportFragmentManager
 
-        // Check if fragment already exists in the container
+        // Ensure FragmentManager is in valid state
+        if (fm.isStateSaved) {
+            return false
+        }
+
         val existingFragment = fm.findFragmentById(FRAGMENT_CONTAINER_ID)
         if (existingFragment is BrowserFragment) {
             // Fragment already replaced, no need to do it again
@@ -202,7 +202,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         val nativeFragment = BrowserFragment.create()
         fm.beginTransaction()
             .replace(FRAGMENT_CONTAINER_ID, nativeFragment)
-            .commitAllowingStateLoss()
+            .commit()
 
         return true
     }
