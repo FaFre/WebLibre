@@ -1,3 +1,10 @@
+## 0.9.15
+
+* Improved intent handling
+* Refactored tab grid
+* Several UI improvements
+* Optimized build
+
 ## 0.9.14
 
 * Bundle bangs and disable auto fetch (sync from repo still possible via settings)
