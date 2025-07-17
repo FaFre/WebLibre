@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -26,6 +25,64 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
+
+class _TabDraggable extends HookConsumerWidget {
+  final TabEntity entity;
+  final VoidCallback onClose;
+
+  const _TabDraggable({
+    required super.key,
+    required this.entity,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeTab = ref.watch(selectedTabProvider);
+
+    final dragData = ref.watch(
+      willAcceptDropProvider.select((value) {
+        final dragTabId = switch (value) {
+          ContainerDropData() => value.tabId,
+          DeleteDropData() => value.tabId,
+          null => null,
+        };
+
+        return (dragTabId == entity.tabId) ? value : null;
+      }),
+    );
+
+    final tab = SingleTabPreview(
+      tabId: entity.tabId,
+      activeTabId: activeTab,
+      onClose: onClose,
+      sourceSearchQuery: switch (entity) {
+        DefaultTabEntity _ => null,
+        final SearchResultTabEntity entity => entity.searchQuery,
+        TabTreeEntity _ => throw UnimplementedError(),
+      },
+    );
+
+    return CustomDraggable(
+      key: Key(entity.tabId),
+      data: TabDragData(entity.tabId),
+      child: switch (dragData) {
+        ContainerDropData() => Opacity(
+          opacity: 0.3,
+          child: Transform.scale(scale: 0.9, child: tab),
+        ),
+        DeleteDropData() => Opacity(
+          opacity: 0.3,
+          child: ColorFiltered(
+            colorFilter: const ColorFilter.mode(Colors.red, BlendMode.modulate),
+            child: tab,
+          ),
+        ),
+        null => tab,
+      },
+    );
+  }
+}
 
 class _TabSheetHeader extends HookConsumerWidget {
   static const headerSize = 124.0;
@@ -245,7 +302,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                 builder: (context, ref, child) {
                   final container = ref.watch(selectedContainerProvider);
 
-                  final filteredTabIds = ref.watch(
+                  final filteredTabEntities = ref.watch(
                     seamlessFilteredTabEntitiesProvider(
                       searchPartition: TabSearchPartition.preview,
                       // ignore: document_ignores using fast equatable
@@ -268,13 +325,16 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                       );
 
                       return math.max(
-                        math.min(calculatedCount, filteredTabIds.value.length),
+                        math.min(
+                          calculatedCount,
+                          filteredTabEntities.value.length,
+                        ),
                         2,
                       );
                     },
                     [
                       MediaQuery.of(context).size.width,
-                      filteredTabIds.value.length,
+                      filteredTabEntities.value.length,
                     ],
                   );
 
@@ -291,7 +351,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   );
 
                   useEffect(() {
-                    final index = filteredTabIds.value.indexWhere(
+                    final index = filteredTabEntities.value.indexWhere(
                       (entity) => entity.tabId == activeTab,
                     );
 
@@ -310,69 +370,20 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                     }
 
                     return null;
-                  }, [filteredTabIds, activeTab]);
+                  }, [filteredTabEntities, activeTab]);
 
                   final tabs = useMemoized(() {
-                    return filteredTabIds.value
+                    return filteredTabEntities.value
                         .where((entity) => entity is! TabTreeEntity)
-                        .mapIndexed((index, entity) {
-                          final child = Consumer(
-                            child: SingleTabPreview(
-                              tabId: entity.tabId,
-                              activeTabId: activeTab,
-                              onClose: onClose,
-                              sourceSearchQuery: switch (entity) {
-                                DefaultTabEntity() => null,
-                                SearchResultTabEntity() => entity.searchQuery,
-                                TabTreeEntity() => throw UnimplementedError(),
-                              },
-                            ),
-                            builder: (context, ref, child) {
-                              final dragData = ref.watch(
-                                willAcceptDropProvider.select((value) {
-                                  final dragTabId = switch (value) {
-                                    ContainerDropData() => value.tabId,
-                                    DeleteDropData() => value.tabId,
-                                    null => null,
-                                  };
-
-                                  return (dragTabId == entity.tabId)
-                                      ? value
-                                      : null;
-                                }),
-                              );
-
-                              return switch (dragData) {
-                                ContainerDropData() => Opacity(
-                                  opacity: 0.3,
-                                  child: Transform.scale(
-                                    scale: 0.9,
-                                    child: child,
-                                  ),
-                                ),
-                                DeleteDropData() => Opacity(
-                                  opacity: 0.3,
-                                  child: ColorFiltered(
-                                    colorFilter: const ColorFilter.mode(
-                                      Colors.red,
-                                      BlendMode.modulate,
-                                    ),
-                                    child: child,
-                                  ),
-                                ),
-                                null => child!,
-                              };
-                            },
-                          );
-
-                          return CustomDraggable(
+                        .map(
+                          (entity) => _TabDraggable(
                             key: Key(entity.tabId),
-                            data: TabDragData(entity.tabId),
-                            child: child,
-                          );
-                        })
+                            entity: entity,
+                            onClose: onClose,
+                          ),
+                        )
                         .toList();
-                  }, [filteredTabIds, activeTab]);
+                  }, [filteredTabEntities]);
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -396,7 +407,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           containerRepositoryProvider.notifier,
                         );
 
-                        final tabId = filteredTabIds.value[oldIndex].tabId;
+                        final tabId = filteredTabEntities.value[oldIndex].tabId;
                         final containerId = await ref
                             .read(tabDataRepositoryProvider.notifier)
                             .containerTabId(tabId);
@@ -407,14 +418,14 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             containerId,
                           );
                         } else if (newIndex >=
-                            filteredTabIds.value.length - 1) {
+                            filteredTabEntities.value.length - 1) {
                           key = await containerRepository.getTrailingOrderKey(
                             containerId,
                           );
                         } else {
                           final orderAfterIndex = newIndex;
                           key = await containerRepository.getOrderKeyAfterTab(
-                            filteredTabIds.value[orderAfterIndex].tabId,
+                            filteredTabEntities.value[orderAfterIndex].tabId,
                             containerId,
                           );
                         }
