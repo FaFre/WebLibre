@@ -335,6 +335,12 @@ class TabTreePreview extends HookConsumerWidget {
               onTap: () async {
                 if (entity.totalTabs > 1) {
                   await TabTreeRoute(entity.rootId).push(context);
+                } else if (entity.tabId != activeTabId) {
+                  //Close first to avoid rebuilds
+                  onClose();
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .selectTab(tab.id);
                 }
               },
               // onDeleteAll: (host) async {
