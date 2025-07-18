@@ -1,3 +1,9 @@
+## 0.9.15-1
+
+* Added certificate information title
+* Fixed draggable tabs
+* Open single tab in tree view automatically
+
 ## 0.9.15
 
 * Improved intent handling

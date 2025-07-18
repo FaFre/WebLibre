@@ -1,0 +1,3 @@
+* Added certificate information title
+* Fixed draggable tabs
+* Open single tab in tree view automatically
