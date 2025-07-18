@@ -30,11 +30,7 @@ class _TabDraggable extends HookConsumerWidget {
   final TabEntity entity;
   final VoidCallback onClose;
 
-  const _TabDraggable({
-    required super.key,
-    required this.entity,
-    required this.onClose,
-  });
+  const _TabDraggable({required this.entity, required this.onClose});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,24 +59,20 @@ class _TabDraggable extends HookConsumerWidget {
       },
     );
 
-    return CustomDraggable(
-      key: Key(entity.tabId),
-      data: TabDragData(entity.tabId),
-      child: switch (dragData) {
-        ContainerDropData() => Opacity(
-          opacity: 0.3,
-          child: Transform.scale(scale: 0.9, child: tab),
+    return switch (dragData) {
+      ContainerDropData() => Opacity(
+        opacity: 0.3,
+        child: Transform.scale(scale: 0.9, child: tab),
+      ),
+      DeleteDropData() => Opacity(
+        opacity: 0.3,
+        child: ColorFiltered(
+          colorFilter: const ColorFilter.mode(Colors.red, BlendMode.modulate),
+          child: tab,
         ),
-        DeleteDropData() => Opacity(
-          opacity: 0.3,
-          child: ColorFiltered(
-            colorFilter: const ColorFilter.mode(Colors.red, BlendMode.modulate),
-            child: tab,
-          ),
-        ),
-        null => tab,
-      },
-    );
+      ),
+      null => tab,
+    };
   }
 }
 
@@ -383,10 +375,13 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                     return filteredTabEntities.value
                         .where((entity) => entity is! TabTreeEntity)
                         .map(
-                          (entity) => _TabDraggable(
+                          (entity) => CustomDraggable(
                             key: Key(entity.tabId),
-                            entity: entity,
-                            onClose: onClose,
+                            data: TabDragData(entity.tabId),
+                            child: _TabDraggable(
+                              entity: entity,
+                              onClose: onClose,
+                            ),
                           ),
                         )
                         .toList();
