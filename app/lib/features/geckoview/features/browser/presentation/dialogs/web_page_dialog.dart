@@ -16,6 +16,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/certificate_tile.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -56,6 +57,8 @@ class WebPageDialog extends HookConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 0.0),
               child: WebsiteTitleTile(url, precachedInfo: precachedInfo),
             ),
+            CertificateTile(),
+            const Divider(),
             SizedBox(
               //We need this to stretch the dialog, then padding from dialog is applied
               width: double.maxFinite,
@@ -67,8 +70,7 @@ class WebPageDialog extends HookConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 4),
-            const Divider(),
+            const SizedBox(height: 8),
             Flexible(
               child: FadingScroll(
                 fadingSize: 25,
