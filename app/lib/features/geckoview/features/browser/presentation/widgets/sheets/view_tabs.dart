@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -192,7 +193,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                 ),
               if (!treeViewEnabled)
                 Padding(
-                  padding: const EdgeInsets.only(left: 8.0, top: 12),
+                  padding: const EdgeInsets.only(top: 12),
                   child: Consumer(
                     builder: (context, ref, child) {
                       final selectedContainer = ref.watch(
@@ -389,75 +390,86 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: ReorderableBuilder.builder(
-                      //Rebuild when cross axis count changes
-                      key: ValueKey(crossAxisCount),
-                      scrollController: sheetScrollController,
-                      itemCount: tabs.length,
-                      onDragStarted: (index) {
-                        ref.read(willAcceptDropProvider.notifier).clear();
-                      },
-                      onReorderPositions: (positions) async {
-                        assert(
-                          positions.length == 1,
-                          'Not ready for multiple reorders',
-                        );
-
-                        final oldIndex = positions.first.oldIndex;
-                        final newIndex = positions.first.newIndex;
-
-                        final containerRepository = ref.read(
-                          containerRepositoryProvider.notifier,
-                        );
-
-                        final tabId = filteredTabEntities.value[oldIndex].tabId;
-                        final containerId = await ref
-                            .read(tabDataRepositoryProvider.notifier)
-                            .containerTabId(tabId);
-
-                        final String key;
-                        if (newIndex <= 0) {
-                          key = await containerRepository.getLeadingOrderKey(
-                            containerId,
-                          );
-                        } else if (newIndex >=
-                            filteredTabEntities.value.length - 1) {
-                          key = await containerRepository.getTrailingOrderKey(
-                            containerId,
-                          );
-                        } else {
-                          if (newIndex < oldIndex) {
-                            key = await containerRepository.getOrderKeyAfterTab(
-                              filteredTabEntities.value[newIndex - 1].tabId,
-                              containerId,
-                            );
-                          } else {
-                            key = await containerRepository
-                                .getOrderKeyBeforeTab(
-                                  filteredTabEntities.value[newIndex + 1].tabId,
-                                  containerId,
-                                );
-                          }
-                        }
-
-                        await ref
-                            .read(tabDataRepositoryProvider.notifier)
-                            .assignOrderKey(tabId, key);
-                      },
-                      childBuilder: (itemBuilder) {
-                        return GridView.builder(
-                          key: gridViewKey,
-                          controller: sheetScrollController,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            //Sync values for itemHeight calculation _calculateItemHeight
-                            childAspectRatio: 0.75,
-                            mainAxisSpacing: 8.0,
-                            crossAxisSpacing: 8.0,
-                            crossAxisCount: crossAxisCount,
-                          ),
+                    child: FadingScroll(
+                      fadingSize: 10,
+                      controller: sheetScrollController,
+                      builder: (context, controller) {
+                        return ReorderableBuilder.builder(
+                          //Rebuild when cross axis count changes
+                          key: ValueKey(crossAxisCount),
+                          scrollController: controller,
                           itemCount: tabs.length,
-                          itemBuilder: (context, index) =>
-                              itemBuilder(tabs[index], index),
+                          onDragStarted: (index) {
+                            ref.read(willAcceptDropProvider.notifier).clear();
+                          },
+                          onReorderPositions: (positions) async {
+                            assert(
+                              positions.length == 1,
+                              'Not ready for multiple reorders',
+                            );
+
+                            final oldIndex = positions.first.oldIndex;
+                            final newIndex = positions.first.newIndex;
+
+                            final containerRepository = ref.read(
+                              containerRepositoryProvider.notifier,
+                            );
+
+                            final tabId =
+                                filteredTabEntities.value[oldIndex].tabId;
+                            final containerId = await ref
+                                .read(tabDataRepositoryProvider.notifier)
+                                .containerTabId(tabId);
+
+                            final String key;
+                            if (newIndex <= 0) {
+                              key = await containerRepository
+                                  .getLeadingOrderKey(containerId);
+                            } else if (newIndex >=
+                                filteredTabEntities.value.length - 1) {
+                              key = await containerRepository
+                                  .getTrailingOrderKey(containerId);
+                            } else {
+                              if (newIndex < oldIndex) {
+                                key = await containerRepository
+                                    .getOrderKeyAfterTab(
+                                      filteredTabEntities
+                                          .value[newIndex - 1]
+                                          .tabId,
+                                      containerId,
+                                    );
+                              } else {
+                                key = await containerRepository
+                                    .getOrderKeyBeforeTab(
+                                      filteredTabEntities
+                                          .value[newIndex + 1]
+                                          .tabId,
+                                      containerId,
+                                    );
+                              }
+                            }
+
+                            await ref
+                                .read(tabDataRepositoryProvider.notifier)
+                                .assignOrderKey(tabId, key);
+                          },
+                          childBuilder: (itemBuilder) {
+                            return GridView.builder(
+                              key: gridViewKey,
+                              controller: controller,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    //Sync values for itemHeight calculation _calculateItemHeight
+                                    childAspectRatio: 0.75,
+                                    mainAxisSpacing: 8.0,
+                                    crossAxisSpacing: 8.0,
+                                    crossAxisCount: crossAxisCount,
+                                  ),
+                              itemCount: tabs.length,
+                              itemBuilder: (context, index) =>
+                                  itemBuilder(tabs[index], index),
+                            );
+                          },
                         );
                       },
                     ),
