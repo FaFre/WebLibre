@@ -79,7 +79,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
           itemBuilder: (context, index) {
             final item = items[index];
             final child = Padding(
-              padding: const EdgeInsets.only(right: 8.0),
+              padding: const EdgeInsets.only(right: 8.0, top: 4.0),
               child: _BadgeWrapper(
                 count: itemBadgeCount?.call(item),
                 child: FilterChip(

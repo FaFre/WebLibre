@@ -187,7 +187,10 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                 WebExtensionActionType.page,
                               );
                             },
-                            icon: ExtensionBadgeIcon(extension),
+                            icon: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: ExtensionBadgeIcon(extension),
+                            ),
                           ),
                         ),
                       ],
@@ -237,7 +240,10 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                 WebExtensionActionType.browser,
                               );
                             },
-                            leadingIcon: ExtensionBadgeIcon(extension),
+                            leadingIcon: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: ExtensionBadgeIcon(extension),
+                            ),
                             child: Text(extension.title ?? ''),
                           ),
                         ),
