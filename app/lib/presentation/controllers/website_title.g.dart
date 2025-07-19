@@ -6,7 +6,7 @@ part of 'website_title.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pageInfoHash() => r'32527f7803e3eb33f74ce58d0773a9386df2546d';
+String _$pageInfoHash() => r'a57b4b72b16b63f5f366e014bb56cd0f021bcfa8';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -157,7 +157,7 @@ class _PageInfoProviderElement
   bool get isImageRequest => (origin as PageInfoProvider).isImageRequest;
 }
 
-String _$completePageInfoHash() => r'6a258150d2bb72b8f21de973ddcd23734f79ace0';
+String _$completePageInfoHash() => r'51474d7b110cfac44dd64e9f71fde091c5a35d4e';
 
 abstract class _$CompletePageInfo
     extends BuildlessAutoDisposeNotifier<AsyncValue<WebPageInfo>> {

@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
+import 'package:weblibre/extensions/ref_cache.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -17,6 +18,8 @@ const _supportedFetchSchemes = {'http', 'https'};
 class CompletePageInfo extends _$CompletePageInfo {
   @override
   AsyncValue<WebPageInfo> build(Uri url, WebPageInfo? cached) {
+    ref.cacheFor(const Duration(minutes: 2));
+
     if (cached?.isPageInfoComplete == true ||
         !_supportedFetchSchemes.contains(url.scheme)) {
       return AsyncData(cached!);
@@ -91,7 +94,7 @@ Future<WebPageInfo> pageInfo(
       );
 
   if (result.isSuccess) {
-    ref.keepAlive();
+    ref.cacheFor(const Duration(minutes: 2));
   }
 
   return result.value;

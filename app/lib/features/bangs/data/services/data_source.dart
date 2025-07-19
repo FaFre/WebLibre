@@ -11,7 +11,7 @@ import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
 part 'data_source.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class BangDataSourceService extends _$BangDataSourceService {
   @override
   void build() {}
