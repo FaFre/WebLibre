@@ -27,6 +27,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDownloadsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFindApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoIconsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
@@ -152,6 +153,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoTabsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTabsApiImpl())
         GeckoIconsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoIconsApiImpl())
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
+        GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl())
         GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
         GeckoContainerProxyApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoContainerProxyApiImpl())
         GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())

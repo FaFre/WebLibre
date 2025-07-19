@@ -442,5 +442,127 @@ class _TabDescendantsProviderElement
   String get tabId => (origin as TabDescendantsProvider).tabId;
 }
 
+String _$containerTabsDataHash() => r'1987b2d69f2ba663a7343e93572aad3c31a29be3';
+
+/// See also [containerTabsData].
+@ProviderFor(containerTabsData)
+const containerTabsDataProvider = ContainerTabsDataFamily();
+
+/// See also [containerTabsData].
+class ContainerTabsDataFamily extends Family<AsyncValue<List<TabData>>> {
+  /// See also [containerTabsData].
+  const ContainerTabsDataFamily();
+
+  /// See also [containerTabsData].
+  ContainerTabsDataProvider call(String containerId) {
+    return ContainerTabsDataProvider(containerId);
+  }
+
+  @override
+  ContainerTabsDataProvider getProviderOverride(
+    covariant ContainerTabsDataProvider provider,
+  ) {
+    return call(provider.containerId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'containerTabsDataProvider';
+}
+
+/// See also [containerTabsData].
+class ContainerTabsDataProvider
+    extends AutoDisposeStreamProvider<List<TabData>> {
+  /// See also [containerTabsData].
+  ContainerTabsDataProvider(String containerId)
+    : this._internal(
+        (ref) => containerTabsData(ref as ContainerTabsDataRef, containerId),
+        from: containerTabsDataProvider,
+        name: r'containerTabsDataProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$containerTabsDataHash,
+        dependencies: ContainerTabsDataFamily._dependencies,
+        allTransitiveDependencies:
+            ContainerTabsDataFamily._allTransitiveDependencies,
+        containerId: containerId,
+      );
+
+  ContainerTabsDataProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.containerId,
+  }) : super.internal();
+
+  final String containerId;
+
+  @override
+  Override overrideWith(
+    Stream<List<TabData>> Function(ContainerTabsDataRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ContainerTabsDataProvider._internal(
+        (ref) => create(ref as ContainerTabsDataRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        containerId: containerId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<List<TabData>> createElement() {
+    return _ContainerTabsDataProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ContainerTabsDataProvider &&
+        other.containerId == containerId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, containerId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ContainerTabsDataRef on AutoDisposeStreamProviderRef<List<TabData>> {
+  /// The parameter `containerId` of this provider.
+  String get containerId;
+}
+
+class _ContainerTabsDataProviderElement
+    extends AutoDisposeStreamProviderElement<List<TabData>>
+    with ContainerTabsDataRef {
+  _ContainerTabsDataProviderElement(super.provider);
+
+  @override
+  String get containerId => (origin as ContainerTabsDataProvider).containerId;
+}
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

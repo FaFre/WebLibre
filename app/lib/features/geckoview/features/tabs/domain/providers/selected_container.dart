@@ -38,8 +38,7 @@ class SelectedContainer extends _$SelectedContainer {
             .read(localAuthenticationServiceProvider.notifier)
             .authenticate(
               authKey: 'container_access::${container.id}',
-              localizedReason:
-                  'Require authentication for container ${container.name ?? 'New Container'}',
+              localizedReason: 'Require authentication for container',
               settings: container.metadata.authSettings,
               useAuthCache: true,
             );

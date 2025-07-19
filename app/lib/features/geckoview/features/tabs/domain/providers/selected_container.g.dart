@@ -25,7 +25,7 @@ final selectedContainerDataProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedContainerDataRef = AutoDisposeStreamProviderRef<ContainerData?>;
-String _$selectedContainerHash() => r'736a60b8f19273d3bdc25d1717e3a613384e59a6';
+String _$selectedContainerHash() => r'34457f0adc45d437a9ab817387be4b1664cd2e7a';
 
 /// See also [SelectedContainer].
 @ProviderFor(SelectedContainer)

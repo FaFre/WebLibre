@@ -72,6 +72,7 @@ dependencies:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git
   sqlite3: ^2.7.7
   sqlite3_flutter_libs: ^0.5.36
+  synchronized: ^3.4.0
   text_scroll: ^0.2.0
   timeago: ^3.7.1
   tor:

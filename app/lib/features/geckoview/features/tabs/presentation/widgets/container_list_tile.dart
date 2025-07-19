@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 
 class ContainerListTile extends HookWidget {
   final ContainerData container;
@@ -22,7 +23,7 @@ class ContainerListTile extends HookWidget {
       child: ListTile(
         selected: isSelected,
         leading: CircleAvatar(backgroundColor: container.color),
-        title: Text(container.name ?? 'New Container'),
+        title: ContainerTitle(container: container),
         onTap: onTap,
         trailing: const Icon(Icons.chevron_right),
       ),

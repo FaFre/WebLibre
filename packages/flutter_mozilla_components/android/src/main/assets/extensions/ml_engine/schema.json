@@ -1,0 +1,61 @@
+[
+    {
+        "namespace": "experiments.nlp",
+        "description": "Natural Language Processing utilities",
+        "functions": [
+            {
+                "name": "extractKeywords",
+                "type": "function",
+                "description": "Extract keywords from a corpus of text documents",
+                "async": true,
+                "parameters": [
+                    {
+                        "name": "corpus",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Array of text documents to extract keywords from"
+                    },
+                    {
+                        "name": "maxKeywords",
+                        "type": "integer",
+                        "optional": true,
+                        "default": 3,
+                        "description": "Maximum number of keywords to extract per document"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "namespace": "experiments.ml",
+        "description": "Machine Learning utilities",
+        "functions": [
+            {
+                "name": "containerTopic",
+                "type": "function",
+                "description": "Generate topic from keywords and documents using ML engine",
+                "async": true,
+                "parameters": [
+                    {
+                        "name": "keywords",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Array of keywords to generate topic from"
+                    },
+                    {
+                        "name": "documents",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Array of document titles/content"
+                    }
+                ]
+            }
+        ]
+    }
+]

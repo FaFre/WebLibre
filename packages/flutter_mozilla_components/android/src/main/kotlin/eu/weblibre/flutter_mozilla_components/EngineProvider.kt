@@ -9,6 +9,7 @@ import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.PrefManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
+import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
@@ -39,7 +40,7 @@ object EngineProvider {
             builder.extensionsWebAPIEnabled(true)
 
             // Disable output for now to improve performance
-            //builder.consoleOutput(true)
+            builder.consoleOutput(true)
 
             runtime = GeckoRuntime.create(context, builder.build())
         }
@@ -57,6 +58,7 @@ object EngineProvider {
             PrefManagerFeature.install(it)
             ContainerProxyFeature.install(it)
             BrowserExtensionFeature.install(it, extensionEvents)
+            MLEngineFeature.install(it)
         }
     }
 

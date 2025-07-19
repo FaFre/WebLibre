@@ -110,7 +110,7 @@ class ContainerSelectionRoute extends GoRouteData
 }
 
 class ContainerEditRoute extends GoRouteData with _$ContainerEditRoute {
-  final ContainerData $extra;
+  final ContainerDataWithCount $extra;
 
   ContainerEditRoute(this.$extra);
 

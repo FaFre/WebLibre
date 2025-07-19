@@ -9,6 +9,7 @@ import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 class ContainerChips extends HookConsumerWidget {
@@ -75,7 +76,7 @@ class ContainerChips extends HookConsumerWidget {
                       ),
                     ),
                     itemLabel: (container) =>
-                        Text(container.name ?? 'New Container'),
+                        ContainerTitle(container: container),
                     itemBadgeCount: (container) => container.tabCount,
                     itemWrap: (child, container) {
                       return HookBuilder(
@@ -169,6 +170,7 @@ class ContainerChips extends HookConsumerWidget {
                 ),
               if (displayMenu)
                 IconButton(
+                  visualDensity: VisualDensity.compact,
                   onPressed: () async {
                     await ContainerListRoute().push(context);
                   },

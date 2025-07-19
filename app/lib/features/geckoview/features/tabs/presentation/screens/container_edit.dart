@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
@@ -59,6 +60,11 @@ class ContainerEditScreen extends HookConsumerWidget {
       text: initialContainer.name,
     );
 
+    final containerHasTabs = switch (initialContainer) {
+      ContainerDataWithCount(:final tabCount?) when tabCount > 0 => true,
+      _ => false,
+    };
+
     return Scaffold(
       appBar: AppBar(
         title: Text(switch (_mode) {
@@ -89,8 +95,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                     .read(localAuthenticationServiceProvider.notifier)
                     .authenticate(
                       authKey: 'container_access::${container.id}',
-                      localizedReason:
-                          'Require authentication for container ${container.name ?? 'New Container'}',
+                      localizedReason: 'Require authentication for container',
                     );
 
                 if (!authResult) {
@@ -140,6 +145,38 @@ class ContainerEditScreen extends HookConsumerWidget {
                           ),
                         ),
                         label: const Text('Name'),
+                        suffixIcon:
+                            (_mode == _DialogMode.edit && containerHasTabs)
+                            ? Consumer(
+                                builder: (context, ref, child) {
+                                  final isLoading = ref.watch(
+                                    containerTopicControllerProvider.select(
+                                      (value) => value.isLoading,
+                                    ),
+                                  );
+
+                                  return IconButton(
+                                    onPressed: isLoading
+                                        ? null
+                                        : () async {
+                                            final topic = await ref
+                                                .read(
+                                                  containerTopicControllerProvider
+                                                      .notifier,
+                                                )
+                                                .getContainerTopic(
+                                                  initialContainer.id,
+                                                );
+
+                                            if (topic != null) {
+                                              textController.text = topic;
+                                            }
+                                          },
+                                    icon: const Icon(MdiIcons.creation),
+                                  );
+                                },
+                              )
+                            : null,
                       ),
                       controller: textController,
                     ),

@@ -954,6 +954,12 @@ abstract class GeckoPrefApi {
 }
 
 @HostApi()
+abstract class GeckoMlApi {
+  @async
+  String getContainerTopic(List<String> titles);
+}
+
+@HostApi()
 abstract class GeckoBrowserExtensionApi {
   @async
   List<Object> getMarkdown(List<String> htmlList);

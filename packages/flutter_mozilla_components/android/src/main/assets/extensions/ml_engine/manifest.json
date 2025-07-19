@@ -1,0 +1,61 @@
+{
+  "manifest_version": 2,
+  "name": "ml-engine",
+  "version": "1.0",
+  "description": "WebLibre ML Engine",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ml-engine@weblibre.eu"
+    }
+  },
+  "experiment_apis": {
+    "nlp": {
+      "schema": "schema.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "script": "api/nlp.js",
+        "paths": [
+          [
+            "experiments",
+            "nlp"
+          ]
+        ]
+      }
+    },
+    "ml": {
+      "schema": "schema.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "script": "api/ml.js",
+        "paths": [
+          [
+            "experiments",
+            "ml"
+          ]
+        ]
+      }
+    }
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "optional_permissions": [
+    "trialML"
+  ],
+  "permissions": [
+    "nativeMessaging",
+    "nativeMessagingFromContent",
+    "geckoViewAddons",
+    "cookies",
+    "menus",
+    "scripting",
+    "storage",
+    "<all_urls>"
+  ]
+}

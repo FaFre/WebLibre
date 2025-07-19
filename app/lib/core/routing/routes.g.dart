@@ -517,7 +517,7 @@ mixin _$ContainerCreateRoute on GoRouteData {
 
 mixin _$ContainerEditRoute on GoRouteData {
   static ContainerEditRoute _fromState(GoRouterState state) =>
-      ContainerEditRoute(state.extra as ContainerData);
+      ContainerEditRoute(state.extra as ContainerDataWithCount);
 
   ContainerEditRoute get _self => this as ContainerEditRoute;
 
