@@ -28,7 +28,9 @@ port.onMessage.addListener(async (message) => {
     switch (message["action"]) {
         case "getContainerTopic":
             const documents = message["args"];
-            const keywords = await browser.experiments.nlp.extractKeywords([documents.slice(0, 3).join(" ")]);
+            const keywords = (documents.length > 1)
+                ? await browser.experiments.nlp.extractKeywords([documents.slice(0, 3).join(" ")])
+                : [[]];
 
             browser.experiments.ml.containerTopic(keywords[0], documents)
                 .then(sendJsonResultForRequest(requestId))
