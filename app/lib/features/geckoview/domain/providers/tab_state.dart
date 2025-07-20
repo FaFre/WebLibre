@@ -15,6 +15,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 
 part 'tab_state.g.dart';
@@ -215,4 +216,14 @@ TabType? selectedTabType(Ref ref) {
   return isPrivate.mapNotNull(
     (isCurrentPrivate) => isCurrentPrivate ? TabType.private : TabType.regular,
   );
+}
+
+@Riverpod(keepAlive: true)
+AsyncValue<String?> selectedTabContainerId(Ref ref) {
+  final tabId = ref.watch(selectedTabProvider);
+  if (tabId != null) {
+    return ref.watch(watchContainerTabIdProvider(tabId));
+  }
+
+  return const AsyncData(null);
 }

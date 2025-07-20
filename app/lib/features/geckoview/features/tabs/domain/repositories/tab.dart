@@ -15,7 +15,7 @@ class TabDataRepository extends _$TabDataRepository {
   ) async {
     final currentContainerId = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .containerTabId(tabId);
+        .getContainerTabId(tabId);
 
     final currentContainerData = await currentContainerId.mapNotNull(
       (containerId) => ref
@@ -81,7 +81,7 @@ class TabDataRepository extends _$TabDataRepository {
     }
   }
 
-  Future<String?> containerTabId(String tabId) {
+  Future<String?> getContainerTabId(String tabId) {
     return ref
         .read(tabDatabaseProvider)
         .tabDao

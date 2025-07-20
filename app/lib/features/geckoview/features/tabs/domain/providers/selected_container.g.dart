@@ -44,7 +44,7 @@ final selectedContainerTabCountProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedContainerTabCountRef = AutoDisposeProviderRef<AsyncValue<int>>;
-String _$selectedContainerHash() => r'34457f0adc45d437a9ab817387be4b1664cd2e7a';
+String _$selectedContainerHash() => r'0441c56a22fd8cab71fec4906d3c22f40553b327';
 
 /// See also [SelectedContainer].
 @ProviderFor(SelectedContainer)

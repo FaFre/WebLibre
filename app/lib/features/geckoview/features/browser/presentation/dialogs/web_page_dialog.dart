@@ -231,7 +231,9 @@ class WebPageDialog extends HookConsumerWidget {
                           ),
                           builder: (context, ref, child) {
                             final containerId = ref.watch(
-                              selectedContainerProvider,
+                              selectedTabContainerIdProvider.select(
+                                (value) => value.valueOrNull,
+                              ),
                             );
 
                             return Visibility(

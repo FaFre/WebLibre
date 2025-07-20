@@ -433,7 +433,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                                 filteredTabEntities.value[oldIndex].tabId;
                             final containerId = await ref
                                 .read(tabDataRepositoryProvider.notifier)
-                                .containerTabId(tabId);
+                                .getContainerTabId(tabId);
 
                             final String key;
                             if (newIndex <= 0) {

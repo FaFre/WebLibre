@@ -68,7 +68,7 @@ Future<WebPageInfo> pageInfo(
   if (tabId != null) {
     final containerId = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .containerTabId(tabId);
+        .getContainerTabId(tabId);
 
     final containerData = await containerId.mapNotNull(
       (containerId) => ref

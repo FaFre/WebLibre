@@ -175,6 +175,24 @@ final selectedTabTypeProvider = AutoDisposeProvider<TabType?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedTabTypeRef = AutoDisposeProviderRef<TabType?>;
+String _$selectedTabContainerIdHash() =>
+    r'9f0246a02a069b1a66211a3924f32e9d75f0f344';
+
+/// See also [selectedTabContainerId].
+@ProviderFor(selectedTabContainerId)
+final selectedTabContainerIdProvider = Provider<AsyncValue<String?>>.internal(
+  selectedTabContainerId,
+  name: r'selectedTabContainerIdProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedTabContainerIdHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SelectedTabContainerIdRef = ProviderRef<AsyncValue<String?>>;
 String _$tabStatesHash() => r'e4d2f2b4ddd65beac8a1fd0d22bad1e0a26b41bd';
 
 /// See also [TabStates].

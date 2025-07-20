@@ -77,3 +77,12 @@ Stream<List<TabData>> containerTabsData(Ref ref, String containerId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.containerDao.getContainerTabsData(containerId).watch();
 }
+
+@Riverpod()
+Stream<String?> watchContainerTabId(Ref ref, String tabId) {
+  return ref
+      .read(tabDatabaseProvider)
+      .tabDao
+      .getTabContainerId(tabId)
+      .watchSingleOrNull();
+}

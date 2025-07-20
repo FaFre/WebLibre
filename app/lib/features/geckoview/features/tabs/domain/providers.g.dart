@@ -687,5 +687,126 @@ class _ContainerTabsDataProviderElement
   String get containerId => (origin as ContainerTabsDataProvider).containerId;
 }
 
+String _$watchContainerTabIdHash() =>
+    r'b8f107e462f417b128221240242167a0754f040f';
+
+/// See also [watchContainerTabId].
+@ProviderFor(watchContainerTabId)
+const watchContainerTabIdProvider = WatchContainerTabIdFamily();
+
+/// See also [watchContainerTabId].
+class WatchContainerTabIdFamily extends Family<AsyncValue<String?>> {
+  /// See also [watchContainerTabId].
+  const WatchContainerTabIdFamily();
+
+  /// See also [watchContainerTabId].
+  WatchContainerTabIdProvider call(String tabId) {
+    return WatchContainerTabIdProvider(tabId);
+  }
+
+  @override
+  WatchContainerTabIdProvider getProviderOverride(
+    covariant WatchContainerTabIdProvider provider,
+  ) {
+    return call(provider.tabId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'watchContainerTabIdProvider';
+}
+
+/// See also [watchContainerTabId].
+class WatchContainerTabIdProvider extends AutoDisposeStreamProvider<String?> {
+  /// See also [watchContainerTabId].
+  WatchContainerTabIdProvider(String tabId)
+    : this._internal(
+        (ref) => watchContainerTabId(ref as WatchContainerTabIdRef, tabId),
+        from: watchContainerTabIdProvider,
+        name: r'watchContainerTabIdProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$watchContainerTabIdHash,
+        dependencies: WatchContainerTabIdFamily._dependencies,
+        allTransitiveDependencies:
+            WatchContainerTabIdFamily._allTransitiveDependencies,
+        tabId: tabId,
+      );
+
+  WatchContainerTabIdProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.tabId,
+  }) : super.internal();
+
+  final String tabId;
+
+  @override
+  Override overrideWith(
+    Stream<String?> Function(WatchContainerTabIdRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: WatchContainerTabIdProvider._internal(
+        (ref) => create(ref as WatchContainerTabIdRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        tabId: tabId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<String?> createElement() {
+    return _WatchContainerTabIdProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchContainerTabIdProvider && other.tabId == tabId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, tabId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin WatchContainerTabIdRef on AutoDisposeStreamProviderRef<String?> {
+  /// The parameter `tabId` of this provider.
+  String get tabId;
+}
+
+class _WatchContainerTabIdProviderElement
+    extends AutoDisposeStreamProviderElement<String?>
+    with WatchContainerTabIdRef {
+  _WatchContainerTabIdProviderElement(super.provider);
+
+  @override
+  String get tabId => (origin as WatchContainerTabIdProvider).tabId;
+}
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

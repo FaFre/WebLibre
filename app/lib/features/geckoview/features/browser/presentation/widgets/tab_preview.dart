@@ -237,7 +237,7 @@ class SingleTabPreview extends HookConsumerWidget {
       onDeleteAll: (host) async {
         final containerId = await ref
             .read(tabDataRepositoryProvider.notifier)
-            .containerTabId(tab.id);
+            .getContainerTabId(tab.id);
 
         await ref
             .read(tabDataRepositoryProvider.notifier)
