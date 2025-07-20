@@ -36,7 +36,7 @@ jobs:
       - name: Determine build type
         id: build-type
         run: |
-          if [[ "${{ github.ref_name }}" =~ ^v.*-(pre|alpha) ]]; then
+          if [[ "${{ github.ref_name }}" =~ (pre|alpha) ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
             echo "Build type: Prerelease (APK only)"
           else
