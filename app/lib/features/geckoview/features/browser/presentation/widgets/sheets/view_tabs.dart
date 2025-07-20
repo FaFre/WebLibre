@@ -346,31 +346,45 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   );
 
                   final lastScroll = useRef<String?>(null);
-                  useEffect(() {
-                    if (lastScroll.value != activeTab) {
-                      final index = filteredTabEntities.value.indexWhere(
-                        (entity) => entity.tabId == activeTab,
-                      );
+                  final scrollControllerIsAttached = useListenableSelector(
+                    sheetScrollController,
+                    () => sheetScrollController.hasClients,
+                  );
 
-                      if (index > -1) {
-                        final offset = (index ~/ 2) * itemHeight;
-
-                        if (offset != sheetScrollController.offset) {
-                          lastScroll.value = activeTab;
-
-                          unawaited(
-                            sheetScrollController.animateTo(
-                              offset,
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                            ),
+                  useEffect(
+                    () {
+                      if (scrollControllerIsAttached) {
+                        if (lastScroll.value != activeTab) {
+                          final index = filteredTabEntities.value.indexWhere(
+                            (entity) => entity.tabId == activeTab,
                           );
+
+                          if (index > -1) {
+                            final offset = (index ~/ 2) * itemHeight;
+
+                            if (offset != sheetScrollController.offset) {
+                              lastScroll.value = activeTab;
+
+                              unawaited(
+                                sheetScrollController.animateTo(
+                                  offset,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeInOut,
+                                ),
+                              );
+                            }
+                          }
                         }
                       }
-                    }
 
-                    return null;
-                  }, [filteredTabEntities, activeTab]);
+                      return null;
+                    },
+                    [
+                      filteredTabEntities,
+                      activeTab,
+                      scrollControllerIsAttached,
+                    ],
+                  );
 
                   final tabs = useMemoized(() {
                     return filteredTabEntities.value
@@ -391,7 +405,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: FadingScroll(
-                      fadingSize: 10,
+                      fadingSize: 5,
                       controller: sheetScrollController,
                       builder: (context, controller) {
                         return ReorderableBuilder.builder(
