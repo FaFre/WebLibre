@@ -25,6 +25,25 @@ final selectedContainerDataProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedContainerDataRef = AutoDisposeStreamProviderRef<ContainerData?>;
+String _$selectedContainerTabCountHash() =>
+    r'60218b4a9058738dfd43628d5e3c55f93080732f';
+
+/// See also [selectedContainerTabCount].
+@ProviderFor(selectedContainerTabCount)
+final selectedContainerTabCountProvider =
+    AutoDisposeProvider<AsyncValue<int>>.internal(
+      selectedContainerTabCount,
+      name: r'selectedContainerTabCountProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$selectedContainerTabCountHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SelectedContainerTabCountRef = AutoDisposeProviderRef<AsyncValue<int>>;
 String _$selectedContainerHash() => r'34457f0adc45d437a9ab817387be4b1664cd2e7a';
 
 /// See also [SelectedContainer].

@@ -303,6 +303,129 @@ class _ContainerTabIdsProviderElement
       (origin as ContainerTabIdsProvider).containerFilter;
 }
 
+String _$containerTabCountHash() => r'586e83429b527b546d43232a58453635ab860d69';
+
+/// See also [containerTabCount].
+@ProviderFor(containerTabCount)
+const containerTabCountProvider = ContainerTabCountFamily();
+
+/// See also [containerTabCount].
+class ContainerTabCountFamily extends Family<AsyncValue<int>> {
+  /// See also [containerTabCount].
+  const ContainerTabCountFamily();
+
+  /// See also [containerTabCount].
+  ContainerTabCountProvider call(ContainerFilter containerFilter) {
+    return ContainerTabCountProvider(containerFilter);
+  }
+
+  @override
+  ContainerTabCountProvider getProviderOverride(
+    covariant ContainerTabCountProvider provider,
+  ) {
+    return call(provider.containerFilter);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'containerTabCountProvider';
+}
+
+/// See also [containerTabCount].
+class ContainerTabCountProvider extends AutoDisposeFutureProvider<int> {
+  /// See also [containerTabCount].
+  ContainerTabCountProvider(ContainerFilter containerFilter)
+    : this._internal(
+        (ref) =>
+            containerTabCount(ref as ContainerTabCountRef, containerFilter),
+        from: containerTabCountProvider,
+        name: r'containerTabCountProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$containerTabCountHash,
+        dependencies: ContainerTabCountFamily._dependencies,
+        allTransitiveDependencies:
+            ContainerTabCountFamily._allTransitiveDependencies,
+        containerFilter: containerFilter,
+      );
+
+  ContainerTabCountProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.containerFilter,
+  }) : super.internal();
+
+  final ContainerFilter containerFilter;
+
+  @override
+  Override overrideWith(
+    FutureOr<int> Function(ContainerTabCountRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ContainerTabCountProvider._internal(
+        (ref) => create(ref as ContainerTabCountRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        containerFilter: containerFilter,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<int> createElement() {
+    return _ContainerTabCountProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ContainerTabCountProvider &&
+        other.containerFilter == containerFilter;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, containerFilter.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ContainerTabCountRef on AutoDisposeFutureProviderRef<int> {
+  /// The parameter `containerFilter` of this provider.
+  ContainerFilter get containerFilter;
+}
+
+class _ContainerTabCountProviderElement
+    extends AutoDisposeFutureProviderElement<int>
+    with ContainerTabCountRef {
+  _ContainerTabCountProviderElement(super.provider);
+
+  @override
+  ContainerFilter get containerFilter =>
+      (origin as ContainerTabCountProvider).containerFilter;
+}
+
 String _$tabTreesHash() => r'b7b7f7136827207dd01a7894a915be3d17b1ae63';
 
 /// See also [tabTrees].

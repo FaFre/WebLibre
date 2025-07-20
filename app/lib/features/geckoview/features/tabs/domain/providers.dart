@@ -50,6 +50,13 @@ Stream<List<String>> containerTabIds(Ref ref, ContainerFilter containerFilter) {
 }
 
 @Riverpod()
+Future<int> containerTabCount(Ref ref, ContainerFilter containerFilter) {
+  return ref.watch(
+    containerTabIdsProvider(containerFilter).selectAsync((tabs) => tabs.length),
+  );
+}
+
+@Riverpod()
 Stream<List<TabTreesResult>> tabTrees(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
   return db.tabTrees().watch();

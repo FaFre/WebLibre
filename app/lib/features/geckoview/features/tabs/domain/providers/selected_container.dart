@@ -3,6 +3,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -137,4 +138,15 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
   }
 
   return Stream.value(null);
+}
+
+@Riverpod()
+AsyncValue<int> selectedContainerTabCount(Ref ref) {
+  final selectedContainer = ref.watch(selectedContainerProvider);
+  final tabCount = ref.watch(
+    // ignore: provider_parameters
+    containerTabCountProvider(ContainerFilter.from(selectedContainer)),
+  );
+
+  return tabCount;
 }
