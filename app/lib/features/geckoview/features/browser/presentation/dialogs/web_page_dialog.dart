@@ -13,11 +13,11 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/site_search.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/certificate_tile.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -211,6 +211,10 @@ class WebPageDialog extends HookConsumerWidget {
                                       );
                                 }
                               }
+
+                              if (context.mounted) {
+                                context.pop();
+                              }
                             }
                           },
                         ),
@@ -222,10 +226,15 @@ class WebPageDialog extends HookConsumerWidget {
                               final selectedTabId = ref.read(
                                 selectedTabProvider,
                               );
+
                               if (selectedTabId != null) {
                                 await ref
                                     .read(tabDataRepositoryProvider.notifier)
                                     .unassignContainer(selectedTabId);
+                              }
+
+                              if (context.mounted) {
+                                context.pop();
                               }
                             },
                           ),
