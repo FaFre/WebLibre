@@ -4,7 +4,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container_topic.dart';
 
 class ContainerTitle extends HookConsumerWidget {
@@ -19,6 +21,12 @@ class ContainerTitle extends HookConsumerWidget {
     }
 
     final topicAsync = ref.watch(containerTopicProvider(container.id));
+    final containerHasTabs = ref.watch(
+      containerTabCountProvider(
+        // ignore: provider_parameters
+        ContainerFilterById(containerId: container.id),
+      ).select((value) => (value.valueOrNull ?? 0) > 0),
+    );
 
     return topicAsync.when(
       skipLoadingOnReload: true,
@@ -34,7 +42,10 @@ class ContainerTitle extends HookConsumerWidget {
               ),
             ),
           ) ??
-          const Text('New Container'),
+          Text(
+            containerHasTabs ? 'Untitled' : 'Empty',
+            style: const TextStyle(fontStyle: FontStyle.italic),
+          ),
       error: (error, stackTrace) {
         logger.e(
           'Could not determine container name ${container.id}',
@@ -42,7 +53,7 @@ class ContainerTitle extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
 
-        return const Text('New Container');
+        return const Text('Untitled');
       },
       loading: () => const Skeletonizer(child: Text('container')),
     );
