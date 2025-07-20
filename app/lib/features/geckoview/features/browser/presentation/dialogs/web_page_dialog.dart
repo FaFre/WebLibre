@@ -17,6 +17,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/address_with_suggestions_field.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/certificate_tile.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -211,6 +212,32 @@ class WebPageDialog extends HookConsumerWidget {
                                 }
                               }
                             }
+                          },
+                        ),
+                        Consumer(
+                          child: ListTile(
+                            leading: const Icon(MdiIcons.folderCancel),
+                            title: const Text('Unassign container'),
+                            onTap: () async {
+                              final selectedTabId = ref.read(
+                                selectedTabProvider,
+                              );
+                              if (selectedTabId != null) {
+                                await ref
+                                    .read(tabDataRepositoryProvider.notifier)
+                                    .unassignContainer(selectedTabId);
+                              }
+                            },
+                          ),
+                          builder: (context, ref, child) {
+                            final containerId = ref.watch(
+                              selectedContainerProvider,
+                            );
+
+                            return Visibility(
+                              visible: containerId != null,
+                              child: child!,
+                            );
                           },
                         ),
                         ShareTile(

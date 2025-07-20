@@ -38,6 +38,13 @@ class TabDataRepository extends _$TabDataRepository {
     }
   }
 
+  Future<void> unassignContainer(String tabId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .assignContainer(tabId, containerId: null);
+  }
+
   Future<void> assignOrderKey(String tabId, String orderKey) {
     return ref
         .read(tabDatabaseProvider)
