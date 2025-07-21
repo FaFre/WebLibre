@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -17,7 +19,7 @@ class ContainerChips extends HookConsumerWidget {
 
   final ContainerData? selectedContainer;
   final bool Function(ContainerDataWithCount)? containerFilter;
-  final void Function(ContainerDataWithCount)? onSelected;
+  final void Function(ContainerDataWithCount?)? onSelected;
   final void Function(ContainerDataWithCount)? onDeleted;
 
   final ValueListenable<TextEditingValue>? searchTextListenable;
@@ -149,6 +151,35 @@ class ContainerChips extends HookConsumerWidget {
                         },
                       );
                     },
+                    prefixListItems: [
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final tabCount = ref.watch(
+                            containerTabCountProvider(
+                              // ignore: provider_parameters
+                              ContainerFilterById(containerId: null),
+                            ).select((value) => value.valueOrNull ?? 0),
+                          );
+
+                          return FilterChip(
+                            avatar: const Icon(MdiIcons.folderHidden),
+                            labelPadding: (tabCount > 0)
+                                ? null
+                                : const EdgeInsets.only(right: 2.0),
+                            label: (tabCount > 0)
+                                ? Text(tabCount.toString())
+                                : const SizedBox.shrink(),
+                            selected: selectedContainer == null,
+                            showCheckmark: false,
+                            onSelected: (value) {
+                              if (value) {
+                                onSelected?.call(null);
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ],
                     availableItems: availableContainers,
                     selectedItem: selectedContainer,
                     onSelected: onSelected,

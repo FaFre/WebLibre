@@ -205,15 +205,21 @@ class _TabSheetHeader extends HookConsumerWidget {
                       return ContainerChips(
                         selectedContainer: selectedContainer,
                         onSelected: (container) async {
-                          final result = await ref
-                              .read(selectedContainerProvider.notifier)
-                              .setContainerId(container.id);
+                          if (container != null) {
+                            final result = await ref
+                                .read(selectedContainerProvider.notifier)
+                                .setContainerId(container.id);
 
-                          if (context.mounted &&
-                              result == SetContainerResult.successHasProxy) {
-                            await ref
-                                .read(startProxyControllerProvider.notifier)
-                                .maybeStartProxy(context);
+                            if (context.mounted &&
+                                result == SetContainerResult.successHasProxy) {
+                              await ref
+                                  .read(startProxyControllerProvider.notifier)
+                                  .maybeStartProxy(context);
+                            }
+                          } else {
+                            ref
+                                .read(selectedContainerProvider.notifier)
+                                .clearContainer();
                           }
                         },
                         onDeleted: (container) {

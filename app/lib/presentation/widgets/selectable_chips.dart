@@ -22,6 +22,7 @@ class _BadgeWrapper extends StatelessWidget {
 
 class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final List<T> availableItems;
+  final List<Widget> prefixListItems;
   final S? selectedItem;
   final int maxCount;
   final bool deleteIcon;
@@ -44,6 +45,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.itemBadgeCount,
     this.itemWrap,
     this.itemTooltip,
+    this.prefixListItems = const [],
     required this.availableItems,
     this.selectedItem,
     this.maxCount = 25,
@@ -75,9 +77,16 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
           //Improve list performance by not rendering outside screen at all
           cacheExtent: 0,
           scrollDirection: Axis.horizontal,
-          itemCount: items.length,
+          itemCount: prefixListItems.length + items.length,
           itemBuilder: (context, index) {
-            final item = items[index];
+            if (index < prefixListItems.length) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0, top: 4.0),
+                child: prefixListItems[index],
+              );
+            }
+
+            final item = items[index - prefixListItems.length];
             final child = Padding(
               padding: const EdgeInsets.only(right: 8.0, top: 4.0),
               child: _BadgeWrapper(
