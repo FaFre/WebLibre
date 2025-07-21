@@ -187,7 +187,9 @@ class WebPageDialog extends HookConsumerWidget {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(MdiIcons.folderArrowUpDown),
+                          leading: const Icon(
+                            MdiIcons.folderArrowUpDownOutline,
+                          ),
                           title: const Text('Assign container'),
                           onTap: () async {
                             final selectedTabId = ref.read(selectedTabProvider);
@@ -220,7 +222,7 @@ class WebPageDialog extends HookConsumerWidget {
                         ),
                         Consumer(
                           child: ListTile(
-                            leading: const Icon(MdiIcons.folderCancel),
+                            leading: const Icon(MdiIcons.folderCancelOutline),
                             title: const Text('Unassign container'),
                             onTap: () async {
                               final selectedTabId = ref.read(

@@ -165,6 +165,7 @@ class AutoSuggestTextField extends HookWidget {
                       return const SizedBox.shrink();
                     }
 
+                    //TODO: maybe change to Text.rich
                     return RichText(
                       maxLines: maxLines,
                       text: TextSpan(

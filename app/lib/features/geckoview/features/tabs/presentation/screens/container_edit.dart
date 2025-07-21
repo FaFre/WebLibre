@@ -217,7 +217,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                     ),
                     SwitchListTile.adaptive(
                       value: useProxy.value,
-                      title: const Text('Use Tor Proxy'),
+                      title: const Text('Use Tor™ Proxy'),
                       secondary: const Icon(TorIcons.onionAlt),
                       contentPadding: EdgeInsets.zero,
                       onChanged: switch (_mode) {
