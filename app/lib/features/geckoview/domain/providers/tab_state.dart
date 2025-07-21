@@ -16,6 +16,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container_topic.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 
 part 'tab_state.g.dart';
@@ -25,19 +26,26 @@ class TabStates extends _$TabStates {
   void _onTabContentStateChange(TabContentState contentState) {
     final current =
         state[contentState.id] ?? TabState.$default(contentState.id);
-    state = {...state}
-      ..[contentState.id] = current.copyWith(
-        parentId: contentState.parentId,
-        contextId: contentState.contextId,
-        url: Uri.parse(contentState.url),
-        title: (contentState.title.isNotEmpty)
-            ? contentState.title
-            : current.title,
-        progress: contentState.progress,
-        isPrivate: contentState.isPrivate,
-        isFullScreen: contentState.isFullScreen,
-        isLoading: contentState.isLoading,
-      );
+    final newState = current.copyWith(
+      parentId: contentState.parentId,
+      contextId: contentState.contextId,
+      url: Uri.parse(contentState.url),
+      title: (contentState.title.isNotEmpty)
+          ? contentState.title
+          : current.title,
+      progress: contentState.progress,
+      isPrivate: contentState.isPrivate,
+      isFullScreen: contentState.isFullScreen,
+      isLoading: contentState.isLoading,
+    );
+
+    state = {...state}..[contentState.id] = newState;
+
+    if (newState.isFinishedLoading) {
+      ref
+          .read(containerTopicRepositoryProvider.notifier)
+          .markInitialLoadComplete();
+    }
   }
 
   Future<void> _onIconChange(IconChangeEvent event) async {

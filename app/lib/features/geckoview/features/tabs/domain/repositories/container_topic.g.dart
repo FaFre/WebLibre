@@ -147,7 +147,7 @@ class _ContainerTopicProviderElement extends FutureProviderElement<String?>
 }
 
 String _$containerTopicRepositoryHash() =>
-    r'20ae14772821ac8a4ec0c16bc551e29098556189';
+    r'8dfc0bc8b4953b5230a1faa24c8b2f0a94ab1f04';
 
 /// See also [ContainerTopicRepository].
 @ProviderFor(ContainerTopicRepository)

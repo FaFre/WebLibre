@@ -15,6 +15,8 @@ part 'container_topic.g.dart';
 class ContainerTopicRepository extends _$ContainerTopicRepository {
   final _service = GeckoMlService();
 
+  //Wait for first complete page laod of any website after startup to ensure everything is ready
+  final _initialLoadComplete = Completer();
   final _lock = Lock();
 
   final _cache = LRUCache<Set<String>, String>(
@@ -27,6 +29,12 @@ class ContainerTopicRepository extends _$ContainerTopicRepository {
     },
   );
 
+  void markInitialLoadComplete() {
+    if (!_initialLoadComplete.isCompleted) {
+      _initialLoadComplete.complete();
+    }
+  }
+
   Future<String?> getContainerTopic(Set<String> titles) async {
     if (titles.isNotEmpty) {
       if (_cache.get(titles) case final String title) {
@@ -35,6 +43,8 @@ class ContainerTopicRepository extends _$ContainerTopicRepository {
 
       try {
         final title = await _lock.synchronized(() async {
+          await _initialLoadComplete.future;
+
           final title = await _service.getContainerTopic(titles);
 
           return _cache.set(titles, title);

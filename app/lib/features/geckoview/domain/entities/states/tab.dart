@@ -42,6 +42,8 @@ class TabState extends WebPageInfo {
   final bool isFullScreen;
   final bool isLoading;
 
+  bool get isFinishedLoading => !isLoading && progress == 100;
+
   final SecurityState securityInfoState;
   final HistoryState historyState;
   final ReaderableState readerableState;
