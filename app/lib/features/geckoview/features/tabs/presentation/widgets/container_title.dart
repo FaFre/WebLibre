@@ -29,11 +29,10 @@ class ContainerTitle extends HookConsumerWidget {
     );
 
     return topicAsync.when(
-      skipLoadingOnReload: true,
       data: (data) =>
           data.mapNotNull(
-            (name) => RichText(
-              text: TextSpan(
+            (name) => Text.rich(
+              TextSpan(
                 children: [
                   TextSpan(text: name),
                   const WidgetSpan(child: SizedBox(width: 4)),
@@ -55,7 +54,8 @@ class ContainerTitle extends HookConsumerWidget {
 
         return const Text('Untitled');
       },
-      loading: () => const Skeletonizer(child: Text('container')),
+      loading: () =>
+          Skeletonizer(child: Text(topicAsync.valueOrNull ?? 'container')),
     );
   }
 }
