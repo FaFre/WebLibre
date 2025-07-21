@@ -40,7 +40,11 @@ class TabSearch extends HookConsumerWidget {
           seamlessFilteredTabPreviewsProvider(
             TabSearchPartition.search,
             // ignore: provider_parameters
-            ContainerFilter.from(selectedContainer.value?.id),
+            selectedContainer.value?.id.mapNotNull(
+                  (containerId) =>
+                      ContainerFilterById(containerId: containerId),
+                ) ??
+                ContainerFilterDisabled(),
           ),
         )
         .value;

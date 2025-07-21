@@ -144,8 +144,10 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
 AsyncValue<int> selectedContainerTabCount(Ref ref) {
   final selectedContainer = ref.watch(selectedContainerProvider);
   final tabCount = ref.watch(
-    // ignore: provider_parameters
-    containerTabCountProvider(ContainerFilter.from(selectedContainer)),
+    containerTabCountProvider(
+      // ignore: provider_parameters
+      ContainerFilterById(containerId: selectedContainer),
+    ),
   );
 
   return tabCount;

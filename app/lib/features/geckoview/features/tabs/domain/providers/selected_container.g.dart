@@ -26,7 +26,7 @@ final selectedContainerDataProvider =
 // ignore: unused_element
 typedef SelectedContainerDataRef = AutoDisposeStreamProviderRef<ContainerData?>;
 String _$selectedContainerTabCountHash() =>
-    r'60218b4a9058738dfd43628d5e3c55f93080732f';
+    r'0fd457793f7870050f81c54d2fbcc81aca60f394';
 
 /// See also [selectedContainerTabCount].
 @ProviderFor(selectedContainerTabCount)

@@ -1,14 +1,6 @@
 import 'package:fast_equatable/fast_equatable.dart';
 
-sealed class ContainerFilter with FastEquatable {
-  ContainerFilter();
-
-  factory ContainerFilter.from(String? containerId) {
-    return (containerId != null)
-        ? ContainerFilterById(containerId: containerId)
-        : ContainerFilterDisabled();
-  }
-}
+sealed class ContainerFilter with FastEquatable {}
 
 class ContainerFilterById extends ContainerFilter {
   final String? containerId;
