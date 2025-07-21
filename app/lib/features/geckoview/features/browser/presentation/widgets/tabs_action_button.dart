@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 
 class TabsActionButton extends HookConsumerWidget {
@@ -15,7 +17,7 @@ class TabsActionButton extends HookConsumerWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
-    this.isActive = false,
+    required this.isActive,
     super.key,
   });
 
@@ -23,7 +25,11 @@ class TabsActionButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
-    final tabCount = ref.watch(selectedContainerTabCountProvider);
+    final tabCount = isActive
+        // ignore: provider_parameters
+        ? ref.watch(containerTabCountProvider(ContainerFilterDisabled()))
+        : ref.watch(selectedContainerTabCountProvider);
+
     final lastTabCount = useRef<int?>(null);
 
     return InkWell(
