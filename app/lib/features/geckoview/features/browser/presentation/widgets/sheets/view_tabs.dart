@@ -192,44 +192,41 @@ class _TabSheetHeader extends HookConsumerWidget {
                   ),
                 ),
               if (!treeViewEnabled)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Consumer(
-                    builder: (context, ref, child) {
-                      final selectedContainer = ref.watch(
-                        selectedContainerDataProvider.select(
-                          (value) => value.valueOrNull,
-                        ),
-                      );
+                Consumer(
+                  builder: (context, ref, child) {
+                    final selectedContainer = ref.watch(
+                      selectedContainerDataProvider.select(
+                        (value) => value.valueOrNull,
+                      ),
+                    );
 
-                      return ContainerChips(
-                        selectedContainer: selectedContainer,
-                        onSelected: (container) async {
-                          if (container != null) {
-                            final result = await ref
-                                .read(selectedContainerProvider.notifier)
-                                .setContainerId(container.id);
+                    return ContainerChips(
+                      selectedContainer: selectedContainer,
+                      onSelected: (container) async {
+                        if (container != null) {
+                          final result = await ref
+                              .read(selectedContainerProvider.notifier)
+                              .setContainerId(container.id);
 
-                            if (context.mounted &&
-                                result == SetContainerResult.successHasProxy) {
-                              await ref
-                                  .read(startProxyControllerProvider.notifier)
-                                  .maybeStartProxy(context);
-                            }
-                          } else {
-                            ref
-                                .read(selectedContainerProvider.notifier)
-                                .clearContainer();
+                          if (context.mounted &&
+                              result == SetContainerResult.successHasProxy) {
+                            await ref
+                                .read(startProxyControllerProvider.notifier)
+                                .maybeStartProxy(context);
                           }
-                        },
-                        onDeleted: (container) {
+                        } else {
                           ref
                               .read(selectedContainerProvider.notifier)
                               .clearContainer();
-                        },
-                      );
-                    },
-                  ),
+                        }
+                      },
+                      onDeleted: (container) {
+                        ref
+                            .read(selectedContainerProvider.notifier)
+                            .clearContainer();
+                      },
+                    );
+                  },
                 ),
               const SizedBox(height: 8),
             ],
