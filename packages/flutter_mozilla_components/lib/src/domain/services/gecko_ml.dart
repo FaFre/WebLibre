@@ -9,7 +9,13 @@ import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 final _apiInstance = GeckoMlApi();
 
 class GeckoMlService {
-  Future<String> getContainerTopic(Set<String> titles, {int maxCount = 10}) {
-    return _apiInstance.getContainerTopic(titles.take(maxCount).toList());
+  Future<String> getContainerTopic(Set<String> titles, {int maxCount = 8}) {
+    var selectedTitles = titles.toList();
+    if (selectedTitles.length > maxCount) {
+      //TODO: Randomize for now, maybe use clusters later
+      selectedTitles = (selectedTitles..shuffle()).take(maxCount).toList();
+    }
+
+    return _apiInstance.getContainerTopic(selectedTitles);
   }
 }
