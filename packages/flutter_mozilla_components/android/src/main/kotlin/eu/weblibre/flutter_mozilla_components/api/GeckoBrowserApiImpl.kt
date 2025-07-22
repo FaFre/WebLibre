@@ -181,32 +181,45 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
         val fragmentActivity = activity as? FragmentActivity ?: return false
 
-        // Check if activity is in valid state
         if (fragmentActivity.isFinishing || fragmentActivity.isDestroyed) {
             return false
         }
 
-        val container = fragmentActivity.findViewById<View>(FRAGMENT_CONTAINER_ID) ?: return false
+        fragmentActivity.findViewById<View>(FRAGMENT_CONTAINER_ID) ?: return false
 
         val fm = fragmentActivity.supportFragmentManager
 
-        // Ensure FragmentManager is in valid state
         if (fm.isStateSaved) {
             return false
         }
 
         val existingFragment = fm.findFragmentById(FRAGMENT_CONTAINER_ID)
         if (existingFragment is BrowserFragment) {
-            // Fragment already replaced, no need to do it again
-            return true
+            // Check if fragment needs engine refresh instead of full replacement
+            if (!isFragmentCorrupted(existingFragment)) {
+                return true
+            }
         }
 
         val nativeFragment = BrowserFragment.create()
         fm.beginTransaction()
             .replace(FRAGMENT_CONTAINER_ID, nativeFragment)
-            .commit()
+            .commitNow()
 
         return true
+    }
+
+    private fun isFragmentCorrupted(fragment: BrowserFragment): Boolean {
+        if (!fragment.isAdded || fragment.isDetached || fragment.isRemoving) {
+            return true
+        }
+
+        val view = fragment.view ?: return true
+        if (view.visibility != View.VISIBLE || view.width == 0 || view.height == 0) {
+            return true
+        }
+
+        return false
     }
 
     override fun onTrimMemory(level: Long) {
