@@ -219,6 +219,10 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             return true
         }
 
+        if(!view.isAttachedToWindow) {
+            return true
+        }
+
         return false
     }
 
