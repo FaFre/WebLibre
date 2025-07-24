@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'container_topic.dart';
+part of 'gecko_inference.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$containerTopicHash() => r'aa3fd27f26bb94b6c9e794d8470537240b8d2713';
+String _$containerTopicHash() => r'b680381eab3dded9ca6f174fbcc5da5c59d7e9f0';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -146,22 +146,151 @@ class _ContainerTopicProviderElement extends FutureProviderElement<String?>
   String get containerId => (origin as ContainerTopicProvider).containerId;
 }
 
-String _$containerTopicRepositoryHash() =>
-    r'8dfc0bc8b4953b5230a1faa24c8b2f0a94ab1f04';
+String _$containerTabSuggestionsHash() =>
+    r'ab8e596f0c7e8562bf998c701145e48eb1e520d5';
 
-/// See also [ContainerTopicRepository].
-@ProviderFor(ContainerTopicRepository)
-final containerTopicRepositoryProvider =
-    NotifierProvider<ContainerTopicRepository, void>.internal(
-      ContainerTopicRepository.new,
-      name: r'containerTopicRepositoryProvider',
+/// See also [containerTabSuggestions].
+@ProviderFor(containerTabSuggestions)
+const containerTabSuggestionsProvider = ContainerTabSuggestionsFamily();
+
+/// See also [containerTabSuggestions].
+class ContainerTabSuggestionsFamily extends Family<AsyncValue<List<String>?>> {
+  /// See also [containerTabSuggestions].
+  const ContainerTabSuggestionsFamily();
+
+  /// See also [containerTabSuggestions].
+  ContainerTabSuggestionsProvider call(String? containerId) {
+    return ContainerTabSuggestionsProvider(containerId);
+  }
+
+  @override
+  ContainerTabSuggestionsProvider getProviderOverride(
+    covariant ContainerTabSuggestionsProvider provider,
+  ) {
+    return call(provider.containerId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'containerTabSuggestionsProvider';
+}
+
+/// See also [containerTabSuggestions].
+class ContainerTabSuggestionsProvider
+    extends AutoDisposeFutureProvider<List<String>?> {
+  /// See also [containerTabSuggestions].
+  ContainerTabSuggestionsProvider(String? containerId)
+    : this._internal(
+        (ref) => containerTabSuggestions(
+          ref as ContainerTabSuggestionsRef,
+          containerId,
+        ),
+        from: containerTabSuggestionsProvider,
+        name: r'containerTabSuggestionsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$containerTabSuggestionsHash,
+        dependencies: ContainerTabSuggestionsFamily._dependencies,
+        allTransitiveDependencies:
+            ContainerTabSuggestionsFamily._allTransitiveDependencies,
+        containerId: containerId,
+      );
+
+  ContainerTabSuggestionsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.containerId,
+  }) : super.internal();
+
+  final String? containerId;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<String>?> Function(ContainerTabSuggestionsRef provider)
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: ContainerTabSuggestionsProvider._internal(
+        (ref) => create(ref as ContainerTabSuggestionsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        containerId: containerId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<String>?> createElement() {
+    return _ContainerTabSuggestionsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ContainerTabSuggestionsProvider &&
+        other.containerId == containerId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, containerId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin ContainerTabSuggestionsRef
+    on AutoDisposeFutureProviderRef<List<String>?> {
+  /// The parameter `containerId` of this provider.
+  String? get containerId;
+}
+
+class _ContainerTabSuggestionsProviderElement
+    extends AutoDisposeFutureProviderElement<List<String>?>
+    with ContainerTabSuggestionsRef {
+  _ContainerTabSuggestionsProviderElement(super.provider);
+
+  @override
+  String? get containerId =>
+      (origin as ContainerTabSuggestionsProvider).containerId;
+}
+
+String _$geckoInferenceRepositoryHash() =>
+    r'bdae6dab14c33c6503f37f2e17b8d50fb820ac26';
+
+/// See also [GeckoInferenceRepository].
+@ProviderFor(GeckoInferenceRepository)
+final geckoInferenceRepositoryProvider =
+    NotifierProvider<GeckoInferenceRepository, void>.internal(
+      GeckoInferenceRepository.new,
+      name: r'geckoInferenceRepositoryProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$containerTopicRepositoryHash,
+          : _$geckoInferenceRepositoryHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$ContainerTopicRepository = Notifier<void>;
+typedef _$GeckoInferenceRepository = Notifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

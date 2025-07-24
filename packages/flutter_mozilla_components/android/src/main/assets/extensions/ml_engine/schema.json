@@ -33,7 +33,23 @@
         "description": "Machine Learning utilities",
         "functions": [
             {
-                "name": "containerTopic",
+                "name": "generateEmbeddings",
+                "type": "function",
+                "description": "Generate embeddings for a list of text strings using ML engine",
+                "async": true,
+                "parameters": [
+                    {
+                        "name": "textToEmbedList",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Array of text strings to generate embeddings for"
+                    }
+                ]
+            },
+            {
+                "name": "predictTopic",
                 "type": "function",
                 "description": "Generate topic from keywords and documents using ML engine",
                 "async": true,

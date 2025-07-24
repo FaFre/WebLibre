@@ -7,7 +7,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container_topic.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 
 class ContainerTitle extends HookConsumerWidget {
   final ContainerData container;

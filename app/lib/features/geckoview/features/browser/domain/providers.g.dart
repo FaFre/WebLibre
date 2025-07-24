@@ -282,6 +282,134 @@ class _AvailableTabStatesProviderElement
       (origin as AvailableTabStatesProvider).containerFilter;
 }
 
+String _$suggestedTabEntitiesHash() =>
+    r'f8c41ea3136ae0761e558323afb9d33bf5b8fd21';
+
+/// See also [suggestedTabEntities].
+@ProviderFor(suggestedTabEntities)
+const suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily();
+
+/// See also [suggestedTabEntities].
+class SuggestedTabEntitiesFamily
+    extends Family<EquatableValue<List<TabEntity>>> {
+  /// See also [suggestedTabEntities].
+  const SuggestedTabEntitiesFamily();
+
+  /// See also [suggestedTabEntities].
+  SuggestedTabEntitiesProvider call(String? containerId) {
+    return SuggestedTabEntitiesProvider(containerId);
+  }
+
+  @override
+  SuggestedTabEntitiesProvider getProviderOverride(
+    covariant SuggestedTabEntitiesProvider provider,
+  ) {
+    return call(provider.containerId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'suggestedTabEntitiesProvider';
+}
+
+/// See also [suggestedTabEntities].
+class SuggestedTabEntitiesProvider
+    extends AutoDisposeProvider<EquatableValue<List<TabEntity>>> {
+  /// See also [suggestedTabEntities].
+  SuggestedTabEntitiesProvider(String? containerId)
+    : this._internal(
+        (ref) =>
+            suggestedTabEntities(ref as SuggestedTabEntitiesRef, containerId),
+        from: suggestedTabEntitiesProvider,
+        name: r'suggestedTabEntitiesProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$suggestedTabEntitiesHash,
+        dependencies: SuggestedTabEntitiesFamily._dependencies,
+        allTransitiveDependencies:
+            SuggestedTabEntitiesFamily._allTransitiveDependencies,
+        containerId: containerId,
+      );
+
+  SuggestedTabEntitiesProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.containerId,
+  }) : super.internal();
+
+  final String? containerId;
+
+  @override
+  Override overrideWith(
+    EquatableValue<List<TabEntity>> Function(SuggestedTabEntitiesRef provider)
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: SuggestedTabEntitiesProvider._internal(
+        (ref) => create(ref as SuggestedTabEntitiesRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        containerId: containerId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeProviderElement<EquatableValue<List<TabEntity>>> createElement() {
+    return _SuggestedTabEntitiesProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SuggestedTabEntitiesProvider &&
+        other.containerId == containerId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, containerId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SuggestedTabEntitiesRef
+    on AutoDisposeProviderRef<EquatableValue<List<TabEntity>>> {
+  /// The parameter `containerId` of this provider.
+  String? get containerId;
+}
+
+class _SuggestedTabEntitiesProviderElement
+    extends AutoDisposeProviderElement<EquatableValue<List<TabEntity>>>
+    with SuggestedTabEntitiesRef {
+  _SuggestedTabEntitiesProviderElement(super.provider);
+
+  @override
+  String? get containerId =>
+      (origin as SuggestedTabEntitiesProvider).containerId;
+}
+
 String _$seamlessFilteredTabEntitiesHash() =>
     r'2cd698d4e7c9d9cda9e17abbf9a99e512425e4cd';
 

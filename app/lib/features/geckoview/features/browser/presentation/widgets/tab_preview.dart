@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -14,15 +15,21 @@ import 'package:weblibre/features/geckoview/features/find_in_page/domain/entitie
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
-class _TabBox extends StatelessWidget {
+class TabContainer extends StatelessWidget {
   final bool isActive;
   final bool isPrivate;
   final Widget? child;
 
-  const _TabBox({required this.isActive, required this.isPrivate, this.child});
+  const TabContainer({
+    required this.isActive,
+    required this.isPrivate,
+    this.child,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +54,37 @@ class _TabBox extends StatelessWidget {
   }
 }
 
+class TabMiniPreview extends HookConsumerWidget {
+  final String tabId;
+
+  const TabMiniPreview({super.key, required this.tabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final thumbnail = ref.watch(
+      tabStateProvider(tabId).select((value) => value?.thumbnail),
+    );
+
+    return TabContainer(
+      isActive: false,
+      isPrivate: false,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+        child: Skeleton.replace(
+          replace: thumbnail == null,
+          replacement: const Bone.square(size: double.infinity),
+          child: SizedBox(
+            width: double.infinity,
+            child: RepaintBoundary(
+              child: RawImage(image: thumbnail?.value, fit: BoxFit.fitWidth),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class TabPreview extends HookWidget {
   final TabState tab;
   final bool isActive;
@@ -57,6 +95,8 @@ class TabPreview extends HookWidget {
   final VoidCallback? onDelete;
   final void Function(String host)? onDeleteAll;
 
+  final Widget? trailingChild;
+
   const TabPreview({
     required this.tab,
     required this.isActive,
@@ -65,13 +105,14 @@ class TabPreview extends HookWidget {
     this.onLongPress,
     this.onDelete,
     this.onDeleteAll,
+    this.trailingChild,
     super.key,
   });
   @override
   Widget build(BuildContext context) {
     final extendedDeleteMenuController = useMenuController();
 
-    return _TabBox(
+    return TabContainer(
       isActive: isActive,
       isPrivate: tab.isPrivate,
       child: InkWell(
@@ -130,6 +171,7 @@ class TabPreview extends HookWidget {
                       icon: const Icon(Icons.close),
                     ),
                   ),
+                ?trailingChild,
               ],
             ),
             Row(
@@ -259,6 +301,51 @@ class SingleTabPreview extends HookConsumerWidget {
   }
 }
 
+class SuggestedSingleTabPreview extends HookConsumerWidget {
+  final String tabId;
+  final String containerId;
+
+  final String? activeTabId;
+
+  SuggestedSingleTabPreview({
+    required this.tabId,
+    required this.containerId,
+    required this.activeTabId,
+  }) : super(key: ValueKey(tabId));
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tab = ref.watch(tabStateProvider(tabId));
+
+    if (tab == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Opacity(
+      opacity: 0.5,
+      child: TabPreview(
+        tab: tab,
+        isActive: tabId == activeTabId,
+        onTap: () async {
+          final containerData = await ref
+              .read(containerRepositoryProvider.notifier)
+              .getContainerData(containerId);
+
+          if (containerData != null) {
+            await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .assignContainer(tabId, containerData);
+          }
+        },
+        trailingChild: const IconButton(
+          icon: Icon(MdiIcons.creation),
+          onPressed: null,
+        ),
+      ),
+    );
+  }
+}
+
 class TabTreePreview extends HookConsumerWidget {
   final TabTreeEntity entity;
   final String? activeTabId;
@@ -303,7 +390,7 @@ class TabTreePreview extends HookConsumerWidget {
           _addPadding(
             index,
             stackCount,
-            _TabBox(
+            TabContainer(
               isActive: entity.tabId == activeTabId,
               isPrivate: tab.isPrivate,
             ),

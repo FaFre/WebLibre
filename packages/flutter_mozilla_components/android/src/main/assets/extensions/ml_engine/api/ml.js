@@ -46,9 +46,9 @@ const SMART_TAB_GROUPING_CONFIG = {
  */
 function createModelInput(keywords, documents) {
     if (!keywords || keywords.length === 0) {
-        return `Topic from keywords: titles: \n${documents.join(" \n")}`;
+        return `Topic from keywords: titles: \n${documents.slice(0, 3).join(" \n")}`;
     }
-    return `Topic from keywords: ${keywords.join(", ")}. titles: \n${documents.join(" \n")}`;
+    return `Topic from keywords: ${keywords.join(", ")}. titles: \n${documents.slice(0, 3).join(" \n")}`;
 }
 
 /**
@@ -81,7 +81,6 @@ function cutAtDuplicateWords(phrase) {
     return phrase; // return original phrase
 }
 
-
 /**
    *
    * @param {MLEngine} engine the engine to check
@@ -96,7 +95,29 @@ this.ml = class extends ExtensionAPI {
         return {
             experiments: {
                 ml: {
-                    async containerTopic(keywords, documents) {
+                    async generateEmbeddings(textToEmbedList) {
+                        const inputData = {
+                            inputArgs: textToEmbedList,
+                            runOptions: {
+                                pooling: "mean",
+                                normalize: true,
+                            },
+                        };
+
+                        if (isEngineClosed(this.embeddingEngine)) {
+                            this.embeddingEngine = await createEngine(SMART_TAB_GROUPING_CONFIG.embedding);
+                        }
+
+                        const request = {
+                            args: [inputData.inputArgs],
+                            options: inputData.runOptions,
+                        };
+
+                        const generated = await this.embeddingEngine.run(request);
+
+                        return JSON.stringify(generated);
+                    },
+                    async predictTopic(keywords, documents) {
                         if (isEngineClosed(this.topicEngine)) {
                             const {
                                 featureId,

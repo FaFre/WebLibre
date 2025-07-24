@@ -193,7 +193,7 @@ final selectedTabContainerIdProvider = Provider<AsyncValue<String?>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedTabContainerIdRef = ProviderRef<AsyncValue<String?>>;
-String _$tabStatesHash() => r'ec7e0905d77b2f82491c5b5af0d2ce1351a564f4';
+String _$tabStatesHash() => r'66cff6a7b36328ee23b89fdd53046987b346bfcd';
 
 /// See also [TabStates].
 @ProviderFor(TabStates)

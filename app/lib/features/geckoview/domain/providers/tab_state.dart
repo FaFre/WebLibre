@@ -16,7 +16,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container_topic.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 
 part 'tab_state.g.dart';
@@ -43,7 +43,7 @@ class TabStates extends _$TabStates {
 
     if (newState.isFinishedLoading) {
       ref
-          .read(containerTopicRepositoryProvider.notifier)
+          .read(geckoInferenceRepositoryProvider.notifier)
           .markInitialLoadComplete();
     }
   }

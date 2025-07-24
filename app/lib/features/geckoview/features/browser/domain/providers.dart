@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
@@ -11,6 +12,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 
 part 'providers.g.dart';
@@ -86,6 +88,37 @@ EquatableValue<Map<String, TabState>> availableTabStates(
     for (final tabId in availableTabs.value)
       if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
   });
+}
+
+@Riverpod()
+EquatableValue<List<TabEntity>> suggestedTabEntities(
+  Ref ref,
+  String? containerId,
+) {
+  final excludedTabIds = ref.watch(
+    containerTabIdsProvider(
+      // ignore: provider_parameters
+      ContainerFilterById(containerId: containerId),
+    ).select((value) => EquatableValue(value.valueOrNull)),
+  );
+
+  final suggestions = ref.watch(
+    containerTabSuggestionsProvider(containerId).select(
+      (value) => EquatableValue(
+        value.valueOrNull.mapNotNull(
+              (result) => result
+                  .whereNot(
+                    (tabId) => excludedTabIds.value?.contains(tabId) ?? false,
+                  )
+                  .map((tabId) => DefaultTabEntity(tabId: tabId))
+                  .toList(),
+            ) ??
+            const [],
+      ),
+    ),
+  );
+
+  return suggestions;
 }
 
 @Riverpod()

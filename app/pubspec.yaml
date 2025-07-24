@@ -96,6 +96,8 @@ dev_dependencies:
   drift_dev: ^2.28.0
   fast_equatable_lint: ^0.3.2
   flutter_launcher_icons: ^0.14.4
+  flutter_test:
+    sdk: flutter
   go_router_builder: ^3.0.1
   json_serializable: ^6.9.5
   lint: ^2.8.0

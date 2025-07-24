@@ -13,6 +13,7 @@ import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tree_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
@@ -29,9 +30,14 @@ import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 
 class _TabDraggable extends HookConsumerWidget {
   final TabEntity entity;
+  final String? suggestedContainerId;
   final VoidCallback onClose;
 
-  const _TabDraggable({required this.entity, required this.onClose});
+  const _TabDraggable({
+    required this.entity,
+    required this.onClose,
+    this.suggestedContainerId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,16 +55,22 @@ class _TabDraggable extends HookConsumerWidget {
       }),
     );
 
-    final tab = SingleTabPreview(
-      tabId: entity.tabId,
-      activeTabId: activeTab,
-      onClose: onClose,
-      sourceSearchQuery: switch (entity) {
-        DefaultTabEntity _ => null,
-        final SearchResultTabEntity entity => entity.searchQuery,
-        TabTreeEntity _ => throw UnimplementedError(),
-      },
-    );
+    final tab = (suggestedContainerId != null)
+        ? SuggestedSingleTabPreview(
+            tabId: entity.tabId,
+            activeTabId: activeTab,
+            containerId: suggestedContainerId!,
+          )
+        : SingleTabPreview(
+            tabId: entity.tabId,
+            activeTabId: activeTab,
+            onClose: onClose,
+            sourceSearchQuery: switch (entity) {
+              DefaultTabEntity _ => null,
+              final SearchResultTabEntity entity => entity.searchQuery,
+              TabTreeEntity _ => throw UnimplementedError(),
+            },
+          );
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -132,6 +144,10 @@ class _TabSheetHeader extends HookConsumerWidget {
                             searchTextFocus.requestFocus();
                           },
                         ),
+                        const SizedBox(
+                          height: 32,
+                          child: VerticalDivider(indent: 4, endIndent: 4),
+                        ),
                         IconButton(
                           icon: const Icon(MdiIcons.familyTree),
                           selectedIcon: const Icon(MdiIcons.table),
@@ -142,6 +158,27 @@ class _TabSheetHeader extends HookConsumerWidget {
                             ref
                                 .read(treeViewControllerProvider.notifier)
                                 .toggle();
+                          },
+                        ),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final tabSuggestionsEnabled = ref.watch(
+                              tabSuggestionsControllerProvider,
+                            );
+
+                            return IconButton.filledTonal(
+                              icon: const Icon(MdiIcons.imageAutoAdjust),
+                              isSelected: tabSuggestionsEnabled,
+                              iconSize: 18,
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                ref
+                                    .read(
+                                      tabSuggestionsControllerProvider.notifier,
+                                    )
+                                    .toggle();
+                              },
+                            );
                           },
                         ),
                       ],
@@ -298,7 +335,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                 builder: (context, ref, child) {
                   final gridViewKey = useMemoized(() => GlobalKey());
 
-                  final container = ref.watch(selectedContainerProvider);
+                  final containerId = ref.watch(selectedContainerProvider);
 
                   final filteredTabEntities = ref.watch(
                     seamlessFilteredTabEntitiesProvider(
@@ -306,35 +343,36 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                       // ignore: document_ignores using fast equatable
                       // ignore: provider_parameters
                       containerFilter: ContainerFilterById(
-                        containerId: container,
+                        containerId: containerId,
                       ),
                       groupTrees: false,
                     ),
                   );
 
+                  final tabSuggestionsEnabled = ref.watch(
+                    tabSuggestionsControllerProvider,
+                  );
+                  final suggestedTabEntities = ref.watch(
+                    suggestedTabEntitiesProvider(
+                      tabSuggestionsEnabled ? containerId : null,
+                    ),
+                  );
+
+                  final itemCount =
+                      filteredTabEntities.value.length +
+                      suggestedTabEntities.value.length;
+
                   final activeTab = ref.watch(selectedTabProvider);
 
-                  final crossAxisCount = useMemoized(
-                    () {
-                      final calculatedCount = _calculateCrossAxisItemCount(
-                        screenWidth: MediaQuery.of(context).size.width,
-                        horizontalPadding: 4.0,
-                        crossAxisSpacing: 8.0,
-                      );
+                  final crossAxisCount = useMemoized(() {
+                    final calculatedCount = _calculateCrossAxisItemCount(
+                      screenWidth: MediaQuery.of(context).size.width,
+                      horizontalPadding: 4.0,
+                      crossAxisSpacing: 8.0,
+                    );
 
-                      return math.max(
-                        math.min(
-                          calculatedCount,
-                          filteredTabEntities.value.length,
-                        ),
-                        2,
-                      );
-                    },
-                    [
-                      MediaQuery.of(context).size.width,
-                      filteredTabEntities.value.length,
-                    ],
-                  );
+                    return math.max(math.min(calculatedCount, itemCount), 2);
+                  }, [MediaQuery.of(context).size.width, itemCount]);
 
                   final itemHeight = useMemoized(
                     () => _calculateItemHeight(
@@ -390,20 +428,29 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   );
 
                   final tabs = useMemoized(() {
-                    return filteredTabEntities.value
-                        .where((entity) => entity is! TabTreeEntity)
-                        .map(
-                          (entity) => CustomDraggable(
-                            key: Key(entity.tabId),
-                            data: TabDragData(entity.tabId),
-                            child: _TabDraggable(
-                              entity: entity,
-                              onClose: onClose,
-                            ),
+                    return [
+                      ...filteredTabEntities.value.map(
+                        (entity) => CustomDraggable(
+                          key: Key(entity.tabId),
+                          data: TabDragData(entity.tabId),
+                          child: _TabDraggable(
+                            entity: entity,
+                            onClose: onClose,
                           ),
-                        )
-                        .toList();
-                  }, [filteredTabEntities]);
+                        ),
+                      ),
+                      ...suggestedTabEntities.value.map(
+                        (entity) => CustomDraggable(
+                          key: Key('suggested_${entity.tabId}'),
+                          child: _TabDraggable(
+                            entity: entity,
+                            onClose: onClose,
+                            suggestedContainerId: containerId,
+                          ),
+                        ),
+                      ),
+                    ];
+                  }, [filteredTabEntities, suggestedTabEntities]);
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -415,7 +462,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                           //Rebuild when cross axis count changes
                           key: ValueKey(crossAxisCount),
                           scrollController: controller,
-                          itemCount: tabs.length,
+                          itemCount: itemCount,
                           onDragStarted: (index) {
                             ref.read(willAcceptDropProvider.notifier).clear();
                           },
@@ -431,6 +478,11 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             final containerRepository = ref.read(
                               containerRepositoryProvider.notifier,
                             );
+
+                            //Suggestions are at the end and not reorderable, so skip
+                            if (oldIndex >= filteredTabEntities.value.length) {
+                              return;
+                            }
 
                             final tabId =
                                 filteredTabEntities.value[oldIndex].tabId;
@@ -482,7 +534,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                                     crossAxisSpacing: 8.0,
                                     crossAxisCount: crossAxisCount,
                                   ),
-                              itemCount: tabs.length,
+                              itemCount: itemCount,
                               itemBuilder: (context, index) =>
                                   itemBuilder(tabs[index], index),
                             );

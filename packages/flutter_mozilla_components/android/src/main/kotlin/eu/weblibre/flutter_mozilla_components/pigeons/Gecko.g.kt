@@ -3425,7 +3425,8 @@ interface GeckoPrefApi {
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoMlApi {
-  fun getContainerTopic(titles: List<String>, callback: (Result<String>) -> Unit)
+  fun predictDocumentTopic(documents: List<String>, callback: (Result<String>) -> Unit)
+  fun generateDocumentEmbeddings(documents: List<String>, callback: (Result<List<Any?>>) -> Unit)
 
   companion object {
     /** The codec used by GeckoMlApi. */
@@ -3437,12 +3438,32 @@ interface GeckoMlApi {
     fun setUp(binaryMessenger: BinaryMessenger, api: GeckoMlApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoMlApi.getContainerTopic$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoMlApi.predictDocumentTopic$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val titlesArg = args[0] as List<String>
-            api.getContainerTopic(titlesArg) { result: Result<String> ->
+            val documentsArg = args[0] as List<String>
+            api.predictDocumentTopic(documentsArg) { result: Result<String> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoMlApi.generateDocumentEmbeddings$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val documentsArg = args[0] as List<String>
+            api.generateDocumentEmbeddings(documentsArg) { result: Result<List<Any?>> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

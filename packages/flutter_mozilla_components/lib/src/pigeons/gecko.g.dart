@@ -3968,14 +3968,14 @@ class GeckoMlApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<String> getContainerTopic(List<String> titles) async {
-    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoMlApi.getContainerTopic$pigeonVar_messageChannelSuffix';
+  Future<String> predictDocumentTopic(List<String> documents) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoMlApi.predictDocumentTopic$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[titles]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[documents]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -3993,6 +3993,34 @@ class GeckoMlApi {
       );
     } else {
       return (pigeonVar_replyList[0] as String?)!;
+    }
+  }
+
+  Future<List<Object?>> generateDocumentEmbeddings(List<String> documents) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoMlApi.generateDocumentEmbeddings$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[documents]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as List<Object?>?)!;
     }
   }
 }

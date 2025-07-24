@@ -956,7 +956,9 @@ abstract class GeckoPrefApi {
 @HostApi()
 abstract class GeckoMlApi {
   @async
-  String getContainerTopic(List<String> titles);
+  String predictDocumentTopic(List<String> documents);
+  @async
+  List generateDocumentEmbeddings(List<String> documents);
 }
 
 @HostApi()

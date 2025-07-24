@@ -26,15 +26,25 @@ function sendErrorForRequest(id) {
 port.onMessage.addListener(async (message) => {
     let requestId = message["id"]
     switch (message["action"]) {
-        case "getContainerTopic":
+        case "predictDocumentTopic": {
             const documents = message["args"];
             const keywords = (documents.length > 1)
                 ? await browser.experiments.nlp.extractKeywords([documents.slice(0, 3).join(" ")])
                 : [[]];
 
-            browser.experiments.ml.containerTopic(keywords[0], documents)
+            browser.experiments.ml.predictTopic(keywords[0], documents)
                 .then(sendJsonResultForRequest(requestId))
-                .catch(sendErrorForRequest(requestId))
-            break
+                .catch(sendErrorForRequest(requestId));
+
+            break;
+        }
+        case "generateDocumentEmbeddings": {
+            const documents = message["args"];
+            await browser.experiments.ml.generateEmbeddings(documents)
+                .then(sendJsonResultForRequest(requestId))
+                .catch(sendErrorForRequest(requestId));
+
+            break;
+        }
     }
 });

@@ -164,7 +164,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                                                   containerTopicControllerProvider
                                                       .notifier,
                                                 )
-                                                .getContainerTopic(
+                                                .predictDocumentTopic(
                                                   initialContainer.id,
                                                 );
 

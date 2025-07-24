@@ -73,9 +73,15 @@ Stream<Map<String, String?>> tabDescendants(Ref ref, String tabId) {
 }
 
 @Riverpod()
-Stream<List<TabData>> containerTabsData(Ref ref, String containerId) {
+Stream<List<TabData>> containerTabsData(Ref ref, String? containerId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.containerDao.getContainerTabsData(containerId).watch();
+}
+
+@Riverpod()
+Stream<ContainerData?> containerData(Ref ref, String containerId) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.containerDao.getContainerData(containerId).watchSingleOrNull();
 }
 
 @Riverpod()

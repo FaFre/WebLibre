@@ -1,11 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container_topic.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 
 part 'container_topic.g.dart';
 
 @Riverpod()
 class ContainerTopicController extends _$ContainerTopicController {
-  Future<String?> getContainerTopic(String containerId) async {
+  Future<String?> predictDocumentTopic(String containerId) async {
     state = const AsyncLoading();
 
     final result = await AsyncValue.guard(() async {

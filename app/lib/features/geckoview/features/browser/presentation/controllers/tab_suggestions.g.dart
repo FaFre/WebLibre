@@ -1,30 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'container_topic.dart';
+part of 'tab_suggestions.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$containerTopicControllerHash() =>
-    r'fa38ebd3c1352b471e58444b04d1cb0528aae1dd';
+String _$tabSuggestionsControllerHash() =>
+    r'5ce7f385b8aba14d432912cf0acb06aad04433fc';
 
-/// See also [ContainerTopicController].
-@ProviderFor(ContainerTopicController)
-final containerTopicControllerProvider =
-    AutoDisposeNotifierProvider<
-      ContainerTopicController,
-      AsyncValue<void>
-    >.internal(
-      ContainerTopicController.new,
-      name: r'containerTopicControllerProvider',
+/// See also [TabSuggestionsController].
+@ProviderFor(TabSuggestionsController)
+final tabSuggestionsControllerProvider =
+    NotifierProvider<TabSuggestionsController, bool>.internal(
+      TabSuggestionsController.new,
+      name: r'tabSuggestionsControllerProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$containerTopicControllerHash,
+          : _$tabSuggestionsControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$ContainerTopicController = AutoDisposeNotifier<AsyncValue<void>>;
+typedef _$TabSuggestionsController = Notifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
