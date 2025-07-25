@@ -22,7 +22,6 @@ class DownloadService : AbstractFetchDownloadService() {
     override val httpClient by lazy { components.core.client }
     override val store: BrowserStore by lazy { components.core.store }
     override val notificationsDelegate: NotificationsDelegate by lazy { components.notificationsDelegate }
-    override val dateTimeProvider: DateTimeProvider by lazy { components.dateTimeProvider }
     override val fileSizeFormatter: FileSizeFormatter by lazy { components.fileSizeFormatter }
-    //override val downloadEstimator: DownloadEstimator by lazy { components.downloadEstimator }
+    override val downloadEstimator: DownloadEstimator by lazy { components.downloadEstimator }
 }

@@ -58,5 +58,5 @@ class Components(private val context: Context,
 
     val dateTimeProvider: DateTimeProvider by lazy { DefaultDateTimeProvider() }
 
-    //val downloadEstimator: DownloadEstimator by lazy { DownloadEstimator(dateTimeProvider = dateTimeProvider) }
+    val downloadEstimator: DownloadEstimator by lazy { DownloadEstimator(dateTimeProvider = dateTimeProvider) }
 }
