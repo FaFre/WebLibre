@@ -25,6 +25,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 
@@ -108,6 +109,12 @@ class _TabSheetHeader extends HookConsumerWidget {
       () => searchTextController.text.isNotEmpty,
     );
 
+    final enableAiFeatures = ref.watch(
+      generalSettingsRepositoryProvider.select(
+        (settings) => settings.enableLocalAiFeatures,
+      ),
+    );
+
     useListenableCallback(searchTextController, () async {
       await ref
           .read(
@@ -160,27 +167,29 @@ class _TabSheetHeader extends HookConsumerWidget {
                                 .toggle();
                           },
                         ),
-                        Consumer(
-                          builder: (context, ref, child) {
-                            final tabSuggestionsEnabled = ref.watch(
-                              tabSuggestionsControllerProvider,
-                            );
+                        if (enableAiFeatures)
+                          Consumer(
+                            builder: (context, ref, child) {
+                              final tabSuggestionsEnabled = ref.watch(
+                                tabSuggestionsControllerProvider,
+                              );
 
-                            return IconButton.filledTonal(
-                              icon: const Icon(MdiIcons.imageAutoAdjust),
-                              isSelected: tabSuggestionsEnabled,
-                              iconSize: 18,
-                              padding: EdgeInsets.zero,
-                              onPressed: () {
-                                ref
-                                    .read(
-                                      tabSuggestionsControllerProvider.notifier,
-                                    )
-                                    .toggle();
-                              },
-                            );
-                          },
-                        ),
+                              return IconButton.filledTonal(
+                                icon: const Icon(MdiIcons.imageAutoAdjust),
+                                isSelected: tabSuggestionsEnabled,
+                                iconSize: 18,
+                                padding: EdgeInsets.zero,
+                                onPressed: () {
+                                  ref
+                                      .read(
+                                        tabSuggestionsControllerProvider
+                                            .notifier,
+                                      )
+                                      .toggle();
+                                },
+                              );
+                            },
+                          ),
                       ],
                     ),
                     TextButton.icon(
@@ -215,9 +224,9 @@ class _TabSheetHeader extends HookConsumerWidget {
                         );
 
                         if (result == true) {
-                        await ref
-                            .read(tabDataRepositoryProvider.notifier)
-                            .closeAllTabsByContainer(container);
+                          await ref
+                              .read(tabDataRepositoryProvider.notifier)
+                              .closeAllTabsByContainer(container);
                         }
                       },
                       icon: const Icon(MdiIcons.closeBoxMultiple),
@@ -380,9 +389,16 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                   final tabSuggestionsEnabled = ref.watch(
                     tabSuggestionsControllerProvider,
                   );
+                  final enableAiFeatures = ref.watch(
+                    generalSettingsRepositoryProvider.select(
+                      (settings) => settings.enableLocalAiFeatures,
+                    ),
+                  );
                   final suggestedTabEntities = ref.watch(
                     suggestedTabEntitiesProvider(
-                      tabSuggestionsEnabled ? containerId : null,
+                      (enableAiFeatures && tabSuggestionsEnabled)
+                          ? containerId
+                          : null,
                     ),
                   );
 

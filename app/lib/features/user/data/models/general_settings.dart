@@ -34,6 +34,7 @@ class GeneralSettings with FastEquatable {
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool createChildTabsOption;
   final bool showExtensionShortcut;
+  final bool enableLocalAiFeatures;
 
   final bool proxyPrivateTabsTor;
 
@@ -47,6 +48,7 @@ class GeneralSettings with FastEquatable {
     required this.createChildTabsOption,
     required this.proxyPrivateTabsTor,
     required this.showExtensionShortcut,
+    required this.enableLocalAiFeatures,
   });
 
   GeneralSettings.withDefaults({
@@ -59,6 +61,7 @@ class GeneralSettings with FastEquatable {
     bool? createChildTabsOption,
     bool? proxyPrivateTabsTor,
     bool? showExtensionShortcut,
+    bool? enableLocalAiFeatures,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -67,7 +70,8 @@ class GeneralSettings with FastEquatable {
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        createChildTabsOption = createChildTabsOption ?? false,
        proxyPrivateTabsTor = proxyPrivateTabsTor ?? false,
-       showExtensionShortcut = showExtensionShortcut ?? false;
+       showExtensionShortcut = showExtensionShortcut ?? false,
+       enableLocalAiFeatures = enableLocalAiFeatures ?? true;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -85,5 +89,6 @@ class GeneralSettings with FastEquatable {
     createChildTabsOption,
     showExtensionShortcut,
     proxyPrivateTabsTor,
+    enableLocalAiFeatures,
   ];
 }

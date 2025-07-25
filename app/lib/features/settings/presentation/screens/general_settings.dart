@@ -157,6 +157,22 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                 ),
               ),
               SwitchListTile.adaptive(
+                title: const Text('On Device AI'),
+                subtitle: const Text(
+                  'Local on-device features including container topic and tab suggestions',
+                ),
+                secondary: const Icon(MdiIcons.creation),
+                value: generalSettings.enableLocalAiFeatures,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) => currentSettings.copyWith
+                            .enableLocalAiFeatures(value),
+                      );
+                },
+              ),
+              SwitchListTile.adaptive(
                 title: const Text('Enable Reader Mode'),
                 subtitle: const Text(
                   'Optional browser app bar tool that extracts and simplifies web pages for improved readability by removing ads, sidebars, and other non-essential elements.',

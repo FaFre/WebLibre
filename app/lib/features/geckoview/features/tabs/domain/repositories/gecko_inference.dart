@@ -10,6 +10,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/embedding_text_processing.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/nearest_neighbor.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 
 part 'gecko_inference.g.dart';
@@ -41,6 +42,14 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
   }
 
   Future<String?> predictDocumentTopic(Set<String> titles) async {
+    if (!ref.read(
+      generalSettingsRepositoryProvider.select(
+        (settings) => settings.enableLocalAiFeatures,
+      ),
+    )) {
+      return null;
+    }
+
     if (titles.isNotEmpty) {
       if (_topicCache.get(titles) case final String title) {
         return title;
@@ -69,6 +78,14 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     required List<String> assignedDocumentsInput,
     required List<String> unassignedDocumentsInput,
   }) async {
+    if (!ref.read(
+      generalSettingsRepositoryProvider.select(
+        (settings) => settings.enableLocalAiFeatures,
+      ),
+    )) {
+      return null;
+    }
+
     final processedDocuments = <String, String>{};
     final unassignedDocumentsProcessed = unassignedDocumentsInput.map((doc) {
       final processed = preprocessText(doc);

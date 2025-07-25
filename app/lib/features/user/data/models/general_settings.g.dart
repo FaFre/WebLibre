@@ -29,6 +29,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings showExtensionShortcut(bool showExtensionShortcut);
 
+  GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -45,6 +47,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool createChildTabsOption,
     bool proxyPrivateTabsTor,
     bool showExtensionShortcut,
+    bool enableLocalAiFeatures,
   });
 }
 
@@ -92,6 +95,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(showExtensionShortcut: showExtensionShortcut);
 
   @override
+  GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures) =>
+      this(enableLocalAiFeatures: enableLocalAiFeatures);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -108,6 +115,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
     Object? showExtensionShortcut = const $CopyWithPlaceholder(),
+    Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder()
@@ -151,6 +159,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.showExtensionShortcut
           // ignore: cast_nullable_to_non_nullable
           : showExtensionShortcut as bool,
+      enableLocalAiFeatures:
+          enableLocalAiFeatures == const $CopyWithPlaceholder()
+          ? _value.enableLocalAiFeatures
+          // ignore: cast_nullable_to_non_nullable
+          : enableLocalAiFeatures as bool,
     );
   }
 }
@@ -182,6 +195,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
       createChildTabsOption: json['createChildTabsOption'] as bool?,
       proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
       showExtensionShortcut: json['showExtensionShortcut'] as bool?,
+      enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
@@ -198,6 +212,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
               .defaultSearchSuggestionsProvider]!,
       'createChildTabsOption': instance.createChildTabsOption,
       'showExtensionShortcut': instance.showExtensionShortcut,
+      'enableLocalAiFeatures': instance.enableLocalAiFeatures,
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
     };
 
