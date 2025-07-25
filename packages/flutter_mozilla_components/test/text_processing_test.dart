@@ -1,5 +1,5 @@
+import 'package:flutter_mozilla_components/src/utils/ml/embedding_text_processing.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/embedding_text_processing.dart';
 
 void main() {
   group('Text processing basic cases', () {

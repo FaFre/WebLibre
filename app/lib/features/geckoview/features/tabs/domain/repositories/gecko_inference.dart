@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:flutter_mozilla_components/ml_utils.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/embedding_text_processing.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/nearest_neighbor.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 

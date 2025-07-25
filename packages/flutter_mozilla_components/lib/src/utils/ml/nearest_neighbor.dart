@@ -1,5 +1,11 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 import 'package:collection/collection.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/cosine_similarity.dart';
+import 'package:flutter_mozilla_components/src/utils/ml/cosine_similarity.dart';
 
 List<String> findNearestNeighborsRecursive({
   required Map<String, List<double>> embeddings,
