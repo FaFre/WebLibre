@@ -5,7 +5,7 @@ part 'onboarding.g.dart';
 
 @Riverpod(keepAlive: true)
 class OnboardingRepository extends _$OnboardingRepository {
-  static const targetRevision = 1;
+  static const targetRevision = 2;
 
   Future<int?> getCurrentRevision() {
     return ref
