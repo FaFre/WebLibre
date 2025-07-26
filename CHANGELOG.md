@@ -1,3 +1,8 @@
+## 0.9.16
+
+* Integrated on-device ai for container naming and tab sugegstions
+* Improved Tab and container UI
+
 ## 0.9.15-1
 
 * Added certificate information title
