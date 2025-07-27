@@ -1,3 +1,8 @@
+## 0.9.16-1
+
+* Fixed drop animation lag
+* Allow drop into the unassigned container
+
 ## 0.9.16
 
 * Integrated on-device ai for container naming and tab sugegstions
