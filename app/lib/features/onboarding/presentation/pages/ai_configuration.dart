@@ -85,7 +85,7 @@ class AiConfigurationPage extends HookConsumerWidget {
                 const TextSpan(text: '• '),
                 const TextSpan(
                   text:
-                      'WebLibre uses a local AI model to read your open tab titles and suggest container tabs and names. Everything happens on your device.\n\n',
+                      'WebLibre uses a local AI model to analyze your open tab titles and suggest container tabs and names. All processing happens entirely on your device.\n\n',
                 ),
                 const TextSpan(text: '• '),
                 const TextSpan(
