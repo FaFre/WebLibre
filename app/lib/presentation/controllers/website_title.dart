@@ -81,6 +81,8 @@ Future<WebPageInfo> pageInfo(
   Uri url, {
   required bool isImageRequest,
 }) async {
+  final link = ref.cacheFor(const Duration(minutes: 2));
+
   final tabId = ref.read(selectedTabProvider);
 
   int? proxyPort;
@@ -112,8 +114,8 @@ Future<WebPageInfo> pageInfo(
         proxyPort: proxyPort,
       );
 
-  if (result.isSuccess) {
-    ref.cacheFor(const Duration(minutes: 2));
+  if (!result.isSuccess) {
+    link.close();
   }
 
   return result.value;
