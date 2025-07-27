@@ -121,6 +121,7 @@ class BrowserScreen extends HookConsumerWidget {
               ref.read(willAcceptDropProvider.notifier).clear();
             },
             onAcceptWithDetails: (details) async {
+              ref.read(willAcceptDropProvider.notifier).clear();
               await ref
                   .read(tabRepositoryProvider.notifier)
                   .closeTab(details.data.tabId);

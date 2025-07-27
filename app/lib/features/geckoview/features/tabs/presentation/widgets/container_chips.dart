@@ -23,14 +23,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/tab_drag_container_target.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 class ContainerChips extends HookConsumerWidget {
@@ -62,8 +60,6 @@ class ContainerChips extends HookConsumerWidget {
     final containersAsync = ref.watch(
       matchSortedContainersWithCountProvider(searchText),
     );
-
-    final dragTargetTabId = useValueNotifier<String?>(null);
 
     return containersAsync.when(
       data: (containers) {
@@ -100,103 +96,41 @@ class ContainerChips extends HookConsumerWidget {
                         ContainerTitle(container: container),
                     itemBadgeCount: (container) => container.tabCount,
                     itemWrap: (child, container) {
-                      return HookBuilder(
-                        builder: (context) {
-                          final overlayController =
-                              useOverlayPortalController();
-
-                          return DragTarget<TabDragData>(
-                            onMove: (details) {
-                              ref
-                                  .read(willAcceptDropProvider.notifier)
-                                  .setData(
-                                    ContainerDropData(details.data.tabId),
-                                  );
-
-                              dragTargetTabId.value = details.data.tabId;
-                              overlayController.show();
-                            },
-                            onLeave: (data) {
-                              ref.read(willAcceptDropProvider.notifier).clear();
-
-                              dragTargetTabId.value = null;
-                              overlayController.hide();
-                            },
-                            onAcceptWithDetails: (details) async {
-                              await ref
-                                  .read(tabDataRepositoryProvider.notifier)
-                                  .assignContainer(
-                                    details.data.tabId,
-                                    container,
-                                  );
-
-                              dragTargetTabId.value = null;
-                              overlayController.hide();
-                            },
-                            builder: (context, candidateData, rejectedData) {
-                              final renderBox =
-                                  context.findRenderObject() as RenderBox?;
-                              final position =
-                                  renderBox?.localToGlobal(Offset.zero) ??
-                                  Offset.zero;
-
-                              return OverlayPortal(
-                                controller: overlayController,
-                                overlayChildBuilder: (context) => Positioned(
-                                  top: position.dy,
-                                  left: position.dx,
-                                  child: IgnorePointer(
-                                    child: Transform.scale(
-                                      scale: 1.1,
-                                      child: child,
-                                    ),
-                                  ),
-                                ),
-                                child: HookBuilder(
-                                  builder: (context) {
-                                    final dragTabId = useValueListenable(
-                                      dragTargetTabId,
-                                    );
-
-                                    return Opacity(
-                                      opacity: (dragTabId == null) ? 1.0 : 0.0,
-                                      child: child,
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          );
-                        },
+                      return TabDragContainerTarget(
+                        container: container,
+                        child: child,
                       );
                     },
                     prefixListItems: [
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final tabCount = ref.watch(
-                            containerTabCountProvider(
-                              // ignore: provider_parameters
-                              ContainerFilterById(containerId: null),
-                            ).select((value) => value.valueOrNull ?? 0),
-                          );
+                      TabDragContainerTarget(
+                        container: null,
+                        child: Consumer(
+                          builder: (context, ref, child) {
+                            final tabCount = ref.watch(
+                              containerTabCountProvider(
+                                // ignore: provider_parameters
+                                ContainerFilterById(containerId: null),
+                              ).select((value) => value.valueOrNull ?? 0),
+                            );
 
-                          return FilterChip(
-                            avatar: const Icon(MdiIcons.folderHidden),
-                            labelPadding: (tabCount > 0)
-                                ? null
-                                : const EdgeInsets.only(right: 2.0),
-                            label: (tabCount > 0)
-                                ? Text(tabCount.toString())
-                                : const SizedBox.shrink(),
-                            selected: selectedContainer == null,
-                            showCheckmark: false,
-                            onSelected: (value) {
-                              if (value) {
-                                onSelected?.call(null);
-                              }
-                            },
-                          );
-                        },
+                            return FilterChip(
+                              avatar: const Icon(MdiIcons.folderHidden),
+                              labelPadding: (tabCount > 0)
+                                  ? null
+                                  : const EdgeInsets.only(right: 2.0),
+                              label: (tabCount > 0)
+                                  ? Text(tabCount.toString())
+                                  : const SizedBox.shrink(),
+                              selected: selectedContainer == null,
+                              showCheckmark: false,
+                              onSelected: (value) {
+                                if (value) {
+                                  onSelected?.call(null);
+                                }
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ],
                     availableItems: availableContainers,
