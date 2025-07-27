@@ -1,3 +1,7 @@
+## 0.9.16-2
+
+* Fix icon caching issue
+
 ## 0.9.16-1
 
 * Fixed drop animation lag
