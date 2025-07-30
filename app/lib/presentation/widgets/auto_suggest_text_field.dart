@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/utils/text_field_line_count.dart';
 
 class AutoSuggestTextField extends HookWidget {
   final TextEditingController controller;
@@ -83,54 +84,26 @@ class AutoSuggestTextField extends HookWidget {
       controller.text.isNotEmpty &&
       suggestion!.startsWith(controller.text);
 
-  static int _getLineCountUsingBoxes(
-    String text,
-    TextStyle style,
-    double maxWidth,
-  ) {
-    final textSpan = TextSpan(text: text, style: style);
-
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout(maxWidth: maxWidth);
-
-    // Select all text
-    final selection = TextSelection(baseOffset: 0, extentOffset: text.length);
-
-    // Each box represents one line
-    final lines = textPainter.getBoxesForSelection(selection);
-    return lines.length;
-  }
-
   @override
   Widget build(BuildContext context) {
     final textFieldKey = useMemoized(() => GlobalKey());
 
     final showSuggestion = useListenableSelector(controller, () {
       if (maxLines != 1) {
-        final box = textFieldKey.currentContext?.findRenderObject();
-        if (box case final RenderBox box) {
-          final width = box.size.width;
-
-          final lines = _getLineCountUsingBoxes(
-            controller.text,
+        final lines = getTextFieldLineCount(
+          textFieldKey,
+          controller.text,
+          style ?? Theme.of(context).textTheme.bodyLarge!,
+        );
+        final suggestionLines = suggestion.mapNotNull(
+          (suggestion) => getTextFieldLineCount(
+            textFieldKey,
+            suggestion,
             style ?? Theme.of(context).textTheme.bodyLarge!,
-            width,
-          );
+          ),
+        );
 
-          final suggestionLines = suggestion.mapNotNull(
-            (suggestion) => _getLineCountUsingBoxes(
-              suggestion,
-              style ?? Theme.of(context).textTheme.bodyLarge!,
-              width,
-            ),
-          );
-
-          return lines == 1 && suggestionLines == 1;
-        }
+        return lines == 1 && suggestionLines == 1;
       }
 
       return true;
@@ -149,6 +122,12 @@ class AutoSuggestTextField extends HookWidget {
               decoration: baseDecoration.copyWith(
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 border: InputBorder.none,
+                suffixIcon: baseDecoration.suffixIcon.mapNotNull(
+                  (_) => const SizedBox.square(dimension: 48),
+                ),
+                prefixIcon: baseDecoration.prefixIcon.mapNotNull(
+                  (_) => const SizedBox.square(dimension: 48),
+                ),
                 label: HookBuilder(
                   builder: (context) {
                     final text = useListenableSelector(
