@@ -17,6 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+const _supportedSchemes = {'https', 'http', 'ftp', 'file', 'content', 'about'};
+
 extension UriX on Uri {
   Uri get base => Uri.parse('$scheme://$authority');
+
+  bool get hasSupportedScheme => _supportedSchemes.contains(scheme);
 }

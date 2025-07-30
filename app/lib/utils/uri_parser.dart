@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:universal_io/io.dart';
+import 'package:weblibre/extensions/uri.dart';
 
 final _domainRegex = RegExp(r'\.[a-zA-Z]{2,}$');
-const _supportedSchemes = {'https', 'http', 'ftp', 'file', 'content', 'about'};
 
 Uri? tryParseUrl(String? input, {bool eagerParsing = false}) {
   if (input != null) {
@@ -42,7 +42,7 @@ Uri? tryParseUrl(String? input, {bool eagerParsing = false}) {
         }
 
         if (uri.authority.isNotEmpty) {
-          if (_supportedSchemes.contains(uri.scheme) || !uri.hasScheme) {
+          if (uri.hasSupportedScheme || !uri.hasScheme) {
             return uri;
           }
         }
