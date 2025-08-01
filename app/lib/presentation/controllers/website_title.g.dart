@@ -157,14 +157,13 @@ class _PageInfoProviderElement
   bool get isImageRequest => (origin as PageInfoProvider).isImageRequest;
 }
 
-String _$completePageInfoHash() => r'51474d7b110cfac44dd64e9f71fde091c5a35d4e';
+String _$completePageInfoHash() => r'face1bf561e0447a1260515816bac00c2b47fc71';
 
 abstract class _$CompletePageInfo
     extends BuildlessAutoDisposeNotifier<AsyncValue<WebPageInfo>> {
-  late final Uri url;
-  late final WebPageInfo? cached;
+  late final TabState cached;
 
-  AsyncValue<WebPageInfo> build(Uri url, WebPageInfo? cached);
+  AsyncValue<WebPageInfo> build(TabState cached);
 }
 
 /// See also [CompletePageInfo].
@@ -177,15 +176,15 @@ class CompletePageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
   const CompletePageInfoFamily();
 
   /// See also [CompletePageInfo].
-  CompletePageInfoProvider call(Uri url, WebPageInfo? cached) {
-    return CompletePageInfoProvider(url, cached);
+  CompletePageInfoProvider call(TabState cached) {
+    return CompletePageInfoProvider(cached);
   }
 
   @override
   CompletePageInfoProvider getProviderOverride(
     covariant CompletePageInfoProvider provider,
   ) {
-    return call(provider.url, provider.cached);
+    return call(provider.cached);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -211,11 +210,9 @@ class CompletePageInfoProvider
           AsyncValue<WebPageInfo>
         > {
   /// See also [CompletePageInfo].
-  CompletePageInfoProvider(Uri url, WebPageInfo? cached)
+  CompletePageInfoProvider(TabState cached)
     : this._internal(
-        () => CompletePageInfo()
-          ..url = url
-          ..cached = cached,
+        () => CompletePageInfo()..cached = cached,
         from: completePageInfoProvider,
         name: r'completePageInfoProvider',
         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -224,7 +221,6 @@ class CompletePageInfoProvider
         dependencies: CompletePageInfoFamily._dependencies,
         allTransitiveDependencies:
             CompletePageInfoFamily._allTransitiveDependencies,
-        url: url,
         cached: cached,
       );
 
@@ -235,18 +231,16 @@ class CompletePageInfoProvider
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.url,
     required this.cached,
   }) : super.internal();
 
-  final Uri url;
-  final WebPageInfo? cached;
+  final TabState cached;
 
   @override
   AsyncValue<WebPageInfo> runNotifierBuild(
     covariant CompletePageInfo notifier,
   ) {
-    return notifier.build(url, cached);
+    return notifier.build(cached);
   }
 
   @override
@@ -254,15 +248,12 @@ class CompletePageInfoProvider
     return ProviderOverride(
       origin: this,
       override: CompletePageInfoProvider._internal(
-        () => create()
-          ..url = url
-          ..cached = cached,
+        () => create()..cached = cached,
         from: from,
         name: null,
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        url: url,
         cached: cached,
       ),
     );
@@ -276,15 +267,12 @@ class CompletePageInfoProvider
 
   @override
   bool operator ==(Object other) {
-    return other is CompletePageInfoProvider &&
-        other.url == url &&
-        other.cached == cached;
+    return other is CompletePageInfoProvider && other.cached == cached;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, url.hashCode);
     hash = _SystemHash.combine(hash, cached.hashCode);
 
     return _SystemHash.finish(hash);
@@ -295,11 +283,8 @@ class CompletePageInfoProvider
 // ignore: unused_element
 mixin CompletePageInfoRef
     on AutoDisposeNotifierProviderRef<AsyncValue<WebPageInfo>> {
-  /// The parameter `url` of this provider.
-  Uri get url;
-
   /// The parameter `cached` of this provider.
-  WebPageInfo? get cached;
+  TabState get cached;
 }
 
 class _CompletePageInfoProviderElement
@@ -312,9 +297,7 @@ class _CompletePageInfoProviderElement
   _CompletePageInfoProviderElement(super.provider);
 
   @override
-  Uri get url => (origin as CompletePageInfoProvider).url;
-  @override
-  WebPageInfo? get cached => (origin as CompletePageInfoProvider).cached;
+  TabState get cached => (origin as CompletePageInfoProvider).cached;
 }
 
 // ignore_for_file: type=lint

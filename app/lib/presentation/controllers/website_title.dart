@@ -24,7 +24,9 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/extensions/ref_cache.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
@@ -36,26 +38,27 @@ const _supportedFetchSchemes = {'http', 'https'};
 @Riverpod()
 class CompletePageInfo extends _$CompletePageInfo {
   @override
-  AsyncValue<WebPageInfo> build(Uri url, WebPageInfo? cached) {
+  AsyncValue<WebPageInfo> build(TabState cached) {
     ref.cacheFor(const Duration(minutes: 2));
 
-    if (cached?.isPageInfoComplete == true ||
-        !_supportedFetchSchemes.contains(url.scheme)) {
-      return AsyncData(cached!);
+    if (cached.isPageInfoComplete ||
+        !_supportedFetchSchemes.contains(cached.url.scheme)) {
+      return AsyncData(cached);
     }
 
     ref.listen(
       fireImmediately: true,
-      pageInfoProvider(url, isImageRequest: false),
+      pageInfoProvider(cached.url, isImageRequest: false),
       (previous, next) {
-        if (cached != null && next.hasValue) {
+        if (next.hasValue) {
+          final current = stateOrNull?.valueOrNull ?? cached;
+
           state = AsyncData(
-            WebPageInfo(
-              url: url,
+            current.copyWith(
               //Cached is preferred as this comes from gecko and is more likely to be correct compared to manual request
-              favicon: cached.favicon ?? next.value!.favicon,
-              feeds: cached.feeds ?? next.value!.feeds,
-              title: cached.title ?? next.value!.title,
+              favicon: current.favicon ?? next.value!.favicon,
+              feeds: current.feeds ?? next.value!.feeds,
+              title: current.title.whenNotEmpty ?? next.value!.title,
             ),
           );
         } else {
@@ -71,7 +74,29 @@ class CompletePageInfo extends _$CompletePageInfo {
       },
     );
 
-    return (cached != null) ? AsyncData(cached) : const AsyncLoading();
+    ref.listen(
+      fireImmediately: true,
+      tabStateProvider(cached.id).select((value) => value?.title.whenNotEmpty),
+      (previous, next) {
+        if (next != null) {
+          final current = stateOrNull?.valueOrNull ?? cached;
+          state = AsyncData(current.copyWith.title(next));
+        }
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      tabStateProvider(cached.id).select((value) => value?.favicon),
+      (previous, next) {
+        if (next != null) {
+          final current = stateOrNull?.valueOrNull ?? cached;
+          state = AsyncData(current.copyWith.favicon(next));
+        }
+      },
+    );
+
+    return AsyncData(cached);
   }
 }
 

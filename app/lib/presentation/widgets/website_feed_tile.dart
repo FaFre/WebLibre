@@ -24,24 +24,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/widgets/rounded_text.dart';
 
 class WebsiteFeedTile extends HookConsumerWidget {
-  final Uri url;
-  final WebPageInfo? precachedInfo;
+  final TabState initialTabState;
 
-  const WebsiteFeedTile(this.url, {this.precachedInfo, super.key});
+  const WebsiteFeedTile(this.initialTabState, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pageInfoAsync = ref.watch(
-      completePageInfoProvider(url, precachedInfo),
-    );
+    final pageInfoAsync = ref.watch(completePageInfoProvider(initialTabState));
 
     return Skeletonizer(
-      enabled: pageInfoAsync.isLoading && precachedInfo?.feeds == null,
+      enabled: pageInfoAsync.isLoading && initialTabState.feeds == null,
       child: pageInfoAsync.when(
         skipLoadingOnReload: true,
         data: (info) {
