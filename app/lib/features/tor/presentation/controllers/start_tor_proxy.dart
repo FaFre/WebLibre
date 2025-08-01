@@ -51,7 +51,10 @@ class StartProxyController extends _$StartProxyController {
 
           ref
               .read(overlayControllerProvider.notifier)
-              .show(Positioned(top: 0, left: 0, child: TorNotification()));
+              .show(
+                (context) =>
+                    Positioned(top: 0, left: 0, child: TorNotification()),
+              );
 
           await connection;
         }

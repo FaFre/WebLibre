@@ -57,7 +57,7 @@ class BrowserScreen extends HookConsumerWidget {
     final eventService = ref.watch(eventServiceProvider);
 
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
-    final displayedOverlay = ref.watch(overlayControllerProvider);
+    final overlayBuilder = ref.watch(overlayControllerProvider);
 
     final lastBackButtonPress = useRef<DateTime?>(null);
 
@@ -130,7 +130,7 @@ class BrowserScreen extends HookConsumerWidget {
               return OverlayPortal(
                 controller: overlayController,
                 overlayChildBuilder: (context) {
-                  return displayedOverlay!;
+                  return overlayBuilder!.call(context);
                 },
                 child: Listener(
                   onPointerDown: (displayedSheet != null)
@@ -161,7 +161,7 @@ class BrowserScreen extends HookConsumerWidget {
                         return true;
                       }
 
-                      if (displayedOverlay != null) {
+                      if (overlayBuilder != null) {
                         ref.read(overlayControllerProvider.notifier).dismiss();
                         return true;
                       }

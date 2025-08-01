@@ -25,13 +25,13 @@ part 'overlay.g.dart';
 @Riverpod()
 class OverlayController extends _$OverlayController {
   @override
-  Widget? build() {
+  WidgetBuilder? build() {
     return null;
   }
 
   // ignore: use_setters_to_change_properties api decision
-  void show(Widget dialog) {
-    state = dialog;
+  void show(WidgetBuilder builder) {
+    state = builder;
   }
 
   void dismiss() {
