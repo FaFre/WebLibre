@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 
 sealed class Sheet with FastEquatable {}
 
@@ -26,11 +27,11 @@ final class ViewTabsSheet extends Sheet {
   List<Object?> get hashParameters => [null];
 }
 
-final class TabQaChatSheet extends Sheet {
-  final String chatId;
+final class EditUrlSheet extends Sheet {
+  final TabState tabState;
 
-  TabQaChatSheet({required this.chatId});
+  EditUrlSheet({required this.tabState});
 
   @override
-  List<Object?> get hashParameters => [chatId];
+  List<Object?> get hashParameters => [tabState];
 }

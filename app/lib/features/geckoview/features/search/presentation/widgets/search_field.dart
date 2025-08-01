@@ -36,6 +36,9 @@ class SearchField extends HookConsumerWidget {
   final bool autofocus;
   final void Function(String)? onSubmitted;
   final bool showSuggestions;
+  final int? maxLines;
+  final VoidCallback? onTap;
+  final bool unfocusOnTapOutside;
 
   final BangData? activeBang;
   final bool showBangIcon;
@@ -48,6 +51,9 @@ class SearchField extends HookConsumerWidget {
     required this.showSuggestions,
     this.label,
     this.focusNode,
+    this.maxLines = 1,
+    this.onTap,
+    this.unfocusOnTapOutside = true,
     this.showBangIcon = true,
     this.autofocus = false,
   });
@@ -93,6 +99,11 @@ class SearchField extends HookConsumerWidget {
       suggestion: suggestion.value,
       enableIMEPersonalizedLearning: !incognitoEnabled,
       focusNode: safeFocusNode,
+      maxLines: maxLines,
+      //Submit isntead of newline
+      textInputAction: (maxLines == null || maxLines! > 1)
+          ? TextInputAction.done
+          : null,
       autofocus: autofocus,
       decoration: InputDecoration(
         border: InputBorder.none,
@@ -120,10 +131,13 @@ class SearchField extends HookConsumerWidget {
                 },
               ),
       ),
-      onTapOutside: (event) {
-        safeFocusNode.unfocus();
-      },
+      onTapOutside: unfocusOnTapOutside
+          ? (event) {
+              safeFocusNode.unfocus();
+            }
+          : null,
       onSubmitted: onSubmitted,
+      onTap: onTap,
     );
   }
 }

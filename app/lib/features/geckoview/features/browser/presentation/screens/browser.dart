@@ -30,6 +30,7 @@ import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/extensions/media_query.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
@@ -40,7 +41,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/she
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tree_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
@@ -262,10 +263,10 @@ class BrowserScreen extends HookConsumerWidget {
                       key: ValueKey(displayedSheet),
                       maxChildSize: MediaQuery.of(context).relativeSafeArea(),
                     ),
-                    final TabQaChatSheet parameter => _QaSheet(
+                    final EditUrlSheet parameter => _ViewUrlSheet(
                       key: ValueKey(displayedSheet),
+                      initialTabState: parameter.tabState,
                       maxChildSize: MediaQuery.of(context).relativeSafeArea(),
-                      chatId: parameter.chatId,
                     ),
                   },
                 )
@@ -353,11 +354,15 @@ class _BrowserView extends StatelessWidget {
   }
 }
 
-class _QaSheet extends HookConsumerWidget {
-  final String chatId;
+class _ViewUrlSheet extends HookConsumerWidget {
   final double maxChildSize;
+  final TabState initialTabState;
 
-  const _QaSheet({super.key, required this.chatId, this.maxChildSize = 1.0});
+  const _ViewUrlSheet({
+    super.key,
+    required this.initialTabState,
+    this.maxChildSize = 1.0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -366,6 +371,7 @@ class _QaSheet extends HookConsumerWidget {
     return DraggableScrollableSheet(
       controller: draggableScrollableController,
       expand: false,
+      initialChildSize: 172.0 / MediaQuery.of(context).size.height,
       minChildSize: 0.1,
       maxChildSize: maxChildSize,
       builder: (context, scrollController) {
@@ -374,28 +380,13 @@ class _QaSheet extends HookConsumerWidget {
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
           ),
-          child: Column(
-            children: [
-              DraggableScrollableHeader(
-                controller: draggableScrollableController,
-                child: Material(
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        margin: const EdgeInsets.symmetric(vertical: 16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          child: ViewTabSheetWidget(
+            initialTabState: initialTabState,
+            sheetScrollController: scrollController,
+            draggableScrollableController: draggableScrollableController,
+            onClose: () {
+              ref.read(bottomSheetControllerProvider.notifier).dismiss();
+            },
           ),
         );
       },

@@ -17,41 +17,45 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
+import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/fixed_search_suggestions.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class SiteSearch extends HookConsumerWidget {
   final String domain;
   final List<BangData> availableBangs;
+  final String? initialText;
   final bool searchInNewTab;
 
   const SiteSearch({
     required this.domain,
     required this.availableBangs,
     super.key,
-    this.searchInNewTab = true,
+    this.initialText,
+    this.searchInNewTab = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formKey = useMemoized(() => GlobalKey<FormState>());
-
-    final searchTextController = useTextEditingController();
+    final searchTextController = useTextEditingController(text: initialText);
+    final searchFocusNode = useFocusNode();
 
     useListenableCallback(searchTextController, () {
       ref
@@ -60,44 +64,55 @@ class SiteSearch extends HookConsumerWidget {
     });
 
     final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));
+    final defaultSearchBang = ref.watch(
+      defaultSearchBangDataProvider.select((value) => value.valueOrNull),
+    );
 
-    final activeBang = selectedBang ?? availableBangs.firstOrNull;
+    Future<void> submitSearch(String value) async {
+      if (value.isNotEmpty) {
+        final bang = selectedBang ?? defaultSearchBang;
 
-    Future<void> submitSearch(String query) async {
-      if (activeBang != null && (formKey.currentState?.validate() == true)) {
-        final isPrivate =
-            ref.read(selectedTabStateProvider)?.isPrivate ?? false;
+        final newUrl = uri_parser.tryParseUrl(value, eagerParsing: true);
 
-        final searchUri = activeBang.getTemplateUrl(query);
-
-        if (!isPrivate) {
-          await ref
-              .read(bangSearchProvider.notifier)
-              .triggerBangSearch(activeBang, query);
-        }
-
-        if (searchInNewTab) {
-          await ref
-              .read(tabRepositoryProvider.notifier)
-              .addTab(url: searchUri, private: isPrivate);
-        } else {
+        if (newUrl != null) {
           await ref
               .read(tabSessionProvider(tabId: null).notifier)
-              .loadUrl(url: searchUri);
-        }
+              .loadUrl(url: newUrl);
 
-        if (context.mounted) {
-          context.pop();
+          ref.read(bottomSheetControllerProvider.notifier).dismiss();
+        } else if (bang != null) {
+          final isPrivate =
+              ref.read(selectedTabStateProvider)?.isPrivate ?? false;
+
+          final searchUri = bang.getTemplateUrl(value);
+
+          if (!isPrivate) {
+            await ref
+                .read(bangSearchProvider.notifier)
+                .triggerBangSearch(bang, value);
+          }
+
+          if (searchInNewTab) {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .addTab(url: searchUri, private: isPrivate);
+          } else {
+            await ref
+                .read(tabSessionProvider(tabId: null).notifier)
+                .loadUrl(url: searchUri);
+          }
+
+          ref.read(bottomSheetControllerProvider.notifier).dismiss();
         }
       }
     }
 
-    return Form(
-      key: formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Visibility(
+          visible: availableBangs.isNotEmpty,
+          child: SizedBox(
             height: 48,
             width: double.maxFinite,
             child: SelectableChips(
@@ -109,6 +124,18 @@ class SiteSearch extends HookConsumerWidget {
               availableItems: availableBangs,
               selectedItem: selectedBang,
               onSelected: (bang) {
+                if (selectedBang == null) {
+                  final hasSupportedScheme =
+                      uri_parser
+                          .tryParseUrl(searchTextController.text)
+                          .mapNotNull((uri) => uri.hasSupportedScheme) ??
+                      false;
+
+                  if (hasSupportedScheme) {
+                    searchTextController.clear();
+                  }
+                }
+
                 ref
                     .read(selectedBangTriggerProvider(domain: domain).notifier)
                     .setTrigger(bang.trigger);
@@ -125,37 +152,33 @@ class SiteSearch extends HookConsumerWidget {
               },
             ),
           ),
-          SearchField(
-            textEditingController: searchTextController,
-            activeBang: activeBang,
-            onSubmitted: (_) async {
-              await submitSearch(searchTextController.text);
-            },
-            showSuggestions: false,
-          ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 150),
-            child: FadingScroll(
-              fadingSize: 25,
-              builder: (context, controller) {
-                return CustomScrollView(
-                  shrinkWrap: true,
-                  controller: controller,
-                  slivers: [
-                    SearchTermSuggestions(
-                      searchTextController: searchTextController,
-                      activeBang: activeBang,
-                      submitSearch: submitSearch,
-                      showHistory: false,
-                      showChips: false,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+        SearchField(
+          textEditingController: searchTextController,
+          focusNode: searchFocusNode,
+          maxLines: null,
+          activeBang: selectedBang,
+          showSuggestions: true,
+          onTap: () {
+            if (!searchFocusNode.hasFocus) {
+              // Select all text when the field is tapped
+              searchTextController.selection = TextSelection(
+                baseOffset: 0,
+                extentOffset: searchTextController.text.length,
+              );
+            }
+          },
+          unfocusOnTapOutside: false,
+          onSubmitted: (value) async {
+            await submitSearch(value);
+          },
+        ),
+        FixedSearchTermSuggestions(
+          searchTextController: searchTextController,
+          activeBang: selectedBang,
+          submitSearch: submitSearch,
+        ),
+      ],
     );
   }
 }

@@ -284,12 +284,6 @@ RouteBase get $browserRoute => GoRouteData.$route(
   factory: _$BrowserRoute._fromState,
   routes: [
     GoRouteData.$route(
-      path: 'page/:url',
-      name: 'WebPageRoute',
-
-      factory: _$WebPageRoute._fromState,
-    ),
-    GoRouteData.$route(
       path: 'search/:tabType/:searchText',
       name: 'SearchRoute',
 
@@ -360,34 +354,6 @@ mixin _$BrowserRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
-}
-
-mixin _$WebPageRoute on GoRouteData {
-  static WebPageRoute _fromState(GoRouterState state) => WebPageRoute(
-    url: state.pathParameters['url']!,
-    $extra: state.extra as WebPageInfo?,
-  );
-
-  WebPageRoute get _self => this as WebPageRoute;
-
-  @override
-  String get location =>
-      GoRouteData.$location('/page/${Uri.encodeComponent(_self.url)}');
-
-  @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
-
-  @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
-
-  @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
 }
 
 mixin _$SearchRoute on GoRouteData {

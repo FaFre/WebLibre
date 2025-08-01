@@ -23,14 +23,19 @@ class Debouncer {
   final Duration debounce;
 
   Timer? _timer;
+  bool _hasRan = false;
 
   Debouncer(this.debounce);
 
   bool get isDebouncing => _timer?.isActive ?? false;
+  bool get hasRan => _hasRan;
 
   void eventOccured(void Function() callback) {
     _timer?.cancel();
-    _timer = Timer(debounce, callback);
+    _timer = Timer(debounce, () {
+      callback.call();
+      _hasRan = true;
+    });
   }
 
   void dispose() {

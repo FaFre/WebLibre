@@ -35,7 +35,6 @@ import 'package:weblibre/features/geckoview/domain/providers/web_extensions_stat
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/edit_url_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
@@ -77,30 +76,13 @@ class BrowserBottomAppBar extends HookConsumerWidget {
       height: AppBar().preferredSize.height,
       padding: EdgeInsets.zero,
       child: GestureDetector(
-        onTap: () async {
+        onTap: () {
           final tabState = ref.read(selectedTabStateProvider);
 
           if (tabState != null) {
-            await WebPageRoute(
-              url: tabState.url.toString(),
-              $extra: tabState,
-            ).push(context);
-          }
-        },
-        onLongPress: () async {
-          final tabState = ref.read(selectedTabStateProvider);
-
-          if (tabState != null) {
-            final newUrl = await showDialog<Uri?>(
-              context: context,
-              builder: (context) => EditUrlDialog(initialUrl: tabState.url),
-            );
-
-            if (newUrl != null) {
-              await ref
-                  .read(tabSessionProvider(tabId: null).notifier)
-                  .loadUrl(url: newUrl);
-            }
+            ref
+                .read(bottomSheetControllerProvider.notifier)
+                .show(EditUrlSheet(tabState: tabState));
           }
         },
         onHorizontalDragStart: (details) {

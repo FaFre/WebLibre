@@ -23,7 +23,6 @@ part of 'routes.dart';
   name: BrowserRoute.name,
   path: '/',
   routes: [
-    TypedGoRoute<WebPageRoute>(name: 'WebPageRoute', path: 'page/:url'),
     TypedGoRoute<SearchRoute>(
       name: 'SearchRoute',
       path: 'search/:tabType/:searchText',
@@ -63,20 +62,6 @@ class BrowserRoute extends GoRouteData with _$BrowserRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BrowserScreen();
-  }
-}
-
-class WebPageRoute extends GoRouteData with _$WebPageRoute {
-  final String url;
-  final WebPageInfo? $extra;
-
-  const WebPageRoute({required this.url, required this.$extra});
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(
-      builder: (_) => WebPageDialog(url: Uri.parse(url), precachedInfo: $extra),
-    );
   }
 }
 

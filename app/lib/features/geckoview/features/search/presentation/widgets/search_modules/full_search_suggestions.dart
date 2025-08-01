@@ -32,20 +32,15 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chips.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 
-class SearchTermSuggestions extends HookConsumerWidget {
+class FullSearchTermSuggestions extends HookConsumerWidget {
   final TextEditingController searchTextController;
   final Future<void> Function(String query) submitSearch;
   final BangData? activeBang;
 
-  final bool showHistory;
-  final bool showChips;
-
-  const SearchTermSuggestions({
+  const FullSearchTermSuggestions({
     required this.searchTextController,
     required this.submitSearch,
     required this.activeBang,
-    this.showHistory = true,
-    this.showChips = true,
     super.key,
   });
 
@@ -68,9 +63,7 @@ class SearchTermSuggestions extends HookConsumerWidget {
 
     final Widget listSliver;
 
-    if (showHistory &&
-        !searchTextIsNotEmpty &&
-        (searchHistory.value.isNotEmpty)) {
+    if (!searchTextIsNotEmpty && (searchHistory.value.isNotEmpty)) {
       final entries = searchHistory.value!;
 
       listSliver = SliverList.builder(
@@ -128,51 +121,50 @@ class SearchTermSuggestions extends HookConsumerWidget {
 
     return MultiSliver(
       children: [
-        if (showChips)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Search Provider',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                  BangChips(
-                    activeBang: activeBang,
-                    onSelected: (bang) {
-                      searchTextController.clear();
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Search Provider',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                BangChips(
+                  activeBang: activeBang,
+                  onSelected: (bang) {
+                    searchTextController.clear();
 
+                    ref
+                        .read(selectedBangTriggerProvider().notifier)
+                        .setTrigger(bang.trigger);
+                  },
+                  onDeleted: (bang) async {
+                    if (ref.read(selectedBangTriggerProvider()) ==
+                        bang.trigger) {
                       ref
                           .read(selectedBangTriggerProvider().notifier)
-                          .setTrigger(bang.trigger);
-                    },
-                    onDeleted: (bang) async {
-                      if (ref.read(selectedBangTriggerProvider()) ==
-                          bang.trigger) {
-                        ref
-                            .read(selectedBangTriggerProvider().notifier)
-                            .clearTrigger();
-                      } else {
-                        final dialogResult = await BangChips.resetBangDialog(
-                          context,
-                          bang.trigger,
-                        );
+                          .clearTrigger();
+                    } else {
+                      final dialogResult = await BangChips.resetBangDialog(
+                        context,
+                        bang.trigger,
+                      );
 
-                        if (dialogResult == true) {
-                          await ref
-                              .read(bangDataRepositoryProvider.notifier)
-                              .resetFrequency(bang.trigger);
-                        }
+                      if (dialogResult == true) {
+                        await ref
+                            .read(bangDataRepositoryProvider.notifier)
+                            .resetFrequency(bang.trigger);
                       }
-                    },
-                    searchTextController: searchTextController,
-                  ),
-                ],
-              ),
+                    }
+                  },
+                  searchTextController: searchTextController,
+                ),
+              ],
             ),
           ),
+        ),
         SliverToBoxAdapter(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 150),
