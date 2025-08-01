@@ -42,7 +42,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/presentation/widgets/share_tile.dart';
 import 'package:weblibre/presentation/widgets/website_feed_tile.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
-import 'package:weblibre/utils/debouncer.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class ClampingScrollPhysicsWithoutImplicit extends ClampingScrollPhysics {
@@ -82,53 +81,34 @@ class ViewTabSheetWidget extends HookConsumerWidget {
       ).select((value) => value.valueOrNull ?? const []),
     );
 
-    final initialScrollDebouncer = useMemoized(
-      () => Debouncer(const Duration(milliseconds: 150)),
-    );
+    final scrolledTo = useRef(0.0);
     useEffect(() {
-      if (!initialScrollDebouncer.hasRan) {
-        initialScrollDebouncer.eventOccured(() {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final header = headerKey.currentContext?.findRenderObject();
-            final text = textFieldKey.currentContext?.findRenderObject();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final header = headerKey.currentContext?.findRenderObject();
+        final text = textFieldKey.currentContext?.findRenderObject();
 
-            if (header case final RenderBox headerBox) {
-              if (text case final RenderBox textBox) {
-                final totalHeight =
-                    headerBox.size.height +
-                    textBox.size.height +
-                    kToolbarHeight;
+        if (header case final RenderBox headerBox) {
+          if (text case final RenderBox textBox) {
+            final totalHeight =
+                headerBox.size.height + textBox.size.height + kToolbarHeight;
 
-                final relative =
-                    totalHeight / MediaQuery.of(context).size.height;
+            final relative = totalHeight / MediaQuery.of(context).size.height;
 
-                draggableScrollableController.jumpTo(relative);
-              }
+            if (draggableScrollableController.size < relative &&
+                relative > scrolledTo.value) {
+              await draggableScrollableController.animateTo(
+                relative,
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.bounceIn,
+              );
+              scrolledTo.value = relative;
             }
-          });
-        });
-      }
+          }
+        }
+      });
 
       return null;
     });
-
-    // final changes = useRef(0.0);
-    // useEffect(() {
-    //   final emitter = KeyboardHeightEmitter();
-
-    //   emitter.onKeyboardHeightChanged((height) {
-    //     final diff =
-    //         height / MediaQuery.of(context).size.height - changes.value;
-
-    //     draggableScrollableController.jumpTo(
-    //       draggableScrollableController.size + diff,
-    //     );
-
-    //     changes.value += diff;
-    //   });
-
-    //   return () => emitter.dispose();
-    // }, []);
 
     final changes = useRef(0.0);
     useEffect(() {
@@ -148,231 +128,213 @@ class ViewTabSheetWidget extends HookConsumerWidget {
       return null;
     }, [MediaQuery.of(context).viewInsets.bottom]);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        DraggableScrollableHeader(
-          key: headerKey,
-          controller: draggableScrollableController,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 0.0),
-                child: GestureDetector(
-                  onTap: () {
-                    draggableScrollableController.jumpTo(1.0);
-                  },
-                  child: WebsiteTitleTile(initialTabState),
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) => [
+        SliverToBoxAdapter(
+          child: DraggableScrollableHeader(
+            key: headerKey,
+            controller: draggableScrollableController,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 0.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      draggableScrollableController.jumpTo(1.0);
+                    },
+                    child: WebsiteTitleTile(initialTabState),
+                  ),
                 ),
-              ),
-              CertificateTile(),
-              const Divider(),
-            ],
-          ),
-        ),
-        Flexible(
-          child: FadingScroll(
-            fadingSize: 25,
-            controller: sheetScrollController,
-            builder: (context, controller) {
-              return ListView(
-                controller: controller,
-                physics: const ClampingScrollPhysicsWithoutImplicit(),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: SiteSearch(
-                      key: textFieldKey,
-                      domain: initialTabState.url.host,
-                      availableBangs: availableBangs,
-                      initialText: initialTabState.url.toString(),
-                    ),
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(MdiIcons.contentCopy),
-                    title: const Text('Copy address'),
-                    onTap: () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: initialTabState.url.toString()),
-                      );
-
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .dismiss();
-                    },
-                  ),
-                  ListTile(
-                    onTap: () async {
-                      await ui_helper.launchUrlFeedback(
-                        context,
-                        initialTabState.url,
-                      );
-                    },
-                    leading: const Icon(Icons.open_in_browser),
-                    title: const Text('Launch External'),
-                  ),
-                  ListTile(
-                    leading: const Icon(MdiIcons.tabPlus),
-                    title: const Text('Clone tab'),
-                    onTap: () async {
-                      final tabId = await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(url: initialTabState.url);
-
-                      if (context.mounted) {
-                        //save reference before pop `ref` gets disposed
-                        final repo = ref.read(tabRepositoryProvider.notifier);
-
-                        ui_helper.showTabSwitchMessage(
-                          context,
-                          onSwitch: () async {
-                            await repo.selectTab(tabId);
-                          },
-                        );
-
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .dismiss();
-                      }
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(MdiIcons.tabUnselected),
-                    title: const Text('Clone as private tab'),
-                    onTap: () async {
-                      final tabId = await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(url: initialTabState.url, private: true);
-
-                      if (context.mounted) {
-                        //save reference before pop `ref` gets disposed
-                        final repo = ref.read(tabRepositoryProvider.notifier);
-
-                        ui_helper.showTabSwitchMessage(
-                          context,
-                          onSwitch: () async {
-                            await repo.selectTab(tabId);
-                          },
-                        );
-
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .dismiss();
-                      }
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(MdiIcons.folderArrowUpDownOutline),
-                    title: const Text('Assign container'),
-                    onTap: () async {
-                      final targetContainerId = await ContainerSelectionRoute()
-                          .push<String?>(context);
-
-                      if (targetContainerId != null) {
-                        final containerData = await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .getContainerData(targetContainerId);
-
-                        if (containerData != null) {
-                          await ref
-                              .read(tabDataRepositoryProvider.notifier)
-                              .assignContainer(
-                                initialTabState.id,
-                                containerData,
-                              );
-                        }
-                      }
-
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .dismiss();
-                    },
-                  ),
-                  Consumer(
-                    child: ListTile(
-                      leading: const Icon(MdiIcons.folderCancelOutline),
-                      title: const Text('Unassign container'),
-                      onTap: () async {
-                        await ref
-                            .read(tabDataRepositoryProvider.notifier)
-                            .unassignContainer(initialTabState.id);
-
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .dismiss();
-                      },
-                    ),
-                    builder: (context, ref, child) {
-                      final containerId = ref.watch(
-                        watchContainerTabIdProvider(
-                          initialTabState.id,
-                        ).select((value) => value.valueOrNull),
-                      );
-
-                      return Visibility(
-                        visible: containerId != null,
-                        child: child!,
-                      );
-                    },
-                  ),
-                  ShareTile(
-                    onTap: () async {
-                      await SharePlus.instance.share(
-                        ShareParams(uri: initialTabState.url),
-                      );
-
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .dismiss();
-                    },
-                    onTapQr: () async {
-                      await showQrCode(context, initialTabState.url.toString());
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.mobile_screen_share),
-                    title: const Text('Share screenshot'),
-                    onTap: () async {
-                      final screenshot = await ref
-                          .read(selectedTabSessionNotifierProvider)
-                          .requestScreenshot();
-
-                      if (screenshot != null) {
-                        ui.decodeImageFromList(screenshot, (result) async {
-                          final png = await result.toByteData(
-                            format: ui.ImageByteFormat.png,
-                          );
-
-                          if (png != null) {
-                            final file = XFile.fromData(
-                              png.buffer.asUint8List(),
-                              mimeType: 'image/png',
-                            );
-
-                            await SharePlus.instance.share(
-                              ShareParams(
-                                files: [file],
-                                subject: initialTabState.title,
-                              ),
-                            );
-                          }
-                        });
-                      }
-
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .dismiss();
-                    },
-                  ),
-                  WebsiteFeedTile(initialTabState),
-                ],
-              );
-            },
+                CertificateTile(),
+                const Divider(),
+              ],
+            ),
           ),
         ),
       ],
+      body: FadingScroll(
+        fadingSize: 15,
+        controller: sheetScrollController,
+        builder: (context, controller) {
+          return ListView(
+            controller: controller,
+            physics: const ClampingScrollPhysicsWithoutImplicit(),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: SiteSearch(
+                  key: textFieldKey,
+                  domain: initialTabState.url.host,
+                  availableBangs: availableBangs,
+                  initialText: initialTabState.url.toString(),
+                ),
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(MdiIcons.contentCopy),
+                title: const Text('Copy address'),
+                onTap: () async {
+                  await Clipboard.setData(
+                    ClipboardData(text: initialTabState.url.toString()),
+                  );
+
+                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                },
+              ),
+              ListTile(
+                onTap: () async {
+                  await ui_helper.launchUrlFeedback(
+                    context,
+                    initialTabState.url,
+                  );
+                },
+                leading: const Icon(Icons.open_in_browser),
+                title: const Text('Launch External'),
+              ),
+              ListTile(
+                leading: const Icon(MdiIcons.tabPlus),
+                title: const Text('Clone tab'),
+                onTap: () async {
+                  final tabId = await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(url: initialTabState.url);
+
+                  if (context.mounted) {
+                    //save reference before pop `ref` gets disposed
+                    final repo = ref.read(tabRepositoryProvider.notifier);
+
+                    ui_helper.showTabSwitchMessage(
+                      context,
+                      onSwitch: () async {
+                        await repo.selectTab(tabId);
+                      },
+                    );
+
+                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(MdiIcons.tabUnselected),
+                title: const Text('Clone as private tab'),
+                onTap: () async {
+                  final tabId = await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(url: initialTabState.url, private: true);
+
+                  if (context.mounted) {
+                    //save reference before pop `ref` gets disposed
+                    final repo = ref.read(tabRepositoryProvider.notifier);
+
+                    ui_helper.showTabSwitchMessage(
+                      context,
+                      onSwitch: () async {
+                        await repo.selectTab(tabId);
+                      },
+                    );
+
+                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(MdiIcons.folderArrowUpDownOutline),
+                title: const Text('Assign container'),
+                onTap: () async {
+                  final targetContainerId = await ContainerSelectionRoute()
+                      .push<String?>(context);
+
+                  if (targetContainerId != null) {
+                    final containerData = await ref
+                        .read(containerRepositoryProvider.notifier)
+                        .getContainerData(targetContainerId);
+
+                    if (containerData != null) {
+                      await ref
+                          .read(tabDataRepositoryProvider.notifier)
+                          .assignContainer(initialTabState.id, containerData);
+                    }
+                  }
+
+                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                },
+              ),
+              Consumer(
+                child: ListTile(
+                  leading: const Icon(MdiIcons.folderCancelOutline),
+                  title: const Text('Unassign container'),
+                  onTap: () async {
+                    await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .unassignContainer(initialTabState.id);
+
+                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  },
+                ),
+                builder: (context, ref, child) {
+                  final containerId = ref.watch(
+                    watchContainerTabIdProvider(
+                      initialTabState.id,
+                    ).select((value) => value.valueOrNull),
+                  );
+
+                  return Visibility(
+                    visible: containerId != null,
+                    child: child!,
+                  );
+                },
+              ),
+              ShareTile(
+                onTap: () async {
+                  await SharePlus.instance.share(
+                    ShareParams(uri: initialTabState.url),
+                  );
+
+                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                },
+                onTapQr: () async {
+                  await showQrCode(context, initialTabState.url.toString());
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.mobile_screen_share),
+                title: const Text('Share screenshot'),
+                onTap: () async {
+                  final screenshot = await ref
+                      .read(selectedTabSessionNotifierProvider)
+                      .requestScreenshot();
+
+                  if (screenshot != null) {
+                    ui.decodeImageFromList(screenshot, (result) async {
+                      final png = await result.toByteData(
+                        format: ui.ImageByteFormat.png,
+                      );
+
+                      if (png != null) {
+                        final file = XFile.fromData(
+                          png.buffer.asUint8List(),
+                          mimeType: 'image/png',
+                        );
+
+                        await SharePlus.instance.share(
+                          ShareParams(
+                            files: [file],
+                            subject: initialTabState.title,
+                          ),
+                        );
+                      }
+                    });
+                  }
+
+                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                },
+              ),
+              WebsiteFeedTile(initialTabState),
+            ],
+          );
+        },
+      ),
     );
   }
 }
