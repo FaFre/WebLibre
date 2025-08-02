@@ -380,236 +380,225 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
-        Column(
-          children: [
-            DraggableScrollableHeader(
-              controller: draggableScrollableController,
-              child: _TabSheetHeader(onClose: onClose, treeViewEnabled: false),
-            ),
-            Expanded(
-              child: HookConsumer(
-                builder: (context, ref, child) {
-                  final gridViewKey = useMemoized(() => GlobalKey());
-
-                  final containerId = ref.watch(selectedContainerProvider);
-
-                  final filteredTabEntities = ref.watch(
-                    seamlessFilteredTabEntitiesProvider(
-                      searchPartition: TabSearchPartition.preview,
-                      // ignore: document_ignores using fast equatable
-                      // ignore: provider_parameters
-                      containerFilter: ContainerFilterById(
-                        containerId: containerId,
-                      ),
-                      groupTrees: false,
-                    ),
-                  );
-
-                  final tabSuggestionsEnabled = ref.watch(
-                    tabSuggestionsControllerProvider,
-                  );
-                  final enableAiFeatures = ref.watch(
-                    generalSettingsRepositoryProvider.select(
-                      (settings) => settings.enableLocalAiFeatures,
-                    ),
-                  );
-                  final suggestedTabEntities = ref.watch(
-                    suggestedTabEntitiesProvider(
-                      (enableAiFeatures && tabSuggestionsEnabled)
-                          ? containerId
-                          : null,
-                    ),
-                  );
-
-                  final itemCount =
-                      filteredTabEntities.value.length +
-                      suggestedTabEntities.value.length;
-
-                  final activeTab = ref.watch(selectedTabProvider);
-
-                  final crossAxisCount = useMemoized(() {
-                    final calculatedCount = _calculateCrossAxisItemCount(
-                      screenWidth: MediaQuery.of(context).size.width,
-                      horizontalPadding: 4.0,
-                      crossAxisSpacing: 8.0,
-                    );
-
-                    return math.max(math.min(calculatedCount, itemCount), 2);
-                  }, [MediaQuery.of(context).size.width, itemCount]);
-
-                  final itemHeight = useMemoized(
-                    () => _calculateItemHeight(
-                      screenWidth: MediaQuery.of(context).size.width,
-                      childAspectRatio: 0.75,
-                      horizontalPadding: 4.0,
-                      mainAxisSpacing: 8.0,
-                      crossAxisSpacing: 8.0,
-                      crossAxisCount: crossAxisCount,
-                    ),
-                    [MediaQuery.of(context).size.width, crossAxisCount],
-                  );
-
-                  final lastScroll = useRef<String?>(null);
-                  final scrollControllerIsAttached = useListenableSelector(
-                    sheetScrollController,
-                    () => sheetScrollController.hasClients,
-                  );
-
-                  useEffect(
-                    () {
-                      if (scrollControllerIsAttached) {
-                        if (lastScroll.value != activeTab) {
-                          final index = filteredTabEntities.value.indexWhere(
-                            (entity) => entity.tabId == activeTab,
-                          );
-
-                          if (index > -1) {
-                            final offset = (index ~/ 2) * itemHeight;
-
-                            if (offset != sheetScrollController.offset) {
-                              lastScroll.value = activeTab;
-
-                              unawaited(
-                                sheetScrollController.animateTo(
-                                  offset,
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.easeInOut,
-                                ),
-                              );
-                            }
-                          }
-                        }
-                      }
-
-                      return null;
-                    },
-                    [
-                      filteredTabEntities,
-                      activeTab,
-                      scrollControllerIsAttached,
-                    ],
-                  );
-
-                  final tabs = useMemoized(() {
-                    return [
-                      ...filteredTabEntities.value.map(
-                        (entity) => CustomDraggable(
-                          key: Key(entity.tabId),
-                          data: TabDragData(entity.tabId),
-                          child: _TabDraggable(
-                            entity: entity,
-                            onClose: onClose,
-                          ),
-                        ),
-                      ),
-                      ...suggestedTabEntities.value.map(
-                        (entity) => CustomDraggable(
-                          key: Key('suggested_${entity.tabId}'),
-                          child: _TabDraggable(
-                            entity: entity,
-                            onClose: onClose,
-                            suggestedContainerId: containerId,
-                          ),
-                        ),
-                      ),
-                    ];
-                  }, [filteredTabEntities, suggestedTabEntities]);
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: FadingScroll(
-                      fadingSize: 5,
-                      controller: sheetScrollController,
-                      builder: (context, controller) {
-                        return ReorderableBuilder.builder(
-                          //Rebuild when cross axis count changes
-                          key: ValueKey(crossAxisCount),
-                          scrollController: controller,
-                          itemCount: itemCount,
-                          onDragStarted: (index) {
-                            ref.read(willAcceptDropProvider.notifier).clear();
-                          },
-                          onReorderPositions: (positions) async {
-                            assert(
-                              positions.length == 1,
-                              'Not ready for multiple reorders',
-                            );
-
-                            final oldIndex = positions.first.oldIndex;
-                            final newIndex = positions.first.newIndex;
-
-                            final containerRepository = ref.read(
-                              containerRepositoryProvider.notifier,
-                            );
-
-                            //Suggestions are at the end and not reorderable, so skip
-                            if (oldIndex >= filteredTabEntities.value.length) {
-                              return;
-                            }
-
-                            final tabId =
-                                filteredTabEntities.value[oldIndex].tabId;
-                            final containerId = await ref
-                                .read(tabDataRepositoryProvider.notifier)
-                                .getContainerTabId(tabId);
-
-                            final String key;
-                            if (newIndex <= 0) {
-                              key = await containerRepository
-                                  .getLeadingOrderKey(containerId);
-                            } else if (newIndex >=
-                                filteredTabEntities.value.length - 1) {
-                              key = await containerRepository
-                                  .getTrailingOrderKey(containerId);
-                            } else {
-                              if (newIndex < oldIndex) {
-                                key = await containerRepository
-                                    .getOrderKeyAfterTab(
-                                      filteredTabEntities
-                                          .value[newIndex - 1]
-                                          .tabId,
-                                      containerId,
-                                    );
-                              } else {
-                                key = await containerRepository
-                                    .getOrderKeyBeforeTab(
-                                      filteredTabEntities
-                                          .value[newIndex + 1]
-                                          .tabId,
-                                      containerId,
-                                    );
-                              }
-                            }
-
-                            await ref
-                                .read(tabDataRepositoryProvider.notifier)
-                                .assignOrderKey(tabId, key);
-                          },
-                          childBuilder: (itemBuilder) {
-                            return GridView.builder(
-                              key: gridViewKey,
-                              controller: controller,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    //Sync values for itemHeight calculation _calculateItemHeight
-                                    childAspectRatio: 0.75,
-                                    mainAxisSpacing: 8.0,
-                                    crossAxisSpacing: 8.0,
-                                    crossAxisCount: crossAxisCount,
-                                  ),
-                              itemCount: itemCount,
-                              itemBuilder: (context, index) =>
-                                  itemBuilder(tabs[index], index),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
+        NestedScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverToBoxAdapter(
+              child: DraggableScrollableHeader(
+                controller: draggableScrollableController,
+                child: _TabSheetHeader(
+                  onClose: onClose,
+                  treeViewEnabled: false,
+                ),
               ),
             ),
           ],
+          body: HookConsumer(
+            builder: (context, ref, child) {
+              final gridViewKey = useMemoized(() => GlobalKey());
+
+              final containerId = ref.watch(selectedContainerProvider);
+
+              final filteredTabEntities = ref.watch(
+                seamlessFilteredTabEntitiesProvider(
+                  searchPartition: TabSearchPartition.preview,
+                  // ignore: document_ignores using fast equatable
+                  // ignore: provider_parameters
+                  containerFilter: ContainerFilterById(
+                    containerId: containerId,
+                  ),
+                  groupTrees: false,
+                ),
+              );
+
+              final tabSuggestionsEnabled = ref.watch(
+                tabSuggestionsControllerProvider,
+              );
+              final enableAiFeatures = ref.watch(
+                generalSettingsRepositoryProvider.select(
+                  (settings) => settings.enableLocalAiFeatures,
+                ),
+              );
+              final suggestedTabEntities = ref.watch(
+                suggestedTabEntitiesProvider(
+                  (enableAiFeatures && tabSuggestionsEnabled)
+                      ? containerId
+                      : null,
+                ),
+              );
+
+              final itemCount =
+                  filteredTabEntities.value.length +
+                  suggestedTabEntities.value.length;
+
+              final activeTab = ref.watch(selectedTabProvider);
+
+              final crossAxisCount = useMemoized(() {
+                final calculatedCount = _calculateCrossAxisItemCount(
+                  screenWidth: MediaQuery.of(context).size.width,
+                  horizontalPadding: 4.0,
+                  crossAxisSpacing: 8.0,
+                );
+
+                return math.max(math.min(calculatedCount, itemCount), 2);
+              }, [MediaQuery.of(context).size.width, itemCount]);
+
+              final itemHeight = useMemoized(
+                () => _calculateItemHeight(
+                  screenWidth: MediaQuery.of(context).size.width,
+                  childAspectRatio: 0.75,
+                  horizontalPadding: 4.0,
+                  mainAxisSpacing: 8.0,
+                  crossAxisSpacing: 8.0,
+                  crossAxisCount: crossAxisCount,
+                ),
+                [MediaQuery.of(context).size.width, crossAxisCount],
+              );
+
+              final lastScroll = useRef<String?>(null);
+              final scrollControllerIsAttached = useListenableSelector(
+                sheetScrollController,
+                () => sheetScrollController.hasClients,
+              );
+
+              useEffect(() {
+                if (scrollControllerIsAttached) {
+                  if (lastScroll.value != activeTab) {
+                    final index = filteredTabEntities.value.indexWhere(
+                      (entity) => entity.tabId == activeTab,
+                    );
+
+                    if (index > -1) {
+                      final offset = (index ~/ 2) * itemHeight;
+
+                      if (offset != sheetScrollController.offset) {
+                        lastScroll.value = activeTab;
+
+                        unawaited(
+                          sheetScrollController.animateTo(
+                            offset,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                          ),
+                        );
+                      }
+                    }
+                  }
+                }
+
+                return null;
+              }, [filteredTabEntities, activeTab, scrollControllerIsAttached]);
+
+              final tabs = useMemoized(() {
+                return [
+                  ...filteredTabEntities.value.map(
+                    (entity) => CustomDraggable(
+                      key: Key(entity.tabId),
+                      data: TabDragData(entity.tabId),
+                      child: _TabDraggable(entity: entity, onClose: onClose),
+                    ),
+                  ),
+                  ...suggestedTabEntities.value.map(
+                    (entity) => CustomDraggable(
+                      key: Key('suggested_${entity.tabId}'),
+                      child: _TabDraggable(
+                        entity: entity,
+                        onClose: onClose,
+                        suggestedContainerId: containerId,
+                      ),
+                    ),
+                  ),
+                ];
+              }, [filteredTabEntities, suggestedTabEntities]);
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: FadingScroll(
+                  fadingSize: 5,
+                  controller: sheetScrollController,
+                  builder: (context, controller) {
+                    return ReorderableBuilder.builder(
+                      //Rebuild when cross axis count changes
+                      key: ValueKey(crossAxisCount),
+                      scrollController: controller,
+                      itemCount: itemCount,
+                      onDragStarted: (index) {
+                        ref.read(willAcceptDropProvider.notifier).clear();
+                      },
+                      onReorderPositions: (positions) async {
+                        assert(
+                          positions.length == 1,
+                          'Not ready for multiple reorders',
+                        );
+
+                        final oldIndex = positions.first.oldIndex;
+                        final newIndex = positions.first.newIndex;
+
+                        final containerRepository = ref.read(
+                          containerRepositoryProvider.notifier,
+                        );
+
+                        //Suggestions are at the end and not reorderable, so skip
+                        if (oldIndex >= filteredTabEntities.value.length) {
+                          return;
+                        }
+
+                        final tabId = filteredTabEntities.value[oldIndex].tabId;
+                        final containerId = await ref
+                            .read(tabDataRepositoryProvider.notifier)
+                            .getContainerTabId(tabId);
+
+                        final String key;
+                        if (newIndex <= 0) {
+                          key = await containerRepository.getLeadingOrderKey(
+                            containerId,
+                          );
+                        } else if (newIndex >=
+                            filteredTabEntities.value.length - 1) {
+                          key = await containerRepository.getTrailingOrderKey(
+                            containerId,
+                          );
+                        } else {
+                          if (newIndex < oldIndex) {
+                            key = await containerRepository.getOrderKeyAfterTab(
+                              filteredTabEntities.value[newIndex - 1].tabId,
+                              containerId,
+                            );
+                          } else {
+                            key = await containerRepository
+                                .getOrderKeyBeforeTab(
+                                  filteredTabEntities.value[newIndex + 1].tabId,
+                                  containerId,
+                                );
+                          }
+                        }
+
+                        await ref
+                            .read(tabDataRepositoryProvider.notifier)
+                            .assignOrderKey(tabId, key);
+                      },
+                      childBuilder: (itemBuilder) {
+                        return GridView.builder(
+                          key: gridViewKey,
+                          controller: controller,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            //Sync values for itemHeight calculation _calculateItemHeight
+                            childAspectRatio: 0.75,
+                            mainAxisSpacing: 8.0,
+                            crossAxisSpacing: 8.0,
+                            crossAxisCount: crossAxisCount,
+                          ),
+                          itemCount: itemCount,
+                          itemBuilder: (context, index) =>
+                              itemBuilder(tabs[index], index),
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(
