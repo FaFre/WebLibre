@@ -31,8 +31,8 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28"  />
 
+    <!-- Fenix only uses this in debug manifest -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
