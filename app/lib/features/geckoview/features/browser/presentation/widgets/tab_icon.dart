@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
@@ -46,12 +48,16 @@ class TabIcon extends HookConsumerWidget {
     }, [state.icon, state.url]);
 
     return Skeletonizer(
-      enabled:
-          icon.connectionState != ConnectionState.done && icon.data == null,
+      enabled: icon.connectionState != ConnectionState.done,
       child: Skeleton.replace(
         replacement: Bone.icon(size: iconSize),
         child: RepaintBoundary(
-          child: RawImage(image: icon.data, height: iconSize, width: iconSize),
+          child:
+              icon.data.mapNotNull(
+                (icon) =>
+                    RawImage(image: icon, height: iconSize, width: iconSize),
+              ) ??
+              Icon(MdiIcons.web, size: iconSize),
         ),
       ),
     );

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -40,10 +41,16 @@ class WebsiteTitleTile extends HookConsumerWidget {
         skipLoadingOnReload: true,
         data: (info) {
           return ListTile(
-            leading: RawImage(
-              image: info.favicon?.image.value,
-              height: 24,
-              width: 24,
+            leading: RepaintBoundary(
+              child:
+                  info.favicon.mapNotNull(
+                    (favicon) => RawImage(
+                      image: favicon.image.value,
+                      height: 24,
+                      width: 24,
+                    ),
+                  ) ??
+                  const Icon(MdiIcons.web, size: 24),
             ),
             contentPadding: EdgeInsets.zero,
             title: Text(

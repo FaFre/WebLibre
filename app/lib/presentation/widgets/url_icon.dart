@@ -40,7 +40,7 @@ class UrlIcon extends HookConsumerWidget {
     );
 
     return Skeletonizer(
-      enabled: !icon.hasData,
+      enabled: icon.connectionState != ConnectionState.done,
       child: SizedBox.square(
         dimension: iconSize,
         child: (icon.data != null)

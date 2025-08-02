@@ -20,6 +20,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
@@ -91,11 +92,15 @@ class HistorySuggestions extends HookConsumerWidget {
 
                       return ListTile(
                         leading: RepaintBoundary(
-                          child: RawImage(
-                            image: icon.data?.value,
-                            height: 24,
-                            width: 24,
-                          ),
+                          child:
+                              icon.data?.value.mapNotNull(
+                                (favicon) => RawImage(
+                                  image: favicon,
+                                  height: 24,
+                                  width: 24,
+                                ),
+                              ) ??
+                              const Icon(MdiIcons.web, size: 24),
                         ),
                         title: suggestion.title.mapNotNull(
                           (title) => Text(title),
