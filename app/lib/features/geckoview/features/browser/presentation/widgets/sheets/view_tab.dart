@@ -61,12 +61,14 @@ class ViewTabSheetWidget extends HookConsumerWidget {
   final ScrollController sheetScrollController;
   final DraggableScrollableController draggableScrollableController;
   final VoidCallback onClose;
+  final double initialHeight;
 
   const ViewTabSheetWidget({
     required this.initialTabState,
     required this.sheetScrollController,
     required this.draggableScrollableController,
     required this.onClose,
+    required this.initialHeight,
   });
 
   @override
@@ -99,7 +101,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
               await draggableScrollableController.animateTo(
                 relative,
                 duration: const Duration(milliseconds: 150),
-                curve: Curves.bounceIn,
+                curve: Curves.easeInOut,
               );
               scrolledTo.value = relative;
             }
@@ -110,25 +112,26 @@ class ViewTabSheetWidget extends HookConsumerWidget {
       return null;
     });
 
-    final changes = useRef(0.0);
+    final bottomInsets = useRef(0.0);
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final diff =
             ((MediaQuery.of(context).viewInsets.bottom / 2) /
                 MediaQuery.of(context).size.height) -
-            changes.value;
+            bottomInsets.value;
 
         draggableScrollableController.jumpTo(
           draggableScrollableController.size + diff,
         );
 
-        changes.value += diff;
+        bottomInsets.value += diff;
       });
 
       return null;
     }, [MediaQuery.of(context).viewInsets.bottom]);
 
     return NestedScrollView(
+      physics: const NeverScrollableScrollPhysics(),
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         SliverToBoxAdapter(
           child: DraggableScrollableHeader(
@@ -140,8 +143,22 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 0.0),
                   child: GestureDetector(
-                    onTap: () {
-                      draggableScrollableController.jumpTo(1.0);
+                    onTap: () async {
+                      if (draggableScrollableController.size > 0.95) {
+                        await draggableScrollableController.animateTo(
+                          (scrolledTo.value > 0.0)
+                              ? scrolledTo.value
+                              : initialHeight,
+                          duration: const Duration(milliseconds: 150),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        await draggableScrollableController.animateTo(
+                          1.0,
+                          duration: const Duration(milliseconds: 150),
+                          curve: Curves.easeInOut,
+                        );
+                      }
                     },
                     child: WebsiteTitleTile(initialTabState),
                   ),

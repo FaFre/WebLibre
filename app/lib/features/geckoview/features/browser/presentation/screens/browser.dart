@@ -368,10 +368,12 @@ class _ViewUrlSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draggableScrollableController = useDraggableScrollableController();
 
+    final initialHeight = 172.0 / MediaQuery.of(context).size.height;
+
     return DraggableScrollableSheet(
       controller: draggableScrollableController,
       expand: false,
-      initialChildSize: 172.0 / MediaQuery.of(context).size.height,
+      initialChildSize: initialHeight,
       minChildSize: 0.1,
       maxChildSize: maxChildSize,
       builder: (context, scrollController) {
@@ -387,6 +389,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
             onClose: () {
               ref.read(bottomSheetControllerProvider.notifier).dismiss();
             },
+            initialHeight: initialHeight,
           ),
         );
       },
