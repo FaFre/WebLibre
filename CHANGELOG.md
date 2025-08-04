@@ -1,3 +1,9 @@
+## 0.9.17
+
+* Reworked Tab UI into bottom sheet
+* Adjusted Android permissions
+* Improved Favicon handling
+
 ## 0.9.16-2
 
 * Fix icon caching issue
