@@ -144,7 +144,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 0.0),
                   child: GestureDetector(
                     onTap: () async {
-                      if (draggableScrollableController.size > 0.95) {
+                      if (draggableScrollableController.size > 0.85) {
                         await draggableScrollableController.animateTo(
                           (scrolledTo.value > 0.0)
                               ? scrolledTo.value
