@@ -5,6 +5,7 @@ class Intent {
   final String? action;
   final String? data;
   final List<String> categories;
+  final String? mimeType;
   final Map<String, Object?> extra;
 
   Intent({
@@ -12,6 +13,7 @@ class Intent {
     required this.action,
     required this.data,
     required this.categories,
+    required this.mimeType,
     required this.extra,
   });
 }

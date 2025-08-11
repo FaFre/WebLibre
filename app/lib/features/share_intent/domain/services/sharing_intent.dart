@@ -20,6 +20,8 @@
 import 'dart:async';
 
 import 'package:mime/mime.dart' as mime;
+import 'package:nullability/nullability.dart';
+import 'package:path/path.dart' as p;
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
@@ -44,13 +46,37 @@ final _sharingIntentTransformer =
 
         if (data != null) {
           if (uri_to_file.isUriSupported(data)) {
-            final file = await uri_to_file.toFile(data);
-            final mimeType = mime.lookupMimeType(file.path);
-            switch (mimeType) {
-              case 'application/pdf':
-                sink.add(ReceivedIntentParameter(data, null));
-              default:
-                logger.w('Unhandled mime type: $mimeType');
+            var path = data;
+            if (p.extension(data).whenNotEmpty == null) {
+              if (intent.mimeType.whenNotEmpty != null) {
+                final ext = mime.extensionFromMime(intent.mimeType!);
+                if (ext != null) {
+                  path = p.setExtension(path, '.$ext');
+                } else {
+                  logger.w(
+                    'Could not determine file extension for: ${intent.mimeType}',
+                  );
+                }
+              } else {
+                logger.w(
+                  'Received intent without extension and mime type $path',
+                );
+              }
+            }
+
+            try {
+              final file = await uri_to_file.toFile(path);
+              final mimeType = mime.lookupMimeType(file.path);
+              switch (mimeType) {
+                case 'application/pdf':
+                  sink.add(ReceivedIntentParameter(path, null));
+                default:
+                  logger.w('Unhandled mime type: $mimeType');
+              }
+            } catch (e) {
+              logger.e('Failed to convert URI to file: $e');
+              // Fallback: pass the original URI
+              sink.add(ReceivedIntentParameter(data, null));
             }
           } else {
             sink.add(ReceivedIntentParameter(data, null));

@@ -3,6 +3,7 @@ package eu.weblibre.simple_intent_receiver
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -30,10 +31,8 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     activity = binding.activity
     binding.addOnNewIntentListener(this)
 
-    // Process the initial intent if available
     binding.activity.intent?.let { intent ->
-      val uri = intent.toUri(0);
-
+      val uri = intent.toUri(0)
       if (lastHandledIntent != uri) {
         handleIntent(intent)
         lastHandledIntent = uri
@@ -55,15 +54,43 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
   }
 
   override fun onNewIntent(intent: Intent): Boolean {
-    // Update the activity's intent to ensure proper state
     activity?.setIntent(intent)
     return handleIntent(intent)
   }
 
   private fun handleIntent(intent: Intent): Boolean {
-    // Check if this intent is coming from a different task
+    // Grant URI permissions for content URIs
+    intent.data?.let { uri ->
+      if (uri.scheme == "content") {
+        try {
+          activity?.grantUriPermission(
+            context.packageName,
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+          )
+        } catch (e: Exception) {
+          Log.w("SimpleIntentReceiver", "Could not grant URI permission for: $uri", e)
+        }
+      }
+    }
+
+    // Handle SEND action with STREAM extra
+    intent.getStringExtra(Intent.EXTRA_STREAM)?.let { streamUri ->
+      try {
+        val uri = Uri.parse(streamUri)
+        if (uri.scheme == "content") {
+          activity?.grantUriPermission(
+            context.packageName,
+            uri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+          )
+        }
+      } catch (e: Exception) {
+        Log.w("SimpleIntentReceiver", "Could not grant URI permission for stream: $streamUri", e)
+      }
+    }
+
     if (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0) {
-      // Clear any existing tasks with this activity
       intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 
@@ -77,25 +104,20 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     val data = intent.dataString
     val fromPackageName = intent.getPackage()
 
-    // Extract categories
     val categories = ArrayList<String>()
     intent.categories?.let {
       categories.addAll(it)
     }
 
-    // Extract extras
     val extras = HashMap<String, Any?>()
     intent.extras?.let { bundle ->
       for (key in bundle.keySet()) {
         try {
           when (val value = bundle.get(key)) {
-            // Handle Bundle objects specially
             is Bundle -> {
-              // Convert nested Bundle to Map
               val bundleMap = HashMap<String, Any?>()
               for (bundleKey in value.keySet()) {
                 val bundleValue = value.get(bundleKey)
-                // Only add primitive types and strings that can be safely serialized
                 if (bundleValue == null || bundleValue is String ||
                   bundleValue is Boolean || bundleValue is Int ||
                   bundleValue is Long || bundleValue is Double ||
@@ -107,12 +129,10 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
               }
               extras[key] = bundleMap
             }
-            // Handle other types that Flutter can serialize
             null, is String, is Boolean, is Int, is Long, is Double, is Float,
             is ByteArray, is IntArray, is LongArray, is DoubleArray, is FloatArray -> {
               extras[key] = value
             }
-            // For any other types, convert to string
             else -> {
               extras[key] = value.toString()
             }
@@ -129,6 +149,7 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
       action = action,
       data = data,
       categories = categories,
+      mimeType = intent.type,
       extra = extras
     )
   }
