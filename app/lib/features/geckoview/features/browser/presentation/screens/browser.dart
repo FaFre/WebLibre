@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_appearance_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -182,6 +183,14 @@ class BrowserScreen extends HookConsumerWidget {
                         );
 
                         await controller.stopLoading();
+                        return true;
+                      } else if (tabState?.readerableState.active == true) {
+                        lastBackButtonPress.value = null;
+
+                        await ref
+                            .read(readerableScreenControllerProvider.notifier)
+                            .toggleReaderView(false);
+
                         return true;
                       } else if (tabState?.historyState.canGoBack == true) {
                         lastBackButtonPress.value = null;
