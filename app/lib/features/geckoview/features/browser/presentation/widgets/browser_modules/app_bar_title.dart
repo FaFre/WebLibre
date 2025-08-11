@@ -46,6 +46,8 @@ class AppBarTitle extends HookConsumerWidget {
           color: Theme.of(context).colorScheme.error,
           size: 14,
         );
+      } else if (tabState.readerableState.active) {
+        return const Icon(MdiIcons.lockMinus, size: 14);
       } else if (!tabState.securityInfoState.secure) {
         return Icon(
           MdiIcons.lockAlert,
