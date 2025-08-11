@@ -32,6 +32,7 @@ import 'package:socks5_proxy/socks_client.dart';
 import 'package:universal_io/io.dart';
 import 'package:weblibre/core/http_error_handler.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/extensions/http_encoding.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/web_feed/utils/feed_finder.dart';
@@ -240,7 +241,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
             }
           }
 
-          final document = html_parser.parse(response.body);
+          final document = html_parser.parse(response.bodyUnicodeFallback);
 
           final title = document.querySelector('title')?.text;
           final resources = _extractIcons(baseUri, document);

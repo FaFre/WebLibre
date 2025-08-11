@@ -21,6 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/extensions/http_encoding.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_parse_result.dart';
 import 'package:weblibre/features/web_feed/utils/feed_parser.dart';
 
@@ -44,7 +45,10 @@ class FeedReader extends _$FeedReader {
             .get(url)
             .timeout(const Duration(seconds: 30));
 
-        final parser = FeedParser.parse(url: url, xmlString: response.body);
+        final parser = FeedParser.parse(
+          url: url,
+          xmlString: response.bodyUnicodeFallback,
+        );
         final result = FeedParseResult(
           feedData: parser.readGeneralData(),
           articleData: parser.readArticles(),
