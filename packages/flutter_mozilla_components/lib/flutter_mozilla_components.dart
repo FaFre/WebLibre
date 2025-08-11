@@ -45,6 +45,7 @@ export 'src/pigeons/gecko.g.dart'
         IconType,
         ImageHitResult,
         ImageSrcHitResult,
+        LogLevel,
         PhoneHitResult,
         Resource,
         ResourceSize,

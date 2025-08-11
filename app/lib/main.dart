@@ -24,7 +24,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
-    show GeckoBrowserService;
+    show GeckoBrowserService, LogLevel;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/error_observer.dart';
@@ -58,7 +58,9 @@ void main() async {
 
   //Ensure everything is ready
   await Future.delayed(Duration.zero);
-  await GeckoBrowserService().initialize();
+  await GeckoBrowserService().initialize(
+    kDebugMode ? LogLevel.debug : LogLevel.warn,
+  );
 
   await HomeWidget.setAppGroupId('weblibre');
 

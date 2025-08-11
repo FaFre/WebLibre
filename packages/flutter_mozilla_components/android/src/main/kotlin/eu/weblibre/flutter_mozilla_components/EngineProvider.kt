@@ -17,12 +17,17 @@ import mozilla.components.concept.engine.DefaultSettings
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.webcompat.WebCompatFeature
+import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 
 object EngineProvider {
     private var runtime: GeckoRuntime? = null
+
+    private val components by lazy {
+        requireNotNull(GlobalComponents.components) { "Components not initialized" }
+    }
 
     @Synchronized
     fun getOrCreateRuntime(context: Context): GeckoRuntime {
@@ -38,9 +43,8 @@ object EngineProvider {
             builder.aboutConfigEnabled(true)
             builder.extensionsProcessEnabled(true)
             builder.extensionsWebAPIEnabled(true)
-
-            // Disable output for now to improve performance
-            // builder.consoleOutput(true)
+            builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
+            builder.consoleOutput(components.logLevel == Log.Priority.DEBUG)
 
             runtime = GeckoRuntime.create(context, builder.build())
         }

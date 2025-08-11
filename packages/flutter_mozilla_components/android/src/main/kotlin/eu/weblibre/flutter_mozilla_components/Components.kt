@@ -28,11 +28,13 @@ import mozilla.components.feature.downloads.DefaultFileSizeFormatter
 import mozilla.components.feature.downloads.DownloadEstimator
 import mozilla.components.feature.downloads.FileSizeFormatter
 import mozilla.components.support.base.android.NotificationsDelegate
+import mozilla.components.support.base.log.Log
 
 class Components(private val context: Context,
                  val flutterEvents: GeckoStateEvents,
                  val readerViewController: ReaderViewController,
                  val selectionAction: SelectionActionDelegate,
+                 val logLevel: Log.Priority,
                  private val addonEvents: GeckoAddonEvents,
                  private val tabContentEvents: GeckoTabContentEvents,
                  private val extensionEvents: BrowserExtensionEvents

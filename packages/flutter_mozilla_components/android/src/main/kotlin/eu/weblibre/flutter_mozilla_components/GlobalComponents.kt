@@ -52,7 +52,8 @@ object GlobalComponents {
         selectionAction: SelectionActionDelegate,
         addonEvents: GeckoAddonEvents,
         tabContentEvents: GeckoTabContentEvents,
-        extensionEvents: BrowserExtensionEvents
+        extensionEvents: BrowserExtensionEvents,
+        logLevel: Log.Priority
     ) {
         Logger.debug("Creating new components")
 
@@ -61,6 +62,7 @@ object GlobalComponents {
             flutterEvents,
             readerViewController,
             selectionAction,
+            logLevel,
             addonEvents,
             tabContentEvents,
             extensionEvents

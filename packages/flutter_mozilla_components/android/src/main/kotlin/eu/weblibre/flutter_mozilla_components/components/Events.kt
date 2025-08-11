@@ -159,7 +159,6 @@ class Events(
                 }
                 .debounce { 50 }
                 .collect { tab ->
-                    logger.info("title: ${tab.content.title} ${tab.content.url}")
                     flutterEvents.onTabContentStateChange(
                         System.currentTimeMillis(),
                         TabContentState(

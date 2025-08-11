@@ -32,11 +32,12 @@
 }
 
 ####################################################################################################
-# Remove debug logs from release builds
+# REMOVE all Log messages except warnings and errors
 ####################################################################################################
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);
     public static int v(...);
+    public static int i(...);
     public static int d(...);
 }
 

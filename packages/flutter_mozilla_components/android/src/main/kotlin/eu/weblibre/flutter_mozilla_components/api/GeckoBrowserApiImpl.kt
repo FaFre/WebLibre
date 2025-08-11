@@ -37,6 +37,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.LogLevel
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewEvents
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -45,6 +46,26 @@ import mozilla.components.browser.state.action.SystemAction
 import mozilla.components.feature.addons.logger
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.sink.AndroidLogSink
+import mozilla.components.support.base.log.sink.LogSink
+
+class PriorityAwareLogSink(
+    private val minLogPriority: Log.Priority,
+    private val androidLogSink: LogSink,
+) : LogSink {
+
+    override fun log(
+        priority: Log.Priority,
+        tag: String?,
+        throwable: Throwable?,
+        message: String,
+    ) {
+        if (priority < minLogPriority) {
+            return
+        }
+
+        androidLogSink.log(priority, tag, throwable, message)
+    }
+}
 
 /**
  * Implementation of GeckoBrowserApi that handles browser-related operations
@@ -94,12 +115,19 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         isPlatformViewRegistered = false
     }
 
-    override fun initialize() {
+    override fun initialize(logLevel: LogLevel) {
         synchronized(this) {
             if(!isGeckoInitialized) {
-                Log.addSink(AndroidLogSink())
+                val level = when(logLevel) {
+                    LogLevel.DEBUG -> Log.Priority.DEBUG
+                    LogLevel.INFO -> Log.Priority.INFO
+                    LogLevel.WARN -> Log.Priority.WARN
+                    LogLevel.ERROR -> Log.Priority.ERROR
+                };
 
-                setupGeckoEngine()
+                Log.addSink(PriorityAwareLogSink(level, AndroidLogSink("WebLibre")))
+
+                setupGeckoEngine(level)
                 isGeckoInitialized = true
             }
         }
@@ -115,7 +143,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         return false
     }
 
-    private fun setupGeckoEngine() {
+    private fun setupGeckoEngine(logLevel: Log.Priority) {
         val selectionActionEvents = GeckoSelectionActionEvents(_flutterPluginBinding.binaryMessenger)
 
         val selectionActionDelegate = DefaultSelectionActionDelegate(selectionActionEvents) { actions ->
@@ -144,7 +172,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             selectionActionDelegate,
             addonEvents,
             tabContentEvents,
-            extensionEvents
+            extensionEvents,
+            logLevel
         )
 
         GeckoEngineSettingsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoEngineSettingsApiImpl())

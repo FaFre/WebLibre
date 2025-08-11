@@ -732,6 +732,8 @@ class ShareInternetResourceState {
   );
 }
 
+enum LogLevel { debug, info, warn, error }
+
 @ConfigurePigeon(
   PigeonOptions(
     dartOut: 'lib/src/pigeons/gecko.g.dart',
@@ -746,7 +748,7 @@ class ShareInternetResourceState {
 )
 @HostApi()
 abstract class GeckoBrowserApi {
-  void initialize();
+  void initialize(LogLevel logLevel);
   bool showNativeFragment();
   void onTrimMemory(int level);
 }
