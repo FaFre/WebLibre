@@ -258,6 +258,7 @@ class SingleTabPreview extends HookConsumerWidget {
   final String tabId;
   final String? activeTabId;
   final String? sourceSearchQuery;
+  final double deleteThreshold;
 
   final void Function() onClose;
 
@@ -266,6 +267,7 @@ class SingleTabPreview extends HookConsumerWidget {
     required this.activeTabId,
     required this.onClose,
     required this.sourceSearchQuery,
+    this.deleteThreshold = 100,
   }) : super(key: ValueKey(tabId));
 
   @override
@@ -276,46 +278,73 @@ class SingleTabPreview extends HookConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return TabPreview(
-      tab: tab,
-      isActive: tabId == activeTabId,
-      onTap: () async {
-        if (tabId != activeTabId) {
-          //Close first to avoid rebuilds
-          onClose();
-          await ref.read(tabRepositoryProvider.notifier).selectTab(tab.id);
-          if (sourceSearchQuery.isNotEmpty &&
-              ref.read(findInPageControllerProvider(tabId)) ==
-                  FindInPageState.hidden()) {
-            await ref
-                .read(findInPageControllerProvider(tabId).notifier)
-                .findAll(text: sourceSearchQuery!);
-          }
-        } else {
-          onClose();
-        }
-      },
-      onDeleteAll: (host) async {
-        final containerId = await ref
-            .read(tabDataRepositoryProvider.notifier)
-            .getContainerTabId(tab.id);
+    final dragStartPosition = useRef(Offset.zero);
+    final draggedDistance = useState(0.0);
 
-        await ref
-            .read(tabDataRepositoryProvider.notifier)
-            .closeAllTabsByHost(containerId, host);
+    return GestureDetector(
+      onHorizontalDragStart: (details) {
+        dragStartPosition.value = details.globalPosition;
+        draggedDistance.value = 0.0;
       },
-      // onDoubleTap: () {
-      //   ref.read(overlayDialogControllerProvider.notifier).show(
-      //         TabActionDialog(
-      //           initialTab: tab,
-      //           onDismiss:
-      //               ref.read(overlayDialogControllerProvider.notifier).dismiss,
-      //         ),
-      //       );
-      // },
-      onDelete: () async {
-        await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
+      onHorizontalDragUpdate: (details) {
+        final cappedDistance = math.min(
+          (dragStartPosition.value - details.globalPosition).dx.abs(),
+          deleteThreshold,
+        );
+
+        draggedDistance.value = cappedDistance;
       },
+      onHorizontalDragEnd: (details) async {
+        if (draggedDistance.value >= deleteThreshold) {
+          await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
+        }
+
+        draggedDistance.value = 0.0;
+      },
+      child: Opacity(
+        opacity: 1.0 - draggedDistance.value / deleteThreshold,
+        child: TabPreview(
+          tab: tab,
+          isActive: tabId == activeTabId,
+          onTap: () async {
+            if (tabId != activeTabId) {
+              //Close first to avoid rebuilds
+              onClose();
+              await ref.read(tabRepositoryProvider.notifier).selectTab(tab.id);
+              if (sourceSearchQuery.isNotEmpty &&
+                  ref.read(findInPageControllerProvider(tabId)) ==
+                      FindInPageState.hidden()) {
+                await ref
+                    .read(findInPageControllerProvider(tabId).notifier)
+                    .findAll(text: sourceSearchQuery!);
+              }
+            } else {
+              onClose();
+            }
+          },
+          onDeleteAll: (host) async {
+            final containerId = await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .getContainerTabId(tab.id);
+
+            await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .closeAllTabsByHost(containerId, host);
+          },
+          // onDoubleTap: () {
+          //   ref.read(overlayDialogControllerProvider.notifier).show(
+          //         TabActionDialog(
+          //           initialTab: tab,
+          //           onDismiss:
+          //               ref.read(overlayDialogControllerProvider.notifier).dismiss,
+          //         ),
+          //       );
+          // },
+          onDelete: () async {
+            await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
+          },
+        ),
+      ),
     );
   }
 }
