@@ -456,38 +456,36 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
               );
 
               final lastScroll = useRef<String?>(null);
-              final scrollControllerIsAttached = useListenableSelector(
-                sheetScrollController,
-                () => sheetScrollController.hasClients,
-              );
 
               useEffect(() {
-                if (scrollControllerIsAttached) {
-                  if (lastScroll.value != activeTab) {
-                    final index = filteredTabEntities.value.indexWhere(
-                      (entity) => entity.tabId == activeTab,
-                    );
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (sheetScrollController.hasClients) {
+                    if (lastScroll.value != activeTab) {
+                      final index = filteredTabEntities.value.indexWhere(
+                        (entity) => entity.tabId == activeTab,
+                      );
 
-                    if (index > -1) {
-                      final offset = (index ~/ 2) * itemHeight;
+                      if (index > -1) {
+                        final offset = (index ~/ 2) * itemHeight;
 
-                      if (offset != sheetScrollController.offset) {
-                        lastScroll.value = activeTab;
+                        if (offset != sheetScrollController.offset) {
+                          lastScroll.value = activeTab;
 
-                        unawaited(
-                          sheetScrollController.animateTo(
-                            offset,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                          ),
-                        );
+                          unawaited(
+                            sheetScrollController.animateTo(
+                              offset,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            ),
+                          );
+                        }
                       }
                     }
                   }
-                }
+                });
 
                 return null;
-              }, [filteredTabEntities, activeTab, scrollControllerIsAttached]);
+              }, [filteredTabEntities, activeTab]);
 
               final tabs = useMemoized(() {
                 return [
