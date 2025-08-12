@@ -24,9 +24,10 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
-    show GeckoBrowserService, LogLevel;
+    show GeckoBrowserService, GeckoLoggingService, LogLevel;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:logger/logger.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/defaults.dart';
@@ -58,6 +59,16 @@ void main() async {
 
   //Ensure everything is ready
   await Future.delayed(Duration.zero);
+
+  GeckoLoggingService.setUp((level, message) {
+    logger.log(switch (level) {
+      LogLevel.debug => Level.debug,
+      LogLevel.info => Level.info,
+      LogLevel.warn => Level.warning,
+      LogLevel.error => Level.error,
+    }, message);
+  });
+
   await GeckoBrowserService().initialize(
     kDebugMode ? LogLevel.debug : LogLevel.warn,
   );

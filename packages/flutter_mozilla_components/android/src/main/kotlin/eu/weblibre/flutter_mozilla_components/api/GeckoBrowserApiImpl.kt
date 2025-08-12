@@ -27,6 +27,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDownloadsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFindApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoIconsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
@@ -44,13 +45,15 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import mozilla.components.browser.state.action.SystemAction
 import mozilla.components.feature.addons.logger
+import mozilla.components.support.base.ext.getStacktraceAsString
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.sink.AndroidLogSink
 import mozilla.components.support.base.log.sink.LogSink
+import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
 class PriorityAwareLogSink(
     private val minLogPriority: Log.Priority,
-    private val androidLogSink: LogSink,
+    private val geckoLogging: GeckoLogging
 ) : LogSink {
 
     override fun log(
@@ -63,7 +66,22 @@ class PriorityAwareLogSink(
             return
         }
 
-        androidLogSink.log(priority, tag, throwable, message)
+        val level = when(priority) {
+            Log.Priority.DEBUG -> LogLevel.DEBUG
+            Log.Priority.INFO -> LogLevel.INFO
+            Log.Priority.WARN -> LogLevel.WARN
+            Log.Priority.ERROR -> LogLevel.ERROR
+        };
+
+        val logMessage: String = if (throwable != null) {
+            "$message\n${throwable.getStacktraceAsString()}"
+        } else {
+            message
+        }
+
+        runOnUiThread {
+            geckoLogging.onLog(level, logMessage) { _ -> }
+        }
     }
 }
 
@@ -118,6 +136,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     override fun initialize(logLevel: LogLevel) {
         synchronized(this) {
             if(!isGeckoInitialized) {
+                val geckoLogging = GeckoLogging(_flutterPluginBinding.binaryMessenger)
+
                 val level = when(logLevel) {
                     LogLevel.DEBUG -> Log.Priority.DEBUG
                     LogLevel.INFO -> Log.Priority.INFO
@@ -125,7 +145,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
                     LogLevel.ERROR -> Log.Priority.ERROR
                 };
 
-                Log.addSink(PriorityAwareLogSink(level, AndroidLogSink("WebLibre")))
+                Log.addSink(PriorityAwareLogSink(level, geckoLogging))
 
                 setupGeckoEngine(level)
                 isGeckoInitialized = true

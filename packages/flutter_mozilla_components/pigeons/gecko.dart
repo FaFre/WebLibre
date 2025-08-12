@@ -1052,6 +1052,11 @@ abstract class GeckoStateEvents {
   void onLongPress(int timestamp, String id, HitResult hitResult);
 }
 
+@FlutterApi()
+abstract class GeckoLogging {
+  void onLog(LogLevel level, String message);
+}
+
 @HostApi()
 abstract class ReaderViewEvents {
   void onToggleReaderView(bool enable);

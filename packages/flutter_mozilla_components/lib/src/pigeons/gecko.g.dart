@@ -4753,6 +4753,44 @@ abstract class GeckoStateEvents {
   }
 }
 
+abstract class GeckoLogging {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  void onLog(LogLevel level, String message);
+
+  static void setUp(GeckoLogging? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoLogging.onLog$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoLogging.onLog was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final LogLevel? arg_level = (args[0] as LogLevel?);
+          assert(arg_level != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoLogging.onLog was null, expected non-null LogLevel.');
+          final String? arg_message = (args[1] as String?);
+          assert(arg_message != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoLogging.onLog was null, expected non-null String.');
+          try {
+            api.onLog(arg_level!, arg_message!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+  }
+}
+
 class ReaderViewEvents {
   /// Constructor for [ReaderViewEvents].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default

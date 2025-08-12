@@ -3999,6 +3999,32 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
     }
   }
 }
+/** Generated class from Pigeon that represents Flutter messages that can be called from Kotlin. */
+class GeckoLogging(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by GeckoLogging. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  fun onLog(levelArg: LogLevel, messageArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoLogging.onLog$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(levelArg, messageArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+}
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface ReaderViewEvents {
   fun onToggleReaderView(enable: Boolean)
