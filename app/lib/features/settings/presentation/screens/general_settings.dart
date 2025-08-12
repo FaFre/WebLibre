@@ -23,6 +23,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
@@ -91,6 +92,116 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                                 (currentSettings) => currentSettings.copyWith
                                     .themeMode(value.first),
                               );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('New Tab Default'),
+                      subtitle: Text(
+                        'Choose the default type for manually created tabs',
+                      ),
+                      leading: Icon(MdiIcons.tab),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    Center(
+                      child: SegmentedButton(
+                        showSelectedIcon: false,
+                        segments: const [
+                          ButtonSegment(
+                            value: TabType.regular,
+                            label: Text('Regular'),
+                            icon: Icon(MdiIcons.tab),
+                          ),
+                          ButtonSegment(
+                            value: TabType.private,
+                            label: Text('Private'),
+                            icon: Icon(MdiIcons.tabUnselected),
+                          ),
+                        ],
+                        selected: {generalSettings.defaultCreateTabType},
+                        onSelectionChanged: (value) async {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .defaultCreateTabType(value.first),
+                              );
+                        },
+                        style: switch (generalSettings.defaultCreateTabType) {
+                          TabType.regular => null,
+                          TabType.private => SegmentedButton.styleFrom(
+                            selectedBackgroundColor: const Color(0x648000D7),
+                          ),
+                          TabType.child => null,
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('External Link Handling'),
+                      subtitle: Text(
+                        'Choose how external links open in WebLibre',
+                      ),
+                      leading: Icon(MdiIcons.tabPlus),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    Center(
+                      child: SegmentedButton(
+                        showSelectedIcon: false,
+                        segments: const [
+                          ButtonSegment(
+                            value: TabType.regular,
+                            label: Text('Regular'),
+                            icon: Icon(MdiIcons.tab),
+                          ),
+                          ButtonSegment(
+                            value: TabType.private,
+                            label: Text('Private'),
+                            icon: Icon(MdiIcons.tabUnselected),
+                          ),
+                        ],
+                        selected: {generalSettings.defaultIntentTabType},
+                        onSelectionChanged: (value) async {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .defaultIntentTabType(value.first),
+                              );
+                        },
+                        style: switch (generalSettings.defaultIntentTabType) {
+                          TabType.regular => null,
+                          TabType.private => SegmentedButton.styleFrom(
+                            selectedBackgroundColor: const Color(0x648000D7),
+                          ),
+                          TabType.child => null,
                         },
                       ),
                     ),

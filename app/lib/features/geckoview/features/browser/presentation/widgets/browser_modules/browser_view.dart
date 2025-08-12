@@ -313,13 +313,16 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 widget.suggestionTimeout) {
           //Don't do anything if a child route is active
           if (GoRouterState.of(context).topRoute?.name == BrowserRoute.name) {
+            final settings = ref.read(generalSettingsRepositoryProvider);
+
             unawaited(
               showSuggestNewTabMessage(
                 context,
                 onAdd: (searchText) async {
                   await SearchRoute(
                     tabType:
-                        ref.read(selectedTabTypeProvider) ?? TabType.regular,
+                        ref.read(selectedTabTypeProvider) ??
+                        settings.defaultCreateTabType,
                     searchText: searchText ?? SearchRoute.emptySearchText,
                   ).push(context);
                 },

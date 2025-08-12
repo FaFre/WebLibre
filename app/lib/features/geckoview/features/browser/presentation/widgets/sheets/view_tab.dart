@@ -215,7 +215,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                 onTap: () async {
                   final tabId = await ref
                       .read(tabRepositoryProvider.notifier)
-                      .addTab(url: initialTabState.url);
+                      .addTab(url: initialTabState.url, private: false);
 
                   if (context.mounted) {
                     //save reference before pop `ref` gets disposed

@@ -21,6 +21,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'general_settings.g.dart';
@@ -54,6 +55,8 @@ class GeneralSettings with FastEquatable {
   final bool createChildTabsOption;
   final bool showExtensionShortcut;
   final bool enableLocalAiFeatures;
+  final TabType defaultCreateTabType;
+  final TabType defaultIntentTabType;
 
   final bool proxyPrivateTabsTor;
 
@@ -68,6 +71,8 @@ class GeneralSettings with FastEquatable {
     required this.proxyPrivateTabsTor,
     required this.showExtensionShortcut,
     required this.enableLocalAiFeatures,
+    required this.defaultCreateTabType,
+    required this.defaultIntentTabType,
   });
 
   GeneralSettings.withDefaults({
@@ -81,6 +86,8 @@ class GeneralSettings with FastEquatable {
     bool? proxyPrivateTabsTor,
     bool? showExtensionShortcut,
     bool? enableLocalAiFeatures,
+    TabType? defaultCreateTabType,
+    TabType? defaultIntentTabType,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -90,7 +97,9 @@ class GeneralSettings with FastEquatable {
        createChildTabsOption = createChildTabsOption ?? false,
        proxyPrivateTabsTor = proxyPrivateTabsTor ?? false,
        showExtensionShortcut = showExtensionShortcut ?? false,
-       enableLocalAiFeatures = enableLocalAiFeatures ?? true;
+       enableLocalAiFeatures = enableLocalAiFeatures ?? true,
+       defaultCreateTabType = defaultCreateTabType ?? TabType.regular,
+       defaultIntentTabType = defaultIntentTabType ?? TabType.regular;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -107,7 +116,9 @@ class GeneralSettings with FastEquatable {
     defaultSearchSuggestionsProvider,
     createChildTabsOption,
     showExtensionShortcut,
-    proxyPrivateTabsTor,
     enableLocalAiFeatures,
+    defaultCreateTabType,
+    defaultIntentTabType,
+    proxyPrivateTabsTor,
   ];
 }

@@ -25,6 +25,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangListScreen extends HookConsumerWidget {
@@ -61,10 +62,14 @@ class BangListScreen extends HookConsumerWidget {
                           .read(selectedBangTriggerProvider().notifier)
                           .setTrigger(bang.trigger);
 
+                      final settings = ref.read(
+                        generalSettingsRepositoryProvider,
+                      );
+
                       SearchRoute(
                         tabType:
                             ref.read(selectedTabTypeProvider) ??
-                            TabType.regular,
+                            settings.defaultCreateTabType,
                       ).go(context);
                     },
                   );

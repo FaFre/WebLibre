@@ -605,8 +605,12 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
+              final settings = ref.read(generalSettingsRepositoryProvider);
+
               await SearchRoute(
-                tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
+                tabType:
+                    ref.read(selectedTabTypeProvider) ??
+                    settings.defaultCreateTabType,
               ).push(context);
 
               onClose();
@@ -782,8 +786,12 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
+              final settings = ref.read(generalSettingsRepositoryProvider);
+
               await SearchRoute(
-                tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
+                tabType:
+                    ref.read(selectedTabTypeProvider) ??
+                    settings.defaultCreateTabType,
               ).push(context);
 
               onClose();

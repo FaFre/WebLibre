@@ -207,9 +207,18 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 ),
                 MenuItemButton(
                   onPressed: () async {
+                    final isPrivate =
+                        ref
+                            .read(generalSettingsRepositoryProvider)
+                            .defaultCreateTabType ==
+                        TabType.private;
+
                     await ref
                         .read(tabRepositoryProvider.notifier)
-                        .addTab(url: ref.read(docsUriProvider));
+                        .addTab(
+                          url: ref.read(docsUriProvider),
+                          private: isPrivate,
+                        );
                   },
                   leadingIcon: const Icon(Icons.help),
                   child: const Text('Help and feedback'),
@@ -257,10 +266,17 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                         ),
                         MenuItemButton(
                           onPressed: () async {
+                            final isPrivate =
+                                ref
+                                    .read(generalSettingsRepositoryProvider)
+                                    .defaultCreateTabType ==
+                                TabType.private;
+
                             await ref
                                 .read(tabRepositoryProvider.notifier)
                                 .addTab(
                                   url: Uri.parse('https://addons.mozilla.org'),
+                                  private: isPrivate,
                                 );
                           },
                           leadingIcon: const Icon(MdiIcons.puzzlePlus),

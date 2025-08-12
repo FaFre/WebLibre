@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class BangDetails extends HookConsumerWidget {
@@ -86,10 +87,15 @@ class BangDetails extends HookConsumerWidget {
                     ),
                     onPressed: () async {
                       final url = Uri.parse(bangData.getTemplateUrl('').origin);
+                      final isPrivate =
+                          ref
+                              .read(generalSettingsRepositoryProvider)
+                              .defaultCreateTabType ==
+                          TabType.private;
 
                       await ref
                           .read(tabRepositoryProvider.notifier)
-                          .addTab(url: url);
+                          .addTab(url: url, private: isPrivate);
 
                       if (context.mounted) {
                         BrowserRoute().go(context);

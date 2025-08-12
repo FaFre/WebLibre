@@ -25,6 +25,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -38,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
@@ -64,7 +66,7 @@ class TabRepository extends _$TabRepository {
     String? parentId,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
     Source source = Internal.newTab,
-    bool private = false,
+    required bool private,
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
   }) async {
@@ -222,7 +224,7 @@ class TabRepository extends _$TabRepository {
     if (availableContainers.isNotEmpty) {
       //Last resort push new tab to avoid any authenticated tab is selected
       // ignore: avoid_redundant_argument_values
-      await addTab(selectTab: true);
+      await addTab(selectTab: true, private: false);
     }
   }
 
@@ -345,9 +347,17 @@ class TabRepository extends _$TabRepository {
       engineBoundIntentStreamProvider,
       (previous, next) {
         next.whenData((value) async {
+          final isPrivate =
+              ref
+                  .read(generalSettingsRepositoryProvider)
+                  .defaultIntentTabType ==
+              TabType.private;
+
           switch (value) {
             case SharedUrl():
-              _tabFromIntent.add(await addTab(url: value.url));
+              _tabFromIntent.add(
+                await addTab(url: value.url, private: isPrivate),
+              );
             case SharedText():
               final defaultSearchBang =
                   ref.read(selectedBangDataProvider()) ??
@@ -356,6 +366,7 @@ class TabRepository extends _$TabRepository {
               _tabFromIntent.add(
                 await addTab(
                   url: defaultSearchBang?.getTemplateUrl(value.text),
+                  private: isPrivate,
                 ),
               );
           }

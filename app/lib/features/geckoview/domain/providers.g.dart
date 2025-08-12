@@ -7,7 +7,7 @@ part of 'providers.dart';
 // **************************************************************************
 
 String _$selectionActionServiceHash() =>
-    r'ab6aeb105020a16ed24911acd73ba8553e5b3905';
+    r'f356434878b46fd443c8e3a8a48cf07c34a63b70';
 
 /// See also [selectionActionService].
 @ProviderFor(selectionActionService)

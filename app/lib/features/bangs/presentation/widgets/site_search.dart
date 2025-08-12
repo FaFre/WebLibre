@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
@@ -33,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/fixed_search_suggestions.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -82,7 +84,11 @@ class SiteSearch extends HookConsumerWidget {
           ref.read(bottomSheetControllerProvider.notifier).dismiss();
         } else if (bang != null) {
           final isPrivate =
-              ref.read(selectedTabStateProvider)?.isPrivate ?? false;
+              ref.read(selectedTabStateProvider)?.isPrivate ??
+              ref
+                      .read(generalSettingsRepositoryProvider)
+                      .defaultCreateTabType ==
+                  TabType.private;
 
           final searchUri = bang.getTemplateUrl(value);
 

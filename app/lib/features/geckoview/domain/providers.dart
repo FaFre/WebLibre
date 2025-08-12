@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
 
@@ -43,8 +44,11 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
     service.setActions([
       SearchAction((text) async {
         final router = await ref.read(routerProvider.future);
+        final settings = ref.read(generalSettingsRepositoryProvider);
         final route = SearchRoute(
-          tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
+          tabType:
+              ref.read(selectedTabTypeProvider) ??
+              settings.defaultCreateTabType,
           searchText: text,
         );
 
@@ -57,13 +61,19 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
 
         if (defaultSearchBang != null) {
           final currentTab = ref.read(selectedTabStateProvider);
+          final isPrivate =
+              currentTab?.isPrivate ??
+              ref
+                      .read(generalSettingsRepositoryProvider)
+                      .defaultCreateTabType ==
+                  TabType.private;
 
           await ref
               .read(tabRepositoryProvider.notifier)
               .addTab(
                 url: defaultSearchBang.getTemplateUrl(text),
                 parentId: currentTab?.id,
-                private: currentTab?.isPrivate ?? false,
+                private: isPrivate,
               );
         } else {
           logger.e('No default search bang found');

@@ -6,7 +6,7 @@ part of 'feed_reader.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$feedReaderHash() => r'301e01fa831c58723dc0ab118496f4fb34c38610';
+String _$feedReaderHash() => r'5d1ca364fe7ad702628a7f2bbd3e706876bc3111';
 
 /// See also [FeedReader].
 @ProviderFor(FeedReader)

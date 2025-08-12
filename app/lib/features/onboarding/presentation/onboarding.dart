@@ -144,7 +144,10 @@ class OnboardingScreen extends HookConsumerWidget {
 
                         await ref
                             .read(tabRepositoryProvider.notifier)
-                            .addTab(url: ref.read(docsUriProvider));
+                            .addTab(
+                              url: ref.read(docsUriProvider),
+                              private: false,
+                            );
 
                         ref.invalidate(routerProvider);
                       },

@@ -31,6 +31,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures);
 
+  GeneralSettings defaultCreateTabType(TabType defaultCreateTabType);
+
+  GeneralSettings defaultIntentTabType(TabType defaultIntentTabType);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -48,6 +52,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool proxyPrivateTabsTor,
     bool showExtensionShortcut,
     bool enableLocalAiFeatures,
+    TabType defaultCreateTabType,
+    TabType defaultIntentTabType,
   });
 }
 
@@ -99,6 +105,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(enableLocalAiFeatures: enableLocalAiFeatures);
 
   @override
+  GeneralSettings defaultCreateTabType(TabType defaultCreateTabType) =>
+      this(defaultCreateTabType: defaultCreateTabType);
+
+  @override
+  GeneralSettings defaultIntentTabType(TabType defaultIntentTabType) =>
+      this(defaultIntentTabType: defaultIntentTabType);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -116,6 +130,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
     Object? showExtensionShortcut = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
+    Object? defaultCreateTabType = const $CopyWithPlaceholder(),
+    Object? defaultIntentTabType = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder()
@@ -164,6 +180,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.enableLocalAiFeatures
           // ignore: cast_nullable_to_non_nullable
           : enableLocalAiFeatures as bool,
+      defaultCreateTabType: defaultCreateTabType == const $CopyWithPlaceholder()
+          ? _value.defaultCreateTabType
+          // ignore: cast_nullable_to_non_nullable
+          : defaultCreateTabType as TabType,
+      defaultIntentTabType: defaultIntentTabType == const $CopyWithPlaceholder()
+          ? _value.defaultIntentTabType
+          // ignore: cast_nullable_to_non_nullable
+          : defaultIntentTabType as TabType,
     );
   }
 }
@@ -196,6 +220,14 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
       proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
       showExtensionShortcut: json['showExtensionShortcut'] as bool?,
       enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
+      defaultCreateTabType: $enumDecodeNullable(
+        _$TabTypeEnumMap,
+        json['defaultCreateTabType'],
+      ),
+      defaultIntentTabType: $enumDecodeNullable(
+        _$TabTypeEnumMap,
+        json['defaultIntentTabType'],
+      ),
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
@@ -213,6 +245,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
       'createChildTabsOption': instance.createChildTabsOption,
       'showExtensionShortcut': instance.showExtensionShortcut,
       'enableLocalAiFeatures': instance.enableLocalAiFeatures,
+      'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
+      'defaultIntentTabType': _$TabTypeEnumMap[instance.defaultIntentTabType]!,
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
     };
 
@@ -237,4 +271,10 @@ const _$SearchSuggestionProvidersEnumMap = {
   SearchSuggestionProviders.ddg: 'ddg',
   SearchSuggestionProviders.kagi: 'kagi',
   SearchSuggestionProviders.qwant: 'qwant',
+};
+
+const _$TabTypeEnumMap = {
+  TabType.regular: 'regular',
+  TabType.private: 'private',
+  TabType.child: 'child',
 };

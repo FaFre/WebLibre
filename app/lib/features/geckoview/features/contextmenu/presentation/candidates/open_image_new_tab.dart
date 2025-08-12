@@ -22,9 +22,11 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class OpenImageInNewTab extends HookConsumerWidget {
@@ -43,6 +45,10 @@ class OpenImageInNewTab extends HookConsumerWidget {
       title: const Text('Open image in new tab'),
       onTap: () async {
         final currentTab = ref.read(selectedTabStateProvider);
+        final isPrivate =
+            currentTab?.isPrivate ??
+            ref.read(generalSettingsRepositoryProvider).defaultCreateTabType ==
+                TabType.private;
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)
@@ -50,7 +56,7 @@ class OpenImageInNewTab extends HookConsumerWidget {
               url: hitResult.tryGetLink(),
               parentId: currentTab?.id,
               selectTab: false,
-              private: currentTab?.isPrivate ?? false,
+              private: isPrivate,
             );
 
         if (context.mounted) {

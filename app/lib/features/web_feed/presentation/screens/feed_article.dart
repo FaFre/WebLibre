@@ -26,6 +26,7 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/extensions/atom.dart';
@@ -193,9 +194,18 @@ class FeedArticleScreen extends HookConsumerWidget {
                       if (articleLink != null)
                         IconButton(
                           onPressed: () async {
+                            final isPrivate =
+                                ref
+                                    .read(generalSettingsRepositoryProvider)
+                                    .defaultCreateTabType ==
+                                TabType.private;
+
                             await ref
                                 .read(tabRepositoryProvider.notifier)
-                                .addTab(url: articleLink.uri);
+                                .addTab(
+                                  url: articleLink.uri,
+                                  private: isPrivate,
+                                );
 
                             if (context.mounted) {
                               BrowserRoute().go(context);
@@ -231,9 +241,15 @@ class FeedArticleScreen extends HookConsumerWidget {
                         onTapLink: (text, href, title) async {
                           if (href.mapNotNull(Uri.tryParse)
                               case final Uri url) {
+                            final isPrivate =
+                                ref
+                                    .read(generalSettingsRepositoryProvider)
+                                    .defaultCreateTabType ==
+                                TabType.private;
+
                             await ref
                                 .read(tabRepositoryProvider.notifier)
-                                .addTab(url: url);
+                                .addTab(url: url, private: isPrivate);
 
                             if (context.mounted) {
                               showTabOpenedMessage(
