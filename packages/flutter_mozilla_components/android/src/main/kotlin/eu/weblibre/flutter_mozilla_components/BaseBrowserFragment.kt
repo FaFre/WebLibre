@@ -41,6 +41,7 @@ import mozilla.components.feature.session.SwipeRefreshFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsRules
 import mozilla.components.feature.sitepermissions.SitePermissionsRules.AutoplayAction
+import mozilla.components.feature.webauthn.WebAuthnFeature
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
@@ -69,6 +70,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val mediaSessionFullscreenFeature =
         ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
 
+    private val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
+
     private var pictureInPictureFeature: PictureInPictureFeature? = null
 
     private val sessionId: String?
@@ -88,6 +91,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     private val activityResultHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
         promptFeature,
+        webAuthnFeature
     )
 
     protected abstract fun createEngine(components: Components) : EngineView
@@ -298,6 +302,17 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             ),
             owner = this,
             view = binding.root,
+        )
+
+        webAuthnFeature.set(
+            feature = WebAuthnFeature(
+                engine = components.core.engine,
+                activity = requireActivity(),
+                exitFullScreen = components.useCases.sessionUseCases.exitFullscreen::invoke,
+                currentTab = { components.core.store.state.selectedTabId },
+            ),
+            owner = this,
+            view = view
         )
     }
 
