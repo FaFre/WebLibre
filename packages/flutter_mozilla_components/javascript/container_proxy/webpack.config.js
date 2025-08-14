@@ -34,13 +34,6 @@ module.exports = {
         loader: 'ts-loader',
         exclude: /node_modules/,
       },
-      {
-        test: /\.module\.scss$/i,
-        use: ['style-loader', 'css-modules-typescript-loader', {
-          loader: 'css-loader',
-          options: { modules: { localIdentName: '[name]__[local]--[hash:base64:5]' } }
-        }, 'sass-loader'],
-      },
     ]
   },
   plugins: [
