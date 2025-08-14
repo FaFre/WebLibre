@@ -1050,6 +1050,8 @@ abstract class GeckoStateEvents {
 
   void onFindResults(int timestamp, String id, List<FindResultState> results);
   void onLongPress(int timestamp, String id, HitResult hitResult);
+
+  void onScrollChange(int timestamp, String tabId, int scrollY);
 }
 
 @FlutterApi()

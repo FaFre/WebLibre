@@ -99,7 +99,7 @@ class BrowserScreen extends HookConsumerWidget {
           ),
         ),
         child: Scaffold(
-          bottomNavigationBar: Consumer(
+          bottomNavigationBar: HookConsumer(
             builder: (context, ref, child) {
               final tabInFullScreen = ref.watch(
                 selectedTabStateProvider.select(
@@ -107,8 +107,30 @@ class BrowserScreen extends HookConsumerWidget {
                 ),
               );
 
+              final hidden = useState(false);
+              final diffAcc = useRef(0.0);
+
+              ref.listen(
+                selectedTabScrollYProvider(const Duration(milliseconds: 250)),
+                (previous, next) {
+                  if (previous?.valueOrNull != null &&
+                      next.valueOrNull != null) {
+                    final diff = previous!.value! - next.value!;
+                    if (diff < 0) {
+                      diffAcc.value += diff;
+                      if (diffAcc.value.abs() > kToolbarHeight * 2) {
+                        hidden.value = true;
+                      }
+                    } else if (diff > 0) {
+                      diffAcc.value = 0.0;
+                      hidden.value = false;
+                    }
+                  }
+                },
+              );
+
               return Visibility(
-                visible: !tabInFullScreen,
+                visible: !tabInFullScreen && !hidden.value,
                 child: BrowserBottomAppBar(displayedSheet: displayedSheet),
               );
             },

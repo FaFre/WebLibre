@@ -19,6 +19,7 @@ typedef IconUpdateEvent = ({String url, Uint8List bytes});
 typedef ThumbnailEvent = ({String tabId, Uint8List? bytes});
 typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
 typedef LongPressEvent = ({String tabId, HitResult hitResult});
+typedef ScrollEvent = ({String tabId, int scrollY});
 
 class GeckoEventService extends GeckoStateEvents {
   // Stream controllers
@@ -37,6 +38,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _thumbnailSubject = PublishSubject<ThumbnailEvent>();
   final _findResultsSubject = PublishSubject<FindResultsEvent>();
   final _longPressSubject = PublishSubject<LongPressEvent>();
+  final _scrollEventSubject = PublishSubject<ScrollEvent>();
 
   final _tabAddedSubject = PublishSubject<String>();
 
@@ -56,6 +58,7 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<ThumbnailEvent> get thumbnailEvents => _thumbnailSubject.stream;
   Stream<FindResultsEvent> get findResultsEvent => _findResultsSubject.stream;
   Stream<LongPressEvent> get longPressEvent => _longPressSubject.stream;
+  Stream<ScrollEvent> get scrollEvent => _scrollEventSubject.stream;
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
 
@@ -166,6 +169,14 @@ class GeckoEventService extends GeckoStateEvents {
     _tabAddedSubject.addWhenMoreRecent(timestamp, null, tabId);
   }
 
+  @override
+  void onScrollChange(int timestamp, String tabId, int scrollY) {
+    _scrollEventSubject.addWhenMoreRecent(timestamp, tabId, (
+      tabId: tabId,
+      scrollY: scrollY,
+    ));
+  }
+
   GeckoEventService.setUp({
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
@@ -188,6 +199,7 @@ class GeckoEventService extends GeckoStateEvents {
     unawaited(_thumbnailSubject.close());
     unawaited(_findResultsSubject.close());
     unawaited(_longPressSubject.close());
+    unawaited(_scrollEventSubject.close());
     unawaited(_tabAddedSubject.close());
   }
 }

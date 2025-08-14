@@ -133,6 +133,15 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                     ) { _ -> }
                 }
             }
+            is ReaderAction.UpdateReaderScrollYAction -> {
+                runOnUiThread {
+                    flutterEvents.onScrollChange(
+                        System.currentTimeMillis(),
+                        action.tabId,
+                        action.scrollY.toLong()
+                    ) { _ -> }
+                }
+            }
             else -> {
                 //logger.debug("Event fired: " + action.javaClass.name)
             }

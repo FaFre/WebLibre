@@ -4338,6 +4338,8 @@ abstract class GeckoStateEvents {
 
   void onLongPress(int timestamp, String id, HitResult hitResult);
 
+  void onScrollChange(int timestamp, String tabId, int scrollY);
+
   static void setUp(GeckoStateEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
@@ -4741,6 +4743,37 @@ abstract class GeckoStateEvents {
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null HitResult.');
           try {
             api.onLongPress(arg_timestamp!, arg_id!, arg_hitResult!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onScrollChange$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onScrollChange was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_timestamp = (args[0] as int?);
+          assert(arg_timestamp != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onScrollChange was null, expected non-null int.');
+          final String? arg_tabId = (args[1] as String?);
+          assert(arg_tabId != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onScrollChange was null, expected non-null String.');
+          final int? arg_scrollY = (args[2] as int?);
+          assert(arg_scrollY != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onScrollChange was null, expected non-null int.');
+          try {
+            api.onScrollChange(arg_timestamp!, arg_tabId!, arg_scrollY!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
