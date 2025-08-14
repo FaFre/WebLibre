@@ -17,7 +17,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
-    "babel-loader": "^9.2.1",
+    "babel-loader": "^10.0.0",
     "clean-webpack-plugin": "^4.0.0",
     "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.96.1",
