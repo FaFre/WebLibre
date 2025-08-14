@@ -1,0 +1,37 @@
+version: 2
+updates:
+  # Dart (pub)
+  - package-ecosystem: "pub"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pub"
+    directory: "/packages/simple_intent_receiver"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pub"
+    directory: "/packages/flutter_mozilla_components"
+    schedule:
+      interval: "weekly"
+  # Node.js (npm, for JS/TS)
+  - package-ecosystem: "npm"
+    directory: "packages/flutter_mozilla_components/javascript/readability"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "packages/flutter_mozilla_components/javascript/container_proxy"
+    schedule:
+      interval: "weekly"
+  # Gradle (for Kotlin/Java)
+  - package-ecosystem: "gradle"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gradle"
+    directory: "/packages/simple_intent_receiver"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gradle"
+    directory: "/packages/flutter_mozilla_components"
+    schedule:
+      interval: "weekly"
