@@ -37,6 +37,7 @@
     "addons-linter": "^7.8.0",
     "chai": "^5.1.2",
     "copy-webpack-plugin": "^12.0.2",
+    "esm": "^3.2.25",
     "mocha": "^10.8.2",
     "sinon": "^8.1.1",
     "standardx": "^7.0.0",
