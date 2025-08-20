@@ -18,9 +18,10 @@ class Search(
 ) {
     val sessionSuggestions by lazy {
         SessionSuggestionProvider(
-            context.resources,
-            core.store,
-            useCases.tabsUseCases.selectTab,
+            store = core.store,
+            icons = core.icons,
+            selectTabUseCase = useCases.tabsUseCases.selectTab,
+            switchToTabDescription = "Switch to tab"
         )
     }
 

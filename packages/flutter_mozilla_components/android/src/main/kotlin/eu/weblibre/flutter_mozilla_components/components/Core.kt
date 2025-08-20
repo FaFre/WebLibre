@@ -160,7 +160,7 @@ class Core(private val context: Context,
         BrowserStore(
             middleware = listOf(
                 FlutterEventMiddleware(flutterEvents),
-                DownloadMiddleware(context, DownloadService::class.java),
+                DownloadMiddleware(context, DownloadService::class.java, {false}),
                 ThumbnailsMiddleware(thumbnailStorage),
                 ReaderViewMiddleware(),
 //                UndoMiddleware(),
