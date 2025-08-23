@@ -47,6 +47,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_appearance_button.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class BrowserScreen extends HookConsumerWidget {
@@ -80,38 +81,100 @@ class BrowserScreen extends HookConsumerWidget {
       },
     );
 
+    final themeData = useMemoized(
+      () => Theme.of(context).copyWith(
+        bottomSheetTheme: BottomSheetThemeData(
+          constraints: BoxConstraints(
+            maxWidth:
+                MediaQuery.of(context).size.width -
+                math.max(
+                  MediaQuery.of(context).padding.left * 2,
+                  MediaQuery.of(context).padding.right * 2,
+                ),
+          ),
+        ),
+      ),
+      [],
+    );
+
+    bool dismissOnThreshold(DraggableScrollableNotification notification) {
+      if (!context.mounted) return false;
+
+      if (notification.extent <= 0.1) {
+        ref.read(bottomSheetControllerProvider.notifier).dismiss();
+        return true;
+      } else {
+        ref.read(bottomSheetExtendProvider.notifier).add(notification.extent);
+      }
+
+      return false;
+    }
+
     return PopScope(
       //We need this for BackButtonListener to work downstream
       //No direct pop result will be handled here
       canPop: false,
       child: Theme(
-        data: Theme.of(context).copyWith(
-          bottomSheetTheme: BottomSheetThemeData(
-            //Remove M3 default of 640p
-            constraints: BoxConstraints(
-              maxWidth:
-                  MediaQuery.of(context).size.width -
-                  math.max(
-                    MediaQuery.of(context).padding.left * 2,
-                    MediaQuery.of(context).padding.right * 2,
-                  ),
-            ),
-          ),
-        ),
+        data: themeData,
         child: Scaffold(
           bottomNavigationBar: HookConsumer(
             builder: (context, ref, child) {
+              final tabId = ref.watch(selectedTabProvider);
+              final displayedSheet = ref.watch(bottomSheetControllerProvider);
+
               final tabInFullScreen = ref.watch(
                 selectedTabStateProvider.select(
                   (value) => value?.isFullScreen ?? false,
                 ),
               );
 
+              final autoHideTabBar = ref.watch(
+                generalSettingsWithDefaultsProvider.select(
+                  (value) => value.autoHideTabBar,
+                ),
+              );
+
+              if (!autoHideTabBar) {
+                return Visibility(
+                  visible: !tabInFullScreen,
+                  child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+                );
+              }
+
               final hidden = useState(false);
               final diffAcc = useRef(0.0);
 
+              useEffect(() {
+                hidden.value = false;
+                diffAcc.value = 0.0;
+
+                return null;
+              }, [tabId]);
+
               ref.listen(
-                selectedTabScrollYProvider(const Duration(milliseconds: 250)),
+                tabStateProvider(tabId).select((value) => value?.isLoading),
+                (previous, next) {
+                  if (next == true) {
+                    hidden.value = false;
+                    diffAcc.value = 0.0;
+                  }
+                },
+              );
+
+              ref.listen(
+                tabStateProvider(tabId).select((value) => value?.historyState),
+                (previous, next) {
+                  if (next != null && previous != null) {
+                    if (previous != next) {
+                      hidden.value = false;
+                      diffAcc.value = 0.0;
+                    }
+                  }
+                },
+              );
+
+              ref.listen(
+                tabScrollYProvider(tabId, const Duration(milliseconds: 50)),
                 (previous, next) {
                   if (previous?.valueOrNull != null &&
                       next.valueOrNull != null) {
@@ -266,7 +329,7 @@ class BrowserScreen extends HookConsumerWidget {
                         return true;
                       }
                     },
-                    child: _BrowserView(displayedSheet: displayedSheet),
+                    child: _BrowserView(sheetDisplayed: displayedSheet != null),
                   ),
                 ),
               );
@@ -274,33 +337,25 @@ class BrowserScreen extends HookConsumerWidget {
           ),
           floatingActionButton: ReaderAppearanceButton(),
           bottomSheet: (displayedSheet != null)
-              ? NotificationListener<DraggableScrollableNotification>(
-                  onNotification: (notification) {
-                    if (notification.extent <= 0.1) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .dismiss();
-                      return true;
-                    } else {
-                      ref
-                          .read(bottomSheetExtendProvider.notifier)
-                          .add(notification.extent);
-                    }
-
-                    return false;
-                  },
-                  child: switch (displayedSheet) {
-                    ViewTabsSheet() => _ViewTabsSheet(
+              ? switch (displayedSheet) {
+                  ViewTabsSheet() =>
+                    NotificationListener<DraggableScrollableNotification>(
                       key: ValueKey(displayedSheet),
-                      maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                      onNotification: dismissOnThreshold,
+                      child: _ViewTabsSheet(
+                        maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                      ),
                     ),
-                    final EditUrlSheet parameter => _ViewUrlSheet(
-                      key: ValueKey(displayedSheet),
-                      initialTabState: parameter.tabState,
-                      maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                  final EditUrlSheet parameter =>
+                    NotificationListener<DraggableScrollableNotification>(
+                      key: ValueKey(parameter),
+                      onNotification: dismissOnThreshold,
+                      child: _ViewUrlSheet(
+                        initialTabState: parameter.tabState,
+                        maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                      ),
                     ),
-                  },
-                )
+                }
               : null,
         ),
       ),
@@ -309,9 +364,9 @@ class BrowserScreen extends HookConsumerWidget {
 }
 
 class _BrowserView extends StatelessWidget {
-  const _BrowserView({required this.displayedSheet});
+  const _BrowserView({required this.sheetDisplayed});
 
-  final Sheet? displayedSheet;
+  final bool sheetDisplayed;
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +431,7 @@ class _BrowserView extends StatelessWidget {
             ],
           ),
         ),
-        if (displayedSheet != null)
+        if (sheetDisplayed)
           ModalBarrier(
             color: Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
           ),
@@ -389,11 +444,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
   final double maxChildSize;
   final TabState initialTabState;
 
-  const _ViewUrlSheet({
-    super.key,
-    required this.initialTabState,
-    this.maxChildSize = 1.0,
-  });
+  const _ViewUrlSheet({required this.initialTabState, this.maxChildSize = 1.0});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -431,7 +482,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
 class _ViewTabsSheet extends HookConsumerWidget {
   final double maxChildSize;
 
-  const _ViewTabsSheet({super.key, this.maxChildSize = 1.0});
+  const _ViewTabsSheet({this.maxChildSize = 1.0});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

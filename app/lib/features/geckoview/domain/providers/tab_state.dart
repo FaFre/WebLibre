@@ -256,8 +256,7 @@ AsyncValue<String?> selectedTabContainerId(Ref ref) {
 }
 
 @Riverpod()
-Stream<int> selectedTabScrollY(Ref ref, Duration sampleTime) {
-  final tabId = ref.watch(selectedTabProvider);
+Stream<int> tabScrollY(Ref ref, String? tabId, Duration sampleTime) {
   final eventService = ref.watch(eventServiceProvider);
 
   return eventService.scrollEvent

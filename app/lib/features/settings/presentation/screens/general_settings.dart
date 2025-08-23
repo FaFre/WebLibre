@@ -372,6 +372,20 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                       );
                 },
               ),
+              SwitchListTile.adaptive(
+                title: const Text('Auto Hide Tab Bar'),
+                subtitle: const Text('Hide tab bar when scrolling'),
+                secondary: const Icon(MdiIcons.folderHidden),
+                value: generalSettings.autoHideTabBar,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) =>
+                            currentSettings.copyWith.autoHideTabBar(value),
+                      );
+                },
+              ),
               Consumer(
                 builder: (context, ref, child) {
                   final size = ref.watch(

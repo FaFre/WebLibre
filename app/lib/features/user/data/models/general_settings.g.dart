@@ -35,6 +35,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings defaultIntentTabType(TabType defaultIntentTabType);
 
+  GeneralSettings autoHideTabBar(bool autoHideTabBar);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -54,6 +56,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enableLocalAiFeatures,
     TabType defaultCreateTabType,
     TabType defaultIntentTabType,
+    bool autoHideTabBar,
   });
 }
 
@@ -113,6 +116,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(defaultIntentTabType: defaultIntentTabType);
 
   @override
+  GeneralSettings autoHideTabBar(bool autoHideTabBar) =>
+      this(autoHideTabBar: autoHideTabBar);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -132,6 +139,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? defaultCreateTabType = const $CopyWithPlaceholder(),
     Object? defaultIntentTabType = const $CopyWithPlaceholder(),
+    Object? autoHideTabBar = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder()
@@ -188,6 +196,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultIntentTabType
           // ignore: cast_nullable_to_non_nullable
           : defaultIntentTabType as TabType,
+      autoHideTabBar: autoHideTabBar == const $CopyWithPlaceholder()
+          ? _value.autoHideTabBar
+          // ignore: cast_nullable_to_non_nullable
+          : autoHideTabBar as bool,
     );
   }
 }
@@ -228,6 +240,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         _$TabTypeEnumMap,
         json['defaultIntentTabType'],
       ),
+      autoHideTabBar: json['autoHideTabBar'] as bool?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
@@ -248,6 +261,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
       'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
       'defaultIntentTabType': _$TabTypeEnumMap[instance.defaultIntentTabType]!,
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
+      'autoHideTabBar': instance.autoHideTabBar,
     };
 
 const _$ThemeModeEnumMap = {

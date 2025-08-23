@@ -57,8 +57,8 @@ class GeneralSettings with FastEquatable {
   final bool enableLocalAiFeatures;
   final TabType defaultCreateTabType;
   final TabType defaultIntentTabType;
-
   final bool proxyPrivateTabsTor;
+  final bool autoHideTabBar;
 
   GeneralSettings({
     required this.themeMode,
@@ -73,6 +73,7 @@ class GeneralSettings with FastEquatable {
     required this.enableLocalAiFeatures,
     required this.defaultCreateTabType,
     required this.defaultIntentTabType,
+    required this.autoHideTabBar,
   });
 
   GeneralSettings.withDefaults({
@@ -88,6 +89,7 @@ class GeneralSettings with FastEquatable {
     bool? enableLocalAiFeatures,
     TabType? defaultCreateTabType,
     TabType? defaultIntentTabType,
+    bool? autoHideTabBar,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -99,7 +101,8 @@ class GeneralSettings with FastEquatable {
        showExtensionShortcut = showExtensionShortcut ?? false,
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        defaultCreateTabType = defaultCreateTabType ?? TabType.regular,
-       defaultIntentTabType = defaultIntentTabType ?? TabType.regular;
+       defaultIntentTabType = defaultIntentTabType ?? TabType.regular,
+       autoHideTabBar = autoHideTabBar ?? true;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -120,5 +123,6 @@ class GeneralSettings with FastEquatable {
     defaultCreateTabType,
     defaultIntentTabType,
     proxyPrivateTabsTor,
+    autoHideTabBar,
   ];
 }

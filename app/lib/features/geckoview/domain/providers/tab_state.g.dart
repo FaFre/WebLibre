@@ -193,28 +193,27 @@ final selectedTabContainerIdProvider = Provider<AsyncValue<String?>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SelectedTabContainerIdRef = ProviderRef<AsyncValue<String?>>;
-String _$selectedTabScrollYHash() =>
-    r'7ca7cccfa7ebb7f13e0d7c096ce6c93f9e220cb5';
+String _$tabScrollYHash() => r'dcb1e82b42bab98c4fc2ee4c7a22f37a28b8ce9e';
 
-/// See also [selectedTabScrollY].
-@ProviderFor(selectedTabScrollY)
-const selectedTabScrollYProvider = SelectedTabScrollYFamily();
+/// See also [tabScrollY].
+@ProviderFor(tabScrollY)
+const tabScrollYProvider = TabScrollYFamily();
 
-/// See also [selectedTabScrollY].
-class SelectedTabScrollYFamily extends Family<AsyncValue<int>> {
-  /// See also [selectedTabScrollY].
-  const SelectedTabScrollYFamily();
+/// See also [tabScrollY].
+class TabScrollYFamily extends Family<AsyncValue<int>> {
+  /// See also [tabScrollY].
+  const TabScrollYFamily();
 
-  /// See also [selectedTabScrollY].
-  SelectedTabScrollYProvider call(Duration sampleTime) {
-    return SelectedTabScrollYProvider(sampleTime);
+  /// See also [tabScrollY].
+  TabScrollYProvider call(String? tabId, Duration sampleTime) {
+    return TabScrollYProvider(tabId, sampleTime);
   }
 
   @override
-  SelectedTabScrollYProvider getProviderOverride(
-    covariant SelectedTabScrollYProvider provider,
+  TabScrollYProvider getProviderOverride(
+    covariant TabScrollYProvider provider,
   ) {
-    return call(provider.sampleTime);
+    return call(provider.tabId, provider.sampleTime);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -229,51 +228,52 @@ class SelectedTabScrollYFamily extends Family<AsyncValue<int>> {
       _allTransitiveDependencies;
 
   @override
-  String? get name => r'selectedTabScrollYProvider';
+  String? get name => r'tabScrollYProvider';
 }
 
-/// See also [selectedTabScrollY].
-class SelectedTabScrollYProvider extends AutoDisposeStreamProvider<int> {
-  /// See also [selectedTabScrollY].
-  SelectedTabScrollYProvider(Duration sampleTime)
+/// See also [tabScrollY].
+class TabScrollYProvider extends AutoDisposeStreamProvider<int> {
+  /// See also [tabScrollY].
+  TabScrollYProvider(String? tabId, Duration sampleTime)
     : this._internal(
-        (ref) => selectedTabScrollY(ref as SelectedTabScrollYRef, sampleTime),
-        from: selectedTabScrollYProvider,
-        name: r'selectedTabScrollYProvider',
+        (ref) => tabScrollY(ref as TabScrollYRef, tabId, sampleTime),
+        from: tabScrollYProvider,
+        name: r'tabScrollYProvider',
         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
             ? null
-            : _$selectedTabScrollYHash,
-        dependencies: SelectedTabScrollYFamily._dependencies,
-        allTransitiveDependencies:
-            SelectedTabScrollYFamily._allTransitiveDependencies,
+            : _$tabScrollYHash,
+        dependencies: TabScrollYFamily._dependencies,
+        allTransitiveDependencies: TabScrollYFamily._allTransitiveDependencies,
+        tabId: tabId,
         sampleTime: sampleTime,
       );
 
-  SelectedTabScrollYProvider._internal(
+  TabScrollYProvider._internal(
     super._createNotifier, {
     required super.name,
     required super.dependencies,
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
+    required this.tabId,
     required this.sampleTime,
   }) : super.internal();
 
+  final String? tabId;
   final Duration sampleTime;
 
   @override
-  Override overrideWith(
-    Stream<int> Function(SelectedTabScrollYRef provider) create,
-  ) {
+  Override overrideWith(Stream<int> Function(TabScrollYRef provider) create) {
     return ProviderOverride(
       origin: this,
-      override: SelectedTabScrollYProvider._internal(
-        (ref) => create(ref as SelectedTabScrollYRef),
+      override: TabScrollYProvider._internal(
+        (ref) => create(ref as TabScrollYRef),
         from: from,
         name: null,
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
+        tabId: tabId,
         sampleTime: sampleTime,
       ),
     );
@@ -281,18 +281,20 @@ class SelectedTabScrollYProvider extends AutoDisposeStreamProvider<int> {
 
   @override
   AutoDisposeStreamProviderElement<int> createElement() {
-    return _SelectedTabScrollYProviderElement(this);
+    return _TabScrollYProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SelectedTabScrollYProvider &&
+    return other is TabScrollYProvider &&
+        other.tabId == tabId &&
         other.sampleTime == sampleTime;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, tabId.hashCode);
     hash = _SystemHash.combine(hash, sampleTime.hashCode);
 
     return _SystemHash.finish(hash);
@@ -301,18 +303,22 @@ class SelectedTabScrollYProvider extends AutoDisposeStreamProvider<int> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SelectedTabScrollYRef on AutoDisposeStreamProviderRef<int> {
+mixin TabScrollYRef on AutoDisposeStreamProviderRef<int> {
+  /// The parameter `tabId` of this provider.
+  String? get tabId;
+
   /// The parameter `sampleTime` of this provider.
   Duration get sampleTime;
 }
 
-class _SelectedTabScrollYProviderElement
-    extends AutoDisposeStreamProviderElement<int>
-    with SelectedTabScrollYRef {
-  _SelectedTabScrollYProviderElement(super.provider);
+class _TabScrollYProviderElement extends AutoDisposeStreamProviderElement<int>
+    with TabScrollYRef {
+  _TabScrollYProviderElement(super.provider);
 
   @override
-  Duration get sampleTime => (origin as SelectedTabScrollYProvider).sampleTime;
+  String? get tabId => (origin as TabScrollYProvider).tabId;
+  @override
+  Duration get sampleTime => (origin as TabScrollYProvider).sampleTime;
 }
 
 String _$tabStatesHash() => r'66cff6a7b36328ee23b89fdd53046987b346bfcd';
