@@ -22,6 +22,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:nullability/nullability.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -95,7 +96,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   }
 
   //Eager fetch, when up to date settings are required
-  Future<GeneralSettings> fetch() {
+  Future<GeneralSettings> fetchSettings() {
     return ref
         .read(userDatabaseProvider)
         .settingDao
@@ -104,9 +105,13 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         .then(_deserializeSettings);
   }
 
-  Future<void> updateSettings(UpdateGeneralSettingsFunc updateWithCurrent) {
-    final oldJson = state.toJson();
-    final newJson = updateWithCurrent(state).toJson();
+  Future<void> updateSettings(
+    UpdateGeneralSettingsFunc updateWithCurrent,
+  ) async {
+    final current = await fetchSettings();
+
+    final oldJson = current.toJson();
+    final newJson = updateWithCurrent(current).toJson();
 
     final db = ref.read(userDatabaseProvider);
 
@@ -120,20 +125,23 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   }
 
   @override
-  GeneralSettings build() {
+  Stream<GeneralSettings> build() {
     final db = ref.watch(userDatabaseProvider);
 
-    final watchSub = db.settingDao
+    return db.settingDao
         .getAllSettingsOfPartitionKey(_partitionKey)
         .watch()
-        .listen((event) {
-          state = _deserializeSettings(event);
+        .map((event) {
+          return _deserializeSettings(event);
         });
-
-    ref.onDispose(() async {
-      await watchSub.cancel();
-    });
-
-    return GeneralSettings.withDefaults();
   }
+}
+
+@Riverpod()
+GeneralSettings generalSettingsWithDefaults(Ref ref) {
+  return ref.watch(
+    generalSettingsRepositoryProvider.select(
+      (value) => value.valueOrNull ?? GeneralSettings.withDefaults(),
+    ),
+  );
 }

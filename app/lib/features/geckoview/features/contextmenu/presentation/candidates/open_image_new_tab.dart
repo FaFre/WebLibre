@@ -47,7 +47,9 @@ class OpenImageInNewTab extends HookConsumerWidget {
         final currentTab = ref.read(selectedTabStateProvider);
         final isPrivate =
             currentTab?.isPrivate ??
-            ref.read(generalSettingsRepositoryProvider).defaultCreateTabType ==
+            ref
+                    .read(generalSettingsWithDefaultsProvider)
+                    .defaultCreateTabType ==
                 TabType.private;
 
         final tabId = await ref

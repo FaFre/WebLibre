@@ -86,7 +86,7 @@ class SiteSearch extends HookConsumerWidget {
           final isPrivate =
               ref.read(selectedTabStateProvider)?.isPrivate ??
               ref
-                      .read(generalSettingsRepositoryProvider)
+                      .read(generalSettingsWithDefaultsProvider)
                       .defaultCreateTabType ==
                   TabType.private;
 

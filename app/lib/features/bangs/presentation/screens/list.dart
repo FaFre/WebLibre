@@ -63,7 +63,7 @@ class BangListScreen extends HookConsumerWidget {
                           .setTrigger(bang.trigger);
 
                       final settings = ref.read(
-                        generalSettingsRepositoryProvider,
+                        generalSettingsWithDefaultsProvider,
                       );
 
                       SearchRoute(

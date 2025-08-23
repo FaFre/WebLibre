@@ -33,7 +33,7 @@ part 'search_suggestions.g.dart';
 @Riverpod(keepAlive: true)
 ISearchSuggestionProvider defaultSearchSuggestions(Ref ref) {
   final provider = ref.watch(
-    generalSettingsRepositoryProvider.select(
+    generalSettingsWithDefaultsProvider.select(
       (value) => value.defaultSearchSuggestionsProvider,
     ),
   );

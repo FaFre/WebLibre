@@ -84,4 +84,10 @@ class GeckoEngineSettingsService {
       GeckoEngineSettings(webContentIsolationStrategy: state),
     );
   }
+
+  Future<void> contentBlocking(ContentBlocking state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(contentBlocking: state),
+    );
+  }
 }

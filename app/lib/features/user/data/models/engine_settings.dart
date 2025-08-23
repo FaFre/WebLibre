@@ -54,6 +54,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   WebContentIsolationStrategy get webContentIsolationStrategy =>
       super.webContentIsolationStrategy!;
 
+  final QueryParameterStripping queryParameterStripping;
+
+  final BounceTrackingProtectionMode bounceTrackingProtectionMode;
+
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  ContentBlocking get contentBlocking => ContentBlocking(
+    queryParameterStripping: queryParameterStripping,
+    queryParameterStrippingAllowList: '',
+    queryParameterStrippingStripList:
+        '__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid srsltid ss_email_id twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid',
+    bounceTrackingProtectionMode: bounceTrackingProtectionMode,
+  );
+
   EngineSettings({
     required super.javascriptEnabled,
     required super.trackingProtectionPolicy,
@@ -66,6 +80,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.cookieBannerHandlingGlobalRulesSubFrames,
     required super.webContentIsolationStrategy,
     required super.userAgent,
+    required this.queryParameterStripping,
+    required this.bounceTrackingProtectionMode,
   });
 
   EngineSettings.withDefaults({
@@ -79,8 +95,15 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bool? cookieBannerHandlingGlobalRules,
     bool? cookieBannerHandlingGlobalRulesSubFrames,
     WebContentIsolationStrategy? webContentIsolationStrategy,
+    QueryParameterStripping? queryParameterStripping,
+    BounceTrackingProtectionMode? bounceTrackingProtectionMode,
     super.userAgent,
-  }) : super(
+  }) : queryParameterStripping =
+           queryParameterStripping ?? QueryParameterStripping.disabled,
+       bounceTrackingProtectionMode =
+           bounceTrackingProtectionMode ??
+           BounceTrackingProtectionMode.disabled,
+       super(
          javascriptEnabled: javascriptEnabled ?? true,
          trackingProtectionPolicy:
              trackingProtectionPolicy ?? TrackingProtectionPolicy.strict,
@@ -119,5 +142,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.cookieBannerHandlingGlobalRulesSubFrames,
     super.webContentIsolationStrategy,
     super.userAgent,
+    queryParameterStripping,
+    bounceTrackingProtectionMode,
   ];
 }

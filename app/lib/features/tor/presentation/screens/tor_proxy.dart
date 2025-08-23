@@ -34,7 +34,7 @@ class TorProxyScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final torProxyPort = ref.watch(torProxyServiceProvider);
     final proxyPrivateTabsTor = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (value) => value.proxyPrivateTabsTor,
       ),
     );

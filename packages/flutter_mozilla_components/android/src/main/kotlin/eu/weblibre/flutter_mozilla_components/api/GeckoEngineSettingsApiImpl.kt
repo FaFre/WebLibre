@@ -12,6 +12,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
+import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.WebContentIsolationStrategy
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.EngineSession
@@ -112,6 +113,22 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         if(settings.userAgent != null) {
             components.core.engineSettings.userAgentString = settings.userAgent;
         }
+        if(settings.contentBlocking != null) {
+            components.core.engineSettings.queryParameterStripping = when(settings.contentBlocking.queryParameterStripping) {
+                QueryParameterStripping.ENABLED -> true
+                QueryParameterStripping.DISABLED -> false
+                QueryParameterStripping.PRIVATE_ONLY -> false
+            }
+            components.core.engineSettings.queryParameterStrippingPrivateBrowsing = when(settings.contentBlocking.queryParameterStripping) {
+                QueryParameterStripping.ENABLED -> true
+                QueryParameterStripping.DISABLED -> false
+                QueryParameterStripping.PRIVATE_ONLY -> true
+            }
+            components.core.engineSettings.queryParameterStrippingAllowList = settings.contentBlocking.queryParameterStrippingAllowList
+            components.core.engineSettings.queryParameterStrippingStripList = settings.contentBlocking.queryParameterStrippingStripList
+
+            //TODO: Add bounce tracking protection when available
+        }
     }
 
     override fun updateRuntimeSettings(settings: GeckoEngineSettings) {
@@ -160,6 +177,24 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         }
         if(settings.userAgent != null) {
             components.core.engine.settings.userAgentString = components.core.engineSettings.userAgentString
+            reloadSession = true
+        }
+        if(settings.contentBlocking != null) {
+            components.core.engine.settings.queryParameterStripping = when(settings.contentBlocking.queryParameterStripping) {
+                QueryParameterStripping.ENABLED -> true
+                QueryParameterStripping.DISABLED -> false
+                QueryParameterStripping.PRIVATE_ONLY -> false
+            }
+            components.core.engine.settings.queryParameterStrippingPrivateBrowsing = when(settings.contentBlocking.queryParameterStripping) {
+                QueryParameterStripping.ENABLED -> true
+                QueryParameterStripping.DISABLED -> false
+                QueryParameterStripping.PRIVATE_ONLY -> true
+            }
+            components.core.engine.settings.queryParameterStrippingAllowList = settings.contentBlocking.queryParameterStrippingAllowList
+            components.core.engine.settings.queryParameterStrippingStripList = settings.contentBlocking.queryParameterStrippingStripList
+
+            //TODO: Add bounce tracking protection when available
+
             reloadSession = true
         }
 

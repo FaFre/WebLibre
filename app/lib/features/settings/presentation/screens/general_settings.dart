@@ -39,7 +39,7 @@ class GeneralSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final generalSettings = ref.watch(generalSettingsRepositoryProvider);
+    final generalSettings = ref.watch(generalSettingsWithDefaultsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('General Settings')),

@@ -276,7 +276,7 @@ class _ContainerTabSuggestionsProviderElement
 }
 
 String _$geckoInferenceRepositoryHash() =>
-    r'170bd0b67e5f1edc43ed97d4535f41353fb8796e';
+    r'6099998a3f49fc4faf650878ab4afd6268c593e2';
 
 /// See also [GeckoInferenceRepository].
 @ProviderFor(GeckoInferenceRepository)

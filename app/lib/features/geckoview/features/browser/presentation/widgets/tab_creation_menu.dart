@@ -39,7 +39,7 @@ class TabCreationMenu extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final createChildTabsOption = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (value) => value.createChildTabsOption,
       ),
     );

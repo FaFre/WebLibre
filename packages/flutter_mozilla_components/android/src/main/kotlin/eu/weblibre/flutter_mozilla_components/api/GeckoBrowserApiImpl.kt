@@ -16,6 +16,7 @@ import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
@@ -133,7 +134,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         isPlatformViewRegistered = false
     }
 
-    override fun initialize(logLevel: LogLevel) {
+    override fun initialize(logLevel: LogLevel, contentBlocking: ContentBlocking) {
         synchronized(this) {
             if(!isGeckoInitialized) {
                 val geckoLogging = GeckoLogging(_flutterPluginBinding.binaryMessenger)
@@ -147,7 +148,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
                 Log.addSink(PriorityAwareLogSink(level, geckoLogging))
 
-                setupGeckoEngine(level)
+                setupGeckoEngine(level, contentBlocking)
                 isGeckoInitialized = true
             }
         }
@@ -163,7 +164,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         return false
     }
 
-    private fun setupGeckoEngine(logLevel: Log.Priority) {
+    private fun setupGeckoEngine(logLevel: Log.Priority, contentBlocking: ContentBlocking) {
         val selectionActionEvents = GeckoSelectionActionEvents(_flutterPluginBinding.binaryMessenger)
 
         val selectionActionDelegate = DefaultSelectionActionDelegate(selectionActionEvents) { actions ->
@@ -193,7 +194,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             addonEvents,
             tabContentEvents,
             extensionEvents,
-            logLevel
+            logLevel,
+            contentBlocking
         )
 
         GeckoEngineSettingsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoEngineSettingsApiImpl())

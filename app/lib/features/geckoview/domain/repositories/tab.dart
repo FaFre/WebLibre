@@ -349,7 +349,7 @@ class TabRepository extends _$TabRepository {
         next.whenData((value) async {
           final isPrivate =
               ref
-                  .read(generalSettingsRepositoryProvider)
+                  .read(generalSettingsWithDefaultsProvider)
                   .defaultIntentTabType ==
               TabType.private;
 

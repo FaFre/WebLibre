@@ -37,7 +37,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final engineSettings = ref.watch(engineSettingsRepositoryProvider);
+    final engineSettings = ref.watch(engineSettingsWithDefaultsProvider);
 
     final userAgentTextController = useTextEditingController(
       text: engineSettings.userAgent,

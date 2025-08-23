@@ -34,13 +34,13 @@ class ReaderButton extends HookConsumerWidget {
     final readerChanging = ref.watch(readerableScreenControllerProvider);
 
     final enableReadability = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (value) => value.enableReadability,
       ),
     );
 
     final enforceReadability = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (value) => value.enforceReadability,
       ),
     );

@@ -41,6 +41,14 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings userAgent(String? userAgent);
 
+  EngineSettings queryParameterStripping(
+    QueryParameterStripping queryParameterStripping,
+  );
+
+  EngineSettings bounceTrackingProtectionMode(
+    BounceTrackingProtectionMode bounceTrackingProtectionMode,
+  );
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -59,6 +67,8 @@ abstract class _$EngineSettingsCWProxy {
     bool? cookieBannerHandlingGlobalRulesSubFrames,
     WebContentIsolationStrategy? webContentIsolationStrategy,
     String? userAgent,
+    QueryParameterStripping queryParameterStripping,
+    BounceTrackingProtectionMode bounceTrackingProtectionMode,
   });
 }
 
@@ -125,6 +135,16 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   EngineSettings userAgent(String? userAgent) => this(userAgent: userAgent);
 
   @override
+  EngineSettings queryParameterStripping(
+    QueryParameterStripping queryParameterStripping,
+  ) => this(queryParameterStripping: queryParameterStripping);
+
+  @override
+  EngineSettings bounceTrackingProtectionMode(
+    BounceTrackingProtectionMode bounceTrackingProtectionMode,
+  ) => this(bounceTrackingProtectionMode: bounceTrackingProtectionMode);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -145,6 +165,8 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
         const $CopyWithPlaceholder(),
     Object? webContentIsolationStrategy = const $CopyWithPlaceholder(),
     Object? userAgent = const $CopyWithPlaceholder(),
+    Object? queryParameterStripping = const $CopyWithPlaceholder(),
+    Object? bounceTrackingProtectionMode = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -201,6 +223,16 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.userAgent
           // ignore: cast_nullable_to_non_nullable
           : userAgent as String?,
+      queryParameterStripping:
+          queryParameterStripping == const $CopyWithPlaceholder()
+          ? _value.queryParameterStripping
+          // ignore: cast_nullable_to_non_nullable
+          : queryParameterStripping as QueryParameterStripping,
+      bounceTrackingProtectionMode:
+          bounceTrackingProtectionMode == const $CopyWithPlaceholder()
+          ? _value.bounceTrackingProtectionMode
+          // ignore: cast_nullable_to_non_nullable
+          : bounceTrackingProtectionMode as BounceTrackingProtectionMode,
     );
   }
 }
@@ -247,6 +279,14 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
         _$WebContentIsolationStrategyEnumMap,
         json['webContentIsolationStrategy'],
       ),
+      queryParameterStripping: $enumDecodeNullable(
+        _$QueryParameterStrippingEnumMap,
+        json['queryParameterStripping'],
+      ),
+      bounceTrackingProtectionMode: $enumDecodeNullable(
+        _$BounceTrackingProtectionModeEnumMap,
+        json['bounceTrackingProtectionMode'],
+      ),
       userAgent: json['userAgent'] as String?,
     );
 
@@ -271,6 +311,11 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'webContentIsolationStrategy':
       _$WebContentIsolationStrategyEnumMap[instance
           .webContentIsolationStrategy]!,
+  'queryParameterStripping':
+      _$QueryParameterStrippingEnumMap[instance.queryParameterStripping]!,
+  'bounceTrackingProtectionMode':
+      _$BounceTrackingProtectionModeEnumMap[instance
+          .bounceTrackingProtectionMode]!,
 };
 
 const _$TrackingProtectionPolicyEnumMap = {
@@ -302,4 +347,17 @@ const _$WebContentIsolationStrategyEnumMap = {
   WebContentIsolationStrategy.isolateNothing: 'isolateNothing',
   WebContentIsolationStrategy.isolateEverything: 'isolateEverything',
   WebContentIsolationStrategy.isolateHighValue: 'isolateHighValue',
+};
+
+const _$QueryParameterStrippingEnumMap = {
+  QueryParameterStripping.disabled: 'disabled',
+  QueryParameterStripping.privateOnly: 'privateOnly',
+  QueryParameterStripping.enabled: 'enabled',
+};
+
+const _$BounceTrackingProtectionModeEnumMap = {
+  BounceTrackingProtectionMode.disabled: 'disabled',
+  BounceTrackingProtectionMode.enabled: 'enabled',
+  BounceTrackingProtectionMode.enabledStandby: 'enabledStandby',
+  BounceTrackingProtectionMode.enabledDryRun: 'enabledDryRun',
 };

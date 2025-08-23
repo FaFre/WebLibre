@@ -85,13 +85,14 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   @override
   Widget build(BuildContext context) {
     useOnInitialization(() async {
-      await ref.read(generalSettingsRepositoryProvider.notifier).fetch().then((
-        settings,
-      ) async {
-        await ref
-            .read(browserDataServiceProvider.notifier)
-            .deleteDataOnEngineStart(settings.deleteBrowsingDataOnQuit);
-      });
+      await ref
+          .read(generalSettingsRepositoryProvider.notifier)
+          .fetchSettings()
+          .then((settings) async {
+            await ref
+                .read(browserDataServiceProvider.notifier)
+                .deleteDataOnEngineStart(settings.deleteBrowsingDataOnQuit);
+          });
     });
 
     final hasTab = ref.watch(
@@ -313,7 +314,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 widget.suggestionTimeout) {
           //Don't do anything if a child route is active
           if (GoRouterState.of(context).topRoute?.name == BrowserRoute.name) {
-            final settings = ref.read(generalSettingsRepositoryProvider);
+            final settings = ref.read(generalSettingsWithDefaultsProvider);
 
             unawaited(
               showSuggestNewTabMessage(

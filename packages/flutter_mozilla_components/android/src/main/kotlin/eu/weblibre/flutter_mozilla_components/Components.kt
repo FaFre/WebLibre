@@ -15,6 +15,7 @@ import eu.weblibre.flutter_mozilla_components.components.Search
 import eu.weblibre.flutter_mozilla_components.components.Services
 import eu.weblibre.flutter_mozilla_components.components.UseCases
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -35,6 +36,7 @@ class Components(private val context: Context,
                  val readerViewController: ReaderViewController,
                  val selectionAction: SelectionActionDelegate,
                  val logLevel: Log.Priority,
+                 val contentBlocking: ContentBlocking,
                  private val addonEvents: GeckoAddonEvents,
                  private val tabContentEvents: GeckoTabContentEvents,
                  private val extensionEvents: BrowserExtensionEvents

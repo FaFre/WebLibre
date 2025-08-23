@@ -196,7 +196,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                           onPressed: () async {
                             final isPrivate =
                                 ref
-                                    .read(generalSettingsRepositoryProvider)
+                                    .read(generalSettingsWithDefaultsProvider)
                                     .defaultCreateTabType ==
                                 TabType.private;
 
@@ -243,7 +243,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                               case final Uri url) {
                             final isPrivate =
                                 ref
-                                    .read(generalSettingsRepositoryProvider)
+                                    .read(generalSettingsWithDefaultsProvider)
                                     .defaultCreateTabType ==
                                 TabType.private;
 

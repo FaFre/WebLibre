@@ -10,15 +10,19 @@ import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.PrefManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
+import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.concept.engine.DefaultSettings
 import mozilla.components.concept.engine.Engine
+import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
+import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 
@@ -34,6 +38,29 @@ object EngineProvider {
         if (runtime == null) {
             Logger.debug("Creating Runtime")
             val builder = GeckoRuntimeSettings.Builder()
+            val contentBlocking = ContentBlocking.Settings.Builder();
+
+            contentBlocking.bounceTrackingProtectionMode(when(components.contentBlocking.bounceTrackingProtectionMode) {
+                BounceTrackingProtectionMode.ENABLED -> EngineSession.BounceTrackingProtectionMode.ENABLED.mode
+                BounceTrackingProtectionMode.DISABLED -> EngineSession.BounceTrackingProtectionMode.DISABLED.mode
+                BounceTrackingProtectionMode.ENABLED_STANDBY -> EngineSession.BounceTrackingProtectionMode.ENABLED_STANDBY.mode
+                BounceTrackingProtectionMode.ENABLED_DRY_RUN -> EngineSession.BounceTrackingProtectionMode.ENABLED_DRY_RUN.mode
+            })
+
+            contentBlocking.queryParameterStrippingEnabled(when(components.contentBlocking.queryParameterStripping) {
+                QueryParameterStripping.ENABLED -> true
+                QueryParameterStripping.DISABLED -> false
+                QueryParameterStripping.PRIVATE_ONLY -> false
+            })
+
+            contentBlocking.queryParameterStrippingPrivateBrowsingEnabled(when(components.contentBlocking.queryParameterStripping) {
+                QueryParameterStripping.ENABLED -> true
+                QueryParameterStripping.DISABLED -> false
+                QueryParameterStripping.PRIVATE_ONLY -> true
+            })
+
+            contentBlocking.queryParameterStrippingAllowList(components.contentBlocking.queryParameterStrippingAllowList)
+            contentBlocking.queryParameterStrippingStripList(components.contentBlocking.queryParameterStrippingStripList)
 
 //            if (isCrashReportActive) {
 //                builder.crashHandler(CrashHandlerService::class.java)
@@ -45,6 +72,7 @@ object EngineProvider {
             builder.extensionsWebAPIEnabled(true)
             builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
             builder.consoleOutput(components.logLevel == Log.Priority.DEBUG)
+            builder.contentBlocking(contentBlocking.build())
 
             runtime = GeckoRuntime.create(context, builder.build())
         }

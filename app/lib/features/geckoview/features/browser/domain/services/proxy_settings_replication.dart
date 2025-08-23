@@ -84,7 +84,7 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
     ref.listen(
       fireImmediately: true,
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (value) => value.proxyPrivateTabsTor,
       ),
       (previous, next) async {

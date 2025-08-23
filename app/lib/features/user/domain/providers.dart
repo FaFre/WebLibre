@@ -42,7 +42,7 @@ Stream<double> iconCacheSizeMegabytes(Ref ref) {
 @Riverpod()
 bool incognitoModeEnabled(Ref ref) {
   return ref.watch(
-    generalSettingsRepositoryProvider.select(
+    generalSettingsWithDefaultsProvider.select(
       (value) => value.deleteBrowsingDataOnQuit != null,
     ),
   );

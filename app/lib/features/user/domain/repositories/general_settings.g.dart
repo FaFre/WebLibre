@@ -6,13 +6,33 @@ part of 'general_settings.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$generalSettingsWithDefaultsHash() =>
+    r'd2a20cb527f8bf5a16e273933cf7ccc9d0851dc4';
+
+/// See also [generalSettingsWithDefaults].
+@ProviderFor(generalSettingsWithDefaults)
+final generalSettingsWithDefaultsProvider =
+    AutoDisposeProvider<GeneralSettings>.internal(
+      generalSettingsWithDefaults,
+      name: r'generalSettingsWithDefaultsProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$generalSettingsWithDefaultsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef GeneralSettingsWithDefaultsRef =
+    AutoDisposeProviderRef<GeneralSettings>;
 String _$generalSettingsRepositoryHash() =>
-    r'538e03e9eff8beefc0918614c86d8919224c3039';
+    r'7e1c4d6051c4c3972b6998dee89d13b49be32e48';
 
 /// See also [GeneralSettingsRepository].
 @ProviderFor(GeneralSettingsRepository)
 final generalSettingsRepositoryProvider =
-    NotifierProvider<GeneralSettingsRepository, GeneralSettings>.internal(
+    StreamNotifierProvider<GeneralSettingsRepository, GeneralSettings>.internal(
       GeneralSettingsRepository.new,
       name: r'generalSettingsRepositoryProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -22,6 +42,6 @@ final generalSettingsRepositoryProvider =
       allTransitiveDependencies: null,
     );
 
-typedef _$GeneralSettingsRepository = Notifier<GeneralSettings>;
+typedef _$GeneralSettingsRepository = StreamNotifier<GeneralSettings>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

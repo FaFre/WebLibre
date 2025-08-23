@@ -536,6 +536,25 @@ enum TrackingProtectionPolicy { none, recommended, strict, custom }
 
 enum HttpsOnlyMode { disabled, privateOnly, enabled }
 
+enum QueryParameterStripping { disabled, privateOnly, enabled }
+
+enum BounceTrackingProtectionMode {
+  /// Fully disabled.
+  disabled,
+
+  /// Fully enabled.
+  enabled,
+
+  /// Disabled, but collects user interaction data. Use this mode as the
+  /// "disabled" state when the feature can be toggled on and off, e.g. via
+  /// preferences.
+  enabledStandby,
+
+  /// Feature enabled, but tracker purging is only simulated. Used for
+  /// testing and telemetry collection.
+  enabledDryRun,
+}
+
 enum ColorScheme { system, light, dark }
 
 enum CookieBannerHandlingMode { disabled, rejectAll, rejectOrAcceptAll }
@@ -544,6 +563,20 @@ enum WebContentIsolationStrategy {
   isolateNothing,
   isolateEverything,
   isolateHighValue,
+}
+
+class ContentBlocking {
+  QueryParameterStripping queryParameterStripping;
+  String queryParameterStrippingAllowList;
+  String queryParameterStrippingStripList;
+  BounceTrackingProtectionMode bounceTrackingProtectionMode;
+
+  ContentBlocking(
+    this.queryParameterStripping,
+    this.queryParameterStrippingAllowList,
+    this.queryParameterStrippingStripList,
+    this.bounceTrackingProtectionMode,
+  );
 }
 
 class GeckoEngineSettings {
@@ -558,6 +591,7 @@ class GeckoEngineSettings {
   final bool? cookieBannerHandlingGlobalRulesSubFrames;
   final WebContentIsolationStrategy? webContentIsolationStrategy;
   final String? userAgent;
+  final ContentBlocking? contentBlocking;
 
   GeckoEngineSettings(
     this.javascriptEnabled,
@@ -571,6 +605,7 @@ class GeckoEngineSettings {
     this.cookieBannerHandlingGlobalRulesSubFrames,
     this.webContentIsolationStrategy,
     this.userAgent,
+    this.contentBlocking,
   );
 }
 
@@ -748,7 +783,7 @@ enum LogLevel { debug, info, warn, error }
 )
 @HostApi()
 abstract class GeckoBrowserApi {
-  void initialize(LogLevel logLevel);
+  void initialize(LogLevel logLevel, ContentBlocking contentBlocking);
   bool showNativeFragment();
   void onTrimMemory(int level);
 }

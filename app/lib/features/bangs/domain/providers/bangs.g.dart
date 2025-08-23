@@ -7,7 +7,7 @@ part of 'bangs.dart';
 // **************************************************************************
 
 String _$defaultSearchBangDataHash() =>
-    r'acce519559903505f9623f3631b6f4177a396d39';
+    r'5fa3f588b57a82dd8fffb2082e495108a242ef72';
 
 /// See also [defaultSearchBangData].
 @ProviderFor(defaultSearchBangData)

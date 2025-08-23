@@ -35,8 +35,8 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final generalSettings = ref.watch(generalSettingsRepositoryProvider);
-    final engineSettings = ref.watch(engineSettingsRepositoryProvider);
+    final generalSettings = ref.watch(generalSettingsWithDefaultsProvider);
+    final engineSettings = ref.watch(engineSettingsWithDefaultsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Web Engine Settings')),
@@ -115,7 +115,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   ),
                 ),
               SwitchListTile.adaptive(
-                title: const Text('Enable Global Privacy Control (GPC)'),
+                title: const Text('Global Privacy Control (GPC)'),
                 secondary: const Icon(MdiIcons.incognitoCircleOff),
                 value: engineSettings.globalPrivacyControlEnabled,
                 onChanged: (value) async {
@@ -300,6 +300,76 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
               //     ],
               //   ),
               // ),
+              SwitchListTile.adaptive(
+                title: const Text('Bounce Tracking Protection'),
+                secondary: const Icon(MdiIcons.securityNetwork),
+                value: switch (engineSettings
+                    .contentBlocking
+                    .bounceTrackingProtectionMode) {
+                  BounceTrackingProtectionMode.disabled => false,
+                  BounceTrackingProtectionMode.enabled => true,
+                  BounceTrackingProtectionMode.enabledStandby => false,
+                  BounceTrackingProtectionMode.enabledDryRun => false,
+                },
+                onChanged: (value) async {
+                  await ref
+                      .read(saveEngineSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) => currentSettings.copyWith
+                            .bounceTrackingProtectionMode(
+                              value
+                                  ? BounceTrackingProtectionMode.enabled
+                                  : BounceTrackingProtectionMode.disabled,
+                            ),
+                      );
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('Query Parameter Stripping'),
+                      leading: Icon(MdiIcons.closeNetwork),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    Center(
+                      child: SegmentedButton<QueryParameterStripping>(
+                        segments: const [
+                          ButtonSegment(
+                            value: QueryParameterStripping.disabled,
+                            label: Text('Disabled'),
+                          ),
+                          ButtonSegment(
+                            value: QueryParameterStripping.enabled,
+                            label: Text('Enabled'),
+                          ),
+                          ButtonSegment(
+                            value: QueryParameterStripping.privateOnly,
+                            label: Text('Private mode only'),
+                          ),
+                        ],
+                        selected: {engineSettings.queryParameterStripping},
+                        onSelectionChanged: (value) async {
+                          await ref
+                              .read(
+                                saveEngineSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .queryParameterStripping(value.first),
+                              );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               ListTile(
                 title: const Text('Web Engine Hardening'),
                 contentPadding: const EdgeInsets.symmetric(

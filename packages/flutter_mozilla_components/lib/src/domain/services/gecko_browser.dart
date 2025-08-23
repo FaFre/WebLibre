@@ -13,8 +13,8 @@ class GeckoBrowserService {
 
   GeckoBrowserService({GeckoBrowserApi? api}) : _api = api ?? _apiInstance;
 
-  Future<void> initialize(LogLevel logLevel) {
-    return _api.initialize(logLevel);
+  Future<void> initialize(LogLevel logLevel, ContentBlocking contentBlocking) {
+    return _api.initialize(logLevel, contentBlocking);
   }
 
   Future<bool> showNativeFragment() {

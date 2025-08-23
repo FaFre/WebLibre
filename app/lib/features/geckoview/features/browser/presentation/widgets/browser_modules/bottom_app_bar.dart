@@ -65,7 +65,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
     );
 
     final showExtensionShortcut = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (value) => value.showExtensionShortcut,
       ),
     );
@@ -209,7 +209,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   onPressed: () async {
                     final isPrivate =
                         ref
-                            .read(generalSettingsRepositoryProvider)
+                            .read(generalSettingsWithDefaultsProvider)
                             .defaultCreateTabType ==
                         TabType.private;
 
@@ -268,7 +268,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                           onPressed: () async {
                             final isPrivate =
                                 ref
-                                    .read(generalSettingsRepositoryProvider)
+                                    .read(generalSettingsWithDefaultsProvider)
                                     .defaultCreateTabType ==
                                 TabType.private;
 

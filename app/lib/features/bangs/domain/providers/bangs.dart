@@ -31,7 +31,7 @@ part 'bangs.g.dart';
 @Riverpod(keepAlive: true)
 Stream<BangData?> defaultSearchBangData(Ref ref) {
   final trigger = ref.watch(
-    generalSettingsRepositoryProvider.select(
+    generalSettingsWithDefaultsProvider.select(
       (value) => value.defaultSearchProvider,
     ),
   );

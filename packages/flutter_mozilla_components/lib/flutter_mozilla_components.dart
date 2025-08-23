@@ -31,7 +31,9 @@ export 'src/geckoview_widget.dart';
 export 'src/pigeons/gecko.g.dart'
     show
         AudioHitResult,
+        BounceTrackingProtectionMode,
         ColorScheme,
+        ContentBlocking,
         CookieBannerHandlingMode,
         CookieSameSiteStatus,
         EmailHitResult,
@@ -48,6 +50,7 @@ export 'src/pigeons/gecko.g.dart'
         ImageSrcHitResult,
         LogLevel,
         PhoneHitResult,
+        QueryParameterStripping,
         Resource,
         ResourceSize,
         SecurityInfoState,

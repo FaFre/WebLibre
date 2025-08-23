@@ -89,7 +89,7 @@ class BangDetails extends HookConsumerWidget {
                       final url = Uri.parse(bangData.getTemplateUrl('').origin);
                       final isPrivate =
                           ref
-                              .read(generalSettingsRepositoryProvider)
+                              .read(generalSettingsWithDefaultsProvider)
                               .defaultCreateTabType ==
                           TabType.private;
 

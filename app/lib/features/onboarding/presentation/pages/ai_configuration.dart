@@ -32,7 +32,7 @@ class AiConfigurationPage extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     final enableLocalAiFeatures = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
       ),
     );

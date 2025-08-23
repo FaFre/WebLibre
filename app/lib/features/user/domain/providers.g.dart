@@ -43,7 +43,7 @@ final iconCacheSizeMegabytesProvider =
 // ignore: unused_element
 typedef IconCacheSizeMegabytesRef = AutoDisposeStreamProviderRef<double>;
 String _$incognitoModeEnabledHash() =>
-    r'3968c2d4945be09a0bc08ce0d70b0390187c44e8';
+    r'36957b70a5261f9d3ad228e07cc8dd5c8f616082';
 
 /// See also [incognitoModeEnabled].
 @ProviderFor(incognitoModeEnabled)

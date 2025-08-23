@@ -52,7 +52,7 @@ class SearchScreen extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final createChildTabsOption = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (value) => value.createChildTabsOption,
       ),
     );

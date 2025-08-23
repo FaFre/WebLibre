@@ -61,7 +61,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
 
   Future<String?> predictDocumentTopic(Set<String> titles) async {
     if (!ref.read(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
       ),
     )) {
@@ -97,7 +97,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     required List<String> unassignedDocumentsInput,
   }) async {
     if (!ref.read(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
       ),
     )) {

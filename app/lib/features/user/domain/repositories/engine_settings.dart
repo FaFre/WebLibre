@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -33,9 +34,72 @@ typedef UpdateEngineSettingsFunc =
 class EngineSettingsRepository extends _$EngineSettingsRepository {
   final _partitionKey = 'engine';
 
-  Future<void> updateSettings(UpdateEngineSettingsFunc updateWithCurrent) {
-    final oldJson = state.toJson();
-    final newJson = updateWithCurrent(state).toJson();
+  EngineSettings _deserializeSettings(
+    List<MapEntry<String, DriftAny?>> entries,
+  ) {
+    final db = ref.read(userDatabaseProvider);
+    final settings = Map.fromEntries(entries);
+
+    return EngineSettings.fromJson({
+      'incognitoMode': settings['incognitoMode']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'javascriptEnabled': settings['javascriptEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'trackingProtectionPolicy': settings['trackingProtectionPolicy']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'httpsOnlyMode': settings['httpsOnlyMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'globalPrivacyControlEnabled': settings['globalPrivacyControlEnabled']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'cookieBannerHandlingMode': settings['cookieBannerHandlingMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'cookieBannerHandlingModePrivateBrowsing':
+          settings['cookieBannerHandlingModePrivateBrowsing']?.readAs(
+            DriftSqlType.string,
+            db.typeMapping,
+          ),
+      'cookieBannerHandlingGlobalRules':
+          settings['cookieBannerHandlingGlobalRules']?.readAs(
+            DriftSqlType.bool,
+            db.typeMapping,
+          ),
+      'cookieBannerHandlingGlobalRulesSubFrames':
+          settings['cookieBannerHandlingGlobalRulesSubFrames']?.readAs(
+            DriftSqlType.bool,
+            db.typeMapping,
+          ),
+      'webContentIsolationStrategy': settings['webContentIsolationStrategy']
+          ?.readAs(DriftSqlType.string, db.typeMapping),
+      'userAgent': settings['userAgent']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'queryParameterStripping': settings['queryParameterStripping']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'bounceTrackingProtectionMode': settings['bounceTrackingProtectionMode']
+          ?.readAs(DriftSqlType.string, db.typeMapping),
+    });
+  }
+
+  Future<void> updateSettings(
+    UpdateEngineSettingsFunc updateWithCurrent,
+  ) async {
+    final current = await fetchSettings();
+
+    final oldJson = current.toJson();
+    final newJson = updateWithCurrent(current).toJson();
 
     return ref.read(userDatabaseProvider).transaction(() async {
       for (final MapEntry(:key, :value) in newJson.entries) {
@@ -49,69 +113,33 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
     });
   }
 
+  Future<EngineSettings> fetchSettings() {
+    return ref
+        .read(userDatabaseProvider)
+        .settingDao
+        .getAllSettingsOfPartitionKey(_partitionKey)
+        .get()
+        .then(_deserializeSettings);
+  }
+
   @override
-  EngineSettings build() {
+  Stream<EngineSettings> build() {
     final db = ref.watch(userDatabaseProvider);
 
-    final watchSub = db.settingDao
+    return db.settingDao
         .getAllSettingsOfPartitionKey(_partitionKey)
         .watch()
-        .listen((entries) {
-          final settings = Map.fromEntries(entries);
-
-          state = EngineSettings.fromJson({
-            'incognitoMode': settings['incognitoMode']?.readAs(
-              DriftSqlType.bool,
-              db.typeMapping,
-            ),
-            'javascriptEnabled': settings['javascriptEnabled']?.readAs(
-              DriftSqlType.bool,
-              db.typeMapping,
-            ),
-            'trackingProtectionPolicy': settings['trackingProtectionPolicy']
-                ?.readAs(DriftSqlType.string, db.typeMapping),
-            'httpsOnlyMode': settings['httpsOnlyMode']?.readAs(
-              DriftSqlType.string,
-              db.typeMapping,
-            ),
-            'globalPrivacyControlEnabled':
-                settings['globalPrivacyControlEnabled']?.readAs(
-                  DriftSqlType.bool,
-                  db.typeMapping,
-                ),
-            'cookieBannerHandlingMode': settings['cookieBannerHandlingMode']
-                ?.readAs(DriftSqlType.string, db.typeMapping),
-            'cookieBannerHandlingModePrivateBrowsing':
-                settings['cookieBannerHandlingModePrivateBrowsing']?.readAs(
-                  DriftSqlType.string,
-                  db.typeMapping,
-                ),
-            'cookieBannerHandlingGlobalRules':
-                settings['cookieBannerHandlingGlobalRules']?.readAs(
-                  DriftSqlType.bool,
-                  db.typeMapping,
-                ),
-            'cookieBannerHandlingGlobalRulesSubFrames':
-                settings['cookieBannerHandlingGlobalRulesSubFrames']?.readAs(
-                  DriftSqlType.bool,
-                  db.typeMapping,
-                ),
-            'webContentIsolationStrategy':
-                settings['webContentIsolationStrategy']?.readAs(
-                  DriftSqlType.string,
-                  db.typeMapping,
-                ),
-            'userAgent': settings['userAgent']?.readAs(
-              DriftSqlType.string,
-              db.typeMapping,
-            ),
-          });
+        .map((entries) {
+          return _deserializeSettings(entries);
         });
-
-    ref.onDispose(() async {
-      await watchSub.cancel();
-    });
-
-    return EngineSettings.withDefaults();
   }
+}
+
+@Riverpod()
+EngineSettings engineSettingsWithDefaults(Ref ref) {
+  return ref.watch(
+    engineSettingsRepositoryProvider.select(
+      (value) => value.valueOrNull ?? EngineSettings.withDefaults(),
+    ),
+  );
 }

@@ -32,6 +32,7 @@ import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
+import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
@@ -69,10 +70,6 @@ void main() async {
     }, message);
   });
 
-  await GeckoBrowserService().initialize(
-    kDebugMode ? LogLevel.debug : LogLevel.warn,
-  );
-
   await HomeWidget.setAppGroupId('weblibre');
 
   runApp(
@@ -81,12 +78,21 @@ void main() async {
       child: HookConsumer(
         builder: (context, ref, child) {
           final themeMode = ref.watch(
-            generalSettingsRepositoryProvider.select(
+            generalSettingsWithDefaultsProvider.select(
               (value) => value.themeMode,
             ),
           );
 
           useOnInitialization(() async {
+            final engineSettings = await ref
+                .read(engineSettingsRepositoryProvider.notifier)
+                .fetchSettings();
+
+            await GeckoBrowserService().initialize(
+              kDebugMode ? LogLevel.debug : LogLevel.warn,
+              engineSettings.contentBlocking,
+            );
+
             await ref
                 .read(appInitializationServiceProvider.notifier)
                 .initialize();

@@ -129,7 +129,7 @@ class _TabSheetHeader extends HookConsumerWidget {
     );
 
     final enableAiFeatures = ref.watch(
-      generalSettingsRepositoryProvider.select(
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
       ),
     );
@@ -415,7 +415,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                 tabSuggestionsControllerProvider,
               );
               final enableAiFeatures = ref.watch(
-                generalSettingsRepositoryProvider.select(
+                generalSettingsWithDefaultsProvider.select(
                   (settings) => settings.enableLocalAiFeatures,
                 ),
               );
@@ -605,7 +605,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              final settings = ref.read(generalSettingsRepositoryProvider);
+              final settings = ref.read(generalSettingsWithDefaultsProvider);
 
               await SearchRoute(
                 tabType:
@@ -786,7 +786,7 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              final settings = ref.read(generalSettingsRepositoryProvider);
+              final settings = ref.read(generalSettingsWithDefaultsProvider);
 
               await SearchRoute(
                 tabType:
