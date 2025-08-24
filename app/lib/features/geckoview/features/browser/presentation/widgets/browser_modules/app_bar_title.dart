@@ -63,7 +63,7 @@ class AppBarTitle extends HookConsumerWidget {
 
     return Row(
       children: [
-        TabIcon(state: tabState),
+        TabIcon(tabState: tabState),
         const SizedBox(width: 8),
         Expanded(
           child: Column(

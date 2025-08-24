@@ -77,11 +77,13 @@ class _TabDraggable extends HookConsumerWidget {
 
     final tab = (suggestedContainerId != null)
         ? SuggestedSingleTabPreview(
+            key: ValueKey(entity.tabId),
             tabId: entity.tabId,
             activeTabId: activeTab,
             containerId: suggestedContainerId!,
           )
         : SingleTabPreview(
+            key: ValueKey(entity.tabId),
             tabId: entity.tabId,
             activeTabId: activeTab,
             onClose: onClose,

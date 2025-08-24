@@ -27,25 +27,25 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class TabIcon extends HookConsumerWidget {
-  final TabState state;
+  final TabState tabState;
 
   final double iconSize;
 
-  const TabIcon({super.key, required this.state, this.iconSize = 16});
+  const TabIcon({super.key, required this.tabState, this.iconSize = 16});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final icon = useCachedFuture(() async {
-      if (state.icon != null) {
-        return state.icon!.value;
+      if (tabState.icon != null) {
+        return tabState.icon!.value;
       }
 
       final icon = await ref
           .read(genericWebsiteServiceProvider.notifier)
-          .getCachedIcon(state.url);
+          .getCachedIcon(tabState.url);
 
       return icon?.image.value;
-    }, [state.icon, state.url]);
+    }, [tabState.icon, tabState.url]);
 
     return Skeletonizer(
       enabled: icon.connectionState != ConnectionState.done,

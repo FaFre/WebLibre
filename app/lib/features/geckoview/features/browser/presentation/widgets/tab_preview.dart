@@ -26,7 +26,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
@@ -104,8 +103,8 @@ class TabMiniPreview extends HookConsumerWidget {
   }
 }
 
-class TabPreview extends HookWidget {
-  final TabState tab;
+class TabPreview extends HookConsumerWidget {
+  final String tabId;
   final bool isActive;
 
   final VoidCallback? onTap;
@@ -117,7 +116,7 @@ class TabPreview extends HookWidget {
   final Widget? trailingChild;
 
   const TabPreview({
-    required this.tab,
+    required this.tabId,
     required this.isActive,
     this.onTap,
     this.onDoubleTap,
@@ -127,13 +126,19 @@ class TabPreview extends HookWidget {
     this.trailingChild,
     super.key,
   });
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabState = ref.watch(tabStateProvider(tabId));
+    if (tabState == null) {
+      return const SizedBox.shrink();
+    }
+
     final extendedDeleteMenuController = useMenuController();
 
     return TabContainer(
       isActive: isActive,
-      isPrivate: tab.isPrivate,
+      isPrivate: tabState.isPrivate,
       child: InkWell(
         borderRadius: const BorderRadius.all(Radius.circular(14.0)),
         onTap: onTap,
@@ -148,9 +153,9 @@ class TabPreview extends HookWidget {
                     padding: const EdgeInsets.only(left: 6.0, top: 2.0),
                     child: Text(
                       overflow: TextOverflow.ellipsis,
-                      tab.title,
+                      tabState.title,
                       maxLines: 2,
-                      style: tab.isPrivate
+                      style: tabState.isPrivate
                           ? const TextStyle(color: Colors.white)
                           : null,
                     ),
@@ -164,13 +169,13 @@ class TabPreview extends HookWidget {
                     },
                     menuChildren: [
                       ?onDeleteAll.mapNotNull(
-                        (p0) => MenuItemButton(
+                        (value) => MenuItemButton(
                           onPressed: () {
-                            p0(tab.url.host);
+                            value(tabState.url.host);
                           },
 
                           leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                          child: Text('Close all from ${tab.url.host}'),
+                          child: Text('Close all from ${tabState.url.host}'),
                         ),
                       ),
                     ],
@@ -196,17 +201,17 @@ class TabPreview extends HookWidget {
             Row(
               children: [
                 const SizedBox(width: 6.0),
-                TabIcon(state: tab),
+                TabIcon(tabState: tabState),
                 const SizedBox(width: 6.0),
                 Expanded(
                   child: Text(
-                    tab.url.authority,
+                    tabState.url.authority,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: tab.isPrivate ? Colors.white : null,
+                      color: tabState.isPrivate ? Colors.white : null,
                     ),
                   ),
                 ),
-                if (tab.isPrivate) ...[
+                if (tabState.isPrivate) ...[
                   const SizedBox(width: 6.0),
                   const SizedBox(
                     height: 16,
@@ -229,7 +234,7 @@ class TabPreview extends HookWidget {
               ],
             ),
             const SizedBox(height: 6),
-            if (tab.thumbnail != null)
+            if (tabState.thumbnail != null)
               Expanded(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(
@@ -240,7 +245,7 @@ class TabPreview extends HookWidget {
                     width: double.infinity,
                     child: RepaintBoundary(
                       child: RawImage(
-                        image: tab.thumbnail!.value,
+                        image: tabState.thumbnail!.value,
                         fit: BoxFit.fitWidth,
                       ),
                     ),
@@ -262,19 +267,22 @@ class SingleTabPreview extends HookConsumerWidget {
 
   final void Function() onClose;
 
-  SingleTabPreview({
+  const SingleTabPreview({
     required this.tabId,
     required this.activeTabId,
     required this.onClose,
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
-  }) : super(key: ValueKey(tabId));
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tab = ref.watch(tabStateProvider(tabId));
+    final hasTabState = ref.watch(
+      tabStateProvider(tabId).select((value) => value != null),
+    );
 
-    if (tab == null) {
+    if (!hasTabState) {
       return const SizedBox.shrink();
     }
 
@@ -296,7 +304,7 @@ class SingleTabPreview extends HookConsumerWidget {
       },
       onHorizontalDragEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
-          await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
+          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
         }
 
         draggedDistance.value = 0.0;
@@ -304,13 +312,13 @@ class SingleTabPreview extends HookConsumerWidget {
       child: Opacity(
         opacity: 1.0 - draggedDistance.value / deleteThreshold,
         child: TabPreview(
-          tab: tab,
+          tabId: tabId,
           isActive: tabId == activeTabId,
           onTap: () async {
             if (tabId != activeTabId) {
               //Close first to avoid rebuilds
               onClose();
-              await ref.read(tabRepositoryProvider.notifier).selectTab(tab.id);
+              await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
               if (sourceSearchQuery.isNotEmpty &&
                   ref.read(findInPageControllerProvider(tabId)) ==
                       FindInPageState.hidden()) {
@@ -325,7 +333,7 @@ class SingleTabPreview extends HookConsumerWidget {
           onDeleteAll: (host) async {
             final containerId = await ref
                 .read(tabDataRepositoryProvider.notifier)
-                .getContainerTabId(tab.id);
+                .getContainerTabId(tabId);
 
             await ref
                 .read(tabDataRepositoryProvider.notifier)
@@ -341,7 +349,7 @@ class SingleTabPreview extends HookConsumerWidget {
           //       );
           // },
           onDelete: () async {
-            await ref.read(tabRepositoryProvider.notifier).closeTab(tab.id);
+            await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
           },
         ),
       ),
@@ -355,24 +363,27 @@ class SuggestedSingleTabPreview extends HookConsumerWidget {
 
   final String? activeTabId;
 
-  SuggestedSingleTabPreview({
+  const SuggestedSingleTabPreview({
     required this.tabId,
     required this.containerId,
     required this.activeTabId,
-  }) : super(key: ValueKey(tabId));
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tab = ref.watch(tabStateProvider(tabId));
+    final hasTabState = ref.watch(
+      tabStateProvider(tabId).select((value) => value != null),
+    );
 
-    if (tab == null) {
+    if (!hasTabState) {
       return const SizedBox.shrink();
     }
 
     return Opacity(
       opacity: 0.5,
       child: TabPreview(
-        tab: tab,
+        tabId: tabId,
         isActive: tabId == activeTabId,
         onTap: () async {
           final containerData = await ref
@@ -424,9 +435,11 @@ class TabTreePreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tab = ref.watch(tabStateProvider(entity.tabId));
+    final isTabPrivate = ref.watch(
+      tabStateProvider(entity.tabId).select((value) => value?.isPrivate),
+    );
 
-    if (tab == null) {
+    if (isTabPrivate != null) {
       return const SizedBox.shrink();
     }
 
@@ -440,7 +453,7 @@ class TabTreePreview extends HookConsumerWidget {
             stackCount,
             TabContainer(
               isActive: entity.tabId == activeTabId,
-              isPrivate: tab.isPrivate,
+              isPrivate: isTabPrivate == true,
             ),
           ),
         _addPadding(
@@ -454,7 +467,7 @@ class TabTreePreview extends HookConsumerWidget {
             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             textColor: Theme.of(context).colorScheme.onPrimaryContainer,
             child: TabPreview(
-              tab: tab,
+              tabId: entity.tabId,
               isActive: entity.tabId == activeTabId,
               onLongPress: () async {
                 if (entity.tabId != activeTabId) {
@@ -462,7 +475,7 @@ class TabTreePreview extends HookConsumerWidget {
                   onClose();
                   await ref
                       .read(tabRepositoryProvider.notifier)
-                      .selectTab(tab.id);
+                      .selectTab(entity.tabId);
                 } else {
                   onClose();
                 }
@@ -475,7 +488,7 @@ class TabTreePreview extends HookConsumerWidget {
                   onClose();
                   await ref
                       .read(tabRepositoryProvider.notifier)
-                      .selectTab(tab.id);
+                      .selectTab(entity.tabId);
                 }
               },
               // onDeleteAll: (host) async {

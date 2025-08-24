@@ -183,6 +183,7 @@ class TabTreeDialog extends HookConsumerWidget {
                   return SizedBox.fromSize(
                     size: childSize,
                     child: SingleTabPreview(
+                      key: ValueKey(id),
                       tabId: id,
                       activeTabId: selectedTabId,
                       onClose: () {
