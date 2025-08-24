@@ -187,9 +187,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                       leading: Icon(MdiIcons.incognitoCircleOff),
                       contentPadding: EdgeInsets.zero,
                     ),
-                    RadioListTile<TrackingProtectionPolicy>.adaptive(
-                      value: TrackingProtectionPolicy.none,
-                      title: const Text('Disabled'),
+                    RadioGroup(
                       groupValue: engineSettings.trackingProtectionPolicy,
                       onChanged: (value) async {
                         await ref
@@ -199,13 +197,15 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                                   .trackingProtectionPolicy(value),
                             );
                       },
+                      child:
+                          const RadioListTile<
+                            TrackingProtectionPolicy
+                          >.adaptive(
+                            value: TrackingProtectionPolicy.none,
+                            title: Text('Disabled'),
+                          ),
                     ),
-                    RadioListTile<TrackingProtectionPolicy>.adaptive(
-                      value: TrackingProtectionPolicy.recommended,
-                      title: const Text('Standard'),
-                      subtitle: const Text(
-                        'Pages will load normally, but block fewer trackers.',
-                      ),
+                    RadioGroup(
                       groupValue: engineSettings.trackingProtectionPolicy,
                       onChanged: (value) async {
                         await ref
@@ -215,13 +215,15 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                                   .trackingProtectionPolicy(value),
                             );
                       },
-                    ),
-                    RadioListTile<TrackingProtectionPolicy>.adaptive(
-                      value: TrackingProtectionPolicy.strict,
-                      title: const Text('Strict'),
-                      subtitle: const Text(
-                        'Stronger tracking protection and faster performance, but some sites may not work properly.',
+                      child: const RadioListTile<TrackingProtectionPolicy>.adaptive(
+                        value: TrackingProtectionPolicy.recommended,
+                        title: Text('Standard'),
+                        subtitle: Text(
+                          'Pages will load normally, but block fewer trackers.',
+                        ),
                       ),
+                    ),
+                    RadioGroup(
                       groupValue: engineSettings.trackingProtectionPolicy,
                       onChanged: (value) async {
                         await ref
@@ -231,15 +233,27 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                                   .trackingProtectionPolicy(value),
                             );
                       },
-                    ),
-                    RadioListTile<TrackingProtectionPolicy>.adaptive(
-                      value: TrackingProtectionPolicy.custom,
-                      title: const Text('Custom'),
-                      subtitle: const Text(
-                        'Choose which trackers and scripts to block.',
+                      child: const RadioListTile<TrackingProtectionPolicy>.adaptive(
+                        value: TrackingProtectionPolicy.strict,
+                        title: Text('Strict'),
+                        subtitle: Text(
+                          'Stronger tracking protection and faster performance, but some sites may not work properly.',
+                        ),
                       ),
+                    ),
+                    RadioGroup(
                       groupValue: engineSettings.trackingProtectionPolicy,
-                      onChanged: null,
+                      onChanged: (_) {},
+                      child:
+                          const RadioListTile<
+                            TrackingProtectionPolicy
+                          >.adaptive(
+                            value: TrackingProtectionPolicy.custom,
+                            title: Text('Custom'),
+                            subtitle: Text(
+                              'Choose which trackers and scripts to block.',
+                            ),
+                          ),
                     ),
                   ],
                 ),

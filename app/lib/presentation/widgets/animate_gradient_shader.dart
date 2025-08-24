@@ -224,6 +224,7 @@ class _AnimateGradientShaderState extends State<AnimateGradientShader>
     _controller =
         (widget.controller ??
               AnimationController(vsync: this, duration: widget.duration))
+          // ignore: discarded_futures
           ..repeat(reverse: widget.reverse);
 
     _animation = CurvedAnimation(parent: _controller!, curve: Curves.easeInOut);
