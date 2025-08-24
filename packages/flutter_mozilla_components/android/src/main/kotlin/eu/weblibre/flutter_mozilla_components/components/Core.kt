@@ -51,6 +51,7 @@ import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
 import mozilla.components.feature.readerview.ReaderViewMiddleware
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
+import mozilla.components.feature.session.middleware.undo.UndoMiddleware
 import mozilla.components.feature.sitepermissions.OnDiskSitePermissionsStorage
 import mozilla.components.feature.webnotifications.WebNotificationFeature
 import mozilla.components.support.base.worker.Frequency
@@ -163,7 +164,7 @@ class Core(private val context: Context,
                 DownloadMiddleware(context, DownloadService::class.java, {false}),
                 ThumbnailsMiddleware(thumbnailStorage),
                 ReaderViewMiddleware(),
-//                UndoMiddleware(),
+                UndoMiddleware(),
                 LastAccessMiddleware(),
 //                PromptMiddleware(),
                 SessionPrioritizationMiddleware(),

@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class TabCreationMenu extends HookConsumerWidget {
   final Widget child;
@@ -56,6 +57,13 @@ class TabCreationMenu extends HookConsumerWidget {
               await ref
                   .read(tabRepositoryProvider.notifier)
                   .closeTab(selectedTabId!);
+
+              if (context.mounted) {
+                ui_helper.showTabUndoClose(
+                  context,
+                  ref.read(tabRepositoryProvider.notifier).undoClose,
+                );
+              }
             },
             leadingIcon: const Icon(Icons.close),
             child: const Text('Close Tab'),

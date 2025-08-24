@@ -410,7 +410,19 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                       await ref
                                           .read(tabRepositoryProvider.notifier)
                                           .closeTab(selectedTabId);
+
                                       trippleDotMenuController.close();
+
+                                      if (context.mounted) {
+                                        ui_helper.showTabUndoClose(
+                                          context,
+                                          ref
+                                              .read(
+                                                tabRepositoryProvider.notifier,
+                                              )
+                                              .undoClose,
+                                        );
+                                      }
                                     },
                                     icon: const Icon(Icons.close),
                                   ),

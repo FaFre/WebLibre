@@ -108,8 +108,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _periodicScreenshotUpdate?.cancel();
           _periodicScreenshotUpdate = null;
           _timerPaused = false;
-
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
         }
 
         if (next.isLoading == false &&

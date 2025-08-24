@@ -245,6 +245,10 @@ class TabRepository extends _$TabRepository {
     return _tabsService.removeTabs(ids: tabIds);
   }
 
+  Future<void> undoClose() {
+    return _tabsService.undo();
+  }
+
   @override
   void build() {
     final eventSerivce = ref.watch(eventServiceProvider);

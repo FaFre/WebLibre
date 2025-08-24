@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class TabContainer extends StatelessWidget {
   final bool isActive;
@@ -305,6 +306,13 @@ class SingleTabPreview extends HookConsumerWidget {
       onHorizontalDragEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+
+          if (context.mounted) {
+            ui_helper.showTabUndoClose(
+              context,
+              ref.read(tabRepositoryProvider.notifier).undoClose,
+            );
+          }
         }
 
         draggedDistance.value = 0.0;
@@ -335,9 +343,17 @@ class SingleTabPreview extends HookConsumerWidget {
                 .read(tabDataRepositoryProvider.notifier)
                 .getContainerTabId(tabId);
 
-            await ref
+            final count = await ref
                 .read(tabDataRepositoryProvider.notifier)
                 .closeAllTabsByHost(containerId, host);
+
+            if (context.mounted) {
+              ui_helper.showTabUndoClose(
+                context,
+                ref.read(tabRepositoryProvider.notifier).undoClose,
+                count: count,
+              );
+            }
           },
           // onDoubleTap: () {
           //   ref.read(overlayDialogControllerProvider.notifier).show(
@@ -350,6 +366,13 @@ class SingleTabPreview extends HookConsumerWidget {
           // },
           onDelete: () async {
             await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+
+            if (context.mounted) {
+              ui_helper.showTabUndoClose(
+                context,
+                ref.read(tabRepositoryProvider.notifier).undoClose,
+              );
+            }
           },
         ),
       ),
@@ -510,41 +533,20 @@ class TabTreePreview extends HookConsumerWidget {
               //       );
               // },
               onDelete: () async {
-                final result = (entity.totalTabs > 1)
-                    ? await showDialog<bool?>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Close Tab Tree'),
-                            content: Text(
-                              'Are you sure you want to close the entire tree containing ${entity.totalTabs} tabs?',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                                child: const Text('Close'),
-                              ),
-                            ],
-                          );
-                        },
-                      )
-                    : true;
+                final tabs = await ref.read(
+                  tabDescendantsProvider(entity.rootId).future,
+                );
 
-                if (result == true) {
-                  final tabs = await ref.read(
-                    tabDescendantsProvider(entity.rootId).future,
+                await ref
+                    .read(tabRepositoryProvider.notifier)
+                    .closeTabs(tabs.keys.toList());
+
+                if (context.mounted) {
+                  ui_helper.showTabUndoClose(
+                    context,
+                    ref.read(tabRepositoryProvider.notifier).undoClose,
+                    count: tabs.length,
                   );
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .closeTabs(tabs.keys.toList());
                 }
               },
             ),

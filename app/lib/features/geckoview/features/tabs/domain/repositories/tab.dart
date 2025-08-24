@@ -71,7 +71,7 @@ class TabDataRepository extends _$TabDataRepository {
         .assignOrderKey(tabId, orderKey: orderKey);
   }
 
-  Future<void> closeAllTabsByContainer(String? containerId) async {
+  Future<int> closeAllTabsByContainer(String? containerId) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
         .containerDao
@@ -81,9 +81,11 @@ class TabDataRepository extends _$TabDataRepository {
     if (tabIds.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
     }
+
+    return tabIds.length;
   }
 
-  Future<void> closeAllTabsByHost(String? containerId, String host) async {
+  Future<int> closeAllTabsByHost(String? containerId, String host) async {
     final tabs = await ref
         .read(tabDatabaseProvider)
         .containerDao
@@ -98,6 +100,8 @@ class TabDataRepository extends _$TabDataRepository {
     if (filtered.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(filtered);
     }
+
+    return filtered.length;
   }
 
   Future<String?> getContainerTabId(String tabId) {

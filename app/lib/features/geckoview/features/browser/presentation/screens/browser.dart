@@ -272,6 +272,13 @@ class BrowserScreen extends HookConsumerWidget {
               await ref
                   .read(tabRepositoryProvider.notifier)
                   .closeTab(details.data.tabId);
+
+              if (context.mounted) {
+                ui_helper.showTabUndoClose(
+                  context,
+                  ref.read(tabRepositoryProvider.notifier).undoClose,
+                );
+              }
             },
             builder: (context, _, _) {
               return OverlayPortal(
@@ -372,6 +379,16 @@ class BrowserScreen extends HookConsumerWidget {
                           await ref
                               .read(tabRepositoryProvider.notifier)
                               .closeTab(tabState.id);
+
+                          if (context.mounted) {
+                            ui_helper.showTabUndoClose(
+                              context,
+                              ref
+                                  .read(tabRepositoryProvider.notifier)
+                                  .undoClose,
+                            );
+                          }
+
                           return true;
                         } else {
                           //Mark back as unhandled and navigator will pop

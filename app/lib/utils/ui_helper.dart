@@ -148,3 +148,20 @@ Future<void> launchUrlFeedback(
     }
   }
 }
+
+void showTabUndoClose(
+  BuildContext context,
+  VoidCallback onUndo, {
+  int count = 1,
+  Duration duration = const Duration(seconds: 2),
+}) {
+  final snackBar = SnackBar(
+    content: (count > 1)
+        ? Text('$count Tabs closed')
+        : const Text('Tab closed'),
+    action: SnackBarAction(label: 'Undo', onPressed: onUndo),
+    duration: duration,
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}

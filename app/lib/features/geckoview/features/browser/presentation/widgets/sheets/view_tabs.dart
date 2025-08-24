@@ -31,6 +31,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tree_view.dart';
@@ -47,6 +48,7 @@ import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.d
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class _TabDraggable extends HookConsumerWidget {
   final TabEntity entity;
@@ -216,38 +218,17 @@ class _TabSheetHeader extends HookConsumerWidget {
                     TextButton.icon(
                       onPressed: () async {
                         final container = ref.read(selectedContainerProvider);
-                        final result = await showDialog<bool?>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Close All Tabs'),
-                              content: Text(
-                                (container != null)
-                                    ? 'Are you sure you want to close all container tabs?'
-                                    : 'Are you sure you want to close all unassigned tabs?',
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, false);
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, true);
-                                  },
-                                  child: const Text('Close'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
 
-                        if (result == true) {
-                          await ref
-                              .read(tabDataRepositoryProvider.notifier)
-                              .closeAllTabsByContainer(container);
+                        final count = await ref
+                            .read(tabDataRepositoryProvider.notifier)
+                            .closeAllTabsByContainer(container);
+
+                        if (context.mounted) {
+                          ui_helper.showTabUndoClose(
+                            context,
+                            ref.read(tabRepositoryProvider.notifier).undoClose,
+                            count: count,
+                          );
                         }
                       },
                       icon: const Icon(MdiIcons.closeBoxMultiple),
