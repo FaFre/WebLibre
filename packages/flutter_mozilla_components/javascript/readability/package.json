@@ -11,7 +11,7 @@
   "description": "",
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "remove-markdown": "^0.5.5",
+    "remove-markdown": "^0.6.2",
     "turndown": "^7.2.0"
   },
   "devDependencies": {
