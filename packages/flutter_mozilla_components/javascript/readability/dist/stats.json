@@ -1,8 +1,8 @@
 {
-  "hash": "3b7b601a842a4a70dcf0",
+  "hash": "1d5bede379cdf6035685",
   "version": "5.97.1",
-  "time": 695,
-  "builtAt": 1740408169935,
+  "time": 548,
+  "builtAt": 1756032309689,
   "publicPath": "auto",
   "outputPath": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/dist",
   "assetsByChunkName": {
@@ -14,14 +14,14 @@
     {
       "type": "asset",
       "name": "readability.min.js",
-      "size": 49105,
+      "size": 49805,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
       "info": {
         "javascriptModule": false,
         "minimized": true,
-        "size": 49105
+        "size": 49805
       },
       "chunkNames": [
         "main"
@@ -43,9 +43,9 @@
       "initial": true,
       "entry": true,
       "recorded": false,
-      "size": 122550,
+      "size": 128734,
       "sizes": {
-        "javascript": 121880,
+        "javascript": 128064,
         "runtime": 670
       },
       "names": [
@@ -59,7 +59,7 @@
         "readability.min.js"
       ],
       "auxiliaryFiles": [],
-      "hash": "560dd27471dfc45dd435",
+      "hash": "917adf20241b61c5c035",
       "childrenByOrder": {},
       "id": 792,
       "siblings": [],
@@ -70,9 +70,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 4162,
+          "size": 4271,
           "sizes": {
-            "javascript": 4162
+            "javascript": 4271
           },
           "built": true,
           "codeGenerated": true,
@@ -123,7 +123,7 @@
               "active": true,
               "explanation": "",
               "userRequest": null,
-              "loc": "107:2-16",
+              "loc": "121:2-16",
               "moduleId": 804,
               "resolvedModuleId": 804
             },
@@ -145,8 +145,8 @@
           "usedExports": null,
           "providedExports": null,
           "optimizationBailout": [
-            "CommonJS bailout: module.exports is used directly at 107:2-16",
-            "Statement (VariableDeclaration) with side effects in source code at 22:0-27:2",
+            "CommonJS bailout: module.exports is used directly at 121:2-16",
+            "Statement (VariableDeclaration) with side effects in source code at 22:0-28:2",
             "ModuleConcatenation bailout: Module is not an ECMAScript module"
           ],
           "depth": 2
@@ -155,9 +155,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 84033,
+          "size": 89980,
           "sizes": {
-            "javascript": 84033
+            "javascript": 89980
           },
           "built": true,
           "codeGenerated": true,
@@ -208,7 +208,7 @@
               "active": true,
               "explanation": "",
               "userRequest": null,
-              "loc": "2313:2-16",
+              "loc": "2785:2-16",
               "moduleId": 238,
               "resolvedModuleId": 238
             },
@@ -230,8 +230,8 @@
           "usedExports": null,
           "providedExports": null,
           "optimizationBailout": [
-            "CommonJS bailout: module.exports is used directly at 2313:2-16",
-            "Statement (ExpressionStatement) with side effects in source code at 98:0-2309:2",
+            "CommonJS bailout: module.exports is used directly at 2785:2-16",
+            "Statement (ExpressionStatement) with side effects in source code at 111:0-2780:2",
             "ModuleConcatenation bailout: Module is not an ECMAScript module"
           ],
           "depth": 2
@@ -240,9 +240,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 226,
+          "size": 192,
           "sizes": {
-            "javascript": 226
+            "javascript": 192
           },
           "built": true,
           "codeGenerated": true,
@@ -302,7 +302,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "@mozilla/readability",
-              "loc": "7:0-73",
+              "loc": "13:0-73",
               "moduleId": 922,
               "resolvedModuleId": null
             },
@@ -316,7 +316,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "@mozilla/readability",
-              "loc": "44:17-37",
+              "loc": "50:17-37",
               "moduleId": 922,
               "resolvedModuleId": null
             },
@@ -330,7 +330,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "@mozilla/readability",
-              "loc": "45:19-30",
+              "loc": "51:19-30",
               "moduleId": 922,
               "resolvedModuleId": null
             }
@@ -348,9 +348,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 4061,
+          "size": 4012,
           "sizes": {
-            "javascript": 4061
+            "javascript": 4012
           },
           "built": true,
           "codeGenerated": true,
@@ -396,7 +396,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "remove-markdown",
-              "loc": "9:21-47",
+              "loc": "15:21-47",
               "moduleId": 922,
               "resolvedModuleId": null
             },
@@ -419,7 +419,7 @@
           "providedExports": null,
           "optimizationBailout": [
             "CommonJS bailout: module.exports is used directly at 1:0-14",
-            "Statement (ExpressionStatement) with side effects in source code at 1:0-99:2",
+            "Statement (ExpressionStatement) with side effects in source code at 1:0-92:2",
             "ModuleConcatenation bailout: Module is not an ECMAScript module"
           ],
           "depth": 1
@@ -428,9 +428,9 @@
           "type": "module",
           "moduleType": "javascript/esm",
           "layer": null,
-          "size": 29398,
+          "size": 29609,
           "sizes": {
-            "javascript": 29398
+            "javascript": 29609
           },
           "built": true,
           "codeGenerated": true,
@@ -498,9 +498,9 @@
               "type": "module",
               "moduleType": "javascript/auto",
               "layer": null,
-              "size": 4336,
+              "size": 4547,
               "sizes": {
-                "javascript": 4336
+                "javascript": 4547
               },
               "built": true,
               "codeGenerated": false,
@@ -534,7 +534,7 @@
                 "parseReaderable"
               ],
               "optimizationBailout": [
-                "Statement (VariableDeclaration) with side effects in source code at 9:0-48"
+                "Statement (VariableDeclaration) with side effects in source code at 15:0-48"
               ],
               "depth": 0
             },
@@ -588,7 +588,7 @@
                   "active": true,
                   "explanation": "",
                   "userRequest": "turndown",
-                  "loc": "8:0-39",
+                  "loc": "14:0-39",
                   "moduleId": null,
                   "resolvedModuleId": null
                 },
@@ -602,7 +602,7 @@
                   "active": true,
                   "explanation": "",
                   "userRequest": "turndown",
-                  "loc": "10:26-41",
+                  "loc": "16:26-41",
                   "moduleId": null,
                   "resolvedModuleId": null
                 }
@@ -745,9 +745,9 @@
       "type": "module",
       "moduleType": "javascript/esm",
       "layer": null,
-      "size": 29398,
+      "size": 29609,
       "sizes": {
-        "javascript": 29398
+        "javascript": 29609
       },
       "built": true,
       "codeGenerated": true,
@@ -814,9 +814,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 4336,
+          "size": 4547,
           "sizes": {
-            "javascript": 4336
+            "javascript": 4547
           },
           "built": true,
           "codeGenerated": false,
@@ -849,7 +849,7 @@
             "parseReaderable"
           ],
           "optimizationBailout": [
-            "Statement (VariableDeclaration) with side effects in source code at 9:0-48"
+            "Statement (VariableDeclaration) with side effects in source code at 15:0-48"
           ],
           "depth": 0
         },
@@ -902,7 +902,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "turndown",
-              "loc": "8:0-39",
+              "loc": "14:0-39",
               "moduleId": null,
               "resolvedModuleId": null
             },
@@ -916,7 +916,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "turndown",
-              "loc": "10:26-41",
+              "loc": "16:26-41",
               "moduleId": null,
               "resolvedModuleId": null
             }
@@ -938,9 +938,9 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 226,
+      "size": 192,
       "sizes": {
-        "javascript": 226
+        "javascript": 192
       },
       "built": true,
       "codeGenerated": true,
@@ -999,7 +999,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "@mozilla/readability",
-          "loc": "7:0-73",
+          "loc": "13:0-73",
           "moduleId": 922,
           "resolvedModuleId": null
         },
@@ -1013,7 +1013,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "@mozilla/readability",
-          "loc": "44:17-37",
+          "loc": "50:17-37",
           "moduleId": 922,
           "resolvedModuleId": null
         },
@@ -1027,7 +1027,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "@mozilla/readability",
-          "loc": "45:19-30",
+          "loc": "51:19-30",
           "moduleId": 922,
           "resolvedModuleId": null
         }
@@ -1090,7 +1090,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "turndown",
-          "loc": "8:0-39",
+          "loc": "14:0-39",
           "moduleId": null,
           "resolvedModuleId": null
         },
@@ -1104,7 +1104,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "turndown",
-          "loc": "10:26-41",
+          "loc": "16:26-41",
           "moduleId": null,
           "resolvedModuleId": null
         }
@@ -1124,9 +1124,9 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 4061,
+      "size": 4012,
       "sizes": {
-        "javascript": 4061
+        "javascript": 4012
       },
       "built": true,
       "codeGenerated": true,
@@ -1171,7 +1171,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "remove-markdown",
-          "loc": "9:21-47",
+          "loc": "15:21-47",
           "moduleId": 922,
           "resolvedModuleId": null
         },
@@ -1194,7 +1194,7 @@
       "providedExports": null,
       "optimizationBailout": [
         "CommonJS bailout: module.exports is used directly at 1:0-14",
-        "Statement (ExpressionStatement) with side effects in source code at 1:0-99:2",
+        "Statement (ExpressionStatement) with side effects in source code at 1:0-92:2",
         "ModuleConcatenation bailout: Module is not an ECMAScript module"
       ],
       "depth": 1
@@ -1203,9 +1203,9 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 84033,
+      "size": 89980,
       "sizes": {
-        "javascript": 84033
+        "javascript": 89980
       },
       "built": true,
       "codeGenerated": true,
@@ -1255,7 +1255,7 @@
           "active": true,
           "explanation": "",
           "userRequest": null,
-          "loc": "2313:2-16",
+          "loc": "2785:2-16",
           "moduleId": 238,
           "resolvedModuleId": 238
         },
@@ -1277,8 +1277,8 @@
       "usedExports": null,
       "providedExports": null,
       "optimizationBailout": [
-        "CommonJS bailout: module.exports is used directly at 2313:2-16",
-        "Statement (ExpressionStatement) with side effects in source code at 98:0-2309:2",
+        "CommonJS bailout: module.exports is used directly at 2785:2-16",
+        "Statement (ExpressionStatement) with side effects in source code at 111:0-2780:2",
         "ModuleConcatenation bailout: Module is not an ECMAScript module"
       ],
       "depth": 2
@@ -1287,9 +1287,9 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 4162,
+      "size": 4271,
       "sizes": {
-        "javascript": 4162
+        "javascript": 4271
       },
       "built": true,
       "codeGenerated": true,
@@ -1339,7 +1339,7 @@
           "active": true,
           "explanation": "",
           "userRequest": null,
-          "loc": "107:2-16",
+          "loc": "121:2-16",
           "moduleId": 804,
           "resolvedModuleId": 804
         },
@@ -1361,8 +1361,8 @@
       "usedExports": null,
       "providedExports": null,
       "optimizationBailout": [
-        "CommonJS bailout: module.exports is used directly at 107:2-16",
-        "Statement (VariableDeclaration) with side effects in source code at 22:0-27:2",
+        "CommonJS bailout: module.exports is used directly at 121:2-16",
+        "Statement (VariableDeclaration) with side effects in source code at 22:0-28:2",
         "ModuleConcatenation bailout: Module is not an ECMAScript module"
       ],
       "depth": 2
@@ -1482,11 +1482,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 49105
+          "size": 49805
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 49105,
+      "assetsSize": 49805,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,
@@ -1504,11 +1504,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 49105
+          "size": 49805
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 49105,
+      "assetsSize": 49805,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,
