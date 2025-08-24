@@ -57,9 +57,13 @@ class BrowserScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scaffoldKey = useMemoized(() => GlobalKey<ScaffoldState>());
+
     final eventService = ref.watch(eventServiceProvider);
 
-    final displayedSheet = ref.watch(bottomSheetControllerProvider);
+    final sheetDisplayed = ref.watch(
+      bottomSheetControllerProvider.select((value) => value != null),
+    );
     final overlayBuilder = ref.watch(overlayControllerProvider);
 
     final tabInFullScreen = ref.watch(
@@ -101,18 +105,57 @@ class BrowserScreen extends HookConsumerWidget {
       [],
     );
 
-    bool dismissOnThreshold(DraggableScrollableNotification notification) {
-      if (!context.mounted) return false;
+    final sheetController = useRef<PersistentBottomSheetController?>(null);
+    ref.listen(bottomSheetControllerProvider, (previous, next) {
+      final state = scaffoldKey.currentState;
+      if (state != null) {
+        if (sheetController.value != null) {
+          sheetController.value!.close();
+          sheetController.value = null;
+        }
 
-      if (notification.extent <= 0.1) {
-        ref.read(bottomSheetControllerProvider.notifier).dismiss();
-        return true;
-      } else {
-        ref.read(bottomSheetExtendProvider.notifier).add(notification.extent);
+        if (next != null) {
+          bool dismissOnThreshold(
+            DraggableScrollableNotification notification,
+          ) {
+            if (!context.mounted) return false;
+
+            if (notification.extent <= 0.1) {
+              ref.read(bottomSheetControllerProvider.notifier).dismiss();
+              return true;
+            } else {
+              ref
+                  .read(bottomSheetExtendProvider.notifier)
+                  .add(notification.extent);
+            }
+
+            return false;
+          }
+
+          final sheet = switch (next) {
+            ViewTabsSheet() =>
+              NotificationListener<DraggableScrollableNotification>(
+                key: ValueKey(next),
+                onNotification: dismissOnThreshold,
+                child: _ViewTabsSheet(
+                  maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                ),
+              ),
+            final EditUrlSheet parameter =>
+              NotificationListener<DraggableScrollableNotification>(
+                key: ValueKey(parameter),
+                onNotification: dismissOnThreshold,
+                child: _ViewUrlSheet(
+                  initialTabState: parameter.tabState,
+                  maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+                ),
+              ),
+          };
+
+          sheetController.value = state.showBottomSheet((context) => sheet);
+        }
       }
-
-      return false;
-    }
+    });
 
     return PopScope(
       //We need this for BackButtonListener to work downstream
@@ -121,6 +164,7 @@ class BrowserScreen extends HookConsumerWidget {
       child: Theme(
         data: themeData,
         child: Scaffold(
+          key: scaffoldKey,
           extendBodyBehindAppBar: tabInFullScreen,
           bottomNavigationBar: HookConsumer(
             builder: (context, ref, child) {
@@ -236,7 +280,7 @@ class BrowserScreen extends HookConsumerWidget {
                   return overlayBuilder!.call(context);
                 },
                 child: Listener(
-                  onPointerDown: (displayedSheet != null)
+                  onPointerDown: sheetDisplayed
                       ? (_) {
                           ref
                               .read(bottomSheetControllerProvider.notifier)
@@ -257,7 +301,7 @@ class BrowserScreen extends HookConsumerWidget {
                         return false;
                       }
 
-                      if (displayedSheet != null) {
+                      if (sheetDisplayed) {
                         ref
                             .read(bottomSheetControllerProvider.notifier)
                             .dismiss();
@@ -346,7 +390,7 @@ class BrowserScreen extends HookConsumerWidget {
                       }
                     },
                     child: _BrowserView(
-                      sheetDisplayed: displayedSheet != null,
+                      sheetDisplayed: sheetDisplayed,
                       isFullscreen: tabInFullScreen,
                     ),
                   ),
@@ -355,27 +399,6 @@ class BrowserScreen extends HookConsumerWidget {
             },
           ),
           floatingActionButton: ReaderAppearanceButton(),
-          bottomSheet: (displayedSheet != null)
-              ? switch (displayedSheet) {
-                  ViewTabsSheet() =>
-                    NotificationListener<DraggableScrollableNotification>(
-                      key: ValueKey(displayedSheet),
-                      onNotification: dismissOnThreshold,
-                      child: _ViewTabsSheet(
-                        maxChildSize: MediaQuery.of(context).relativeSafeArea(),
-                      ),
-                    ),
-                  final EditUrlSheet parameter =>
-                    NotificationListener<DraggableScrollableNotification>(
-                      key: ValueKey(parameter),
-                      onNotification: dismissOnThreshold,
-                      child: _ViewUrlSheet(
-                        initialTabState: parameter.tabState,
-                        maxChildSize: MediaQuery.of(context).relativeSafeArea(),
-                      ),
-                    ),
-                }
-              : null,
         ),
       ),
     );
