@@ -62,6 +62,10 @@ class BrowserScreen extends HookConsumerWidget {
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
     final overlayBuilder = ref.watch(overlayControllerProvider);
 
+    final tabInFullScreen = ref.watch(
+      selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),
+    );
+
     final lastBackButtonPress = useRef<DateTime?>(null);
 
     final overlayController = useOverlayPortalController();
@@ -117,6 +121,7 @@ class BrowserScreen extends HookConsumerWidget {
       child: Theme(
         data: themeData,
         child: Scaffold(
+          extendBodyBehindAppBar: tabInFullScreen,
           bottomNavigationBar: HookConsumer(
             builder: (context, ref, child) {
               final tabId = ref.watch(selectedTabProvider);
@@ -329,7 +334,10 @@ class BrowserScreen extends HookConsumerWidget {
                         return true;
                       }
                     },
-                    child: _BrowserView(sheetDisplayed: displayedSheet != null),
+                    child: _BrowserView(
+                      sheetDisplayed: displayedSheet != null,
+                      isFullscreen: tabInFullScreen,
+                    ),
                   ),
                 ),
               );
@@ -364,15 +372,23 @@ class BrowserScreen extends HookConsumerWidget {
 }
 
 class _BrowserView extends StatelessWidget {
-  const _BrowserView({required this.sheetDisplayed});
-
   final bool sheetDisplayed;
+  final bool isFullscreen;
+
+  const _BrowserView({
+    required this.sheetDisplayed,
+    required this.isFullscreen,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         SafeArea(
+          top: !isFullscreen,
+          right: !isFullscreen,
+          bottom: !isFullscreen,
+          left: !isFullscreen,
           child: Stack(
             children: [
               const BrowserView(),
