@@ -12,6 +12,7 @@ WebLibre is an independent browser project built on the foundation of [Mozilla's
 
 > **⚠️ Alpha Release Notice**  
 > WebLibre is currently in the alpha phase. Expect frequent updates, potential bugs, and breaking changes. Please report issues on [GitHub](https://github.com/FaFre/WebLibre/issues).
+> Currently only F-Droid builds are free from Google dependencies.
 
 ---
 
