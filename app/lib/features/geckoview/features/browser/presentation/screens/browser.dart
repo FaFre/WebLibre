@@ -185,13 +185,24 @@ class BrowserScreen extends HookConsumerWidget {
                       next.valueOrNull != null) {
                     final diff = previous!.value! - next.value!;
                     if (diff < 0) {
+                      if (diffAcc.value > 0) {
+                        diffAcc.value = 0.0;
+                      }
+
                       diffAcc.value += diff;
-                      if (diffAcc.value.abs() > kToolbarHeight * 2) {
+                      if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
                         hidden.value = true;
                       }
                     } else if (diff > 0) {
-                      diffAcc.value = 0.0;
-                      hidden.value = false;
+                      if (diffAcc.value < 0) {
+                        diffAcc.value = 0.0;
+                      }
+
+                      diffAcc.value += diff;
+                      if (diffAcc.value.abs() > (kToolbarHeight / 2)) {
+                        diffAcc.value = 0.0;
+                        hidden.value = false;
+                      }
                     }
                   }
                 },
