@@ -1,7 +1,7 @@
 name: weblibre
 description: "The Privacy-Focused & AI-Powered Research Browser"
 publish_to: 'none'
-version: 0.9.18-alpha-4+23
+version: 0.9.18-alpha-5+23
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
@@ -86,7 +86,7 @@ dependencies:
       url: https://github.com/FaFre/uri-to-file.git
   url_launcher: ^6.3.2
   uuid: ^4.5.1
-  vector_math: ^2.1.4
+  vector_math: ^2.2.0
 
 dev_dependencies:
   analyzer_plugin: ^0.13.4
