@@ -316,6 +316,9 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
               // ),
               SwitchListTile.adaptive(
                 title: const Text('Bounce Tracking Protection'),
+                subtitle: const Text(
+                  'Blocks redirect trackers that collect data through intermediate URL redirects between websites',
+                ),
                 secondary: const Icon(MdiIcons.securityNetwork),
                 value: switch (engineSettings
                     .contentBlocking
@@ -349,6 +352,9 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   children: [
                     const ListTile(
                       title: Text('Query Parameter Stripping'),
+                      subtitle: Text(
+                        'Removes tracking parameters from URLs to prevent cross-site user tracking',
+                      ),
                       leading: Icon(MdiIcons.closeNetwork),
                       contentPadding: EdgeInsets.zero,
                     ),
