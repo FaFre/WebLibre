@@ -86,7 +86,7 @@ object EngineProvider {
 
         return GeckoEngine(context, defaultSettings, runtime).also {
             WebCompatFeature.install(it)
-            CookieManagerFeature.install(it)
+            //CookieManagerFeature.install(it)
             PrefManagerFeature.install(it)
             ContainerProxyFeature.install(it)
             BrowserExtensionFeature.install(it, extensionEvents)
