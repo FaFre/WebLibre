@@ -21,6 +21,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:lexo_rank/lexo_rank.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
@@ -55,6 +56,21 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return query.map((row) => row.read(db.tab.containerId));
   }
 
+  Future<String> _generateOrderKey({
+    required Value<String?> parentId,
+    required Value<String?> containerId,
+  }) {
+    if (parentId.value.isNotEmpty) {
+      return db.containerDao
+          .generateOrderKeyAfterTabId(containerId.value, parentId.value!)
+          .getSingle();
+    } else {
+      return db.containerDao
+          .generateLeadingOrderKey(containerId.value)
+          .getSingle();
+    }
+  }
+
   Future<String> upsertContainerTabTransactional(
     Future<String> Function() createTab, {
     required Value<String?> parentId,
@@ -63,12 +79,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
   }) {
     return db.transaction(() async {
       final tabId = await createTab();
-
       final currentOrderKey =
           orderKey.value ??
-          await db.containerDao
-              .generateLeadingOrderKey(containerId.value)
-              .getSingle();
+          await _generateOrderKey(parentId: parentId, containerId: containerId);
 
       await db.tab.insertOne(
         TabCompanion.insert(
@@ -101,9 +114,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     return db.transaction(() async {
       final currentOrderKey =
           orderKey.value ??
-          await db.containerDao
-              .generateLeadingOrderKey(containerId.value)
-              .getSingle();
+          await _generateOrderKey(parentId: parentId, containerId: containerId);
 
       await db.tab.insertOne(
         TabCompanion.insert(
