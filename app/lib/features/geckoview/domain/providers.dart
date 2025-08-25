@@ -42,7 +42,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
 
   unawaited(
     service.setActions([
-      SearchAction((text) async {
+      NewTabAction((text) async {
         final router = await ref.read(routerProvider.future);
         final settings = ref.read(generalSettingsWithDefaultsProvider);
         final route = SearchRoute(

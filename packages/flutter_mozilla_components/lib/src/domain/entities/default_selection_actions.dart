@@ -48,11 +48,11 @@ class DefaultSearchAction extends BaseSelectionAction {
       );
 }
 
-class SearchAction extends BaseSelectionAction {
-  SearchAction(PerformAction action)
+class NewTabAction extends BaseSelectionAction {
+  NewTabAction(PerformAction action)
     : super(
-        id: 'CUSTOM_CONTEXT_MENU_SEARCH',
-        title: 'Search',
+        id: 'CUSTOM_CONTEXT_MENU_NEW_TAB',
+        title: 'New Tab',
         performAction: action,
       );
 }
