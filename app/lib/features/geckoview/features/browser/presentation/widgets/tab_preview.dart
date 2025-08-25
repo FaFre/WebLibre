@@ -462,7 +462,7 @@ class TabTreePreview extends HookConsumerWidget {
       tabStateProvider(entity.tabId).select((value) => value?.isPrivate),
     );
 
-    if (isTabPrivate != null) {
+    if (isTabPrivate == null) {
       return const SizedBox.shrink();
     }
 
