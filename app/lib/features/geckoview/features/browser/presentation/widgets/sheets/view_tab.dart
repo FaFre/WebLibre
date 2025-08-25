@@ -185,6 +185,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                   domain: initialTabState.url.host,
                   availableBangs: availableBangs,
                   initialText: initialTabState.url.toString(),
+                  label: const Text('Address'),
                 ),
               ),
               const Divider(),

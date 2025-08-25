@@ -45,6 +45,7 @@ class SiteSearch extends HookConsumerWidget {
   final List<BangData> availableBangs;
   final String? initialText;
   final bool searchInNewTab;
+  final Widget? label;
 
   const SiteSearch({
     required this.domain,
@@ -52,6 +53,7 @@ class SiteSearch extends HookConsumerWidget {
     super.key,
     this.initialText,
     this.searchInNewTab = false,
+    this.label,
   });
 
   @override
@@ -165,6 +167,7 @@ class SiteSearch extends HookConsumerWidget {
           maxLines: null,
           activeBang: selectedBang,
           showSuggestions: true,
+          label: label,
           onTap: () {
             if (!searchFocusNode.hasFocus) {
               // Select all text when the field is tapped
