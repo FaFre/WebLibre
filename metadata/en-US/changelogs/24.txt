@@ -1,0 +1,18 @@
+### GeckoView 142.0
+
+* Added 'Undo' action for closed tabs
+* Added swipe gesture to close tab
+* Added compatibility for receiving intents of various MIME types
+* Introduced Bounce Tracking Protection
+* Introduced Query Parameter Stripping as setting
+* Introduced setting to control default tab type for creating new tabs and opening links
+* Upgraded Flutter to latest stable version
+* Automatic hide tab bar on scroll
+* Sort newly created tabs after parent instead of at front
+* Set default fallback encoding for Web Feeds to UTF-8
+* Take full screen size when in fullscreen mode
+* Improved error logging
+* Filter out sensitive logs
+* Minor UI improvements
+* Fix Reader Mode issue on back navigation
+* Fix bottom sheet scrolling issues
