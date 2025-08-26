@@ -1,3 +1,10 @@
+## 0.9.21
+### GeckoView 142.0
+
+* Restore previous tab state on undo delete
+* Fix Reader Mode issue on back arrow navigation
+* Unhide tab bar on app resume
+
 ## 0.9.20
 ### GeckoView 142.0
 

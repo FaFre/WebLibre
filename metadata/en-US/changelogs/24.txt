@@ -1,4 +1,4 @@
-### GeckoView 142.0
+GeckoView 142.0
 
 * Added 'Undo' action for closed tabs
 * Added swipe gesture to close tab
