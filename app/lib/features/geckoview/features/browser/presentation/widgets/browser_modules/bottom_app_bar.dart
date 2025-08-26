@@ -40,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -395,8 +396,23 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                         ).notifier,
                                       );
 
+                                      final isReaderActive = ref.read(
+                                        selectedTabStateProvider.select(
+                                          (state) =>
+                                              state?.readerableState.active ??
+                                              false,
+                                        ),
+                                      );
+
                                       if (isLoading) {
                                         await controller.stopLoading();
+                                      } else if (isReaderActive) {
+                                        await ref
+                                            .read(
+                                              readerableScreenControllerProvider
+                                                  .notifier,
+                                            )
+                                            .toggleReaderView(false);
                                       } else {
                                         await controller.goBack();
                                       }
