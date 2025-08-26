@@ -193,19 +193,28 @@ class BrowserScreen extends HookConsumerWidget {
               final hidden = useState(false);
               final diffAcc = useRef(0.0);
 
-              useEffect(() {
+              void resetHiddenState() {
                 hidden.value = false;
                 diffAcc.value = 0.0;
+              }
+
+              useEffect(() {
+                resetHiddenState();
 
                 return null;
               }, [tabId]);
+
+              useOnAppLifecycleStateChange((previous, current) {
+                if (current == AppLifecycleState.resumed) {
+                  resetHiddenState();
+                }
+              });
 
               ref.listen(
                 tabStateProvider(tabId).select((value) => value?.isLoading),
                 (previous, next) {
                   if (next == true) {
-                    hidden.value = false;
-                    diffAcc.value = 0.0;
+                    resetHiddenState();
                   }
                 },
               );
@@ -215,8 +224,7 @@ class BrowserScreen extends HookConsumerWidget {
                 (previous, next) {
                   if (next != null && previous != null) {
                     if (previous != next) {
-                      hidden.value = false;
-                      diffAcc.value = 0.0;
+                      resetHiddenState();
                     }
                   }
                 },
@@ -244,8 +252,7 @@ class BrowserScreen extends HookConsumerWidget {
 
                       diffAcc.value += diff;
                       if (diffAcc.value.abs() > (kToolbarHeight / 2)) {
-                        diffAcc.value = 0.0;
-                        hidden.value = false;
+                        resetHiddenState();
                       }
                     }
                   }
