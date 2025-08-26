@@ -30,6 +30,9 @@ part 'tab.g.dart';
 
 @DriftAccessor()
 class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
+  final _undoHistory = <String, TabData>{};
+  Timer? _clearHistoryTimer;
+
   TabDao(super.db);
 
   UpdateStatement<Tab, TabData> _updateByIdStatement(String id) =>
@@ -207,7 +210,20 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
 
   Future<void> syncTabs({required List<String> retainTabIds}) {
     return db.transaction(() async {
-      await (db.tab.delete()..where((t) => t.id.isNotIn(retainTabIds))).go();
+      final deleted =
+          await (db.tab.delete()..where((t) => t.id.isNotIn(retainTabIds)))
+              .goAndReturn();
+
+      if (deleted.isNotEmpty) {
+        _clearHistoryTimer?.cancel();
+
+        _undoHistory.addAll({for (final tab in deleted) tab.id: tab});
+
+        _clearHistoryTimer = Timer(const Duration(seconds: 5), () {
+          //Dont keep things in memory
+          _undoHistory.clear();
+        });
+      }
 
       var currentOrderKey = await db.containerDao
           .generateLeadingOrderKey(null)
@@ -215,11 +231,13 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
 
       await db.tab.insertAll(
         retainTabIds.map((id) {
-          final insertable = TabCompanion.insert(
-            id: id,
-            orderKey: currentOrderKey,
-            timestamp: DateTime.now(),
-          );
+          final insertable =
+              _undoHistory[id] ??
+              TabCompanion.insert(
+                id: id,
+                orderKey: currentOrderKey,
+                timestamp: DateTime.now(),
+              );
 
           currentOrderKey = LexoRank.parse(currentOrderKey).genPrev().value;
 
