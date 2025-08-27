@@ -22,7 +22,7 @@ A core mission of WebLibre is to shield users from third-party surveillance—wh
 - [**Cookie Isolation:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Ensures cookies are separated by container or context, preventing cross-site tracking.
 - [**Content Blocking:**](https://docs.weblibre.eu/Privacy--and--Security#content-blocking) Blocks ads, trackers, and other unwanted content by default.
 - [**Tor Proxying:**](https://docs.weblibre.eu/Tabs/Containers/Features/Tor-Proxy) Allows you to selectively route browsing traffic through the Tor network for enhanced anonymity.
-- [**Local Search Engine:**](https://docs.weblibre.eu/Personal-Local-Search-Engine) All search indexing and queries are performed on your device—your data never leaves your control.
+- [**Local Search Engine:**](https://docs.weblibre.eu/Personal-Local-Search-Engine) whenever possible, your device handles search and retrieval, minimizing the need to contact remote services.
 
 By combining these tools, WebLibre empowers you to browse the web freely and privately, minimizing exposure to unwanted monitoring and giving you genuine control over your online experience.
 
