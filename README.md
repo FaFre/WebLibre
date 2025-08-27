@@ -8,26 +8,36 @@
   <img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg">
 </a>
 
-WebLibre is an independent browser project built on the foundation of [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/). It offers a fully featured web browser with support for Firefox mobile add-ons, designed with privacy and usability at its core.
+WebLibre is an independent browser project built on the foundation of [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/). It offers a fully featured web browser compatible with Firefox mobile add-ons, designed with privacy and usability at its core.
 
 > **⚠️ Alpha Release Notice**  
 > WebLibre is currently in the alpha phase. Expect frequent updates, potential bugs, and breaking changes. Please report issues on [GitHub](https://github.com/FaFre/WebLibre/issues).
 > Currently only F-Droid builds are free from Google dependencies.
 
----
+## Privacy by Design
+
+A core mission of WebLibre is to shield users from third-party surveillance—whether by ISPs, tracking companies, or other entities seeking to monitor or collect data on your browsing habits. WebLibre achieves this through a suite of optional privacy features, including:
+
+- [**Web Engine Hardening:**](https://docs.weblibre.eu/Privacy--and--Security#hardening--advanced-controls) Strengthens the browser’s core to resist tracking and fingerprinting techniques.
+- [**Cookie Isolation:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Ensures cookies are separated by container or context, preventing cross-site tracking.
+- [**Content Blocking:**](https://docs.weblibre.eu/Privacy--and--Security#content-blocking) Blocks ads, trackers, and other unwanted content by default.
+- [**Tor Proxying:**](https://docs.weblibre.eu/Tabs/Containers/Features/Tor-Proxy) Allows you to selectively route browsing traffic through the Tor network for enhanced anonymity.
+- [**Local Search Engine:**](https://docs.weblibre.eu/Personal-Local-Search-Engine) All search indexing and queries are performed on your device—your data never leaves your control.
+
+By combining these tools, WebLibre empowers you to browse the web freely and privately, minimizing exposure to unwanted monitoring and giving you genuine control over your online experience.
 
 ## Features
 
-### Tab Management
+### [Tab Management](https://docs.weblibre.eu/Tabs/Tab-Management)
 
-- **Tab Containers:** Organize tabs into isolated containers for enhanced privacy and workflow management with optional features:
-    - **Container Cookie Contexts:** Separate “cookie jars” for each container.
-    - **Tor Proxy:** Route container traffic through the Tor network for anonymous browsing.
-    - **Biometric Authentication:** Restrict access to containers using fingerprint or face recognition.
-- **Tree View Navigation:** Visualize and manage complex tab hierarchies for better browsing context.
-- **Local AI Assistance:** Use on-device AI models to group tabs and manage containers effortlessly.
+- [**Tab Containers:**](https://docs.weblibre.eu/Tabs/Containers/Container) Organize tabs into isolated containers for enhanced privacy and workflow management with optional features:
+    - [**Container Cookie Contexts:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Separate “cookie jars” for each container.
+    - [**Tor Proxy:**](https://docs.weblibre.eu/Tabs/Containers/Features/Tor-Proxy) Route container traffic through the Tor network for anonymous browsing.
+    - [**Biometric Authentication:**](https://docs.weblibre.eu/Tabs/Containers/Features/Biometric-authentication) Restrict access to containers using fingerprint or face recognition.
+- [**Tree View Navigation:**](https://docs.weblibre.eu/Tabs/Tree-View-Navigation) Visualize and manage complex tab hierarchies for better browsing context.
+- [**Local AI Assistance:**](https://docs.weblibre.eu/Tabs/Containers/Features/On-Device-AI) Use on-device AI models to group tabs and manage containers effortlessly.
 
-### Personal Local Search Engine
+### [Personal Local Search Engine](https://docs.weblibre.eu/Personal-Local-Search-Engine)
 
 - **Unified Search:** Instantly search across:
     - **Open Tabs:** By title, address, and full page content (no size limits).
@@ -44,7 +54,7 @@ WebLibre is an independent browser project built on the foundation of [Mozilla's
 - **Ad and Content Blocking:** Optional content blocker (uBlock Origin) installation during onboarding.
 - **Web Engine Hardening:** Comprehensive and easy-to-use privacy and security presets for the Gecko Web-Engine.
 
-### Bangs
+### [Bangs](https://docs.weblibre.eu/Bangs)
 
 - **Direct On-Site Search:** Use thousands of powerful shortcuts (“bangs”) to search directly on popular websites—no third-party search engine required.
 
