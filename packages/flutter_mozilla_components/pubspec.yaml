@@ -1,7 +1,8 @@
 name: flutter_mozilla_components
 description: "A new Flutter plugin project."
 version: 0.0.1
-homepage:
+publish_to: 'none'
+resolution: workspace
 
 environment:
   sdk: '>=3.8.0 <4.0.0'

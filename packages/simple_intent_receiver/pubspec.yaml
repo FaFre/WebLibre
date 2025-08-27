@@ -1,7 +1,8 @@
 name: simple_intent_receiver
 description: "A new Flutter plugin project."
 version: 0.0.1
-homepage:
+publish_to: 'none'
+resolution: workspace
 
 environment:
   sdk: ^3.8.0
