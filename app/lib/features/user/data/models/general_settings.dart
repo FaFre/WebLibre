@@ -29,6 +29,8 @@ part 'general_settings.g.dart';
 const _fallbackSearchProvider = 'wikipedia';
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
+enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
+
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
   history('Browsing history'),
@@ -59,6 +61,7 @@ class GeneralSettings with FastEquatable {
   final TabType defaultIntentTabType;
   final bool proxyPrivateTabsTor;
   final bool autoHideTabBar;
+  final TabBarSwipeAction tabBarSwipeAction;
 
   GeneralSettings({
     required this.themeMode,
@@ -74,6 +77,7 @@ class GeneralSettings with FastEquatable {
     required this.defaultCreateTabType,
     required this.defaultIntentTabType,
     required this.autoHideTabBar,
+    required this.tabBarSwipeAction,
   });
 
   GeneralSettings.withDefaults({
@@ -90,6 +94,7 @@ class GeneralSettings with FastEquatable {
     TabType? defaultCreateTabType,
     TabType? defaultIntentTabType,
     bool? autoHideTabBar,
+    TabBarSwipeAction? tabBarSwipeAction,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -102,7 +107,9 @@ class GeneralSettings with FastEquatable {
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        defaultCreateTabType = defaultCreateTabType ?? TabType.regular,
        defaultIntentTabType = defaultIntentTabType ?? TabType.regular,
-       autoHideTabBar = autoHideTabBar ?? true;
+       autoHideTabBar = autoHideTabBar ?? true,
+       tabBarSwipeAction =
+           tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -124,5 +131,6 @@ class GeneralSettings with FastEquatable {
     defaultIntentTabType,
     proxyPrivateTabsTor,
     autoHideTabBar,
+    tabBarSwipeAction,
   ];
 }

@@ -96,6 +96,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'tabBarSwipeAction': settings['tabBarSwipeAction']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 

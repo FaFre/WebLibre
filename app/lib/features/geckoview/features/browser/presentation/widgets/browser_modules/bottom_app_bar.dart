@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
@@ -93,7 +94,29 @@ class BrowserBottomAppBar extends HookConsumerWidget {
           final distance = dragStartPosition.value - details.globalPosition;
 
           if (distance.dx.abs() > 50) {
-            await ref.read(tabRepositoryProvider.notifier).selectPreviousTab();
+            final selectedTab = ref.read(selectedTabProvider);
+            final setting = await ref
+                .read(generalSettingsRepositoryProvider.notifier)
+                .fetchSettings();
+
+            if (selectedTab != null) {
+              switch (setting.tabBarSwipeAction) {
+                case TabBarSwipeAction.switchLastOpened:
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .selectPreviouslyOpenedTab(selectedTab);
+                case TabBarSwipeAction.navigateOrderedTabs:
+                  if (distance.dx < 0) {
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .selectPreviousTab(selectedTab);
+                  } else {
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .selectNextTab(selectedTab);
+                  }
+              }
+            }
           }
         },
         child: AppBar(

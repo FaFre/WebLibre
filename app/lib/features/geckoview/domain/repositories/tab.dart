@@ -48,7 +48,6 @@ part 'tab.g.dart';
 class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
 
-  String? _previousTabId;
   final _tabFromIntent = <String>{};
 
   bool hasLaunchedFromIntent(String? tabId) {
@@ -124,9 +123,40 @@ class TabRepository extends _$TabRepository {
         );
   }
 
-  Future<bool> selectPreviousTab() async {
-    if (_previousTabId != null) {
-      return selectTab(_previousTabId!);
+  Future<bool> selectPreviouslyOpenedTab(String tabId) async {
+    final previousTabId = await ref
+        .read(tabDatabaseProvider)
+        .previousTabByTimestamp(tabId: tabId)
+        .getSingleOrNull();
+
+    if (previousTabId != null) {
+      return selectTab(previousTabId);
+    }
+
+    return false;
+  }
+
+  Future<bool> selectPreviousTab(String tabId) async {
+    final previousTabId = await ref
+        .read(tabDatabaseProvider)
+        .previousTabByOrderKey(tabId: tabId)
+        .getSingleOrNull();
+
+    if (previousTabId != null) {
+      return selectTab(previousTabId);
+    }
+
+    return false;
+  }
+
+  Future<bool> selectNextTab(String tabId) async {
+    final previousTabId = await ref
+        .read(tabDatabaseProvider)
+        .nextTabByOrderKey(tabId: tabId)
+        .getSingleOrNull();
+
+    if (previousTabId != null) {
+      return selectTab(previousTabId);
     }
 
     return false;
@@ -283,7 +313,6 @@ class TabRepository extends _$TabRepository {
       selectedTabProvider,
       (previous, tabId) async {
         if (tabId != null) {
-          _previousTabId = previous;
           await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
         }
       },
@@ -302,10 +331,6 @@ class TabRepository extends _$TabRepository {
         //Only sync tabs if there has been a previous value or is not empty
         final syncTabs =
             next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
-
-        if (_previousTabId != null && !next.value.contains(_previousTabId)) {
-          _previousTabId = null;
-        }
 
         if (syncTabs) {
           await db.tabDao.syncTabs(retainTabIds: next.value);

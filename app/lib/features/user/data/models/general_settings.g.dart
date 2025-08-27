@@ -37,6 +37,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
+  GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -57,6 +59,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabType defaultCreateTabType,
     TabType defaultIntentTabType,
     bool autoHideTabBar,
+    TabBarSwipeAction tabBarSwipeAction,
   });
 }
 
@@ -120,6 +123,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(autoHideTabBar: autoHideTabBar);
 
   @override
+  GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction) =>
+      this(tabBarSwipeAction: tabBarSwipeAction);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -140,6 +147,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? defaultCreateTabType = const $CopyWithPlaceholder(),
     Object? defaultIntentTabType = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
+    Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder()
@@ -200,6 +208,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.autoHideTabBar
           // ignore: cast_nullable_to_non_nullable
           : autoHideTabBar as bool,
+      tabBarSwipeAction: tabBarSwipeAction == const $CopyWithPlaceholder()
+          ? _value.tabBarSwipeAction
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarSwipeAction as TabBarSwipeAction,
     );
   }
 }
@@ -241,28 +253,34 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         json['defaultIntentTabType'],
       ),
       autoHideTabBar: json['autoHideTabBar'] as bool?,
+      tabBarSwipeAction: $enumDecodeNullable(
+        _$TabBarSwipeActionEnumMap,
+        json['tabBarSwipeAction'],
+      ),
     );
 
-Map<String, dynamic> _$GeneralSettingsToJson(GeneralSettings instance) =>
-    <String, dynamic>{
-      'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
-      'enableReadability': instance.enableReadability,
-      'enforceReadability': instance.enforceReadability,
-      'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
-          ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
-          .toList(),
-      'defaultSearchProvider': instance.defaultSearchProvider,
-      'defaultSearchSuggestionsProvider':
-          _$SearchSuggestionProvidersEnumMap[instance
-              .defaultSearchSuggestionsProvider]!,
-      'createChildTabsOption': instance.createChildTabsOption,
-      'showExtensionShortcut': instance.showExtensionShortcut,
-      'enableLocalAiFeatures': instance.enableLocalAiFeatures,
-      'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
-      'defaultIntentTabType': _$TabTypeEnumMap[instance.defaultIntentTabType]!,
-      'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
-      'autoHideTabBar': instance.autoHideTabBar,
-    };
+Map<String, dynamic> _$GeneralSettingsToJson(
+  GeneralSettings instance,
+) => <String, dynamic>{
+  'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
+  'enableReadability': instance.enableReadability,
+  'enforceReadability': instance.enforceReadability,
+  'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
+      ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
+      .toList(),
+  'defaultSearchProvider': instance.defaultSearchProvider,
+  'defaultSearchSuggestionsProvider':
+      _$SearchSuggestionProvidersEnumMap[instance
+          .defaultSearchSuggestionsProvider]!,
+  'createChildTabsOption': instance.createChildTabsOption,
+  'showExtensionShortcut': instance.showExtensionShortcut,
+  'enableLocalAiFeatures': instance.enableLocalAiFeatures,
+  'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
+  'defaultIntentTabType': _$TabTypeEnumMap[instance.defaultIntentTabType]!,
+  'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
+  'autoHideTabBar': instance.autoHideTabBar,
+  'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
+};
 
 const _$ThemeModeEnumMap = {
   ThemeMode.system: 'system',
@@ -291,4 +309,9 @@ const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
   TabType.child: 'child',
+};
+
+const _$TabBarSwipeActionEnumMap = {
+  TabBarSwipeAction.switchLastOpened: 'switchLastOpened',
+  TabBarSwipeAction.navigateOrderedTabs: 'navigateOrderedTabs',
 };

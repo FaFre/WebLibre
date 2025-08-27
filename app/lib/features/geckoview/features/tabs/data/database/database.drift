@@ -241,3 +241,33 @@ unorderedTabDescendants:
   )
   SELECT id, parent_id
   FROM descendants;
+
+previousTabByTimestamp:
+  WITH ranked_tabs AS (
+    SELECT id, timestamp,
+          LAG(id) OVER (ORDER BY timestamp) as prev_tab_id
+    FROM tab
+  )
+  SELECT prev_tab_id
+  FROM ranked_tabs 
+  WHERE id = :tab_id;
+
+previousTabByOrderKey:
+  WITH ranked_tabs AS (
+    SELECT id, order_key,
+          LAG(id) OVER (ORDER BY order_key) as prev_tab_id
+    FROM tab
+  )
+  SELECT prev_tab_id
+  FROM ranked_tabs 
+  WHERE id = :tab_id;
+
+nextTabByOrderKey:
+  WITH ranked_tabs AS (
+    SELECT id, order_key,
+          LEAD(id) OVER (ORDER BY order_key) as next_tab_id
+    FROM tab
+  )
+  SELECT next_tab_id
+  FROM ranked_tabs 
+  WHERE id = :tab_id;

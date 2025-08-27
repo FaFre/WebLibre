@@ -27,7 +27,7 @@ final generalSettingsWithDefaultsProvider =
 typedef GeneralSettingsWithDefaultsRef =
     AutoDisposeProviderRef<GeneralSettings>;
 String _$generalSettingsRepositoryHash() =>
-    r'43f314d1c0d318d8c28afd38fee5f2416a26f423';
+    r'e311760a7773109a90c28275262883fcca348bbb';
 
 /// See also [GeneralSettingsRepository].
 @ProviderFor(GeneralSettingsRepository)

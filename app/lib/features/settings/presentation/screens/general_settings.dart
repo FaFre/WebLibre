@@ -386,6 +386,67 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                       );
                 },
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('Tab Bar Swipe Behavior'),
+                      leading: Icon(MdiIcons.gestureSwipeHorizontal),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    RadioGroup(
+                      groupValue: generalSettings.tabBarSwipeAction,
+                      onChanged: (value) async {
+                        if (value != null) {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .tabBarSwipeAction(value),
+                              );
+                        }
+                      },
+                      child: const RadioListTile.adaptive(
+                        value: TabBarSwipeAction.switchLastOpened,
+                        title: Text('Switch to Last Used Tab'),
+                        subtitle: Text(
+                          'Swipe to toggle between current and previously opened tab',
+                        ),
+                      ),
+                    ),
+                    RadioGroup(
+                      groupValue: generalSettings.tabBarSwipeAction,
+                      onChanged: (value) async {
+                        if (value != null) {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .tabBarSwipeAction(value),
+                              );
+                        }
+                      },
+                      child: const RadioListTile.adaptive(
+                        value: TabBarSwipeAction.navigateOrderedTabs,
+                        title: Text('Navigate Sequential Tabs'),
+                        subtitle: Text(
+                          'Swipe left/right to move through tabs in order',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Consumer(
                 builder: (context, ref, child) {
                   final size = ref.watch(
