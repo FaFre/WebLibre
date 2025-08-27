@@ -5,7 +5,9 @@ environment:
 workspace:
   - app/
   - packages/flutter_mozilla_components
+  - packages/flutter_mozilla_components/example
   - packages/simple_intent_receiver
+  - packages/simple_intent_receiver/example
 dev_dependencies:
   melos: ^7.1.0
 
