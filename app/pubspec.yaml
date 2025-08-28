@@ -89,6 +89,9 @@ dependencies:
 dependency_overrides: 
   # Avoid gradle 8.12 for fdroid compatibility for now 
   flutter_plugin_android_lifecycle: 2.0.29
+  local_auth_android: 1.0.51
+  path_provider_android: 2.2.17
+  url_launcher_android: 6.3.17
 
 dev_dependencies:
   analyzer_plugin: ^0.13.4
