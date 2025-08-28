@@ -53,6 +53,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @override
   WebContentIsolationStrategy get webContentIsolationStrategy =>
       super.webContentIsolationStrategy!;
+  @override
+  bool get enterpriseRootsEnabled => super.enterpriseRootsEnabled!;
 
   final QueryParameterStripping queryParameterStripping;
 
@@ -80,6 +82,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.cookieBannerHandlingGlobalRulesSubFrames,
     required super.webContentIsolationStrategy,
     required super.userAgent,
+    required super.enterpriseRootsEnabled,
     required this.queryParameterStripping,
     required this.bounceTrackingProtectionMode,
   });
@@ -98,6 +101,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     QueryParameterStripping? queryParameterStripping,
     BounceTrackingProtectionMode? bounceTrackingProtectionMode,
     super.userAgent,
+    bool? enterpriseRootsEnabled,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
@@ -122,6 +126,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          webContentIsolationStrategy:
              webContentIsolationStrategy ??
              WebContentIsolationStrategy.isolateHighValue,
+         enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
        );
 
   factory EngineSettings.fromJson(Map<String, dynamic> json) =>
@@ -144,5 +149,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.userAgent,
     queryParameterStripping,
     bounceTrackingProtectionMode,
+    super.enterpriseRootsEnabled,
   ];
 }

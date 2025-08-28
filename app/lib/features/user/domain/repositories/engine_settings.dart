@@ -90,6 +90,10 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
       ),
       'bounceTrackingProtectionMode': settings['bounceTrackingProtectionMode']
           ?.readAs(DriftSqlType.string, db.typeMapping),
+      'enterpriseRootsEnabled': settings['enterpriseRootsEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

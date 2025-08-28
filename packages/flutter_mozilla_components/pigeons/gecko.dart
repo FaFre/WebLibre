@@ -592,6 +592,7 @@ class GeckoEngineSettings {
   final WebContentIsolationStrategy? webContentIsolationStrategy;
   final String? userAgent;
   final ContentBlocking? contentBlocking;
+  final bool? enterpriseRootsEnabled;
 
   GeckoEngineSettings(
     this.javascriptEnabled,
@@ -606,6 +607,7 @@ class GeckoEngineSettings {
     this.webContentIsolationStrategy,
     this.userAgent,
     this.contentBlocking,
+    this.enterpriseRootsEnabled,
   );
 }
 

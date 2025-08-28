@@ -118,6 +118,22 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                   },
                 ),
               ),
+              SwitchListTile.adaptive(
+                title: const Text('Use third party CA certificates'),
+                subtitle: const Text(
+                  'Allows the use of third party certificates from the Android CA store',
+                ),
+                secondary: const Icon(MdiIcons.certificate),
+                value: engineSettings.enterpriseRootsEnabled,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveEngineSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) => currentSettings.copyWith
+                            .enterpriseRootsEnabled(value),
+                      );
+                },
+              ),
               CustomListTile(
                 title: 'Error Logs',
                 subtitle: 'Copy logs for issue reporting',

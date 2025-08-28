@@ -129,6 +129,9 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
 
             //TODO: Add bounce tracking protection when available
         }
+        if(settings.enterpriseRootsEnabled != null) {
+            components.core.engineSettings.enterpriseRootsEnabled = settings.enterpriseRootsEnabled;
+        }
     }
 
     override fun updateRuntimeSettings(settings: GeckoEngineSettings) {
@@ -195,6 +198,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
 
             //TODO: Add bounce tracking protection when available
 
+            reloadSession = true
+        }
+        if(settings.enterpriseRootsEnabled != null) {
+            components.core.engine.settings.enterpriseRootsEnabled = components.core.engineSettings.enterpriseRootsEnabled
             reloadSession = true
         }
 

@@ -41,6 +41,8 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings userAgent(String? userAgent);
 
+  EngineSettings enterpriseRootsEnabled(bool? enterpriseRootsEnabled);
+
   EngineSettings queryParameterStripping(
     QueryParameterStripping queryParameterStripping,
   );
@@ -67,6 +69,7 @@ abstract class _$EngineSettingsCWProxy {
     bool? cookieBannerHandlingGlobalRulesSubFrames,
     WebContentIsolationStrategy? webContentIsolationStrategy,
     String? userAgent,
+    bool? enterpriseRootsEnabled,
     QueryParameterStripping queryParameterStripping,
     BounceTrackingProtectionMode bounceTrackingProtectionMode,
   });
@@ -135,6 +138,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   EngineSettings userAgent(String? userAgent) => this(userAgent: userAgent);
 
   @override
+  EngineSettings enterpriseRootsEnabled(bool? enterpriseRootsEnabled) =>
+      this(enterpriseRootsEnabled: enterpriseRootsEnabled);
+
+  @override
   EngineSettings queryParameterStripping(
     QueryParameterStripping queryParameterStripping,
   ) => this(queryParameterStripping: queryParameterStripping);
@@ -165,6 +172,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
         const $CopyWithPlaceholder(),
     Object? webContentIsolationStrategy = const $CopyWithPlaceholder(),
     Object? userAgent = const $CopyWithPlaceholder(),
+    Object? enterpriseRootsEnabled = const $CopyWithPlaceholder(),
     Object? queryParameterStripping = const $CopyWithPlaceholder(),
     Object? bounceTrackingProtectionMode = const $CopyWithPlaceholder(),
   }) {
@@ -223,6 +231,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.userAgent
           // ignore: cast_nullable_to_non_nullable
           : userAgent as String?,
+      enterpriseRootsEnabled:
+          enterpriseRootsEnabled == const $CopyWithPlaceholder()
+          ? _value.enterpriseRootsEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : enterpriseRootsEnabled as bool?,
       queryParameterStripping:
           queryParameterStripping == const $CopyWithPlaceholder()
           ? _value.queryParameterStripping
@@ -288,6 +301,7 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
         json['bounceTrackingProtectionMode'],
       ),
       userAgent: json['userAgent'] as String?,
+      enterpriseRootsEnabled: json['enterpriseRootsEnabled'] as bool?,
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
@@ -311,6 +325,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'webContentIsolationStrategy':
       _$WebContentIsolationStrategyEnumMap[instance
           .webContentIsolationStrategy]!,
+  'enterpriseRootsEnabled': instance.enterpriseRootsEnabled,
   'queryParameterStripping':
       _$QueryParameterStrippingEnumMap[instance.queryParameterStripping]!,
   'bounceTrackingProtectionMode':

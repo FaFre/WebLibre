@@ -26,7 +26,7 @@ final engineSettingsWithDefaultsProvider =
 // ignore: unused_element
 typedef EngineSettingsWithDefaultsRef = AutoDisposeProviderRef<EngineSettings>;
 String _$engineSettingsRepositoryHash() =>
-    r'aa522c35377280c451f6ac9e5f7063eab7ba6efc';
+    r'd0c2fbe060b5eaee7189f6cb0dd58c97cf5987b5';
 
 /// See also [EngineSettingsRepository].
 @ProviderFor(EngineSettingsRepository)
