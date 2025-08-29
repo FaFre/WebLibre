@@ -2,7 +2,7 @@ name: weblibre
 description: "The Privacy-Focused & AI-Powered Research Browser"
 publish_to: 'none'
 resolution: workspace
-version: 0.9.22-alpha-2+25
+version: 0.9.22+26
 
 environment:
   sdk: '>=3.8.0 <4.0.0'

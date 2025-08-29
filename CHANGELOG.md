@@ -1,3 +1,10 @@
+## 0.9.22
+### GeckoView 142.0
+
+* Added setting to use third party CA certificates
+* Added setting to control tab bar swipe behavior
+* Downgraded AGP for F-Droid compatibility
+
 ## 0.9.21
 ### GeckoView 142.0
 
