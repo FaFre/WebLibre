@@ -6,6 +6,7 @@ workspace:
   - app/
   - packages/flutter_mozilla_components
   - packages/flutter_mozilla_components/example
+  - packages/pluggable_transports_proxy
   - packages/simple_intent_receiver
   - packages/simple_intent_receiver/example
 dev_dependencies:

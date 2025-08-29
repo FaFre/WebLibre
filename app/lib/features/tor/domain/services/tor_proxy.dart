@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:pluggable_transports_proxy/pluggable_transports_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
@@ -36,8 +37,12 @@ class _TorService {
 
   ValueStream<int?> get portStream => _portSubject.stream;
 
-  Future<void> start() async {
+  Future<void> start({ProxyType? proxyType, String? bridgeLines}) async {
     await service.startService();
+    service.invoke('start', {
+      if (proxyType != null) 'proxyType': proxyType.name,
+      if (bridgeLines != null) 'bridgeLines': bridgeLines,
+    });
   }
 
   Future<void> requestSync() async {

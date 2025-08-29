@@ -19,12 +19,15 @@
  */
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:pluggable_transports_proxy/pluggable_transports_proxy.dart';
 import 'package:tor/tor.dart';
 
 @pragma('vm:entry-point')
 Future<void> onStart(ServiceInstance service) async {
   Timer? timeout;
+  final startedProxyType = <ProxyType>{};
 
   await Tor.init();
 
@@ -37,6 +40,12 @@ Future<void> onStart(ServiceInstance service) async {
     timeout = null;
 
     Tor.instance.stop();
+
+    for (final proxyType in startedProxyType) {
+      await IPtProxyController().stop(proxyType);
+    }
+    startedProxyType.clear();
+
     service.invoke('portUpdate', {'port': -1});
 
     await portSub.cancel();
@@ -52,7 +61,36 @@ Future<void> onStart(ServiceInstance service) async {
     });
   }
 
-  await Tor.instance.start();
+  Future<void> startService(ProxyType? proxyType, String? bridgeLines) async {
+    if (proxyType != null) {
+      final port = await IPtProxyController().start(proxyType, "");
+      startedProxyType.add(proxyType);
+
+      switch (proxyType) {
+        case ProxyType.obfs4:
+          await Tor.instance.start(obfs4Port: port, bridgeLines: bridgeLines);
+        case ProxyType.meekLite:
+          throw UnimplementedError();
+        case ProxyType.webtunnel:
+          throw UnimplementedError();
+        case ProxyType.snowflake:
+          await Tor.instance.start(
+            snowflakePort: port,
+            bridgeLines: bridgeLines,
+          );
+      }
+    } else {
+      await Tor.instance.start();
+    }
+  }
+
+  service.on("start").listen((event) async {
+    final proxyType = ProxyType.values.firstWhereOrNull(
+      (x) => x.name == event?['proxyType'],
+    );
+
+    await startService(proxyType, event?['bridgeLines'] as String?);
+  });
 
   service.on("heartbeat").listen((event) {
     // logger.d('Received tor heartbeat');

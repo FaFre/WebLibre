@@ -51,6 +51,8 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
+  pluggable_transports_proxy:
+    path: ../packages/pluggable_transports_proxy
   pretty_qr_code: ^3.5.0
   riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
@@ -75,9 +77,7 @@ dependencies:
   text_scroll: ^0.2.0
   timeago: ^3.7.1
   tor:
-    git: 
-      url: https://github.com/FaFre/tor.git
-      ref: update
+    path: /home/fafre/development/repos/tor
   universal_io: ^2.2.2
   uri_to_file:
     git:
