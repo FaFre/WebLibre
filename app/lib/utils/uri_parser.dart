@@ -28,10 +28,21 @@ Uri? tryParseUrl(String? input, {bool eagerParsing = false}) {
     if (uri != null) {
       if (uri.authority.isEmpty && eagerParsing) {
         if (uri.pathSegments.isNotEmpty) {
-          if (_domainRegex.hasMatch(uri.pathSegments.first)) {
-            uri = Uri.tryParse('https://$input');
-          } else if (InternetAddress.tryParse(uri.pathSegments.first) != null) {
-            uri = Uri.tryParse('https://$input');
+          int? port;
+          var firstSegment = uri.pathSegments.first;
+
+          //When there is no scheme while aprsing, the port becomse the first segment because : is treated as delimeter
+          if (int.tryParse(firstSegment) case final int segmentPort) {
+            port = segmentPort;
+            firstSegment = uri.scheme;
+          }
+
+          if (_domainRegex.hasMatch(firstSegment)) {
+            uri = Uri.tryParse('https://$input')?.replace(port: port);
+          } else if (firstSegment == 'localhost') {
+            uri = Uri.tryParse('https://$input')?.replace(port: port);
+          } else if (InternetAddress.tryParse(firstSegment) != null) {
+            uri = Uri.tryParse('https://$input')?.replace(port: port);
           }
         }
       }
