@@ -24,7 +24,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'proxy_settings_replication.g.dart';
 
@@ -84,7 +84,7 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
     ref.listen(
       fireImmediately: true,
-      generalSettingsWithDefaultsProvider.select(
+      torSettingsWithDefaultsProvider.select(
         (value) => value.proxyPrivateTabsTor,
       ),
       (previous, next) async {

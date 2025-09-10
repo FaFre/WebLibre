@@ -22,8 +22,8 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/data/models/tor_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
@@ -33,11 +33,7 @@ class TorProxyScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final torProxyPort = ref.watch(torProxyServiceProvider);
-    final proxyPrivateTabsTor = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.proxyPrivateTabsTor,
-      ),
-    );
+    final torSettings = ref.watch(torSettingsWithDefaultsProvider);
 
     useOnInitialization(() async {
       await ref.read(torProxyServiceProvider.notifier).requestSync();
@@ -136,7 +132,7 @@ class TorProxyScreen extends HookConsumerWidget {
                           }
                           return null; // Use the default color.
                         }),
-                        value: proxyPrivateTabsTor,
+                        value: torSettings.proxyPrivateTabsTor,
                         title: const Text('Proxy Private Tabs'),
                         subtitle: const Text(
                           'When enabled, all Private Tabs will be tunneled through Tor',
@@ -144,12 +140,57 @@ class TorProxyScreen extends HookConsumerWidget {
                         secondary: const Icon(MdiIcons.arrowDecision),
                         onChanged: (value) async {
                           await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
+                              .read(saveTorSettingsControllerProvider.notifier)
                               .save(
                                 (currentSettings) => currentSettings.copyWith
                                     .proxyPrivateTabsTor(value),
+                              );
+                        },
+                      ),
+                    ),
+                    ListTileTheme(
+                      iconColor: Colors.white,
+                      textColor: Colors.white,
+                      child: SwitchListTile.adaptive(
+                        inactiveThumbColor: Colors.white,
+                        activeColor: const Color(0xFF68B030),
+                        trackColor: WidgetStateProperty.resolveWith<Color?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (states.isEmpty) {
+                            return const Color(0xFF333A41);
+                          }
+                          return null; // Use the default color.
+                        }),
+                        trackOutlineColor:
+                            WidgetStateProperty.resolveWith<Color?>((
+                              Set<WidgetState> states,
+                            ) {
+                              if (states.isEmpty) {
+                                return Colors.white;
+                              }
+                              return null; // Use the default color.
+                            }),
+                        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (states.contains(WidgetState.selected)) {
+                            return const Icon(MdiIcons.arrowDecisionAuto);
+                          }
+                          return null; // Use the default color.
+                        }),
+                        value: torSettings.autoConfig,
+                        title: const Text('Configure Transport Automatically'),
+                        subtitle: const Text(
+                          'From some locations, it is necessary to use a pluggable transport to connect to the Tor network that is otherwise blocked. Turn off automatic configuration to manually configure how Tor connects.',
+                        ),
+                        secondary: const Icon(MdiIcons.arrowDecision),
+                        onChanged: (value) async {
+                          await ref
+                              .read(saveTorSettingsControllerProvider.notifier)
+                              .save(
+                                (currentSettings) =>
+                                    currentSettings.copyWith.autoConfig(value),
                               );
                         },
                       ),

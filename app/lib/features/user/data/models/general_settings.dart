@@ -59,7 +59,6 @@ class GeneralSettings with FastEquatable {
   final bool enableLocalAiFeatures;
   final TabType defaultCreateTabType;
   final TabType defaultIntentTabType;
-  final bool proxyPrivateTabsTor;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
 
@@ -71,7 +70,6 @@ class GeneralSettings with FastEquatable {
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
     required this.createChildTabsOption,
-    required this.proxyPrivateTabsTor,
     required this.showExtensionShortcut,
     required this.enableLocalAiFeatures,
     required this.defaultCreateTabType,
@@ -88,7 +86,6 @@ class GeneralSettings with FastEquatable {
     String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? createChildTabsOption,
-    bool? proxyPrivateTabsTor,
     bool? showExtensionShortcut,
     bool? enableLocalAiFeatures,
     TabType? defaultCreateTabType,
@@ -102,7 +99,6 @@ class GeneralSettings with FastEquatable {
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        createChildTabsOption = createChildTabsOption ?? false,
-       proxyPrivateTabsTor = proxyPrivateTabsTor ?? false,
        showExtensionShortcut = showExtensionShortcut ?? false,
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        defaultCreateTabType = defaultCreateTabType ?? TabType.regular,
@@ -129,7 +125,6 @@ class GeneralSettings with FastEquatable {
     enableLocalAiFeatures,
     defaultCreateTabType,
     defaultIntentTabType,
-    proxyPrivateTabsTor,
     autoHideTabBar,
     tabBarSwipeAction,
   ];

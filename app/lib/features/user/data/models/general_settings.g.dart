@@ -25,8 +25,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings createChildTabsOption(bool createChildTabsOption);
 
-  GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor);
-
   GeneralSettings showExtensionShortcut(bool showExtensionShortcut);
 
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures);
@@ -53,7 +51,6 @@ abstract class _$GeneralSettingsCWProxy {
     String defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
-    bool proxyPrivateTabsTor,
     bool showExtensionShortcut,
     bool enableLocalAiFeatures,
     TabType defaultCreateTabType,
@@ -99,10 +96,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(createChildTabsOption: createChildTabsOption);
 
   @override
-  GeneralSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor) =>
-      this(proxyPrivateTabsTor: proxyPrivateTabsTor);
-
-  @override
   GeneralSettings showExtensionShortcut(bool showExtensionShortcut) =>
       this(showExtensionShortcut: showExtensionShortcut);
 
@@ -141,7 +134,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
-    Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
     Object? showExtensionShortcut = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? defaultCreateTabType = const $CopyWithPlaceholder(),
@@ -182,10 +174,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.createChildTabsOption
           // ignore: cast_nullable_to_non_nullable
           : createChildTabsOption as bool,
-      proxyPrivateTabsTor: proxyPrivateTabsTor == const $CopyWithPlaceholder()
-          ? _value.proxyPrivateTabsTor
-          // ignore: cast_nullable_to_non_nullable
-          : proxyPrivateTabsTor as bool,
       showExtensionShortcut:
           showExtensionShortcut == const $CopyWithPlaceholder()
           ? _value.showExtensionShortcut
@@ -241,7 +229,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         json['defaultSearchSuggestionsProvider'],
       ),
       createChildTabsOption: json['createChildTabsOption'] as bool?,
-      proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
       showExtensionShortcut: json['showExtensionShortcut'] as bool?,
       enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
       defaultCreateTabType: $enumDecodeNullable(
@@ -277,7 +264,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
   'defaultIntentTabType': _$TabTypeEnumMap[instance.defaultIntentTabType]!,
-  'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
 };

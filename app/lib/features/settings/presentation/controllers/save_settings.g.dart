@@ -40,5 +40,22 @@ final saveEngineSettingsControllerProvider =
     );
 
 typedef _$SaveEngineSettingsController = AsyncNotifier<void>;
+String _$saveTorSettingsControllerHash() =>
+    r'd8aa04d7ae60c97bdad6c072f894189509dd35d3';
+
+/// See also [SaveTorSettingsController].
+@ProviderFor(SaveTorSettingsController)
+final saveTorSettingsControllerProvider =
+    AsyncNotifierProvider<SaveTorSettingsController, void>.internal(
+      SaveTorSettingsController.new,
+      name: r'saveTorSettingsControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$saveTorSettingsControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$SaveTorSettingsController = AsyncNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

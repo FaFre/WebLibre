@@ -27,6 +27,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:weblibre/features/tor/utils/tor_entrypoint.dart';
+import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'tor_proxy.g.dart';
 
@@ -105,6 +106,18 @@ class TorProxyService extends _$TorProxyService {
 
     if (currentPort == null || forceReconnect) {
       state = const AsyncLoading();
+
+      final torSettings = await ref
+          .read(torSettingsRepositoryProvider.notifier)
+          .fetchSettings();
+
+      if (torSettings.autoConfig) {
+        final moat = MoatService();
+        final config = await moat.autoConf();
+
+        todo
+      }
+
       await _tor.start();
       _enableHeartbeatTimer();
     }
