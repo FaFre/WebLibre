@@ -116,6 +116,8 @@ void showTabSwitchMessage(
   String? tabName,
   void Function()? onSwitch,
 }) {
+  ScaffoldMessenger.of(context).clearSnackBars();
+
   final message = switch (tabName.whenNotEmpty) {
     String() => "New tab '$tabName' opened",
     null => 'New tab opened',
@@ -155,6 +157,8 @@ void showTabUndoClose(
   int count = 1,
   Duration duration = const Duration(seconds: 2),
 }) {
+  ScaffoldMessenger.of(context).clearSnackBars();
+
   final snackBar = SnackBar(
     content: (count > 1)
         ? Text('$count Tabs closed')
