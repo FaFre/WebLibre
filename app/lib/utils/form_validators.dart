@@ -22,8 +22,8 @@ import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 String? validateUrl(
   String? value, {
+  required bool eagerParsing,
   bool requireAuthority = true,
-  bool eagerParsing = true,
   bool onlyHttpProtocol = false,
   bool required = true,
 }) {
