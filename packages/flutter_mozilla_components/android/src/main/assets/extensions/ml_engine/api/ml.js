@@ -16,6 +16,7 @@ const SMART_TAB_GROUPING_CONFIG = {
         taskName: ML_TASK_FEATURE_EXTRACTION,
         featureId: "smart-tab-embedding",
         backend: "onnx",
+        fallbackBackend: "onnx",
     },
     topicGeneration: {
         dtype: "q8",
@@ -23,6 +24,7 @@ const SMART_TAB_GROUPING_CONFIG = {
         taskName: ML_TASK_TEXT2TEXT,
         featureId: "smart-tab-topic",
         backend: "onnx",
+        fallbackBackend: "onnx",
     },
     // dataConfig: {
     //     titleKey: "label",
