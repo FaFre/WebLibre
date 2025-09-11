@@ -233,6 +233,7 @@ class _FeedEditContent extends HookConsumerWidget {
                             value,
                             onlyHttpProtocol: true,
                             required: false,
+                            eagerParsing: false,
                           );
                         },
                       ),
@@ -249,6 +250,7 @@ class _FeedEditContent extends HookConsumerWidget {
                             value,
                             onlyHttpProtocol: true,
                             required: false,
+                            eagerParsing: false,
                           );
                         },
                       ),
@@ -269,7 +271,11 @@ class _FeedEditContent extends HookConsumerWidget {
                         controller: urlTextController,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
-                          return validateUrl(value, onlyHttpProtocol: true);
+                          return validateUrl(
+                            value,
+                            onlyHttpProtocol: true,
+                            eagerParsing: false,
+                          );
                         },
                       ),
                     ],

@@ -49,6 +49,7 @@ class AutoSuggestTextField extends HookWidget {
   final bool? enableIMEPersonalizedLearning;
   final TapRegionCallback? onTapOutside;
   final VoidCallback? onTap;
+  final bool autocorrect;
 
   const AutoSuggestTextField({
     super.key,
@@ -77,6 +78,7 @@ class AutoSuggestTextField extends HookWidget {
     this.enableIMEPersonalizedLearning = true,
     this.onTapOutside,
     this.onTap,
+    this.autocorrect = false,
   });
 
   bool _suggestionHasMatch() =>
@@ -216,6 +218,7 @@ class AutoSuggestTextField extends HookWidget {
           onChanged: onChanged,
           onEditingComplete: onEditingComplete,
           validator: validator,
+          autocorrect: autocorrect,
           onFieldSubmitted: onSubmitted.mapNotNull(
             (onSubmitted) => (value) {
               if (_suggestionHasMatch()) {

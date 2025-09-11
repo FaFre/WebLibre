@@ -25,21 +25,16 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
@@ -68,12 +63,16 @@ class TabRepository extends _$TabRepository {
     required bool private,
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
+    Value<ContainerData?>? container,
+    bool launchedFromIntent = false,
   }) async {
-    final selectedContainer = await ref
-        .read(selectedContainerProvider.notifier)
-        .fetchData();
+    final assingedContainer =
+        container ??
+        Value<ContainerData?>(
+          await ref.read(selectedContainerProvider.notifier).fetchData(),
+        );
 
-    return ref
+    final newTabId = await ref
         .read(tabDatabaseProvider)
         .tabDao
         .upsertContainerTabTransactional(
@@ -84,7 +83,7 @@ class TabRepository extends _$TabRepository {
               startLoading: startLoading,
               parentId: parentId,
               flags: flags,
-              contextId: selectedContainer?.metadata.contextualIdentity,
+              contextId: assingedContainer.value?.metadata.contextualIdentity,
               source: source,
               private: private,
               historyMetadata: historyMetadata,
@@ -92,8 +91,14 @@ class TabRepository extends _$TabRepository {
             );
           },
           parentId: Value(parentId),
-          containerId: Value(selectedContainer?.id),
+          containerId: Value(assingedContainer.value?.id),
         );
+
+    if (launchedFromIntent) {
+      _tabFromIntent.add(newTabId);
+    }
+
+    return newTabId;
   }
 
   Future<String> duplicateTab({
@@ -365,45 +370,6 @@ class TabRepository extends _$TabRepository {
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to tabStatesProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listen(
-      fireImmediately: true,
-      engineBoundIntentStreamProvider,
-      (previous, next) {
-        next.whenData((value) async {
-          final isPrivate =
-              ref
-                  .read(generalSettingsWithDefaultsProvider)
-                  .defaultIntentTabType ==
-              TabType.private;
-
-          switch (value) {
-            case SharedUrl():
-              _tabFromIntent.add(
-                await addTab(url: value.url, private: isPrivate),
-              );
-            case SharedText():
-              final defaultSearchBang =
-                  ref.read(selectedBangDataProvider()) ??
-                  await ref.read(defaultSearchBangDataProvider.future);
-
-              _tabFromIntent.add(
-                await addTab(
-                  url: defaultSearchBang?.getTemplateUrl(value.text),
-                  private: isPrivate,
-                ),
-              );
-          }
-        });
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to engineBoundIntentStreamProvider',
           error: error,
           stackTrace: stackTrace,
         );

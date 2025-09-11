@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.CallSuper
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
@@ -37,6 +38,12 @@ class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
         return components.core.engine.createView(requireContext()).apply {
            selectionActionDelegate = components.selectionAction
         }
+    }
+
+    @Deprecated("Deprecated in Java")
+    @CallSuper
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super<BaseBrowserFragment>.onActivityResult(requestCode, data, resultCode)
     }
 
     @Suppress("LongMethod")

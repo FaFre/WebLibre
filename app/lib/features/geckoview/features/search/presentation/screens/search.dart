@@ -44,8 +44,13 @@ import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 class SearchScreen extends HookConsumerWidget {
   final String? initialSearchText;
   final TabType tabType;
+  final bool launchedFromIntent;
 
-  const SearchScreen({required this.initialSearchText, required this.tabType});
+  const SearchScreen({
+    required this.initialSearchText,
+    required this.tabType,
+    this.launchedFromIntent = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -109,6 +114,7 @@ class SearchScreen extends HookConsumerWidget {
               parentId: (selectedTabType.value == TabType.child)
                   ? ref.read(selectedTabProvider)
                   : null,
+              launchedFromIntent: launchedFromIntent,
             );
 
         if (context.mounted) {
@@ -212,6 +218,7 @@ class SearchScreen extends HookConsumerWidget {
                                     (selectedTabType.value == TabType.child)
                                     ? ref.read(selectedTabProvider)
                                     : null,
+                                launchedFromIntent: launchedFromIntent,
                               );
 
                           if (context.mounted) {

@@ -86,6 +86,8 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     final scrolledTo = useRef(0.0);
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!context.mounted) return;
+
         final header = headerKey.currentContext?.findRenderObject();
         final text = textFieldKey.currentContext?.findRenderObject();
 
@@ -96,14 +98,16 @@ class ViewTabSheetWidget extends HookConsumerWidget {
 
             final relative = totalHeight / MediaQuery.of(context).size.height;
 
-            if (draggableScrollableController.size < relative &&
-                relative > scrolledTo.value) {
-              await draggableScrollableController.animateTo(
-                relative,
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeInOut,
-              );
-              scrolledTo.value = relative;
+            if (relative >= 0 && relative <= 1) {
+              if (draggableScrollableController.size < relative &&
+                  relative > scrolledTo.value) {
+                await draggableScrollableController.animateTo(
+                  relative,
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeInOut,
+                );
+                scrolledTo.value = relative;
+              }
             }
           }
         }
@@ -113,22 +117,28 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     });
 
     final bottomInsets = useRef(0.0);
-    useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final diff =
-            ((MediaQuery.of(context).viewInsets.bottom / 2) /
-                MediaQuery.of(context).size.height) -
-            bottomInsets.value;
+    useEffect(
+      () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final diff =
+              ((MediaQuery.of(context).viewInsets.bottom / 2) /
+                  MediaQuery.of(context).size.height) -
+              bottomInsets.value;
 
-        draggableScrollableController.jumpTo(
-          draggableScrollableController.size + diff,
-        );
+          draggableScrollableController.jumpTo(
+            draggableScrollableController.size + diff,
+          );
 
-        bottomInsets.value += diff;
-      });
+          bottomInsets.value += diff;
+        });
 
-      return null;
-    }, [MediaQuery.of(context).viewInsets.bottom]);
+        return null;
+      },
+      [
+        MediaQuery.of(context).viewInsets.bottom,
+        MediaQuery.of(context).size.height,
+      ],
+    );
 
     return NestedScrollView(
       physics: const NeverScrollableScrollPhysics(),

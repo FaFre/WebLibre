@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -242,6 +243,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                         .addTab(
                           url: ref.read(docsUriProvider),
                           private: isPrivate,
+                          container: const Value(null),
                         );
                   },
                   leadingIcon: const Icon(Icons.help),
@@ -301,6 +303,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                 .addTab(
                                   url: Uri.parse('https://addons.mozilla.org'),
                                   private: isPrivate,
+                                  container: const Value(null),
                                 );
                           },
                           leadingIcon: const Icon(MdiIcons.puzzlePlus),

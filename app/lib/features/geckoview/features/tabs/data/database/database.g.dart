@@ -1256,28 +1256,28 @@ abstract class _$TabDatabase extends GeneratedDatabase {
     );
   }
 
-  Selectable<String> previousTabByTimestamp({required String tabId}) {
+  Selectable<String?> previousTabByTimestamp({required String tabId}) {
     return customSelect(
       'WITH ranked_tabs AS (SELECT id, timestamp, LAG(id)OVER (ORDER BY timestamp RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_tab_id FROM tab) SELECT prev_tab_id FROM ranked_tabs WHERE id = ?1',
       variables: [Variable<String>(tabId)],
       readsFrom: {tab},
-    ).map((QueryRow row) => row.read<String>('prev_tab_id'));
+    ).map((QueryRow row) => row.readNullable<String>('prev_tab_id'));
   }
 
-  Selectable<String> previousTabByOrderKey({required String tabId}) {
+  Selectable<String?> previousTabByOrderKey({required String tabId}) {
     return customSelect(
       'WITH ranked_tabs AS (SELECT id, order_key, LAG(id)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_tab_id FROM tab) SELECT prev_tab_id FROM ranked_tabs WHERE id = ?1',
       variables: [Variable<String>(tabId)],
       readsFrom: {tab},
-    ).map((QueryRow row) => row.read<String>('prev_tab_id'));
+    ).map((QueryRow row) => row.readNullable<String>('prev_tab_id'));
   }
 
-  Selectable<String> nextTabByOrderKey({required String tabId}) {
+  Selectable<String?> nextTabByOrderKey({required String tabId}) {
     return customSelect(
       'WITH ranked_tabs AS (SELECT id, order_key, LEAD(id)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_tab_id FROM tab) SELECT next_tab_id FROM ranked_tabs WHERE id = ?1',
       variables: [Variable<String>(tabId)],
       readsFrom: {tab},
-    ).map((QueryRow row) => row.read<String>('next_tab_id'));
+    ).map((QueryRow row) => row.readNullable<String>('next_tab_id'));
   }
 
   @override

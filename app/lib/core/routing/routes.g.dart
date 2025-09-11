@@ -333,6 +333,12 @@ RouteBase get $browserRoute => GoRouteData.$route(
 
       factory: _$TabTreeRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: 'open_content',
+      name: 'OpenSharedContentRoute',
+
+      factory: _$OpenSharedContentRoute._fromState,
+    ),
   ],
 );
 
@@ -361,6 +367,7 @@ mixin _$SearchRoute on GoRouteData {
     tabType: _$TabTypeEnumMap._$fromName(state.pathParameters['tabType']!)!,
     searchText:
         state.pathParameters['searchText'] ?? SearchRoute.emptySearchText,
+    $extra: state.extra as bool,
   );
 
   SearchRoute get _self => this as SearchRoute;
@@ -371,17 +378,19 @@ mixin _$SearchRoute on GoRouteData {
   );
 
   @override
-  void go(BuildContext context) => context.go(location);
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
 
   @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+      context.pushReplacement(location, extra: _self.$extra);
 
   @override
-  void replace(BuildContext context) => context.replace(location);
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 const _$TabTypeEnumMap = {
@@ -550,6 +559,31 @@ mixin _$TabTreeRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$OpenSharedContentRoute on GoRouteData {
+  static OpenSharedContentRoute _fromState(GoRouterState state) =>
+      OpenSharedContentRoute(state.extra as Uri);
+
+  OpenSharedContentRoute get _self => this as OpenSharedContentRoute;
+
+  @override
+  String get location => GoRouteData.$location('/open_content');
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 extension<T extends Enum> on Map<T, String> {

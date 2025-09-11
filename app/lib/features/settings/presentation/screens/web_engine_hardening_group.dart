@@ -47,46 +47,47 @@ class WebEngineHardeningGroupScreen extends HookConsumerWidget {
         data: (group) {
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Card(
-                  color: theme.colorScheme.primaryContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SwitchListTile(
-                      value: group.isActiveOrOptional,
-                      title: Text(
-                        groupName,
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                      subtitle: group.description.mapNotNull(
-                        (description) => Text(
-                          description,
+              if (group.showMasterSwitch)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    color: theme.colorScheme.primaryContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SwitchListTile(
+                        value: group.isActiveOrOptional,
+                        title: Text(
+                          groupName,
                           style: TextStyle(
                             color: theme.colorScheme.onPrimaryContainer,
                           ),
                         ),
-                      ),
-                      onChanged: (value) async {
-                        final notifier = ref.read(
-                          preferenceSettingsGroupRepositoryProvider(
-                            PreferencePartition.user,
-                            groupName,
-                          ).notifier,
-                        );
+                        subtitle: group.description.mapNotNull(
+                          (description) => Text(
+                            description,
+                            style: TextStyle(
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) async {
+                          final notifier = ref.read(
+                            preferenceSettingsGroupRepositoryProvider(
+                              PreferencePartition.user,
+                              groupName,
+                            ).notifier,
+                          );
 
-                        if (value) {
-                          await notifier.apply();
-                        } else {
-                          await notifier.reset();
-                        }
-                      },
+                          if (value) {
+                            await notifier.apply();
+                          } else {
+                            await notifier.reset();
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
               Expanded(
                 child: ListView(
                   children: group.settings.entries.map((setting) {

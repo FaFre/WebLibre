@@ -31,6 +31,8 @@ const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
+enum TabIntentOpenSetting { regular, private, ask }
+
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
   history('Browsing history'),
@@ -58,7 +60,7 @@ class GeneralSettings with FastEquatable {
   final bool showExtensionShortcut;
   final bool enableLocalAiFeatures;
   final TabType defaultCreateTabType;
-  final TabType defaultIntentTabType;
+  final TabIntentOpenSetting tabIntentOpenSetting;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
 
@@ -73,7 +75,7 @@ class GeneralSettings with FastEquatable {
     required this.showExtensionShortcut,
     required this.enableLocalAiFeatures,
     required this.defaultCreateTabType,
-    required this.defaultIntentTabType,
+    required this.tabIntentOpenSetting,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
   });
@@ -89,7 +91,7 @@ class GeneralSettings with FastEquatable {
     bool? showExtensionShortcut,
     bool? enableLocalAiFeatures,
     TabType? defaultCreateTabType,
-    TabType? defaultIntentTabType,
+    TabIntentOpenSetting? tabIntentOpenSetting,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
   }) : themeMode = themeMode ?? ThemeMode.dark,
@@ -102,7 +104,7 @@ class GeneralSettings with FastEquatable {
        showExtensionShortcut = showExtensionShortcut ?? false,
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        defaultCreateTabType = defaultCreateTabType ?? TabType.regular,
-       defaultIntentTabType = defaultIntentTabType ?? TabType.regular,
+       tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened;
@@ -124,7 +126,7 @@ class GeneralSettings with FastEquatable {
     showExtensionShortcut,
     enableLocalAiFeatures,
     defaultCreateTabType,
-    defaultIntentTabType,
+    tabIntentOpenSetting,
     autoHideTabBar,
     tabBarSwipeAction,
   ];

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -147,6 +148,7 @@ class OnboardingScreen extends HookConsumerWidget {
                             .addTab(
                               url: ref.read(docsUriProvider),
                               private: false,
+                              container: const Value(null),
                             );
 
                         ref.invalidate(routerProvider);

@@ -175,17 +175,22 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                         showSelectedIcon: false,
                         segments: const [
                           ButtonSegment(
-                            value: TabType.regular,
+                            value: TabIntentOpenSetting.ask,
+                            label: Text('Prompt'),
+                            icon: Icon(MdiIcons.messageQuestion),
+                          ),
+                          ButtonSegment(
+                            value: TabIntentOpenSetting.regular,
                             label: Text('Regular'),
                             icon: Icon(MdiIcons.tab),
                           ),
                           ButtonSegment(
-                            value: TabType.private,
+                            value: TabIntentOpenSetting.private,
                             label: Text('Private'),
                             icon: Icon(MdiIcons.tabUnselected),
                           ),
                         ],
-                        selected: {generalSettings.defaultIntentTabType},
+                        selected: {generalSettings.tabIntentOpenSetting},
                         onSelectionChanged: (value) async {
                           await ref
                               .read(
@@ -193,15 +198,16 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                               )
                               .save(
                                 (currentSettings) => currentSettings.copyWith
-                                    .defaultIntentTabType(value.first),
+                                    .tabIntentOpenSetting(value.first),
                               );
                         },
-                        style: switch (generalSettings.defaultIntentTabType) {
-                          TabType.regular => null,
-                          TabType.private => SegmentedButton.styleFrom(
-                            selectedBackgroundColor: const Color(0x648000D7),
-                          ),
-                          TabType.child => null,
+                        style: switch (generalSettings.tabIntentOpenSetting) {
+                          TabIntentOpenSetting.regular => null,
+                          TabIntentOpenSetting.private =>
+                            SegmentedButton.styleFrom(
+                              selectedBackgroundColor: const Color(0x648000D7),
+                            ),
+                          TabIntentOpenSetting.ask => null,
                         },
                       ),
                     ),
