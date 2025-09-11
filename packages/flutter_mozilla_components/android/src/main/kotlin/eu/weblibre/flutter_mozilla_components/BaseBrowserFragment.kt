@@ -16,6 +16,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
@@ -34,6 +35,7 @@ import mozilla.components.feature.downloads.temporary.ShareResourceFeature
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
 import mozilla.components.feature.prompts.PromptFeature
+import mozilla.components.feature.prompts.file.AndroidPhotoPicker
 import mozilla.components.feature.session.FullScreenFeature
 import mozilla.components.feature.session.PictureInPictureFeature
 import mozilla.components.feature.session.SessionFeature
@@ -43,6 +45,7 @@ import mozilla.components.feature.sitepermissions.SitePermissionsRules
 import mozilla.components.feature.sitepermissions.SitePermissionsRules.AutoplayAction
 import mozilla.components.feature.webauthn.WebAuthnFeature
 import mozilla.components.support.base.feature.ActivityResultHandler
+import mozilla.components.support.base.feature.PermissionsFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
@@ -73,6 +76,20 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
 
     private var pictureInPictureFeature: PictureInPictureFeature? = null
+
+    // Registers a photo picker activity launcher in single-select mode.
+    private val singleMediaPicker =
+        AndroidPhotoPicker.singleMediaPicker(
+            { this },
+            { promptFeature.get() },
+        )
+
+    // Registers a photo picker activity launcher in multi-select mode.
+    private val multipleMediaPicker =
+        AndroidPhotoPicker.multipleMediaPicker(
+            { this },
+            { promptFeature.get() },
+        )
 
     private val sessionId: String?
         get() = arguments?.getString(SESSION_ID_KEY)
@@ -224,6 +241,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 onNeedToRequestPermissions = { permissions ->
                     requestPromptsPermissionsLauncher.launch(permissions)
                 },
+                androidPhotoPicker = AndroidPhotoPicker(
+                    requireContext(),
+                    singleMediaPicker,
+                    multipleMediaPicker,
+                ),
             ),
             owner = this,
             view = view,
@@ -392,6 +414,21 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         }
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
+    final override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
+        val feature: PermissionsFeature? = when (requestCode) {
+            REQUEST_CODE_DOWNLOAD_PERMISSIONS -> downloadsFeature.get()
+            REQUEST_CODE_PROMPT_PERMISSIONS -> promptFeature.get()
+            REQUEST_CODE_APP_PERMISSIONS -> sitePermissionsFeature.get()
+            else -> null
+        }
+        feature?.onPermissionsResult(permissions, grantResults)
+    }
+
     @CallSuper
     override fun onActivityResult(requestCode: Int, data: Intent?, resultCode: Int): Boolean {
         return activityResultHandler.any { it.onActivityResult(requestCode, data, resultCode) }
@@ -399,6 +436,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     companion object {
         private const val SESSION_ID_KEY = "session_id"
+
+        private const val REQUEST_CODE_DOWNLOAD_PERMISSIONS = 1
+        private const val REQUEST_CODE_PROMPT_PERMISSIONS = 2
+        private const val REQUEST_CODE_APP_PERMISSIONS = 3
 
         @JvmStatic
         protected fun Bundle.putSessionId(sessionId: String?) {

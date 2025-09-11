@@ -46,8 +46,11 @@ import mozilla.components.feature.addons.update.DefaultAddonUpdater
 import mozilla.components.feature.customtabs.store.CustomTabsServiceStore
 import mozilla.components.feature.downloads.DownloadMiddleware
 import mozilla.components.feature.media.MediaSessionFeature
+import mozilla.components.feature.media.middleware.LastMediaAccessMiddleware
 import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
+import mozilla.components.feature.prompts.PromptMiddleware
 import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
+import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
 import mozilla.components.feature.readerview.ReaderViewMiddleware
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
@@ -166,9 +169,11 @@ class Core(private val context: Context,
                 ReaderViewMiddleware(),
                 UndoMiddleware(),
                 LastAccessMiddleware(),
-//                PromptMiddleware(),
                 SessionPrioritizationMiddleware(),
                 RecordingDevicesMiddleware(context, components.notificationsDelegate),
+                PromptMiddleware(),
+                FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
+                LastMediaAccessMiddleware(),
             ) + EngineMiddleware.create(
                 engine,
                 // We are disabling automatic suspending of engine sessions under memory pressure.

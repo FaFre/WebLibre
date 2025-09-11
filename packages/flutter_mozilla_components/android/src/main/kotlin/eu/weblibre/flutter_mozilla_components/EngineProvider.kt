@@ -70,7 +70,7 @@ object EngineProvider {
             builder.aboutConfigEnabled(true)
             builder.extensionsProcessEnabled(true)
             builder.extensionsWebAPIEnabled(true)
-            builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
+            //builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
             builder.consoleOutput(components.logLevel == Log.Priority.DEBUG)
             builder.contentBlocking(contentBlocking.build())
 
