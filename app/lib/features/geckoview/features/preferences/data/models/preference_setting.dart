@@ -33,6 +33,10 @@ class PreferenceSettingGroup with FastEquatable {
     (setting) => setting.requireUserOptIn || setting.isActive,
   );
 
+  bool get showMasterSwitch =>
+      settings.values.length >
+      settings.values.where((setting) => setting.requireUserOptIn).length;
+
   bool get isPartlyActive => settings.values.any((setting) => setting.isActive);
 
   bool get hasInactiveOptional => settings.values.any(
