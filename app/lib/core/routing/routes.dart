@@ -26,6 +26,7 @@ import 'package:weblibre/features/about/presentation/screens/about.dart';
 import 'package:weblibre/features/bangs/presentation/screens/categories.dart';
 import 'package:weblibre/features/bangs/presentation/screens/list.dart';
 import 'package:weblibre/features/bangs/presentation/screens/search.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/open_shared_content.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/tab_tree.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/browser.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';

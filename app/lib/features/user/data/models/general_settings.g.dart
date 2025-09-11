@@ -33,7 +33,9 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings defaultCreateTabType(TabType defaultCreateTabType);
 
-  GeneralSettings defaultIntentTabType(TabType defaultIntentTabType);
+  GeneralSettings tabIntentOpenSetting(
+    TabIntentOpenSetting tabIntentOpenSetting,
+  );
 
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
@@ -57,7 +59,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool showExtensionShortcut,
     bool enableLocalAiFeatures,
     TabType defaultCreateTabType,
-    TabType defaultIntentTabType,
+    TabIntentOpenSetting tabIntentOpenSetting,
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
   });
@@ -115,8 +117,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(defaultCreateTabType: defaultCreateTabType);
 
   @override
-  GeneralSettings defaultIntentTabType(TabType defaultIntentTabType) =>
-      this(defaultIntentTabType: defaultIntentTabType);
+  GeneralSettings tabIntentOpenSetting(
+    TabIntentOpenSetting tabIntentOpenSetting,
+  ) => this(tabIntentOpenSetting: tabIntentOpenSetting);
 
   @override
   GeneralSettings autoHideTabBar(bool autoHideTabBar) =>
@@ -145,7 +148,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? showExtensionShortcut = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? defaultCreateTabType = const $CopyWithPlaceholder(),
-    Object? defaultIntentTabType = const $CopyWithPlaceholder(),
+    Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
   }) {
@@ -200,10 +203,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultCreateTabType
           // ignore: cast_nullable_to_non_nullable
           : defaultCreateTabType as TabType,
-      defaultIntentTabType: defaultIntentTabType == const $CopyWithPlaceholder()
-          ? _value.defaultIntentTabType
+      tabIntentOpenSetting: tabIntentOpenSetting == const $CopyWithPlaceholder()
+          ? _value.tabIntentOpenSetting
           // ignore: cast_nullable_to_non_nullable
-          : defaultIntentTabType as TabType,
+          : tabIntentOpenSetting as TabIntentOpenSetting,
       autoHideTabBar: autoHideTabBar == const $CopyWithPlaceholder()
           ? _value.autoHideTabBar
           // ignore: cast_nullable_to_non_nullable
@@ -248,9 +251,9 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         _$TabTypeEnumMap,
         json['defaultCreateTabType'],
       ),
-      defaultIntentTabType: $enumDecodeNullable(
-        _$TabTypeEnumMap,
-        json['defaultIntentTabType'],
+      tabIntentOpenSetting: $enumDecodeNullable(
+        _$TabIntentOpenSettingEnumMap,
+        json['tabIntentOpenSetting'],
       ),
       autoHideTabBar: json['autoHideTabBar'] as bool?,
       tabBarSwipeAction: $enumDecodeNullable(
@@ -276,7 +279,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showExtensionShortcut': instance.showExtensionShortcut,
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
-  'defaultIntentTabType': _$TabTypeEnumMap[instance.defaultIntentTabType]!,
+  'tabIntentOpenSetting':
+      _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
@@ -309,6 +313,12 @@ const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
   TabType.child: 'child',
+};
+
+const _$TabIntentOpenSettingEnumMap = {
+  TabIntentOpenSetting.regular: 'regular',
+  TabIntentOpenSetting.private: 'private',
+  TabIntentOpenSetting.ask: 'ask',
 };
 
 const _$TabBarSwipeActionEnumMap = {

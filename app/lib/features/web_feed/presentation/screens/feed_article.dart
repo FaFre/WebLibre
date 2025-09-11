@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:collection/collection.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -205,6 +206,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                 .addTab(
                                   url: articleLink.uri,
                                   private: isPrivate,
+                                  container: const Value(null),
                                 );
 
                             if (context.mounted) {

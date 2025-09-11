@@ -54,6 +54,10 @@ part of 'routes.dart';
       name: 'TabTreeRoute',
       path: 'tab_tree/:rootTabId',
     ),
+    TypedGoRoute<OpenSharedContentRoute>(
+      name: 'OpenSharedContentRoute',
+      path: 'open_content',
+    ),
   ],
 )
 class BrowserRoute extends GoRouteData with _$BrowserRoute {
@@ -75,9 +79,12 @@ class SearchRoute extends GoRouteData with _$SearchRoute {
   //This should be nullable but isnt allowed by go_router
   final String searchText;
 
+  final bool $extra;
+
   const SearchRoute({
     required this.tabType,
     this.searchText = SearchRoute.emptySearchText,
+    this.$extra = false,
   });
 
   @override
@@ -87,6 +94,7 @@ class SearchRoute extends GoRouteData with _$SearchRoute {
       initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
           ? null
           : searchText,
+      launchedFromIntent: $extra,
     );
   }
 }
@@ -157,5 +165,16 @@ class TabTreeRoute extends GoRouteData with _$TabTreeRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => TabTreeDialog(rootTabId));
+  }
+}
+
+class OpenSharedContentRoute extends GoRouteData with _$OpenSharedContentRoute {
+  final Uri $extra;
+
+  const OpenSharedContentRoute(this.$extra);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(builder: (_) => OpenSharedContent(sharedUrl: $extra));
   }
 }
