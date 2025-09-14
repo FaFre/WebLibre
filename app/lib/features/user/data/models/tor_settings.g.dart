@@ -9,7 +9,11 @@ part of 'tor_settings.dart';
 abstract class _$TorSettingsCWProxy {
   TorSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor);
 
-  TorSettings autoConfig(bool autoConfig);
+  TorSettings config(TorConnectionConfig config);
+
+  TorSettings requireBridge(bool requireBridge);
+
+  TorSettings fetchRemoteBridges(bool fetchRemoteBridges);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TorSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -17,7 +21,12 @@ abstract class _$TorSettingsCWProxy {
   /// ```dart
   /// TorSettings(...).copyWith(id: 12, name: "My name")
   /// ````
-  TorSettings call({bool proxyPrivateTabsTor, bool autoConfig});
+  TorSettings call({
+    bool proxyPrivateTabsTor,
+    TorConnectionConfig config,
+    bool requireBridge,
+    bool fetchRemoteBridges,
+  });
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfTorSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfTorSettings.copyWith.fieldName(...)`
@@ -31,7 +40,15 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
       this(proxyPrivateTabsTor: proxyPrivateTabsTor);
 
   @override
-  TorSettings autoConfig(bool autoConfig) => this(autoConfig: autoConfig);
+  TorSettings config(TorConnectionConfig config) => this(config: config);
+
+  @override
+  TorSettings requireBridge(bool requireBridge) =>
+      this(requireBridge: requireBridge);
+
+  @override
+  TorSettings fetchRemoteBridges(bool fetchRemoteBridges) =>
+      this(fetchRemoteBridges: fetchRemoteBridges);
 
   @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TorSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -42,17 +59,27 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
   /// ````
   TorSettings call({
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
-    Object? autoConfig = const $CopyWithPlaceholder(),
+    Object? config = const $CopyWithPlaceholder(),
+    Object? requireBridge = const $CopyWithPlaceholder(),
+    Object? fetchRemoteBridges = const $CopyWithPlaceholder(),
   }) {
     return TorSettings(
       proxyPrivateTabsTor: proxyPrivateTabsTor == const $CopyWithPlaceholder()
           ? _value.proxyPrivateTabsTor
           // ignore: cast_nullable_to_non_nullable
           : proxyPrivateTabsTor as bool,
-      autoConfig: autoConfig == const $CopyWithPlaceholder()
-          ? _value.autoConfig
+      config: config == const $CopyWithPlaceholder()
+          ? _value.config
           // ignore: cast_nullable_to_non_nullable
-          : autoConfig as bool,
+          : config as TorConnectionConfig,
+      requireBridge: requireBridge == const $CopyWithPlaceholder()
+          ? _value.requireBridge
+          // ignore: cast_nullable_to_non_nullable
+          : requireBridge as bool,
+      fetchRemoteBridges: fetchRemoteBridges == const $CopyWithPlaceholder()
+          ? _value.fetchRemoteBridges
+          // ignore: cast_nullable_to_non_nullable
+          : fetchRemoteBridges as bool,
     );
   }
 }
@@ -70,11 +97,22 @@ extension $TorSettingsCopyWith on TorSettings {
 TorSettings _$TorSettingsFromJson(Map<String, dynamic> json) =>
     TorSettings.withDefaults(
       proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
-      autoConfig: json['autoConfig'] as bool?,
+      config: $enumDecodeNullable(_$TorConnectionConfigEnumMap, json['config']),
+      requireBridge: json['requireBridge'] as bool?,
+      fetchRemoteBridges: json['fetchRemoteBridges'] as bool?,
     );
 
 Map<String, dynamic> _$TorSettingsToJson(TorSettings instance) =>
     <String, dynamic>{
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
-      'autoConfig': instance.autoConfig,
+      'config': _$TorConnectionConfigEnumMap[instance.config]!,
+      'requireBridge': instance.requireBridge,
+      'fetchRemoteBridges': instance.fetchRemoteBridges,
     };
+
+const _$TorConnectionConfigEnumMap = {
+  TorConnectionConfig.auto: 'auto',
+  TorConnectionConfig.direct: 'direct',
+  TorConnectionConfig.obfs4: 'obfs4',
+  TorConnectionConfig.snowflake: 'snowflake',
+};

@@ -47,7 +47,7 @@ class StartProxyController extends _$StartProxyController {
         if (result == true) {
           final connection = ref
               .read(torProxyServiceProvider.notifier)
-              .connect();
+              .startOrReconfigure();
 
           ref
               .read(overlayControllerProvider.notifier)
@@ -59,6 +59,9 @@ class StartProxyController extends _$StartProxyController {
           await connection;
         }
       }
+    } else {
+      //Reconfigure
+      await ref.read(torProxyServiceProvider.notifier).startOrReconfigure();
     }
   }
 

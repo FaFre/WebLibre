@@ -26,7 +26,7 @@ final torSettingsWithDefaultsProvider =
 // ignore: unused_element
 typedef TorSettingsWithDefaultsRef = AutoDisposeProviderRef<TorSettings>;
 String _$torSettingsRepositoryHash() =>
-    r'686e8576453f33a0d2d0eb2869e29ca88e00bc37';
+    r'ef80d1cc6b9b72cce371c03c656b10a0924d49d0';
 
 /// See also [TorSettingsRepository].
 @ProviderFor(TorSettingsRepository)

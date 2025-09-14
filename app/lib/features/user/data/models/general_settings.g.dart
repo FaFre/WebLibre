@@ -266,7 +266,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showExtensionShortcut': instance.showExtensionShortcut,
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
-  'defaultIntentTabType': _$TabTypeEnumMap[instance.defaultIntentTabType]!,
+  'tabIntentOpenSetting':
+      _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
 };

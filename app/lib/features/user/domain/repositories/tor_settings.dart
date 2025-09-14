@@ -23,7 +23,12 @@ class TorSettingsRepository extends _$TorSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
-      'autoConfig': settings['autoConfig']?.readAs(
+      'config': settings['config']?.readAs(DriftSqlType.string, db.typeMapping),
+      'requireBridge': settings['requireBridge']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'fetchRemoteBridges': settings['fetchRemoteBridges']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,
       ),

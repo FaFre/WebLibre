@@ -9,6 +9,8 @@ import 'package:socks5_proxy/socks_client.dart';
 const String _meekParameters =
     'url=https://1723079976.rsc.cdn77.org;front=www.phpmyadmin.net';
 
+const defaultBridges = [TransportType.obfs4, TransportType.snowflake];
+
 /// Manages MOAT API connections with persistent proxy setup.
 class MoatService {
   MoatApi? _api;
@@ -66,10 +68,10 @@ class MoatService {
   }
 
   /// Converts BuiltInBridges to Settings for requested transports.
-  List<Setting> _convertBuiltinToSettings(
-    BuiltInBridges builtinBridges,
-    List<TransportType> transports,
-  ) {
+  static List<Setting> convertBuiltinToSettings(
+    BuiltInBridges builtinBridges, {
+    List<TransportType> transports = defaultBridges,
+  }) {
     final settings = <Setting>[];
 
     for (final transport in transports) {
@@ -85,7 +87,7 @@ class MoatService {
         settings.add(
           Setting(
             bridge: Bridge(
-              type: transport.value,
+              type: transport,
               source: 'builtin',
               bridges: bridgeStrings,
             ),
@@ -98,29 +100,20 @@ class MoatService {
   }
 
   /// Gets built-in bridges from the MOAT service endpoint.
-  Future<List<Setting>?> getBuiltinBridges({
-    List<TransportType> transports = const [
-      TransportType.obfs4,
-      TransportType.snowflake,
-      TransportType.meek,
-    ],
+  Future<BuiltInBridges> getBuiltinBridges({
+    List<TransportType> transports = defaultBridges,
   }) async {
     _ensureInitialized();
 
     final builtinBridges = await _api!.builtin();
-    final settings = _convertBuiltinToSettings(builtinBridges, transports);
-    return settings.isEmpty ? null : settings;
+    return builtinBridges;
   }
 
   /// Tries to automatically configure Pluggable Transports.
   Future<List<Setting>?> autoConf({
     String? country,
     bool cannotConnectWithoutPt = false,
-    List<TransportType> transports = const [
-      TransportType.obfs4,
-      TransportType.snowflake,
-      TransportType.webtunnel,
-    ],
+    List<TransportType> transports = defaultBridges,
   }) async {
     _ensureInitialized();
 
@@ -143,6 +136,18 @@ class MoatService {
     }
 
     response = await _api!.defaults(SettingsRequest(transports: transports));
+    return response.settings;
+  }
+
+  Future<List<Setting>?> getDefaultBridges({
+    List<TransportType> transports = defaultBridges,
+  }) async {
+    _ensureInitialized();
+
+    final response = await _api!.defaults(
+      SettingsRequest(transports: transports),
+    );
+
     return response.settings;
   }
 

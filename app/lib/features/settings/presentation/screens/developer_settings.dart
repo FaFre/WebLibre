@@ -17,7 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:developer';
+
 import 'package:fading_scroll/fading_scroll.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -163,6 +166,38 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                   label: const Text('Copy'),
                 ),
               ),
+              if (kDebugMode)
+                CustomListTile(
+                  title: 'Dart VM',
+                  subtitle: 'Copy Dart VM service URL',
+                  prefix: Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Icon(
+                      Icons.bug_report,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  suffix: FilledButton.icon(
+                    onPressed: () async {
+                      final serviceProtocolInfo = await Service.getInfo();
+
+                      await Clipboard.setData(
+                        ClipboardData(
+                          text:
+                              serviceProtocolInfo.serverUri?.toString() ??
+                              'Error',
+                        ),
+                      );
+
+                      if (context.mounted) {
+                        showInfoMessage(context, 'Service URL copied');
+                      }
+                    },
+                    icon: const Icon(Icons.copy),
+                    label: const Text('Copy'),
+                  ),
+                ),
             ],
           );
         },

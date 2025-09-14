@@ -39,6 +39,14 @@ class TorProxyScreen extends HookConsumerWidget {
       await ref.read(torProxyServiceProvider.notifier).requestSync();
     });
 
+    ref.listen(torSettingsRepositoryProvider, (previous, next) async {
+      final torService = ref.read(torProxyServiceProvider.notifier);
+
+      if (await torService.requestSync() != null) {
+        await torService.startOrReconfigure();
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(title: const Text('Tor™ Proxy')),
       body: SafeArea(
@@ -46,9 +54,8 @@ class TorProxyScreen extends HookConsumerWidget {
           color: const Color(0xFF7D4698),
           child: Column(
             children: [
-              Flexible(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+              Expanded(
+                child: ListView(
                   children: [
                     const Icon(TorIcons.onionAlt, size: 84),
                     const SizedBox(height: 16),
@@ -92,7 +99,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                 if (value) {
                                   await ref
                                       .read(torProxyServiceProvider.notifier)
-                                      .connect();
+                                      .startOrReconfigure();
                                 } else {
                                   await ref
                                       .read(torProxyServiceProvider.notifier)
@@ -137,7 +144,7 @@ class TorProxyScreen extends HookConsumerWidget {
                         subtitle: const Text(
                           'When enabled, all Private Tabs will be tunneled through Tor',
                         ),
-                        secondary: const Icon(MdiIcons.arrowDecision),
+                        secondary: const Icon(MdiIcons.incognito),
                         onChanged: (value) async {
                           await ref
                               .read(saveTorSettingsControllerProvider.notifier)
@@ -179,27 +186,173 @@ class TorProxyScreen extends HookConsumerWidget {
                           }
                           return null; // Use the default color.
                         }),
-                        value: torSettings.autoConfig,
-                        title: const Text('Configure Transport Automatically'),
+                        value: torSettings.config == TorConnectionConfig.auto,
+                        title: const Text('Auto Configure Transport'),
                         subtitle: const Text(
-                          'From some locations, it is necessary to use a pluggable transport to connect to the Tor network that is otherwise blocked. Turn off automatic configuration to manually configure how Tor connects.',
+                          'From some locations, it is necessary to use a pluggable transport to connect to Tor',
                         ),
-                        secondary: const Icon(MdiIcons.arrowDecision),
-                        onChanged: (value) async {
-                          await ref
-                              .read(saveTorSettingsControllerProvider.notifier)
-                              .save(
-                                (currentSettings) =>
-                                    currentSettings.copyWith.autoConfig(value),
-                              );
-                        },
+                        secondary: const Icon(MdiIcons.arrowDecisionAuto),
+                        onChanged: torProxyPort.isLoading
+                            ? null
+                            : (value) async {
+                                await ref
+                                    .read(
+                                      saveTorSettingsControllerProvider
+                                          .notifier,
+                                    )
+                                    .save(
+                                      (currentSettings) =>
+                                          currentSettings.copyWith.config(
+                                            value
+                                                ? TorConnectionConfig.auto
+                                                : TorConnectionConfig.direct,
+                                          ),
+                                    );
+                              },
                       ),
                     ),
+                    if (torSettings.config == TorConnectionConfig.auto) ...[
+                      SwitchListTile.adaptive(
+                        value: torSettings.requireBridge,
+                        contentPadding: const EdgeInsets.only(
+                          left: 56,
+                          right: 24,
+                        ),
+                        onChanged: torProxyPort.isLoading
+                            ? null
+                            : (value) async {
+                                await ref
+                                    .read(
+                                      saveTorSettingsControllerProvider
+                                          .notifier,
+                                    )
+                                    .save(
+                                      (currentSettings) => currentSettings
+                                          .copyWith
+                                          .requireBridge(value),
+                                    );
+                              },
+                        title: const Text(
+                          "I'm sure I cannot connect without a bridge",
+                        ),
+                      ),
+                    ] else ...[
+                      RadioGroup(
+                        groupValue: torSettings.config,
+                        onChanged: (value) async {
+                          if (value != null) {
+                            await ref
+                                .read(
+                                  saveTorSettingsControllerProvider.notifier,
+                                )
+                                .save(
+                                  (currentSettings) =>
+                                      currentSettings.copyWith.config(value),
+                                );
+                          }
+                        },
+                        child: RadioListTile.adaptive(
+                          value: TorConnectionConfig.direct,
+                          enabled: !torProxyPort.isLoading,
+                          contentPadding: const EdgeInsets.only(
+                            left: 56,
+                            right: 24,
+                          ),
+                          title: Text('Direct Connection'),
+                          subtitle: Text(
+                            'The best way to connect to Tor if Tor is not blocked',
+                          ),
+                        ),
+                      ),
+                      RadioGroup(
+                        groupValue: torSettings.config,
+                        onChanged: (value) async {
+                          if (value != null) {
+                            await ref
+                                .read(
+                                  saveTorSettingsControllerProvider.notifier,
+                                )
+                                .save(
+                                  (currentSettings) =>
+                                      currentSettings.copyWith.config(value),
+                                );
+                          }
+                        },
+                        child: RadioListTile.adaptive(
+                          value: TorConnectionConfig.obfs4,
+                          enabled: !torProxyPort.isLoading,
+                          contentPadding: const EdgeInsets.only(
+                            left: 56,
+                            right: 24,
+                          ),
+                          title: Text('obfs4'),
+                          subtitle: Text(
+                            'Suitable for light censorship and high bandwidth needs',
+                          ),
+                        ),
+                      ),
+                      RadioGroup(
+                        groupValue: torSettings.config,
+                        onChanged: (value) async {
+                          if (value != null) {
+                            await ref
+                                .read(
+                                  saveTorSettingsControllerProvider.notifier,
+                                )
+                                .save(
+                                  (currentSettings) =>
+                                      currentSettings.copyWith.config(value),
+                                );
+                          }
+                        },
+                        child: RadioListTile.adaptive(
+                          value: TorConnectionConfig.snowflake,
+                          enabled: !torProxyPort.isLoading,
+                          contentPadding: const EdgeInsets.only(
+                            left: 56,
+                            right: 24,
+                          ),
+                          title: Text('Snowflake'),
+                          subtitle: Text('Suitable for heavy censorship'),
+                        ),
+                      ),
+                      CheckboxListTile.adaptive(
+                        value: torSettings.fetchRemoteBridges,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        enabled:
+                            torSettings.config != TorConnectionConfig.direct,
+                        contentPadding: const EdgeInsets.only(
+                          left: 56,
+                          right: 24,
+                        ),
+                        onChanged: torProxyPort.isLoading
+                            ? null
+                            : (value) async {
+                                if (value != null) {
+                                  await ref
+                                      .read(
+                                        saveTorSettingsControllerProvider
+                                            .notifier,
+                                      )
+                                      .save(
+                                        (currentSettings) => currentSettings
+                                            .copyWith
+                                            .fetchRemoteBridges(value),
+                                      );
+                                }
+                              },
+                        title: const Text(
+                          "Fetch fresh Bridges before connecting",
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              Flexible(
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24.0),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     if (torProxyPort.isLoading)
                       const Column(

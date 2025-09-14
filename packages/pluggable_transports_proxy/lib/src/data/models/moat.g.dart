@@ -50,7 +50,7 @@ Map<String, dynamic> _$SettingToJson(Setting instance) => <String, dynamic>{
 };
 
 Bridge _$BridgeFromJson(Map<String, dynamic> json) => Bridge(
-  type: json['type'] as String,
+  type: Bridge._transportFromJson(json['type']),
   source: json['source'] as String,
   bridges: (json['bridge_strings'] as List<dynamic>?)
       ?.map((e) => e as String)
@@ -58,7 +58,7 @@ Bridge _$BridgeFromJson(Map<String, dynamic> json) => Bridge(
 );
 
 Map<String, dynamic> _$BridgeToJson(Bridge instance) => <String, dynamic>{
-  'type': instance.type,
+  'type': Bridge._transportToJson(instance.type),
   'source': instance.source,
   'bridge_strings': instance.bridges,
 };

@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'start_tor_proxy.dart';
+part of 'tor_proxy.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$startProxyControllerHash() =>
-    r'8840d5ffe9346c3f8b0aa0b3e034605b606c5e34';
+String _$torProxyServiceHash() => r'82b4964ddf14d02893ebbea3b25d91216359ba10';
 
-/// See also [StartProxyController].
-@ProviderFor(StartProxyController)
-final startProxyControllerProvider =
-    AutoDisposeNotifierProvider<StartProxyController, void>.internal(
-      StartProxyController.new,
-      name: r'startProxyControllerProvider',
+/// See also [TorProxyService].
+@ProviderFor(TorProxyService)
+final torProxyServiceProvider =
+    AsyncNotifierProvider<TorProxyService, int?>.internal(
+      TorProxyService.new,
+      name: r'torProxyServiceProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$startProxyControllerHash,
+          : _$torProxyServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$StartProxyController = AutoDisposeNotifier<void>;
+typedef _$TorProxyService = AsyncNotifier<int?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

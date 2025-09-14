@@ -83,12 +83,18 @@ class Setting {
 
 @JsonSerializable()
 class Bridge {
-  final String type;
+  @JsonKey(toJson: _transportToJson, fromJson: _transportFromJson)
+  final TransportType type;
   final String source;
   @JsonKey(name: 'bridge_strings')
   final List<String>? bridges;
 
   const Bridge({required this.type, required this.source, this.bridges});
+
+  static String _transportToJson(TransportType transport) => transport.value;
+
+  static TransportType _transportFromJson(dynamic json) =>
+      TransportType.fromString(json as String)!;
 
   factory Bridge.fromJson(Map<String, dynamic> json) => _$BridgeFromJson(json);
 

@@ -20,13 +20,17 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:nullability/nullability.dart';
 import 'package:pluggable_transports_proxy/pluggable_transports_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
+import 'package:weblibre/features/tor/domain/repositories/builtin_bridges.dart';
 import 'package:weblibre/features/tor/utils/tor_entrypoint.dart';
+import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'tor_proxy.g.dart';
@@ -38,9 +42,19 @@ class _TorService {
 
   ValueStream<int?> get portStream => _portSubject.stream;
 
-  Future<void> start({ProxyType? proxyType, String? bridgeLines}) async {
+  Future<void> startOrReconfigure({
+    ProxyType? proxyType,
+    String? bridgeLines,
+  }) async {
     await service.startService();
-    service.invoke('start', {
+    service.invoke('startOrReconfigure', {
+      if (proxyType != null) 'proxyType': proxyType.name,
+      if (bridgeLines != null) 'bridgeLines': bridgeLines,
+    });
+  }
+
+  Future<void> reconfigure({ProxyType? proxyType, String? bridgeLines}) async {
+    service.invoke('reconfigure', {
       if (proxyType != null) 'proxyType': proxyType.name,
       if (bridgeLines != null) 'bridgeLines': bridgeLines,
     });
@@ -101,7 +115,7 @@ class TorProxyService extends _$TorProxyService {
     });
   }
 
-  Future<void> connect({bool forceReconnect = false}) async {
+  Future<void> startOrReconfigure({bool forceReconnect = false}) async {
     final currentPort = await requestSync();
 
     if (currentPort == null || forceReconnect) {
@@ -111,14 +125,97 @@ class TorProxyService extends _$TorProxyService {
           .read(torSettingsRepositoryProvider.notifier)
           .fetchSettings();
 
-      if (torSettings.autoConfig) {
-        final moat = MoatService();
-        final config = await moat.autoConf();
+      Setting? setting;
+      if (torSettings.config == TorConnectionConfig.auto) {
+        List<Setting>? config;
 
-        todo
+        final moat = MoatService();
+        try {
+          await moat.initialize();
+          config = await moat.autoConf(
+            cannotConnectWithoutPt: torSettings.requireBridge,
+          );
+
+          if (config == null && torSettings.requireBridge) {
+            config = MoatService.convertBuiltinToSettings(
+              await ref
+                  .read(builtinBridgesRepositoryProvider(moat).notifier)
+                  .getBridges(),
+            );
+          }
+        } catch (e, s) {
+          logger.e('Failed auto configure bridges', error: e, stackTrace: s);
+        } finally {
+          await moat.dispose();
+        }
+
+        setting = config.mapNotNull(
+          (config) =>
+              config.firstWhereOrNull(
+                (setting) => setting.bridge.type == TransportType.obfs4,
+              ) ??
+              config.firstWhereOrNull(
+                (setting) => setting.bridge.type == TransportType.snowflake,
+              ),
+        );
+      } else if (torSettings.config != TorConnectionConfig.direct) {
+        List<Setting>? config;
+
+        final moat = MoatService();
+        try {
+          await moat.initialize();
+          if (torSettings.fetchRemoteBridges) {
+            config = await moat.getDefaultBridges();
+          }
+
+          if (config == null && torSettings.requireBridge) {
+            config = MoatService.convertBuiltinToSettings(
+              await ref
+                  .read(builtinBridgesRepositoryProvider(moat).notifier)
+                  .getBridges(tryUpdate: torSettings.fetchRemoteBridges),
+            );
+          }
+
+          setting = config.mapNotNull(
+            (config) => config.firstWhereOrNull(
+              (setting) =>
+                  setting.bridge.type ==
+                  switch (torSettings.config) {
+                    TorConnectionConfig.auto => throw UnimplementedError(),
+                    TorConnectionConfig.direct => throw UnimplementedError(),
+                    TorConnectionConfig.obfs4 => TransportType.obfs4,
+                    TorConnectionConfig.snowflake => TransportType.snowflake,
+                  },
+            ),
+          );
+        } catch (e, s) {
+          logger.e('Failed auto configure bridges', error: e, stackTrace: s);
+        } finally {
+          await moat.dispose();
+        }
       }
 
-      await _tor.start();
+      if (setting != null) {
+        switch (setting.bridge.type) {
+          case TransportType.obfs4:
+            await _tor.startOrReconfigure(
+              proxyType: ProxyType.obfs4,
+              bridgeLines: setting.bridge.bridges?.join('\n'),
+            );
+          case TransportType.snowflake:
+            await _tor.startOrReconfigure(
+              proxyType: ProxyType.snowflake,
+              bridgeLines: setting.bridge.bridges?.join('\n'),
+            );
+          case TransportType.meek:
+          case TransportType.meekAzure:
+          case TransportType.webtunnel:
+            throw UnimplementedError();
+        }
+      } else {
+        await _tor.startOrReconfigure();
+      }
+
       _enableHeartbeatTimer();
     }
   }

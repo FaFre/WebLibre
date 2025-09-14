@@ -35,16 +35,19 @@ Future<void> onStart(ServiceInstance service) async {
     service.invoke('portUpdate', {'port': port});
   });
 
+  Future<void> stopProxies() async {
+    for (final proxyType in startedProxyType) {
+      await IPtProxyController().stop(proxyType);
+    }
+    startedProxyType.clear();
+  }
+
   Future<void> stopService() async {
     timeout?.cancel();
     timeout = null;
 
     Tor.instance.stop();
-
-    for (final proxyType in startedProxyType) {
-      await IPtProxyController().stop(proxyType);
-    }
-    startedProxyType.clear();
+    await stopProxies();
 
     service.invoke('portUpdate', {'port': -1});
 
@@ -84,12 +87,57 @@ Future<void> onStart(ServiceInstance service) async {
     }
   }
 
-  service.on("start").listen((event) async {
+  Future<void> reconfigureService(
+    ProxyType? proxyType,
+    String? bridgeLines,
+  ) async {
+    if (Tor.instance.hasClient) {
+      await stopProxies();
+
+      if (proxyType != null) {
+        final port = await IPtProxyController().start(proxyType, "");
+        startedProxyType.add(proxyType);
+
+        switch (proxyType) {
+          case ProxyType.obfs4:
+            await Tor.instance.reconfigure(
+              obfs4Port: port,
+              bridgeLines: bridgeLines,
+            );
+          case ProxyType.meekLite:
+            throw UnimplementedError();
+          case ProxyType.webtunnel:
+            throw UnimplementedError();
+          case ProxyType.snowflake:
+            await Tor.instance.reconfigure(
+              snowflakePort: port,
+              bridgeLines: bridgeLines,
+            );
+        }
+      } else {
+        await Tor.instance.reconfigure();
+      }
+    }
+  }
+
+  service.on("startOrReconfigure").listen((event) async {
     final proxyType = ProxyType.values.firstWhereOrNull(
       (x) => x.name == event?['proxyType'],
     );
 
-    await startService(proxyType, event?['bridgeLines'] as String?);
+    await reconfigureService(proxyType, event?['bridgeLines'] as String?);
+
+    if (!Tor.instance.hasClient) {
+      await startService(proxyType, event?['bridgeLines'] as String?);
+    }
+  });
+
+  service.on("reconfigure").listen((event) async {
+    final proxyType = ProxyType.values.firstWhereOrNull(
+      (x) => x.name == event?['proxyType'],
+    );
+
+    await reconfigureService(proxyType, event?['bridgeLines'] as String?);
   });
 
   service.on("heartbeat").listen((event) {
