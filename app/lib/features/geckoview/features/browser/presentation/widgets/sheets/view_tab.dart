@@ -96,18 +96,17 @@ class ViewTabSheetWidget extends HookConsumerWidget {
             final totalHeight =
                 headerBox.size.height + textBox.size.height + kToolbarHeight;
 
-            final relative = totalHeight / MediaQuery.of(context).size.height;
+            final relative = (totalHeight / MediaQuery.of(context).size.height)
+                .clamp(0.0, 1.0);
 
-            if (relative >= 0 && relative <= 1) {
-              if (draggableScrollableController.size < relative &&
-                  relative > scrolledTo.value) {
-                await draggableScrollableController.animateTo(
-                  relative,
-                  duration: const Duration(milliseconds: 150),
-                  curve: Curves.easeInOut,
-                );
-                scrolledTo.value = relative;
-              }
+            if (draggableScrollableController.size < relative &&
+                relative > scrolledTo.value) {
+              await draggableScrollableController.animateTo(
+                relative,
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeInOut,
+              );
+              scrolledTo.value = relative;
             }
           }
         }
@@ -125,9 +124,12 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                   MediaQuery.of(context).size.height) -
               bottomInsets.value;
 
-          draggableScrollableController.jumpTo(
-            draggableScrollableController.size + diff,
+          final jumpValue = (draggableScrollableController.size + diff).clamp(
+            0.0,
+            1.0,
           );
+
+          draggableScrollableController.jumpTo(jumpValue);
 
           bottomInsets.value += diff;
         });

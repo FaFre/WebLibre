@@ -115,44 +115,44 @@ class BrowserScreen extends HookConsumerWidget {
         }
 
         if (next != null) {
-          bool dismissOnThreshold(
-            DraggableScrollableNotification notification,
-          ) {
-            if (!context.mounted) return false;
+          final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
 
-            if (notification.extent <= 0.1) {
-              ref.read(bottomSheetControllerProvider.notifier).dismiss();
-              return true;
-            } else {
-              ref
-                  .read(bottomSheetExtendProvider.notifier)
-                  .add(notification.extent);
+          sheetController.value = state.showBottomSheet((context) {
+            bool dismissOnThreshold(
+              DraggableScrollableNotification notification,
+            ) {
+              if (notification.extent <= 0.1) {
+                ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                return true;
+              } else {
+                ref
+                    .read(bottomSheetExtendProvider.notifier)
+                    .add(notification.extent);
+              }
+
+              return false;
             }
 
-            return false;
-          }
-
-          final sheet = switch (next) {
-            ViewTabsSheet() =>
-              NotificationListener<DraggableScrollableNotification>(
-                key: ValueKey(next),
-                onNotification: dismissOnThreshold,
-                child: _ViewTabsSheet(
-                  maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+            final sheet = switch (next) {
+              ViewTabsSheet() =>
+                NotificationListener<DraggableScrollableNotification>(
+                  key: ValueKey(next),
+                  onNotification: dismissOnThreshold,
+                  child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
                 ),
-              ),
-            final EditUrlSheet parameter =>
-              NotificationListener<DraggableScrollableNotification>(
-                key: ValueKey(parameter),
-                onNotification: dismissOnThreshold,
-                child: _ViewUrlSheet(
-                  initialTabState: parameter.tabState,
-                  maxChildSize: MediaQuery.of(context).relativeSafeArea(),
+              final EditUrlSheet parameter =>
+                NotificationListener<DraggableScrollableNotification>(
+                  key: ValueKey(parameter),
+                  onNotification: dismissOnThreshold,
+                  child: _ViewUrlSheet(
+                    initialTabState: parameter.tabState,
+                    maxChildSize: relativeSafeArea,
+                  ),
                 ),
-              ),
-          };
+            };
 
-          sheetController.value = state.showBottomSheet((context) => sheet);
+            return sheet;
+          });
         }
       }
     });
