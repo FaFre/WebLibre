@@ -74,7 +74,7 @@ dependencies:
   text_scroll: ^0.2.1
   timeago: ^3.7.1
   tor:
-    path: /home/fafre/development/repos/tor
+    path: ./packages/tor
   universal_io: ^2.2.2
   uri_to_file:
     git:

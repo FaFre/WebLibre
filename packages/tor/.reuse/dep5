@@ -1,0 +1,32 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: tor
+Upstream-Contact: Igor Cota <igor@foundationdevices.com>
+Source: https://github.com/Foundation-Devices/tor
+
+Files: cargokit/*
+Copyright: 2022 Matej Knopp
+License: MIT
+
+Files: lib/generated*
+Copyright: 2024 Foundation Devices Inc.
+License: MIT
+
+Files: example/linux/flutter/generated*
+Copyright: 2024 Foundation Devices Inc.
+License: MIT
+
+Files:  example/macos/Flutter/Generated*
+Copyright: 2024 Foundation Devices Inc.
+License: MIT
+
+Files: example/windows/flutter/generated*
+Copyright: 2024 Foundation Devices Inc.
+License: MIT
+
+Files: rust/target/*
+Copyright: 2024 Foundation Devices Inc.
+License: MIT
+
+Files: CHANGELOG.md
+Copyright: 2024 Foundation Devices Inc.
+License: MIT

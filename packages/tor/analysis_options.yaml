@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2022 Foundation Devices Inc.
+# SPDX-FileCopyrightText: 2024 Foundation Devices Inc.
+#
+# SPDX-License-Identifier: MIT
+
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - 'lib/generated*'
+    - 'cargokit'
