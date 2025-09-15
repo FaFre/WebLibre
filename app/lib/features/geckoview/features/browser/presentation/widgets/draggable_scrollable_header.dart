@@ -37,9 +37,9 @@ class DraggableScrollableHeader extends StatefulWidget {
     super.key,
     required this.controller,
     required this.child,
-    this.velocitySensitivity = 0.35, // Higher = more sensitive to velocity
+    this.velocitySensitivity = 0.25, // Higher = more sensitive to velocity
     this.maxVelocity = 2500.0, // Maximum velocity to consider
-    this.minVelocity = 150.0, // Minimum velocity to trigger momentum
+    this.minVelocity = 50.0, // Minimum velocity to trigger momentum
     this.animationDuration = const Duration(milliseconds: 300),
     this.animationCurve = Curves.decelerate,
     this.dragSensitivity = 1.0, // Controls drag responsiveness
