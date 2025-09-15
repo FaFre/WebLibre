@@ -37,64 +37,7 @@ class DraggableScrollableHeader extends StatefulWidget {
     super.key,
     required this.controller,
     required this.child,
-    this.velocitySensitivity = 0.35, // Higher = more sensitive to velocity
-    this.maxVelocity = 2500.0, // Maximum velocity to consider
-    this.minVelocity = 150.0, // Minimum velocity to trigger momentum
-    this.animationDuration = const Duration(milliseconds: 300),
-    this.animationCurve = Curves.decelerate,
-    this.dragSensitivity = 1.0, // Controls drag responsiveness
   });
-
-  @override
-  State<DraggableScrollableHeader> createState() =>
-      _DraggableScrollableHeaderState();
-}
-
-class _DraggableScrollableHeaderState extends State<DraggableScrollableHeader>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double>? _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: widget.animationDuration,
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _animateToPosition(
-    double targetSize, {
-    Duration? customDuration,
-  }) async {
-    if (customDuration != null) {
-      _animationController.duration = customDuration;
-    } else {
-      _animationController.duration = widget.animationDuration;
-    }
-
-    _animation = Tween<double>(begin: widget.controller.size, end: targetSize)
-        .animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: widget.animationCurve,
-          ),
-        );
-
-    _animationController.reset();
-    await _animationController.forward();
-
-    _animation!.addListener(() {
-      widget.controller.jumpTo(_animation!.value);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
