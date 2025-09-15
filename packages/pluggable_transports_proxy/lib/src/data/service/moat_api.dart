@@ -51,12 +51,16 @@ class MoatApi {
 
   Future<http.Response> _get(String endpoint) async {
     final uri = Uri.parse('$_baseUrl$endpoint');
-    return await _client.get(uri, headers: _headers);
+    return await _client
+        .get(uri, headers: _headers)
+        .timeout(const Duration(seconds: 15));
   }
 
   Future<http.Response> _post(String endpoint, Object body) async {
     final uri = Uri.parse('$_baseUrl$endpoint');
-    return await _client.post(uri, headers: _headers, body: jsonEncode(body));
+    return await _client
+        .post(uri, headers: _headers, body: jsonEncode(body))
+        .timeout(const Duration(seconds: 15));
   }
 
   Map<String, String> get _headers => {
