@@ -21,7 +21,6 @@ import 'dart:io';
 
 import 'package:http/io_client.dart';
 import 'package:pluggable_transports_proxy/pluggable_transports_proxy.dart';
-import 'package:pluggable_transports_proxy/src/data/models/moat.dart';
 import 'package:pluggable_transports_proxy/src/data/service/moat_api.dart';
 import 'package:socks5_proxy/socks_client.dart';
 

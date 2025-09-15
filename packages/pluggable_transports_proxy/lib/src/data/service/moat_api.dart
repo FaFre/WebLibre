@@ -31,14 +31,20 @@ class MoatApi {
   MoatApi(this._client);
 
   Future<SettingsResponse> settings([SettingsRequest? request]) async {
-    final response = await _post('settings', request ?? SettingsRequest());
+    final response = await _post(
+      'settings',
+      request ?? const SettingsRequest(),
+    );
     return SettingsResponse.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
   }
 
   Future<SettingsResponse> defaults([SettingsRequest? request]) async {
-    final response = await _post('defaults', request ?? SettingsRequest());
+    final response = await _post(
+      'defaults',
+      request ?? const SettingsRequest(),
+    );
     return SettingsResponse.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );

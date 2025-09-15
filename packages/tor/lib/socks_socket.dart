@@ -95,19 +95,28 @@ class SOCKSSocket {
   /// Is SSL enabled?
   final bool sslEnabled;
 
+  /// Constructor.
+  SOCKSSocket({
+    required this.proxyHost,
+    required this.proxyPort,
+    required this.sslEnabled,
+  }) {
+    unawaited(_init());
+  }
+
   /// Private constructor.
   SOCKSSocket._(this.proxyHost, this.proxyPort, this.sslEnabled);
 
-  /// Provides a stream of data as List<int>.
+  /// Provides a stream of data as List`<int>`.
   Stream<List<int>> get inputStream => sslEnabled
       ? _secureResponseController.stream
       : _responseController.stream;
 
-  /// Provides a StreamSink compatible with List<int> for sending data.
+  /// Provides a StreamSink compatible with List`<int>` for sending data.
   StreamSink<List<int>> get outputStream {
     // Create a simple StreamSink wrapper for _socksSocket and
     // _secureSocksSocket that accepts List<int> and forwards it to write method.
-    var sink = StreamController<List<int>>();
+    final sink = StreamController<List<int>>();
     sink.stream.listen((data) {
       if (sslEnabled) {
         _secureSocksSocket.add(data);
@@ -129,26 +138,19 @@ class SOCKSSocket {
   ///
   /// Returns:
   ///  A Future that resolves to a SOCKSSocket instance.
-  static Future<SOCKSSocket> create(
-      {required String proxyHost,
-      required int proxyPort,
-      bool sslEnabled = false}) async {
+  static Future<SOCKSSocket> create({
+    required String proxyHost,
+    required int proxyPort,
+    bool sslEnabled = false,
+  }) async {
     // Create a SOCKS socket instance.
-    var instance = SOCKSSocket._(proxyHost, proxyPort, sslEnabled);
+    final instance = SOCKSSocket._(proxyHost, proxyPort, sslEnabled);
 
     // Initialize the SOCKS socket.
     await instance._init();
 
     // Return the SOCKS socket instance.
     return instance;
-  }
-
-  /// Constructor.
-  SOCKSSocket(
-      {required this.proxyHost,
-      required this.proxyPort,
-      required this.sslEnabled}) {
-    _init();
   }
 
   /// Initializes the SOCKS socket.
@@ -159,10 +161,7 @@ class SOCKSSocket {
   ///   A Future that resolves to void.
   Future<void> _init() async {
     // Connect to the SOCKS proxy server.
-    _socksSocket = await Socket.connect(
-      proxyHost,
-      proxyPort,
-    );
+    _socksSocket = await Socket.connect(proxyHost, proxyPort);
 
     // Listen to the socket.
     _subscription = _socksSocket.listen(
@@ -196,12 +195,13 @@ class SOCKSSocket {
     _socksSocket.add([0x05, 0x01, 0x00]);
 
     // Wait for server response.
-    var response = await _responseController.stream.first;
+    final response = await _responseController.stream.first;
 
     // Check if the connection was successful.
     if (response[1] != 0x00) {
       throw Exception(
-          'socks_socket.connect(): Failed to connect to SOCKS5 proxy.');
+        'socks_socket.connect(): Failed to connect to SOCKS5 proxy.',
+      );
     }
 
     return;
@@ -217,7 +217,7 @@ class SOCKSSocket {
   ///   A Future that resolves to void.
   Future<void> connectTo(String domain, int port) async {
     // Connect command.
-    var request = [
+    final request = [
       0x05, // SOCKS version.
       0x01, // Connect command.
       0x00, // Reserved.
@@ -225,19 +225,20 @@ class SOCKSSocket {
       domain.length,
       ...domain.codeUnits,
       (port >> 8) & 0xFF,
-      port & 0xFF
+      port & 0xFF,
     ];
 
     // Send the connect command to the SOCKS proxy server.
     _socksSocket.add(request);
 
     // Wait for server response.
-    var response = await _responseController.stream.first;
+    final response = await _responseController.stream.first;
 
     // Check if the connection was successful.
     if (response[1] != 0x00) {
       throw Exception(
-          'socks_socket.connectTo(): Failed to connect to target through SOCKS5 proxy.');
+        'socks_socket.connectTo(): Failed to connect to target through SOCKS5 proxy.',
+      );
     }
 
     // Upgrade to SSL if needed.
@@ -265,9 +266,9 @@ class SOCKSSocket {
           _secureResponseController.addError("$e");
           // TODO make sure sending error as string is acceptable.
         },
-        onDone: () {
+        onDone: () async {
           // Close the response controller when the socket is closed.
-          _secureResponseController.close();
+          await _secureResponseController.close();
         },
       );
     }
@@ -288,7 +289,7 @@ class SOCKSSocket {
     if (object == null) return;
 
     // Write the data to the socket.
-    List<int> data = utf8.encode(object.toString());
+    final List<int> data = utf8.encode(object.toString());
     if (sslEnabled) {
       _secureSocksSocket.add(data);
     } else {
@@ -310,9 +311,9 @@ class SOCKSSocket {
     } finally {
       await _subscription?.cancel();
       await _socksSocket.close();
-      _responseController.close();
+      await _responseController.close();
       if (sslEnabled) {
-        _secureResponseController.close();
+        await _secureResponseController.close();
       }
     }
   }
@@ -355,7 +356,7 @@ class SOCKSSocket {
       _socksSocket.writeln(command);
 
       // Wait for the response from the proxy server.
-      var responseData = await _responseController.stream.first;
+      final responseData = await _responseController.stream.first;
       if (kDebugMode) {
         print("responseData: ${utf8.decode(responseData)}");
       }
@@ -364,7 +365,7 @@ class SOCKSSocket {
       _secureSocksSocket.writeln(command);
 
       // Wait for the response from the proxy server.
-      var responseData = await _secureResponseController.stream.first;
+      final responseData = await _secureResponseController.stream.first;
       if (kDebugMode) {
         print("secure responseData: ${utf8.decode(responseData)}");
       }

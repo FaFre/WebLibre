@@ -14,7 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tor/generated_bindings.dart' as rust;
 
-DynamicLibrary load(name) {
+DynamicLibrary load(String name) {
   if (Platform.isAndroid || Platform.isLinux) {
     return DynamicLibrary.open('lib$name.so');
   } else if (Platform.isIOS || Platform.isMacOS) {
@@ -33,7 +33,9 @@ class CouldntBootstrapDirectory implements Exception {
 }
 
 class NotSupportedPlatform implements Exception {
-  NotSupportedPlatform(String s);
+  String reason;
+
+  NotSupportedPlatform(this.reason);
 }
 
 class ClientNotActive implements Exception {}
@@ -97,8 +99,8 @@ class Tor {
   /// Returns a Future that completes when the Tor service has started.
   ///
   /// Throws an exception if the Tor service fails to start.
-  static Future<Tor> init({enabled = true}) async {
-    var singleton = Tor._instance;
+  static Future<Tor> init({bool enabled = true}) async {
+    final singleton = Tor._instance;
     singleton._enabled = enabled;
     return singleton;
   }
@@ -117,15 +119,15 @@ class Tor {
   }
 
   Future<int> _getRandomUnusedPort({List<int> excluded = const []}) async {
-    var random = Random.secure();
+    final random = Random.secure();
     int potentialPort = 0;
 
     retry:
     while (potentialPort <= 0 || excluded.contains(potentialPort)) {
       potentialPort = random.nextInt(65535);
       try {
-        var socket = await ServerSocket.bind("0.0.0.0", potentialPort);
-        socket.close();
+        final socket = await ServerSocket.bind("0.0.0.0", potentialPort);
+        await socket.close();
         return potentialPort;
       } catch (_) {
         continue retry;
@@ -142,33 +144,39 @@ class Tor {
   /// Throws an exception if the Tor service fails to start.
   ///
   /// Returns a Future that completes when the Tor service has started.
-  Future<void> start(
-      {int? obfs4Port, int? snowflakePort, String? bridgeLines}) async {
+  Future<void> start({
+    int? obfs4Port,
+    int? snowflakePort,
+    String? bridgeLines,
+  }) async {
     broadcastState();
 
     // Set the state and cache directories.
     final Directory appSupportDir = await getApplicationSupportDirectory();
-    final stateDir =
-        await Directory('${appSupportDir.path}/tor_state').create();
-    final cacheDir =
-        await Directory('${appSupportDir.path}/tor_cache').create();
+    final stateDir = await Directory(
+      '${appSupportDir.path}/tor_state',
+    ).create();
+    final cacheDir = await Directory(
+      '${appSupportDir.path}/tor_cache',
+    ).create();
 
     // Generate a random port.
-    int newPort = await _getRandomUnusedPort();
+    final newPort = await _getRandomUnusedPort();
 
     // Start the Tor service in an isolate.
-    final tor = await Isolate.run(() async {
+    final tor = await Isolate.run(() {
       // Load the Tor library.
-      var lib = rust.NativeLibrary(load(libName));
+      final lib = rust.NativeLibrary(load(libName));
 
       // Start the Tor service.
       final tor = lib.tor_start(
-          newPort,
-          stateDir.path.toNativeUtf8() as Pointer<Char>,
-          cacheDir.path.toNativeUtf8() as Pointer<Char>,
-          obfs4Port ?? -1,
-          snowflakePort ?? -1,
-          bridgeLines?.toNativeUtf8() as Pointer<Char>? ?? nullptr);
+        newPort,
+        stateDir.path.toNativeUtf8() as Pointer<Char>,
+        cacheDir.path.toNativeUtf8() as Pointer<Char>,
+        obfs4Port ?? -1,
+        snowflakePort ?? -1,
+        bridgeLines?.toNativeUtf8() as Pointer<Char>? ?? nullptr,
+      );
 
       // Throw an exception if the Tor service fails to start.
       if (tor.client == nullptr) {
@@ -190,24 +198,30 @@ class Tor {
     broadcastState();
   }
 
-  Future<void> reconfigure(
-      {int? obfs4Port, int? snowflakePort, String? bridgeLines}) async {
+  Future<void> reconfigure({
+    int? obfs4Port,
+    int? snowflakePort,
+    String? bridgeLines,
+  }) async {
     final lib = rust.NativeLibrary(_lib);
 
     // Set the state and cache directories.
     final Directory appSupportDir = await getApplicationSupportDirectory();
-    final stateDir =
-        await Directory('${appSupportDir.path}/tor_state').create();
-    final cacheDir =
-        await Directory('${appSupportDir.path}/tor_cache').create();
+    final stateDir = await Directory(
+      '${appSupportDir.path}/tor_state',
+    ).create();
+    final cacheDir = await Directory(
+      '${appSupportDir.path}/tor_cache',
+    ).create();
 
     final reconfigured = lib.tor_reconfigure(
-        _clientPtr,
-        stateDir.path.toNativeUtf8() as Pointer<Char>,
-        cacheDir.path.toNativeUtf8() as Pointer<Char>,
-        obfs4Port ?? -1,
-        snowflakePort ?? -1,
-        bridgeLines?.toNativeUtf8() as Pointer<Char>? ?? nullptr);
+      _clientPtr,
+      stateDir.path.toNativeUtf8() as Pointer<Char>,
+      cacheDir.path.toNativeUtf8() as Pointer<Char>,
+      obfs4Port ?? -1,
+      snowflakePort ?? -1,
+      bridgeLines?.toNativeUtf8() as Pointer<Char>? ?? nullptr,
+    );
 
     if (!reconfigured) {
       throwRustException(lib);
@@ -270,25 +284,29 @@ class Tor {
 
   Future<void> isReady() async {
     return await Future.doWhile(
-        () => Future.delayed(const Duration(seconds: 1)).then((_) {
-              // We are waiting and making absolutely no request unless:
-              // Tor is disabled
-              if (!enabled) {
-                return false;
-              }
+      () => Future.delayed(const Duration(seconds: 1)).then((_) {
+        // We are waiting and making absolutely no request unless:
+        // Tor is disabled
+        if (!enabled) {
+          return false;
+        }
 
-              // ...or Tor circuit is established
-              if (bootstrapped) {
-                return false;
-              }
+        // ...or Tor circuit is established
+        if (bootstrapped) {
+          return false;
+        }
 
-              // This way we avoid making clearnet req's while Tor is initialising
-              return true;
-            }));
+        // This way we avoid making clearnet req's while Tor is initialising
+        return true;
+      }),
+    );
   }
 
-  static throwRustException(rust.NativeLibrary lib) {
-    String rustError = lib.tor_last_error_message().cast<Utf8>().toDartString();
+  static void throwRustException(rust.NativeLibrary lib) {
+    final String rustError = lib
+        .tor_last_error_message()
+        .cast<Utf8>()
+        .toDartString();
 
     throw _getRustException(rustError);
   }

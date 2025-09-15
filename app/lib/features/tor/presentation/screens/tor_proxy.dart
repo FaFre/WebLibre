@@ -258,8 +258,8 @@ class TorProxyScreen extends HookConsumerWidget {
                             left: 56,
                             right: 24,
                           ),
-                          title: Text('Direct Connection'),
-                          subtitle: Text(
+                          title: const Text('Direct Connection'),
+                          subtitle: const Text(
                             'The best way to connect to Tor if Tor is not blocked',
                           ),
                         ),
@@ -285,8 +285,8 @@ class TorProxyScreen extends HookConsumerWidget {
                             left: 56,
                             right: 24,
                           ),
-                          title: Text('obfs4'),
-                          subtitle: Text(
+                          title: const Text('obfs4'),
+                          subtitle: const Text(
                             'Suitable for light censorship and high bandwidth needs',
                           ),
                         ),
@@ -312,8 +312,8 @@ class TorProxyScreen extends HookConsumerWidget {
                             left: 56,
                             right: 24,
                           ),
-                          title: Text('Snowflake'),
-                          subtitle: Text('Suitable for heavy censorship'),
+                          title: const Text('Snowflake'),
+                          subtitle: const Text('Suitable for heavy censorship'),
                         ),
                       ),
                       CheckboxListTile.adaptive(
