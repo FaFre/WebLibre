@@ -40,7 +40,7 @@ Uri? tryParseUrl(String? input, {bool eagerParsing = false}) {
           if (_domainRegex.hasMatch(firstSegment)) {
             uri = Uri.tryParse('https://$input')?.replace(port: port);
           } else if (firstSegment == 'localhost') {
-            uri = Uri.tryParse('https://$input')?.replace(port: port);
+            uri = Uri.tryParse('http://$input')?.replace(port: port);
           } else if (InternetAddress.tryParse(firstSegment) != null) {
             uri = Uri.tryParse('https://$input')?.replace(port: port);
           }
