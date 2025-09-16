@@ -50,6 +50,10 @@ class OpenSharedContent extends HookConsumerWidget {
               container: Value(selectedContainer.value),
               launchedFromIntent: true,
             );
+
+        if (context.mounted) {
+          context.pop();
+        }
       }
     }
 
@@ -83,11 +87,7 @@ class OpenSharedContent extends HookConsumerWidget {
               minLines: 1,
               maxLines: 10,
               validator: (value) {
-                return validateUrl(
-                  value,
-                  onlyHttpProtocol: true,
-                  eagerParsing: false,
-                );
+                return validateUrl(value, eagerParsing: false);
               },
             ),
           ),
@@ -96,9 +96,6 @@ class OpenSharedContent extends HookConsumerWidget {
             leading: const Icon(MdiIcons.tab),
             onTap: () async {
               await openTab(false);
-              if (context.mounted) {
-                context.pop();
-              }
             },
           ),
           ListTile(
@@ -106,9 +103,6 @@ class OpenSharedContent extends HookConsumerWidget {
             leading: const Icon(MdiIcons.tabUnselected),
             onTap: () async {
               await openTab(true);
-              if (context.mounted) {
-                context.pop();
-              }
             },
           ),
         ],
