@@ -1,3 +1,18 @@
+## 0.9.23
+### GeckoView 142.0.1
+
+**New Features**
+- Added Tor Bridge support with automatic configuration and bridge updates
+- Added setting to display dialog for choosing external link handling behavior
+
+**Bug Fixes**
+- Fixed media upload issues on websites
+- Fixed hardening settings UI display problems
+
+**Improvements**
+- Enhanced bottom sheet user interface
+- Improved URI parsing and protocol detection for address bar input
+
 ## 0.9.22
 ### GeckoView 142.0
 
