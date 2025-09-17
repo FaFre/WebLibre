@@ -267,6 +267,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     persistentStorage = SitePermissionsRules.Action.ASK_TO_ALLOW,
                     mediaKeySystemAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
                     crossOriginStorageAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                    localDeviceAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                    localNetworkAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
                 ),
                 onNeedToRequestPermissions = { permissions ->
                     requestSitePermissionsLauncher.launch(permissions)
