@@ -1,0 +1,3 @@
+GeckoView 143.0.0
+
+* Upgraded GeckoView
