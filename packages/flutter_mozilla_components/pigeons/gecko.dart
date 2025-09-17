@@ -382,6 +382,36 @@ class Cookie {
   );
 }
 
+enum VisitType {
+  link,
+  typed,
+  bookmark,
+  embed,
+  redirectPermanent,
+  redirectTemporary,
+  download,
+  framedLink,
+  reload,
+}
+
+class VisitInfo {
+  final String url;
+  final String? title;
+  final int visitTime;
+  final VisitType visitType;
+  final String? previewImageUrl;
+  final bool isRemote;
+
+  VisitInfo(
+    this.url,
+    this.title,
+    this.visitTime,
+    this.visitType,
+    this.previewImageUrl,
+    this.isRemote,
+  );
+}
+
 class HistoryItem {
   final String url;
   final String title;
@@ -1185,6 +1215,16 @@ abstract class GeckoDeleteBrowsingDataController {
   void deleteSitePermissions();
   @async
   void deleteDownloads();
+}
+
+@HostApi()
+abstract class GeckoHistoryApi {
+  @async
+  List<VisitInfo> getDetailedVisits(
+    int startMillis,
+    int endMillis,
+    List<VisitType> excludeTypes,
+  );
 }
 
 @HostApi()

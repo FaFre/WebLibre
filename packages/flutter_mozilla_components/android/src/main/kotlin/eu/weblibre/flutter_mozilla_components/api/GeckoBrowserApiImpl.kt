@@ -27,6 +27,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataCon
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDownloadsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFindApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoIconsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
@@ -214,6 +215,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoDeleteBrowsingDataController.setUp(_flutterPluginBinding.binaryMessenger, GeckoDeleteBrowsingDataControllerImpl())
         GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl())
         GeckoBrowserExtensionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoBrowserExtensionApiImpl())
+        GeckoHistoryApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoHistoryApiImpl())
 
         ReaderViewEvents.setUp(
             _flutterPluginBinding.binaryMessenger,

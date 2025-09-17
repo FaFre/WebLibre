@@ -17,6 +17,7 @@ export 'src/domain/services/gecko_downloads.dart';
 export 'src/domain/services/gecko_engine_settings.dart';
 export 'src/domain/services/gecko_event.dart';
 export 'src/domain/services/gecko_find_in_page.dart';
+export 'src/domain/services/gecko_history.dart';
 export 'src/domain/services/gecko_icon.dart';
 export 'src/domain/services/gecko_logging.dart';
 export 'src/domain/services/gecko_ml.dart';
@@ -59,6 +60,8 @@ export 'src/pigeons/gecko.g.dart'
         TrackingProtectionPolicy,
         UnknownHitResult,
         VideoHitResult,
+        VisitInfo,
+        VisitType,
         WebContentIsolationStrategy,
         WebExtensionActionType,
         WebExtensionData;
