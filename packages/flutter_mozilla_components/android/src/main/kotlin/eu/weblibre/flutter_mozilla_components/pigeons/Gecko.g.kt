@@ -167,14 +167,33 @@ enum class CookieSameSiteStatus(val raw: Int) {
 }
 
 enum class VisitType(val raw: Int) {
+  /** The user followed a link and got a new toplevel window. */
   LINK(0),
+  /**
+   * The user typed the page's URL in the URL bar or selected it from
+   * URL bar autocomplete results, clicked on it from a history query
+   * (from the History sidebar, History menu, or history query in the
+   * personal toolbar or Places organizer.
+   */
   TYPED(1),
+  /** The user followed a bookmark to get to the page. */
   BOOKMARK(2),
+  /**
+   * Some inner content is loaded. This is true of all images on a
+   * page, and the contents of the iframe. It is also true of any
+   * content in a frame if the user did not explicitly follow a link
+   * to get there.
+   */
   EMBED(3),
+  /** Set when the transition was a permanent redirect. */
   REDIRECT_PERMANENT(4),
+  /** Set when the transition was a temporary redirect. */
   REDIRECT_TEMPORARY(5),
+  /** Set when the transition is a download. */
   DOWNLOAD(6),
+  /** The user followed a link and got a visit in a frame. */
   FRAMED_LINK(7),
+  /** The user reloaded a page. */
   RELOAD(8);
 
   companion object {

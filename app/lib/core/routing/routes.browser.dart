@@ -28,6 +28,7 @@ part of 'routes.dart';
       path: 'search/:tabType/:searchText',
     ),
     TypedGoRoute<TorProxyRoute>(name: 'TorProxyRoute', path: 'tor_proxy'),
+    TypedGoRoute<HistoryRoute>(name: 'HistoryRoute', path: 'history'),
     TypedGoRoute<ContextMenuRoute>(
       name: 'ContextMenuRoute',
       path: 'context_menu',
@@ -176,5 +177,12 @@ class OpenSharedContentRoute extends GoRouteData with _$OpenSharedContentRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => OpenSharedContent(sharedUrl: $extra));
+  }
+}
+
+class HistoryRoute extends GoRouteData with _$HistoryRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const HistoryScreen();
   }
 }

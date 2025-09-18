@@ -257,6 +257,13 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   leadingIcon: const Icon(Icons.settings),
                   child: const Text('Settings'),
                 ),
+                MenuItemButton(
+                  onPressed: () async {
+                    await HistoryRoute().push(context);
+                  },
+                  leadingIcon: const Icon(Icons.history),
+                  child: const Text('History'),
+                ),
                 Consumer(
                   builder: (context, childRef, child) {
                     final browserExtensions = childRef.watch(

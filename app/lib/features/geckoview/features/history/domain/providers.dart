@@ -20,16 +20,38 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 
 part 'providers.g.dart';
 
+@Riverpod(keepAlive: true)
+class HistoryFilter extends _$HistoryFilter {
+  void updateVisitType(VisitType type, bool value) {
+    if (value) {
+      state = state.copyWith.visitTypes({...state.visitTypes, type});
+    } else {
+      state = state.copyWith.visitTypes({...state.visitTypes}..remove(type));
+    }
+  }
+
+  @override
+  HistoryFilterOptions build() {
+    return HistoryFilterOptions.withDefaults();
+  }
+}
+
 @Riverpod()
-Future<List<VisitInfo>> browsingHistory(
-  Ref red, {
-  required DateTime start,
-  required DateTime end,
-  required Set<VisitType> types,
-}) {
+Future<List<VisitInfo>> browsingHistory(Ref ref) {
+  final options = ref.watch(historyFilterProvider);
+
   final service = GeckoHistoryService();
-  return service.getDetailedVisits(start, end, types);
+  return service
+      .getDetailedVisits(
+        options.start ?? DateTime(0),
+        options.end ?? DateTime(9999),
+        options.visitTypes,
+      )
+      .then(
+        (visits) => visits..sort((a, b) => b.visitTime.compareTo(a.visitTime)),
+      );
 }

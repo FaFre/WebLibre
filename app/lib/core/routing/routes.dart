@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/dialog
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/browser.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/context_menu_dialog.dart';
+import 'package:weblibre/features/geckoview/features/history/presentation/screens/history.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/screens/search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';

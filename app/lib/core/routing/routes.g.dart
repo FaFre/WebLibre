@@ -296,6 +296,12 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: _$TorProxyRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'history',
+      name: 'HistoryRoute',
+
+      factory: _$HistoryRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'context_menu',
       name: 'ContextMenuRoute',
 
@@ -404,6 +410,26 @@ mixin _$TorProxyRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/tor_proxy');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$HistoryRoute on GoRouteData {
+  static HistoryRoute _fromState(GoRouterState state) => HistoryRoute();
+
+  @override
+  String get location => GoRouteData.$location('/history');
 
   @override
   void go(BuildContext context) => context.go(location);

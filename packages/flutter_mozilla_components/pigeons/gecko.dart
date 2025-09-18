@@ -383,14 +383,37 @@ class Cookie {
 }
 
 enum VisitType {
+  /// The user followed a link and got a new toplevel window.
   link,
+
+  /// The user typed the page's URL in the URL bar or selected it from
+  /// URL bar autocomplete results, clicked on it from a history query
+  /// (from the History sidebar, History menu, or history query in the
+  /// personal toolbar or Places organizer.
   typed,
+
+  /// The user followed a bookmark to get to the page.
   bookmark,
+
+  /// Some inner content is loaded. This is true of all images on a
+  /// page, and the contents of the iframe. It is also true of any
+  /// content in a frame if the user did not explicitly follow a link
+  /// to get there.
   embed,
+
+  /// Set when the transition was a permanent redirect.
   redirectPermanent,
+
+  /// Set when the transition was a temporary redirect.
   redirectTemporary,
+
+  /// Set when the transition is a download.
   download,
+
+  /// The user followed a link and got a visit in a frame.
   framedLink,
+
+  /// The user reloaded a page.
   reload,
 }
 
