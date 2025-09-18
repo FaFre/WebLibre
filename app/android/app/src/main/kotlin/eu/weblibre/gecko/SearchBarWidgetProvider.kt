@@ -1,47 +1,79 @@
-/*
- * Copyright (c) 2024-2025 Fabian Freund.
- *
- * This file is part of WebLibre
- * (see https://weblibre.eu).
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 package eu.weblibre.gecko
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import android.content.SharedPreferences
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.view.View
-import android.widget.RemoteViews
-import es.antonborri.home_widget.HomeWidgetBackgroundIntent
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.padding
+import androidx.glance.layout.wrapContentHeight
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
-import es.antonborri.home_widget.HomeWidgetProvider
+import android.net.Uri
+import es.antonborri.home_widget.actionStartActivity
+import androidx.core.net.toUri
 
-class SearchBarWidgetProvider : HomeWidgetProvider() {
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, widgetData: SharedPreferences) {
-        appWidgetIds.forEach { widgetId ->
-            val views = RemoteViews(context.packageName, R.layout.search_bar_widget).apply {
-                val searchIntent = HomeWidgetLaunchIntent.getActivity(
-                        context,
-                        MainActivity::class.java,
-                        Uri.parse("widget://search"))
-                setOnClickPendingIntent(R.id.search_button, searchIntent)
-            }
+class SearchBarGlanceWidget : GlanceAppWidget() {
 
-            appWidgetManager.updateAppWidget(widgetId, views)
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent {
+            SearchBarContent(context)
         }
     }
+}
+
+@Composable
+private fun SearchBarContent(context: Context) {
+    Row(
+        modifier = GlanceModifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .background(ImageProvider(R.drawable.search_text_field))
+            .padding(12.dp)
+            .clickable(onClick = actionStartActivity<MainActivity>(context,
+                "widget://search".toUri())),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Start icon
+        Image(
+            provider = ImageProvider(R.drawable.icon_with_size),
+            contentDescription = "Search icon",
+            modifier = GlanceModifier.padding(end = 8.dp)
+        )
+
+        // Search text
+        Text(
+            text = "Search with WebLibre...",
+            style = TextStyle(
+                color = ColorProvider(Color(0xFF848388)),
+                fontSize = 16.sp
+            ),
+            modifier = GlanceModifier.defaultWeight()
+        )
+
+        // End icon (microphone)
+        Image(
+            provider = ImageProvider(R.drawable.mdi_icon_microphone_tint),
+            contentDescription = "Microphone icon",
+            modifier = GlanceModifier.padding(start = 8.dp)
+        )
+    }
+}
+
+class SearchBarWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = SearchBarGlanceWidget()
 }

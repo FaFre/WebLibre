@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -39,6 +40,8 @@ final _contentParserTransformer =
 
         if (parsed != null) {
           sink.add(parsed);
+        } else if (parameter.tool == 'search') {
+          sink.add(SharedText(SearchRoute.emptySearchText));
         }
       },
     );
