@@ -1,3 +1,8 @@
+## 0.9.24
+### GeckoView 143.0.0
+
+* Upgraded GeckoView
+
 ## 0.9.23
 ### GeckoView 142.0.1
 

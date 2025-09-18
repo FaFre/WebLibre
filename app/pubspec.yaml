@@ -2,7 +2,7 @@ name: weblibre
 description: "The Privacy-Focused & AI-Powered Research Browser"
 publish_to: 'none'
 resolution: workspace
-version: 0.9.23+27
+version: 0.9.24+28
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
@@ -91,7 +91,6 @@ dependency_overrides:
   url_launcher_android: 6.3.17
 
 dev_dependencies:
-  analyzer_plugin: ^0.13.4
   build_runner: ^2.4.15
   copy_with_extension_gen: ^6.0.1
   custom_lint: ^0.7.6

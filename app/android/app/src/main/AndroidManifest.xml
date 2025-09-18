@@ -62,6 +62,7 @@
         
         <activity
             android:name=".MainActivity"
+            android:label="WebLibre"
             android:exported="true"
             android:launchMode="singleTask"
             android:taskAffinity="eu.weblibre.gecko.task"
@@ -88,7 +89,7 @@
             </intent-filter>
 
             <intent-filter>
-                <action android:name="eu.weblibre.gecko.action.LAUNCH" />
+                <action android:name="es.antonborri.home_widget.action.LAUNCH" />
             </intent-filter>
 
             <intent-filter>
@@ -134,6 +135,12 @@
             </intent-filter>
 
             <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
                 <action android:name="android.intent.action.WEB_SEARCH" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -176,32 +183,17 @@
             android:label="@string/mozac_feature_addons_addons"
             android:theme="@style/Theme.AppCompat.Light"/>
 
-        <receiver android:name="FullWidgetProvider" android:exported="true">
+        <receiver
+            android:name=".SearchBarWidgetReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider"
-                android:resource="@xml/full_widget_info"/>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/search_bar_widget_info" />
         </receiver>
 
-        <receiver android:name="CompactWidgetProvider" android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-
-            </intent-filter>
-            <meta-data android:name="android.appwidget.provider"
-                android:resource="@xml/compact_widget_info"/>
-        </receiver>
-
-        <receiver android:name="SearchBarWidgetProvider" android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-
-            </intent-filter>
-            <meta-data android:name="android.appwidget.provider"
-                android:resource="@xml/search_bar_widget_info"/>
-        </receiver>
 
         <service
             android:name="eu.weblibre.flutter_mozilla_components.services.CustomTabsService"

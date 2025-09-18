@@ -101,7 +101,7 @@ class MainApp extends HookConsumerWidget {
                     searchText: sharedContent.text,
                     $extra: true, //launched from intent
                   );
-                  await router.push(route.location);
+                  await router.push(route.location, extra: route.$extra);
               }
           }
         });
