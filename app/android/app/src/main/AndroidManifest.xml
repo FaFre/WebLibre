@@ -62,6 +62,7 @@
         
         <activity
             android:name=".MainActivity"
+            android:label="WebLibre"
             android:exported="true"
             android:launchMode="singleTask"
             android:taskAffinity="eu.weblibre.gecko.task"
@@ -131,6 +132,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:mimeType="application/pdf" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
 
             <intent-filter>

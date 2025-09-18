@@ -35,6 +35,8 @@ final _sharingIntentTransformer =
     StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
       handleData: (intent, sink) async {
         final data = switch (intent.action) {
+          'android.intent.action.PROCESS_TEXT' =>
+            intent.extra['android.intent.extra.PROCESS_TEXT'] as String?,
           'android.intent.action.WEB_SEARCH' =>
             intent.extra['query'] as String?,
           'android.intent.action.VIEW' => intent.data,
