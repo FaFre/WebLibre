@@ -18,14 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:weblibre/features/web_feed/data/database/daos/article.drift.dart';
 import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article_query_result.dart';
 
-part 'article.g.dart';
-
 @DriftAccessor()
-class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
+class ArticleDao extends DatabaseAccessor<FeedDatabase> with $ArticleDaoMixin {
   ArticleDao(super.attachedDatabase);
 
   Selectable<FeedArticle> getFeedArticles(Uri? url) {
@@ -152,7 +152,7 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
     final ftsQuery = db.buildFtsQuery(searchString);
 
     if (ftsQuery.isNotEmpty) {
-      return db.queryArticlesFullContent(
+      return db.definitionsDrift.queryArticlesFullContent(
         feedId: feedId?.toString(),
         query: ftsQuery,
         snippetLength: snippetLength,
@@ -161,7 +161,7 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with _$ArticleDaoMixin {
         ellipsis: ellipsis,
       );
     } else {
-      return db.queryArticlesBasic(
+      return db.definitionsDrift.queryArticlesBasic(
         feedId: feedId?.toString(),
         query: db.buildLikeQuery(searchString),
       );

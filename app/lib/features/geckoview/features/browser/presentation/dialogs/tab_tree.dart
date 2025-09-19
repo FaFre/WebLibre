@@ -102,7 +102,7 @@ class TabTreeDialog extends HookConsumerWidget {
       final graph = Graph()..isTree = true;
 
       if (tabs.hasValue) {
-        for (final MapEntry(:key, :value) in tabs.valueOrNull!.entries) {
+        for (final MapEntry(:key, :value) in tabs.value!.entries) {
           if (value != null) {
             final current = Node.Id(key);
             final parent = Node.Id(value);
@@ -113,7 +113,7 @@ class TabTreeDialog extends HookConsumerWidget {
       }
 
       return graph;
-    }, [EquatableValue(tabs.valueOrNull), selectedTabId]);
+    }, [EquatableValue(tabs.value), selectedTabId]);
 
     final graphAlgo = useMemoized(() {
       final config = BuchheimWalkerConfiguration()
@@ -168,7 +168,7 @@ class TabTreeDialog extends HookConsumerWidget {
           minScale: 0.1,
           maxScale: 5.0,
           child: Skeletonizer(
-            enabled: !tabs.hasValue || tabs.valueOrNull?.isEmpty == true,
+            enabled: !tabs.hasValue || tabs.value?.isEmpty == true,
             child: Skeleton.replace(
               replacement: const Bone.square(),
               child: GraphView(

@@ -49,9 +49,7 @@ class TabSearch extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedContainer = useState<ContainerData?>(
-      ref.read(
-        selectedContainerDataProvider.select((value) => value.valueOrNull),
-      ),
+      ref.read(selectedContainerDataProvider.select((value) => value.value)),
     );
 
     final tabs = ref

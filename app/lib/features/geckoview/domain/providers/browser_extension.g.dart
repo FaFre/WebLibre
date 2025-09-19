@@ -6,41 +6,86 @@ part of 'browser_extension.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(browserExtensionService)
+const browserExtensionServiceProvider = BrowserExtensionServiceProvider._();
+
+final class BrowserExtensionServiceProvider
+    extends
+        $FunctionalProvider<
+          GeckoBrowserExtensionService,
+          GeckoBrowserExtensionService,
+          GeckoBrowserExtensionService
+        >
+    with $Provider<GeckoBrowserExtensionService> {
+  const BrowserExtensionServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'browserExtensionServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$browserExtensionServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeckoBrowserExtensionService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GeckoBrowserExtensionService create(Ref ref) {
+    return browserExtensionService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeckoBrowserExtensionService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeckoBrowserExtensionService>(value),
+    );
+  }
+}
+
 String _$browserExtensionServiceHash() =>
     r'c3f67763e0abb10039b407fced6e175e5ec7c6c3';
 
-/// See also [browserExtensionService].
-@ProviderFor(browserExtensionService)
-final browserExtensionServiceProvider =
-    Provider<GeckoBrowserExtensionService>.internal(
-      browserExtensionService,
-      name: r'browserExtensionServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$browserExtensionServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BrowserExtensionServiceRef = ProviderRef<GeckoBrowserExtensionService>;
-String _$feedRequestedHash() => r'4f179d0878072a77a87422ff6afdac53a3d57c04';
-
-/// See also [feedRequested].
 @ProviderFor(feedRequested)
-final feedRequestedProvider = AutoDisposeStreamProvider<String>.internal(
-  feedRequested,
-  name: r'feedRequestedProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$feedRequestedHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const feedRequestedProvider = FeedRequestedProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FeedRequestedRef = AutoDisposeStreamProviderRef<String>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class FeedRequestedProvider
+    extends $FunctionalProvider<AsyncValue<String>, String, Stream<String>>
+    with $FutureModifier<String>, $StreamProvider<String> {
+  const FeedRequestedProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'feedRequestedProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$feedRequestedHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<String> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<String> create(Ref ref) {
+    return feedRequested(ref);
+  }
+}
+
+String _$feedRequestedHash() => r'4f179d0878072a77a87422ff6afdac53a3d57c04';

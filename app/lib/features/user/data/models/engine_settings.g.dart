@@ -51,12 +51,13 @@ abstract class _$EngineSettingsCWProxy {
     BounceTrackingProtectionMode bounceTrackingProtectionMode,
   );
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// EngineSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   EngineSettings call({
     bool? javascriptEnabled,
     TrackingProtectionPolicy? trackingProtectionPolicy,
@@ -75,7 +76,8 @@ abstract class _$EngineSettingsCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfEngineSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfEngineSettings.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfEngineSettings.copyWith(...)` or call `instanceOfEngineSettings.copyWith.fieldName(value)` for a single field.
 class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   const _$EngineSettingsCWProxyImpl(this._value);
 
@@ -83,35 +85,35 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
 
   @override
   EngineSettings javascriptEnabled(bool? javascriptEnabled) =>
-      this(javascriptEnabled: javascriptEnabled);
+      call(javascriptEnabled: javascriptEnabled);
 
   @override
   EngineSettings trackingProtectionPolicy(
     TrackingProtectionPolicy? trackingProtectionPolicy,
-  ) => this(trackingProtectionPolicy: trackingProtectionPolicy);
+  ) => call(trackingProtectionPolicy: trackingProtectionPolicy);
 
   @override
   EngineSettings httpsOnlyMode(HttpsOnlyMode? httpsOnlyMode) =>
-      this(httpsOnlyMode: httpsOnlyMode);
+      call(httpsOnlyMode: httpsOnlyMode);
 
   @override
   EngineSettings globalPrivacyControlEnabled(
     bool? globalPrivacyControlEnabled,
-  ) => this(globalPrivacyControlEnabled: globalPrivacyControlEnabled);
+  ) => call(globalPrivacyControlEnabled: globalPrivacyControlEnabled);
 
   @override
   EngineSettings preferredColorScheme(ColorScheme? preferredColorScheme) =>
-      this(preferredColorScheme: preferredColorScheme);
+      call(preferredColorScheme: preferredColorScheme);
 
   @override
   EngineSettings cookieBannerHandlingMode(
     CookieBannerHandlingMode? cookieBannerHandlingMode,
-  ) => this(cookieBannerHandlingMode: cookieBannerHandlingMode);
+  ) => call(cookieBannerHandlingMode: cookieBannerHandlingMode);
 
   @override
   EngineSettings cookieBannerHandlingModePrivateBrowsing(
     CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing,
-  ) => this(
+  ) => call(
     cookieBannerHandlingModePrivateBrowsing:
         cookieBannerHandlingModePrivateBrowsing,
   );
@@ -119,12 +121,12 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings cookieBannerHandlingGlobalRules(
     bool? cookieBannerHandlingGlobalRules,
-  ) => this(cookieBannerHandlingGlobalRules: cookieBannerHandlingGlobalRules);
+  ) => call(cookieBannerHandlingGlobalRules: cookieBannerHandlingGlobalRules);
 
   @override
   EngineSettings cookieBannerHandlingGlobalRulesSubFrames(
     bool? cookieBannerHandlingGlobalRulesSubFrames,
-  ) => this(
+  ) => call(
     cookieBannerHandlingGlobalRulesSubFrames:
         cookieBannerHandlingGlobalRulesSubFrames,
   );
@@ -132,32 +134,33 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings webContentIsolationStrategy(
     WebContentIsolationStrategy? webContentIsolationStrategy,
-  ) => this(webContentIsolationStrategy: webContentIsolationStrategy);
+  ) => call(webContentIsolationStrategy: webContentIsolationStrategy);
 
   @override
-  EngineSettings userAgent(String? userAgent) => this(userAgent: userAgent);
+  EngineSettings userAgent(String? userAgent) => call(userAgent: userAgent);
 
   @override
   EngineSettings enterpriseRootsEnabled(bool? enterpriseRootsEnabled) =>
-      this(enterpriseRootsEnabled: enterpriseRootsEnabled);
+      call(enterpriseRootsEnabled: enterpriseRootsEnabled);
 
   @override
   EngineSettings queryParameterStripping(
     QueryParameterStripping queryParameterStripping,
-  ) => this(queryParameterStripping: queryParameterStripping);
+  ) => call(queryParameterStripping: queryParameterStripping);
 
   @override
   EngineSettings bounceTrackingProtectionMode(
     BounceTrackingProtectionMode bounceTrackingProtectionMode,
-  ) => this(bounceTrackingProtectionMode: bounceTrackingProtectionMode);
+  ) => call(bounceTrackingProtectionMode: bounceTrackingProtectionMode);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `EngineSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// EngineSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   EngineSettings call({
     Object? javascriptEnabled = const $CopyWithPlaceholder(),
     Object? trackingProtectionPolicy = const $CopyWithPlaceholder(),
@@ -237,12 +240,14 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : enterpriseRootsEnabled as bool?,
       queryParameterStripping:
-          queryParameterStripping == const $CopyWithPlaceholder()
+          queryParameterStripping == const $CopyWithPlaceholder() ||
+              queryParameterStripping == null
           ? _value.queryParameterStripping
           // ignore: cast_nullable_to_non_nullable
           : queryParameterStripping as QueryParameterStripping,
       bounceTrackingProtectionMode:
-          bounceTrackingProtectionMode == const $CopyWithPlaceholder()
+          bounceTrackingProtectionMode == const $CopyWithPlaceholder() ||
+              bounceTrackingProtectionMode == null
           ? _value.bounceTrackingProtectionMode
           // ignore: cast_nullable_to_non_nullable
           : bounceTrackingProtectionMode as BounceTrackingProtectionMode,
@@ -251,7 +256,8 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
 }
 
 extension $EngineSettingsCopyWith on EngineSettings {
-  /// Returns a callable class that can be used as follows: `instanceOfEngineSettings.copyWith(...)` or like so:`instanceOfEngineSettings.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfEngineSettings.copyWith(...)` or `instanceOfEngineSettings.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$EngineSettingsCWProxy get copyWith => _$EngineSettingsCWProxyImpl(this);
 }

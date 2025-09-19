@@ -6,25 +6,59 @@ part of 'fetch_articles.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(FetchArticlesController)
+const fetchArticlesControllerProvider = FetchArticlesControllerProvider._();
+
+final class FetchArticlesControllerProvider
+    extends $NotifierProvider<FetchArticlesController, AsyncValue<void>> {
+  const FetchArticlesControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'fetchArticlesControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$fetchArticlesControllerHash();
+
+  @$internal
+  @override
+  FetchArticlesController create() => FetchArticlesController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>>(value),
+    );
+  }
+}
+
 String _$fetchArticlesControllerHash() =>
     r'7604d9352da886624c3cf6862b89c397edda1f28';
 
-/// See also [FetchArticlesController].
-@ProviderFor(FetchArticlesController)
-final fetchArticlesControllerProvider =
-    AutoDisposeNotifierProvider<
-      FetchArticlesController,
-      AsyncValue<void>
-    >.internal(
-      FetchArticlesController.new,
-      name: r'fetchArticlesControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$fetchArticlesControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$FetchArticlesController = AutoDisposeNotifier<AsyncValue<void>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$FetchArticlesController extends $Notifier<AsyncValue<void>> {
+  AsyncValue<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, AsyncValue<void>>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

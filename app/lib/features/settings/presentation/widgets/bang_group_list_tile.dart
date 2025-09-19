@@ -41,11 +41,11 @@ class BangGroupListTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lastSync = ref.watch(
-      lastSyncOfGroupProvider(group).select((value) => value.valueOrNull),
+      lastSyncOfGroupProvider(group).select((value) => value.value),
     );
 
     final count = ref.watch(
-      bangCountOfGroupProvider(group).select((value) => value.valueOrNull),
+      bangCountOfGroupProvider(group).select((value) => value.value),
     );
 
     return CustomListTile(

@@ -72,7 +72,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   Future<void> _timerTick(Timer timer) async {
     await ref
-        .read(selectedTabSessionNotifierProvider)
+        .read(selectedTabSessionProvider)
         .requestScreenshot(requireImageResult: false)
         .onError((error, stackTrace) {
           logger.e(error, stackTrace: stackTrace);
@@ -129,7 +129,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     );
 
     ref.listen(feedRequestedProvider, (previous, next) async {
-      if (next.valueOrNull.mapNotNull(Uri.tryParse) case final Uri url) {
+      if (next.value.mapNotNull(Uri.tryParse) case final Uri url) {
         if (GoRouterState.of(context).topRoute?.name != FeedAddRoute.name) {
           if (ref.read(addFeedDialogBlockingProvider.notifier).canPush(url)) {
             await FeedAddRoute($extra: url).push(context);

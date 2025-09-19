@@ -12,7 +12,7 @@ workspace:
   - packages/tor
   - packages/tor/example
 dev_dependencies:
-  melos: ^7.1.0
+  melos: ^7.1.1
 
 melos:
   name: weblibre_project

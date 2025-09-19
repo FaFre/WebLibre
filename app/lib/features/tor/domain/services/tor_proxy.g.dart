@@ -6,21 +6,50 @@ part of 'tor_proxy.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(TorProxyService)
+const torProxyServiceProvider = TorProxyServiceProvider._();
+
+final class TorProxyServiceProvider
+    extends $AsyncNotifierProvider<TorProxyService, int?> {
+  const TorProxyServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'torProxyServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$torProxyServiceHash();
+
+  @$internal
+  @override
+  TorProxyService create() => TorProxyService();
+}
+
 String _$torProxyServiceHash() => r'82b4964ddf14d02893ebbea3b25d91216359ba10';
 
-/// See also [TorProxyService].
-@ProviderFor(TorProxyService)
-final torProxyServiceProvider =
-    AsyncNotifierProvider<TorProxyService, int?>.internal(
-      TorProxyService.new,
-      name: r'torProxyServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$torProxyServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$TorProxyService = AsyncNotifier<int?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$TorProxyService extends $AsyncNotifier<int?> {
+  FutureOr<int?> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<int?>, int?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<int?>, int?>,
+              AsyncValue<int?>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

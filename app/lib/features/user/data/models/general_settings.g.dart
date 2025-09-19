@@ -41,12 +41,13 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// GeneralSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   GeneralSettings call({
     ThemeMode themeMode,
     bool enableReadability,
@@ -65,77 +66,79 @@ abstract class _$GeneralSettingsCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfGeneralSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfGeneralSettings.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfGeneralSettings.copyWith(...)` or call `instanceOfGeneralSettings.copyWith.fieldName(value)` for a single field.
 class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   const _$GeneralSettingsCWProxyImpl(this._value);
 
   final GeneralSettings _value;
 
   @override
-  GeneralSettings themeMode(ThemeMode themeMode) => this(themeMode: themeMode);
+  GeneralSettings themeMode(ThemeMode themeMode) => call(themeMode: themeMode);
 
   @override
   GeneralSettings enableReadability(bool enableReadability) =>
-      this(enableReadability: enableReadability);
+      call(enableReadability: enableReadability);
 
   @override
   GeneralSettings enforceReadability(bool enforceReadability) =>
-      this(enforceReadability: enforceReadability);
+      call(enforceReadability: enforceReadability);
 
   @override
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
-  ) => this(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
+  ) => call(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
 
   @override
   GeneralSettings defaultSearchProvider(String defaultSearchProvider) =>
-      this(defaultSearchProvider: defaultSearchProvider);
+      call(defaultSearchProvider: defaultSearchProvider);
 
   @override
   GeneralSettings defaultSearchSuggestionsProvider(
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
-  ) => this(defaultSearchSuggestionsProvider: defaultSearchSuggestionsProvider);
+  ) => call(defaultSearchSuggestionsProvider: defaultSearchSuggestionsProvider);
 
   @override
   GeneralSettings createChildTabsOption(bool createChildTabsOption) =>
-      this(createChildTabsOption: createChildTabsOption);
+      call(createChildTabsOption: createChildTabsOption);
 
   @override
   GeneralSettings showExtensionShortcut(bool showExtensionShortcut) =>
-      this(showExtensionShortcut: showExtensionShortcut);
+      call(showExtensionShortcut: showExtensionShortcut);
 
   @override
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures) =>
-      this(enableLocalAiFeatures: enableLocalAiFeatures);
+      call(enableLocalAiFeatures: enableLocalAiFeatures);
 
   @override
   GeneralSettings defaultCreateTabType(TabType defaultCreateTabType) =>
-      this(defaultCreateTabType: defaultCreateTabType);
+      call(defaultCreateTabType: defaultCreateTabType);
 
   @override
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
-  ) => this(tabIntentOpenSetting: tabIntentOpenSetting);
+  ) => call(tabIntentOpenSetting: tabIntentOpenSetting);
 
   @override
   GeneralSettings autoHideTabBar(bool autoHideTabBar) =>
-      this(autoHideTabBar: autoHideTabBar);
+      call(autoHideTabBar: autoHideTabBar);
 
   @override
   GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction) =>
-      this(tabBarSwipeAction: tabBarSwipeAction);
+      call(tabBarSwipeAction: tabBarSwipeAction);
 
   @override
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval) =>
-      this(historyAutoCleanInterval: historyAutoCleanInterval);
+      call(historyAutoCleanInterval: historyAutoCleanInterval);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// GeneralSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   GeneralSettings call({
     Object? themeMode = const $CopyWithPlaceholder(),
     Object? enableReadability = const $CopyWithPlaceholder(),
@@ -153,15 +156,19 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
-      themeMode: themeMode == const $CopyWithPlaceholder()
+      themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
           ? _value.themeMode
           // ignore: cast_nullable_to_non_nullable
           : themeMode as ThemeMode,
-      enableReadability: enableReadability == const $CopyWithPlaceholder()
+      enableReadability:
+          enableReadability == const $CopyWithPlaceholder() ||
+              enableReadability == null
           ? _value.enableReadability
           // ignore: cast_nullable_to_non_nullable
           : enableReadability as bool,
-      enforceReadability: enforceReadability == const $CopyWithPlaceholder()
+      enforceReadability:
+          enforceReadability == const $CopyWithPlaceholder() ||
+              enforceReadability == null
           ? _value.enforceReadability
           // ignore: cast_nullable_to_non_nullable
           : enforceReadability as bool,
@@ -171,48 +178,62 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
       defaultSearchProvider:
-          defaultSearchProvider == const $CopyWithPlaceholder()
+          defaultSearchProvider == const $CopyWithPlaceholder() ||
+              defaultSearchProvider == null
           ? _value.defaultSearchProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchProvider as String,
       defaultSearchSuggestionsProvider:
-          defaultSearchSuggestionsProvider == const $CopyWithPlaceholder()
+          defaultSearchSuggestionsProvider == const $CopyWithPlaceholder() ||
+              defaultSearchSuggestionsProvider == null
           ? _value.defaultSearchSuggestionsProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchSuggestionsProvider as SearchSuggestionProviders,
       createChildTabsOption:
-          createChildTabsOption == const $CopyWithPlaceholder()
+          createChildTabsOption == const $CopyWithPlaceholder() ||
+              createChildTabsOption == null
           ? _value.createChildTabsOption
           // ignore: cast_nullable_to_non_nullable
           : createChildTabsOption as bool,
       showExtensionShortcut:
-          showExtensionShortcut == const $CopyWithPlaceholder()
+          showExtensionShortcut == const $CopyWithPlaceholder() ||
+              showExtensionShortcut == null
           ? _value.showExtensionShortcut
           // ignore: cast_nullable_to_non_nullable
           : showExtensionShortcut as bool,
       enableLocalAiFeatures:
-          enableLocalAiFeatures == const $CopyWithPlaceholder()
+          enableLocalAiFeatures == const $CopyWithPlaceholder() ||
+              enableLocalAiFeatures == null
           ? _value.enableLocalAiFeatures
           // ignore: cast_nullable_to_non_nullable
           : enableLocalAiFeatures as bool,
-      defaultCreateTabType: defaultCreateTabType == const $CopyWithPlaceholder()
+      defaultCreateTabType:
+          defaultCreateTabType == const $CopyWithPlaceholder() ||
+              defaultCreateTabType == null
           ? _value.defaultCreateTabType
           // ignore: cast_nullable_to_non_nullable
           : defaultCreateTabType as TabType,
-      tabIntentOpenSetting: tabIntentOpenSetting == const $CopyWithPlaceholder()
+      tabIntentOpenSetting:
+          tabIntentOpenSetting == const $CopyWithPlaceholder() ||
+              tabIntentOpenSetting == null
           ? _value.tabIntentOpenSetting
           // ignore: cast_nullable_to_non_nullable
           : tabIntentOpenSetting as TabIntentOpenSetting,
-      autoHideTabBar: autoHideTabBar == const $CopyWithPlaceholder()
+      autoHideTabBar:
+          autoHideTabBar == const $CopyWithPlaceholder() ||
+              autoHideTabBar == null
           ? _value.autoHideTabBar
           // ignore: cast_nullable_to_non_nullable
           : autoHideTabBar as bool,
-      tabBarSwipeAction: tabBarSwipeAction == const $CopyWithPlaceholder()
+      tabBarSwipeAction:
+          tabBarSwipeAction == const $CopyWithPlaceholder() ||
+              tabBarSwipeAction == null
           ? _value.tabBarSwipeAction
           // ignore: cast_nullable_to_non_nullable
           : tabBarSwipeAction as TabBarSwipeAction,
       historyAutoCleanInterval:
-          historyAutoCleanInterval == const $CopyWithPlaceholder()
+          historyAutoCleanInterval == const $CopyWithPlaceholder() ||
+              historyAutoCleanInterval == null
           ? _value.historyAutoCleanInterval
           // ignore: cast_nullable_to_non_nullable
           : historyAutoCleanInterval as Duration,
@@ -221,7 +242,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
 }
 
 extension $GeneralSettingsCopyWith on GeneralSettings {
-  /// Returns a callable class that can be used as follows: `instanceOfGeneralSettings.copyWith(...)` or like so:`instanceOfGeneralSettings.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfGeneralSettings.copyWith(...)` or `instanceOfGeneralSettings.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$GeneralSettingsCWProxy get copyWith => _$GeneralSettingsCWProxyImpl(this);
 }

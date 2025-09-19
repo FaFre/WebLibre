@@ -27,12 +27,13 @@ abstract class _$BangDataCWProxy {
 
   BangData icon(BrowserIcon? icon);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BangData(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BangData(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// BangData(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   BangData call({
     String websiteName,
     String domain,
@@ -47,49 +48,51 @@ abstract class _$BangDataCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfBangData.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfBangData.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfBangData.copyWith(...)` or call `instanceOfBangData.copyWith.fieldName(value)` for a single field.
 class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
   const _$BangDataCWProxyImpl(this._value);
 
   final BangData _value;
 
   @override
-  BangData websiteName(String websiteName) => this(websiteName: websiteName);
+  BangData websiteName(String websiteName) => call(websiteName: websiteName);
 
   @override
-  BangData domain(String domain) => this(domain: domain);
+  BangData domain(String domain) => call(domain: domain);
 
   @override
-  BangData trigger(String trigger) => this(trigger: trigger);
+  BangData trigger(String trigger) => call(trigger: trigger);
 
   @override
-  BangData urlTemplate(String urlTemplate) => this(urlTemplate: urlTemplate);
+  BangData urlTemplate(String urlTemplate) => call(urlTemplate: urlTemplate);
 
   @override
-  BangData category(String? category) => this(category: category);
+  BangData category(String? category) => call(category: category);
 
   @override
-  BangData subCategory(String? subCategory) => this(subCategory: subCategory);
+  BangData subCategory(String? subCategory) => call(subCategory: subCategory);
 
   @override
-  BangData format(Set<BangFormat>? format) => this(format: format);
+  BangData format(Set<BangFormat>? format) => call(format: format);
 
   @override
-  BangData frequency(int? frequency) => this(frequency: frequency);
+  BangData frequency(int? frequency) => call(frequency: frequency);
 
   @override
-  BangData lastUsed(DateTime? lastUsed) => this(lastUsed: lastUsed);
+  BangData lastUsed(DateTime? lastUsed) => call(lastUsed: lastUsed);
 
   @override
-  BangData icon(BrowserIcon? icon) => this(icon: icon);
+  BangData icon(BrowserIcon? icon) => call(icon: icon);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BangData(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BangData(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// BangData(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   BangData call({
     Object? websiteName = const $CopyWithPlaceholder(),
     Object? domain = const $CopyWithPlaceholder(),
@@ -103,19 +106,21 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
     Object? icon = const $CopyWithPlaceholder(),
   }) {
     return BangData(
-      websiteName: websiteName == const $CopyWithPlaceholder()
+      websiteName:
+          websiteName == const $CopyWithPlaceholder() || websiteName == null
           ? _value.websiteName
           // ignore: cast_nullable_to_non_nullable
           : websiteName as String,
-      domain: domain == const $CopyWithPlaceholder()
+      domain: domain == const $CopyWithPlaceholder() || domain == null
           ? _value.domain
           // ignore: cast_nullable_to_non_nullable
           : domain as String,
-      trigger: trigger == const $CopyWithPlaceholder()
+      trigger: trigger == const $CopyWithPlaceholder() || trigger == null
           ? _value.trigger
           // ignore: cast_nullable_to_non_nullable
           : trigger as String,
-      urlTemplate: urlTemplate == const $CopyWithPlaceholder()
+      urlTemplate:
+          urlTemplate == const $CopyWithPlaceholder() || urlTemplate == null
           ? _value.urlTemplate
           // ignore: cast_nullable_to_non_nullable
           : urlTemplate as String,
@@ -148,7 +153,8 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
 }
 
 extension $BangDataCopyWith on BangData {
-  /// Returns a callable class that can be used as follows: `instanceOfBangData.copyWith(...)` or like so:`instanceOfBangData.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfBangData.copyWith(...)` or `instanceOfBangData.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$BangDataCWProxy get copyWith => _$BangDataCWProxyImpl(this);
 }

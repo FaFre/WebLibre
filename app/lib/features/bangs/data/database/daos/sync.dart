@@ -18,14 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:weblibre/features/bangs/data/database/daos/sync.drift.dart';
 import 'package:weblibre/features/bangs/data/database/database.dart';
+import 'package:weblibre/features/bangs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
-part 'sync.g.dart';
-
 @DriftAccessor()
-class SyncDao extends DatabaseAccessor<BangDatabase> with _$SyncDaoMixin {
+class SyncDao extends DatabaseAccessor<BangDatabase> with $SyncDaoMixin {
   SyncDao(super.db);
 
   SingleOrNullSelectable<DateTime?> getLastSyncOfGroup(BangGroup group) {

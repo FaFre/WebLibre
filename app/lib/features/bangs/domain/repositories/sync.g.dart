@@ -6,22 +6,59 @@ part of 'sync.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bangSyncRepositoryHash() =>
-    r'0b83cd341c7a6b84cc59a4b077274e0cb0dd495a';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [BangSyncRepository].
 @ProviderFor(BangSyncRepository)
-final bangSyncRepositoryProvider =
-    NotifierProvider<BangSyncRepository, void>.internal(
-      BangSyncRepository.new,
-      name: r'bangSyncRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$bangSyncRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+const bangSyncRepositoryProvider = BangSyncRepositoryProvider._();
 
-typedef _$BangSyncRepository = Notifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class BangSyncRepositoryProvider
+    extends $NotifierProvider<BangSyncRepository, void> {
+  const BangSyncRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bangSyncRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bangSyncRepositoryHash();
+
+  @$internal
+  @override
+  BangSyncRepository create() => BangSyncRepository();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$bangSyncRepositoryHash() =>
+    r'bb977652087d2ff2cb75b093adcfc45dafa21d2a';
+
+abstract class _$BangSyncRepository extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

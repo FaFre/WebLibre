@@ -20,14 +20,14 @@
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-
-part 'container.g.dart';
 
 @DriftAccessor()
 class ContainerDao extends DatabaseAccessor<TabDatabase>
-    with _$ContainerDaoMixin {
+    with $ContainerDaoMixin {
   ContainerDao(super.db);
 
   Future<void> addContainer(ContainerData container) {
@@ -99,27 +99,39 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     String? containerId, {
     int bucket = 0,
   }) {
-    return db.leadingOrderKey(bucket: bucket, containerId: containerId);
+    return db.definitionsDrift.leadingOrderKey(
+      bucket: bucket,
+      containerId: containerId,
+    );
   }
 
   SingleSelectable<String> generateTrailingOrderKey(
     String? containerId, {
     int bucket = 0,
   }) {
-    return db.trailingOrderKey(bucket: bucket, containerId: containerId);
+    return db.definitionsDrift.trailingOrderKey(
+      bucket: bucket,
+      containerId: containerId,
+    );
   }
 
   SingleSelectable<String> generateOrderKeyAfterTabId(
     String? containerId,
     String tabId,
   ) {
-    return db.orderKeyAfterTab(containerId: containerId, tabId: tabId);
+    return db.definitionsDrift.orderKeyAfterTab(
+      containerId: containerId,
+      tabId: tabId,
+    );
   }
 
   SingleSelectable<String> generateOrderKeyBeforeTabId(
     String? containerId,
     String tabId,
   ) {
-    return db.orderKeyBeforeTab(containerId: containerId, tabId: tabId);
+    return db.definitionsDrift.orderKeyBeforeTab(
+      containerId: containerId,
+      tabId: tabId,
+    );
   }
 }

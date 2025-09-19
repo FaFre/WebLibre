@@ -20,16 +20,15 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 
-class ErrorObserver extends ProviderObserver {
+final class ErrorObserver extends ProviderObserver {
   const ErrorObserver();
 
   @override
   void providerDidFail(
-    ProviderBase<Object?> provider,
+    ProviderObserverContext context,
     Object error,
     StackTrace stackTrace,
-    ProviderContainer container,
   ) {
-    logger.e('Provider $provider threw $error at $stackTrace');
+    logger.e('Provider ${context.provider} threw $error at $stackTrace');
   }
 }

@@ -6,174 +6,138 @@ part of 'tab_session.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$selectedTabSessionNotifierHash() =>
-    r'aef19991d5b05a2bb28e8a6ccb57dc75c2f3148f';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [selectedTabSessionNotifier].
-@ProviderFor(selectedTabSessionNotifier)
-final selectedTabSessionNotifierProvider =
-    AutoDisposeProvider<Raw<TabSession>>.internal(
-      selectedTabSessionNotifier,
-      name: r'selectedTabSessionNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$selectedTabSessionNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedTabSessionNotifierRef = AutoDisposeProviderRef<Raw<TabSession>>;
-String _$tabSessionHash() => r'33d68f3860b3bc9a92db386535c7482bf4416008';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$TabSession extends BuildlessAutoDisposeNotifier<void> {
-  late final String? tabId;
-
-  void build({required String? tabId});
-}
-
-/// See also [TabSession].
 @ProviderFor(TabSession)
-const tabSessionProvider = TabSessionFamily();
+const tabSessionProvider = TabSessionFamily._();
 
-/// See also [TabSession].
-class TabSessionFamily extends Family<void> {
-  /// See also [TabSession].
-  const TabSessionFamily();
+final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
+  const TabSessionProvider._({
+    required TabSessionFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'tabSessionProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [TabSession].
-  TabSessionProvider call({required String? tabId}) {
-    return TabSessionProvider(tabId: tabId);
+  @override
+  String debugGetCreateSourceHash() => _$tabSessionHash();
+
+  @override
+  String toString() {
+    return r'tabSessionProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  TabSessionProvider getProviderOverride(
-    covariant TabSessionProvider provider,
-  ) {
-    return call(tabId: provider.tabId);
-  }
+  TabSession create() => TabSession();
 
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'tabSessionProvider';
-}
-
-/// See also [TabSession].
-class TabSessionProvider
-    extends AutoDisposeNotifierProviderImpl<TabSession, void> {
-  /// See also [TabSession].
-  TabSessionProvider({required String? tabId})
-    : this._internal(
-        () => TabSession()..tabId = tabId,
-        from: tabSessionProvider,
-        name: r'tabSessionProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$tabSessionHash,
-        dependencies: TabSessionFamily._dependencies,
-        allTransitiveDependencies: TabSessionFamily._allTransitiveDependencies,
-        tabId: tabId,
-      );
-
-  TabSessionProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.tabId,
-  }) : super.internal();
-
-  final String? tabId;
-
-  @override
-  void runNotifierBuild(covariant TabSession notifier) {
-    return notifier.build(tabId: tabId);
-  }
-
-  @override
-  Override overrideWith(TabSession Function() create) {
-    return ProviderOverride(
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
       origin: this,
-      override: TabSessionProvider._internal(
-        () => create()..tabId = tabId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        tabId: tabId,
-      ),
+      providerOverride: $SyncValueProvider<void>(value),
     );
-  }
-
-  @override
-  AutoDisposeNotifierProviderElement<TabSession, void> createElement() {
-    return _TabSessionProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is TabSessionProvider && other.tabId == tabId;
+    return other is TabSessionProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, tabId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin TabSessionRef on AutoDisposeNotifierProviderRef<void> {
-  /// The parameter `tabId` of this provider.
-  String? get tabId;
-}
+String _$tabSessionHash() => r'33d68f3860b3bc9a92db386535c7482bf4416008';
 
-class _TabSessionProviderElement
-    extends AutoDisposeNotifierProviderElement<TabSession, void>
-    with TabSessionRef {
-  _TabSessionProviderElement(super.provider);
+final class TabSessionFamily extends $Family
+    with $ClassFamilyOverride<TabSession, void, void, void, String?> {
+  const TabSessionFamily._()
+    : super(
+        retry: null,
+        name: r'tabSessionProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  TabSessionProvider call({required String? tabId}) =>
+      TabSessionProvider._(argument: tabId, from: this);
 
   @override
-  String? get tabId => (origin as TabSessionProvider).tabId;
+  String toString() => r'tabSessionProvider';
 }
 
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$TabSession extends $Notifier<void> {
+  late final _$args = ref.$arg as String?;
+  String? get tabId => _$args;
+
+  void build({required String? tabId});
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build(tabId: _$args);
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}
+
+@ProviderFor(selectedTabSessionNotifier)
+const selectedTabSessionProvider = SelectedTabSessionNotifierProvider._();
+
+final class SelectedTabSessionNotifierProvider
+    extends
+        $FunctionalProvider<Raw<TabSession>, Raw<TabSession>, Raw<TabSession>>
+    with $Provider<Raw<TabSession>> {
+  const SelectedTabSessionNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedTabSessionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedTabSessionNotifierHash();
+
+  @$internal
+  @override
+  $ProviderElement<Raw<TabSession>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Raw<TabSession> create(Ref ref) {
+    return selectedTabSessionNotifier(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Raw<TabSession> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Raw<TabSession>>(value),
+    );
+  }
+}
+
+String _$selectedTabSessionNotifierHash() =>
+    r'aef19991d5b05a2bb28e8a6ccb57dc75c2f3148f';

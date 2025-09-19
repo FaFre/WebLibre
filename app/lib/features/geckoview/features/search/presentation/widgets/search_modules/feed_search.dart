@@ -62,7 +62,7 @@ class FeedSearch extends HookConsumerWidget {
           );
     });
 
-    if (articlesAsync.hasValue && (articlesAsync.valueOrNull.isEmpty)) {
+    if (articlesAsync.hasValue && (articlesAsync.value.isEmpty)) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
@@ -190,7 +190,7 @@ class FeedSearch extends HookConsumerWidget {
               );
             },
             loading: () => SliverList.builder(
-              itemCount: articlesAsync.valueOrNull?.length ?? 3,
+              itemCount: articlesAsync.value?.length ?? 3,
               itemBuilder: (context, index) {
                 return const ListTile(title: Bone.text());
               },

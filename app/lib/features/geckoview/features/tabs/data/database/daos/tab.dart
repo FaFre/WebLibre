@@ -23,13 +23,13 @@ import 'package:drift/drift.dart';
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 
-part 'tab.g.dart';
-
 @DriftAccessor()
-class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
+class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   final _undoHistory = <String, TabData>{};
   Timer? _clearHistoryTimer;
 
@@ -258,7 +258,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
     final ftsQuery = db.buildFtsQuery(searchString);
 
     if (ftsQuery.isNotEmpty) {
-      return db.queryTabsFullContent(
+      return db.definitionsDrift.queryTabsFullContent(
         query: ftsQuery,
         snippetLength: snippetLength,
         beforeMatch: matchPrefix,
@@ -266,7 +266,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with _$TabDaoMixin {
         ellipsis: ellipsis,
       );
     } else {
-      return db.queryTabsBasic(query: db.buildLikeQuery(searchString));
+      return db.definitionsDrift.queryTabsBasic(
+        query: db.buildLikeQuery(searchString),
+      );
     }
   }
 }

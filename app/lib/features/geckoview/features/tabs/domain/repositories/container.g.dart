@@ -6,22 +6,59 @@ part of 'container.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$containerRepositoryHash() =>
-    r'af4ccf6cc12eebae2313df6c8f9ca63db842ffe5';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [ContainerRepository].
 @ProviderFor(ContainerRepository)
-final containerRepositoryProvider =
-    NotifierProvider<ContainerRepository, void>.internal(
-      ContainerRepository.new,
-      name: r'containerRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$containerRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+const containerRepositoryProvider = ContainerRepositoryProvider._();
 
-typedef _$ContainerRepository = Notifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class ContainerRepositoryProvider
+    extends $NotifierProvider<ContainerRepository, void> {
+  const ContainerRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'containerRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$containerRepositoryHash();
+
+  @$internal
+  @override
+  ContainerRepository create() => ContainerRepository();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$containerRepositoryHash() =>
+    r'6d84d672e24ac3d2cb376e93cbbe61fc223d89b3';
+
+abstract class _$ContainerRepository extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

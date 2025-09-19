@@ -13,12 +13,13 @@ abstract class _$ContainerAuthSettingsCWProxy {
 
   ContainerAuthSettings lockTimeout(Duration? lockTimeout);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerAuthSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerAuthSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ContainerAuthSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   ContainerAuthSettings call({
     bool authenticationRequired,
     bool lockOnAppBackground,
@@ -26,7 +27,8 @@ abstract class _$ContainerAuthSettingsCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfContainerAuthSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfContainerAuthSettings.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfContainerAuthSettings.copyWith(...)` or call `instanceOfContainerAuthSettings.copyWith.fieldName(value)` for a single field.
 class _$ContainerAuthSettingsCWProxyImpl
     implements _$ContainerAuthSettingsCWProxy {
   const _$ContainerAuthSettingsCWProxyImpl(this._value);
@@ -35,23 +37,24 @@ class _$ContainerAuthSettingsCWProxyImpl
 
   @override
   ContainerAuthSettings authenticationRequired(bool authenticationRequired) =>
-      this(authenticationRequired: authenticationRequired);
+      call(authenticationRequired: authenticationRequired);
 
   @override
   ContainerAuthSettings lockOnAppBackground(bool lockOnAppBackground) =>
-      this(lockOnAppBackground: lockOnAppBackground);
+      call(lockOnAppBackground: lockOnAppBackground);
 
   @override
   ContainerAuthSettings lockTimeout(Duration? lockTimeout) =>
-      this(lockTimeout: lockTimeout);
+      call(lockTimeout: lockTimeout);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerAuthSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerAuthSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ContainerAuthSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   ContainerAuthSettings call({
     Object? authenticationRequired = const $CopyWithPlaceholder(),
     Object? lockOnAppBackground = const $CopyWithPlaceholder(),
@@ -59,11 +62,14 @@ class _$ContainerAuthSettingsCWProxyImpl
   }) {
     return ContainerAuthSettings(
       authenticationRequired:
-          authenticationRequired == const $CopyWithPlaceholder()
+          authenticationRequired == const $CopyWithPlaceholder() ||
+              authenticationRequired == null
           ? _value.authenticationRequired
           // ignore: cast_nullable_to_non_nullable
           : authenticationRequired as bool,
-      lockOnAppBackground: lockOnAppBackground == const $CopyWithPlaceholder()
+      lockOnAppBackground:
+          lockOnAppBackground == const $CopyWithPlaceholder() ||
+              lockOnAppBackground == null
           ? _value.lockOnAppBackground
           // ignore: cast_nullable_to_non_nullable
           : lockOnAppBackground as bool,
@@ -76,7 +82,8 @@ class _$ContainerAuthSettingsCWProxyImpl
 }
 
 extension $ContainerAuthSettingsCopyWith on ContainerAuthSettings {
-  /// Returns a callable class that can be used as follows: `instanceOfContainerAuthSettings.copyWith(...)` or like so:`instanceOfContainerAuthSettings.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfContainerAuthSettings.copyWith(...)` or `instanceOfContainerAuthSettings.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$ContainerAuthSettingsCWProxy get copyWith =>
       _$ContainerAuthSettingsCWProxyImpl(this);
@@ -91,12 +98,13 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata useProxy(bool useProxy);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerMetadata(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ContainerMetadata(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   ContainerMetadata call({
     IconData? iconData,
     String? contextualIdentity,
@@ -105,33 +113,35 @@ abstract class _$ContainerMetadataCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfContainerMetadata.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfContainerMetadata.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfContainerMetadata.copyWith(...)` or call `instanceOfContainerMetadata.copyWith.fieldName(value)` for a single field.
 class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   const _$ContainerMetadataCWProxyImpl(this._value);
 
   final ContainerMetadata _value;
 
   @override
-  ContainerMetadata iconData(IconData? iconData) => this(iconData: iconData);
+  ContainerMetadata iconData(IconData? iconData) => call(iconData: iconData);
 
   @override
   ContainerMetadata contextualIdentity(String? contextualIdentity) =>
-      this(contextualIdentity: contextualIdentity);
+      call(contextualIdentity: contextualIdentity);
 
   @override
   ContainerMetadata authSettings(ContainerAuthSettings authSettings) =>
-      this(authSettings: authSettings);
+      call(authSettings: authSettings);
 
   @override
-  ContainerMetadata useProxy(bool useProxy) => this(useProxy: useProxy);
+  ContainerMetadata useProxy(bool useProxy) => call(useProxy: useProxy);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerMetadata(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ContainerMetadata(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   ContainerMetadata call({
     Object? iconData = const $CopyWithPlaceholder(),
     Object? contextualIdentity = const $CopyWithPlaceholder(),
@@ -147,11 +157,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.contextualIdentity
           // ignore: cast_nullable_to_non_nullable
           : contextualIdentity as String?,
-      authSettings: authSettings == const $CopyWithPlaceholder()
+      authSettings:
+          authSettings == const $CopyWithPlaceholder() || authSettings == null
           ? _value.authSettings
           // ignore: cast_nullable_to_non_nullable
           : authSettings as ContainerAuthSettings,
-      useProxy: useProxy == const $CopyWithPlaceholder()
+      useProxy: useProxy == const $CopyWithPlaceholder() || useProxy == null
           ? _value.useProxy
           // ignore: cast_nullable_to_non_nullable
           : useProxy as bool,
@@ -160,7 +171,8 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
 }
 
 extension $ContainerMetadataCopyWith on ContainerMetadata {
-  /// Returns a callable class that can be used as follows: `instanceOfContainerMetadata.copyWith(...)` or like so:`instanceOfContainerMetadata.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfContainerMetadata.copyWith(...)` or `instanceOfContainerMetadata.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$ContainerMetadataCWProxy get copyWith =>
       _$ContainerMetadataCWProxyImpl(this);
@@ -175,12 +187,13 @@ abstract class _$ContainerDataCWProxy {
 
   ContainerData metadata(ContainerMetadata? metadata);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerData(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerData(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ContainerData(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   ContainerData call({
     String id,
     String? name,
@@ -189,32 +202,34 @@ abstract class _$ContainerDataCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfContainerData.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfContainerData.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfContainerData.copyWith(...)` or call `instanceOfContainerData.copyWith.fieldName(value)` for a single field.
 class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
   const _$ContainerDataCWProxyImpl(this._value);
 
   final ContainerData _value;
 
   @override
-  ContainerData id(String id) => this(id: id);
+  ContainerData id(String id) => call(id: id);
 
   @override
-  ContainerData name(String? name) => this(name: name);
+  ContainerData name(String? name) => call(name: name);
 
   @override
-  ContainerData color(Color color) => this(color: color);
+  ContainerData color(Color color) => call(color: color);
 
   @override
   ContainerData metadata(ContainerMetadata? metadata) =>
-      this(metadata: metadata);
+      call(metadata: metadata);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ContainerData(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerData(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// ContainerData(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   ContainerData call({
     Object? id = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
@@ -222,7 +237,7 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
     Object? metadata = const $CopyWithPlaceholder(),
   }) {
     return ContainerData(
-      id: id == const $CopyWithPlaceholder()
+      id: id == const $CopyWithPlaceholder() || id == null
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,
@@ -230,7 +245,7 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
           : name as String?,
-      color: color == const $CopyWithPlaceholder()
+      color: color == const $CopyWithPlaceholder() || color == null
           ? _value.color
           // ignore: cast_nullable_to_non_nullable
           : color as Color,
@@ -243,7 +258,8 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
 }
 
 extension $ContainerDataCopyWith on ContainerData {
-  /// Returns a callable class that can be used as follows: `instanceOfContainerData.copyWith(...)` or like so:`instanceOfContainerData.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfContainerData.copyWith(...)` or `instanceOfContainerData.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$ContainerDataCWProxy get copyWith => _$ContainerDataCWProxyImpl(this);
 }

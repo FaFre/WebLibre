@@ -6,21 +6,58 @@ part of 'global_drop.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(WillAcceptDrop)
+const willAcceptDropProvider = WillAcceptDropProvider._();
+
+final class WillAcceptDropProvider
+    extends $NotifierProvider<WillAcceptDrop, DropTargetData?> {
+  const WillAcceptDropProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'willAcceptDropProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$willAcceptDropHash();
+
+  @$internal
+  @override
+  WillAcceptDrop create() => WillAcceptDrop();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DropTargetData? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DropTargetData?>(value),
+    );
+  }
+}
+
 String _$willAcceptDropHash() => r'97b47784ef9101757602b4408d1f545ef2308830';
 
-/// See also [WillAcceptDrop].
-@ProviderFor(WillAcceptDrop)
-final willAcceptDropProvider =
-    AutoDisposeNotifierProvider<WillAcceptDrop, DropTargetData?>.internal(
-      WillAcceptDrop.new,
-      name: r'willAcceptDropProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$willAcceptDropHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$WillAcceptDrop = AutoDisposeNotifier<DropTargetData?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$WillAcceptDrop extends $Notifier<DropTargetData?> {
+  DropTargetData? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<DropTargetData?, DropTargetData?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<DropTargetData?, DropTargetData?>,
+              DropTargetData?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

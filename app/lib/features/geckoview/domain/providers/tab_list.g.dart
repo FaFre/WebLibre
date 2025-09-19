@@ -6,21 +6,63 @@ part of 'tab_list.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(TabList)
+const tabListProvider = TabListProvider._();
+
+final class TabListProvider
+    extends $NotifierProvider<TabList, EquatableValue<List<String>>> {
+  const TabListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabListProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabListHash();
+
+  @$internal
+  @override
+  TabList create() => TabList();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<String>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<String>>>(value),
+    );
+  }
+}
+
 String _$tabListHash() => r'0b9ca1e089a59895df4cbf28691c2849a7004f08';
 
-/// See also [TabList].
-@ProviderFor(TabList)
-final tabListProvider =
-    NotifierProvider<TabList, EquatableValue<List<String>>>.internal(
-      TabList.new,
-      name: r'tabListProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$tabListHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$TabList = Notifier<EquatableValue<List<String>>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$TabList extends $Notifier<EquatableValue<List<String>>> {
+  EquatableValue<List<String>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref =
+        this.ref
+            as $Ref<EquatableValue<List<String>>, EquatableValue<List<String>>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                EquatableValue<List<String>>,
+                EquatableValue<List<String>>
+              >,
+              EquatableValue<List<String>>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

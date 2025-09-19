@@ -83,9 +83,7 @@ EquatableValue<List<String>> availableTabIds(
   ContainerFilter containerFilter,
 ) {
   final containerTabs = ref.watch(
-    containerTabIdsProvider(
-      containerFilter,
-    ).select((value) => value.valueOrNull),
+    containerTabIdsProvider(containerFilter).select((value) => value.value),
   );
   final tabList = ref.watch(tabListProvider);
 
@@ -118,13 +116,13 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
     containerTabIdsProvider(
       // ignore: provider_parameters
       ContainerFilterById(containerId: containerId),
-    ).select((value) => EquatableValue(value.valueOrNull)),
+    ).select((value) => EquatableValue(value.value)),
   );
 
   final suggestions = ref.watch(
     containerTabSuggestionsProvider(containerId).select(
       (value) => EquatableValue(
-        value.valueOrNull.mapNotNull(
+        value.value.mapNotNull(
               (result) => result
                   .whereNot(
                     (tabId) => excludedTabIds.value?.contains(tabId) ?? false,
@@ -151,7 +149,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       .watch(
         tabSearchRepositoryProvider(searchPartition).select(
           (value) => EquatableValue(
-            value.valueOrNull.mapNotNull(
+            value.value.mapNotNull(
               (result) => result.results
                   .map(
                     (tab) => SearchResultTabEntity(
@@ -179,7 +177,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       final trees = ref.watch(
         tabTreesProvider.select(
           (value) => EquatableValue(
-            value.valueOrNull
+            value.value
                     ?.map(
                       (tree) => TabTreeEntity(
                         tabId: tree.latestTabId,
@@ -228,7 +226,7 @@ EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
       .watch(
         tabSearchRepositoryProvider(
           searchPartition,
-        ).select((value) => EquatableValue(value.valueOrNull)),
+        ).select((value) => EquatableValue(value.value)),
       )
       .value;
 

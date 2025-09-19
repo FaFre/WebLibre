@@ -6,22 +6,59 @@ part of 'brave.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(BraveAutosuggestService)
+const braveAutosuggestServiceProvider = BraveAutosuggestServiceProvider._();
+
+final class BraveAutosuggestServiceProvider
+    extends $NotifierProvider<BraveAutosuggestService, void> {
+  const BraveAutosuggestServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'braveAutosuggestServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$braveAutosuggestServiceHash();
+
+  @$internal
+  @override
+  BraveAutosuggestService create() => BraveAutosuggestService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
 String _$braveAutosuggestServiceHash() =>
     r'3b2f465dcf4b44b0450975d3909fc7066d171bf2';
 
-/// See also [BraveAutosuggestService].
-@ProviderFor(BraveAutosuggestService)
-final braveAutosuggestServiceProvider =
-    NotifierProvider<BraveAutosuggestService, void>.internal(
-      BraveAutosuggestService.new,
-      name: r'braveAutosuggestServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$braveAutosuggestServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$BraveAutosuggestService = Notifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$BraveAutosuggestService extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

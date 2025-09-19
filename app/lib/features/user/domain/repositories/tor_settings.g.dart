@@ -6,41 +6,93 @@ part of 'tor_settings.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$torSettingsWithDefaultsHash() =>
-    r'b355678ae49e038f7e1b60f2d5da3f806349cba8';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [torSettingsWithDefaults].
-@ProviderFor(torSettingsWithDefaults)
-final torSettingsWithDefaultsProvider =
-    AutoDisposeProvider<TorSettings>.internal(
-      torSettingsWithDefaults,
-      name: r'torSettingsWithDefaultsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$torSettingsWithDefaultsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(TorSettingsRepository)
+const torSettingsRepositoryProvider = TorSettingsRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TorSettingsWithDefaultsRef = AutoDisposeProviderRef<TorSettings>;
+final class TorSettingsRepositoryProvider
+    extends $StreamNotifierProvider<TorSettingsRepository, TorSettings> {
+  const TorSettingsRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'torSettingsRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$torSettingsRepositoryHash();
+
+  @$internal
+  @override
+  TorSettingsRepository create() => TorSettingsRepository();
+}
+
 String _$torSettingsRepositoryHash() =>
     r'ef80d1cc6b9b72cce371c03c656b10a0924d49d0';
 
-/// See also [TorSettingsRepository].
-@ProviderFor(TorSettingsRepository)
-final torSettingsRepositoryProvider =
-    StreamNotifierProvider<TorSettingsRepository, TorSettings>.internal(
-      TorSettingsRepository.new,
-      name: r'torSettingsRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$torSettingsRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$TorSettingsRepository extends $StreamNotifier<TorSettings> {
+  Stream<TorSettings> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<TorSettings>, TorSettings>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<TorSettings>, TorSettings>,
+              AsyncValue<TorSettings>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
-typedef _$TorSettingsRepository = StreamNotifier<TorSettings>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(torSettingsWithDefaults)
+const torSettingsWithDefaultsProvider = TorSettingsWithDefaultsProvider._();
+
+final class TorSettingsWithDefaultsProvider
+    extends $FunctionalProvider<TorSettings, TorSettings, TorSettings>
+    with $Provider<TorSettings> {
+  const TorSettingsWithDefaultsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'torSettingsWithDefaultsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$torSettingsWithDefaultsHash();
+
+  @$internal
+  @override
+  $ProviderElement<TorSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TorSettings create(Ref ref) {
+    return torSettingsWithDefaults(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TorSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TorSettings>(value),
+    );
+  }
+}
+
+String _$torSettingsWithDefaultsHash() =>
+    r'47005584ad9d3445a8dfa54ffcd0987763997003';

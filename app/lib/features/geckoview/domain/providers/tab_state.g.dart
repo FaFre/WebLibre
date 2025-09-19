@@ -6,336 +6,334 @@ part of 'tab_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tabStateHash() => r'f57b2353acc99ca73670d504b45ea5ff19df38c7';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
+@ProviderFor(TabStates)
+const tabStatesProvider = TabStatesProvider._();
 
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-/// See also [tabState].
-@ProviderFor(tabState)
-const tabStateProvider = TabStateFamily();
-
-/// See also [tabState].
-class TabStateFamily extends Family<TabState?> {
-  /// See also [tabState].
-  const TabStateFamily();
-
-  /// See also [tabState].
-  TabStateProvider call(String? tabId) {
-    return TabStateProvider(tabId);
-  }
-
-  @override
-  TabStateProvider getProviderOverride(covariant TabStateProvider provider) {
-    return call(provider.tabId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'tabStateProvider';
-}
-
-/// See also [tabState].
-class TabStateProvider extends AutoDisposeProvider<TabState?> {
-  /// See also [tabState].
-  TabStateProvider(String? tabId)
-    : this._internal(
-        (ref) => tabState(ref as TabStateRef, tabId),
-        from: tabStateProvider,
-        name: r'tabStateProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$tabStateHash,
-        dependencies: TabStateFamily._dependencies,
-        allTransitiveDependencies: TabStateFamily._allTransitiveDependencies,
-        tabId: tabId,
+final class TabStatesProvider
+    extends $NotifierProvider<TabStates, Map<String, TabState>> {
+  const TabStatesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabStatesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
       );
 
-  TabStateProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.tabId,
-  }) : super.internal();
-
-  final String? tabId;
-
   @override
-  Override overrideWith(TabState? Function(TabStateRef provider) create) {
-    return ProviderOverride(
+  String debugGetCreateSourceHash() => _$tabStatesHash();
+
+  @$internal
+  @override
+  TabStates create() => TabStates();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, TabState> value) {
+    return $ProviderOverride(
       origin: this,
-      override: TabStateProvider._internal(
-        (ref) => create(ref as TabStateRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        tabId: tabId,
-      ),
+      providerOverride: $SyncValueProvider<Map<String, TabState>>(value),
     );
   }
-
-  @override
-  AutoDisposeProviderElement<TabState?> createElement() {
-    return _TabStateProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is TabStateProvider && other.tabId == tabId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, tabId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin TabStateRef on AutoDisposeProviderRef<TabState?> {
-  /// The parameter `tabId` of this provider.
-  String? get tabId;
-}
-
-class _TabStateProviderElement extends AutoDisposeProviderElement<TabState?>
-    with TabStateRef {
-  _TabStateProviderElement(super.provider);
-
-  @override
-  String? get tabId => (origin as TabStateProvider).tabId;
-}
-
-String _$selectedTabStateHash() => r'dbd36af7af286bd9d079f30e8e11bbda23bf7728';
-
-/// See also [selectedTabState].
-@ProviderFor(selectedTabState)
-final selectedTabStateProvider = AutoDisposeProvider<TabState?>.internal(
-  selectedTabState,
-  name: r'selectedTabStateProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedTabStateHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedTabStateRef = AutoDisposeProviderRef<TabState?>;
-String _$selectedTabTypeHash() => r'53093fc6db8becde7500163661e087fb0a2eb955';
-
-/// See also [selectedTabType].
-@ProviderFor(selectedTabType)
-final selectedTabTypeProvider = AutoDisposeProvider<TabType?>.internal(
-  selectedTabType,
-  name: r'selectedTabTypeProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedTabTypeHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedTabTypeRef = AutoDisposeProviderRef<TabType?>;
-String _$selectedTabContainerIdHash() =>
-    r'9f0246a02a069b1a66211a3924f32e9d75f0f344';
-
-/// See also [selectedTabContainerId].
-@ProviderFor(selectedTabContainerId)
-final selectedTabContainerIdProvider = Provider<AsyncValue<String?>>.internal(
-  selectedTabContainerId,
-  name: r'selectedTabContainerIdProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedTabContainerIdHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedTabContainerIdRef = ProviderRef<AsyncValue<String?>>;
-String _$tabScrollYHash() => r'dcb1e82b42bab98c4fc2ee4c7a22f37a28b8ce9e';
-
-/// See also [tabScrollY].
-@ProviderFor(tabScrollY)
-const tabScrollYProvider = TabScrollYFamily();
-
-/// See also [tabScrollY].
-class TabScrollYFamily extends Family<AsyncValue<int>> {
-  /// See also [tabScrollY].
-  const TabScrollYFamily();
-
-  /// See also [tabScrollY].
-  TabScrollYProvider call(String? tabId, Duration sampleTime) {
-    return TabScrollYProvider(tabId, sampleTime);
-  }
-
-  @override
-  TabScrollYProvider getProviderOverride(
-    covariant TabScrollYProvider provider,
-  ) {
-    return call(provider.tabId, provider.sampleTime);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'tabScrollYProvider';
-}
-
-/// See also [tabScrollY].
-class TabScrollYProvider extends AutoDisposeStreamProvider<int> {
-  /// See also [tabScrollY].
-  TabScrollYProvider(String? tabId, Duration sampleTime)
-    : this._internal(
-        (ref) => tabScrollY(ref as TabScrollYRef, tabId, sampleTime),
-        from: tabScrollYProvider,
-        name: r'tabScrollYProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$tabScrollYHash,
-        dependencies: TabScrollYFamily._dependencies,
-        allTransitiveDependencies: TabScrollYFamily._allTransitiveDependencies,
-        tabId: tabId,
-        sampleTime: sampleTime,
-      );
-
-  TabScrollYProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.tabId,
-    required this.sampleTime,
-  }) : super.internal();
-
-  final String? tabId;
-  final Duration sampleTime;
-
-  @override
-  Override overrideWith(Stream<int> Function(TabScrollYRef provider) create) {
-    return ProviderOverride(
-      origin: this,
-      override: TabScrollYProvider._internal(
-        (ref) => create(ref as TabScrollYRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        tabId: tabId,
-        sampleTime: sampleTime,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeStreamProviderElement<int> createElement() {
-    return _TabScrollYProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is TabScrollYProvider &&
-        other.tabId == tabId &&
-        other.sampleTime == sampleTime;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, tabId.hashCode);
-    hash = _SystemHash.combine(hash, sampleTime.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin TabScrollYRef on AutoDisposeStreamProviderRef<int> {
-  /// The parameter `tabId` of this provider.
-  String? get tabId;
-
-  /// The parameter `sampleTime` of this provider.
-  Duration get sampleTime;
-}
-
-class _TabScrollYProviderElement extends AutoDisposeStreamProviderElement<int>
-    with TabScrollYRef {
-  _TabScrollYProviderElement(super.provider);
-
-  @override
-  String? get tabId => (origin as TabScrollYProvider).tabId;
-  @override
-  Duration get sampleTime => (origin as TabScrollYProvider).sampleTime;
 }
 
 String _$tabStatesHash() => r'66cff6a7b36328ee23b89fdd53046987b346bfcd';
 
-/// See also [TabStates].
-@ProviderFor(TabStates)
-final tabStatesProvider =
-    NotifierProvider<TabStates, Map<String, TabState>>.internal(
-      TabStates.new,
-      name: r'tabStatesProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$tabStatesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
+  Map<String, TabState> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<Map<String, TabState>, Map<String, TabState>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Map<String, TabState>, Map<String, TabState>>,
+              Map<String, TabState>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
-typedef _$TabStates = Notifier<Map<String, TabState>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(tabState)
+const tabStateProvider = TabStateFamily._();
+
+final class TabStateProvider
+    extends $FunctionalProvider<TabState?, TabState?, TabState?>
+    with $Provider<TabState?> {
+  const TabStateProvider._({
+    required TabStateFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'tabStateProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabStateHash();
+
+  @override
+  String toString() {
+    return r'tabStateProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<TabState?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TabState? create(Ref ref) {
+    final argument = this.argument as String?;
+    return tabState(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabState? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabState?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TabStateProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$tabStateHash() => r'f57b2353acc99ca73670d504b45ea5ff19df38c7';
+
+final class TabStateFamily extends $Family
+    with $FunctionalFamilyOverride<TabState?, String?> {
+  const TabStateFamily._()
+    : super(
+        retry: null,
+        name: r'tabStateProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  TabStateProvider call(String? tabId) =>
+      TabStateProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'tabStateProvider';
+}
+
+@ProviderFor(selectedTabState)
+const selectedTabStateProvider = SelectedTabStateProvider._();
+
+final class SelectedTabStateProvider
+    extends $FunctionalProvider<TabState?, TabState?, TabState?>
+    with $Provider<TabState?> {
+  const SelectedTabStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedTabStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedTabStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<TabState?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TabState? create(Ref ref) {
+    return selectedTabState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabState? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabState?>(value),
+    );
+  }
+}
+
+String _$selectedTabStateHash() => r'dbd36af7af286bd9d079f30e8e11bbda23bf7728';
+
+@ProviderFor(selectedTabType)
+const selectedTabTypeProvider = SelectedTabTypeProvider._();
+
+final class SelectedTabTypeProvider
+    extends $FunctionalProvider<TabType?, TabType?, TabType?>
+    with $Provider<TabType?> {
+  const SelectedTabTypeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedTabTypeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedTabTypeHash();
+
+  @$internal
+  @override
+  $ProviderElement<TabType?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TabType? create(Ref ref) {
+    return selectedTabType(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabType? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabType?>(value),
+    );
+  }
+}
+
+String _$selectedTabTypeHash() => r'53093fc6db8becde7500163661e087fb0a2eb955';
+
+@ProviderFor(selectedTabContainerId)
+const selectedTabContainerIdProvider = SelectedTabContainerIdProvider._();
+
+final class SelectedTabContainerIdProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<String?>,
+          AsyncValue<String?>,
+          AsyncValue<String?>
+        >
+    with $Provider<AsyncValue<String?>> {
+  const SelectedTabContainerIdProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedTabContainerIdProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedTabContainerIdHash();
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<String?>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AsyncValue<String?> create(Ref ref) {
+    return selectedTabContainerId(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<String?> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<String?>>(value),
+    );
+  }
+}
+
+String _$selectedTabContainerIdHash() =>
+    r'9f0246a02a069b1a66211a3924f32e9d75f0f344';
+
+@ProviderFor(tabScrollY)
+const tabScrollYProvider = TabScrollYFamily._();
+
+final class TabScrollYProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
+    with $FutureModifier<int>, $StreamProvider<int> {
+  const TabScrollYProvider._({
+    required TabScrollYFamily super.from,
+    required (String?, Duration) super.argument,
+  }) : super(
+         retry: null,
+         name: r'tabScrollYProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabScrollYHash();
+
+  @override
+  String toString() {
+    return r'tabScrollYProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<int> create(Ref ref) {
+    final argument = this.argument as (String?, Duration);
+    return tabScrollY(ref, argument.$1, argument.$2);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TabScrollYProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$tabScrollYHash() => r'dcb1e82b42bab98c4fc2ee4c7a22f37a28b8ce9e';
+
+final class TabScrollYFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<int>, (String?, Duration)> {
+  const TabScrollYFamily._()
+    : super(
+        retry: null,
+        name: r'tabScrollYProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  TabScrollYProvider call(String? tabId, Duration sampleTime) =>
+      TabScrollYProvider._(argument: (tabId, sampleTime), from: this);
+
+  @override
+  String toString() => r'tabScrollYProvider';
+}

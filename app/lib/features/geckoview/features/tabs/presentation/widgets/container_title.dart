@@ -44,7 +44,7 @@ class ContainerTitle extends HookConsumerWidget {
       containerTabCountProvider(
         // ignore: provider_parameters
         ContainerFilterById(containerId: container.id),
-      ).select((value) => (value.valueOrNull ?? 0) > 0),
+      ).select((value) => (value.value ?? 0) > 0),
     );
 
     return topicAsync.when(
@@ -73,8 +73,7 @@ class ContainerTitle extends HookConsumerWidget {
 
         return const Text('Untitled');
       },
-      loading: () =>
-          Skeletonizer(child: Text(topicAsync.valueOrNull ?? 'container')),
+      loading: () => Skeletonizer(child: Text(topicAsync.value ?? 'container')),
     );
   }
 }

@@ -6,38 +6,104 @@ part of 'bottom_sheet.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(BottomSheetController)
+const bottomSheetControllerProvider = BottomSheetControllerProvider._();
+
+final class BottomSheetControllerProvider
+    extends $NotifierProvider<BottomSheetController, Sheet?> {
+  const BottomSheetControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bottomSheetControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bottomSheetControllerHash();
+
+  @$internal
+  @override
+  BottomSheetController create() => BottomSheetController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Sheet? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Sheet?>(value),
+    );
+  }
+}
+
 String _$bottomSheetControllerHash() =>
     r'0b0ea53a96b80b8c1cba79b1d5913274b7127d5b';
 
-/// See also [BottomSheetController].
-@ProviderFor(BottomSheetController)
-final bottomSheetControllerProvider =
-    AutoDisposeNotifierProvider<BottomSheetController, Sheet?>.internal(
-      BottomSheetController.new,
-      name: r'bottomSheetControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$bottomSheetControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$BottomSheetController extends $Notifier<Sheet?> {
+  Sheet? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<Sheet?, Sheet?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Sheet?, Sheet?>,
+              Sheet?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
-typedef _$BottomSheetController = AutoDisposeNotifier<Sheet?>;
+@ProviderFor(BottomSheetExtend)
+const bottomSheetExtendProvider = BottomSheetExtendProvider._();
+
+final class BottomSheetExtendProvider
+    extends $StreamNotifierProvider<BottomSheetExtend, double> {
+  const BottomSheetExtendProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bottomSheetExtendProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bottomSheetExtendHash();
+
+  @$internal
+  @override
+  BottomSheetExtend create() => BottomSheetExtend();
+}
+
 String _$bottomSheetExtendHash() => r'7e11b9047c15bdeb4dfcb488a8573daadb64e25c';
 
-/// See also [BottomSheetExtend].
-@ProviderFor(BottomSheetExtend)
-final bottomSheetExtendProvider =
-    StreamNotifierProvider<BottomSheetExtend, double>.internal(
-      BottomSheetExtend.new,
-      name: r'bottomSheetExtendProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$bottomSheetExtendHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$BottomSheetExtend = StreamNotifier<double>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$BottomSheetExtend extends $StreamNotifier<double> {
+  Stream<double> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<double>, double>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<double>, double>,
+              AsyncValue<double>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

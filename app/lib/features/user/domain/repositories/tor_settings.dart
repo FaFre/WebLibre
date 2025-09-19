@@ -98,7 +98,7 @@ class TorSettingsRepository extends _$TorSettingsRepository {
 TorSettings torSettingsWithDefaults(Ref ref) {
   return ref.watch(
     torSettingsRepositoryProvider.select(
-      (value) => value.valueOrNull ?? TorSettings.withDefaults(),
+      (value) => value.value ?? TorSettings.withDefaults(),
     ),
   );
 }

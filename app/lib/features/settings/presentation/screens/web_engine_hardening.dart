@@ -39,11 +39,11 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
 
     final allGroupsActive = useMemoized(
       () =>
-          preferenceGroups.valueOrNull?.values.every(
+          preferenceGroups.value?.values.every(
             (element) => element.isActiveOrOptional,
           ) ??
           false,
-      [EquatableValue(preferenceGroups.valueOrNull)],
+      [EquatableValue(preferenceGroups.value)],
     );
 
     final theme = Theme.of(context);

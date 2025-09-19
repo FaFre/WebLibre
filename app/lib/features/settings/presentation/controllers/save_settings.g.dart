@@ -6,56 +6,145 @@ part of 'save_settings.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(SaveGeneralSettingsController)
+const saveGeneralSettingsControllerProvider =
+    SaveGeneralSettingsControllerProvider._();
+
+final class SaveGeneralSettingsControllerProvider
+    extends $AsyncNotifierProvider<SaveGeneralSettingsController, void> {
+  const SaveGeneralSettingsControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'saveGeneralSettingsControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$saveGeneralSettingsControllerHash();
+
+  @$internal
+  @override
+  SaveGeneralSettingsController create() => SaveGeneralSettingsController();
+}
+
 String _$saveGeneralSettingsControllerHash() =>
     r'b75c9c52452a9cb687f69dad1523f1ed5205847e';
 
-/// See also [SaveGeneralSettingsController].
-@ProviderFor(SaveGeneralSettingsController)
-final saveGeneralSettingsControllerProvider =
-    AsyncNotifierProvider<SaveGeneralSettingsController, void>.internal(
-      SaveGeneralSettingsController.new,
-      name: r'saveGeneralSettingsControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$saveGeneralSettingsControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}
 
-typedef _$SaveGeneralSettingsController = AsyncNotifier<void>;
+@ProviderFor(SaveEngineSettingsController)
+const saveEngineSettingsControllerProvider =
+    SaveEngineSettingsControllerProvider._();
+
+final class SaveEngineSettingsControllerProvider
+    extends $AsyncNotifierProvider<SaveEngineSettingsController, void> {
+  const SaveEngineSettingsControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'saveEngineSettingsControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$saveEngineSettingsControllerHash();
+
+  @$internal
+  @override
+  SaveEngineSettingsController create() => SaveEngineSettingsController();
+}
+
 String _$saveEngineSettingsControllerHash() =>
     r'd3d74a6aadc89532b1d81c424d92efbfa43002d5';
 
-/// See also [SaveEngineSettingsController].
-@ProviderFor(SaveEngineSettingsController)
-final saveEngineSettingsControllerProvider =
-    AsyncNotifierProvider<SaveEngineSettingsController, void>.internal(
-      SaveEngineSettingsController.new,
-      name: r'saveEngineSettingsControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$saveEngineSettingsControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$SaveEngineSettingsController extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}
 
-typedef _$SaveEngineSettingsController = AsyncNotifier<void>;
+@ProviderFor(SaveTorSettingsController)
+const saveTorSettingsControllerProvider = SaveTorSettingsControllerProvider._();
+
+final class SaveTorSettingsControllerProvider
+    extends $AsyncNotifierProvider<SaveTorSettingsController, void> {
+  const SaveTorSettingsControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'saveTorSettingsControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$saveTorSettingsControllerHash();
+
+  @$internal
+  @override
+  SaveTorSettingsController create() => SaveTorSettingsController();
+}
+
 String _$saveTorSettingsControllerHash() =>
     r'd8aa04d7ae60c97bdad6c072f894189509dd35d3';
 
-/// See also [SaveTorSettingsController].
-@ProviderFor(SaveTorSettingsController)
-final saveTorSettingsControllerProvider =
-    AsyncNotifierProvider<SaveTorSettingsController, void>.internal(
-      SaveTorSettingsController.new,
-      name: r'saveTorSettingsControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$saveTorSettingsControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$SaveTorSettingsController = AsyncNotifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$SaveTorSettingsController extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

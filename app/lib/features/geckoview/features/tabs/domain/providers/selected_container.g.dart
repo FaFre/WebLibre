@@ -6,59 +6,141 @@ part of 'selected_container.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(SelectedContainer)
+const selectedContainerProvider = SelectedContainerProvider._();
+
+final class SelectedContainerProvider
+    extends $NotifierProvider<SelectedContainer, String?> {
+  const SelectedContainerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedContainerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedContainerHash();
+
+  @$internal
+  @override
+  SelectedContainer create() => SelectedContainer();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$selectedContainerHash() => r'9e9a9b5e3c91ff1fbf8544e329524f8e064587fe';
+
+abstract class _$SelectedContainer extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
+@ProviderFor(selectedContainerData)
+const selectedContainerDataProvider = SelectedContainerDataProvider._();
+
+final class SelectedContainerDataProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ContainerData?>,
+          ContainerData?,
+          Stream<ContainerData?>
+        >
+    with $FutureModifier<ContainerData?>, $StreamProvider<ContainerData?> {
+  const SelectedContainerDataProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedContainerDataProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedContainerDataHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<ContainerData?> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<ContainerData?> create(Ref ref) {
+    return selectedContainerData(ref);
+  }
+}
+
 String _$selectedContainerDataHash() =>
     r'1ec86a82e1fc4823a867285f05036c903633a165';
 
-/// See also [selectedContainerData].
-@ProviderFor(selectedContainerData)
-final selectedContainerDataProvider =
-    AutoDisposeStreamProvider<ContainerData?>.internal(
-      selectedContainerData,
-      name: r'selectedContainerDataProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$selectedContainerDataHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(selectedContainerTabCount)
+const selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedContainerDataRef = AutoDisposeStreamProviderRef<ContainerData?>;
+final class SelectedContainerTabCountProvider
+    extends
+        $FunctionalProvider<AsyncValue<int>, AsyncValue<int>, AsyncValue<int>>
+    with $Provider<AsyncValue<int>> {
+  const SelectedContainerTabCountProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedContainerTabCountProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedContainerTabCountHash();
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<int>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AsyncValue<int> create(Ref ref) {
+    return selectedContainerTabCount(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<int> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<int>>(value),
+    );
+  }
+}
+
 String _$selectedContainerTabCountHash() =>
     r'0fd457793f7870050f81c54d2fbcc81aca60f394';
-
-/// See also [selectedContainerTabCount].
-@ProviderFor(selectedContainerTabCount)
-final selectedContainerTabCountProvider =
-    AutoDisposeProvider<AsyncValue<int>>.internal(
-      selectedContainerTabCount,
-      name: r'selectedContainerTabCountProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$selectedContainerTabCountHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SelectedContainerTabCountRef = AutoDisposeProviderRef<AsyncValue<int>>;
-String _$selectedContainerHash() => r'0441c56a22fd8cab71fec4906d3c22f40553b327';
-
-/// See also [SelectedContainer].
-@ProviderFor(SelectedContainer)
-final selectedContainerProvider =
-    NotifierProvider<SelectedContainer, String?>.internal(
-      SelectedContainer.new,
-      name: r'selectedContainerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$selectedContainerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$SelectedContainer = Notifier<String?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

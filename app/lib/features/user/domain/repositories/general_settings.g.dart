@@ -6,42 +6,97 @@ part of 'general_settings.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$generalSettingsWithDefaultsHash() =>
-    r'd2a20cb527f8bf5a16e273933cf7ccc9d0851dc4';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [generalSettingsWithDefaults].
-@ProviderFor(generalSettingsWithDefaults)
-final generalSettingsWithDefaultsProvider =
-    AutoDisposeProvider<GeneralSettings>.internal(
-      generalSettingsWithDefaults,
-      name: r'generalSettingsWithDefaultsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$generalSettingsWithDefaultsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(GeneralSettingsRepository)
+const generalSettingsRepositoryProvider = GeneralSettingsRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef GeneralSettingsWithDefaultsRef =
-    AutoDisposeProviderRef<GeneralSettings>;
+final class GeneralSettingsRepositoryProvider
+    extends
+        $StreamNotifierProvider<GeneralSettingsRepository, GeneralSettings> {
+  const GeneralSettingsRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'generalSettingsRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$generalSettingsRepositoryHash();
+
+  @$internal
+  @override
+  GeneralSettingsRepository create() => GeneralSettingsRepository();
+}
+
 String _$generalSettingsRepositoryHash() =>
     r'3e2a07b8956094cd9376a254d9aedaa80a3c45c4';
 
-/// See also [GeneralSettingsRepository].
-@ProviderFor(GeneralSettingsRepository)
-final generalSettingsRepositoryProvider =
-    StreamNotifierProvider<GeneralSettingsRepository, GeneralSettings>.internal(
-      GeneralSettingsRepository.new,
-      name: r'generalSettingsRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$generalSettingsRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$GeneralSettingsRepository
+    extends $StreamNotifier<GeneralSettings> {
+  Stream<GeneralSettings> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<GeneralSettings>, GeneralSettings>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<GeneralSettings>, GeneralSettings>,
+              AsyncValue<GeneralSettings>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
-typedef _$GeneralSettingsRepository = StreamNotifier<GeneralSettings>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(generalSettingsWithDefaults)
+const generalSettingsWithDefaultsProvider =
+    GeneralSettingsWithDefaultsProvider._();
+
+final class GeneralSettingsWithDefaultsProvider
+    extends
+        $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
+    with $Provider<GeneralSettings> {
+  const GeneralSettingsWithDefaultsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'generalSettingsWithDefaultsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$generalSettingsWithDefaultsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeneralSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GeneralSettings create(Ref ref) {
+    return generalSettingsWithDefaults(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeneralSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeneralSettings>(value),
+    );
+  }
+}
+
+String _$generalSettingsWithDefaultsHash() =>
+    r'4b8ccd2d9ce6a07fd342a0a663d822f8c658655d';

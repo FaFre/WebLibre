@@ -143,7 +143,7 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
 EngineSettings engineSettingsWithDefaults(Ref ref) {
   return ref.watch(
     engineSettingsRepositoryProvider.select(
-      (value) => value.valueOrNull ?? EngineSettings.withDefaults(),
+      (value) => value.value ?? EngineSettings.withDefaults(),
     ),
   );
 }

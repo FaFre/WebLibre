@@ -90,7 +90,7 @@ class TorProxyScreen extends HookConsumerWidget {
                           }
                           return null; // Use the default color.
                         }),
-                        value: torProxyPort.valueOrNull != null,
+                        value: torProxyPort.value != null,
                         title: const Text('Tor™ Proxy'),
                         secondary: const Icon(MdiIcons.power),
                         onChanged: torProxyPort.isLoading
@@ -370,7 +370,7 @@ class TorProxyScreen extends HookConsumerWidget {
                           ),
                         ],
                       ),
-                    if (torProxyPort.valueOrNull != null)
+                    if (torProxyPort.value != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 24.0),
                         child: Row(

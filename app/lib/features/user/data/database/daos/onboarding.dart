@@ -19,12 +19,10 @@
  */
 import 'package:drift/drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
-
-part 'onboarding.g.dart';
+import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
 @DriftAccessor()
-class OnboardingDao extends DatabaseAccessor<UserDatabase>
-    with _$OnboardingDaoMixin {
+class OnboardingDao extends DatabaseAccessor<UserDatabase> {
   OnboardingDao(super.attachedDatabase);
 
   SingleOrNullSelectable<int?> getLastRevision() {

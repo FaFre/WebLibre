@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:weblibre/features/web_feed/data/database/daos/feed.drift.dart';
 import 'package:weblibre/features/web_feed/data/database/database.dart';
-
-part 'feed.g.dart';
+import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 
 @DriftAccessor()
-class FeedDao extends DatabaseAccessor<FeedDatabase> with _$FeedDaoMixin {
+class FeedDao extends DatabaseAccessor<FeedDatabase> with $FeedDaoMixin {
   FeedDao(super.attachedDatabase);
 
   Selectable<FeedData> getFeeds() {

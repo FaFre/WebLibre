@@ -6,22 +6,46 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bangDatabaseHash() => r'e31cf4b499300aff65174a16fb74c7dd8ec3d6f0';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [bangDatabase].
 @ProviderFor(bangDatabase)
-final bangDatabaseProvider = Provider<BangDatabase>.internal(
-  bangDatabase,
-  name: r'bangDatabaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$bangDatabaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const bangDatabaseProvider = BangDatabaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BangDatabaseRef = ProviderRef<BangDatabase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class BangDatabaseProvider
+    extends $FunctionalProvider<BangDatabase, BangDatabase, BangDatabase>
+    with $Provider<BangDatabase> {
+  const BangDatabaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bangDatabaseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bangDatabaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<BangDatabase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  BangDatabase create(Ref ref) {
+    return bangDatabase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BangDatabase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BangDatabase>(value),
+    );
+  }
+}
+
+String _$bangDatabaseHash() => r'e31cf4b499300aff65174a16fb74c7dd8ec3d6f0';

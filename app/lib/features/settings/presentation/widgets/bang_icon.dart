@@ -31,7 +31,7 @@ class BangIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bang = ref.watch(
-      bangDataProvider(trigger).select((value) => value.valueOrNull),
+      bangDataProvider(trigger).select((value) => value.value),
     );
 
     return UrlIcon([

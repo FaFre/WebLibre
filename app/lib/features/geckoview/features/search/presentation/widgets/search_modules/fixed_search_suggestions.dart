@@ -69,8 +69,8 @@ class FixedSearchTermSuggestions extends HookConsumerWidget {
     final prioritizedSuggestions = isSuggestableText
         ? [
             searchTextController.text,
-            if (searchSuggestions.valueOrNull != null)
-              ...searchSuggestions.valueOrNull!
+            if (searchSuggestions.value != null)
+              ...searchSuggestions.value!
                   .whereNot(
                     (suggestion) => suggestion == searchTextController.text,
                   )

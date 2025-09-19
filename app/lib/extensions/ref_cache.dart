@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:hooks_riverpod/misc.dart';
 import 'package:riverpod/riverpod.dart';
 
 extension CacheForExtension on Ref {

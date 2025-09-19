@@ -6,22 +6,61 @@ part of 'engine_settings_replication.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$engineSettingsReplicationServiceHash() =>
-    r'be3001c952dac6c7c6be3927f6834dae57280601';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [EngineSettingsReplicationService].
 @ProviderFor(EngineSettingsReplicationService)
-final engineSettingsReplicationServiceProvider =
-    NotifierProvider<EngineSettingsReplicationService, void>.internal(
-      EngineSettingsReplicationService.new,
-      name: r'engineSettingsReplicationServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$engineSettingsReplicationServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+const engineSettingsReplicationServiceProvider =
+    EngineSettingsReplicationServiceProvider._();
 
-typedef _$EngineSettingsReplicationService = Notifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class EngineSettingsReplicationServiceProvider
+    extends $NotifierProvider<EngineSettingsReplicationService, void> {
+  const EngineSettingsReplicationServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'engineSettingsReplicationServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$engineSettingsReplicationServiceHash();
+
+  @$internal
+  @override
+  EngineSettingsReplicationService create() =>
+      EngineSettingsReplicationService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$engineSettingsReplicationServiceHash() =>
+    r'015bd9c923de0c09109d0fd489967f52a35ee944';
+
+abstract class _$EngineSettingsReplicationService extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

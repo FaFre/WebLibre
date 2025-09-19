@@ -6,299 +6,186 @@ part of 'website_title.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$pageInfoHash() => r'53380fbf9c67d494944330641cefbde9455cdb60';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
+@ProviderFor(CompletePageInfo)
+const completePageInfoProvider = CompletePageInfoFamily._();
 
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
+final class CompletePageInfoProvider
+    extends $NotifierProvider<CompletePageInfo, AsyncValue<WebPageInfo>> {
+  const CompletePageInfoProvider._({
+    required CompletePageInfoFamily super.from,
+    required TabState super.argument,
+  }) : super(
+         retry: null,
+         name: r'completePageInfoProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$completePageInfoHash();
+
+  @override
+  String toString() {
+    return r'completePageInfoProvider'
+        ''
+        '($argument)';
   }
 
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-/// See also [pageInfo].
-@ProviderFor(pageInfo)
-const pageInfoProvider = PageInfoFamily();
-
-/// See also [pageInfo].
-class PageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
-  /// See also [pageInfo].
-  const PageInfoFamily();
-
-  /// See also [pageInfo].
-  PageInfoProvider call(Uri url, {required bool isImageRequest}) {
-    return PageInfoProvider(url, isImageRequest: isImageRequest);
-  }
-
+  @$internal
   @override
-  PageInfoProvider getProviderOverride(covariant PageInfoProvider provider) {
-    return call(provider.url, isImageRequest: provider.isImageRequest);
-  }
+  CompletePageInfo create() => CompletePageInfo();
 
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'pageInfoProvider';
-}
-
-/// See also [pageInfo].
-class PageInfoProvider extends AutoDisposeFutureProvider<WebPageInfo> {
-  /// See also [pageInfo].
-  PageInfoProvider(Uri url, {required bool isImageRequest})
-    : this._internal(
-        (ref) =>
-            pageInfo(ref as PageInfoRef, url, isImageRequest: isImageRequest),
-        from: pageInfoProvider,
-        name: r'pageInfoProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$pageInfoHash,
-        dependencies: PageInfoFamily._dependencies,
-        allTransitiveDependencies: PageInfoFamily._allTransitiveDependencies,
-        url: url,
-        isImageRequest: isImageRequest,
-      );
-
-  PageInfoProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.url,
-    required this.isImageRequest,
-  }) : super.internal();
-
-  final Uri url;
-  final bool isImageRequest;
-
-  @override
-  Override overrideWith(
-    FutureOr<WebPageInfo> Function(PageInfoRef provider) create,
-  ) {
-    return ProviderOverride(
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<WebPageInfo> value) {
+    return $ProviderOverride(
       origin: this,
-      override: PageInfoProvider._internal(
-        (ref) => create(ref as PageInfoRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        url: url,
-        isImageRequest: isImageRequest,
-      ),
+      providerOverride: $SyncValueProvider<AsyncValue<WebPageInfo>>(value),
     );
   }
 
   @override
-  AutoDisposeFutureProviderElement<WebPageInfo> createElement() {
-    return _PageInfoProviderElement(this);
-  }
-
-  @override
   bool operator ==(Object other) {
-    return other is PageInfoProvider &&
-        other.url == url &&
-        other.isImageRequest == isImageRequest;
+    return other is CompletePageInfoProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, url.hashCode);
-    hash = _SystemHash.combine(hash, isImageRequest.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin PageInfoRef on AutoDisposeFutureProviderRef<WebPageInfo> {
-  /// The parameter `url` of this provider.
-  Uri get url;
+String _$completePageInfoHash() => r'fe1804e1aa4ef34ab4b23b58a4f8a0f6852940b7';
 
-  /// The parameter `isImageRequest` of this provider.
-  bool get isImageRequest;
-}
+final class CompletePageInfoFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          CompletePageInfo,
+          AsyncValue<WebPageInfo>,
+          AsyncValue<WebPageInfo>,
+          AsyncValue<WebPageInfo>,
+          TabState
+        > {
+  const CompletePageInfoFamily._()
+    : super(
+        retry: null,
+        name: r'completePageInfoProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
-class _PageInfoProviderElement
-    extends AutoDisposeFutureProviderElement<WebPageInfo>
-    with PageInfoRef {
-  _PageInfoProviderElement(super.provider);
+  CompletePageInfoProvider call(TabState cached) =>
+      CompletePageInfoProvider._(argument: cached, from: this);
 
   @override
-  Uri get url => (origin as PageInfoProvider).url;
-  @override
-  bool get isImageRequest => (origin as PageInfoProvider).isImageRequest;
+  String toString() => r'completePageInfoProvider';
 }
 
-String _$completePageInfoHash() => r'face1bf561e0447a1260515816bac00c2b47fc71';
-
-abstract class _$CompletePageInfo
-    extends BuildlessAutoDisposeNotifier<AsyncValue<WebPageInfo>> {
-  late final TabState cached;
+abstract class _$CompletePageInfo extends $Notifier<AsyncValue<WebPageInfo>> {
+  late final _$args = ref.$arg as TabState;
+  TabState get cached => _$args;
 
   AsyncValue<WebPageInfo> build(TabState cached);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(_$args);
+    final ref =
+        this.ref as $Ref<AsyncValue<WebPageInfo>, AsyncValue<WebPageInfo>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<WebPageInfo>, AsyncValue<WebPageInfo>>,
+              AsyncValue<WebPageInfo>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
 }
 
-/// See also [CompletePageInfo].
-@ProviderFor(CompletePageInfo)
-const completePageInfoProvider = CompletePageInfoFamily();
+@ProviderFor(pageInfo)
+const pageInfoProvider = PageInfoFamily._();
 
-/// See also [CompletePageInfo].
-class CompletePageInfoFamily extends Family<AsyncValue<WebPageInfo>> {
-  /// See also [CompletePageInfo].
-  const CompletePageInfoFamily();
-
-  /// See also [CompletePageInfo].
-  CompletePageInfoProvider call(TabState cached) {
-    return CompletePageInfoProvider(cached);
-  }
-
-  @override
-  CompletePageInfoProvider getProviderOverride(
-    covariant CompletePageInfoProvider provider,
-  ) {
-    return call(provider.cached);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'completePageInfoProvider';
-}
-
-/// See also [CompletePageInfo].
-class CompletePageInfoProvider
+final class PageInfoProvider
     extends
-        AutoDisposeNotifierProviderImpl<
-          CompletePageInfo,
-          AsyncValue<WebPageInfo>
-        > {
-  /// See also [CompletePageInfo].
-  CompletePageInfoProvider(TabState cached)
-    : this._internal(
-        () => CompletePageInfo()..cached = cached,
-        from: completePageInfoProvider,
-        name: r'completePageInfoProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$completePageInfoHash,
-        dependencies: CompletePageInfoFamily._dependencies,
-        allTransitiveDependencies:
-            CompletePageInfoFamily._allTransitiveDependencies,
-        cached: cached,
-      );
-
-  CompletePageInfoProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.cached,
-  }) : super.internal();
-
-  final TabState cached;
+        $FunctionalProvider<
+          AsyncValue<WebPageInfo>,
+          WebPageInfo,
+          FutureOr<WebPageInfo>
+        >
+    with $FutureModifier<WebPageInfo>, $FutureProvider<WebPageInfo> {
+  const PageInfoProvider._({
+    required PageInfoFamily super.from,
+    required (Uri, {bool isImageRequest}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'pageInfoProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
-  AsyncValue<WebPageInfo> runNotifierBuild(
-    covariant CompletePageInfo notifier,
-  ) {
-    return notifier.build(cached);
+  String debugGetCreateSourceHash() => _$pageInfoHash();
+
+  @override
+  String toString() {
+    return r'pageInfoProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  Override overrideWith(CompletePageInfo Function() create) {
-    return ProviderOverride(
-      origin: this,
-      override: CompletePageInfoProvider._internal(
-        () => create()..cached = cached,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        cached: cached,
-      ),
-    );
-  }
+  $FutureProviderElement<WebPageInfo> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  AutoDisposeNotifierProviderElement<CompletePageInfo, AsyncValue<WebPageInfo>>
-  createElement() {
-    return _CompletePageInfoProviderElement(this);
+  FutureOr<WebPageInfo> create(Ref ref) {
+    final argument = this.argument as (Uri, {bool isImageRequest});
+    return pageInfo(ref, argument.$1, isImageRequest: argument.isImageRequest);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is CompletePageInfoProvider && other.cached == cached;
+    return other is PageInfoProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, cached.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin CompletePageInfoRef
-    on AutoDisposeNotifierProviderRef<AsyncValue<WebPageInfo>> {
-  /// The parameter `cached` of this provider.
-  TabState get cached;
-}
+String _$pageInfoHash() => r'53380fbf9c67d494944330641cefbde9455cdb60';
 
-class _CompletePageInfoProviderElement
-    extends
-        AutoDisposeNotifierProviderElement<
-          CompletePageInfo,
-          AsyncValue<WebPageInfo>
-        >
-    with CompletePageInfoRef {
-  _CompletePageInfoProviderElement(super.provider);
+final class PageInfoFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<WebPageInfo>,
+          (Uri, {bool isImageRequest})
+        > {
+  const PageInfoFamily._()
+    : super(
+        retry: null,
+        name: r'pageInfoProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  PageInfoProvider call(Uri url, {required bool isImageRequest}) =>
+      PageInfoProvider._(
+        argument: (url, isImageRequest: isImageRequest),
+        from: this,
+      );
 
   @override
-  TabState get cached => (origin as CompletePageInfoProvider).cached;
+  String toString() => r'pageInfoProvider';
 }
-
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

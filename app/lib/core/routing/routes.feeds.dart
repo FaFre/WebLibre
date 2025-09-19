@@ -43,14 +43,14 @@ part of 'routes.dart';
     TypedGoRoute<FeedEditRoute>(name: 'FeedEditRoute', path: 'edit/:feedId'),
   ],
 )
-class FeedListRoute extends GoRouteData with _$FeedListRoute {
+class FeedListRoute extends GoRouteData with $FeedListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const FeedListScreen();
   }
 }
 
-class FeedCreateRoute extends GoRouteData with _$FeedCreateRoute {
+class FeedCreateRoute extends GoRouteData with $FeedCreateRoute {
   final Uri feedId;
 
   FeedCreateRoute({required this.feedId});
@@ -61,7 +61,7 @@ class FeedCreateRoute extends GoRouteData with _$FeedCreateRoute {
   }
 }
 
-class SelectFeedDialogRoute extends GoRouteData with _$SelectFeedDialogRoute {
+class SelectFeedDialogRoute extends GoRouteData with $SelectFeedDialogRoute {
   final String feedsJson;
 
   const SelectFeedDialogRoute({required this.feedsJson});
@@ -78,7 +78,7 @@ class SelectFeedDialogRoute extends GoRouteData with _$SelectFeedDialogRoute {
   }
 }
 
-class FeedEditRoute extends GoRouteData with _$FeedEditRoute {
+class FeedEditRoute extends GoRouteData with $FeedEditRoute {
   final Uri feedId;
 
   const FeedEditRoute({required this.feedId});
@@ -89,7 +89,7 @@ class FeedEditRoute extends GoRouteData with _$FeedEditRoute {
   }
 }
 
-class FeedAddRoute extends GoRouteData with _$FeedAddRoute {
+class FeedAddRoute extends GoRouteData with $FeedAddRoute {
   final Uri? $extra;
 
   static const name = 'FeedAddRoute';
@@ -102,7 +102,7 @@ class FeedAddRoute extends GoRouteData with _$FeedAddRoute {
   }
 }
 
-class FeedArticleListRoute extends GoRouteData with _$FeedArticleListRoute {
+class FeedArticleListRoute extends GoRouteData with $FeedArticleListRoute {
   final Uri feedId;
 
   FeedArticleListRoute({required this.feedId});
@@ -113,7 +113,7 @@ class FeedArticleListRoute extends GoRouteData with _$FeedArticleListRoute {
   }
 }
 
-class FeedArticleRoute extends GoRouteData with _$FeedArticleRoute {
+class FeedArticleRoute extends GoRouteData with $FeedArticleRoute {
   final String articleId;
 
   FeedArticleRoute({required this.articleId});

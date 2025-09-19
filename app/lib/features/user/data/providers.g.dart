@@ -6,22 +6,46 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$userDatabaseHash() => r'b925780435806f0241d7ddb635e301e9fc8baf6e';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [userDatabase].
 @ProviderFor(userDatabase)
-final userDatabaseProvider = Provider<UserDatabase>.internal(
-  userDatabase,
-  name: r'userDatabaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$userDatabaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const userDatabaseProvider = UserDatabaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef UserDatabaseRef = ProviderRef<UserDatabase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class UserDatabaseProvider
+    extends $FunctionalProvider<UserDatabase, UserDatabase, UserDatabase>
+    with $Provider<UserDatabase> {
+  const UserDatabaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'userDatabaseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$userDatabaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<UserDatabase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UserDatabase create(Ref ref) {
+    return userDatabase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UserDatabase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UserDatabase>(value),
+    );
+  }
+}
+
+String _$userDatabaseHash() => r'b925780435806f0241d7ddb635e301e9fc8baf6e';

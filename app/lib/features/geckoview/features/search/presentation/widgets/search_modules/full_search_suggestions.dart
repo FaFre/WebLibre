@@ -94,8 +94,8 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
     } else {
       final prioritizedSuggestions = [
         if (searchTextIsNotEmpty) searchTextController.text,
-        if (searchSuggestions.valueOrNull != null)
-          ...searchSuggestions.valueOrNull!.whereNot(
+        if (searchSuggestions.value != null)
+          ...searchSuggestions.value!.whereNot(
             (suggestion) => suggestion == searchTextController.text,
           ),
       ];

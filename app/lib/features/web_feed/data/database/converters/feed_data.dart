@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 
 class FeedDataConverter extends JsonConverter<FeedData, Map<String, dynamic>> {
   const FeedDataConverter();

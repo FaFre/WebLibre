@@ -32,7 +32,7 @@ class ContainerTopicController extends _$ContainerTopicController {
     });
     state = result;
 
-    return result.valueOrNull;
+    return result.value;
   }
 
   @override

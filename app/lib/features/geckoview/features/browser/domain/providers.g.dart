@@ -6,998 +6,683 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$availableTabIdsHash() => r'ec3691063293e1c19c997f7b60178938ae631c7f';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-/// See also [availableTabIds].
-@ProviderFor(availableTabIds)
-const availableTabIdsProvider = AvailableTabIdsFamily();
-
-/// See also [availableTabIds].
-class AvailableTabIdsFamily extends Family<EquatableValue<List<String>>> {
-  /// See also [availableTabIds].
-  const AvailableTabIdsFamily();
-
-  /// See also [availableTabIds].
-  AvailableTabIdsProvider call(ContainerFilter containerFilter) {
-    return AvailableTabIdsProvider(containerFilter);
-  }
-
-  @override
-  AvailableTabIdsProvider getProviderOverride(
-    covariant AvailableTabIdsProvider provider,
-  ) {
-    return call(provider.containerFilter);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'availableTabIdsProvider';
-}
-
-/// See also [availableTabIds].
-class AvailableTabIdsProvider
-    extends AutoDisposeProvider<EquatableValue<List<String>>> {
-  /// See also [availableTabIds].
-  AvailableTabIdsProvider(ContainerFilter containerFilter)
-    : this._internal(
-        (ref) => availableTabIds(ref as AvailableTabIdsRef, containerFilter),
-        from: availableTabIdsProvider,
-        name: r'availableTabIdsProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$availableTabIdsHash,
-        dependencies: AvailableTabIdsFamily._dependencies,
-        allTransitiveDependencies:
-            AvailableTabIdsFamily._allTransitiveDependencies,
-        containerFilter: containerFilter,
-      );
-
-  AvailableTabIdsProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.containerFilter,
-  }) : super.internal();
-
-  final ContainerFilter containerFilter;
-
-  @override
-  Override overrideWith(
-    EquatableValue<List<String>> Function(AvailableTabIdsRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: AvailableTabIdsProvider._internal(
-        (ref) => create(ref as AvailableTabIdsRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        containerFilter: containerFilter,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeProviderElement<EquatableValue<List<String>>> createElement() {
-    return _AvailableTabIdsProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is AvailableTabIdsProvider &&
-        other.containerFilter == containerFilter;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, containerFilter.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin AvailableTabIdsRef
-    on AutoDisposeProviderRef<EquatableValue<List<String>>> {
-  /// The parameter `containerFilter` of this provider.
-  ContainerFilter get containerFilter;
-}
-
-class _AvailableTabIdsProviderElement
-    extends AutoDisposeProviderElement<EquatableValue<List<String>>>
-    with AvailableTabIdsRef {
-  _AvailableTabIdsProviderElement(super.provider);
-
-  @override
-  ContainerFilter get containerFilter =>
-      (origin as AvailableTabIdsProvider).containerFilter;
-}
-
-String _$availableTabStatesHash() =>
-    r'f506b050e1dc4f50fbd2699d97af5a16a037bc4b';
-
-/// See also [availableTabStates].
-@ProviderFor(availableTabStates)
-const availableTabStatesProvider = AvailableTabStatesFamily();
-
-/// See also [availableTabStates].
-class AvailableTabStatesFamily
-    extends Family<EquatableValue<Map<String, TabState>>> {
-  /// See also [availableTabStates].
-  const AvailableTabStatesFamily();
-
-  /// See also [availableTabStates].
-  AvailableTabStatesProvider call(ContainerFilter containerFilter) {
-    return AvailableTabStatesProvider(containerFilter);
-  }
-
-  @override
-  AvailableTabStatesProvider getProviderOverride(
-    covariant AvailableTabStatesProvider provider,
-  ) {
-    return call(provider.containerFilter);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'availableTabStatesProvider';
-}
-
-/// See also [availableTabStates].
-class AvailableTabStatesProvider
-    extends AutoDisposeProvider<EquatableValue<Map<String, TabState>>> {
-  /// See also [availableTabStates].
-  AvailableTabStatesProvider(ContainerFilter containerFilter)
-    : this._internal(
-        (ref) =>
-            availableTabStates(ref as AvailableTabStatesRef, containerFilter),
-        from: availableTabStatesProvider,
-        name: r'availableTabStatesProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$availableTabStatesHash,
-        dependencies: AvailableTabStatesFamily._dependencies,
-        allTransitiveDependencies:
-            AvailableTabStatesFamily._allTransitiveDependencies,
-        containerFilter: containerFilter,
-      );
-
-  AvailableTabStatesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.containerFilter,
-  }) : super.internal();
-
-  final ContainerFilter containerFilter;
-
-  @override
-  Override overrideWith(
-    EquatableValue<Map<String, TabState>> Function(
-      AvailableTabStatesRef provider,
-    )
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: AvailableTabStatesProvider._internal(
-        (ref) => create(ref as AvailableTabStatesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        containerFilter: containerFilter,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeProviderElement<EquatableValue<Map<String, TabState>>>
-  createElement() {
-    return _AvailableTabStatesProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is AvailableTabStatesProvider &&
-        other.containerFilter == containerFilter;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, containerFilter.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin AvailableTabStatesRef
-    on AutoDisposeProviderRef<EquatableValue<Map<String, TabState>>> {
-  /// The parameter `containerFilter` of this provider.
-  ContainerFilter get containerFilter;
-}
-
-class _AvailableTabStatesProviderElement
-    extends AutoDisposeProviderElement<EquatableValue<Map<String, TabState>>>
-    with AvailableTabStatesRef {
-  _AvailableTabStatesProviderElement(super.provider);
-
-  @override
-  ContainerFilter get containerFilter =>
-      (origin as AvailableTabStatesProvider).containerFilter;
-}
-
-String _$suggestedTabEntitiesHash() =>
-    r'f8c41ea3136ae0761e558323afb9d33bf5b8fd21';
-
-/// See also [suggestedTabEntities].
-@ProviderFor(suggestedTabEntities)
-const suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily();
-
-/// See also [suggestedTabEntities].
-class SuggestedTabEntitiesFamily
-    extends Family<EquatableValue<List<TabEntity>>> {
-  /// See also [suggestedTabEntities].
-  const SuggestedTabEntitiesFamily();
-
-  /// See also [suggestedTabEntities].
-  SuggestedTabEntitiesProvider call(String? containerId) {
-    return SuggestedTabEntitiesProvider(containerId);
-  }
-
-  @override
-  SuggestedTabEntitiesProvider getProviderOverride(
-    covariant SuggestedTabEntitiesProvider provider,
-  ) {
-    return call(provider.containerId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'suggestedTabEntitiesProvider';
-}
-
-/// See also [suggestedTabEntities].
-class SuggestedTabEntitiesProvider
-    extends AutoDisposeProvider<EquatableValue<List<TabEntity>>> {
-  /// See also [suggestedTabEntities].
-  SuggestedTabEntitiesProvider(String? containerId)
-    : this._internal(
-        (ref) =>
-            suggestedTabEntities(ref as SuggestedTabEntitiesRef, containerId),
-        from: suggestedTabEntitiesProvider,
-        name: r'suggestedTabEntitiesProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$suggestedTabEntitiesHash,
-        dependencies: SuggestedTabEntitiesFamily._dependencies,
-        allTransitiveDependencies:
-            SuggestedTabEntitiesFamily._allTransitiveDependencies,
-        containerId: containerId,
-      );
-
-  SuggestedTabEntitiesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.containerId,
-  }) : super.internal();
-
-  final String? containerId;
-
-  @override
-  Override overrideWith(
-    EquatableValue<List<TabEntity>> Function(SuggestedTabEntitiesRef provider)
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SuggestedTabEntitiesProvider._internal(
-        (ref) => create(ref as SuggestedTabEntitiesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        containerId: containerId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeProviderElement<EquatableValue<List<TabEntity>>> createElement() {
-    return _SuggestedTabEntitiesProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SuggestedTabEntitiesProvider &&
-        other.containerId == containerId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, containerId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SuggestedTabEntitiesRef
-    on AutoDisposeProviderRef<EquatableValue<List<TabEntity>>> {
-  /// The parameter `containerId` of this provider.
-  String? get containerId;
-}
-
-class _SuggestedTabEntitiesProviderElement
-    extends AutoDisposeProviderElement<EquatableValue<List<TabEntity>>>
-    with SuggestedTabEntitiesRef {
-  _SuggestedTabEntitiesProviderElement(super.provider);
-
-  @override
-  String? get containerId =>
-      (origin as SuggestedTabEntitiesProvider).containerId;
-}
-
-String _$seamlessFilteredTabEntitiesHash() =>
-    r'2cd698d4e7c9d9cda9e17abbf9a99e512425e4cd';
-
-/// See also [seamlessFilteredTabEntities].
-@ProviderFor(seamlessFilteredTabEntities)
-const seamlessFilteredTabEntitiesProvider = SeamlessFilteredTabEntitiesFamily();
-
-/// See also [seamlessFilteredTabEntities].
-class SeamlessFilteredTabEntitiesFamily
-    extends Family<EquatableValue<List<TabEntity>>> {
-  /// See also [seamlessFilteredTabEntities].
-  const SeamlessFilteredTabEntitiesFamily();
-
-  /// See also [seamlessFilteredTabEntities].
-  SeamlessFilteredTabEntitiesProvider call({
-    required TabSearchPartition searchPartition,
-    required ContainerFilter containerFilter,
-    required bool groupTrees,
-  }) {
-    return SeamlessFilteredTabEntitiesProvider(
-      searchPartition: searchPartition,
-      containerFilter: containerFilter,
-      groupTrees: groupTrees,
-    );
-  }
-
-  @override
-  SeamlessFilteredTabEntitiesProvider getProviderOverride(
-    covariant SeamlessFilteredTabEntitiesProvider provider,
-  ) {
-    return call(
-      searchPartition: provider.searchPartition,
-      containerFilter: provider.containerFilter,
-      groupTrees: provider.groupTrees,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'seamlessFilteredTabEntitiesProvider';
-}
-
-/// See also [seamlessFilteredTabEntities].
-class SeamlessFilteredTabEntitiesProvider
-    extends AutoDisposeProvider<EquatableValue<List<TabEntity>>> {
-  /// See also [seamlessFilteredTabEntities].
-  SeamlessFilteredTabEntitiesProvider({
-    required TabSearchPartition searchPartition,
-    required ContainerFilter containerFilter,
-    required bool groupTrees,
-  }) : this._internal(
-         (ref) => seamlessFilteredTabEntities(
-           ref as SeamlessFilteredTabEntitiesRef,
-           searchPartition: searchPartition,
-           containerFilter: containerFilter,
-           groupTrees: groupTrees,
-         ),
-         from: seamlessFilteredTabEntitiesProvider,
-         name: r'seamlessFilteredTabEntitiesProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$seamlessFilteredTabEntitiesHash,
-         dependencies: SeamlessFilteredTabEntitiesFamily._dependencies,
-         allTransitiveDependencies:
-             SeamlessFilteredTabEntitiesFamily._allTransitiveDependencies,
-         searchPartition: searchPartition,
-         containerFilter: containerFilter,
-         groupTrees: groupTrees,
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(SelectedBangTrigger)
+const selectedBangTriggerProvider = SelectedBangTriggerFamily._();
+
+final class SelectedBangTriggerProvider
+    extends $NotifierProvider<SelectedBangTrigger, String?> {
+  const SelectedBangTriggerProvider._({
+    required SelectedBangTriggerFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'selectedBangTriggerProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
        );
 
-  SeamlessFilteredTabEntitiesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.searchPartition,
-    required this.containerFilter,
-    required this.groupTrees,
-  }) : super.internal();
-
-  final TabSearchPartition searchPartition;
-  final ContainerFilter containerFilter;
-  final bool groupTrees;
+  @override
+  String debugGetCreateSourceHash() => _$selectedBangTriggerHash();
 
   @override
-  Override overrideWith(
-    EquatableValue<List<TabEntity>> Function(
-      SeamlessFilteredTabEntitiesRef provider,
-    )
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SeamlessFilteredTabEntitiesProvider._internal(
-        (ref) => create(ref as SeamlessFilteredTabEntitiesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        searchPartition: searchPartition,
-        containerFilter: containerFilter,
-        groupTrees: groupTrees,
-      ),
-    );
+  String toString() {
+    return r'selectedBangTriggerProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  AutoDisposeProviderElement<EquatableValue<List<TabEntity>>> createElement() {
-    return _SeamlessFilteredTabEntitiesProviderElement(this);
+  SelectedBangTrigger create() => SelectedBangTrigger();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SeamlessFilteredTabEntitiesProvider &&
-        other.searchPartition == searchPartition &&
-        other.containerFilter == containerFilter &&
-        other.groupTrees == groupTrees;
+    return other is SelectedBangTriggerProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, searchPartition.hashCode);
-    hash = _SystemHash.combine(hash, containerFilter.hashCode);
-    hash = _SystemHash.combine(hash, groupTrees.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SeamlessFilteredTabEntitiesRef
-    on AutoDisposeProviderRef<EquatableValue<List<TabEntity>>> {
-  /// The parameter `searchPartition` of this provider.
-  TabSearchPartition get searchPartition;
-
-  /// The parameter `containerFilter` of this provider.
-  ContainerFilter get containerFilter;
-
-  /// The parameter `groupTrees` of this provider.
-  bool get groupTrees;
-}
-
-class _SeamlessFilteredTabEntitiesProviderElement
-    extends AutoDisposeProviderElement<EquatableValue<List<TabEntity>>>
-    with SeamlessFilteredTabEntitiesRef {
-  _SeamlessFilteredTabEntitiesProviderElement(super.provider);
-
-  @override
-  TabSearchPartition get searchPartition =>
-      (origin as SeamlessFilteredTabEntitiesProvider).searchPartition;
-  @override
-  ContainerFilter get containerFilter =>
-      (origin as SeamlessFilteredTabEntitiesProvider).containerFilter;
-  @override
-  bool get groupTrees =>
-      (origin as SeamlessFilteredTabEntitiesProvider).groupTrees;
-}
-
-String _$seamlessFilteredTabPreviewsHash() =>
-    r'c50a2d0f9f3ba2bc3db7c96e74d9acdcac2e84e4';
-
-/// See also [seamlessFilteredTabPreviews].
-@ProviderFor(seamlessFilteredTabPreviews)
-const seamlessFilteredTabPreviewsProvider = SeamlessFilteredTabPreviewsFamily();
-
-/// See also [seamlessFilteredTabPreviews].
-class SeamlessFilteredTabPreviewsFamily
-    extends Family<EquatableValue<List<TabPreview>>> {
-  /// See also [seamlessFilteredTabPreviews].
-  const SeamlessFilteredTabPreviewsFamily();
-
-  /// See also [seamlessFilteredTabPreviews].
-  SeamlessFilteredTabPreviewsProvider call(
-    TabSearchPartition searchPartition,
-    ContainerFilter containerFilter,
-  ) {
-    return SeamlessFilteredTabPreviewsProvider(
-      searchPartition,
-      containerFilter,
-    );
-  }
-
-  @override
-  SeamlessFilteredTabPreviewsProvider getProviderOverride(
-    covariant SeamlessFilteredTabPreviewsProvider provider,
-  ) {
-    return call(provider.searchPartition, provider.containerFilter);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'seamlessFilteredTabPreviewsProvider';
-}
-
-/// See also [seamlessFilteredTabPreviews].
-class SeamlessFilteredTabPreviewsProvider
-    extends AutoDisposeProvider<EquatableValue<List<TabPreview>>> {
-  /// See also [seamlessFilteredTabPreviews].
-  SeamlessFilteredTabPreviewsProvider(
-    TabSearchPartition searchPartition,
-    ContainerFilter containerFilter,
-  ) : this._internal(
-        (ref) => seamlessFilteredTabPreviews(
-          ref as SeamlessFilteredTabPreviewsRef,
-          searchPartition,
-          containerFilter,
-        ),
-        from: seamlessFilteredTabPreviewsProvider,
-        name: r'seamlessFilteredTabPreviewsProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$seamlessFilteredTabPreviewsHash,
-        dependencies: SeamlessFilteredTabPreviewsFamily._dependencies,
-        allTransitiveDependencies:
-            SeamlessFilteredTabPreviewsFamily._allTransitiveDependencies,
-        searchPartition: searchPartition,
-        containerFilter: containerFilter,
-      );
-
-  SeamlessFilteredTabPreviewsProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.searchPartition,
-    required this.containerFilter,
-  }) : super.internal();
-
-  final TabSearchPartition searchPartition;
-  final ContainerFilter containerFilter;
-
-  @override
-  Override overrideWith(
-    EquatableValue<List<TabPreview>> Function(
-      SeamlessFilteredTabPreviewsRef provider,
-    )
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: SeamlessFilteredTabPreviewsProvider._internal(
-        (ref) => create(ref as SeamlessFilteredTabPreviewsRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        searchPartition: searchPartition,
-        containerFilter: containerFilter,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeProviderElement<EquatableValue<List<TabPreview>>> createElement() {
-    return _SeamlessFilteredTabPreviewsProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SeamlessFilteredTabPreviewsProvider &&
-        other.searchPartition == searchPartition &&
-        other.containerFilter == containerFilter;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, searchPartition.hashCode);
-    hash = _SystemHash.combine(hash, containerFilter.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SeamlessFilteredTabPreviewsRef
-    on AutoDisposeProviderRef<EquatableValue<List<TabPreview>>> {
-  /// The parameter `searchPartition` of this provider.
-  TabSearchPartition get searchPartition;
-
-  /// The parameter `containerFilter` of this provider.
-  ContainerFilter get containerFilter;
-}
-
-class _SeamlessFilteredTabPreviewsProviderElement
-    extends AutoDisposeProviderElement<EquatableValue<List<TabPreview>>>
-    with SeamlessFilteredTabPreviewsRef {
-  _SeamlessFilteredTabPreviewsProviderElement(super.provider);
-
-  @override
-  TabSearchPartition get searchPartition =>
-      (origin as SeamlessFilteredTabPreviewsProvider).searchPartition;
-  @override
-  ContainerFilter get containerFilter =>
-      (origin as SeamlessFilteredTabPreviewsProvider).containerFilter;
 }
 
 String _$selectedBangTriggerHash() =>
     r'b0e12bc95e93d50d04f1c658230cea9f15ff0385';
 
-abstract class _$SelectedBangTrigger extends BuildlessNotifier<String?> {
-  late final String? domain;
-
-  String? build({String? domain});
-}
-
-/// See also [SelectedBangTrigger].
-@ProviderFor(SelectedBangTrigger)
-const selectedBangTriggerProvider = SelectedBangTriggerFamily();
-
-/// See also [SelectedBangTrigger].
-class SelectedBangTriggerFamily extends Family<String?> {
-  /// See also [SelectedBangTrigger].
-  const SelectedBangTriggerFamily();
-
-  /// See also [SelectedBangTrigger].
-  SelectedBangTriggerProvider call({String? domain}) {
-    return SelectedBangTriggerProvider(domain: domain);
-  }
-
-  @override
-  SelectedBangTriggerProvider getProviderOverride(
-    covariant SelectedBangTriggerProvider provider,
-  ) {
-    return call(domain: provider.domain);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'selectedBangTriggerProvider';
-}
-
-/// See also [SelectedBangTrigger].
-class SelectedBangTriggerProvider
-    extends NotifierProviderImpl<SelectedBangTrigger, String?> {
-  /// See also [SelectedBangTrigger].
-  SelectedBangTriggerProvider({String? domain})
-    : this._internal(
-        () => SelectedBangTrigger()..domain = domain,
-        from: selectedBangTriggerProvider,
+final class SelectedBangTriggerFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          SelectedBangTrigger,
+          String?,
+          String?,
+          String?,
+          String?
+        > {
+  const SelectedBangTriggerFamily._()
+    : super(
+        retry: null,
         name: r'selectedBangTriggerProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$selectedBangTriggerHash,
-        dependencies: SelectedBangTriggerFamily._dependencies,
-        allTransitiveDependencies:
-            SelectedBangTriggerFamily._allTransitiveDependencies,
-        domain: domain,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
       );
 
-  SelectedBangTriggerProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.domain,
-  }) : super.internal();
-
-  final String? domain;
+  SelectedBangTriggerProvider call({String? domain}) =>
+      SelectedBangTriggerProvider._(argument: domain, from: this);
 
   @override
-  String? runNotifierBuild(covariant SelectedBangTrigger notifier) {
-    return notifier.build(domain: domain);
+  String toString() => r'selectedBangTriggerProvider';
+}
+
+abstract class _$SelectedBangTrigger extends $Notifier<String?> {
+  late final _$args = ref.$arg as String?;
+  String? get domain => _$args;
+
+  String? build({String? domain});
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(domain: _$args);
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
+@ProviderFor(SelectedBangData)
+const selectedBangDataProvider = SelectedBangDataFamily._();
+
+final class SelectedBangDataProvider
+    extends $NotifierProvider<SelectedBangData, BangData?> {
+  const SelectedBangDataProvider._({
+    required SelectedBangDataFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'selectedBangDataProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedBangDataHash();
+
+  @override
+  String toString() {
+    return r'selectedBangDataProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  Override overrideWith(SelectedBangTrigger Function() create) {
-    return ProviderOverride(
+  SelectedBangData create() => SelectedBangData();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BangData? value) {
+    return $ProviderOverride(
       origin: this,
-      override: SelectedBangTriggerProvider._internal(
-        () => create()..domain = domain,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        domain: domain,
-      ),
+      providerOverride: $SyncValueProvider<BangData?>(value),
     );
   }
 
   @override
-  NotifierProviderElement<SelectedBangTrigger, String?> createElement() {
-    return _SelectedBangTriggerProviderElement(this);
-  }
-
-  @override
   bool operator ==(Object other) {
-    return other is SelectedBangTriggerProvider && other.domain == domain;
+    return other is SelectedBangDataProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, domain.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SelectedBangTriggerRef on NotifierProviderRef<String?> {
-  /// The parameter `domain` of this provider.
-  String? get domain;
-}
-
-class _SelectedBangTriggerProviderElement
-    extends NotifierProviderElement<SelectedBangTrigger, String?>
-    with SelectedBangTriggerRef {
-  _SelectedBangTriggerProviderElement(super.provider);
-
-  @override
-  String? get domain => (origin as SelectedBangTriggerProvider).domain;
 }
 
 String _$selectedBangDataHash() => r'666858556efe59d2de38a04fda30e8ec227c6675';
 
-abstract class _$SelectedBangData
-    extends BuildlessAutoDisposeNotifier<BangData?> {
-  late final String? domain;
-
-  BangData? build({String? domain});
-}
-
-/// See also [SelectedBangData].
-@ProviderFor(SelectedBangData)
-const selectedBangDataProvider = SelectedBangDataFamily();
-
-/// See also [SelectedBangData].
-class SelectedBangDataFamily extends Family<BangData?> {
-  /// See also [SelectedBangData].
-  const SelectedBangDataFamily();
-
-  /// See also [SelectedBangData].
-  SelectedBangDataProvider call({String? domain}) {
-    return SelectedBangDataProvider(domain: domain);
-  }
-
-  @override
-  SelectedBangDataProvider getProviderOverride(
-    covariant SelectedBangDataProvider provider,
-  ) {
-    return call(domain: provider.domain);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'selectedBangDataProvider';
-}
-
-/// See also [SelectedBangData].
-class SelectedBangDataProvider
-    extends AutoDisposeNotifierProviderImpl<SelectedBangData, BangData?> {
-  /// See also [SelectedBangData].
-  SelectedBangDataProvider({String? domain})
-    : this._internal(
-        () => SelectedBangData()..domain = domain,
-        from: selectedBangDataProvider,
+final class SelectedBangDataFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          SelectedBangData,
+          BangData?,
+          BangData?,
+          BangData?,
+          String?
+        > {
+  const SelectedBangDataFamily._()
+    : super(
+        retry: null,
         name: r'selectedBangDataProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$selectedBangDataHash,
-        dependencies: SelectedBangDataFamily._dependencies,
-        allTransitiveDependencies:
-            SelectedBangDataFamily._allTransitiveDependencies,
-        domain: domain,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
       );
 
-  SelectedBangDataProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.domain,
-  }) : super.internal();
-
-  final String? domain;
+  SelectedBangDataProvider call({String? domain}) =>
+      SelectedBangDataProvider._(argument: domain, from: this);
 
   @override
-  BangData? runNotifierBuild(covariant SelectedBangData notifier) {
-    return notifier.build(domain: domain);
+  String toString() => r'selectedBangDataProvider';
+}
+
+abstract class _$SelectedBangData extends $Notifier<BangData?> {
+  late final _$args = ref.$arg as String?;
+  String? get domain => _$args;
+
+  BangData? build({String? domain});
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(domain: _$args);
+    final ref = this.ref as $Ref<BangData?, BangData?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<BangData?, BangData?>,
+              BangData?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
+@ProviderFor(availableTabIds)
+const availableTabIdsProvider = AvailableTabIdsFamily._();
+
+final class AvailableTabIdsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<String>>,
+          EquatableValue<List<String>>,
+          EquatableValue<List<String>>
+        >
+    with $Provider<EquatableValue<List<String>>> {
+  const AvailableTabIdsProvider._({
+    required AvailableTabIdsFamily super.from,
+    required ContainerFilter super.argument,
+  }) : super(
+         retry: null,
+         name: r'availableTabIdsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$availableTabIdsHash();
+
+  @override
+  String toString() {
+    return r'availableTabIdsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<String>> create(Ref ref) {
+    final argument = this.argument as ContainerFilter;
+    return availableTabIds(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<String>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<String>>>(value),
+    );
   }
 
   @override
-  Override overrideWith(SelectedBangData Function() create) {
-    return ProviderOverride(
-      origin: this,
-      override: SelectedBangDataProvider._internal(
-        () => create()..domain = domain,
-        from: from,
-        name: null,
+  bool operator ==(Object other) {
+    return other is AvailableTabIdsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$availableTabIdsHash() => r'6926ca03f97b12ebf9a46a48ed3da1b2cd559a74';
+
+final class AvailableTabIdsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<String>>,
+          ContainerFilter
+        > {
+  const AvailableTabIdsFamily._()
+    : super(
+        retry: null,
+        name: r'availableTabIdsProvider',
         dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        domain: domain,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  AvailableTabIdsProvider call(ContainerFilter containerFilter) =>
+      AvailableTabIdsProvider._(argument: containerFilter, from: this);
+
+  @override
+  String toString() => r'availableTabIdsProvider';
+}
+
+@ProviderFor(availableTabStates)
+const availableTabStatesProvider = AvailableTabStatesFamily._();
+
+final class AvailableTabStatesProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<Map<String, TabState>>,
+          EquatableValue<Map<String, TabState>>,
+          EquatableValue<Map<String, TabState>>
+        >
+    with $Provider<EquatableValue<Map<String, TabState>>> {
+  const AvailableTabStatesProvider._({
+    required AvailableTabStatesFamily super.from,
+    required ContainerFilter super.argument,
+  }) : super(
+         retry: null,
+         name: r'availableTabStatesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$availableTabStatesHash();
+
+  @override
+  String toString() {
+    return r'availableTabStatesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<Map<String, TabState>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<Map<String, TabState>> create(Ref ref) {
+    final argument = this.argument as ContainerFilter;
+    return availableTabStates(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<Map<String, TabState>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<Map<String, TabState>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AvailableTabStatesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$availableTabStatesHash() =>
+    r'f506b050e1dc4f50fbd2699d97af5a16a037bc4b';
+
+final class AvailableTabStatesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<Map<String, TabState>>,
+          ContainerFilter
+        > {
+  const AvailableTabStatesFamily._()
+    : super(
+        retry: null,
+        name: r'availableTabStatesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  AvailableTabStatesProvider call(ContainerFilter containerFilter) =>
+      AvailableTabStatesProvider._(argument: containerFilter, from: this);
+
+  @override
+  String toString() => r'availableTabStatesProvider';
+}
+
+@ProviderFor(suggestedTabEntities)
+const suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
+
+final class SuggestedTabEntitiesProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabEntity>>,
+          EquatableValue<List<TabEntity>>,
+          EquatableValue<List<TabEntity>>
+        >
+    with $Provider<EquatableValue<List<TabEntity>>> {
+  const SuggestedTabEntitiesProvider._({
+    required SuggestedTabEntitiesFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'suggestedTabEntitiesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$suggestedTabEntitiesHash();
+
+  @override
+  String toString() {
+    return r'suggestedTabEntitiesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabEntity>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabEntity>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return suggestedTabEntities(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<TabEntity>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<TabEntity>>>(
+        value,
       ),
     );
   }
 
   @override
-  AutoDisposeNotifierProviderElement<SelectedBangData, BangData?>
-  createElement() {
-    return _SelectedBangDataProviderElement(this);
-  }
-
-  @override
   bool operator ==(Object other) {
-    return other is SelectedBangDataProvider && other.domain == domain;
+    return other is SuggestedTabEntitiesProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, domain.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin SelectedBangDataRef on AutoDisposeNotifierProviderRef<BangData?> {
-  /// The parameter `domain` of this provider.
-  String? get domain;
-}
+String _$suggestedTabEntitiesHash() =>
+    r'84a85520dc589e4bcc4afa2a63691ad08be25ddd';
 
-class _SelectedBangDataProviderElement
-    extends AutoDisposeNotifierProviderElement<SelectedBangData, BangData?>
-    with SelectedBangDataRef {
-  _SelectedBangDataProviderElement(super.provider);
+final class SuggestedTabEntitiesFamily extends $Family
+    with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {
+  const SuggestedTabEntitiesFamily._()
+    : super(
+        retry: null,
+        name: r'suggestedTabEntitiesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SuggestedTabEntitiesProvider call(String? containerId) =>
+      SuggestedTabEntitiesProvider._(argument: containerId, from: this);
 
   @override
-  String? get domain => (origin as SelectedBangDataProvider).domain;
+  String toString() => r'suggestedTabEntitiesProvider';
 }
 
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(seamlessFilteredTabEntities)
+const seamlessFilteredTabEntitiesProvider =
+    SeamlessFilteredTabEntitiesFamily._();
+
+final class SeamlessFilteredTabEntitiesProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabEntity>>,
+          EquatableValue<List<TabEntity>>,
+          EquatableValue<List<TabEntity>>
+        >
+    with $Provider<EquatableValue<List<TabEntity>>> {
+  const SeamlessFilteredTabEntitiesProvider._({
+    required SeamlessFilteredTabEntitiesFamily super.from,
+    required ({
+      TabSearchPartition searchPartition,
+      ContainerFilter containerFilter,
+      bool groupTrees,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'seamlessFilteredTabEntitiesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$seamlessFilteredTabEntitiesHash();
+
+  @override
+  String toString() {
+    return r'seamlessFilteredTabEntitiesProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabEntity>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabEntity>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              TabSearchPartition searchPartition,
+              ContainerFilter containerFilter,
+              bool groupTrees,
+            });
+    return seamlessFilteredTabEntities(
+      ref,
+      searchPartition: argument.searchPartition,
+      containerFilter: argument.containerFilter,
+      groupTrees: argument.groupTrees,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<TabEntity>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<TabEntity>>>(
+        value,
+      ),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SeamlessFilteredTabEntitiesProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$seamlessFilteredTabEntitiesHash() =>
+    r'18b8ec876116eaa6e60fa321faba18a3bd7dd004';
+
+final class SeamlessFilteredTabEntitiesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<TabEntity>>,
+          ({
+            TabSearchPartition searchPartition,
+            ContainerFilter containerFilter,
+            bool groupTrees,
+          })
+        > {
+  const SeamlessFilteredTabEntitiesFamily._()
+    : super(
+        retry: null,
+        name: r'seamlessFilteredTabEntitiesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SeamlessFilteredTabEntitiesProvider call({
+    required TabSearchPartition searchPartition,
+    required ContainerFilter containerFilter,
+    required bool groupTrees,
+  }) => SeamlessFilteredTabEntitiesProvider._(
+    argument: (
+      searchPartition: searchPartition,
+      containerFilter: containerFilter,
+      groupTrees: groupTrees,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'seamlessFilteredTabEntitiesProvider';
+}
+
+@ProviderFor(seamlessFilteredTabPreviews)
+const seamlessFilteredTabPreviewsProvider =
+    SeamlessFilteredTabPreviewsFamily._();
+
+final class SeamlessFilteredTabPreviewsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabPreview>>,
+          EquatableValue<List<TabPreview>>,
+          EquatableValue<List<TabPreview>>
+        >
+    with $Provider<EquatableValue<List<TabPreview>>> {
+  const SeamlessFilteredTabPreviewsProvider._({
+    required SeamlessFilteredTabPreviewsFamily super.from,
+    required (TabSearchPartition, ContainerFilter) super.argument,
+  }) : super(
+         retry: null,
+         name: r'seamlessFilteredTabPreviewsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$seamlessFilteredTabPreviewsHash();
+
+  @override
+  String toString() {
+    return r'seamlessFilteredTabPreviewsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabPreview>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabPreview>> create(Ref ref) {
+    final argument = this.argument as (TabSearchPartition, ContainerFilter);
+    return seamlessFilteredTabPreviews(ref, argument.$1, argument.$2);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<TabPreview>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<TabPreview>>>(
+        value,
+      ),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SeamlessFilteredTabPreviewsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$seamlessFilteredTabPreviewsHash() =>
+    r'ee1d441ca5f5822e201de8fc0b264ea7b8db0776';
+
+final class SeamlessFilteredTabPreviewsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<TabPreview>>,
+          (TabSearchPartition, ContainerFilter)
+        > {
+  const SeamlessFilteredTabPreviewsFamily._()
+    : super(
+        retry: null,
+        name: r'seamlessFilteredTabPreviewsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SeamlessFilteredTabPreviewsProvider call(
+    TabSearchPartition searchPartition,
+    ContainerFilter containerFilter,
+  ) => SeamlessFilteredTabPreviewsProvider._(
+    argument: (searchPartition, containerFilter),
+    from: this,
+  );
+
+  @override
+  String toString() => r'seamlessFilteredTabPreviewsProvider';
+}

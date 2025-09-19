@@ -6,59 +6,114 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$storedAuthDataHash() => r'5f7e3ef6233a2036f7ce3728131901a46b1e548e';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [_storedAuthData].
 @ProviderFor(_storedAuthData)
-final _storedAuthDataProvider = AutoDisposeFutureProvider<String?>.internal(
-  _storedAuthData,
-  name: r'_storedAuthDataProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$storedAuthDataHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const _storedAuthDataProvider = _StoredAuthDataProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef _StoredAuthDataRef = AutoDisposeFutureProviderRef<String?>;
+final class _StoredAuthDataProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
+    with $FutureModifier<String?>, $FutureProvider<String?> {
+  const _StoredAuthDataProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'_storedAuthDataProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$_storedAuthDataHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String?> create(Ref ref) {
+    return _storedAuthData(ref);
+  }
+}
+
+String _$_storedAuthDataHash() => r'5f7e3ef6233a2036f7ce3728131901a46b1e548e';
+
+@ProviderFor(iconCacheSizeMegabytes)
+const iconCacheSizeMegabytesProvider = IconCacheSizeMegabytesProvider._();
+
+final class IconCacheSizeMegabytesProvider
+    extends $FunctionalProvider<AsyncValue<double>, double, Stream<double>>
+    with $FutureModifier<double>, $StreamProvider<double> {
+  const IconCacheSizeMegabytesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'iconCacheSizeMegabytesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$iconCacheSizeMegabytesHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<double> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<double> create(Ref ref) {
+    return iconCacheSizeMegabytes(ref);
+  }
+}
+
 String _$iconCacheSizeMegabytesHash() =>
     r'5d7f5f6485060b08ce4fd8fa634f07bf8bfdbd2d';
 
-/// See also [iconCacheSizeMegabytes].
-@ProviderFor(iconCacheSizeMegabytes)
-final iconCacheSizeMegabytesProvider =
-    AutoDisposeStreamProvider<double>.internal(
-      iconCacheSizeMegabytes,
-      name: r'iconCacheSizeMegabytesProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$iconCacheSizeMegabytesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(incognitoModeEnabled)
+const incognitoModeEnabledProvider = IncognitoModeEnabledProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef IconCacheSizeMegabytesRef = AutoDisposeStreamProviderRef<double>;
+final class IncognitoModeEnabledProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  const IncognitoModeEnabledProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'incognitoModeEnabledProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$incognitoModeEnabledHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return incognitoModeEnabled(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
 String _$incognitoModeEnabledHash() =>
     r'36957b70a5261f9d3ad228e07cc8dd5c8f616082';
-
-/// See also [incognitoModeEnabled].
-@ProviderFor(incognitoModeEnabled)
-final incognitoModeEnabledProvider = AutoDisposeProvider<bool>.internal(
-  incognitoModeEnabled,
-  name: r'incognitoModeEnabledProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$incognitoModeEnabledHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef IncognitoModeEnabledRef = AutoDisposeProviderRef<bool>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

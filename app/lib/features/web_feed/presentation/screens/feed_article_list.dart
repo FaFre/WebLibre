@@ -48,7 +48,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
                 final feedTitle = ref.watch(
                   feedDataProvider(
                     feedId,
-                  ).select((value) => value.valueOrNull?.title.whenNotEmpty),
+                  ).select((value) => value.value?.title.whenNotEmpty),
                 );
 
                 final focusNode = useFocusNode();

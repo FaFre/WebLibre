@@ -110,7 +110,7 @@ class ContainerChips extends HookConsumerWidget {
                               containerTabCountProvider(
                                 // ignore: provider_parameters
                                 ContainerFilterById(containerId: null),
-                              ).select((value) => value.valueOrNull ?? 0),
+                              ).select((value) => value.value ?? 0),
                             );
 
                             return FilterChip(

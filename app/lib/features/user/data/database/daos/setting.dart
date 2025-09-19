@@ -21,12 +21,12 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/user/data/database/daos/setting.drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
-
-part 'setting.g.dart';
+import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
 @DriftAccessor()
-class SettingDao extends DatabaseAccessor<UserDatabase> with _$SettingDaoMixin {
+class SettingDao extends DatabaseAccessor<UserDatabase> with $SettingDaoMixin {
   SettingDao(super.attachedDatabase);
 
   Future<int> updateSetting(String key, String? partitionKey, Object? value) {

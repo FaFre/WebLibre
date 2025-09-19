@@ -24,7 +24,7 @@ import 'package:nullability/nullability.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/tags_horizontal_list.dart';

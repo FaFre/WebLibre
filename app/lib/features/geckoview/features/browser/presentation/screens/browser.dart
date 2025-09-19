@@ -180,8 +180,7 @@ class BrowserScreen extends HookConsumerWidget {
               ref.listen(
                 tabScrollYProvider(tabId, const Duration(milliseconds: 50)),
                 (previous, next) {
-                  if (previous?.valueOrNull != null &&
-                      next.valueOrNull != null) {
+                  if (previous?.value != null && next.value != null) {
                     final diff = previous!.value! - next.value!;
                     if (diff < 0) {
                       if (diffAcc.value > 0) {
@@ -279,7 +278,7 @@ class BrowserScreen extends HookConsumerWidget {
 
                         if (tabState?.isFullScreen == true) {
                           await ref
-                              .read(selectedTabSessionNotifierProvider)
+                              .read(selectedTabSessionProvider)
                               .exitFullscreen();
                           return true;
                         }
@@ -288,7 +287,7 @@ class BrowserScreen extends HookConsumerWidget {
                           lastBackButtonPress.value = null;
 
                           final controller = ref.read(
-                            selectedTabSessionNotifierProvider,
+                            selectedTabSessionProvider,
                           );
 
                           await controller.stopLoading();
@@ -305,7 +304,7 @@ class BrowserScreen extends HookConsumerWidget {
                           lastBackButtonPress.value = null;
 
                           final controller = ref.read(
-                            selectedTabSessionNotifierProvider,
+                            selectedTabSessionProvider,
                           );
 
                           await controller.goBack();

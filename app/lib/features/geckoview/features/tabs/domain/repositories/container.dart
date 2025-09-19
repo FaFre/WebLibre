@@ -35,7 +35,11 @@ class ContainerRepository extends _$ContainerRepository {
   }
 
   Future<List<ContainerDataWithCount>> getAllContainersWithCount() {
-    return ref.read(tabDatabaseProvider).containersWithCount().get();
+    return ref
+        .read(tabDatabaseProvider)
+        .definitionsDrift
+        .containersWithCount()
+        .get();
   }
 
   Future<void> replaceContainer(ContainerData container) {

@@ -6,22 +6,46 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tabDatabaseHash() => r'422bd4789296dc271fabbd5906f2e2ab16bccaa3';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [tabDatabase].
 @ProviderFor(tabDatabase)
-final tabDatabaseProvider = Provider<TabDatabase>.internal(
-  tabDatabase,
-  name: r'tabDatabaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tabDatabaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const tabDatabaseProvider = TabDatabaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TabDatabaseRef = ProviderRef<TabDatabase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TabDatabaseProvider
+    extends $FunctionalProvider<TabDatabase, TabDatabase, TabDatabase>
+    with $Provider<TabDatabase> {
+  const TabDatabaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabDatabaseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabDatabaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<TabDatabase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TabDatabase create(Ref ref) {
+    return tabDatabase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabDatabase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabDatabase>(value),
+    );
+  }
+}
+
+String _$tabDatabaseHash() => r'422bd4789296dc271fabbd5906f2e2ab16bccaa3';

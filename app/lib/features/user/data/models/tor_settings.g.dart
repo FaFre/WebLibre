@@ -15,12 +15,13 @@ abstract class _$TorSettingsCWProxy {
 
   TorSettings fetchRemoteBridges(bool fetchRemoteBridges);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TorSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TorSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TorSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   TorSettings call({
     bool proxyPrivateTabsTor,
     TorConnectionConfig config,
@@ -29,7 +30,8 @@ abstract class _$TorSettingsCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfTorSettings.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfTorSettings.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfTorSettings.copyWith(...)` or call `instanceOfTorSettings.copyWith.fieldName(value)` for a single field.
 class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
   const _$TorSettingsCWProxyImpl(this._value);
 
@@ -37,26 +39,27 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
 
   @override
   TorSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor) =>
-      this(proxyPrivateTabsTor: proxyPrivateTabsTor);
+      call(proxyPrivateTabsTor: proxyPrivateTabsTor);
 
   @override
-  TorSettings config(TorConnectionConfig config) => this(config: config);
+  TorSettings config(TorConnectionConfig config) => call(config: config);
 
   @override
   TorSettings requireBridge(bool requireBridge) =>
-      this(requireBridge: requireBridge);
+      call(requireBridge: requireBridge);
 
   @override
   TorSettings fetchRemoteBridges(bool fetchRemoteBridges) =>
-      this(fetchRemoteBridges: fetchRemoteBridges);
+      call(fetchRemoteBridges: fetchRemoteBridges);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `TorSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TorSettings(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// TorSettings(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   TorSettings call({
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
     Object? config = const $CopyWithPlaceholder(),
@@ -64,19 +67,24 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
     Object? fetchRemoteBridges = const $CopyWithPlaceholder(),
   }) {
     return TorSettings(
-      proxyPrivateTabsTor: proxyPrivateTabsTor == const $CopyWithPlaceholder()
+      proxyPrivateTabsTor:
+          proxyPrivateTabsTor == const $CopyWithPlaceholder() ||
+              proxyPrivateTabsTor == null
           ? _value.proxyPrivateTabsTor
           // ignore: cast_nullable_to_non_nullable
           : proxyPrivateTabsTor as bool,
-      config: config == const $CopyWithPlaceholder()
+      config: config == const $CopyWithPlaceholder() || config == null
           ? _value.config
           // ignore: cast_nullable_to_non_nullable
           : config as TorConnectionConfig,
-      requireBridge: requireBridge == const $CopyWithPlaceholder()
+      requireBridge:
+          requireBridge == const $CopyWithPlaceholder() || requireBridge == null
           ? _value.requireBridge
           // ignore: cast_nullable_to_non_nullable
           : requireBridge as bool,
-      fetchRemoteBridges: fetchRemoteBridges == const $CopyWithPlaceholder()
+      fetchRemoteBridges:
+          fetchRemoteBridges == const $CopyWithPlaceholder() ||
+              fetchRemoteBridges == null
           ? _value.fetchRemoteBridges
           // ignore: cast_nullable_to_non_nullable
           : fetchRemoteBridges as bool,
@@ -85,7 +93,8 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
 }
 
 extension $TorSettingsCopyWith on TorSettings {
-  /// Returns a callable class that can be used as follows: `instanceOfTorSettings.copyWith(...)` or like so:`instanceOfTorSettings.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfTorSettings.copyWith(...)` or `instanceOfTorSettings.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$TorSettingsCWProxy get copyWith => _$TorSettingsCWProxyImpl(this);
 }

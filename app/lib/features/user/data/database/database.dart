@@ -21,14 +21,13 @@ import 'package:drift/drift.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
-
-part 'database.g.dart';
+import 'package:weblibre/features/user/data/database/database.drift.dart';
 
 @DriftDatabase(
-  include: {'database.drift'},
+  include: {'definitions.drift'},
   daos: [SettingDao, CacheDao, OnboardingDao],
 )
-class UserDatabase extends _$UserDatabase {
+class UserDatabase extends $UserDatabase {
   @override
   final int schemaVersion = 1;
 

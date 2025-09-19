@@ -6,157 +6,104 @@ part of 'find_in_page.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$findInPageRepositoryHash() =>
-    r'c289f136c27a22978f15668a13d7044eb39c3355';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$FindInPageRepository extends BuildlessNotifier<String?> {
-  late final String? tabId;
-
-  String? build(String? tabId);
-}
-
-/// See also [FindInPageRepository].
 @ProviderFor(FindInPageRepository)
-const findInPageRepositoryProvider = FindInPageRepositoryFamily();
+const findInPageRepositoryProvider = FindInPageRepositoryFamily._();
 
-/// See also [FindInPageRepository].
-class FindInPageRepositoryFamily extends Family<String?> {
-  /// See also [FindInPageRepository].
-  const FindInPageRepositoryFamily();
+final class FindInPageRepositoryProvider
+    extends $NotifierProvider<FindInPageRepository, String?> {
+  const FindInPageRepositoryProvider._({
+    required FindInPageRepositoryFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'findInPageRepositoryProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [FindInPageRepository].
-  FindInPageRepositoryProvider call(String? tabId) {
-    return FindInPageRepositoryProvider(tabId);
+  @override
+  String debugGetCreateSourceHash() => _$findInPageRepositoryHash();
+
+  @override
+  String toString() {
+    return r'findInPageRepositoryProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  FindInPageRepositoryProvider getProviderOverride(
-    covariant FindInPageRepositoryProvider provider,
-  ) {
-    return call(provider.tabId);
-  }
+  FindInPageRepository create() => FindInPageRepository();
 
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'findInPageRepositoryProvider';
-}
-
-/// See also [FindInPageRepository].
-class FindInPageRepositoryProvider
-    extends NotifierProviderImpl<FindInPageRepository, String?> {
-  /// See also [FindInPageRepository].
-  FindInPageRepositoryProvider(String? tabId)
-    : this._internal(
-        () => FindInPageRepository()..tabId = tabId,
-        from: findInPageRepositoryProvider,
-        name: r'findInPageRepositoryProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$findInPageRepositoryHash,
-        dependencies: FindInPageRepositoryFamily._dependencies,
-        allTransitiveDependencies:
-            FindInPageRepositoryFamily._allTransitiveDependencies,
-        tabId: tabId,
-      );
-
-  FindInPageRepositoryProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.tabId,
-  }) : super.internal();
-
-  final String? tabId;
-
-  @override
-  String? runNotifierBuild(covariant FindInPageRepository notifier) {
-    return notifier.build(tabId);
-  }
-
-  @override
-  Override overrideWith(FindInPageRepository Function() create) {
-    return ProviderOverride(
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
       origin: this,
-      override: FindInPageRepositoryProvider._internal(
-        () => create()..tabId = tabId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        tabId: tabId,
-      ),
+      providerOverride: $SyncValueProvider<String?>(value),
     );
   }
 
   @override
-  NotifierProviderElement<FindInPageRepository, String?> createElement() {
-    return _FindInPageRepositoryProviderElement(this);
-  }
-
-  @override
   bool operator ==(Object other) {
-    return other is FindInPageRepositoryProvider && other.tabId == tabId;
+    return other is FindInPageRepositoryProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, tabId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin FindInPageRepositoryRef on NotifierProviderRef<String?> {
-  /// The parameter `tabId` of this provider.
-  String? get tabId;
-}
+String _$findInPageRepositoryHash() =>
+    r'c289f136c27a22978f15668a13d7044eb39c3355';
 
-class _FindInPageRepositoryProviderElement
-    extends NotifierProviderElement<FindInPageRepository, String?>
-    with FindInPageRepositoryRef {
-  _FindInPageRepositoryProviderElement(super.provider);
+final class FindInPageRepositoryFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          FindInPageRepository,
+          String?,
+          String?,
+          String?,
+          String?
+        > {
+  const FindInPageRepositoryFamily._()
+    : super(
+        retry: null,
+        name: r'findInPageRepositoryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
+      );
+
+  FindInPageRepositoryProvider call(String? tabId) =>
+      FindInPageRepositoryProvider._(argument: tabId, from: this);
 
   @override
-  String? get tabId => (origin as FindInPageRepositoryProvider).tabId;
+  String toString() => r'findInPageRepositoryProvider';
 }
 
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$FindInPageRepository extends $Notifier<String?> {
+  late final _$args = ref.$arg as String?;
+  String? get tabId => _$args;
+
+  String? build(String? tabId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(_$args);
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

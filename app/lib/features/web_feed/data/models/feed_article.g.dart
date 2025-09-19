@@ -43,12 +43,13 @@ abstract class _$FeedArticleCWProxy {
 
   FeedArticle siteLink(Uri? siteLink);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `FeedArticle(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `FeedArticle(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// FeedArticle(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   FeedArticle call({
     String id,
     Uri feedId,
@@ -71,79 +72,81 @@ abstract class _$FeedArticleCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfFeedArticle.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfFeedArticle.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfFeedArticle.copyWith(...)` or call `instanceOfFeedArticle.copyWith.fieldName(value)` for a single field.
 class _$FeedArticleCWProxyImpl implements _$FeedArticleCWProxy {
   const _$FeedArticleCWProxyImpl(this._value);
 
   final FeedArticle _value;
 
   @override
-  FeedArticle id(String id) => this(id: id);
+  FeedArticle id(String id) => call(id: id);
 
   @override
-  FeedArticle feedId(Uri feedId) => this(feedId: feedId);
+  FeedArticle feedId(Uri feedId) => call(feedId: feedId);
 
   @override
-  FeedArticle fetched(DateTime fetched) => this(fetched: fetched);
+  FeedArticle fetched(DateTime fetched) => call(fetched: fetched);
 
   @override
-  FeedArticle created(DateTime? created) => this(created: created);
+  FeedArticle created(DateTime? created) => call(created: created);
 
   @override
-  FeedArticle updated(DateTime? updated) => this(updated: updated);
+  FeedArticle updated(DateTime? updated) => call(updated: updated);
 
   @override
-  FeedArticle lastRead(DateTime? lastRead) => this(lastRead: lastRead);
+  FeedArticle lastRead(DateTime? lastRead) => call(lastRead: lastRead);
 
   @override
-  FeedArticle title(String? title) => this(title: title);
+  FeedArticle title(String? title) => call(title: title);
 
   @override
-  FeedArticle authors(List<FeedAuthor>? authors) => this(authors: authors);
+  FeedArticle authors(List<FeedAuthor>? authors) => call(authors: authors);
 
   @override
-  FeedArticle tags(List<FeedCategory>? tags) => this(tags: tags);
+  FeedArticle tags(List<FeedCategory>? tags) => call(tags: tags);
 
   @override
-  FeedArticle links(List<FeedLink>? links) => this(links: links);
+  FeedArticle links(List<FeedLink>? links) => call(links: links);
 
   @override
   FeedArticle summaryHtml(String? summaryHtml) =>
-      this(summaryHtml: summaryHtml);
+      call(summaryHtml: summaryHtml);
 
   @override
   FeedArticle summaryMarkdown(String? summaryMarkdown) =>
-      this(summaryMarkdown: summaryMarkdown);
+      call(summaryMarkdown: summaryMarkdown);
 
   @override
   FeedArticle summaryPlain(String? summaryPlain) =>
-      this(summaryPlain: summaryPlain);
+      call(summaryPlain: summaryPlain);
 
   @override
   FeedArticle contentHtml(String? contentHtml) =>
-      this(contentHtml: contentHtml);
+      call(contentHtml: contentHtml);
 
   @override
   FeedArticle contentMarkdown(String? contentMarkdown) =>
-      this(contentMarkdown: contentMarkdown);
+      call(contentMarkdown: contentMarkdown);
 
   @override
   FeedArticle contentPlain(String? contentPlain) =>
-      this(contentPlain: contentPlain);
+      call(contentPlain: contentPlain);
 
   @override
-  FeedArticle icon(Uri? icon) => this(icon: icon);
+  FeedArticle icon(Uri? icon) => call(icon: icon);
 
   @override
-  FeedArticle siteLink(Uri? siteLink) => this(siteLink: siteLink);
+  FeedArticle siteLink(Uri? siteLink) => call(siteLink: siteLink);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `FeedArticle(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `FeedArticle(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// FeedArticle(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   FeedArticle call({
     Object? id = const $CopyWithPlaceholder(),
     Object? feedId = const $CopyWithPlaceholder(),
@@ -165,15 +168,15 @@ class _$FeedArticleCWProxyImpl implements _$FeedArticleCWProxy {
     Object? siteLink = const $CopyWithPlaceholder(),
   }) {
     return FeedArticle(
-      id: id == const $CopyWithPlaceholder()
+      id: id == const $CopyWithPlaceholder() || id == null
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,
-      feedId: feedId == const $CopyWithPlaceholder()
+      feedId: feedId == const $CopyWithPlaceholder() || feedId == null
           ? _value.feedId
           // ignore: cast_nullable_to_non_nullable
           : feedId as Uri,
-      fetched: fetched == const $CopyWithPlaceholder()
+      fetched: fetched == const $CopyWithPlaceholder() || fetched == null
           ? _value.fetched
           // ignore: cast_nullable_to_non_nullable
           : fetched as DateTime,
@@ -242,7 +245,8 @@ class _$FeedArticleCWProxyImpl implements _$FeedArticleCWProxy {
 }
 
 extension $FeedArticleCopyWith on FeedArticle {
-  /// Returns a callable class that can be used as follows: `instanceOfFeedArticle.copyWith(...)` or like so:`instanceOfFeedArticle.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfFeedArticle.copyWith(...)` or `instanceOfFeedArticle.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$FeedArticleCWProxy get copyWith => _$FeedArticleCWProxyImpl(this);
 }

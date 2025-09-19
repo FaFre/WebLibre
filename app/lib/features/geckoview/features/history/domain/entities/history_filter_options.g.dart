@@ -11,19 +11,21 @@ abstract class _$HistoryFilterOptionsCWProxy {
 
   HistoryFilterOptions visitTypes(Set<VisitType> visitTypes);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `HistoryFilterOptions(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `HistoryFilterOptions(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// HistoryFilterOptions(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   HistoryFilterOptions call({
     DateTimeRange<DateTime>? dateRange,
     Set<VisitType> visitTypes,
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfHistoryFilterOptions.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfHistoryFilterOptions.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfHistoryFilterOptions.copyWith(...)` or call `instanceOfHistoryFilterOptions.copyWith.fieldName(value)` for a single field.
 class _$HistoryFilterOptionsCWProxyImpl
     implements _$HistoryFilterOptionsCWProxy {
   const _$HistoryFilterOptionsCWProxyImpl(this._value);
@@ -32,19 +34,20 @@ class _$HistoryFilterOptionsCWProxyImpl
 
   @override
   HistoryFilterOptions dateRange(DateTimeRange<DateTime>? dateRange) =>
-      this(dateRange: dateRange);
+      call(dateRange: dateRange);
 
   @override
   HistoryFilterOptions visitTypes(Set<VisitType> visitTypes) =>
-      this(visitTypes: visitTypes);
+      call(visitTypes: visitTypes);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `HistoryFilterOptions(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `HistoryFilterOptions(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// HistoryFilterOptions(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   HistoryFilterOptions call({
     Object? dateRange = const $CopyWithPlaceholder(),
     Object? visitTypes = const $CopyWithPlaceholder(),
@@ -54,7 +57,8 @@ class _$HistoryFilterOptionsCWProxyImpl
           ? _value.dateRange
           // ignore: cast_nullable_to_non_nullable
           : dateRange as DateTimeRange<DateTime>?,
-      visitTypes: visitTypes == const $CopyWithPlaceholder()
+      visitTypes:
+          visitTypes == const $CopyWithPlaceholder() || visitTypes == null
           ? _value.visitTypes
           // ignore: cast_nullable_to_non_nullable
           : visitTypes as Set<VisitType>,
@@ -63,7 +67,8 @@ class _$HistoryFilterOptionsCWProxyImpl
 }
 
 extension $HistoryFilterOptionsCopyWith on HistoryFilterOptions {
-  /// Returns a callable class that can be used as follows: `instanceOfHistoryFilterOptions.copyWith(...)` or like so:`instanceOfHistoryFilterOptions.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfHistoryFilterOptions.copyWith(...)` or `instanceOfHistoryFilterOptions.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$HistoryFilterOptionsCWProxy get copyWith =>
       _$HistoryFilterOptionsCWProxyImpl(this);

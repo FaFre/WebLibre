@@ -20,10 +20,9 @@
 import 'dart:async';
 
 import 'package:nullability/nullability.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_parse_result.dart';
 import 'package:weblibre/features/web_feed/data/providers.dart';

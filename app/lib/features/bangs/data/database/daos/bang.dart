@@ -19,15 +19,15 @@
  */
 import 'package:drift/drift.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/bangs/data/database/daos/bang.drift.dart';
 import 'package:weblibre/features/bangs/data/database/database.dart';
+import 'package:weblibre/features/bangs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
-part 'bang.g.dart';
-
 @DriftAccessor()
-class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
+class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
   BangDao(super.db);
 
   Selectable<Bang> getBangList({Iterable<BangGroup>? groups}) {
@@ -122,9 +122,11 @@ class BangDao extends DatabaseAccessor<BangDatabase> with _$BangDaoMixin {
     final ftsQuery = db.buildFtsQuery(searchString);
 
     if (ftsQuery.isNotEmpty) {
-      return db.queryBangs(query: ftsQuery);
+      return db.definitionsDrift.queryBangs(query: ftsQuery);
     } else {
-      return db.queryBangsBasic(query: db.buildLikeQuery(searchString));
+      return db.definitionsDrift.queryBangsBasic(
+        query: db.buildLikeQuery(searchString),
+      );
     }
   }
 

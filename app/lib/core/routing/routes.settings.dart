@@ -50,35 +50,35 @@ part of 'routes.dart';
     ),
   ],
 )
-class SettingsRoute extends GoRouteData with _$SettingsRoute {
+class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SettingsScreen();
   }
 }
 
-class GeneralSettingsRoute extends GoRouteData with _$GeneralSettingsRoute {
+class GeneralSettingsRoute extends GoRouteData with $GeneralSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const GeneralSettingsScreen();
   }
 }
 
-class BangSettingsRoute extends GoRouteData with _$BangSettingsRoute {
+class BangSettingsRoute extends GoRouteData with $BangSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BangSettingsScreen();
   }
 }
 
-class WebEngineSettingsRoute extends GoRouteData with _$WebEngineSettingsRoute {
+class WebEngineSettingsRoute extends GoRouteData with $WebEngineSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const WebEngineSettingsScreen();
   }
 }
 
-class DeveloperSettingsRoute extends GoRouteData with _$DeveloperSettingsRoute {
+class DeveloperSettingsRoute extends GoRouteData with $DeveloperSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const DeveloperSettingsScreen();
@@ -86,7 +86,7 @@ class DeveloperSettingsRoute extends GoRouteData with _$DeveloperSettingsRoute {
 }
 
 class WebEngineHardeningRoute extends GoRouteData
-    with _$WebEngineHardeningRoute {
+    with $WebEngineHardeningRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const WebEngineHardeningScreen();
@@ -94,7 +94,7 @@ class WebEngineHardeningRoute extends GoRouteData
 }
 
 class WebEngineHardeningGroupRoute extends GoRouteData
-    with _$WebEngineHardeningGroupRoute {
+    with $WebEngineHardeningGroupRoute {
   final String group;
 
   const WebEngineHardeningGroupRoute({required this.group});

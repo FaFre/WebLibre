@@ -15,12 +15,13 @@ abstract class _$WebPageInfoCWProxy {
 
   WebPageInfo feeds(Set<Uri>? feeds);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebPageInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebPageInfo(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// WebPageInfo(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   WebPageInfo call({
     Uri url,
     String? title,
@@ -29,31 +30,33 @@ abstract class _$WebPageInfoCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfWebPageInfo.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfWebPageInfo.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfWebPageInfo.copyWith(...)` or call `instanceOfWebPageInfo.copyWith.fieldName(value)` for a single field.
 class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
   const _$WebPageInfoCWProxyImpl(this._value);
 
   final WebPageInfo _value;
 
   @override
-  WebPageInfo url(Uri url) => this(url: url);
+  WebPageInfo url(Uri url) => call(url: url);
 
   @override
-  WebPageInfo title(String? title) => this(title: title);
+  WebPageInfo title(String? title) => call(title: title);
 
   @override
-  WebPageInfo favicon(BrowserIcon? favicon) => this(favicon: favicon);
+  WebPageInfo favicon(BrowserIcon? favicon) => call(favicon: favicon);
 
   @override
-  WebPageInfo feeds(Set<Uri>? feeds) => this(feeds: feeds);
+  WebPageInfo feeds(Set<Uri>? feeds) => call(feeds: feeds);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebPageInfo(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebPageInfo(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// WebPageInfo(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   WebPageInfo call({
     Object? url = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
@@ -61,7 +64,7 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
     Object? feeds = const $CopyWithPlaceholder(),
   }) {
     return WebPageInfo(
-      url: url == const $CopyWithPlaceholder()
+      url: url == const $CopyWithPlaceholder() || url == null
           ? _value.url
           // ignore: cast_nullable_to_non_nullable
           : url as Uri,
@@ -82,7 +85,8 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
 }
 
 extension $WebPageInfoCopyWith on WebPageInfo {
-  /// Returns a callable class that can be used as follows: `instanceOfWebPageInfo.copyWith(...)` or like so:`instanceOfWebPageInfo.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfWebPageInfo.copyWith(...)` or `instanceOfWebPageInfo.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$WebPageInfoCWProxy get copyWith => _$WebPageInfoCWProxyImpl(this);
 }

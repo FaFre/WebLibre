@@ -21,12 +21,13 @@ abstract class _$WebExtensionStateCWProxy {
 
   WebExtensionState icon(EquatableImage? icon);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebExtensionState(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebExtensionState(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// WebExtensionState(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   WebExtensionState call({
     String extensionId,
     bool enabled,
@@ -38,7 +39,8 @@ abstract class _$WebExtensionStateCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfWebExtensionState.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfWebExtensionState.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfWebExtensionState.copyWith(...)` or call `instanceOfWebExtensionState.copyWith.fieldName(value)` for a single field.
 class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
   const _$WebExtensionStateCWProxyImpl(this._value);
 
@@ -46,35 +48,36 @@ class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
 
   @override
   WebExtensionState extensionId(String extensionId) =>
-      this(extensionId: extensionId);
+      call(extensionId: extensionId);
 
   @override
-  WebExtensionState enabled(bool enabled) => this(enabled: enabled);
+  WebExtensionState enabled(bool enabled) => call(enabled: enabled);
 
   @override
-  WebExtensionState title(String? title) => this(title: title);
+  WebExtensionState title(String? title) => call(title: title);
 
   @override
-  WebExtensionState badgeText(String? badgeText) => this(badgeText: badgeText);
+  WebExtensionState badgeText(String? badgeText) => call(badgeText: badgeText);
 
   @override
   WebExtensionState badgeTextColor(Color? badgeTextColor) =>
-      this(badgeTextColor: badgeTextColor);
+      call(badgeTextColor: badgeTextColor);
 
   @override
   WebExtensionState badgeBackgroundColor(Color? badgeBackgroundColor) =>
-      this(badgeBackgroundColor: badgeBackgroundColor);
+      call(badgeBackgroundColor: badgeBackgroundColor);
 
   @override
-  WebExtensionState icon(EquatableImage? icon) => this(icon: icon);
+  WebExtensionState icon(EquatableImage? icon) => call(icon: icon);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `WebExtensionState(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebExtensionState(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// WebExtensionState(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   WebExtensionState call({
     Object? extensionId = const $CopyWithPlaceholder(),
     Object? enabled = const $CopyWithPlaceholder(),
@@ -85,11 +88,12 @@ class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
     Object? icon = const $CopyWithPlaceholder(),
   }) {
     return WebExtensionState(
-      extensionId: extensionId == const $CopyWithPlaceholder()
+      extensionId:
+          extensionId == const $CopyWithPlaceholder() || extensionId == null
           ? _value.extensionId
           // ignore: cast_nullable_to_non_nullable
           : extensionId as String,
-      enabled: enabled == const $CopyWithPlaceholder()
+      enabled: enabled == const $CopyWithPlaceholder() || enabled == null
           ? _value.enabled
           // ignore: cast_nullable_to_non_nullable
           : enabled as bool,
@@ -118,7 +122,8 @@ class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
 }
 
 extension $WebExtensionStateCopyWith on WebExtensionState {
-  /// Returns a callable class that can be used as follows: `instanceOfWebExtensionState.copyWith(...)` or like so:`instanceOfWebExtensionState.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfWebExtensionState.copyWith(...)` or `instanceOfWebExtensionState.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$WebExtensionStateCWProxy get copyWith =>
       _$WebExtensionStateCWProxyImpl(this);

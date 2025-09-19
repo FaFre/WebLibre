@@ -21,8 +21,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:drift/drift.dart' show Expression, Insertable, Value;
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/features/bangs/data/database/database.dart'
-    show BangCompanion;
+import 'package:weblibre/features/bangs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
 part 'bang.g.dart';

@@ -6,22 +6,46 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$feedDatabaseHash() => r'c3b20e867da5af6e92d1e8c1efa96b79988837a1';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [feedDatabase].
 @ProviderFor(feedDatabase)
-final feedDatabaseProvider = Provider<FeedDatabase>.internal(
-  feedDatabase,
-  name: r'feedDatabaseProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$feedDatabaseHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const feedDatabaseProvider = FeedDatabaseProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FeedDatabaseRef = ProviderRef<FeedDatabase>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class FeedDatabaseProvider
+    extends $FunctionalProvider<FeedDatabase, FeedDatabase, FeedDatabase>
+    with $Provider<FeedDatabase> {
+  const FeedDatabaseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'feedDatabaseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$feedDatabaseHash();
+
+  @$internal
+  @override
+  $ProviderElement<FeedDatabase> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  FeedDatabase create(Ref ref) {
+    return feedDatabase(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FeedDatabase value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FeedDatabase>(value),
+    );
+  }
+}
+
+String _$feedDatabaseHash() => r'c3b20e867da5af6e92d1e8c1efa96b79988837a1';

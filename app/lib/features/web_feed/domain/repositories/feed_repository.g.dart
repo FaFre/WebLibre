@@ -6,20 +6,58 @@ part of 'feed_repository.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(FeedRepository)
+const feedRepositoryProvider = FeedRepositoryProvider._();
+
+final class FeedRepositoryProvider
+    extends $NotifierProvider<FeedRepository, void> {
+  const FeedRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'feedRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$feedRepositoryHash();
+
+  @$internal
+  @override
+  FeedRepository create() => FeedRepository();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
 String _$feedRepositoryHash() => r'805cc26890b0d43576a1eab0ecb5851b6649d7b7';
 
-/// See also [FeedRepository].
-@ProviderFor(FeedRepository)
-final feedRepositoryProvider = NotifierProvider<FeedRepository, void>.internal(
-  FeedRepository.new,
-  name: r'feedRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$feedRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$FeedRepository = Notifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$FeedRepository extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

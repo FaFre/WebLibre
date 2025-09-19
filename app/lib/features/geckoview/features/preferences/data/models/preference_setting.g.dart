@@ -11,19 +11,21 @@ abstract class _$PreferenceSettingGroupCWProxy {
 
   PreferenceSettingGroup settings(Map<String, PreferenceSetting> settings);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PreferenceSettingGroup(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSettingGroup(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// PreferenceSettingGroup(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   PreferenceSettingGroup call({
     String? description,
     Map<String, PreferenceSetting> settings,
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfPreferenceSettingGroup.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfPreferenceSettingGroup.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfPreferenceSettingGroup.copyWith(...)` or call `instanceOfPreferenceSettingGroup.copyWith.fieldName(value)` for a single field.
 class _$PreferenceSettingGroupCWProxyImpl
     implements _$PreferenceSettingGroupCWProxy {
   const _$PreferenceSettingGroupCWProxyImpl(this._value);
@@ -32,19 +34,20 @@ class _$PreferenceSettingGroupCWProxyImpl
 
   @override
   PreferenceSettingGroup description(String? description) =>
-      this(description: description);
+      call(description: description);
 
   @override
   PreferenceSettingGroup settings(Map<String, PreferenceSetting> settings) =>
-      this(settings: settings);
+      call(settings: settings);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PreferenceSettingGroup(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSettingGroup(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// PreferenceSettingGroup(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   PreferenceSettingGroup call({
     Object? description = const $CopyWithPlaceholder(),
     Object? settings = const $CopyWithPlaceholder(),
@@ -54,7 +57,7 @@ class _$PreferenceSettingGroupCWProxyImpl
           ? _value.description
           // ignore: cast_nullable_to_non_nullable
           : description as String?,
-      settings: settings == const $CopyWithPlaceholder()
+      settings: settings == const $CopyWithPlaceholder() || settings == null
           ? _value.settings
           // ignore: cast_nullable_to_non_nullable
           : settings as Map<String, PreferenceSetting>,
@@ -63,7 +66,8 @@ class _$PreferenceSettingGroupCWProxyImpl
 }
 
 extension $PreferenceSettingGroupCopyWith on PreferenceSettingGroup {
-  /// Returns a callable class that can be used as follows: `instanceOfPreferenceSettingGroup.copyWith(...)` or like so:`instanceOfPreferenceSettingGroup.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfPreferenceSettingGroup.copyWith(...)` or `instanceOfPreferenceSettingGroup.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$PreferenceSettingGroupCWProxy get copyWith =>
       _$PreferenceSettingGroupCWProxyImpl(this);
@@ -82,12 +86,13 @@ abstract class _$PreferenceSettingCWProxy {
 
   PreferenceSetting shouldBeDefault(bool shouldBeDefault);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PreferenceSetting(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSetting(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// PreferenceSetting(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   PreferenceSetting call({
     Object value,
     String? title,
@@ -98,41 +103,43 @@ abstract class _$PreferenceSettingCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfPreferenceSetting.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfPreferenceSetting.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfPreferenceSetting.copyWith(...)` or call `instanceOfPreferenceSetting.copyWith.fieldName(value)` for a single field.
 class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
   const _$PreferenceSettingCWProxyImpl(this._value);
 
   final PreferenceSetting _value;
 
   @override
-  PreferenceSetting value(Object value) => this(value: value);
+  PreferenceSetting value(Object value) => call(value: value);
 
   @override
-  PreferenceSetting title(String? title) => this(title: title);
+  PreferenceSetting title(String? title) => call(title: title);
 
   @override
   PreferenceSetting description(String? description) =>
-      this(description: description);
+      call(description: description);
 
   @override
   PreferenceSetting actualValue(Object? actualValue) =>
-      this(actualValue: actualValue);
+      call(actualValue: actualValue);
 
   @override
   PreferenceSetting requireUserOptIn(bool requireUserOptIn) =>
-      this(requireUserOptIn: requireUserOptIn);
+      call(requireUserOptIn: requireUserOptIn);
 
   @override
   PreferenceSetting shouldBeDefault(bool shouldBeDefault) =>
-      this(shouldBeDefault: shouldBeDefault);
+      call(shouldBeDefault: shouldBeDefault);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `PreferenceSetting(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSetting(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// PreferenceSetting(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   PreferenceSetting call({
     Object? value = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
@@ -142,7 +149,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
     Object? shouldBeDefault = const $CopyWithPlaceholder(),
   }) {
     return PreferenceSetting(
-      value: value == const $CopyWithPlaceholder()
+      value: value == const $CopyWithPlaceholder() || value == null
           ? _value.value
           // ignore: cast_nullable_to_non_nullable
           : value as Object,
@@ -158,11 +165,15 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
           ? _value.actualValue
           // ignore: cast_nullable_to_non_nullable
           : actualValue as Object?,
-      requireUserOptIn: requireUserOptIn == const $CopyWithPlaceholder()
+      requireUserOptIn:
+          requireUserOptIn == const $CopyWithPlaceholder() ||
+              requireUserOptIn == null
           ? _value.requireUserOptIn
           // ignore: cast_nullable_to_non_nullable
           : requireUserOptIn as bool,
-      shouldBeDefault: shouldBeDefault == const $CopyWithPlaceholder()
+      shouldBeDefault:
+          shouldBeDefault == const $CopyWithPlaceholder() ||
+              shouldBeDefault == null
           ? _value.shouldBeDefault
           // ignore: cast_nullable_to_non_nullable
           : shouldBeDefault as bool,
@@ -171,7 +182,8 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
 }
 
 extension $PreferenceSettingCopyWith on PreferenceSetting {
-  /// Returns a callable class that can be used as follows: `instanceOfPreferenceSetting.copyWith(...)` or like so:`instanceOfPreferenceSetting.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfPreferenceSetting.copyWith(...)` or `instanceOfPreferenceSetting.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$PreferenceSettingCWProxy get copyWith =>
       _$PreferenceSettingCWProxyImpl(this);

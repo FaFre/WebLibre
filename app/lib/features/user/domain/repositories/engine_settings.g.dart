@@ -6,41 +6,95 @@ part of 'engine_settings.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$engineSettingsWithDefaultsHash() =>
-    r'018e37f31f893e203b86038e84b0ddf5e72454d4';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [engineSettingsWithDefaults].
-@ProviderFor(engineSettingsWithDefaults)
-final engineSettingsWithDefaultsProvider =
-    AutoDisposeProvider<EngineSettings>.internal(
-      engineSettingsWithDefaults,
-      name: r'engineSettingsWithDefaultsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$engineSettingsWithDefaultsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(EngineSettingsRepository)
+const engineSettingsRepositoryProvider = EngineSettingsRepositoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef EngineSettingsWithDefaultsRef = AutoDisposeProviderRef<EngineSettings>;
+final class EngineSettingsRepositoryProvider
+    extends $StreamNotifierProvider<EngineSettingsRepository, EngineSettings> {
+  const EngineSettingsRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'engineSettingsRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$engineSettingsRepositoryHash();
+
+  @$internal
+  @override
+  EngineSettingsRepository create() => EngineSettingsRepository();
+}
+
 String _$engineSettingsRepositoryHash() =>
     r'd0c2fbe060b5eaee7189f6cb0dd58c97cf5987b5';
 
-/// See also [EngineSettingsRepository].
-@ProviderFor(EngineSettingsRepository)
-final engineSettingsRepositoryProvider =
-    StreamNotifierProvider<EngineSettingsRepository, EngineSettings>.internal(
-      EngineSettingsRepository.new,
-      name: r'engineSettingsRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$engineSettingsRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$EngineSettingsRepository
+    extends $StreamNotifier<EngineSettings> {
+  Stream<EngineSettings> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<EngineSettings>, EngineSettings>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<EngineSettings>, EngineSettings>,
+              AsyncValue<EngineSettings>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
-typedef _$EngineSettingsRepository = StreamNotifier<EngineSettings>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(engineSettingsWithDefaults)
+const engineSettingsWithDefaultsProvider =
+    EngineSettingsWithDefaultsProvider._();
+
+final class EngineSettingsWithDefaultsProvider
+    extends $FunctionalProvider<EngineSettings, EngineSettings, EngineSettings>
+    with $Provider<EngineSettings> {
+  const EngineSettingsWithDefaultsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'engineSettingsWithDefaultsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$engineSettingsWithDefaultsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EngineSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  EngineSettings create(Ref ref) {
+    return engineSettingsWithDefaults(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EngineSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EngineSettings>(value),
+    );
+  }
+}
+
+String _$engineSettingsWithDefaultsHash() =>
+    r'd47fa79c0ad87a2357de58133585b4f6b097b068';

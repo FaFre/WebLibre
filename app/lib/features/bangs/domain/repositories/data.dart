@@ -46,14 +46,17 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<Map<String, List<String>>> watchCategories() {
-    return ref.read(bangDatabaseProvider).categoriesJson().watchSingle().map((
-      json,
-    ) {
-      final decoded = jsonDecode(json) as Map<String, dynamic>;
-      return decoded.map(
-        (key, value) => MapEntry(key, (value as List<dynamic>).cast()),
-      );
-    });
+    return ref
+        .read(bangDatabaseProvider)
+        .definitionsDrift
+        .categoriesJson()
+        .watchSingle()
+        .map((json) {
+          final decoded = jsonDecode(json) as Map<String, dynamic>;
+          return decoded.map(
+            (key, value) => MapEntry(key, (value as List<dynamic>).cast()),
+          );
+        });
   }
 
   Stream<int> watchBangCount(BangGroup group) {
@@ -96,6 +99,7 @@ class BangDataRepository extends _$BangDataRepository {
   Stream<List<SearchHistoryEntry>> watchSearchHistory({required int limit}) {
     return ref
         .read(bangDatabaseProvider)
+        .definitionsDrift
         .searchHistoryEntries(limit: limit)
         .watch();
   }
@@ -116,7 +120,7 @@ class BangDataRepository extends _$BangDataRepository {
     //Pack in a transaction to bundle rebuilds of watch() queries
     return db.transaction(() async {
       await db.bangDao.addSearchEntry(trigger, searchQuery);
-      await db.evictHistoryEntries(limit: maxEntryCount);
+      await db.definitionsDrift.evictHistoryEntries(limit: maxEntryCount);
     });
   }
 

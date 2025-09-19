@@ -272,7 +272,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                   builder: (context, ref, child) {
                     final selectedContainer = ref.watch(
                       selectedContainerDataProvider.select(
-                        (value) => value.valueOrNull,
+                        (value) => value.value,
                       ),
                     );
 

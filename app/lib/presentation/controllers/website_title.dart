@@ -51,7 +51,7 @@ class CompletePageInfo extends _$CompletePageInfo {
       pageInfoProvider(cached.url, isImageRequest: false),
       (previous, next) {
         if (next.hasValue) {
-          final current = stateOrNull?.valueOrNull ?? cached;
+          final current = stateOrNull?.value ?? cached;
 
           state = AsyncData(
             current.copyWith(
@@ -79,7 +79,7 @@ class CompletePageInfo extends _$CompletePageInfo {
       tabStateProvider(cached.id).select((value) => value?.title.whenNotEmpty),
       (previous, next) {
         if (next != null) {
-          final current = stateOrNull?.valueOrNull ?? cached;
+          final current = stateOrNull?.value ?? cached;
           state = AsyncData(current.copyWith.title(next));
         }
       },
@@ -90,7 +90,7 @@ class CompletePageInfo extends _$CompletePageInfo {
       tabStateProvider(cached.id).select((value) => value?.favicon),
       (previous, next) {
         if (next != null) {
-          final current = stateOrNull?.valueOrNull ?? cached;
+          final current = stateOrNull?.value ?? cached;
           state = AsyncData(current.copyWith.favicon(next));
         }
       },

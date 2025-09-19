@@ -21,7 +21,7 @@ import 'package:collection/collection.dart';
 import 'package:nullability/nullability.dart';
 import 'package:rss_dart/dart_rss.dart';
 import 'package:rss_dart/domain/rss1_feed.dart';
-import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_author.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';

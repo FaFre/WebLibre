@@ -131,6 +131,7 @@ class TabRepository extends _$TabRepository {
   Future<bool> selectPreviouslyOpenedTab(String tabId) async {
     final previousTabId = await ref
         .read(tabDatabaseProvider)
+        .definitionsDrift
         .previousTabByTimestamp(tabId: tabId)
         .getSingleOrNull();
 
@@ -144,6 +145,7 @@ class TabRepository extends _$TabRepository {
   Future<bool> selectPreviousTab(String tabId) async {
     final previousTabId = await ref
         .read(tabDatabaseProvider)
+        .definitionsDrift
         .previousTabByOrderKey(tabId: tabId)
         .getSingleOrNull();
 
@@ -157,6 +159,7 @@ class TabRepository extends _$TabRepository {
   Future<bool> selectNextTab(String tabId) async {
     final previousTabId = await ref
         .read(tabDatabaseProvider)
+        .definitionsDrift
         .nextTabByOrderKey(tabId: tabId)
         .getSingleOrNull();
 

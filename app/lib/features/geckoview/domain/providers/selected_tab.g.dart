@@ -6,20 +6,58 @@ part of 'selected_tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(SelectedTab)
+const selectedTabProvider = SelectedTabProvider._();
+
+final class SelectedTabProvider
+    extends $NotifierProvider<SelectedTab, String?> {
+  const SelectedTabProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedTabProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedTabHash();
+
+  @$internal
+  @override
+  SelectedTab create() => SelectedTab();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
 String _$selectedTabHash() => r'26d1bb90c777d7011f4f27f7b962584a4a62a0a7';
 
-/// See also [SelectedTab].
-@ProviderFor(SelectedTab)
-final selectedTabProvider = NotifierProvider<SelectedTab, String?>.internal(
-  SelectedTab.new,
-  name: r'selectedTabProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$selectedTabHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$SelectedTab = Notifier<String?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$SelectedTab extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

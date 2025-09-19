@@ -42,7 +42,7 @@ class DefaultSearchPage extends HookConsumerWidget {
     final bangs = ref.watch(bangListProvider(triggers: defaultBangs));
 
     final activeBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.valueOrNull),
+      defaultSearchBangDataProvider.select((value) => value.value),
     );
     final activeAutosuggest = ref.watch(
       generalSettingsWithDefaultsProvider.select(

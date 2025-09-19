@@ -6,651 +6,491 @@ part of 'bangs.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(defaultSearchBangData)
+const defaultSearchBangDataProvider = DefaultSearchBangDataProvider._();
+
+final class DefaultSearchBangDataProvider
+    extends
+        $FunctionalProvider<AsyncValue<BangData?>, BangData?, Stream<BangData?>>
+    with $FutureModifier<BangData?>, $StreamProvider<BangData?> {
+  const DefaultSearchBangDataProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'defaultSearchBangDataProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$defaultSearchBangDataHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<BangData?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<BangData?> create(Ref ref) {
+    return defaultSearchBangData(ref);
+  }
+}
+
 String _$defaultSearchBangDataHash() =>
     r'5fa3f588b57a82dd8fffb2082e495108a242ef72';
 
-/// See also [defaultSearchBangData].
-@ProviderFor(defaultSearchBangData)
-final defaultSearchBangDataProvider = StreamProvider<BangData?>.internal(
-  defaultSearchBangData,
-  name: r'defaultSearchBangDataProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$defaultSearchBangDataHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DefaultSearchBangDataRef = StreamProviderRef<BangData?>;
-String _$bangDataHash() => r'b10d3a74e19d30fc372b9ecbf7146bccd9fdf83b';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-/// See also [bangData].
 @ProviderFor(bangData)
-const bangDataProvider = BangDataFamily();
+const bangDataProvider = BangDataFamily._();
 
-/// See also [bangData].
-class BangDataFamily extends Family<AsyncValue<BangData?>> {
-  /// See also [bangData].
-  const BangDataFamily();
+final class BangDataProvider
+    extends
+        $FunctionalProvider<AsyncValue<BangData?>, BangData?, Stream<BangData?>>
+    with $FutureModifier<BangData?>, $StreamProvider<BangData?> {
+  const BangDataProvider._({
+    required BangDataFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'bangDataProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// See also [bangData].
-  BangDataProvider call(String trigger) {
-    return BangDataProvider(trigger);
+  @override
+  String debugGetCreateSourceHash() => _$bangDataHash();
+
+  @override
+  String toString() {
+    return r'bangDataProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  BangDataProvider getProviderOverride(covariant BangDataProvider provider) {
-    return call(provider.trigger);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
+  $StreamProviderElement<BangData?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
 
   @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'bangDataProvider';
-}
-
-/// See also [bangData].
-class BangDataProvider extends AutoDisposeStreamProvider<BangData?> {
-  /// See also [bangData].
-  BangDataProvider(String trigger)
-    : this._internal(
-        (ref) => bangData(ref as BangDataRef, trigger),
-        from: bangDataProvider,
-        name: r'bangDataProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$bangDataHash,
-        dependencies: BangDataFamily._dependencies,
-        allTransitiveDependencies: BangDataFamily._allTransitiveDependencies,
-        trigger: trigger,
-      );
-
-  BangDataProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.trigger,
-  }) : super.internal();
-
-  final String trigger;
-
-  @override
-  Override overrideWith(
-    Stream<BangData?> Function(BangDataRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: BangDataProvider._internal(
-        (ref) => create(ref as BangDataRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        trigger: trigger,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeStreamProviderElement<BangData?> createElement() {
-    return _BangDataProviderElement(this);
+  Stream<BangData?> create(Ref ref) {
+    final argument = this.argument as String;
+    return bangData(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is BangDataProvider && other.trigger == trigger;
+    return other is BangDataProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, trigger.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin BangDataRef on AutoDisposeStreamProviderRef<BangData?> {
-  /// The parameter `trigger` of this provider.
-  String get trigger;
-}
+String _$bangDataHash() => r'b10d3a74e19d30fc372b9ecbf7146bccd9fdf83b';
 
-class _BangDataProviderElement
-    extends AutoDisposeStreamProviderElement<BangData?>
-    with BangDataRef {
-  _BangDataProviderElement(super.provider);
+final class BangDataFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<BangData?>, String> {
+  const BangDataFamily._()
+    : super(
+        retry: null,
+        name: r'bangDataProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  BangDataProvider call(String trigger) =>
+      BangDataProvider._(argument: trigger, from: this);
 
   @override
-  String get trigger => (origin as BangDataProvider).trigger;
+  String toString() => r'bangDataProvider';
+}
+
+@ProviderFor(bangCategories)
+const bangCategoriesProvider = BangCategoriesProvider._();
+
+final class BangCategoriesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, List<String>>>,
+          Map<String, List<String>>,
+          Stream<Map<String, List<String>>>
+        >
+    with
+        $FutureModifier<Map<String, List<String>>>,
+        $StreamProvider<Map<String, List<String>>> {
+  const BangCategoriesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bangCategoriesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bangCategoriesHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, List<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, List<String>>> create(Ref ref) {
+    return bangCategories(ref);
+  }
 }
 
 String _$bangCategoriesHash() => r'947fcfd2dffcc7f585c6ed7379d319f4fe72293a';
 
-/// See also [bangCategories].
-@ProviderFor(bangCategories)
-final bangCategoriesProvider =
-    AutoDisposeStreamProvider<Map<String, List<String>>>.internal(
-      bangCategories,
-      name: r'bangCategoriesProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$bangCategoriesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(bangList)
+const bangListProvider = BangListFamily._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BangCategoriesRef =
-    AutoDisposeStreamProviderRef<Map<String, List<String>>>;
+final class BangListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<BangData>>,
+          List<BangData>,
+          Stream<List<BangData>>
+        >
+    with $FutureModifier<List<BangData>>, $StreamProvider<List<BangData>> {
+  const BangListProvider._({
+    required BangListFamily super.from,
+    required ({
+      List<String>? triggers,
+      List<BangGroup>? groups,
+      String? domain,
+      ({String category, String? subCategory})? categoryFilter,
+      bool? orderMostFrequentFirst,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'bangListProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$bangListHash();
+
+  @override
+  String toString() {
+    return r'bangListProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<BangData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<BangData>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              List<String>? triggers,
+              List<BangGroup>? groups,
+              String? domain,
+              ({String category, String? subCategory})? categoryFilter,
+              bool? orderMostFrequentFirst,
+            });
+    return bangList(
+      ref,
+      triggers: argument.triggers,
+      groups: argument.groups,
+      domain: argument.domain,
+      categoryFilter: argument.categoryFilter,
+      orderMostFrequentFirst: argument.orderMostFrequentFirst,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BangListProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
 String _$bangListHash() => r'd1e0bb9fa4f523ce516e075c0d149bf7803ebb2b';
 
-/// See also [bangList].
-@ProviderFor(bangList)
-const bangListProvider = BangListFamily();
+final class BangListFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          Stream<List<BangData>>,
+          ({
+            List<String>? triggers,
+            List<BangGroup>? groups,
+            String? domain,
+            ({String category, String? subCategory})? categoryFilter,
+            bool? orderMostFrequentFirst,
+          })
+        > {
+  const BangListFamily._()
+    : super(
+        retry: null,
+        name: r'bangListProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
-/// See also [bangList].
-class BangListFamily extends Family<AsyncValue<List<BangData>>> {
-  /// See also [bangList].
-  const BangListFamily();
-
-  /// See also [bangList].
   BangListProvider call({
     List<String>? triggers,
     List<BangGroup>? groups,
     String? domain,
     ({String category, String? subCategory})? categoryFilter,
     bool? orderMostFrequentFirst,
-  }) {
-    return BangListProvider(
+  }) => BangListProvider._(
+    argument: (
       triggers: triggers,
       groups: groups,
       domain: domain,
       categoryFilter: categoryFilter,
       orderMostFrequentFirst: orderMostFrequentFirst,
-    );
-  }
+    ),
+    from: this,
+  );
 
   @override
-  BangListProvider getProviderOverride(covariant BangListProvider provider) {
-    return call(
-      triggers: provider.triggers,
-      groups: provider.groups,
-      domain: provider.domain,
-      categoryFilter: provider.categoryFilter,
-      orderMostFrequentFirst: provider.orderMostFrequentFirst,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'bangListProvider';
+  String toString() => r'bangListProvider';
 }
 
-/// See also [bangList].
-class BangListProvider extends AutoDisposeStreamProvider<List<BangData>> {
-  /// See also [bangList].
-  BangListProvider({
-    List<String>? triggers,
-    List<BangGroup>? groups,
-    String? domain,
-    ({String category, String? subCategory})? categoryFilter,
-    bool? orderMostFrequentFirst,
-  }) : this._internal(
-         (ref) => bangList(
-           ref as BangListRef,
-           triggers: triggers,
-           groups: groups,
-           domain: domain,
-           categoryFilter: categoryFilter,
-           orderMostFrequentFirst: orderMostFrequentFirst,
-         ),
-         from: bangListProvider,
-         name: r'bangListProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$bangListHash,
-         dependencies: BangListFamily._dependencies,
-         allTransitiveDependencies: BangListFamily._allTransitiveDependencies,
-         triggers: triggers,
-         groups: groups,
-         domain: domain,
-         categoryFilter: categoryFilter,
-         orderMostFrequentFirst: orderMostFrequentFirst,
-       );
+@ProviderFor(frequentBangList)
+const frequentBangListProvider = FrequentBangListProvider._();
 
-  BangListProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.triggers,
-    required this.groups,
-    required this.domain,
-    required this.categoryFilter,
-    required this.orderMostFrequentFirst,
-  }) : super.internal();
-
-  final List<String>? triggers;
-  final List<BangGroup>? groups;
-  final String? domain;
-  final ({String category, String? subCategory})? categoryFilter;
-  final bool? orderMostFrequentFirst;
-
-  @override
-  Override overrideWith(
-    Stream<List<BangData>> Function(BangListRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: BangListProvider._internal(
-        (ref) => create(ref as BangListRef),
-        from: from,
-        name: null,
+final class FrequentBangListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<BangData>>,
+          List<BangData>,
+          Stream<List<BangData>>
+        >
+    with $FutureModifier<List<BangData>>, $StreamProvider<List<BangData>> {
+  const FrequentBangListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'frequentBangListProvider',
+        isAutoDispose: true,
         dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        triggers: triggers,
-        groups: groups,
-        domain: domain,
-        categoryFilter: categoryFilter,
-        orderMostFrequentFirst: orderMostFrequentFirst,
-      ),
-    );
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$frequentBangListHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<BangData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<BangData>> create(Ref ref) {
+    return frequentBangList(ref);
   }
-
-  @override
-  AutoDisposeStreamProviderElement<List<BangData>> createElement() {
-    return _BangListProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is BangListProvider &&
-        other.triggers == triggers &&
-        other.groups == groups &&
-        other.domain == domain &&
-        other.categoryFilter == categoryFilter &&
-        other.orderMostFrequentFirst == orderMostFrequentFirst;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, triggers.hashCode);
-    hash = _SystemHash.combine(hash, groups.hashCode);
-    hash = _SystemHash.combine(hash, domain.hashCode);
-    hash = _SystemHash.combine(hash, categoryFilter.hashCode);
-    hash = _SystemHash.combine(hash, orderMostFrequentFirst.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin BangListRef on AutoDisposeStreamProviderRef<List<BangData>> {
-  /// The parameter `triggers` of this provider.
-  List<String>? get triggers;
-
-  /// The parameter `groups` of this provider.
-  List<BangGroup>? get groups;
-
-  /// The parameter `domain` of this provider.
-  String? get domain;
-
-  /// The parameter `categoryFilter` of this provider.
-  ({String category, String? subCategory})? get categoryFilter;
-
-  /// The parameter `orderMostFrequentFirst` of this provider.
-  bool? get orderMostFrequentFirst;
-}
-
-class _BangListProviderElement
-    extends AutoDisposeStreamProviderElement<List<BangData>>
-    with BangListRef {
-  _BangListProviderElement(super.provider);
-
-  @override
-  List<String>? get triggers => (origin as BangListProvider).triggers;
-  @override
-  List<BangGroup>? get groups => (origin as BangListProvider).groups;
-  @override
-  String? get domain => (origin as BangListProvider).domain;
-  @override
-  ({String category, String? subCategory})? get categoryFilter =>
-      (origin as BangListProvider).categoryFilter;
-  @override
-  bool? get orderMostFrequentFirst =>
-      (origin as BangListProvider).orderMostFrequentFirst;
 }
 
 String _$frequentBangListHash() => r'2c1ecb7e9416772fc1c32d01d767e1eb4f865975';
 
-/// See also [frequentBangList].
-@ProviderFor(frequentBangList)
-final frequentBangListProvider =
-    AutoDisposeStreamProvider<List<BangData>>.internal(
-      frequentBangList,
-      name: r'frequentBangListProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$frequentBangListHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FrequentBangListRef = AutoDisposeStreamProviderRef<List<BangData>>;
-String _$searchHistoryHash() => r'7b97798729643de8e44fd8024cdc02f35124b08b';
-
-/// See also [searchHistory].
 @ProviderFor(searchHistory)
-final searchHistoryProvider =
-    AutoDisposeStreamProvider<List<SearchHistoryEntry>>.internal(
-      searchHistory,
-      name: r'searchHistoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$searchHistoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+const searchHistoryProvider = SearchHistoryProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SearchHistoryRef =
-    AutoDisposeStreamProviderRef<List<SearchHistoryEntry>>;
-String _$lastSyncOfGroupHash() => r'23d07f3132ba9bb35a31f74e3a69698d31d4c569';
-
-/// See also [lastSyncOfGroup].
-@ProviderFor(lastSyncOfGroup)
-const lastSyncOfGroupProvider = LastSyncOfGroupFamily();
-
-/// See also [lastSyncOfGroup].
-class LastSyncOfGroupFamily extends Family<AsyncValue<DateTime?>> {
-  /// See also [lastSyncOfGroup].
-  const LastSyncOfGroupFamily();
-
-  /// See also [lastSyncOfGroup].
-  LastSyncOfGroupProvider call(BangGroup group) {
-    return LastSyncOfGroupProvider(group);
-  }
-
-  @override
-  LastSyncOfGroupProvider getProviderOverride(
-    covariant LastSyncOfGroupProvider provider,
-  ) {
-    return call(provider.group);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'lastSyncOfGroupProvider';
-}
-
-/// See also [lastSyncOfGroup].
-class LastSyncOfGroupProvider extends AutoDisposeStreamProvider<DateTime?> {
-  /// See also [lastSyncOfGroup].
-  LastSyncOfGroupProvider(BangGroup group)
-    : this._internal(
-        (ref) => lastSyncOfGroup(ref as LastSyncOfGroupRef, group),
-        from: lastSyncOfGroupProvider,
-        name: r'lastSyncOfGroupProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$lastSyncOfGroupHash,
-        dependencies: LastSyncOfGroupFamily._dependencies,
-        allTransitiveDependencies:
-            LastSyncOfGroupFamily._allTransitiveDependencies,
-        group: group,
+final class SearchHistoryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<SearchHistoryEntry>>,
+          List<SearchHistoryEntry>,
+          Stream<List<SearchHistoryEntry>>
+        >
+    with
+        $FutureModifier<List<SearchHistoryEntry>>,
+        $StreamProvider<List<SearchHistoryEntry>> {
+  const SearchHistoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'searchHistoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
       );
 
-  LastSyncOfGroupProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.group,
-  }) : super.internal();
+  @override
+  String debugGetCreateSourceHash() => _$searchHistoryHash();
 
-  final BangGroup group;
+  @$internal
+  @override
+  $StreamProviderElement<List<SearchHistoryEntry>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
 
   @override
-  Override overrideWith(
-    Stream<DateTime?> Function(LastSyncOfGroupRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: LastSyncOfGroupProvider._internal(
-        (ref) => create(ref as LastSyncOfGroupRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        group: group,
-      ),
-    );
+  Stream<List<SearchHistoryEntry>> create(Ref ref) {
+    return searchHistory(ref);
+  }
+}
+
+String _$searchHistoryHash() => r'7b97798729643de8e44fd8024cdc02f35124b08b';
+
+@ProviderFor(lastSyncOfGroup)
+const lastSyncOfGroupProvider = LastSyncOfGroupFamily._();
+
+final class LastSyncOfGroupProvider
+    extends
+        $FunctionalProvider<AsyncValue<DateTime?>, DateTime?, Stream<DateTime?>>
+    with $FutureModifier<DateTime?>, $StreamProvider<DateTime?> {
+  const LastSyncOfGroupProvider._({
+    required LastSyncOfGroupFamily super.from,
+    required BangGroup super.argument,
+  }) : super(
+         retry: null,
+         name: r'lastSyncOfGroupProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$lastSyncOfGroupHash();
+
+  @override
+  String toString() {
+    return r'lastSyncOfGroupProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  AutoDisposeStreamProviderElement<DateTime?> createElement() {
-    return _LastSyncOfGroupProviderElement(this);
+  $StreamProviderElement<DateTime?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<DateTime?> create(Ref ref) {
+    final argument = this.argument as BangGroup;
+    return lastSyncOfGroup(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is LastSyncOfGroupProvider && other.group == group;
+    return other is LastSyncOfGroupProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, group.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin LastSyncOfGroupRef on AutoDisposeStreamProviderRef<DateTime?> {
-  /// The parameter `group` of this provider.
-  BangGroup get group;
-}
+String _$lastSyncOfGroupHash() => r'23d07f3132ba9bb35a31f74e3a69698d31d4c569';
 
-class _LastSyncOfGroupProviderElement
-    extends AutoDisposeStreamProviderElement<DateTime?>
-    with LastSyncOfGroupRef {
-  _LastSyncOfGroupProviderElement(super.provider);
+final class LastSyncOfGroupFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<DateTime?>, BangGroup> {
+  const LastSyncOfGroupFamily._()
+    : super(
+        retry: null,
+        name: r'lastSyncOfGroupProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  LastSyncOfGroupProvider call(BangGroup group) =>
+      LastSyncOfGroupProvider._(argument: group, from: this);
 
   @override
-  BangGroup get group => (origin as LastSyncOfGroupProvider).group;
+  String toString() => r'lastSyncOfGroupProvider';
+}
+
+@ProviderFor(bangCountOfGroup)
+const bangCountOfGroupProvider = BangCountOfGroupFamily._();
+
+final class BangCountOfGroupProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
+    with $FutureModifier<int>, $StreamProvider<int> {
+  const BangCountOfGroupProvider._({
+    required BangCountOfGroupFamily super.from,
+    required BangGroup super.argument,
+  }) : super(
+         retry: null,
+         name: r'bangCountOfGroupProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$bangCountOfGroupHash();
+
+  @override
+  String toString() {
+    return r'bangCountOfGroupProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<int> create(Ref ref) {
+    final argument = this.argument as BangGroup;
+    return bangCountOfGroup(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BangCountOfGroupProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
 String _$bangCountOfGroupHash() => r'211ffcd7f49b637a7953f913dc5eafda344423f3';
 
-/// See also [bangCountOfGroup].
-@ProviderFor(bangCountOfGroup)
-const bangCountOfGroupProvider = BangCountOfGroupFamily();
-
-/// See also [bangCountOfGroup].
-class BangCountOfGroupFamily extends Family<AsyncValue<int>> {
-  /// See also [bangCountOfGroup].
-  const BangCountOfGroupFamily();
-
-  /// See also [bangCountOfGroup].
-  BangCountOfGroupProvider call(BangGroup group) {
-    return BangCountOfGroupProvider(group);
-  }
-
-  @override
-  BangCountOfGroupProvider getProviderOverride(
-    covariant BangCountOfGroupProvider provider,
-  ) {
-    return call(provider.group);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'bangCountOfGroupProvider';
-}
-
-/// See also [bangCountOfGroup].
-class BangCountOfGroupProvider extends AutoDisposeStreamProvider<int> {
-  /// See also [bangCountOfGroup].
-  BangCountOfGroupProvider(BangGroup group)
-    : this._internal(
-        (ref) => bangCountOfGroup(ref as BangCountOfGroupRef, group),
-        from: bangCountOfGroupProvider,
+final class BangCountOfGroupFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<int>, BangGroup> {
+  const BangCountOfGroupFamily._()
+    : super(
+        retry: null,
         name: r'bangCountOfGroupProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$bangCountOfGroupHash,
-        dependencies: BangCountOfGroupFamily._dependencies,
-        allTransitiveDependencies:
-            BangCountOfGroupFamily._allTransitiveDependencies,
-        group: group,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
       );
 
-  BangCountOfGroupProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.group,
-  }) : super.internal();
-
-  final BangGroup group;
+  BangCountOfGroupProvider call(BangGroup group) =>
+      BangCountOfGroupProvider._(argument: group, from: this);
 
   @override
-  Override overrideWith(
-    Stream<int> Function(BangCountOfGroupRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: BangCountOfGroupProvider._internal(
-        (ref) => create(ref as BangCountOfGroupRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        group: group,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeStreamProviderElement<int> createElement() {
-    return _BangCountOfGroupProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is BangCountOfGroupProvider && other.group == group;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, group.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
+  String toString() => r'bangCountOfGroupProvider';
 }
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin BangCountOfGroupRef on AutoDisposeStreamProviderRef<int> {
-  /// The parameter `group` of this provider.
-  BangGroup get group;
-}
-
-class _BangCountOfGroupProviderElement
-    extends AutoDisposeStreamProviderElement<int>
-    with BangCountOfGroupRef {
-  _BangCountOfGroupProviderElement(super.provider);
-
-  @override
-  BangGroup get group => (origin as BangCountOfGroupProvider).group;
-}
-
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

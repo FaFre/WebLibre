@@ -55,7 +55,7 @@ class BangSyncRepository extends _$BangSyncRepository {
         remoteBangs: remoteBangs,
         syncTime: DateTime.now(),
       );
-      await db.optimizeFtsIndex();
+      await db.definitionsDrift.optimizeFtsIndex();
     });
   }
 
@@ -85,7 +85,7 @@ class BangSyncRepository extends _$BangSyncRepository {
         remoteBangs: remoteBangs,
         syncTime: sourceDate,
       );
-      await db.optimizeFtsIndex();
+      await db.definitionsDrift.optimizeFtsIndex();
     });
   }
 

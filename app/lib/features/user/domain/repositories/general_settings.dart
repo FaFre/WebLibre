@@ -149,7 +149,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
 GeneralSettings generalSettingsWithDefaults(Ref ref) {
   return ref.watch(
     generalSettingsRepositoryProvider.select(
-      (value) => value.valueOrNull ?? GeneralSettings.withDefaults(),
+      (value) => value.value ?? GeneralSettings.withDefaults(),
     ),
   );
 }

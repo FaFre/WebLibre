@@ -69,7 +69,7 @@ class SiteSearch extends HookConsumerWidget {
 
     final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));
     final defaultSearchBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.valueOrNull),
+      defaultSearchBangDataProvider.select((value) => value.value),
     );
 
     Future<void> submitSearch(String value) async {

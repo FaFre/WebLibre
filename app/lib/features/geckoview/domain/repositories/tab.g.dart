@@ -6,20 +6,58 @@ part of 'tab.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$tabRepositoryHash() => r'45af26417881bca38973cf702073b1c7857f1cfa';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [TabRepository].
 @ProviderFor(TabRepository)
-final tabRepositoryProvider = NotifierProvider<TabRepository, void>.internal(
-  TabRepository.new,
-  name: r'tabRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$tabRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const tabRepositoryProvider = TabRepositoryProvider._();
 
-typedef _$TabRepository = Notifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TabRepositoryProvider
+    extends $NotifierProvider<TabRepository, void> {
+  const TabRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabRepositoryHash();
+
+  @$internal
+  @override
+  TabRepository create() => TabRepository();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$tabRepositoryHash() => r'7cb56001fbb038321197d237148c9ebf35740521';
+
+abstract class _$TabRepository extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    build();
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, null);
+  }
+}

@@ -6,44 +6,106 @@ part of 'engine_suggestions.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$engineHistorySuggestionsHash() =>
-    r'7e6c17e6a2df98098ca1a683a438d1c261ccabdf';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [engineHistorySuggestions].
-@ProviderFor(engineHistorySuggestions)
-final engineHistorySuggestionsProvider =
-    AutoDisposeProvider<AsyncValue<List<GeckoSuggestion>>>.internal(
-      engineHistorySuggestions,
-      name: r'engineHistorySuggestionsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$engineHistorySuggestionsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+@ProviderFor(EngineSuggestions)
+const engineSuggestionsProvider = EngineSuggestionsProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef EngineHistorySuggestionsRef =
-    AutoDisposeProviderRef<AsyncValue<List<GeckoSuggestion>>>;
+final class EngineSuggestionsProvider
+    extends $StreamNotifierProvider<EngineSuggestions, List<GeckoSuggestion>> {
+  const EngineSuggestionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'engineSuggestionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$engineSuggestionsHash();
+
+  @$internal
+  @override
+  EngineSuggestions create() => EngineSuggestions();
+}
+
 String _$engineSuggestionsHash() => r'ba2c2d7f0a5e99fd9e639acd020b8cf3016c6126';
 
-/// See also [EngineSuggestions].
-@ProviderFor(EngineSuggestions)
-final engineSuggestionsProvider =
-    AutoDisposeStreamNotifierProvider<
-      EngineSuggestions,
-      List<GeckoSuggestion>
-    >.internal(
-      EngineSuggestions.new,
-      name: r'engineSuggestionsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$engineSuggestionsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$EngineSuggestions
+    extends $StreamNotifier<List<GeckoSuggestion>> {
+  Stream<List<GeckoSuggestion>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref =
+        this.ref
+            as $Ref<AsyncValue<List<GeckoSuggestion>>, List<GeckoSuggestion>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                AsyncValue<List<GeckoSuggestion>>,
+                List<GeckoSuggestion>
+              >,
+              AsyncValue<List<GeckoSuggestion>>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
-typedef _$EngineSuggestions = AutoDisposeStreamNotifier<List<GeckoSuggestion>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(engineHistorySuggestions)
+const engineHistorySuggestionsProvider = EngineHistorySuggestionsProvider._();
+
+final class EngineHistorySuggestionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<GeckoSuggestion>>,
+          AsyncValue<List<GeckoSuggestion>>,
+          AsyncValue<List<GeckoSuggestion>>
+        >
+    with $Provider<AsyncValue<List<GeckoSuggestion>>> {
+  const EngineHistorySuggestionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'engineHistorySuggestionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$engineHistorySuggestionsHash();
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<List<GeckoSuggestion>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AsyncValue<List<GeckoSuggestion>> create(Ref ref) {
+    return engineHistorySuggestions(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<List<GeckoSuggestion>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<List<GeckoSuggestion>>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$engineHistorySuggestionsHash() =>
+    r'7e6c17e6a2df98098ca1a683a438d1c261ccabdf';

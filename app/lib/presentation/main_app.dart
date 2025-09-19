@@ -146,7 +146,7 @@ class MainApp extends HookConsumerWidget {
           theme: theme,
           darkTheme: darkTheme,
           themeMode: themeMode,
-          routerConfig: router.valueOrNull,
+          routerConfig: router.value,
         );
       },
       onFailure: (errorMessage) {

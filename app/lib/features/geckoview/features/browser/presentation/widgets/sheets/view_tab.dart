@@ -80,7 +80,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
       bangListProvider(
         domain: initialTabState.url.host,
         orderMostFrequentFirst: true,
-      ).select((value) => value.valueOrNull ?? const []),
+      ).select((value) => value.value ?? const []),
     );
 
     final scrolledTo = useRef(0.0);
@@ -306,7 +306,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                   final containerId = ref.watch(
                     watchContainerTabIdProvider(
                       initialTabState.id,
-                    ).select((value) => value.valueOrNull),
+                    ).select((value) => value.value),
                   );
 
                   return Visibility(
@@ -332,7 +332,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                 title: const Text('Share screenshot'),
                 onTap: () async {
                   final screenshot = await ref
-                      .read(selectedTabSessionNotifierProvider)
+                      .read(selectedTabSessionProvider)
                       .requestScreenshot();
 
                   if (screenshot != null) {

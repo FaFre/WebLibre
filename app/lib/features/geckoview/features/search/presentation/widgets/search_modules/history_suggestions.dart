@@ -55,7 +55,7 @@ class HistorySuggestions extends HookConsumerWidget {
     });
 
     if (historySuggestionsAsync.hasValue &&
-        (historySuggestionsAsync.valueOrNull.isEmpty)) {
+        (historySuggestionsAsync.value.isEmpty)) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
@@ -147,7 +147,7 @@ class HistorySuggestions extends HookConsumerWidget {
               );
             },
             loading: () => SliverList.builder(
-              itemCount: historySuggestionsAsync.valueOrNull?.length ?? 3,
+              itemCount: historySuggestionsAsync.value?.length ?? 3,
               itemBuilder: (context, index) {
                 return const ListTile(title: Bone.text());
               },

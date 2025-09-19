@@ -81,7 +81,7 @@ class SearchScreen extends HookConsumerWidget {
     final searchFocusNode = useFocusNode();
 
     final defaultSearchBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.valueOrNull),
+      defaultSearchBangDataProvider.select((value) => value.value),
     );
 
     final selectedBang = useState<BangData?>(null);

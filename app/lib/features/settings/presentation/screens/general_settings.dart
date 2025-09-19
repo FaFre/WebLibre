@@ -457,7 +457,7 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                 builder: (context, ref, child) {
                   final size = ref.watch(
                     iconCacheSizeMegabytesProvider.select(
-                      (value) => value.valueOrNull,
+                      (value) => value.value,
                     ),
                   );
 

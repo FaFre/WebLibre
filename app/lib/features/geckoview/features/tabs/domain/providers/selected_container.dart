@@ -99,7 +99,7 @@ class SelectedContainer extends _$SelectedContainer {
       fireImmediately: true,
       containersWithCountProvider,
       (previous, next) {
-        if (stateOrNull != null && next.valueOrNull != null) {
+        if (stateOrNull != null && next.value != null) {
           if (!next.value!.any((container) => container.id == state)) {
             clearContainer();
           }

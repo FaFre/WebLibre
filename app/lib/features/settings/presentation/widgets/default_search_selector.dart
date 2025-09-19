@@ -32,7 +32,7 @@ class DefaultSearchSelector extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.valueOrNull),
+      defaultSearchBangDataProvider.select((value) => value.value),
     );
     final availableBangs = ref.watch(frequentBangListProvider);
 

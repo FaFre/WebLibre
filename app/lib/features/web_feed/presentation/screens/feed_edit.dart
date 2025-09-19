@@ -25,7 +25,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/web_feed/data/database/database.dart';
+import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/repositories/feed_repository.dart';

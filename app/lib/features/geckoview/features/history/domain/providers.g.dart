@@ -6,39 +6,97 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$browsingHistoryHash() => r'6447fd4d8209c3befb07f2d82fa41a24bd3accb1';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [browsingHistory].
-@ProviderFor(browsingHistory)
-final browsingHistoryProvider =
-    AutoDisposeFutureProvider<List<VisitInfo>>.internal(
-      browsingHistory,
-      name: r'browsingHistoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$browsingHistoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
+@ProviderFor(HistoryFilter)
+const historyFilterProvider = HistoryFilterProvider._();
+
+final class HistoryFilterProvider
+    extends $NotifierProvider<HistoryFilter, HistoryFilterOptions> {
+  const HistoryFilterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'historyFilterProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$historyFilterHash();
+
+  @$internal
+  @override
+  HistoryFilter create() => HistoryFilter();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HistoryFilterOptions value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HistoryFilterOptions>(value),
     );
+  }
+}
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef BrowsingHistoryRef = AutoDisposeFutureProviderRef<List<VisitInfo>>;
 String _$historyFilterHash() => r'68a604fe857476f7c15be89352a7b10bc456c3d6';
 
-/// See also [HistoryFilter].
-@ProviderFor(HistoryFilter)
-final historyFilterProvider =
-    NotifierProvider<HistoryFilter, HistoryFilterOptions>.internal(
-      HistoryFilter.new,
-      name: r'historyFilterProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$historyFilterHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+abstract class _$HistoryFilter extends $Notifier<HistoryFilterOptions> {
+  HistoryFilterOptions build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<HistoryFilterOptions, HistoryFilterOptions>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<HistoryFilterOptions, HistoryFilterOptions>,
+              HistoryFilterOptions,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
-typedef _$HistoryFilter = Notifier<HistoryFilterOptions>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(browsingHistory)
+const browsingHistoryProvider = BrowsingHistoryProvider._();
+
+final class BrowsingHistoryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<VisitInfo>>,
+          List<VisitInfo>,
+          FutureOr<List<VisitInfo>>
+        >
+    with $FutureModifier<List<VisitInfo>>, $FutureProvider<List<VisitInfo>> {
+  const BrowsingHistoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'browsingHistoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$browsingHistoryHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<VisitInfo>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<VisitInfo>> create(Ref ref) {
+    return browsingHistory(ref);
+  }
+}
+
+String _$browsingHistoryHash() => r'6447fd4d8209c3befb07f2d82fa41a24bd3accb1';
