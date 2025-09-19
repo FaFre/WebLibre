@@ -19,7 +19,6 @@
  */
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';

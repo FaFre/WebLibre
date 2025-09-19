@@ -24,9 +24,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Home(),
-    );
+    return const MaterialApp(home: Home());
   }
 }
 
@@ -47,8 +45,9 @@ class _MyAppState extends State<Home> {
 
   // Set the default text for the onion input field.
   final onionController = TextEditingController(
-      text:
-          'https://cflarexljc3rw355ysrkrzwapozws6nre6xsy3n4yrj7taye3uiby3ad.onion');
+    text:
+        'https://cflarexljc3rw355ysrkrzwapozws6nre6xsy3n4yrj7taye3uiby3ad.onion',
+  );
   // See https://blog.cloudflare.com/cloudflare-onion-service/ for more options:
   // cflarexljc3rw355ysrkrzwapozws6nre6xsy3n4yrj7taye3uiby3ad.onion
   // cflarenuttlfuyn7imozr4atzvfbiw3ezgbdjdldmdx7srterayaozid.onion
@@ -62,14 +61,16 @@ class _MyAppState extends State<Home> {
   // cflare2nge4h4yqr3574crrd7k66lil3torzbisz6uciyuzqc2h2ykyd.onion
 
   final bitcoinOnionController = TextEditingController(
-      text:
-          'qly7g5n5t3f3h23xvbp44vs6vpmayurno4basuu5rcvrupli7y2jmgid.onion:50001');
+    text:
+        'qly7g5n5t3f3h23xvbp44vs6vpmayurno4basuu5rcvrupli7y2jmgid.onion:50001',
+  );
   // For more options, see https://bitnodes.io/nodes/addresses/?q=onion and
   // https://sethforprivacy.com/about/
 
   final moneroOnionController = TextEditingController(
-      text:
-          'ucdouiihzwvb5edg3ezeufcs4yp26gq4x64n6b4kuffb7s7jxynnk7qd.onion:18081/json_rpc');
+    text:
+        'ucdouiihzwvb5edg3ezeufcs4yp26gq4x64n6b4kuffb7s7jxynnk7qd.onion:18081/json_rpc',
+  );
 
   Future<void> startTor() async {
     await Tor.init();
@@ -96,9 +97,7 @@ class _MyAppState extends State<Home> {
   Widget build(BuildContext context) {
     const spacerSmall = SizedBox(height: 10);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tor example'),
-      ),
+      appBar: AppBar(title: const Text('Tor example')),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(10),
@@ -129,11 +128,13 @@ class _MyAppState extends State<Home> {
 
                             await startTor();
 
-                            print("Starting tor took "
-                                "${DateTime.now().difference(time).inSeconds} "
-                                "seconds. Proxy running on port ${Tor.instance.port}");
+                            print(
+                              "Starting tor took "
+                              "${DateTime.now().difference(time).inSeconds} "
+                              "seconds. Proxy running on port ${Tor.instance.port}",
+                            );
 
-                            if (mounted) {
+                            if (context.mounted) {
                               Navigator.of(context).pop();
                             }
                           },
@@ -176,10 +177,11 @@ class _MyAppState extends State<Home> {
 
                             // Assign connection factory.
                             SocksTCPClient.assignToHttpClient(client, [
-                              ProxySettings(InternetAddress.loopbackIPv4,
-                                  Tor.instance.port,
-                                  password:
-                                      null), // TODO Need to get from tor config file.
+                              ProxySettings(
+                                InternetAddress.loopbackIPv4,
+                                Tor.instance.port,
+                                password: null,
+                              ), // TODO Need to get from tor config file.
                             ]);
 
                             // GET request.
@@ -188,8 +190,9 @@ class _MyAppState extends State<Home> {
                             final response = await request.close();
 
                             // Print response.
-                            var responseString =
-                                await utf8.decodeStream(response);
+                            var responseString = await utf8.decodeStream(
+                              response,
+                            );
                             print(responseString);
                             // If host input left to default icanhazip.com, a Tor
                             // exit node IP should be printed to the console.
@@ -223,7 +226,9 @@ class _MyAppState extends State<Home> {
                         //
                         // Note that this is an SSL example.
                         await socksSocket.connectTo(
-                            'bitcoin.stackwallet.com', 50002);
+                          'bitcoin.stackwallet.com',
+                          50002,
+                        );
 
                         // Send a server features command to the connected socket, see method for more specific usage example..
                         await socksSocket.sendServerFeaturesCommand();
@@ -288,17 +293,20 @@ class _MyAppState extends State<Home> {
                               return;
                             }
 
-                            String domain =
-                                bitcoinOnionController.text.split(":").first;
+                            String domain = bitcoinOnionController.text
+                                .split(":")
+                                .first;
                             int port = int.parse(
-                                bitcoinOnionController.text.split(":").last);
+                              bitcoinOnionController.text.split(":").last,
+                            );
 
                             // Instantiate a socks socket at localhost and on the port selected by the tor service.
                             var socksSocket = await SOCKSSocket.create(
                               proxyHost: InternetAddress.loopbackIPv4.address,
                               proxyPort: Tor.instance.port,
-                              sslEnabled: !domain
-                                  .endsWith(".onion"), // For SSL connections.
+                              sslEnabled: !domain.endsWith(
+                                ".onion",
+                              ), // For SSL connections.
                             );
 
                             // Connect to the socks instantiated above.
@@ -341,13 +349,10 @@ class _MyAppState extends State<Home> {
                             // Close the socket.
                             await socksSocket.close();
                           }
-
                         // A mutex should be added to this example to prevent
                         // multiple connections from being made at once.  TODO
                         : null,
-                    child: const Text(
-                      "Test Bitcoin onion node connection",
-                    ),
+                    child: const Text("Test Bitcoin onion node connection"),
                   ),
                 ],
               ),
@@ -369,24 +374,28 @@ class _MyAppState extends State<Home> {
                     onPressed: torStarted
                         ? () async {
                             // Validate the onion address.
-                            if (!moneroOnionController.text
-                                .contains(".onion")) {
+                            if (!moneroOnionController.text.contains(
+                              ".onion",
+                            )) {
                               print("Invalid onion address");
                               return;
-                            } else if (!moneroOnionController.text
-                                .contains(":")) {
+                            } else if (!moneroOnionController.text.contains(
+                              ":",
+                            )) {
                               print("Invalid onion address (needs port)");
                               return;
                             }
 
-                            final String host =
-                                moneroOnionController.text.split(":").first;
-                            final int port = int.parse(moneroOnionController
-                                .text
+                            final String host = moneroOnionController.text
                                 .split(":")
-                                .last
-                                .split("/")
-                                .first);
+                                .first;
+                            final int port = int.parse(
+                              moneroOnionController.text
+                                  .split(":")
+                                  .last
+                                  .split("/")
+                                  .first,
+                            );
                             final String path = moneroOnionController.text
                                 .split(":")
                                 .last
@@ -408,7 +417,8 @@ class _MyAppState extends State<Home> {
                               "method": "get_info",
                             });
 
-                            final request = 'POST /$path HTTP/1.1\r\n'
+                            final request =
+                                'POST /$path HTTP/1.1\r\n'
                                 'Host: $host\r\n'
                                 'Content-Type: application/json\r\n'
                                 'Content-Length: ${body.length}\r\n'
@@ -449,13 +459,10 @@ class _MyAppState extends State<Home> {
 
                             await socksSocket.close();
                           }
-
                         // A mutex should be added to this example to prevent
                         // multiple connections from being made at once.  TODO
                         : null,
-                    child: const Text(
-                      "Test Monero onion node connection",
-                    ),
+                    child: const Text("Test Monero onion node connection"),
                   ),
                 ],
               ),

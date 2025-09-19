@@ -23,7 +23,6 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';

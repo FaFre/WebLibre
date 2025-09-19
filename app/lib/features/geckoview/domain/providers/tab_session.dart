@@ -20,7 +20,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'tab_session.g.dart';
