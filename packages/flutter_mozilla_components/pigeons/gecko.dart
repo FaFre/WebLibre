@@ -1248,6 +1248,12 @@ abstract class GeckoHistoryApi {
     int endMillis,
     List<VisitType> excludeTypes,
   );
+
+  @async
+  void deleteVisit(String url, int timestamp);
+
+  @async
+  void deleteVisitsBetween(int startMillis, int endMillis);
 }
 
 @HostApi()

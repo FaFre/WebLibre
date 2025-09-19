@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -34,6 +35,10 @@ class HistoryFilter extends _$HistoryFilter {
     }
   }
 
+  void setDateRange(DateTimeRange<DateTime>? range) {
+    state = state.copyWith.dateRange(range);
+  }
+
   @override
   HistoryFilterOptions build() {
     return HistoryFilterOptions.withDefaults();
@@ -47,8 +52,8 @@ Future<List<VisitInfo>> browsingHistory(Ref ref) {
   final service = GeckoHistoryService();
   return service
       .getDetailedVisits(
-        options.start ?? DateTime(0),
-        options.end ?? DateTime(9999),
+        options.dateRange?.start ?? DateTime(0),
+        options.dateRange?.end ?? DateTime(9999),
         options.visitTypes,
       )
       .then(

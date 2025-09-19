@@ -39,6 +39,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction);
 
+  GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -59,6 +61,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabIntentOpenSetting tabIntentOpenSetting,
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
+    Duration historyAutoCleanInterval,
   });
 }
 
@@ -123,6 +126,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       this(tabBarSwipeAction: tabBarSwipeAction);
 
   @override
+  GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval) =>
+      this(historyAutoCleanInterval: historyAutoCleanInterval);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `GeneralSettings(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -143,6 +150,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
+    Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder()
@@ -203,6 +211,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarSwipeAction
           // ignore: cast_nullable_to_non_nullable
           : tabBarSwipeAction as TabBarSwipeAction,
+      historyAutoCleanInterval:
+          historyAutoCleanInterval == const $CopyWithPlaceholder()
+          ? _value.historyAutoCleanInterval
+          // ignore: cast_nullable_to_non_nullable
+          : historyAutoCleanInterval as Duration,
     );
   }
 }
@@ -247,6 +260,11 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         _$TabBarSwipeActionEnumMap,
         json['tabBarSwipeAction'],
       ),
+      historyAutoCleanInterval: json['historyAutoCleanInterval'] == null
+          ? null
+          : Duration(
+              microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
+            ),
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -270,6 +288,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
+  'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
 };
 
 const _$ThemeModeEnumMap = {

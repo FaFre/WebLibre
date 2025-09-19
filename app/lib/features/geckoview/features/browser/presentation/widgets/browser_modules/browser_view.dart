@@ -92,6 +92,13 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             await ref
                 .read(browserDataServiceProvider.notifier)
                 .deleteDataOnEngineStart(settings.deleteBrowsingDataOnQuit);
+
+            if (settings.historyAutoCleanInterval > Duration.zero) {
+              await GeckoHistoryService().deleteVisitsBetween(
+                DateTime(0),
+                DateTime.now().subtract(settings.historyAutoCleanInterval),
+              );
+            }
           });
     });
 

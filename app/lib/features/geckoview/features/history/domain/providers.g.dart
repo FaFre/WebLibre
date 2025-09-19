@@ -6,7 +6,7 @@ part of 'providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$browsingHistoryHash() => r'a684c34fc370474a771c5fcc7982a200de2294e5';
+String _$browsingHistoryHash() => r'6447fd4d8209c3befb07f2d82fa41a24bd3accb1';
 
 /// See also [browsingHistory].
 @ProviderFor(browsingHistory)
@@ -24,7 +24,7 @@ final browsingHistoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef BrowsingHistoryRef = AutoDisposeFutureProviderRef<List<VisitInfo>>;
-String _$historyFilterHash() => r'271d60ce79f96ac49d450f01d21cbfdad684ce53';
+String _$historyFilterHash() => r'68a604fe857476f7c15be89352a7b10bc456c3d6';
 
 /// See also [HistoryFilter].
 @ProviderFor(HistoryFilter)

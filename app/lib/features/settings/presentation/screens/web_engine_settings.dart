@@ -24,6 +24,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -49,7 +50,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
               SwitchListTile.adaptive(
                 title: const Text('Incognito Mode'),
                 subtitle: const Text(
-                  'Deletes all browsing data upon app restart for enhanced privacy.',
+                  'Deletes selected browsing data upon app restart for enhanced privacy.',
                 ),
                 secondary: const Icon(MdiIcons.incognito),
                 value: generalSettings.deleteBrowsingDataOnQuit != null,
@@ -114,6 +115,94 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                     ],
                   ),
                 ),
+              ListTile(
+                title: const Text('Delete Browsing Data'),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 16.0,
+                ),
+                leading: const Icon(MdiIcons.delete),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return const DeleteDataDialog(initialSettings: {});
+                    },
+                  );
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('Auto-Clear History'),
+                      subtitle: Text(
+                        'Automatically delete browsing history older than the selected time period',
+                      ),
+                      leading: Icon(MdiIcons.deleteClock),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 40.0),
+                      child: DropdownMenu(
+                        initialSelection:
+                            generalSettings.historyAutoCleanInterval,
+                        inputDecorationTheme: InputDecorationTheme(
+                          prefixIconConstraints: BoxConstraints.tight(
+                            const Size.square(24),
+                          ),
+                        ),
+                        width: double.infinity,
+                        dropdownMenuEntries: const [
+                          DropdownMenuEntry(
+                            value: Duration.zero,
+                            label: 'Never',
+                          ),
+                          DropdownMenuEntry(
+                            value: Duration(days: 1),
+                            label: '1 Day',
+                          ),
+                          DropdownMenuEntry(
+                            value: Duration(days: 7),
+                            label: '1 Week',
+                          ),
+                          DropdownMenuEntry(
+                            value: Duration(days: 14),
+                            label: '2 Weeks',
+                          ),
+                          DropdownMenuEntry(
+                            value: Duration(days: 30),
+                            label: '1 Month',
+                          ),
+                          DropdownMenuEntry(
+                            value: Duration(days: 90),
+                            label: '3 Months',
+                          ),
+                        ],
+                        onSelected: (value) async {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .historyAutoCleanInterval(
+                                      value ?? Duration.zero,
+                                    ),
+                              );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               SwitchListTile.adaptive(
                 title: const Text('Global Privacy Control (GPC)'),
                 secondary: const Icon(MdiIcons.incognitoCircleOff),

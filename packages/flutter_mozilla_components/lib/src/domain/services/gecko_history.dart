@@ -24,4 +24,15 @@ class GeckoHistoryService {
       VisitType.values.toSet().difference(types).toList(),
     );
   }
+
+  Future<void> deleteVisit(VisitInfo info) {
+    return _api.deleteVisit(info.url, info.visitTime);
+  }
+
+  Future<void> deleteVisitsBetween(DateTime start, DateTime end) {
+    return _api.deleteVisitsBetween(
+      start.millisecondsSinceEpoch,
+      end.millisecondsSinceEpoch,
+    );
+  }
 }

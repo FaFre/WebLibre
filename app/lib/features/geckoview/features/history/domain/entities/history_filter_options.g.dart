@@ -7,9 +7,7 @@ part of 'history_filter_options.dart';
 // **************************************************************************
 
 abstract class _$HistoryFilterOptionsCWProxy {
-  HistoryFilterOptions start(DateTime? start);
-
-  HistoryFilterOptions end(DateTime? end);
+  HistoryFilterOptions dateRange(DateTimeRange<DateTime>? dateRange);
 
   HistoryFilterOptions visitTypes(Set<VisitType> visitTypes);
 
@@ -20,8 +18,7 @@ abstract class _$HistoryFilterOptionsCWProxy {
   /// HistoryFilterOptions(...).copyWith(id: 12, name: "My name")
   /// ````
   HistoryFilterOptions call({
-    DateTime? start,
-    DateTime? end,
+    DateTimeRange<DateTime>? dateRange,
     Set<VisitType> visitTypes,
   });
 }
@@ -34,10 +31,8 @@ class _$HistoryFilterOptionsCWProxyImpl
   final HistoryFilterOptions _value;
 
   @override
-  HistoryFilterOptions start(DateTime? start) => this(start: start);
-
-  @override
-  HistoryFilterOptions end(DateTime? end) => this(end: end);
+  HistoryFilterOptions dateRange(DateTimeRange<DateTime>? dateRange) =>
+      this(dateRange: dateRange);
 
   @override
   HistoryFilterOptions visitTypes(Set<VisitType> visitTypes) =>
@@ -51,19 +46,14 @@ class _$HistoryFilterOptionsCWProxyImpl
   /// HistoryFilterOptions(...).copyWith(id: 12, name: "My name")
   /// ````
   HistoryFilterOptions call({
-    Object? start = const $CopyWithPlaceholder(),
-    Object? end = const $CopyWithPlaceholder(),
+    Object? dateRange = const $CopyWithPlaceholder(),
     Object? visitTypes = const $CopyWithPlaceholder(),
   }) {
     return HistoryFilterOptions(
-      start: start == const $CopyWithPlaceholder()
-          ? _value.start
+      dateRange: dateRange == const $CopyWithPlaceholder()
+          ? _value.dateRange
           // ignore: cast_nullable_to_non_nullable
-          : start as DateTime?,
-      end: end == const $CopyWithPlaceholder()
-          ? _value.end
-          // ignore: cast_nullable_to_non_nullable
-          : end as DateTime?,
+          : dateRange as DateTimeRange<DateTime>?,
       visitTypes: visitTypes == const $CopyWithPlaceholder()
           ? _value.visitTypes
           // ignore: cast_nullable_to_non_nullable

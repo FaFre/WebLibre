@@ -69,4 +69,32 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
             }
         }
     }
+
+    override fun deleteVisit(
+        url: String,
+        timestamp: Long,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                components.core.historyStorage.deleteVisit(url, timestamp);
+
+                callback(Result.success(Unit))
+            }
+        }
+    }
+
+    override fun deleteVisitsBetween(
+        startMillis: Long,
+        endMillis: Long,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                components.core.historyStorage.deleteVisitsBetween(startMillis, endMillis);
+
+                callback(Result.success(Unit))
+            }
+        }
+    }
 }

@@ -63,6 +63,7 @@ class GeneralSettings with FastEquatable {
   final TabIntentOpenSetting tabIntentOpenSetting;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
+  final Duration historyAutoCleanInterval;
 
   GeneralSettings({
     required this.themeMode,
@@ -78,6 +79,7 @@ class GeneralSettings with FastEquatable {
     required this.tabIntentOpenSetting,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
+    required this.historyAutoCleanInterval,
   });
 
   GeneralSettings.withDefaults({
@@ -94,6 +96,7 @@ class GeneralSettings with FastEquatable {
     TabIntentOpenSetting? tabIntentOpenSetting,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
+    Duration? historyAutoCleanInterval,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -107,7 +110,9 @@ class GeneralSettings with FastEquatable {
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
-           tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened;
+           tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
+       historyAutoCleanInterval =
+           historyAutoCleanInterval ?? const Duration(days: 90);
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -129,5 +134,6 @@ class GeneralSettings with FastEquatable {
     tabIntentOpenSetting,
     autoHideTabBar,
     tabBarSwipeAction,
+    historyAutoCleanInterval,
   ];
 }

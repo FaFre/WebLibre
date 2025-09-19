@@ -4750,6 +4750,8 @@ interface GeckoDeleteBrowsingDataController {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoHistoryApi {
   fun getDetailedVisits(startMillis: Long, endMillis: Long, excludeTypes: List<VisitType>, callback: (Result<List<VisitInfo>>) -> Unit)
+  fun deleteVisit(url: String, timestamp: Long, callback: (Result<Unit>) -> Unit)
+  fun deleteVisitsBetween(startMillis: Long, endMillis: Long, callback: (Result<Unit>) -> Unit)
 
   companion object {
     /** The codec used by GeckoHistoryApi. */
@@ -4775,6 +4777,46 @@ interface GeckoHistoryApi {
               } else {
                 val data = result.getOrNull()
                 reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteVisit$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val urlArg = args[0] as String
+            val timestampArg = args[1] as Long
+            api.deleteVisit(urlArg, timestampArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteVisitsBetween$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val startMillisArg = args[0] as Long
+            val endMillisArg = args[1] as Long
+            api.deleteVisitsBetween(startMillisArg, endMillisArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
               }
             }
           }

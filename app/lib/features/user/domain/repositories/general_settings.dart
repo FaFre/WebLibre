@@ -96,6 +96,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'historyAutoCleanInterval': settings['historyAutoCleanInterval']?.readAs(
+        DriftSqlType.int,
+        db.typeMapping,
+      ),
     });
   }
 
