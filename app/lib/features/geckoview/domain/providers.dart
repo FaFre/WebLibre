@@ -46,6 +46,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         final settings = ref.read(generalSettingsWithDefaultsProvider);
         final route = SearchRoute(
           tabType:
+              // ignore: only_use_keep_alive_inside_keep_alive
               ref.read(selectedTabTypeProvider) ??
               settings.defaultCreateTabType,
           searchText: text,
@@ -59,6 +60,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         );
 
         if (defaultSearchBang != null) {
+          // ignore: only_use_keep_alive_inside_keep_alive
           final currentTab = ref.read(selectedTabStateProvider);
           final isPrivate =
               currentTab?.isPrivate ??
@@ -81,6 +83,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
       FindInPageAction((text) async {
         final tabId = ref.read(selectedTabProvider);
         if (tabId != null) {
+          // ignore: only_use_keep_alive_inside_keep_alive
           await ref
               .read(findInPageControllerProvider(tabId).notifier)
               .findAll(text: text);

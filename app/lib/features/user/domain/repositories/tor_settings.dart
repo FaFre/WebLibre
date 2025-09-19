@@ -94,7 +94,7 @@ class TorSettingsRepository extends _$TorSettingsRepository {
   }
 }
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 TorSettings torSettingsWithDefaults(Ref ref) {
   return ref.watch(
     torSettingsRepositoryProvider.select(

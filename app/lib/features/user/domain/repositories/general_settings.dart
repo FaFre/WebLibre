@@ -145,7 +145,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   }
 }
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 GeneralSettings generalSettingsWithDefaults(Ref ref) {
   return ref.watch(
     generalSettingsRepositoryProvider.select(

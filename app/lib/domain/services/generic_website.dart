@@ -346,6 +346,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         return cachedIcon;
       }
 
+      // ignore: only_use_keep_alive_inside_keep_alive
       final result = await ref.read(
         pageInfoProvider(url, isImageRequest: true).future,
       );

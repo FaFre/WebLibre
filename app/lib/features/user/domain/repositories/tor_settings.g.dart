@@ -67,7 +67,7 @@ final class TorSettingsWithDefaultsProvider
         argument: null,
         retry: null,
         name: r'torSettingsWithDefaultsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -95,4 +95,4 @@ final class TorSettingsWithDefaultsProvider
 }
 
 String _$torSettingsWithDefaultsHash() =>
-    r'47005584ad9d3445a8dfa54ffcd0987763997003';
+    r'501a7ed7f14870d40b8f60303d3c385a45d9f542';

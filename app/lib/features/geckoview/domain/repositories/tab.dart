@@ -69,6 +69,7 @@ class TabRepository extends _$TabRepository {
     final assingedContainer =
         container ??
         Value<ContainerData?>(
+          // ignore: only_use_keep_alive_inside_keep_alive
           await ref.read(selectedContainerProvider.notifier).fetchData(),
         );
 
@@ -183,6 +184,7 @@ class TabRepository extends _$TabRepository {
 
     if (containerData != null) {
       if (containerData.metadata.authSettings.authenticationRequired) {
+        // ignore: only_use_keep_alive_inside_keep_alive
         if (containerId != ref.read(selectedContainerProvider)) {
           logger.w(
             'Tried to open authenticated tab $tabId but container not selected',
@@ -295,6 +297,7 @@ class TabRepository extends _$TabRepository {
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen((tabId) async {
+      // ignore: only_use_keep_alive_inside_keep_alive
       final containerId = ref.read(selectedContainerProvider);
       await db.tabDao.upsertUnassignedTab(
         tabId,

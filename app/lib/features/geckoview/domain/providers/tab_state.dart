@@ -245,7 +245,7 @@ TabType? selectedTabType(Ref ref) {
   );
 }
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 AsyncValue<String?> selectedTabContainerId(Ref ref) {
   final tabId = ref.watch(selectedTabProvider);
   if (tabId != null) {

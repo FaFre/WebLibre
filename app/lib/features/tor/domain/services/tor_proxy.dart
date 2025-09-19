@@ -138,6 +138,7 @@ class TorProxyService extends _$TorProxyService {
 
           if (config == null && torSettings.requireBridge) {
             config = MoatService.convertBuiltinToSettings(
+              // ignore: only_use_keep_alive_inside_keep_alive
               await ref
                   .read(builtinBridgesRepositoryProvider(moat).notifier)
                   .getBridges(),
@@ -170,6 +171,7 @@ class TorProxyService extends _$TorProxyService {
 
           if (config == null && torSettings.requireBridge) {
             config = MoatService.convertBuiltinToSettings(
+              // ignore: only_use_keep_alive_inside_keep_alive
               await ref
                   .read(builtinBridgesRepositoryProvider(moat).notifier)
                   .getBridges(tryUpdate: torSettings.fetchRemoteBridges),

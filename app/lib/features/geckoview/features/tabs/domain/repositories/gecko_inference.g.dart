@@ -75,7 +75,7 @@ final class ContainerTopicProvider
   }) : super(
          retry: null,
          name: r'containerTopicProvider',
-         isAutoDispose: false,
+         isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -112,7 +112,7 @@ final class ContainerTopicProvider
   }
 }
 
-String _$containerTopicHash() => r'b680381eab3dded9ca6f174fbcc5da5c59d7e9f0';
+String _$containerTopicHash() => r'dd2af0571a84f9cc2536af6a1079e7ee58e2a0a5';
 
 final class ContainerTopicFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<String?>, String> {
@@ -122,7 +122,7 @@ final class ContainerTopicFamily extends $Family
         name: r'containerTopicProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: false,
+        isAutoDispose: true,
       );
 
   ContainerTopicProvider call(String containerId) =>

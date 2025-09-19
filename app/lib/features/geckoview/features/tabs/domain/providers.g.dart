@@ -28,7 +28,7 @@ final class ContainersWithCountProvider
         argument: null,
         retry: null,
         name: r'containersWithCountProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -49,7 +49,7 @@ final class ContainersWithCountProvider
 }
 
 String _$containersWithCountHash() =>
-    r'd08294ef0def19b3401552fa9d533c9a780fa3dd';
+    r'757bb0102afedc07ef0f80a420b4c87cbdbed3e1';
 
 @ProviderFor(matchSortedContainersWithCount)
 const matchSortedContainersWithCountProvider =

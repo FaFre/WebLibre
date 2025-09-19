@@ -238,7 +238,7 @@ final class SelectedTabContainerIdProvider
         argument: null,
         retry: null,
         name: r'selectedTabContainerIdProvider',
-        isAutoDispose: false,
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -267,7 +267,7 @@ final class SelectedTabContainerIdProvider
 }
 
 String _$selectedTabContainerIdHash() =>
-    r'9f0246a02a069b1a66211a3924f32e9d75f0f344';
+    r'07899d29f69654d3b314d0da945ad402b1003b41';
 
 @ProviderFor(tabScrollY)
 const tabScrollYProvider = TabScrollYFamily._();

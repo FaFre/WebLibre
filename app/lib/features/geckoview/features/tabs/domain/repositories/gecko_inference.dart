@@ -176,7 +176,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
   void build() {}
 }
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 Future<String?> containerTopic(Ref ref, String containerId) async {
   final titles = await ref.watch(
     containerTabsDataProvider(containerId).selectAsync(
@@ -188,6 +188,10 @@ Future<String?> containerTopic(Ref ref, String containerId) async {
   final topic = await ref
       .read(geckoInferenceRepositoryProvider.notifier)
       .predictDocumentTopic(titles.value);
+
+  if (topic.isNotEmpty) {
+    ref.keepAlive();
+  }
 
   return topic;
 }

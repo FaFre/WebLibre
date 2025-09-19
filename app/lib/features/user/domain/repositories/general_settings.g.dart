@@ -71,7 +71,7 @@ final class GeneralSettingsWithDefaultsProvider
         argument: null,
         retry: null,
         name: r'generalSettingsWithDefaultsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -99,4 +99,4 @@ final class GeneralSettingsWithDefaultsProvider
 }
 
 String _$generalSettingsWithDefaultsHash() =>
-    r'4b8ccd2d9ce6a07fd342a0a663d822f8c658655d';
+    r'9da4a00a3500286fbf515ee319fa911bfacab40e';

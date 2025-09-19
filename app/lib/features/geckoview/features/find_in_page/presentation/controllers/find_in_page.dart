@@ -26,7 +26,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/domain/reposit
 
 part 'find_in_page.g.dart';
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 class FindInPageController extends _$FindInPageController {
   void show() {
     state = state.copyWith.visible(true);
