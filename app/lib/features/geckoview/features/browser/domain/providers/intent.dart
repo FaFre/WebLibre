@@ -71,4 +71,13 @@ class EngineBoundIntentStream extends _$EngineBoundIntentStream {
       _streamController.stream,
     ]);
   }
+
+  @override
+  bool updateShouldNotify(
+    AsyncValue<SharedContent> previous,
+    AsyncValue<SharedContent> next,
+  ) {
+    // Always notify if e.g. same link opened consecutive that are elseiwese filtered on == comaprison
+    return true;
+  }
 }

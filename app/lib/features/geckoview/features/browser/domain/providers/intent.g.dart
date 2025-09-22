@@ -34,7 +34,7 @@ final class EngineBoundIntentStreamProvider
 }
 
 String _$engineBoundIntentStreamHash() =>
-    r'860e39a7b608d579f7383e2199719067ad26f268';
+    r'd47f50ee8f548fe0416b8ed01bb02adbd79b3386';
 
 abstract class _$EngineBoundIntentStream
     extends $StreamNotifier<SharedContent> {
