@@ -838,6 +838,7 @@ enum LogLevel { debug, info, warn, error }
 )
 @HostApi()
 abstract class GeckoBrowserApi {
+  String getGeckoVersion();
   void initialize(LogLevel logLevel, ContentBlocking contentBlocking);
   bool showNativeFragment();
   void onTrimMemory(int level);

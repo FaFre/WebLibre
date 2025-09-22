@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/about/data/repositories/package_info_repository.dart';
+import 'package:weblibre/features/about/domain/providers.dart';
 
 class AboutDialogScreen extends HookConsumerWidget {
   const AboutDialogScreen();
@@ -42,6 +42,18 @@ class AboutDialogScreen extends HookConsumerWidget {
       applicationName: packageInfo.appName,
       applicationVersion: packageInfo.version,
       applicationLegalese: 'Copyright © Fabian Freund, 2025',
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 32.0),
+          child: Consumer(
+            builder: (context, ref, child) {
+              final geckoVersion = ref.watch(geckoVersionProvider);
+
+              return Text('Gecko Version: ${geckoVersion.value}');
+            },
+          ),
+        ),
+      ],
     );
   }
 }

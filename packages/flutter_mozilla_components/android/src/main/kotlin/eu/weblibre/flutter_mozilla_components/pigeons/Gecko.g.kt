@@ -2648,6 +2648,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
+  fun getGeckoVersion(): String
   fun initialize(logLevel: LogLevel, contentBlocking: ContentBlocking)
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
@@ -2661,6 +2662,21 @@ interface GeckoBrowserApi {
     @JvmOverloads
     fun setUp(binaryMessenger: BinaryMessenger, api: GeckoBrowserApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.getGeckoVersion$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getGeckoVersion())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$separatedMessageChannelSuffix", codec)
         if (api != null) {

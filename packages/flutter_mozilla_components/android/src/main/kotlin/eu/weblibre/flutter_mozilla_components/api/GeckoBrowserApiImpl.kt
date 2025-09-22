@@ -52,6 +52,7 @@ import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.sink.AndroidLogSink
 import mozilla.components.support.base.log.sink.LogSink
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
+import org.mozilla.geckoview.BuildConfig as GeckoViewBuildConfig
 
 class PriorityAwareLogSink(
     private val minLogPriority: Log.Priority,
@@ -133,6 +134,10 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     fun detachActivity() {
         this.activity = null
         isPlatformViewRegistered = false
+    }
+
+    override fun getGeckoVersion(): String {
+        return GeckoViewBuildConfig.MOZ_APP_VERSION + "-" + GeckoViewBuildConfig.MOZ_APP_BUILDID
     }
 
     override fun initialize(logLevel: LogLevel, contentBlocking: ContentBlocking) {

@@ -13,6 +13,10 @@ class GeckoBrowserService {
 
   GeckoBrowserService({GeckoBrowserApi? api}) : _api = api ?? _apiInstance;
 
+  Future<String> getGeckoVersion() {
+    return _api.getGeckoVersion();
+  }
+
   Future<void> initialize(LogLevel logLevel, ContentBlocking contentBlocking) {
     return _api.initialize(logLevel, contentBlocking);
   }

@@ -22,7 +22,7 @@ import 'dart:async';
 import 'package:exceptions/exceptions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/format.dart';
-import 'package:weblibre/features/about/data/repositories/package_info_repository.dart';
+import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
 
