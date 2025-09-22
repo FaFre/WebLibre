@@ -72,6 +72,8 @@ class BrowserScreen extends HookConsumerWidget {
 
     final overlayController = useOverlayPortalController();
 
+    final showAppBar = useValueNotifier(true);
+
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
         overlayController.show();
@@ -137,11 +139,11 @@ class BrowserScreen extends HookConsumerWidget {
                 );
               }
 
-              final hidden = useState(false);
+              final appBarVisible = useValueListenable(showAppBar);
               final diffAcc = useRef(0.0);
 
               void resetHiddenState() {
-                hidden.value = false;
+                showAppBar.value = true;
                 diffAcc.value = 0.0;
               }
 
@@ -189,7 +191,7 @@ class BrowserScreen extends HookConsumerWidget {
 
                       diffAcc.value += diff;
                       if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
-                        hidden.value = true;
+                        showAppBar.value = false;
                       }
                     } else if (diff > 0) {
                       if (diffAcc.value < 0) {
@@ -206,7 +208,7 @@ class BrowserScreen extends HookConsumerWidget {
               );
 
               return Visibility(
-                visible: !tabInFullScreen && !hidden.value,
+                visible: !tabInFullScreen && appBarVisible,
                 child: BrowserBottomAppBar(displayedSheet: displayedSheet),
               );
             },
@@ -282,6 +284,9 @@ class BrowserScreen extends HookConsumerWidget {
                               .exitFullscreen();
                           return true;
                         }
+
+                        //Make sure app bar is visible
+                        showAppBar.value = true;
 
                         if (tabState?.isLoading == true) {
                           lastBackButtonPress.value = null;
