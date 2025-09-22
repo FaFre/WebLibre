@@ -65,7 +65,6 @@ class OpenSharedContent extends HookConsumerWidget {
           Padding(
             padding: const EdgeInsetsDirectional.symmetric(horizontal: 16.0),
             child: SizedBox(
-              height: 48,
               width: double.maxFinite,
               child: ContainerChips(
                 displayMenu: false,
