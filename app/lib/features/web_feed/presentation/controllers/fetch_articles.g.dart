@@ -20,7 +20,7 @@ final class FetchArticlesControllerProvider
         argument: null,
         retry: null,
         name: r'fetchArticlesControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class FetchArticlesControllerProvider
 }
 
 String _$fetchArticlesControllerHash() =>
-    r'7604d9352da886624c3cf6862b89c397edda1f28';
+    r'c198a1c1200aaeb6095fbc6ebe41b3069f1de7cc';
 
 abstract class _$FetchArticlesController extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

@@ -24,7 +24,7 @@ import 'package:weblibre/features/web_feed/domain/services/feed_reader.dart';
 
 part 'fetch_articles.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class FetchArticlesController extends _$FetchArticlesController {
   Future<void> fetchAllArticles() async {
     state = const AsyncLoading();
