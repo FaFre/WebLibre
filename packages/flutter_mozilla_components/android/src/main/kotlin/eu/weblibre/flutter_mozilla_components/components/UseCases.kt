@@ -14,6 +14,8 @@ import mozilla.components.feature.session.SettingsUseCases
 import mozilla.components.feature.session.TrackingProtectionUseCases
 import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.feature.pwa.WebAppShortcutManager
+import mozilla.components.feature.pwa.WebAppUseCases
 
 /**
  * Component group for all use cases. Use cases are provided by feature
@@ -23,6 +25,7 @@ class UseCases(
     private val context: Context,
     private val engine: Engine,
     private val store: BrowserStore,
+    private val shortcutManager: WebAppShortcutManager,
 ) {
     /**
      * Use cases that provide engine interactions for a given browser session.
@@ -50,6 +53,10 @@ class UseCases(
     val customTabsUseCases: CustomTabsUseCases by lazy { CustomTabsUseCases(store, sessionUseCases.loadUrl) }
 
     val appLinksUseCases by lazy { AppLinksUseCases(context) }
+
+    val webAppUseCases by lazy {
+        WebAppUseCases(context, store, shortcutManager)
+    }
 
     //val trackingProtectionUseCases by lazy { TrackingProtectionUseCases(store, engine) }
 }

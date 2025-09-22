@@ -15,6 +15,7 @@ import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActi
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
+import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
@@ -38,6 +39,10 @@ class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
         return components.core.engine.createView(requireContext()).apply {
            selectionActionDelegate = components.selectionAction
         }
+    }
+
+    override fun initializeUI(view: View, tab: SessionState) {
+        //Do nothing, ui is flutter
     }
 
     @Deprecated("Deprecated in Java")

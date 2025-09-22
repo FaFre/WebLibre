@@ -20,18 +20,22 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
+import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.SessionState
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.downloads.temporary.ShareResourceFeature
+import mozilla.components.feature.intent.ext.EXTRA_SESSION_ID
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
 import mozilla.components.feature.prompts.PromptFeature
@@ -60,6 +64,11 @@ import mozilla.components.support.locale.ActivityContextWrapper
  */
 @SuppressWarnings("LargeClass")
 abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, ActivityResultHandler {
+    var customTabSessionId: String? = null
+
+    @VisibleForTesting
+    internal var browserInitialized: Boolean = false
+
     private val sessionFeature = ViewBoundFeatureWrapper<SessionFeature>()
     private val shareResourceFeature = ViewBoundFeatureWrapper<ShareResourceFeature>()
     private val downloadsFeature = ViewBoundFeatureWrapper<DownloadsFeature>()
@@ -113,6 +122,23 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     protected abstract fun createEngine(components: Components) : EngineView
 
+    protected abstract fun initializeUI(view: View, tab: SessionState)
+
+    @VisibleForTesting
+    internal fun getCurrentTab(): SessionState? {
+        return components.core.store.state.findCustomTabOrSelectedTab(customTabSessionId)
+    }
+
+    private fun initializeUI(view: View) {
+        val tab = getCurrentTab()
+        browserInitialized = if (tab != null) {
+            initializeUI(view, tab)
+            true
+        } else {
+            false
+        }
+    }
+
     private lateinit var requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>>
@@ -160,6 +186,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     @CallSuper
     @Suppress("LongMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initializeUI(view)
+
         sessionFeature.set(
             feature = SessionFeature(
                 components.core.store,
@@ -382,6 +410,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     @Suppress("LongMethod")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentBrowserBinding.inflate(inflater, container, false)
+
+        customTabSessionId = requireArguments().getString(EXTRA_SESSION_ID)
 
         createAndSetupEngine()
 

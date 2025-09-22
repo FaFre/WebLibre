@@ -51,6 +51,8 @@ import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
 import mozilla.components.feature.prompts.PromptMiddleware
 import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
 import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
+import mozilla.components.feature.pwa.ManifestStorage
+import mozilla.components.feature.pwa.WebAppShortcutManager
 import mozilla.components.feature.readerview.ReaderViewMiddleware
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
@@ -228,6 +230,19 @@ class Core(private val context: Context,
     val historyStorage by lazy { lazyHistoryStorage.value }
 
     val permissionStorage by lazy { PermissionStorage( geckoSitePermissionsStorage ) }
+
+    val webAppManifestStorage by lazy { ManifestStorage(context) }
+
+    /**
+     * Shortcut component for managing shortcuts on the device home screen.
+     */
+    val webAppShortcutManager by lazy {
+        WebAppShortcutManager(
+            context,
+            client,
+            webAppManifestStorage,
+        )
+    }
 
     /**
      * Constructs a [TrackingProtectionPolicy] based on current preferences.

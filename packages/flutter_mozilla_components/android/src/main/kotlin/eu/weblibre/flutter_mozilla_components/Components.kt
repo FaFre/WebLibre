@@ -43,7 +43,7 @@ class Components(private val context: Context,
 ) {
     val core by lazy { Core(context, this, flutterEvents, extensionEvents) }
     val events by lazy { Events(flutterEvents) }
-    val useCases by lazy { UseCases(context, core.engine, core.store) }
+    val useCases by lazy { UseCases(context, core.engine, core.store, core.webAppShortcutManager) }
     val services by lazy { Services(context, useCases.tabsUseCases) }
     val features by lazy { Features(core.engine, core.store, addonEvents, tabContentEvents) }
     val search by lazy { Search(context, core, useCases) }
