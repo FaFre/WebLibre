@@ -29,8 +29,8 @@ dependencies:
   flutter_secure_storage: ^10.0.0-beta.4
   flutter_slidable: ^4.0.1
   flutter_svg: ^2.2.1
-  go_router: ^16.2.2
-  google_fonts: ^6.3.1
+  go_router: ^16.2.4
+  google_fonts: ^6.3.2
   graphview: ^1.2.0
   home_widget: ^0.8.0
   hooks_riverpod: ^3.0.0
@@ -93,7 +93,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter
-  go_router_builder: ^4.0.1
+  go_router_builder: ^4.1.0
   json_serializable: ^6.11.1
   lint: ^2.8.0
   riverpod_generator: ^3.0.0
