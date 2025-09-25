@@ -60,94 +60,6 @@ export namespace ProxyDao {
   }
 }
 
-export class Store {
-  private proxies: ProxyDao[] = []
-  private relations: { [key: string]: string[] } = {}
-
-  async getAllProxies(): Promise<ProxySettings[]> {
-    const proxyDaos = await this.getAllProxyDaos()
-    const result: ProxySettings[] = proxyDaos.map(tryFromDao).filter(p => p !== undefined) as ProxySettings[]
-    return result
-  }
-
-  async getProxyById(id: string): Promise<ProxySettings | null> {
-    const proxies = await this.getAllProxies()
-    const index = proxies.findIndex(p => p.id === id)
-    if (index === -1) {
-      return null
-    } else {
-      return proxies[index]
-    }
-  }
-
-  async putProxy(proxy: ProxySettings): Promise<void> {
-    const proxies = await this.getAllProxyDaos()
-    const index = proxies.findIndex(p => p.id === proxy.id)
-    if (index !== -1) {
-      proxies[index] = proxy.asDao()
-    } else {
-      proxies.push(proxy.asDao())
-    }
-
-    await this.saveProxyDaos(proxies)
-  }
-
-  async deleteProxyById(id: string): Promise<void> {
-    const proxies = await this.getAllProxyDaos()
-    const index = proxies.findIndex(p => p.id === id)
-    if (index !== -1) {
-      proxies.splice(index, 1)
-      await this.saveProxyDaos(proxies)
-    }
-  }
-
-  async getRelations(): Promise<{ [key: string]: string[] }> {
-    return this.relations
-  }
-
-  async setContainerProxyRelation(cookieStoreId: string, proxyId: string): Promise<void> {
-    this.relations[cookieStoreId] = [proxyId]
-  }
-
-  async removeContainerProxyRelation(cookieStoreId: string, proxyId: string): Promise<void> {
-    const currentRelations = this.relations[cookieStoreId] ?? []
-    this.relations[cookieStoreId] = currentRelations.filter(id => id !== proxyId)
-
-    // If no relations left for this container, clean up by removing the key
-    if (this.relations[cookieStoreId].length === 0) {
-      delete this.relations[cookieStoreId]
-    }
-  }
-
-  async getProxiesForContainer(cookieStoreId: string): Promise<ProxySettings[] | null> {
-    const relations = await this.getRelations()
-
-    const proxyIds: string[] = relations[cookieStoreId] ?? []
-
-    if (proxyIds.length === 0) {
-      return null
-    }
-
-    const proxies = await this.getAllProxies()
-    const proxyById: { [key: string]: ProxySettings } = {}
-    proxies.forEach(function (p) { proxyById[p.id] = p })
-
-    return proxyIds.map(pId => proxyById[pId])
-      .filter(p => p !== undefined)
-      .map(fillInDefaults)
-      .map(tryFromDao)
-      .filter(p => p !== undefined) as ProxySettings[]
-  }
-
-  private async saveProxyDaos(p: ProxyDao[]): Promise<void> {
-    this.proxies = p
-  }
-
-  private async getAllProxyDaos(): Promise<ProxyDao[]> {
-    return this.proxies.map(fillInDefaults)
-  }
-}
-
 function fillInDefaults(proxy: Partial<ProxyDao>): ProxyDao {
   if (proxy.title === undefined) {
     proxy.title = ''
@@ -161,4 +73,90 @@ function fillInDefaults(proxy: Partial<ProxyDao>): ProxyDao {
     }
   }
   return proxy as ProxyDao
+}
+
+export class Store {
+  private proxies: ProxyDao[] = []
+  private relations: { [key: string]: string[] } = {}
+
+  getAllProxies(): ProxySettings[] {
+    const proxyDaos = this.getAllProxyDaos()
+    return proxyDaos.map(tryFromDao).filter(p => p !== undefined) as ProxySettings[]
+  }
+
+  getProxyById(id: string): ProxySettings | null {
+    const proxies = this.getAllProxies()
+    const proxy = proxies.find(p => p.id === id)
+    return proxy ?? null
+  }
+
+  putProxy(proxy: ProxySettings): void {
+    const proxies = this.getAllProxyDaos()
+    const index = proxies.findIndex(p => p.id === proxy.id)
+    if (index !== -1) {
+      proxies[index] = proxy.asDao()
+    } else {
+      proxies.push(proxy.asDao())
+    }
+    this.saveProxyDaos(proxies)
+  }
+
+  deleteProxyById(id: string): void {
+    const proxies = this.getAllProxyDaos()
+    const index = proxies.findIndex(p => p.id === id)
+    if (index !== -1) {
+      proxies.splice(index, 1)
+      this.saveProxyDaos(proxies)
+    }
+  }
+
+  getRelations(): { [key: string]: string[] } {
+    return this.relations
+  }
+
+  hasGeneralRelation(): boolean {
+    return this.relations['general'] != null;
+  }
+
+  setContainerProxyRelation(cookieStoreId: string, proxyId: string): void {
+    this.relations[cookieStoreId] = [proxyId]
+  }
+
+  removeContainerProxyRelation(cookieStoreId: string, proxyId: string): void {
+    const currentRelations = this.relations[cookieStoreId] ?? []
+    this.relations[cookieStoreId] = currentRelations.filter(id => id !== proxyId)
+
+    if (this.relations[cookieStoreId].length === 0) {
+      delete this.relations[cookieStoreId]
+    }
+  }
+
+  getProxiesForContainer(cookieStoreId: string): ProxySettings[] | null {
+    const relations = this.getRelations()
+    const proxyIds: string[] = relations[cookieStoreId]
+      ?? ((cookieStoreId != 'private') ? relations['general'] : null)
+      ?? []
+
+    if (proxyIds.length === 0) {
+      return null
+    }
+
+    const proxies = this.getAllProxies()
+    const proxyById: { [key: string]: ProxySettings } = {}
+    proxies.forEach(p => { proxyById[p.id] = p })
+
+    return proxyIds.map(pId => proxyById[pId])
+      .filter(p => p !== undefined)
+      .map(fillInDefaults)
+      .map(tryFromDao)
+      .filter(p => p !== undefined) as ProxySettings[]
+  }
+
+  private saveProxyDaos(p: ProxyDao[]): void {
+    this.proxies = p
+  }
+
+  private getAllProxyDaos(): ProxyDao[] {
+    return this.proxies.map(fillInDefaults)
+  }
 }

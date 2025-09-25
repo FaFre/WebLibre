@@ -60,18 +60,23 @@ export default class BackgroundMain {
     if (requestDetails.tabId > -1) {
       const tab = (await browser.tabs.get(requestDetails.tabId))
 
-      if (tab.cookieStoreId?.startsWith(containerIdentifier) === true || tab.cookieStoreId === privateIdentifier) {
+      if (this.store.hasGeneralRelation() ||
+        tab.cookieStoreId?.startsWith(containerIdentifier) === true ||
+        tab.cookieStoreId === privateIdentifier
+      ) {
         try {
           let cookieStoreId: string
 
-          if (tab.cookieStoreId.startsWith(containerIdentifier)) {
+          if (tab.cookieStoreId?.startsWith(containerIdentifier) === true) {
             cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
-          } else {
+          } else if (tab.cookieStoreId === privateIdentifier) {
             // Handle private tabs - use 'private' as identifier
             cookieStoreId = 'private'
+          } else {
+            cookieStoreId = 'general'
           }
 
-          const proxies = await this.store.getProxiesForContainer(cookieStoreId)
+          const proxies = this.store.getProxiesForContainer(cookieStoreId)
 
           if (proxies === null) {
             return doNotProxy
