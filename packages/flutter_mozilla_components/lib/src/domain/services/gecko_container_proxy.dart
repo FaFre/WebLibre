@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import 'dart:async';
+
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 
 final _apiInstance = GeckoContainerProxyApi();
@@ -21,9 +23,11 @@ class GeckoContainerProxyService {
     return _apiInstance.removeContainerProxy(contextId);
   }
 
-  Future<bool> healthcheck() {
+  Future<bool> healthcheck() async {
     try {
-      return _apiInstance.healthcheck();
+      return await _apiInstance.healthcheck().timeout(
+        const Duration(milliseconds: 250),
+      );
     } catch (_) {
       return Future.value(false);
     }
