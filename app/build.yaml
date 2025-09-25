@@ -13,6 +13,11 @@ targets:
           skip_verification_code: true
           data_class_to_companions: false
           named_parameters: true
+          databases:
+            bangs: lib/features/bangs/data/database/database.dart
+            tabs: lib/features/geckoview/features/tabs/data/database/database.dart
+            user: lib/features/user/data/database/database.dart
+            web_feed: lib/features/web_feed/data/database/database.dart
           sql:
             dialect: sqlite
             options:
