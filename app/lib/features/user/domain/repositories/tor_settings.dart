@@ -38,6 +38,10 @@ class TorSettingsRepository extends _$TorSettingsRepository {
     final db = ref.read(userDatabaseProvider);
 
     return TorSettings.fromJson({
+      'proxyRegularTabsMode': settings['proxyRegularTabsMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
       'proxyPrivateTabsTor': settings['proxyPrivateTabsTor']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

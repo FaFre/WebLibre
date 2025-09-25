@@ -34,7 +34,7 @@ final class TorSettingsRepositoryProvider
 }
 
 String _$torSettingsRepositoryHash() =>
-    r'ef80d1cc6b9b72cce371c03c656b10a0924d49d0';
+    r'be8519d4baf60436cae422813c2f2bbb5c2186d3';
 
 abstract class _$TorSettingsRepository extends $StreamNotifier<TorSettings> {
   Stream<TorSettings> build();
