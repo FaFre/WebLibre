@@ -7,6 +7,8 @@ part of 'tor_settings.dart';
 // **************************************************************************
 
 abstract class _$TorSettingsCWProxy {
+  TorSettings proxyRegularTabsMode(TorRegularTabProxyMode proxyRegularTabsMode);
+
   TorSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor);
 
   TorSettings config(TorConnectionConfig config);
@@ -23,6 +25,7 @@ abstract class _$TorSettingsCWProxy {
   /// TorSettings(...).copyWith(id: 12, name: "My name")
   /// ```
   TorSettings call({
+    TorRegularTabProxyMode proxyRegularTabsMode,
     bool proxyPrivateTabsTor,
     TorConnectionConfig config,
     bool requireBridge,
@@ -36,6 +39,11 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
   const _$TorSettingsCWProxyImpl(this._value);
 
   final TorSettings _value;
+
+  @override
+  TorSettings proxyRegularTabsMode(
+    TorRegularTabProxyMode proxyRegularTabsMode,
+  ) => call(proxyRegularTabsMode: proxyRegularTabsMode);
 
   @override
   TorSettings proxyPrivateTabsTor(bool proxyPrivateTabsTor) =>
@@ -61,12 +69,19 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
   /// TorSettings(...).copyWith(id: 12, name: "My name")
   /// ```
   TorSettings call({
+    Object? proxyRegularTabsMode = const $CopyWithPlaceholder(),
     Object? proxyPrivateTabsTor = const $CopyWithPlaceholder(),
     Object? config = const $CopyWithPlaceholder(),
     Object? requireBridge = const $CopyWithPlaceholder(),
     Object? fetchRemoteBridges = const $CopyWithPlaceholder(),
   }) {
     return TorSettings(
+      proxyRegularTabsMode:
+          proxyRegularTabsMode == const $CopyWithPlaceholder() ||
+              proxyRegularTabsMode == null
+          ? _value.proxyRegularTabsMode
+          // ignore: cast_nullable_to_non_nullable
+          : proxyRegularTabsMode as TorRegularTabProxyMode,
       proxyPrivateTabsTor:
           proxyPrivateTabsTor == const $CopyWithPlaceholder() ||
               proxyPrivateTabsTor == null
@@ -105,6 +120,10 @@ extension $TorSettingsCopyWith on TorSettings {
 
 TorSettings _$TorSettingsFromJson(Map<String, dynamic> json) =>
     TorSettings.withDefaults(
+      proxyRegularTabsMode: $enumDecodeNullable(
+        _$TorRegularTabProxyModeEnumMap,
+        json['proxyRegularTabsMode'],
+      ),
       proxyPrivateTabsTor: json['proxyPrivateTabsTor'] as bool?,
       config: $enumDecodeNullable(_$TorConnectionConfigEnumMap, json['config']),
       requireBridge: json['requireBridge'] as bool?,
@@ -113,11 +132,18 @@ TorSettings _$TorSettingsFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$TorSettingsToJson(TorSettings instance) =>
     <String, dynamic>{
+      'proxyRegularTabsMode':
+          _$TorRegularTabProxyModeEnumMap[instance.proxyRegularTabsMode]!,
       'proxyPrivateTabsTor': instance.proxyPrivateTabsTor,
       'config': _$TorConnectionConfigEnumMap[instance.config]!,
       'requireBridge': instance.requireBridge,
       'fetchRemoteBridges': instance.fetchRemoteBridges,
     };
+
+const _$TorRegularTabProxyModeEnumMap = {
+  TorRegularTabProxyMode.container: 'container',
+  TorRegularTabProxyMode.all: 'all',
+};
 
 const _$TorConnectionConfigEnumMap = {
   TorConnectionConfig.auto: 'auto',

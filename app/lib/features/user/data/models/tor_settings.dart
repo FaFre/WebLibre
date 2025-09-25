@@ -25,15 +25,19 @@ part 'tor_settings.g.dart';
 
 enum TorConnectionConfig { auto, direct, obfs4, snowflake }
 
+enum TorRegularTabProxyMode { container, all }
+
 @CopyWith()
 @JsonSerializable(includeIfNull: true, constructor: 'withDefaults')
 class TorSettings with FastEquatable {
+  final TorRegularTabProxyMode proxyRegularTabsMode;
   final bool proxyPrivateTabsTor;
   final TorConnectionConfig config;
   final bool requireBridge;
   final bool fetchRemoteBridges;
 
   TorSettings({
+    required this.proxyRegularTabsMode,
     required this.proxyPrivateTabsTor,
     required this.config,
     required this.requireBridge,
@@ -41,11 +45,14 @@ class TorSettings with FastEquatable {
   });
 
   TorSettings.withDefaults({
+    TorRegularTabProxyMode? proxyRegularTabsMode,
     bool? proxyPrivateTabsTor,
     TorConnectionConfig? config,
     bool? requireBridge,
     bool? fetchRemoteBridges,
-  }) : proxyPrivateTabsTor = proxyPrivateTabsTor ?? false,
+  }) : proxyRegularTabsMode =
+           proxyRegularTabsMode ?? TorRegularTabProxyMode.container,
+       proxyPrivateTabsTor = proxyPrivateTabsTor ?? false,
        config = config ?? TorConnectionConfig.auto,
        requireBridge = requireBridge ?? false,
        fetchRemoteBridges = fetchRemoteBridges ?? true;
@@ -57,6 +64,7 @@ class TorSettings with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
+    proxyRegularTabsMode,
     proxyPrivateTabsTor,
     config,
     requireBridge,

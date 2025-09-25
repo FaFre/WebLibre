@@ -18,21 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/tor/domain/repositories/tor_proxy.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'proxy_settings_replication.g.dart';
 
 @Riverpod(keepAlive: true)
 class ProxySettingsReplication extends _$ProxySettingsReplication {
-  final _service = GeckoContainerProxyService();
-
   @override
   void build() {
     ref.listen(
@@ -40,7 +39,9 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       torProxyServiceProvider.select((data) => data.value),
       (previous, next) async {
         if (next != null) {
-          await _service.setProxyPort(next);
+          await ref
+              .read(torProxyRepositoryProvider.notifier)
+              .setProxyPort(next);
         }
       },
       onError: (error, stackTrace) {
@@ -62,13 +63,15 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
           for (final container in next.value!) {
             if (container.metadata.contextualIdentity.isNotEmpty) {
               if (container.metadata.useProxy) {
-                await _service.addContainerProxy(
-                  container.metadata.contextualIdentity!,
-                );
+                await ref
+                    .read(torProxyRepositoryProvider.notifier)
+                    .addContainerProxy(container.metadata.contextualIdentity!);
               } else {
-                await _service.removeContainerProxy(
-                  container.metadata.contextualIdentity!,
-                );
+                await ref
+                    .read(torProxyRepositoryProvider.notifier)
+                    .removeContainerProxy(
+                      container.metadata.contextualIdentity!,
+                    );
               }
             }
           }
@@ -90,9 +93,39 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       ),
       (previous, next) async {
         if (next) {
-          await _service.addContainerProxy('private');
+          await ref
+              .read(torProxyRepositoryProvider.notifier)
+              .addContainerProxy('private');
         } else {
-          await _service.removeContainerProxy('private');
+          await ref
+              .read(torProxyRepositoryProvider.notifier)
+              .removeContainerProxy('private');
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to generalSettingsRepositoryProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      torSettingsWithDefaultsProvider.select(
+        (value) => value.proxyRegularTabsMode,
+      ),
+      (previous, next) async {
+        switch (next) {
+          case TorRegularTabProxyMode.container:
+            await ref
+                .read(torProxyRepositoryProvider.notifier)
+                .removeContainerProxy('general');
+          case TorRegularTabProxyMode.all:
+            await ref
+                .read(torProxyRepositoryProvider.notifier)
+                .addContainerProxy('general');
         }
       },
       onError: (error, stackTrace) {

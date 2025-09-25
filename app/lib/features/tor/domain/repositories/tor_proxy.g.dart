@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'proxy_settings_replication.dart';
+part of 'tor_proxy.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,28 @@ part of 'proxy_settings_replication.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(ProxySettingsReplication)
-const proxySettingsReplicationProvider = ProxySettingsReplicationProvider._();
+@ProviderFor(TorProxyRepository)
+const torProxyRepositoryProvider = TorProxyRepositoryProvider._();
 
-final class ProxySettingsReplicationProvider
-    extends $NotifierProvider<ProxySettingsReplication, void> {
-  const ProxySettingsReplicationProvider._()
+final class TorProxyRepositoryProvider
+    extends $NotifierProvider<TorProxyRepository, void> {
+  const TorProxyRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'proxySettingsReplicationProvider',
+        name: r'torProxyRepositoryProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$proxySettingsReplicationHash();
+  String debugGetCreateSourceHash() => _$torProxyRepositoryHash();
 
   @$internal
   @override
-  ProxySettingsReplication create() => ProxySettingsReplication();
+  TorProxyRepository create() => TorProxyRepository();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -41,10 +41,10 @@ final class ProxySettingsReplicationProvider
   }
 }
 
-String _$proxySettingsReplicationHash() =>
-    r'46063662e3aca4f38a6876f4265ada9a87bde6dc';
+String _$torProxyRepositoryHash() =>
+    r'dd565140620a1f66090e84e541d5ea8e34ab0094';
 
-abstract class _$ProxySettingsReplication extends $Notifier<void> {
+abstract class _$TorProxyRepository extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
