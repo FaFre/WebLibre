@@ -43,6 +43,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -327,7 +328,22 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                     await TorProxyRoute().push(context);
                   },
                   leadingIcon: const Icon(TorIcons.onionAlt),
-                  child: const Text('Tor™ Proxy'),
+                  child: Consumer(
+                    child: const Text('Tor™ Proxy'),
+                    builder: (context, ref, child) {
+                      final torConnected = ref.watch(
+                        torProxyServiceProvider.select(
+                          (value) => value.value != null,
+                        ),
+                      );
+
+                      return Badge(
+                        isLabelVisible: torConnected,
+                        backgroundColor: const Color(0xFF68B030),
+                        child: child,
+                      );
+                    },
+                  ),
                 ),
                 const Divider(),
                 MenuItemButton(
