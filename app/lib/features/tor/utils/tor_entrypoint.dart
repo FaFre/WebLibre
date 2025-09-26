@@ -58,7 +58,8 @@ Future<void> onStart(ServiceInstance service) async {
 
   void addHeartbeat() {
     timeout?.cancel();
-    timeout = Timer(const Duration(minutes: 15), () async {
+    //Kill service after 1 hour of inactivity
+    timeout = Timer(const Duration(hours: 1), () async {
       // logger.i('Terminating tor due to timeout');
       await stopService();
     });
