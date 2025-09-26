@@ -45,6 +45,11 @@ object GlobalComponents {
             .whenSessionsChange()
     }
 
+    @DelicateCoroutinesApi
+    private fun restoreDownloads(newComponents: Components) = GlobalScope.launch(Dispatchers.Main) {
+        newComponents.useCases.downloadsUseCases.restoreDownloads()
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     fun setUp(
         applicationContext: Context,
@@ -82,8 +87,7 @@ object GlobalComponents {
         newComponents.core.engine.warmUp()
 
         restoreBrowserState(newComponents)
-
-        //newComponents.useCases.downloadsUseCases.restoreDownloads()
+        restoreDownloads(newComponents)
 
         try {
             GlobalPlacesDependencyProvider.initialize(newComponents.core.historyStorage)

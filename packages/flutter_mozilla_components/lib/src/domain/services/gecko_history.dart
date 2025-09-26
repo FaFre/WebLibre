@@ -26,7 +26,20 @@ class GeckoHistoryService {
   }
 
   Future<void> deleteVisit(VisitInfo info) {
-    return _api.deleteVisit(info.url, info.visitTime);
+    switch (info.visitType) {
+      case VisitType.link:
+      case VisitType.typed:
+      case VisitType.embed:
+      case VisitType.redirectPermanent:
+      case VisitType.redirectTemporary:
+      case VisitType.framedLink:
+      case VisitType.reload:
+        return _api.deleteVisit(info.url, info.visitTime);
+      case VisitType.download:
+        return _api.deleteDownload(info.contentId!);
+      case VisitType.bookmark:
+        throw UnimplementedError();
+    }
   }
 
   Future<void> deleteVisitsBetween(DateTime start, DateTime end) {

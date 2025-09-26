@@ -1257,6 +1257,7 @@ class VisitInfo {
     required this.visitType,
     this.previewImageUrl,
     required this.isRemote,
+    this.contentId,
   });
 
   String url;
@@ -1271,6 +1272,8 @@ class VisitInfo {
 
   bool isRemote;
 
+  String? contentId;
+
   List<Object?> _toList() {
     return <Object?>[
       url,
@@ -1279,6 +1282,7 @@ class VisitInfo {
       visitType,
       previewImageUrl,
       isRemote,
+      contentId,
     ];
   }
 
@@ -1294,6 +1298,7 @@ class VisitInfo {
       visitType: result[3]! as VisitType,
       previewImageUrl: result[4] as String?,
       isRemote: result[5]! as bool,
+      contentId: result[6] as String?,
     );
   }
 
@@ -5768,6 +5773,29 @@ class GeckoHistoryApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url, timestamp]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> deleteDownload(String id) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteDownload$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[id]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {

@@ -1146,7 +1146,8 @@ data class VisitInfo (
   val visitTime: Long,
   val visitType: VisitType,
   val previewImageUrl: String? = null,
-  val isRemote: Boolean
+  val isRemote: Boolean,
+  val contentId: String? = null
 )
  {
   companion object {
@@ -1157,7 +1158,8 @@ data class VisitInfo (
       val visitType = pigeonVar_list[3] as VisitType
       val previewImageUrl = pigeonVar_list[4] as String?
       val isRemote = pigeonVar_list[5] as Boolean
-      return VisitInfo(url, title, visitTime, visitType, previewImageUrl, isRemote)
+      val contentId = pigeonVar_list[6] as String?
+      return VisitInfo(url, title, visitTime, visitType, previewImageUrl, isRemote, contentId)
     }
   }
   fun toList(): List<Any?> {
@@ -1168,6 +1170,7 @@ data class VisitInfo (
       visitType,
       previewImageUrl,
       isRemote,
+      contentId,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -4767,6 +4770,7 @@ interface GeckoDeleteBrowsingDataController {
 interface GeckoHistoryApi {
   fun getDetailedVisits(startMillis: Long, endMillis: Long, excludeTypes: List<VisitType>, callback: (Result<List<VisitInfo>>) -> Unit)
   fun deleteVisit(url: String, timestamp: Long, callback: (Result<Unit>) -> Unit)
+  fun deleteDownload(id: String, callback: (Result<Unit>) -> Unit)
   fun deleteVisitsBetween(startMillis: Long, endMillis: Long, callback: (Result<Unit>) -> Unit)
 
   companion object {
@@ -4808,6 +4812,25 @@ interface GeckoHistoryApi {
             val urlArg = args[0] as String
             val timestampArg = args[1] as Long
             api.deleteVisit(urlArg, timestampArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteDownload$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as String
+            api.deleteDownload(idArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

@@ -1,7 +1,6 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.pigeons.AutocompleteResult
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
 import eu.weblibre.flutter_mozilla_components.pigeons.VisitInfo
 import eu.weblibre.flutter_mozilla_components.pigeons.VisitType
@@ -10,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mozilla.components.browser.state.state.content.DownloadState
+import kotlin.time.Duration.Companion.milliseconds
 
 class GeckoHistoryApiImpl() : GeckoHistoryApi {
     companion object {
@@ -20,6 +21,32 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
+    private fun Map<String, DownloadState>.toVisitInfoList(
+        startMillis: Long,
+        endMillis: Long,
+    ): List<VisitInfo> =
+        values
+            .filter { isDisplayableItem(it.status) &&
+                    it.createdTime >= startMillis && it.createdTime <= endMillis
+            }
+            .distinctBy { Pair(it.fileName, it.status) }
+            .sortedByDescending { it.createdTime } // sort from newest to oldest
+            .map { it.toVisitInfo() }
+
+    private fun isDisplayableItem(status: DownloadState.Status) =
+        status != DownloadState.Status.CANCELLED
+
+    private fun DownloadState.toVisitInfo() =
+        VisitInfo(
+            url = url,
+            visitType = VisitType.DOWNLOAD,
+            visitTime = createdTime,
+            title = filePath,
+            previewImageUrl = contentType,
+            isRemote = false,
+            contentId = id
+        )
+
     override fun getDetailedVisits(
         startMillis: Long,
         endMillis: Long,
@@ -28,7 +55,7 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
     ) {
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
-                val visits = components.core.historyStorage.getDetailedVisits(
+                var visits = components.core.historyStorage.getDetailedVisits(
                     startMillis,
                     endMillis,
                     excludeTypes.map {
@@ -43,9 +70,7 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
                             VisitType.FRAMED_LINK -> mozilla.components.concept.storage.VisitType.FRAMED_LINK
                             VisitType.RELOAD -> mozilla.components.concept.storage.VisitType.RELOAD
                         }
-                    })
-
-                callback(Result.success(visits.map {
+                    }).map {
                     VisitInfo(
                         url = it.url,
                         title = it.title,
@@ -65,6 +90,12 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
                         isRemote = it.isRemote
                     )
                 }
+
+                if (!excludeTypes.contains(VisitType.DOWNLOAD)) {
+                   visits = visits + components.core.store.state.downloads.toVisitInfoList(startMillis, endMillis)
+                }
+
+                callback(Result.success(visits
                 ))
             }
         }
@@ -78,6 +109,19 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
                 components.core.historyStorage.deleteVisit(url, timestamp);
+
+                callback(Result.success(Unit))
+            }
+        }
+    }
+
+    override fun deleteDownload(
+        id: String,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                components.useCases.downloadsUseCases.removeDownload(id)
 
                 callback(Result.success(Unit))
             }

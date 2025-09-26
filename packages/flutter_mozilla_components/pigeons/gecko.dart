@@ -425,6 +425,8 @@ class VisitInfo {
   final String? previewImageUrl;
   final bool isRemote;
 
+  final String? contentId;
+
   VisitInfo(
     this.url,
     this.title,
@@ -432,6 +434,7 @@ class VisitInfo {
     this.visitType,
     this.previewImageUrl,
     this.isRemote,
+    this.contentId,
   );
 }
 
@@ -1252,6 +1255,9 @@ abstract class GeckoHistoryApi {
 
   @async
   void deleteVisit(String url, int timestamp);
+
+  @async
+  void deleteDownload(String id);
 
   @async
   void deleteVisitsBetween(int startMillis, int endMillis);
