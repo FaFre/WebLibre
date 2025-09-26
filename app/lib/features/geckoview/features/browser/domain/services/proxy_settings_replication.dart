@@ -38,11 +38,9 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       fireImmediately: true,
       torProxyServiceProvider.select((data) => data.value),
       (previous, next) async {
-        if (next != null) {
-          await ref
-              .read(torProxyRepositoryProvider.notifier)
-              .setProxyPort(next);
-        }
+        await ref
+            .read(torProxyRepositoryProvider.notifier)
+            .setProxyPort(next ?? -1);
       },
       onError: (error, stackTrace) {
         logger.e(

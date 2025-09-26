@@ -17,16 +17,21 @@ port.onMessage.addListener((raw: unknown): void => {
     const message = raw as Message;
     switch (message.action) {
         case "setProxyPort":
-            store.putProxy(new Socks5ProxySettings({
-                id: 'tor',
-                type: 'socks',
-                host: '127.0.0.1',
-                port: message.args,
-                doNotProxyLocal: true,
-                title: 'Tor',
-                proxyDNS: true,
-            }))
-            console.log('put tor port ' + message.args)
+            if (message.args > -1) {
+                store.putProxy(new Socks5ProxySettings({
+                    id: 'tor',
+                    type: 'socks',
+                    host: '127.0.0.1',
+                    port: message.args,
+                    doNotProxyLocal: true,
+                    title: 'Tor',
+                    proxyDNS: true,
+                }))
+                console.log('put tor port ' + message.args)
+            } else {
+                store.deleteProxyById('tor')
+                console.log('remove tor port')
+            }
 
             break
         case "addContainerProxy":
