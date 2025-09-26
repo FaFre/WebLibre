@@ -489,6 +489,187 @@ typedef $OnboardingProcessedTableManager =
       i1.OnboardingData,
       i0.PrefetchHooks Function()
     >;
+typedef $RiverpodCreateCompanionBuilder =
+    i1.RiverpodCompanion Function({
+      required String key,
+      required String json,
+      i0.Value<DateTime?> expireAt,
+      i0.Value<String?> destroyKey,
+    });
+typedef $RiverpodUpdateCompanionBuilder =
+    i1.RiverpodCompanion Function({
+      i0.Value<String> key,
+      i0.Value<String> json,
+      i0.Value<DateTime?> expireAt,
+      i0.Value<String?> destroyKey,
+    });
+
+class $RiverpodFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.Riverpod> {
+  $RiverpodFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get expireAt => $composableBuilder(
+    column: $table.expireAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get destroyKey => $composableBuilder(
+    column: $table.destroyKey,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $RiverpodOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.Riverpod> {
+  $RiverpodOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get expireAt => $composableBuilder(
+    column: $table.expireAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get destroyKey => $composableBuilder(
+    column: $table.destroyKey,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $RiverpodAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.Riverpod> {
+  $RiverpodAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+
+  i0.GeneratedColumn<DateTime> get expireAt =>
+      $composableBuilder(column: $table.expireAt, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get destroyKey => $composableBuilder(
+    column: $table.destroyKey,
+    builder: (column) => column,
+  );
+}
+
+class $RiverpodTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i1.Riverpod,
+          i1.RiverpodData,
+          i1.$RiverpodFilterComposer,
+          i1.$RiverpodOrderingComposer,
+          i1.$RiverpodAnnotationComposer,
+          $RiverpodCreateCompanionBuilder,
+          $RiverpodUpdateCompanionBuilder,
+          (
+            i1.RiverpodData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i1.Riverpod,
+              i1.RiverpodData
+            >,
+          ),
+          i1.RiverpodData,
+          i0.PrefetchHooks Function()
+        > {
+  $RiverpodTableManager(i0.GeneratedDatabase db, i1.Riverpod table)
+    : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i1.$RiverpodFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i1.$RiverpodOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i1.$RiverpodAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> key = const i0.Value.absent(),
+                i0.Value<String> json = const i0.Value.absent(),
+                i0.Value<DateTime?> expireAt = const i0.Value.absent(),
+                i0.Value<String?> destroyKey = const i0.Value.absent(),
+              }) => i1.RiverpodCompanion(
+                key: key,
+                json: json,
+                expireAt: expireAt,
+                destroyKey: destroyKey,
+              ),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String json,
+                i0.Value<DateTime?> expireAt = const i0.Value.absent(),
+                i0.Value<String?> destroyKey = const i0.Value.absent(),
+              }) => i1.RiverpodCompanion.insert(
+                key: key,
+                json: json,
+                expireAt: expireAt,
+                destroyKey: destroyKey,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $RiverpodProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i1.Riverpod,
+      i1.RiverpodData,
+      i1.$RiverpodFilterComposer,
+      i1.$RiverpodOrderingComposer,
+      i1.$RiverpodAnnotationComposer,
+      $RiverpodCreateCompanionBuilder,
+      $RiverpodUpdateCompanionBuilder,
+      (
+        i1.RiverpodData,
+        i0.BaseReferences<i0.GeneratedDatabase, i1.Riverpod, i1.RiverpodData>,
+      ),
+      i1.RiverpodData,
+      i0.PrefetchHooks Function()
+    >;
 
 class Setting extends i0.Table with i0.TableInfo<Setting, i1.SettingData> {
   @override
@@ -1121,6 +1302,257 @@ class OnboardingCompanion extends i0.UpdateCompanion<i1.OnboardingData> {
           ..write('revision: $revision, ')
           ..write('completionDate: $completionDate, ')
           ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Riverpod extends i0.Table with i0.TableInfo<Riverpod, i1.RiverpodData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Riverpod(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> key = i0.GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
+  late final i0.GeneratedColumn<String> json = i0.GeneratedColumn<String>(
+    'json',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumn<DateTime> expireAt =
+      i0.GeneratedColumn<DateTime>(
+        'expireAt',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  late final i0.GeneratedColumn<String> destroyKey = i0.GeneratedColumn<String>(
+    'destroyKey',
+    aliasedName,
+    true,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  @override
+  List<i0.GeneratedColumn> get $columns => [key, json, expireAt, destroyKey];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'riverpod';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {key};
+  @override
+  i1.RiverpodData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i1.RiverpodData(
+      key: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      json: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}json'],
+      )!,
+      expireAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}expireAt'],
+      ),
+      destroyKey: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}destroyKey'],
+      ),
+    );
+  }
+
+  @override
+  Riverpod createAlias(String alias) {
+    return Riverpod(attachedDatabase, alias);
+  }
+
+  @override
+  bool get withoutRowId => true;
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class RiverpodData extends i0.DataClass
+    implements i0.Insertable<i1.RiverpodData> {
+  final String key;
+  final String json;
+  final DateTime? expireAt;
+  final String? destroyKey;
+  const RiverpodData({
+    required this.key,
+    required this.json,
+    this.expireAt,
+    this.destroyKey,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['key'] = i0.Variable<String>(key);
+    map['json'] = i0.Variable<String>(json);
+    if (!nullToAbsent || expireAt != null) {
+      map['expireAt'] = i0.Variable<DateTime>(expireAt);
+    }
+    if (!nullToAbsent || destroyKey != null) {
+      map['destroyKey'] = i0.Variable<String>(destroyKey);
+    }
+    return map;
+  }
+
+  factory RiverpodData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return RiverpodData(
+      key: serializer.fromJson<String>(json['key']),
+      json: serializer.fromJson<String>(json['json']),
+      expireAt: serializer.fromJson<DateTime?>(json['expireAt']),
+      destroyKey: serializer.fromJson<String?>(json['destroyKey']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'json': serializer.toJson<String>(json),
+      'expireAt': serializer.toJson<DateTime?>(expireAt),
+      'destroyKey': serializer.toJson<String?>(destroyKey),
+    };
+  }
+
+  i1.RiverpodData copyWith({
+    String? key,
+    String? json,
+    i0.Value<DateTime?> expireAt = const i0.Value.absent(),
+    i0.Value<String?> destroyKey = const i0.Value.absent(),
+  }) => i1.RiverpodData(
+    key: key ?? this.key,
+    json: json ?? this.json,
+    expireAt: expireAt.present ? expireAt.value : this.expireAt,
+    destroyKey: destroyKey.present ? destroyKey.value : this.destroyKey,
+  );
+  RiverpodData copyWithCompanion(i1.RiverpodCompanion data) {
+    return RiverpodData(
+      key: data.key.present ? data.key.value : this.key,
+      json: data.json.present ? data.json.value : this.json,
+      expireAt: data.expireAt.present ? data.expireAt.value : this.expireAt,
+      destroyKey: data.destroyKey.present
+          ? data.destroyKey.value
+          : this.destroyKey,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RiverpodData(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('expireAt: $expireAt, ')
+          ..write('destroyKey: $destroyKey')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, json, expireAt, destroyKey);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i1.RiverpodData &&
+          other.key == this.key &&
+          other.json == this.json &&
+          other.expireAt == this.expireAt &&
+          other.destroyKey == this.destroyKey);
+}
+
+class RiverpodCompanion extends i0.UpdateCompanion<i1.RiverpodData> {
+  final i0.Value<String> key;
+  final i0.Value<String> json;
+  final i0.Value<DateTime?> expireAt;
+  final i0.Value<String?> destroyKey;
+  const RiverpodCompanion({
+    this.key = const i0.Value.absent(),
+    this.json = const i0.Value.absent(),
+    this.expireAt = const i0.Value.absent(),
+    this.destroyKey = const i0.Value.absent(),
+  });
+  RiverpodCompanion.insert({
+    required String key,
+    required String json,
+    this.expireAt = const i0.Value.absent(),
+    this.destroyKey = const i0.Value.absent(),
+  }) : key = i0.Value(key),
+       json = i0.Value(json);
+  static i0.Insertable<i1.RiverpodData> custom({
+    i0.Expression<String>? key,
+    i0.Expression<String>? json,
+    i0.Expression<DateTime>? expireAt,
+    i0.Expression<String>? destroyKey,
+  }) {
+    return i0.RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (json != null) 'json': json,
+      if (expireAt != null) 'expireAt': expireAt,
+      if (destroyKey != null) 'destroyKey': destroyKey,
+    });
+  }
+
+  i1.RiverpodCompanion copyWith({
+    i0.Value<String>? key,
+    i0.Value<String>? json,
+    i0.Value<DateTime?>? expireAt,
+    i0.Value<String?>? destroyKey,
+  }) {
+    return i1.RiverpodCompanion(
+      key: key ?? this.key,
+      json: json ?? this.json,
+      expireAt: expireAt ?? this.expireAt,
+      destroyKey: destroyKey ?? this.destroyKey,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (key.present) {
+      map['key'] = i0.Variable<String>(key.value);
+    }
+    if (json.present) {
+      map['json'] = i0.Variable<String>(json.value);
+    }
+    if (expireAt.present) {
+      map['expireAt'] = i0.Variable<DateTime>(expireAt.value);
+    }
+    if (destroyKey.present) {
+      map['destroyKey'] = i0.Variable<String>(destroyKey.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RiverpodCompanion(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('expireAt: $expireAt, ')
+          ..write('destroyKey: $destroyKey')
           ..write(')'))
         .toString();
   }

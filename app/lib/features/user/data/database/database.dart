@@ -22,6 +22,7 @@ import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
 import 'package:weblibre/features/user/data/database/database.drift.dart';
+import 'package:weblibre/features/user/data/database/database.steps.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
@@ -29,13 +30,18 @@ import 'package:weblibre/features/user/data/database/database.drift.dart';
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 1;
+  final int schemaVersion = 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON;');
     },
+    onUpgrade: stepByStep(
+      from1To2: (m, schema) async {
+        await m.createTable(schema.riverpod);
+      },
+    ),
   );
 
   UserDatabase(super.e);

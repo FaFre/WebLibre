@@ -17,6 +17,7 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   late final i1.Setting setting = i1.Setting(this);
   late final i1.IconCache iconCache = i1.IconCache(this);
   late final i1.Onboarding onboarding = i1.Onboarding(this);
+  late final i1.Riverpod riverpod = i1.Riverpod(this);
   late final i2.SettingDao settingDao = i2.SettingDao(this as i3.UserDatabase);
   late final i4.CacheDao cacheDao = i4.CacheDao(this as i3.UserDatabase);
   late final i5.OnboardingDao onboardingDao = i5.OnboardingDao(
@@ -33,6 +34,7 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
     setting,
     iconCache,
     onboarding,
+    riverpod,
   ];
 }
 
@@ -45,6 +47,8 @@ class $UserDatabaseManager {
       i1.$IconCacheTableManager(_db, _db.iconCache);
   i1.$OnboardingTableManager get onboarding =>
       i1.$OnboardingTableManager(_db, _db.onboarding);
+  i1.$RiverpodTableManager get riverpod =>
+      i1.$RiverpodTableManager(_db, _db.riverpod);
 }
 
 extension DefineFunctions on i7.CommonDatabase {

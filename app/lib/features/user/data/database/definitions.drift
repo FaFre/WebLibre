@@ -15,6 +15,13 @@ CREATE TABLE onboarding (
   completion_date DATETIME NOT NULL
 );
 
+CREATE TABLE riverpod (
+  "key" TEXT PRIMARY KEY NOT NULL,
+  json TEXT NOT NULL,
+  expireAt DATETIME,
+  destroyKey TEXT
+) WITHOUT ROWID;
+
 evictCacheEntries:
   DELETE FROM icon_cache 
   WHERE rowid IN (
