@@ -25,6 +25,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class WebsiteTitleTile extends HookConsumerWidget {
   final TabState initialTabState;
@@ -58,7 +59,7 @@ class WebsiteTitleTile extends HookConsumerWidget {
               maxLines: 6,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: Text(initialTabState.url.authority),
+            subtitle: UriBreadcrumb(uri: initialTabState.url),
           );
         },
         error: (error, stackTrace) {
@@ -77,7 +78,7 @@ class WebsiteTitleTile extends HookConsumerWidget {
           ),
           contentPadding: EdgeInsets.zero,
           title: Text(initialTabState.title.whenNotEmpty ?? 'Untitled'),
-          subtitle: Text(initialTabState.url.authority),
+          subtitle: UriBreadcrumb(uri: initialTabState.url),
         ),
       ),
     );

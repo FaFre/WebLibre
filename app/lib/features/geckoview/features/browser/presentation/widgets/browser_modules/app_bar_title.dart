@@ -25,6 +25,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class AppBarTitle extends HookConsumerWidget {
   const AppBarTitle({super.key});
@@ -100,8 +101,8 @@ class AppBarTitle extends HookConsumerWidget {
                   icon,
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text(
-                      tabState.url.authority,
+                    child: UriBreadcrumb(
+                      uri: tabState.url,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),

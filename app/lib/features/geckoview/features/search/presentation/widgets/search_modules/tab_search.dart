@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class TabSearch extends HookConsumerWidget {
@@ -152,11 +153,7 @@ class TabSearch extends HookConsumerWidget {
                         ),
                       ),
                     )
-                  : Text(
-                      result.url.toString(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  : UriBreadcrumb(uri: result.url),
               onTap: () async {
                 await ref
                     .read(tabRepositoryProvider.notifier)
