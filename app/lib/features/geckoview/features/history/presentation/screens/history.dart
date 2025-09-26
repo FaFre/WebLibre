@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,14 +9,19 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:nullability/nullability.dart';
+import 'package:path/path.dart' as p;
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:universal_io/io.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_file.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class Section extends MultiSliver {
@@ -50,6 +56,7 @@ class Section extends MultiSliver {
              itemCount: items.length,
              itemBuilder: (context, index) {
                final item = items[index];
+               final uri = Uri.parse(item.url);
 
                return Column(
                  key: ValueKey(item.hashCode),
@@ -62,19 +69,42 @@ class Section extends MultiSliver {
                              radius: 12,
                              child: Icon(Icons.check, size: 12),
                            )
-                         : UrlIcon([Uri.parse(item.url)], iconSize: 24),
-                     title: item.title.mapNotNull((title) => Text(title)),
-                     subtitle: Text(
-                       item.url,
-                       maxLines: 2,
-                       overflow: TextOverflow.ellipsis,
+                         : UrlIcon([uri], iconSize: 24),
+                     title: item.title.mapNotNull(
+                       (title) => Text(
+                         switch (item.visitType) {
+                           VisitType.download => p.basename(title),
+                           _ => title,
+                         },
+                         maxLines: 3,
+                         overflow: TextOverflow.ellipsis,
+                       ),
                      ),
+                     subtitle: UriBreadcrumb(uri: uri),
                      trailing: Consumer(
                        builder: (context, ref, _) {
                          return IconButton(
                            onPressed: () async {
                              final service = GeckoHistoryService();
                              await service.deleteVisit(item);
+
+                             final downloadedFile = item.title.mapNotNull(
+                               (title) => File(title),
+                             );
+
+                             if (await downloadedFile?.exists() == true) {
+                               if (context.mounted) {
+                                 final delete = await showDeleteFileDialog(
+                                   context,
+                                   downloadedFile.toString(),
+                                 );
+
+                                 if (delete?.delete == true) {
+                                   await downloadedFile!.delete();
+                                 }
+                               }
+                             }
+
                              // ignore: unused_result
                              await ref.refresh(browsingHistoryProvider.future);
                            },
@@ -95,6 +125,14 @@ class Section extends MultiSliver {
                        spacing: 8.0,
                        children: [
                          Chip(
+                           avatar: switch (item.visitType) {
+                             VisitType.link => const Icon(MdiIcons.openInNew),
+                             VisitType.download => const Icon(
+                               MdiIcons.fileDownload,
+                             ),
+                             VisitType.reload => const Icon(MdiIcons.reload),
+                             _ => null,
+                           },
                            label: switch (item.visitType) {
                              VisitType.link => const Text('Followed Link'),
                              VisitType.typed => const Text('Typed Address'),
@@ -140,6 +178,9 @@ class HistoryScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final historyFilter = ref.watch(historyFilterProvider);
 
+    final textFilterEnabled = useState(false);
+    final textFilterController = useTextEditingController();
+
     final menuController = useMenuController();
 
     final historyEntries = ref.watch(browsingHistoryProvider);
@@ -148,16 +189,60 @@ class HistoryScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: selectedItems.value.isEmpty
+        title: textFilterEnabled.value
+            ? TextField(
+                controller: textFilterController,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.only(top: 12),
+                  border: InputBorder.none,
+                  hintText: 'Filter history...',
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      if (textFilterController.text.isNotEmpty) {
+                        textFilterController.clear();
+                      } else {
+                        textFilterEnabled.value = false;
+                      }
+                    },
+                    icon: const Icon(Icons.clear),
+                  ),
+                ),
+              )
+            : selectedItems.value.isEmpty
             ? const Text('History')
             : Text('${selectedItems.value.length} selected'),
         actions: [
           if (selectedItems.value.isNotEmpty)
             IconButton(
               onPressed: () async {
+                DeleteDecision? deleteDecision;
+
                 for (final item in selectedItems.value) {
                   final service = GeckoHistoryService();
                   await service.deleteVisit(item);
+
+                  final downloadedFile = item.title.mapNotNull(
+                    (title) => File(title),
+                  );
+
+                  if (await downloadedFile?.exists() == true) {
+                    if (deleteDecision?.remember == true) {
+                      if (deleteDecision?.delete == true) {
+                        await downloadedFile!.delete();
+                      }
+                    } else if (context.mounted) {
+                      deleteDecision = await showDeleteFileDialog(
+                        context,
+                        downloadedFile.toString(),
+                        multiFileMode: true,
+                      );
+
+                      if (deleteDecision?.delete == true) {
+                        await downloadedFile!.delete();
+                      }
+                    }
+                  }
                 }
 
                 selectedItems.value = {};
@@ -185,8 +270,17 @@ class HistoryScreen extends HookConsumerWidget {
             ),
           MenuAnchor(
             controller: menuController,
+            consumeOutsideTap: true,
             menuChildren: [
               MenuItemButton(
+                leadingIcon: const Icon(Icons.search),
+                child: const Text('Text Filter'),
+                onPressed: () {
+                  textFilterEnabled.value = true;
+                },
+              ),
+              MenuItemButton(
+                closeOnActivate: false,
                 leadingIcon: const Icon(MdiIcons.calendarRange),
                 trailingIcon: historyFilter.dateRange.mapNotNull(
                   (_) => IconButton(
@@ -232,13 +326,9 @@ class HistoryScreen extends HookConsumerWidget {
                 },
               ),
               const Divider(),
-              ...{
-                VisitType.link,
-                VisitType.typed,
-                VisitType.reload,
-                VisitType.download,
-              }.map(
+              ...{VisitType.link, VisitType.reload, VisitType.download}.map(
                 (type) => CheckboxMenuButton(
+                  closeOnActivate: false,
                   value: historyFilter.visitTypes.contains(type),
                   onChanged: (value) {
                     if (value != null) {
@@ -264,6 +354,17 @@ class HistoryScreen extends HookConsumerWidget {
                   },
                 ),
               ),
+              const Divider(),
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.restore),
+                child: const Text('Reset Filter'),
+                onPressed: () {
+                  textFilterController.clear();
+                  textFilterEnabled.value = false;
+
+                  ref.read(historyFilterProvider.notifier).reset();
+                },
+              ),
             ],
             child: IconButton(
               onPressed: () {
@@ -273,77 +374,104 @@ class HistoryScreen extends HookConsumerWidget {
                   menuController.open();
                 }
               },
-              icon: const Icon(MdiIcons.filter),
+              icon: Badge(
+                isLabelVisible:
+                    historyFilter != HistoryFilterOptions.withDefaults(),
+                child: const Icon(MdiIcons.filter),
+              ),
             ),
           ),
         ],
       ),
-      body: historyEntries.when(
-        data: (data) {
-          return RefreshIndicator(
-            onRefresh: () async {
-              // ignore: unused_result
-              await ref.refresh(browsingHistoryProvider.future);
-            },
-            child: HookBuilder(
-              builder: (context) {
-                final groups = useMemoized(
-                  () => data.groupListsBy(
-                    (element) => timeago.format(
-                      DateTime.fromMillisecondsSinceEpoch(element.visitTime),
-                    ),
-                  ),
-                  [EquatableValue(data)],
-                );
-
-                void toggleSelected(VisitInfo item) {
-                  if (selectedItems.value.contains(item)) {
-                    selectedItems.value = {...selectedItems.value}
-                      ..remove(item);
-                  } else {
-                    selectedItems.value = {...selectedItems.value, item};
-                  }
-                }
-
-                return CustomScrollView(
-                  slivers: [
-                    for (final MapEntry(:key, :value) in groups.entries)
-                      Section(
-                        context: context,
-                        title: key,
-                        items: value,
-                        selectedItems: selectedItems.value,
-                        onLongPress: toggleSelected,
-                        onTap: (item) async {
-                          if (selectedItems.value.isNotEmpty) {
-                            toggleSelected(item);
-                          } else {
-                            await ref
-                                .read(tabRepositoryProvider.notifier)
-                                .addTab(
-                                  url: Uri.parse(item.url),
-                                  private: false,
-                                );
-
-                            if (context.mounted) {
-                              context.pop();
-                            }
-                          }
-                        },
-                      ),
-                  ],
-                );
+      body: SafeArea(
+        child: historyEntries.when(
+          data: (data) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                // ignore: unused_result
+                await ref.refresh(browsingHistoryProvider.future);
               },
+              child: HookBuilder(
+                builder: (context) {
+                  final textFilter = useListenableSelector(
+                    textFilterController,
+                    () => textFilterController.text.toLowerCase(),
+                  );
+
+                  final groups = useMemoized(
+                    () => data
+                        .where(
+                          (visit) =>
+                              textFilter.isEmpty ||
+                              visit.title?.toLowerCase().contains(textFilter) ==
+                                  true ||
+                              visit.url.toLowerCase().contains(textFilter),
+                        )
+                        .groupListsBy(
+                          (element) => timeago.format(
+                            DateTime.fromMillisecondsSinceEpoch(
+                              element.visitTime,
+                            ),
+                          ),
+                        ),
+                    [EquatableValue(data), textFilter],
+                  );
+
+                  void toggleSelected(VisitInfo item) {
+                    if (selectedItems.value.contains(item)) {
+                      selectedItems.value = {...selectedItems.value}
+                        ..remove(item);
+                    } else {
+                      selectedItems.value = {...selectedItems.value, item};
+                    }
+                  }
+
+                  return FadingScroll(
+                    startFadingSize: 0.0,
+                    builder: (context, controller) {
+                      return CustomScrollView(
+                        controller: controller,
+                        slivers: [
+                          for (final MapEntry(:key, :value) in groups.entries)
+                            Section(
+                              context: context,
+                              title: key,
+                              items: value,
+                              selectedItems: selectedItems.value,
+                              onLongPress: toggleSelected,
+                              onTap: (item) async {
+                                if (selectedItems.value.isNotEmpty) {
+                                  toggleSelected(item);
+                                } else {
+                                  await ref
+                                      .read(tabRepositoryProvider.notifier)
+                                      .addTab(
+                                        url: Uri.parse(item.url),
+                                        private: false,
+                                      );
+
+                                  if (context.mounted) {
+                                    context.pop();
+                                  }
+                                }
+                              },
+                            ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Failed to load History',
+              exception: error,
             ),
-          );
-        },
-        error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Failed to load History',
-            exception: error,
           ),
+          loading: () => const Center(child: CircularProgressIndicator()),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }
