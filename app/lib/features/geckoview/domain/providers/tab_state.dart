@@ -49,9 +49,7 @@ class TabStates extends _$TabStates {
       parentId: contentState.parentId,
       contextId: contentState.contextId,
       url: Uri.parse(contentState.url),
-      title: (contentState.title.isNotEmpty)
-          ? contentState.title
-          : current.title,
+      title: contentState.title,
       progress: contentState.progress,
       isPrivate: contentState.isPrivate,
       isFullScreen: contentState.isFullScreen,

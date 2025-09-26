@@ -77,7 +77,7 @@ class CompletePageInfo extends _$CompletePageInfo {
 
     ref.listen(
       fireImmediately: true,
-      tabStateProvider(cached.id).select((value) => value?.title.whenNotEmpty),
+      tabStateProvider(cached.id).select((value) => value?.title),
       (previous, next) {
         if (next != null) {
           final current = stateOrNull?.value ?? cached;
