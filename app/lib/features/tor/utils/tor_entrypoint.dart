@@ -29,7 +29,7 @@ Future<void> onStart(ServiceInstance service) async {
   Timer? timeout;
   final startedProxyType = <ProxyType>{};
 
-  await Tor.init();
+  Tor.init();
 
   final portSub = Tor.instance.events.stream.listen((port) {
     service.invoke('portUpdate', {'port': port});

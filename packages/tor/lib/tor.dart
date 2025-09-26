@@ -99,7 +99,7 @@ class Tor {
   /// Returns a Future that completes when the Tor service has started.
   ///
   /// Throws an exception if the Tor service fails to start.
-  static Future<Tor> init({bool enabled = true}) async {
+  static Tor init({bool enabled = true}) {
     final singleton = Tor._instance;
     singleton._enabled = enabled;
     return singleton;

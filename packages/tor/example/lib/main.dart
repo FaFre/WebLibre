@@ -73,7 +73,7 @@ class _MyAppState extends State<Home> {
   );
 
   Future<void> startTor() async {
-    await Tor.init();
+    Tor.init();
 
     // Start the proxy
     await Tor.instance.start();
