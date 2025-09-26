@@ -17,10 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 part 'providers.g.dart';
 
@@ -34,13 +38,28 @@ class HistoryFilter extends _$HistoryFilter {
     }
   }
 
+  void reset() {
+    state = HistoryFilterOptions.withDefaults();
+  }
+
   void setDateRange(DateTimeRange<DateTime>? range) {
     state = state.copyWith.dateRange(range);
   }
 
   @override
   HistoryFilterOptions build() {
-    return HistoryFilterOptions.withDefaults();
+    final riverpodStorage = ref.watch(riverpodDatabaseStorageProvider);
+
+    persist(
+      riverpodStorage,
+      key: 'HistoryFilterOptions',
+      decode: (encoded) => HistoryFilterOptions.fromJson(
+        jsonDecode(encoded) as Map<String, dynamic>,
+      ),
+      encode: (state) => jsonEncode(state.toJson()),
+    );
+
+    return stateOrNull ?? HistoryFilterOptions.withDefaults();
   }
 }
 

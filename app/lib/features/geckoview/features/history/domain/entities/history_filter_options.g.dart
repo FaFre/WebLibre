@@ -73,3 +73,37 @@ extension $HistoryFilterOptionsCopyWith on HistoryFilterOptions {
   _$HistoryFilterOptionsCWProxy get copyWith =>
       _$HistoryFilterOptionsCWProxyImpl(this);
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+HistoryFilterOptions _$HistoryFilterOptionsFromJson(
+  Map<String, dynamic> json,
+) => HistoryFilterOptions(
+  dateRange: const DateTimeRangeConverter().fromJson(
+    json['dateRange'] as Map<String, dynamic>?,
+  ),
+  visitTypes: (json['visitTypes'] as List<dynamic>)
+      .map((e) => $enumDecode(_$VisitTypeEnumMap, e))
+      .toSet(),
+);
+
+Map<String, dynamic> _$HistoryFilterOptionsToJson(
+  HistoryFilterOptions instance,
+) => <String, dynamic>{
+  'dateRange': const DateTimeRangeConverter().toJson(instance.dateRange),
+  'visitTypes': instance.visitTypes.map((e) => _$VisitTypeEnumMap[e]!).toList(),
+};
+
+const _$VisitTypeEnumMap = {
+  VisitType.link: 'link',
+  VisitType.typed: 'typed',
+  VisitType.bookmark: 'bookmark',
+  VisitType.embed: 'embed',
+  VisitType.redirectPermanent: 'redirectPermanent',
+  VisitType.redirectTemporary: 'redirectTemporary',
+  VisitType.download: 'download',
+  VisitType.framedLink: 'framedLink',
+  VisitType.reload: 'reload',
+};
