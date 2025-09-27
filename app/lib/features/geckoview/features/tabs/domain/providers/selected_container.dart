@@ -33,7 +33,7 @@ part 'selected_container.g.dart';
 
 enum SetContainerResult { failed, success, successHasProxy }
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class SelectedContainer extends _$SelectedContainer {
   Future<ContainerData?> fetchData() async {
     if (state != null) {

@@ -20,7 +20,7 @@ final class SelectedContainerProvider
         argument: null,
         retry: null,
         name: r'selectedContainerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class SelectedContainerProvider
   }
 }
 
-String _$selectedContainerHash() => r'78a43c90ad5e4906ebb33f6b865b23adeb4cae8f';
+String _$selectedContainerHash() => r'9e9a9b5e3c91ff1fbf8544e329524f8e064587fe';
 
 abstract class _$SelectedContainer extends $Notifier<String?> {
   String? build();

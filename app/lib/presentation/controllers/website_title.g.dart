@@ -58,7 +58,7 @@ final class CompletePageInfoProvider
   }
 }
 
-String _$completePageInfoHash() => r'fe1804e1aa4ef34ab4b23b58a4f8a0f6852940b7';
+String _$completePageInfoHash() => r'e033a1439ee47af5aef0fd6bf3e8a41d5e88c6fe';
 
 final class CompletePageInfoFamily extends $Family
     with

@@ -32,9 +32,7 @@ class TabDataRepository extends _$TabDataRepository {
     String tabId,
     ContainerData targetContainer,
   ) async {
-    final currentContainerId = await ref
-        .read(tabDataRepositoryProvider.notifier)
-        .getContainerTabId(tabId);
+    final currentContainerId = await getContainerTabId(tabId);
 
     final currentContainerData = await currentContainerId.mapNotNull(
       (containerId) => ref
