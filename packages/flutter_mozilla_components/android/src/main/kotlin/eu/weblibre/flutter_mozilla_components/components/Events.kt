@@ -54,7 +54,7 @@ class Events(
                     it.content
                 }
                 .ifAnyChanged { arrayOf (it.content.icon) }
-                .debounce { 50 }
+                .debounce { 16 }
                 .collect { tab ->
                     val iconBytes = tab.content.icon?.toWebPBytes()
                     flutterEvents.onIconChange(
@@ -70,7 +70,7 @@ class Events(
                 .filterChanged {
                     it.content.securityInfo
                 }
-                .debounce { 50 }
+                .debounce { 16 }
                 .collect { tab ->
                     flutterEvents.onSecurityInfoStateChange(
                         System.currentTimeMillis(),
@@ -94,7 +94,7 @@ class Events(
                     it.readerState.active,
                 )
                 }
-                .debounce { 50 }
+                .debounce { 16 }
                 .collect { tab ->
                     flutterEvents.onReaderableStateChange(
                         System.currentTimeMillis(),
@@ -118,7 +118,7 @@ class Events(
                     it.content.canGoForward,
                 )
                 }
-                .debounce { 50 }
+                .debounce { 16 }
                 .collect { tab ->
                     flutterEvents.onHistoryStateChange(
                         System.currentTimeMillis(),
@@ -157,7 +157,7 @@ class Events(
                     it.content.progress,
                     it.content.loading)
                 }
-                .debounce { 50 }
+                .debounce { 16 }
                 .collect { tab ->
                     flutterEvents.onTabContentStateChange(
                         System.currentTimeMillis(),
