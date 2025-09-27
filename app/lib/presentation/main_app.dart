@@ -99,9 +99,9 @@ class MainApp extends HookConsumerWidget {
                         ref.read(selectedTabTypeProvider) ??
                         settings.defaultCreateTabType,
                     searchText: sharedContent.text,
-                    $extra: true, //launched from intent
+                    launchedFromIntent: true, //launched from intent
                   );
-                  await router.push(route.location, extra: route.$extra);
+                  await router.push(route.location);
               }
           }
         });

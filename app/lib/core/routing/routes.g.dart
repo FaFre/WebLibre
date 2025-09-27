@@ -353,7 +353,13 @@ mixin $SearchRoute on GoRouteData {
     tabType: _$TabTypeEnumMap._$fromName(state.pathParameters['tabType']!)!,
     searchText:
         state.pathParameters['searchText'] ?? SearchRoute.emptySearchText,
-    $extra: state.extra as bool,
+    launchedFromIntent:
+        _$convertMapValue(
+          'launched-from-intent',
+          state.uri.queryParameters,
+          _$boolConverter,
+        ) ??
+        false,
   );
 
   SearchRoute get _self => this as SearchRoute;
@@ -361,22 +367,24 @@ mixin $SearchRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/search/${Uri.encodeComponent(_$TabTypeEnumMap[_self.tabType]!)}/${Uri.encodeComponent(_self.searchText)}',
+    queryParams: {
+      if (_self.launchedFromIntent != false)
+        'launched-from-intent': _self.launchedFromIntent.toString(),
+    },
   );
 
   @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+  void go(BuildContext context) => context.go(location);
 
   @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
+      context.pushReplacement(location);
 
   @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
+  void replace(BuildContext context) => context.replace(location);
 }
 
 const _$TabTypeEnumMap = {
@@ -590,6 +598,26 @@ mixin $OpenSharedContentRoute on GoRouteData {
   @override
   void replace(BuildContext context) =>
       context.replace(location, extra: _self.$extra);
+}
+
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
+}
+
+bool _$boolConverter(String value) {
+  switch (value) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw UnsupportedError('Cannot convert "$value" into a bool.');
+  }
 }
 
 extension<T extends Enum> on Map<T, String> {

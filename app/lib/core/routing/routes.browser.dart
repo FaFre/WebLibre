@@ -80,12 +80,12 @@ class SearchRoute extends GoRouteData with $SearchRoute {
   //This should be nullable but isnt allowed by go_router
   final String searchText;
 
-  final bool $extra;
+  final bool launchedFromIntent;
 
   const SearchRoute({
     required this.tabType,
     this.searchText = SearchRoute.emptySearchText,
-    this.$extra = false,
+    this.launchedFromIntent = false,
   });
 
   @override
@@ -95,7 +95,7 @@ class SearchRoute extends GoRouteData with $SearchRoute {
       initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
           ? null
           : searchText,
-      launchedFromIntent: $extra,
+      launchedFromIntent: launchedFromIntent,
     );
   }
 }
