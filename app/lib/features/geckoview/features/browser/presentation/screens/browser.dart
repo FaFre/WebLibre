@@ -148,7 +148,9 @@ class BrowserScreen extends HookConsumerWidget {
               }
 
               useEffect(() {
-                resetHiddenState();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  resetHiddenState();
+                });
 
                 return null;
               }, [tabId]);
