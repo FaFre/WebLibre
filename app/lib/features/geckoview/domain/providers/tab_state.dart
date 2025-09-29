@@ -45,11 +45,23 @@ class TabStates extends _$TabStates {
   void _onTabContentStateChange(TabContentState contentState) {
     final current =
         state[contentState.id] ?? TabState.$default(contentState.id);
+    final url = Uri.parse(contentState.url);
+
+    // Determine title based on priority: new non-empty title > existing title if URL unchanged > new title
+    final String resolvedTitle;
+    if (contentState.title.isNotEmpty) {
+      resolvedTitle = contentState.title;
+    } else if (current.url == url) {
+      resolvedTitle = current.title;
+    } else {
+      resolvedTitle = contentState.title;
+    }
+
     final newState = current.copyWith(
       parentId: contentState.parentId,
       contextId: contentState.contextId,
-      url: Uri.parse(contentState.url),
-      title: contentState.title,
+      url: url,
+      title: resolvedTitle,
       progress: contentState.progress,
       isPrivate: contentState.isPrivate,
       isFullScreen: contentState.isFullScreen,
