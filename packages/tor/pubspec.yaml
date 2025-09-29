@@ -33,7 +33,7 @@ dev_dependencies:
   lint: ^2.8.0
 
 ffigen:
-  output: 'lib/generated_bindings.dart'
+  output: 'lib/src/generated_bindings.dart'
   llvm-path:
     - '/usr/lib/llvm-14/lib/libclang.so.1'
   functions:

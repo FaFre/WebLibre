@@ -31,7 +31,7 @@ analyzer:
     - "**.swagger.dart"
     - "**.freezed.dart"
     - "**.chopper.dart"
-    - "lib/generated_bindings.dart"
+    - "lib/src/generated_bindings.dart"
 # For more information about the core and recommended set of lints, see
 # https://dart.dev/go/core-lints
 
