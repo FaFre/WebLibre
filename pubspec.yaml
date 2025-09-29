@@ -10,7 +10,6 @@ workspace:
   - packages/simple_intent_receiver
   - packages/simple_intent_receiver/example
   - packages/tor
-  - packages/tor/example
 dev_dependencies:
   melos: ^7.1.1
 
