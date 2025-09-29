@@ -2115,7 +2115,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
 
   i0.Selectable<String> leadingOrderKey({
     required int bucket,
-    String? containerId,
+    required String? containerId,
   }) {
     return customSelect(
       'SELECT lexo_rank_previous(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key LIMIT 1)) AS _c0',
@@ -2126,7 +2126,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
 
   i0.Selectable<String> trailingOrderKey({
     required int bucket,
-    String? containerId,
+    required String? containerId,
   }) {
     return customSelect(
       'SELECT lexo_rank_next(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
@@ -2136,7 +2136,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
   }
 
   i0.Selectable<String> orderKeyAfterTab({
-    String? containerId,
+    required String? containerId,
     required String tabId,
   }) {
     return customSelect(
@@ -2147,7 +2147,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
   }
 
   i0.Selectable<String> orderKeyBeforeTab({
-    String? containerId,
+    required String? containerId,
     required String tabId,
   }) {
     return customSelect(
@@ -2245,18 +2245,34 @@ class DefinitionsDrift extends i7.ModularAccessor {
     ).map((i0.QueryRow row) => row.readNullable<String>('prev_tab_id'));
   }
 
-  i0.Selectable<String?> previousTabByOrderKey({required String tabId}) {
+  i0.Selectable<String?> previousTabByOrderKey({
+    required bool skipContainerCheck,
+    String? containerId,
+    required String tabId,
+  }) {
     return customSelect(
-      'WITH ranked_tabs AS (SELECT id, order_key, LAG(id)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_tab_id FROM tab) SELECT prev_tab_id FROM ranked_tabs WHERE id = ?1',
-      variables: [i0.Variable<String>(tabId)],
+      'WITH ranked_tabs AS (SELECT id, order_key, LAG(id)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_tab_id FROM tab WHERE ?1 OR container_id IS ?2) SELECT prev_tab_id FROM ranked_tabs WHERE id = ?3',
+      variables: [
+        i0.Variable<bool>(skipContainerCheck),
+        i0.Variable<String>(containerId),
+        i0.Variable<String>(tabId),
+      ],
       readsFrom: {tab},
     ).map((i0.QueryRow row) => row.readNullable<String>('prev_tab_id'));
   }
 
-  i0.Selectable<String?> nextTabByOrderKey({required String tabId}) {
+  i0.Selectable<String?> nextTabByOrderKey({
+    required bool skipContainerCheck,
+    String? containerId,
+    required String tabId,
+  }) {
     return customSelect(
-      'WITH ranked_tabs AS (SELECT id, order_key, LEAD(id)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_tab_id FROM tab) SELECT next_tab_id FROM ranked_tabs WHERE id = ?1',
-      variables: [i0.Variable<String>(tabId)],
+      'WITH ranked_tabs AS (SELECT id, order_key, LEAD(id)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_tab_id FROM tab WHERE ?1 OR container_id IS ?2) SELECT next_tab_id FROM ranked_tabs WHERE id = ?3',
+      variables: [
+        i0.Variable<bool>(skipContainerCheck),
+        i0.Variable<String>(containerId),
+        i0.Variable<String>(tabId),
+      ],
       readsFrom: {tab},
     ).map((i0.QueryRow row) => row.readNullable<String>('next_tab_id'));
   }

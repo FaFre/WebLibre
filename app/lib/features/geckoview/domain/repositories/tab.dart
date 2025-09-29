@@ -143,11 +143,19 @@ class TabRepository extends _$TabRepository {
     return false;
   }
 
-  Future<bool> selectPreviousTab(String tabId) async {
+  Future<bool> selectPreviousTab(
+    String tabId, {
+    String? containerId,
+    bool skipContainerCheck = true,
+  }) async {
     final previousTabId = await ref
         .read(tabDatabaseProvider)
         .definitionsDrift
-        .previousTabByOrderKey(tabId: tabId)
+        .previousTabByOrderKey(
+          tabId: tabId,
+          containerId: containerId,
+          skipContainerCheck: skipContainerCheck,
+        )
         .getSingleOrNull();
 
     if (previousTabId != null) {
@@ -157,11 +165,19 @@ class TabRepository extends _$TabRepository {
     return false;
   }
 
-  Future<bool> selectNextTab(String tabId) async {
+  Future<bool> selectNextTab(
+    String tabId, {
+    String? containerId,
+    bool skipContainerCheck = true,
+  }) async {
     final previousTabId = await ref
         .read(tabDatabaseProvider)
         .definitionsDrift
-        .nextTabByOrderKey(tabId: tabId)
+        .nextTabByOrderKey(
+          tabId: tabId,
+          containerId: containerId,
+          skipContainerCheck: skipContainerCheck,
+        )
         .getSingleOrNull();
 
     if (previousTabId != null) {
@@ -211,9 +227,8 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<void> _selectNextTab(String tabId) async {
-    if (ref.read(tabListProvider).value.length == 1) {
-      return;
-    }
+    // ignore: only_use_keep_alive_inside_keep_alive
+    final tabState = ref.read(tabStateProvider(tabId));
 
     final currentContainerId = await ref
         .read(tabDataRepositoryProvider.notifier)
@@ -221,19 +236,59 @@ class TabRepository extends _$TabRepository {
 
     final sameContainerTabs = await ref
         .read(containerRepositoryProvider.notifier)
-        .getContainerTabIds(currentContainerId);
+        .getContainerTabIds(currentContainerId)
+        .then((tabs) => tabs.where((tab) => tab != tabId).toList());
 
-    final nextAvailabeInContainer = sameContainerTabs.firstWhereOrNull(
-      (tab) => tab != tabId,
-    );
+    final previousTabId = await ref
+        .read(tabDatabaseProvider)
+        .definitionsDrift
+        .previousTabByTimestamp(tabId: tabId)
+        .getSingleOrNull();
 
-    if (nextAvailabeInContainer != null) {
-      return _tabsService.selectTab(tabId: sameContainerTabs.first);
+    if (previousTabId != null) {
+      if (sameContainerTabs.any((tab) => tab == previousTabId)) {
+        return _tabsService.selectTab(tabId: previousTabId);
+      }
+    }
+
+    if (tabState?.parentId != null) {
+      if (sameContainerTabs.any((tab) => tab == tabState?.parentId)) {
+        return _tabsService.selectTab(tabId: tabState!.parentId!);
+      }
+    }
+
+    final previousOrderedTabId = await ref
+        .read(tabDatabaseProvider)
+        .definitionsDrift
+        .previousTabByOrderKey(
+          tabId: tabId,
+          containerId: currentContainerId,
+          skipContainerCheck: false,
+        )
+        .getSingleOrNull();
+
+    if (previousOrderedTabId != null) {
+      return _tabsService.selectTab(tabId: previousOrderedTabId);
+    }
+
+    final nextOrderedTabId = await ref
+        .read(tabDatabaseProvider)
+        .definitionsDrift
+        .nextTabByOrderKey(
+          tabId: tabId,
+          containerId: currentContainerId,
+          skipContainerCheck: false,
+        )
+        .getSingleOrNull();
+
+    if (nextOrderedTabId != null) {
+      return _tabsService.selectTab(tabId: nextOrderedTabId);
     }
 
     final unassignedTabs = await ref
         .read(containerRepositoryProvider.notifier)
-        .getContainerTabIds(null);
+        .getContainerTabIds(null)
+        .then((tabs) => tabs.where((tab) => tab != tabId).toList());
 
     if (unassignedTabs.isNotEmpty) {
       return _tabsService.selectTab(tabId: unassignedTabs.first);
@@ -254,7 +309,8 @@ class TabRepository extends _$TabRepository {
         .mapNotNull(
           (container) => ref
               .read(containerRepositoryProvider.notifier)
-              .getContainerTabIds(container.id),
+              .getContainerTabIds(container.id)
+              .then((tabs) => tabs.where((tab) => tab != tabId).toList()),
         );
 
     if (nextContainerTabs.isNotEmpty) {

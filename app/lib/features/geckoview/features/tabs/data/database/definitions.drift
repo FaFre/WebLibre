@@ -82,7 +82,7 @@ containersWithCount WITH ContainerDataWithCount:
   ) AS tab_agg ON container.id = tab_agg.container_id
   ORDER BY tab_agg.last_updated DESC NULLS LAST;
 
-leadingOrderKey(:container_id AS TEXT OR NULL, :bucket AS INTEGER):
+leadingOrderKey(REQUIRED :container_id AS TEXT OR NULL, :bucket AS INTEGER):
   SELECT lexo_rank_previous(
     :bucket, 
     (
@@ -94,7 +94,7 @@ leadingOrderKey(:container_id AS TEXT OR NULL, :bucket AS INTEGER):
     )
   );
 
-trailingOrderKey(:container_id AS TEXT OR NULL, :bucket AS INTEGER):
+trailingOrderKey(REQUIRED :container_id AS TEXT OR NULL, :bucket AS INTEGER):
   SELECT lexo_rank_next(
     :bucket, 
     (
@@ -106,7 +106,7 @@ trailingOrderKey(:container_id AS TEXT OR NULL, :bucket AS INTEGER):
     )
   );
 
-orderKeyAfterTab(:tab_id AS TEXT, :container_id AS TEXT OR NULL):
+orderKeyAfterTab(:tab_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
   WITH ordered_table AS (
     SELECT id,
           order_key,
@@ -118,7 +118,7 @@ orderKeyAfterTab(:tab_id AS TEXT, :container_id AS TEXT OR NULL):
   FROM ordered_table
   WHERE id = :tab_id;
 
-orderKeyBeforeTab(:tab_id AS TEXT, :container_id AS TEXT OR NULL):
+orderKeyBeforeTab(:tab_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
   WITH ordered_table AS (
     SELECT id,
           order_key,
@@ -252,21 +252,23 @@ previousTabByTimestamp:
   FROM ranked_tabs 
   WHERE id = :tab_id;
 
-previousTabByOrderKey:
+previousTabByOrderKey(:tab_id AS TEXT, :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
   WITH ranked_tabs AS (
     SELECT id, order_key,
           LAG(id) OVER (ORDER BY order_key) as prev_tab_id
     FROM tab
+    WHERE :skip_container_check OR container_id IS :container_id
   )
   SELECT prev_tab_id
   FROM ranked_tabs 
   WHERE id = :tab_id;
 
-nextTabByOrderKey:
+nextTabByOrderKey(:tab_id AS TEXT, :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
   WITH ranked_tabs AS (
     SELECT id, order_key,
           LEAD(id) OVER (ORDER BY order_key) as next_tab_id
     FROM tab
+    WHERE :skip_container_check OR container_id IS :container_id
   )
   SELECT next_tab_id
   FROM ranked_tabs 
