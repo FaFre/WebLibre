@@ -28,7 +28,7 @@ import 'package:weblibre/features/search/domain/entities/abstract/i_search_sugge
 
 part 'general_settings.g.dart';
 
-final _fallbackSearchProvider = BangKey(
+const _fallbackSearchProvider = BangKey(
   group: BangGroup.general,
   trigger: 'wikipedia',
 );

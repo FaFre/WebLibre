@@ -105,7 +105,7 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
     Object? lastUsed = const $CopyWithPlaceholder(),
     Object? icon = const $CopyWithPlaceholder(),
   }) {
-    return BangData(
+    return BangData._copyWith(
       websiteName:
           websiteName == const $CopyWithPlaceholder() || websiteName == null
           ? _value.websiteName

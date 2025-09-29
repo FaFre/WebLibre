@@ -25,7 +25,7 @@ import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 
 part 'bang_data.g.dart';
 
-@CopyWith()
+@CopyWith(constructor: '_copyWith')
 class BangData extends Bang {
   final int frequency;
   final DateTime? lastUsed;
@@ -36,6 +36,21 @@ class BangData extends Bang {
   BangGroup get group => super.group!;
 
   BangData({
+    required super.websiteName,
+    required super.domain,
+    required super.trigger,
+    required super.urlTemplate,
+    required super.group,
+    super.category,
+    super.subCategory,
+    super.format,
+    int? frequency,
+    this.lastUsed,
+    this.icon,
+  }) : frequency = frequency ?? 0;
+
+  //For some reasons including super.group breaks generation of copywith, so we have this one for now
+  BangData._copyWith({
     required super.websiteName,
     required super.domain,
     required super.trigger,

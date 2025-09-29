@@ -36,7 +36,7 @@ BangDatabase bangDatabase(Ref ref) {
       // put the database file, called db.sqlite here, into the documents folder
       // for your app.
       final dbFolder = await path_provider.getApplicationDocumentsDirectory();
-      final file = File(p.join(dbFolder.path, 'bang.db'));
+      final file = File(p.join(dbFolder.path, 'bang2.db'));
 
       // Also work around limitations on old Android versions
       if (Platform.isAndroid) {

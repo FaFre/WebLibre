@@ -2226,6 +2226,12 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i5.BangData>
         i0.DriftSqlType.string,
         data['${effectivePrefix}url_template'],
       )!,
+      group: i3.BangTable.$convertergroup.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.int,
+          data['${effectivePrefix}group'],
+        )!,
+      ),
       category: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
         data['${effectivePrefix}category'],
@@ -2362,6 +2368,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
         domain: row.read<String>('domain'),
         trigger: row.read<String>('trigger'),
         urlTemplate: row.read<String>('url_template'),
+        group: i3.BangTable.$convertergroup.fromSql(row.read<int>('group')),
         category: row.readNullable<String>('category'),
         subCategory: row.readNullable<String>('sub_category'),
         format: i3.BangTable.$converterformat.fromSql(
@@ -2384,6 +2391,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
         domain: row.read<String>('domain'),
         trigger: row.read<String>('trigger'),
         urlTemplate: row.read<String>('url_template'),
+        group: i3.BangTable.$convertergroup.fromSql(row.read<int>('group')),
         category: row.readNullable<String>('category'),
         subCategory: row.readNullable<String>('sub_category'),
         format: i3.BangTable.$converterformat.fromSql(
