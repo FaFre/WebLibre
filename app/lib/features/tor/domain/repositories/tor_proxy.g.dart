@@ -42,7 +42,7 @@ final class TorProxyRepositoryProvider
 }
 
 String _$torProxyRepositoryHash() =>
-    r'dd565140620a1f66090e84e541d5ea8e34ab0094';
+    r'3bdb83bdb1c5d1bb5d8953878cd587d042d30342';
 
 abstract class _$TorProxyRepository extends $Notifier<void> {
   void build();

@@ -13,7 +13,7 @@ class TorProxyRepository extends _$TorProxyRepository {
 
   Future<void> setProxyPort(int port) {
     return _serviceLock.synchronized(() async {
-      await _waitHealthcheck().timeout(const Duration(seconds: 10));
+      await _waitHealthcheck().timeout(const Duration(seconds: 30));
 
       return _service.setProxyPort(port);
     });
