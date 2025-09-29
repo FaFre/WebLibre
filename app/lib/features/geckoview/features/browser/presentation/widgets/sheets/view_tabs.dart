@@ -139,11 +139,13 @@ class _TabSheetHeader extends HookConsumerWidget {
     );
 
     useListenableCallback(searchTextController, () async {
-      await ref
-          .read(
-            tabSearchRepositoryProvider(TabSearchPartition.preview).notifier,
-          )
-          .addQuery(searchTextController.text);
+      if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.preview))) {
+        await ref
+            .read(
+              tabSearchRepositoryProvider(TabSearchPartition.preview).notifier,
+            )
+            .addQuery(searchTextController.text);
+      }
     });
 
     return Material(

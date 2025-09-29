@@ -62,9 +62,11 @@ class SiteSearch extends HookConsumerWidget {
     final searchFocusNode = useFocusNode();
 
     useListenableCallback(searchTextController, () {
-      ref
-          .read(searchSuggestionsProvider().notifier)
-          .addQuery(searchTextController.text);
+      if (ref.exists(searchSuggestionsProvider())) {
+        ref
+            .read(searchSuggestionsProvider().notifier)
+            .addQuery(searchTextController.text);
+      }
     });
 
     final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));

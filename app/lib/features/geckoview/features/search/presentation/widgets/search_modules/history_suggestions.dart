@@ -49,9 +49,11 @@ class HistorySuggestions extends HookConsumerWidget {
     final historySuggestionsAsync = ref.watch(engineHistorySuggestionsProvider);
 
     useListenableCallback(searchTextListenable, () async {
-      await ref
-          .watch(engineSuggestionsProvider.notifier)
-          .addQuery(searchTextListenable.value.text);
+      if (ref.exists(engineSuggestionsProvider)) {
+        await ref
+            .watch(engineSuggestionsProvider.notifier)
+            .addQuery(searchTextListenable.value.text);
+      }
     });
 
     if (historySuggestionsAsync.hasValue &&

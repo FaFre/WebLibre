@@ -61,9 +61,11 @@ class FixedSearchTermSuggestions extends HookConsumerWidget {
     final searchSuggestions = ref.watch(searchSuggestionsProvider());
 
     useListenableCallback(searchTextController, () {
-      ref
-          .read(searchSuggestionsProvider().notifier)
-          .addQuery(searchTextController.text);
+      if (ref.exists(searchSuggestionsProvider())) {
+        ref
+            .read(searchSuggestionsProvider().notifier)
+            .addQuery(searchTextController.text);
+      }
     });
 
     final prioritizedSuggestions = isSuggestableText

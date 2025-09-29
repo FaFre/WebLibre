@@ -98,7 +98,7 @@ final class SearchSuggestionsProvider
   }
 }
 
-String _$searchSuggestionsHash() => r'8d1fb72cab374491a53f7a814f87af6a26356f42';
+String _$searchSuggestionsHash() => r'e181fb417f6199648a7c6d8962b1f1d5a2cf7d27';
 
 final class SearchSuggestionsFamily extends $Family
     with

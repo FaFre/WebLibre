@@ -68,15 +68,19 @@ class TabSearch extends HookConsumerWidget {
         .value;
 
     useListenableCallback(searchTextListenable, () async {
-      await ref
-          .read(tabSearchRepositoryProvider(TabSearchPartition.search).notifier)
-          .addQuery(
-            searchTextListenable.value.text,
-            // ignore: avoid_redundant_argument_values dont break things
-            matchPrefix: _matchPrefix,
-            // ignore: avoid_redundant_argument_values dont break things
-            matchSuffix: _matchSuffix,
-          );
+      if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.search))) {
+        await ref
+            .read(
+              tabSearchRepositoryProvider(TabSearchPartition.search).notifier,
+            )
+            .addQuery(
+              searchTextListenable.value.text,
+              // ignore: avoid_redundant_argument_values dont break things
+              matchPrefix: _matchPrefix,
+              // ignore: avoid_redundant_argument_values dont break things
+              matchSuffix: _matchSuffix,
+            );
+      }
     });
 
     if (tabs.isEmpty) {
