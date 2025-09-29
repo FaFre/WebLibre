@@ -1,9 +1,0 @@
-# SPDX-FileCopyrightText: 2024 Foundation Devices Inc.
-#
-# SPDX-License-Identifier: MIT
-
-include: package:flutter_lints/flutter.yaml
-
-linter:
-  rules:
-    avoid_print: false
