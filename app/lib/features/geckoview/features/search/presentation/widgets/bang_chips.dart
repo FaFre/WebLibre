@@ -44,6 +44,7 @@ class BangChips extends HookConsumerWidget {
     required this.onDeleted,
     this.searchTextController,
     this.displayMenu = true,
+    super.key,
   });
 
   static Future<bool?> resetBangDialog(

@@ -132,6 +132,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
                 BangChips(
+                  key: ValueKey(activeBang),
                   activeBang: activeBang,
                   onSelected: (bang) {
                     searchTextController.clear();
@@ -142,7 +143,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                   },
                   onDeleted: (bang) async {
                     if (ref.read(selectedBangTriggerProvider()) ==
-                        bang.trigger) {
+                        bang.toKey()) {
                       ref
                           .read(selectedBangTriggerProvider().notifier)
                           .clearTrigger();
