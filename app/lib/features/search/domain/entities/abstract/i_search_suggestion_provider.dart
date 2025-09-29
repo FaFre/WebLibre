@@ -18,16 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:exceptions/exceptions.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 
 enum SearchSuggestionProviders {
   none('Disabled', null),
-  brave('Brave', 'brave'),
-  ddg('DuckDuckGo', 'ddg'),
-  kagi('Kagi', 'kagi'),
-  qwant('Qwant', 'qwant');
+  brave('Brave', BangKey(group: BangGroup.general, trigger: 'brave')),
+  ddg('DuckDuckGo', BangKey(group: BangGroup.general, trigger: 'ddg')),
+  kagi('Kagi', BangKey(group: BangGroup.kagi, trigger: 'kagi')),
+  qwant('Qwant', BangKey(group: BangGroup.general, trigger: 'qwant'));
 
   final String label;
-  final String? relatedBang;
+  final BangKey? relatedBang;
 
   const SearchSuggestionProviders(this.label, this.relatedBang);
 }

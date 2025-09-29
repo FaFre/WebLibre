@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -36,12 +37,12 @@ class DefaultSearchSelector extends HookConsumerWidget {
     );
     final availableBangs = ref.watch(frequentBangListProvider);
 
-    Future<void> updateSearchProvider(String trigger) async {
+    Future<void> updateSearchProvider(BangKey key) async {
       await ref
           .read(saveGeneralSettingsControllerProvider.notifier)
           .save(
             (currentSettings) =>
-                currentSettings.copyWith.defaultSearchProvider(trigger),
+                currentSettings.copyWith.defaultSearchProvider(key),
           );
     }
 
@@ -62,13 +63,13 @@ class DefaultSearchSelector extends HookConsumerWidget {
                   availableItems: availableBangs,
                   selectedItem: activeBang,
                   onSelected: (bang) async {
-                    await updateSearchProvider(bang.trigger);
+                    await updateSearchProvider(bang.toKey());
                   },
                 ),
               ),
               IconButton(
                 onPressed: () async {
-                  final trigger = await const BangSearchRoute().push<String?>(
+                  final trigger = await const BangSearchRoute().push<BangKey?>(
                     context,
                   );
 

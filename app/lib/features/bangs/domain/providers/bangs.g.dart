@@ -42,7 +42,7 @@ final class DefaultSearchBangDataProvider
 }
 
 String _$defaultSearchBangDataHash() =>
-    r'5fa3f588b57a82dd8fffb2082e495108a242ef72';
+    r'5f43b8989219cf3cb2f5ca65df351b6cb100427f';
 
 @ProviderFor(bangData)
 const bangDataProvider = BangDataFamily._();
@@ -53,7 +53,7 @@ final class BangDataProvider
     with $FutureModifier<BangData?>, $StreamProvider<BangData?> {
   const BangDataProvider._({
     required BangDataFamily super.from,
-    required String super.argument,
+    required BangKey super.argument,
   }) : super(
          retry: null,
          name: r'bangDataProvider',
@@ -79,7 +79,7 @@ final class BangDataProvider
 
   @override
   Stream<BangData?> create(Ref ref) {
-    final argument = this.argument as String;
+    final argument = this.argument as BangKey;
     return bangData(ref, argument);
   }
 
@@ -94,10 +94,10 @@ final class BangDataProvider
   }
 }
 
-String _$bangDataHash() => r'b10d3a74e19d30fc372b9ecbf7146bccd9fdf83b';
+String _$bangDataHash() => r'bd9f5ec8b29aab74620a9b5a4246cb7e3b2fd377';
 
 final class BangDataFamily extends $Family
-    with $FunctionalFamilyOverride<Stream<BangData?>, String> {
+    with $FunctionalFamilyOverride<Stream<BangData?>, BangKey> {
   const BangDataFamily._()
     : super(
         retry: null,
@@ -107,8 +107,8 @@ final class BangDataFamily extends $Family
         isAutoDispose: true,
       );
 
-  BangDataProvider call(String trigger) =>
-      BangDataProvider._(argument: trigger, from: this);
+  BangDataProvider call(BangKey key) =>
+      BangDataProvider._(argument: key, from: this);
 
   @override
   String toString() => r'bangDataProvider';

@@ -19,11 +19,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class BangIcon extends ConsumerWidget {
-  final String trigger;
+  final BangKey trigger;
   final double iconSize;
 
   const BangIcon({super.key, required this.trigger, this.iconSize = 20});

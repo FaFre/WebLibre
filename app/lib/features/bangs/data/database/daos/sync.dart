@@ -55,8 +55,9 @@ class SyncDao extends DatabaseAccessor<BangDatabase> with $SyncDaoMixin {
     });
   }
 
-  Future<int> deleteBangs(Iterable<String> triggers) {
-    final statement = delete(db.bang)..where((t) => t.trigger.isIn(triggers));
+  Future<int> deleteBangs(BangGroup group, Iterable<String> triggers) {
+    final statement = delete(db.bang)
+      ..where((t) => t.group.equalsValue(group) & t.trigger.isIn(triggers));
     return statement.go();
   }
 
@@ -89,7 +90,7 @@ class SyncDao extends DatabaseAccessor<BangDatabase> with $SyncDaoMixin {
         .map((e) => remoteBangMap[e]!);
 
     await db.transaction(() async {
-      await deleteBangs(removedBangs);
+      await deleteBangs(group, removedBangs);
       await insertBangs(addedBangs);
       await replaceBangs(changedBangs);
       await upsertLastSyncOfGroup(group, syncTime);

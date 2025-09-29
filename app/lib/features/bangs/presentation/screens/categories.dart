@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -38,7 +39,7 @@ class BangCategoriesScreen extends HookConsumerWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              final trigger = await const BangSearchRoute().push<String?>(
+              final trigger = await const BangSearchRoute().push<BangKey?>(
                 context,
               );
 

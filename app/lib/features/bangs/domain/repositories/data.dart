@@ -23,6 +23,7 @@ import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
 import 'package:weblibre/features/bangs/data/providers.dart';
 
@@ -33,12 +34,12 @@ class BangDataRepository extends _$BangDataRepository {
   @override
   void build() {}
 
-  Stream<BangData?> watchBang(String? trigger) {
-    if (trigger != null) {
+  Stream<BangData?> watchBang(BangKey? key) {
+    if (key != null) {
       return ref
           .read(bangDatabaseProvider)
           .bangDao
-          .getBangData(trigger)
+          .getBangData(key.group, key.trigger)
           .watchSingleOrNull();
     } else {
       return Stream.value(null);
@@ -104,14 +105,15 @@ class BangDataRepository extends _$BangDataRepository {
         .watch();
   }
 
-  Future<void> increaseFrequency(String trigger) {
+  Future<void> increaseFrequency(BangGroup group, String trigger) {
     return ref
         .read(bangDatabaseProvider)
         .bangDao
-        .increaseBangFrequency(trigger);
+        .increaseBangFrequency(group, trigger);
   }
 
   Future<void> addSearchEntry(
+    BangGroup group,
     String trigger,
     String searchQuery, {
     required int maxEntryCount,
@@ -119,7 +121,7 @@ class BangDataRepository extends _$BangDataRepository {
     final db = ref.read(bangDatabaseProvider);
     //Pack in a transaction to bundle rebuilds of watch() queries
     return db.transaction(() async {
-      await db.bangDao.addSearchEntry(trigger, searchQuery);
+      await db.bangDao.addSearchEntry(group, trigger, searchQuery);
       await db.definitionsDrift.evictHistoryEntries(limit: maxEntryCount);
     });
   }

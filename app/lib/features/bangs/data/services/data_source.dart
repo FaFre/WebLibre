@@ -35,7 +35,7 @@ class BangDataSourceService extends _$BangDataSourceService {
   @override
   void build() {}
 
-  Future<Result<List<Bang>>> fetchRemoteBangs(Uri url, BangGroup? group) {
+  Future<Result<List<Bang>>> fetchRemoteBangs(Uri url, BangGroup group) {
     return Result.fromAsync(() async {
       return await compute((args) async {
         final client = http.Client();
@@ -51,13 +51,8 @@ class BangDataSourceService extends _$BangDataSourceService {
         }
       }, [url.toString()]).then(
         (json) => json.map((e) {
-          var bang = Bang.fromJson(e as Map<String, dynamic>);
-
-          if (group != null) {
-            bang = bang.copyWith.group(group);
-          }
-
-          return bang;
+          final bang = Bang.fromJson(e as Map<String, dynamic>);
+          return bang.copyWith.group(group);
         }).toList(),
       );
     }, exceptionHandler: handleHttpError);

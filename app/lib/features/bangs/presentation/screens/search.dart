@@ -90,7 +90,7 @@ class BangSearchScreen extends HookConsumerWidget {
                 return BangDetails(
                   bang,
                   onTap: () {
-                    context.pop(bang.trigger);
+                    context.pop(bang.toKey());
                   },
                 );
               },

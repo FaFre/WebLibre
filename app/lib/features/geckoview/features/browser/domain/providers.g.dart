@@ -13,7 +13,7 @@ part of 'providers.dart';
 const selectedBangTriggerProvider = SelectedBangTriggerFamily._();
 
 final class SelectedBangTriggerProvider
-    extends $NotifierProvider<SelectedBangTrigger, String?> {
+    extends $NotifierProvider<SelectedBangTrigger, BangKey?> {
   const SelectedBangTriggerProvider._({
     required SelectedBangTriggerFamily super.from,
     required String? super.argument,
@@ -40,10 +40,10 @@ final class SelectedBangTriggerProvider
   SelectedBangTrigger create() => SelectedBangTrigger();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String? value) {
+  Override overrideWithValue(BangKey? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<String?>(value),
+      providerOverride: $SyncValueProvider<BangKey?>(value),
     );
   }
 
@@ -59,15 +59,15 @@ final class SelectedBangTriggerProvider
 }
 
 String _$selectedBangTriggerHash() =>
-    r'b0e12bc95e93d50d04f1c658230cea9f15ff0385';
+    r'162d053d0207b8b98549adc453111111d8ff69d6';
 
 final class SelectedBangTriggerFamily extends $Family
     with
         $ClassFamilyOverride<
           SelectedBangTrigger,
-          String?,
-          String?,
-          String?,
+          BangKey?,
+          BangKey?,
+          BangKey?,
           String?
         > {
   const SelectedBangTriggerFamily._()
@@ -86,21 +86,21 @@ final class SelectedBangTriggerFamily extends $Family
   String toString() => r'selectedBangTriggerProvider';
 }
 
-abstract class _$SelectedBangTrigger extends $Notifier<String?> {
+abstract class _$SelectedBangTrigger extends $Notifier<BangKey?> {
   late final _$args = ref.$arg as String?;
   String? get domain => _$args;
 
-  String? build({String? domain});
+  BangKey? build({String? domain});
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build(domain: _$args);
-    final ref = this.ref as $Ref<String?, String?>;
+    final ref = this.ref as $Ref<BangKey?, BangKey?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<String?, String?>,
-              String?,
+              AnyNotifier<BangKey?, BangKey?>,
+              BangKey?,
               Object?,
               Object?
             >;

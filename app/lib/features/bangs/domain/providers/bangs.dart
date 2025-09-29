@@ -21,6 +21,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
@@ -30,20 +31,20 @@ part 'bangs.g.dart';
 
 @Riverpod(keepAlive: true)
 Stream<BangData?> defaultSearchBangData(Ref ref) {
-  final trigger = ref.watch(
+  final key = ref.watch(
     generalSettingsWithDefaultsProvider.select(
       (value) => value.defaultSearchProvider,
     ),
   );
 
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  return repository.watchBang(trigger);
+  return repository.watchBang(key);
 }
 
 @Riverpod()
-Stream<BangData?> bangData(Ref ref, String trigger) {
+Stream<BangData?> bangData(Ref ref, BangKey key) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  return repository.watchBang(trigger);
+  return repository.watchBang(key);
 }
 
 @Riverpod()

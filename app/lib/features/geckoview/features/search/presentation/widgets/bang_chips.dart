@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
@@ -121,7 +122,7 @@ class BangChips extends HookConsumerWidget {
                       searchText: (searchText.isEmpty)
                           ? BangSearchRoute.emptySearchText
                           : searchText!,
-                    ).push<String?>(context);
+                    ).push<BangKey?>(context);
 
                     if (trigger != null) {
                       ref

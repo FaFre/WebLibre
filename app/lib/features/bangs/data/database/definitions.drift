@@ -5,14 +5,15 @@ import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
 
 CREATE TABLE bang (
-  "trigger" TEXT PRIMARY KEY NOT NULL,
+  "trigger" TEXT NOT NULL,
   "group" ENUM(BangGroup) NOT NULL,
   website_name TEXT NOT NULL,
   domain TEXT NOT NULL,
   url_template TEXT NOT NULL,
   category TEXT,
   sub_category TEXT,
-  format TEXT MAPPED BY `const BangFormatConverter()`
+  format TEXT MAPPED BY `const BangFormatConverter()`,
+  PRIMARY KEY ("trigger", "group")
 ) WITH Bang;
 
 CREATE TABLE bang_sync (
@@ -21,15 +22,20 @@ CREATE TABLE bang_sync (
 );
 
 CREATE TABLE bang_frequency (
-  "trigger" TEXT PRIMARY KEY NOT NULL REFERENCES bang ("trigger") ON DELETE CASCADE,
+  "trigger" TEXT NOT NULL,
+  "group" ENUM(BangGroup) NOT NULL,
   frequency INTEGER NOT NULL,
-  last_used DATETIME NOT NULL
+  last_used DATETIME NOT NULL,
+  PRIMARY KEY ("trigger", "group"),
+  FOREIGN KEY ("trigger", "group") REFERENCES bang ("trigger", "group") ON DELETE CASCADE
 );
 
 CREATE TABLE bang_history (
   search_query TEXT UNIQUE NOT NULL,
-  "trigger" TEXT NOT NULL REFERENCES bang ("trigger"),
-  search_date DATETIME NOT NULL
+  "trigger" TEXT NOT NULL,
+  "group" ENUM(BangGroup) NOT NULL,
+  search_date DATETIME NOT NULL,
+  FOREIGN KEY ("trigger", "group") REFERENCES bang ("trigger", "group")
 );
 
 CREATE VIRTUAL TABLE bang_fts 
@@ -48,7 +54,7 @@ CREATE VIEW bang_data_view WITH BangData AS
   FROM
     bang b
   LEFT JOIN
-    bang_frequency bf ON b."trigger" = bf."trigger";
+    bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group";
 
 -- Triggers to keep the FTS index up to date.
 CREATE TRIGGER bang_after_insert AFTER INSERT ON bang BEGIN
@@ -90,7 +96,7 @@ queryBangs WITH BangData:
   INNER JOIN
     bang b ON b.rowid = fts.rowid
   LEFT JOIN
-    bang_frequency bf ON b."trigger" = bf."trigger"
+    bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
   CROSS JOIN 
     weights
   ORDER BY 
@@ -114,7 +120,7 @@ queryBangsBasic WITH BangData:
   INNER JOIN
     bang b ON b.rowid = fts.rowid
   LEFT JOIN
-    bang_frequency bf ON b."trigger" = bf."trigger"
+    bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
   CROSS JOIN 
     weights
   WHERE 

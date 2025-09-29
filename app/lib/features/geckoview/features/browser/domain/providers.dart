@@ -23,6 +23,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
@@ -40,7 +41,7 @@ part 'providers.g.dart';
 class SelectedBangTrigger extends _$SelectedBangTrigger {
   // ignore: document_ignores api decision
   // ignore: use_setters_to_change_properties
-  void setTrigger(String trigger) {
+  void setTrigger(BangKey trigger) {
     state = trigger;
   }
 
@@ -49,7 +50,7 @@ class SelectedBangTrigger extends _$SelectedBangTrigger {
   }
 
   @override
-  String? build({String? domain}) {
+  BangKey? build({String? domain}) {
     return null;
   }
 }

@@ -42,7 +42,7 @@ final class BangDataSourceServiceProvider
 }
 
 String _$bangDataSourceServiceHash() =>
-    r'2ff811ece417ae498dacc04a2fa963cffb34c8a9';
+    r'b1bd96bbd834de0f71af86d7f791d367d0a837be';
 
 abstract class _$BangDataSourceService extends $Notifier<void> {
   void build();

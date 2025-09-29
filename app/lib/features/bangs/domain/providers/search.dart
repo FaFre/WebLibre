@@ -34,8 +34,9 @@ class BangSearch extends _$BangSearch {
   Future<Uri> triggerBangSearch(BangData bang, String searchQuery) async {
     final bangDataNotifier = ref.read(bangDataRepositoryProvider.notifier);
 
-    await bangDataNotifier.increaseFrequency(bang.trigger);
+    await bangDataNotifier.increaseFrequency(bang.group, bang.trigger);
     await bangDataNotifier.addSearchEntry(
+      bang.group,
       bang.trigger,
       searchQuery,
       maxEntryCount: 3,

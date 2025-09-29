@@ -37,73 +37,6 @@ typedef $BangTableUpdateCompanionBuilder =
       i0.Value<int> rowid,
     });
 
-final class $BangTableReferences
-    extends i0.BaseReferences<i0.GeneratedDatabase, i3.BangTable, i1.Bang> {
-  $BangTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static i0.MultiTypedResultKey<i3.BangFrequency, List<i3.BangFrequencyData>>
-  _bangFrequencyRefsTable(i0.GeneratedDatabase db) =>
-      i0.MultiTypedResultKey.fromTable(
-        i6.ReadDatabaseContainer(
-          db,
-        ).resultSet<i3.BangFrequency>('bang_frequency'),
-        aliasName: i0.$_aliasNameGenerator(
-          i6.ReadDatabaseContainer(db).resultSet<i3.BangTable>('bang').trigger,
-          i6.ReadDatabaseContainer(
-            db,
-          ).resultSet<i3.BangFrequency>('bang_frequency').trigger,
-        ),
-      );
-
-  i3.$BangFrequencyProcessedTableManager get bangFrequencyRefs {
-    final manager = i3
-        .$BangFrequencyTableManager(
-          $_db,
-          i6.ReadDatabaseContainer(
-            $_db,
-          ).resultSet<i3.BangFrequency>('bang_frequency'),
-        )
-        .filter(
-          (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!),
-        );
-
-    final cache = $_typedResult.readTableOrNull(_bangFrequencyRefsTable($_db));
-    return i0.ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static i0.MultiTypedResultKey<i3.BangHistory, List<i3.BangHistoryData>>
-  _bangHistoryRefsTable(i0.GeneratedDatabase db) =>
-      i0.MultiTypedResultKey.fromTable(
-        i6.ReadDatabaseContainer(db).resultSet<i3.BangHistory>('bang_history'),
-        aliasName: i0.$_aliasNameGenerator(
-          i6.ReadDatabaseContainer(db).resultSet<i3.BangTable>('bang').trigger,
-          i6.ReadDatabaseContainer(
-            db,
-          ).resultSet<i3.BangHistory>('bang_history').trigger,
-        ),
-      );
-
-  i3.$BangHistoryProcessedTableManager get bangHistoryRefs {
-    final manager = i3
-        .$BangHistoryTableManager(
-          $_db,
-          i6.ReadDatabaseContainer(
-            $_db,
-          ).resultSet<i3.BangHistory>('bang_history'),
-        )
-        .filter(
-          (f) => f.trigger.trigger.sqlEquals($_itemColumn<String>('trigger')!),
-        );
-
-    final cache = $_typedResult.readTableOrNull(_bangHistoryRefsTable($_db));
-    return i0.ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
 class $BangTableFilterComposer
     extends i0.Composer<i0.GeneratedDatabase, i3.BangTable> {
   $BangTableFilterComposer({
@@ -158,64 +91,6 @@ class $BangTableFilterComposer
     column: $table.format,
     builder: (column) => i0.ColumnWithTypeConverterFilters(column),
   );
-
-  i0.Expression<bool> bangFrequencyRefs(
-    i0.Expression<bool> Function(i3.$BangFrequencyFilterComposer f) f,
-  ) {
-    final i3.$BangFrequencyFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangFrequency>('bang_frequency'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangFrequencyFilterComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangFrequency>('bang_frequency'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  i0.Expression<bool> bangHistoryRefs(
-    i0.Expression<bool> Function(i3.$BangHistoryFilterComposer f) f,
-  ) {
-    final i3.$BangHistoryFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangHistory>('bang_history'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangHistoryFilterComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangHistory>('bang_history'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $BangTableOrderingComposer
@@ -306,64 +181,6 @@ class $BangTableAnnotationComposer
 
   i0.GeneratedColumnWithTypeConverter<Set<i1.BangFormat>?, String> get format =>
       $composableBuilder(column: $table.format, builder: (column) => column);
-
-  i0.Expression<T> bangFrequencyRefs<T extends Object>(
-    i0.Expression<T> Function(i3.$BangFrequencyAnnotationComposer a) f,
-  ) {
-    final i3.$BangFrequencyAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangFrequency>('bang_frequency'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangFrequencyAnnotationComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangFrequency>('bang_frequency'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  i0.Expression<T> bangHistoryRefs<T extends Object>(
-    i0.Expression<T> Function(i3.$BangHistoryAnnotationComposer a) f,
-  ) {
-    final i3.$BangHistoryAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangHistory>('bang_history'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangHistoryAnnotationComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangHistory>('bang_history'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $BangTableTableManager
@@ -377,12 +194,12 @@ class $BangTableTableManager
           i3.$BangTableAnnotationComposer,
           $BangTableCreateCompanionBuilder,
           $BangTableUpdateCompanionBuilder,
-          (i1.Bang, i3.$BangTableReferences),
+          (
+            i1.Bang,
+            i0.BaseReferences<i0.GeneratedDatabase, i3.BangTable, i1.Bang>,
+          ),
           i1.Bang,
-          i0.PrefetchHooks Function({
-            bool bangFrequencyRefs,
-            bool bangHistoryRefs,
-          })
+          i0.PrefetchHooks Function()
         > {
   $BangTableTableManager(i0.GeneratedDatabase db, i3.BangTable table)
     : super(
@@ -440,68 +257,9 @@ class $BangTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) =>
-                    (e.readTable(table), i3.$BangTableReferences(db, table, e)),
-              )
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback:
-              ({bangFrequencyRefs = false, bangHistoryRefs = false}) {
-                return i0.PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (bangFrequencyRefs)
-                      i6.ReadDatabaseContainer(
-                        db,
-                      ).resultSet<i3.BangFrequency>('bang_frequency'),
-                    if (bangHistoryRefs)
-                      i6.ReadDatabaseContainer(
-                        db,
-                      ).resultSet<i3.BangHistory>('bang_history'),
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (bangFrequencyRefs)
-                        await i0.$_getPrefetchedData<
-                          i1.Bang,
-                          i3.BangTable,
-                          i3.BangFrequencyData
-                        >(
-                          currentTable: table,
-                          referencedTable: i3.$BangTableReferences
-                              ._bangFrequencyRefsTable(db),
-                          managerFromTypedResult: (p0) => i3
-                              .$BangTableReferences(db, table, p0)
-                              .bangFrequencyRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.trigger == item.trigger,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (bangHistoryRefs)
-                        await i0.$_getPrefetchedData<
-                          i1.Bang,
-                          i3.BangTable,
-                          i3.BangHistoryData
-                        >(
-                          currentTable: table,
-                          referencedTable: i3.$BangTableReferences
-                              ._bangHistoryRefsTable(db),
-                          managerFromTypedResult: (p0) => i3
-                              .$BangTableReferences(db, table, p0)
-                              .bangHistoryRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.trigger == item.trigger,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -516,9 +274,9 @@ typedef $BangTableProcessedTableManager =
       i3.$BangTableAnnotationComposer,
       $BangTableCreateCompanionBuilder,
       $BangTableUpdateCompanionBuilder,
-      (i1.Bang, i3.$BangTableReferences),
+      (i1.Bang, i0.BaseReferences<i0.GeneratedDatabase, i3.BangTable, i1.Bang>),
       i1.Bang,
-      i0.PrefetchHooks Function({bool bangFrequencyRefs, bool bangHistoryRefs})
+      i0.PrefetchHooks Function()
     >;
 typedef $BangSyncCreateCompanionBuilder =
     i3.BangSyncCompanion Function({
@@ -660,6 +418,7 @@ typedef $BangSyncProcessedTableManager =
 typedef $BangFrequencyCreateCompanionBuilder =
     i3.BangFrequencyCompanion Function({
       required String trigger,
+      required i2.BangGroup group,
       required int frequency,
       required DateTime lastUsed,
       i0.Value<int> rowid,
@@ -667,50 +426,11 @@ typedef $BangFrequencyCreateCompanionBuilder =
 typedef $BangFrequencyUpdateCompanionBuilder =
     i3.BangFrequencyCompanion Function({
       i0.Value<String> trigger,
+      i0.Value<i2.BangGroup> group,
       i0.Value<int> frequency,
       i0.Value<DateTime> lastUsed,
       i0.Value<int> rowid,
     });
-
-final class $BangFrequencyReferences
-    extends
-        i0.BaseReferences<
-          i0.GeneratedDatabase,
-          i3.BangFrequency,
-          i3.BangFrequencyData
-        > {
-  $BangFrequencyReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static i3.BangTable _triggerTable(i0.GeneratedDatabase db) =>
-      i6.ReadDatabaseContainer(db)
-          .resultSet<i3.BangTable>('bang')
-          .createAlias(
-            i0.$_aliasNameGenerator(
-              i6.ReadDatabaseContainer(
-                db,
-              ).resultSet<i3.BangFrequency>('bang_frequency').trigger,
-              i6.ReadDatabaseContainer(
-                db,
-              ).resultSet<i3.BangTable>('bang').trigger,
-            ),
-          );
-
-  i3.$BangTableProcessedTableManager get trigger {
-    final $_column = $_itemColumn<String>('trigger')!;
-
-    final manager = i3
-        .$BangTableTableManager(
-          $_db,
-          i6.ReadDatabaseContainer($_db).resultSet<i3.BangTable>('bang'),
-        )
-        .filter((f) => f.trigger.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_triggerTable($_db));
-    if (item == null) return manager;
-    return i0.ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
 
 class $BangFrequencyFilterComposer
     extends i0.Composer<i0.GeneratedDatabase, i3.BangFrequency> {
@@ -721,6 +441,17 @@ class $BangFrequencyFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  i0.ColumnFilters<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnWithTypeConverterFilters<i2.BangGroup, i2.BangGroup, int>
+  get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
   i0.ColumnFilters<int> get frequency => $composableBuilder(
     column: $table.frequency,
     builder: (column) => i0.ColumnFilters(column),
@@ -730,33 +461,6 @@ class $BangFrequencyFilterComposer
     column: $table.lastUsed,
     builder: (column) => i0.ColumnFilters(column),
   );
-
-  i3.$BangTableFilterComposer get trigger {
-    final i3.$BangTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangTable>('bang'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangTableFilterComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangTable>('bang'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $BangFrequencyOrderingComposer
@@ -768,6 +472,16 @@ class $BangFrequencyOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  i0.ColumnOrderings<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<int> get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<int> get frequency => $composableBuilder(
     column: $table.frequency,
     builder: (column) => i0.ColumnOrderings(column),
@@ -777,33 +491,6 @@ class $BangFrequencyOrderingComposer
     column: $table.lastUsed,
     builder: (column) => i0.ColumnOrderings(column),
   );
-
-  i3.$BangTableOrderingComposer get trigger {
-    final i3.$BangTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangTable>('bang'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangTableOrderingComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangTable>('bang'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $BangFrequencyAnnotationComposer
@@ -815,38 +502,17 @@ class $BangFrequencyAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
+  i0.GeneratedColumn<String> get trigger =>
+      $composableBuilder(column: $table.trigger, builder: (column) => column);
+
+  i0.GeneratedColumnWithTypeConverter<i2.BangGroup, int> get group =>
+      $composableBuilder(column: $table.group, builder: (column) => column);
+
   i0.GeneratedColumn<int> get frequency =>
       $composableBuilder(column: $table.frequency, builder: (column) => column);
 
   i0.GeneratedColumn<DateTime> get lastUsed =>
       $composableBuilder(column: $table.lastUsed, builder: (column) => column);
-
-  i3.$BangTableAnnotationComposer get trigger {
-    final i3.$BangTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangTable>('bang'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangTableAnnotationComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangTable>('bang'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $BangFrequencyTableManager
@@ -860,9 +526,16 @@ class $BangFrequencyTableManager
           i3.$BangFrequencyAnnotationComposer,
           $BangFrequencyCreateCompanionBuilder,
           $BangFrequencyUpdateCompanionBuilder,
-          (i3.BangFrequencyData, i3.$BangFrequencyReferences),
+          (
+            i3.BangFrequencyData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i3.BangFrequency,
+              i3.BangFrequencyData
+            >,
+          ),
           i3.BangFrequencyData,
-          i0.PrefetchHooks Function({bool trigger})
+          i0.PrefetchHooks Function()
         > {
   $BangFrequencyTableManager(i0.GeneratedDatabase db, i3.BangFrequency table)
     : super(
@@ -878,11 +551,13 @@ class $BangFrequencyTableManager
           updateCompanionCallback:
               ({
                 i0.Value<String> trigger = const i0.Value.absent(),
+                i0.Value<i2.BangGroup> group = const i0.Value.absent(),
                 i0.Value<int> frequency = const i0.Value.absent(),
                 i0.Value<DateTime> lastUsed = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangFrequencyCompanion(
                 trigger: trigger,
+                group: group,
                 frequency: frequency,
                 lastUsed: lastUsed,
                 rowid: rowid,
@@ -890,64 +565,21 @@ class $BangFrequencyTableManager
           createCompanionCallback:
               ({
                 required String trigger,
+                required i2.BangGroup group,
                 required int frequency,
                 required DateTime lastUsed,
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangFrequencyCompanion.insert(
                 trigger: trigger,
+                group: group,
                 frequency: frequency,
                 lastUsed: lastUsed,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  i3.$BangFrequencyReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({trigger = false}) {
-            return i0.PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends i0.TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (trigger) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.trigger,
-                                referencedTable: i3.$BangFrequencyReferences
-                                    ._triggerTable(db),
-                                referencedColumn: i3.$BangFrequencyReferences
-                                    ._triggerTable(db)
-                                    .trigger,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -962,14 +594,22 @@ typedef $BangFrequencyProcessedTableManager =
       i3.$BangFrequencyAnnotationComposer,
       $BangFrequencyCreateCompanionBuilder,
       $BangFrequencyUpdateCompanionBuilder,
-      (i3.BangFrequencyData, i3.$BangFrequencyReferences),
+      (
+        i3.BangFrequencyData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i3.BangFrequency,
+          i3.BangFrequencyData
+        >,
+      ),
       i3.BangFrequencyData,
-      i0.PrefetchHooks Function({bool trigger})
+      i0.PrefetchHooks Function()
     >;
 typedef $BangHistoryCreateCompanionBuilder =
     i3.BangHistoryCompanion Function({
       required String searchQuery,
       required String trigger,
+      required i2.BangGroup group,
       required DateTime searchDate,
       i0.Value<int> rowid,
     });
@@ -977,49 +617,10 @@ typedef $BangHistoryUpdateCompanionBuilder =
     i3.BangHistoryCompanion Function({
       i0.Value<String> searchQuery,
       i0.Value<String> trigger,
+      i0.Value<i2.BangGroup> group,
       i0.Value<DateTime> searchDate,
       i0.Value<int> rowid,
     });
-
-final class $BangHistoryReferences
-    extends
-        i0.BaseReferences<
-          i0.GeneratedDatabase,
-          i3.BangHistory,
-          i3.BangHistoryData
-        > {
-  $BangHistoryReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static i3.BangTable _triggerTable(i0.GeneratedDatabase db) =>
-      i6.ReadDatabaseContainer(db)
-          .resultSet<i3.BangTable>('bang')
-          .createAlias(
-            i0.$_aliasNameGenerator(
-              i6.ReadDatabaseContainer(
-                db,
-              ).resultSet<i3.BangHistory>('bang_history').trigger,
-              i6.ReadDatabaseContainer(
-                db,
-              ).resultSet<i3.BangTable>('bang').trigger,
-            ),
-          );
-
-  i3.$BangTableProcessedTableManager get trigger {
-    final $_column = $_itemColumn<String>('trigger')!;
-
-    final manager = i3
-        .$BangTableTableManager(
-          $_db,
-          i6.ReadDatabaseContainer($_db).resultSet<i3.BangTable>('bang'),
-        )
-        .filter((f) => f.trigger.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_triggerTable($_db));
-    if (item == null) return manager;
-    return i0.ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
 
 class $BangHistoryFilterComposer
     extends i0.Composer<i0.GeneratedDatabase, i3.BangHistory> {
@@ -1035,37 +636,21 @@ class $BangHistoryFilterComposer
     builder: (column) => i0.ColumnFilters(column),
   );
 
+  i0.ColumnFilters<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnWithTypeConverterFilters<i2.BangGroup, i2.BangGroup, int>
+  get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
   i0.ColumnFilters<DateTime> get searchDate => $composableBuilder(
     column: $table.searchDate,
     builder: (column) => i0.ColumnFilters(column),
   );
-
-  i3.$BangTableFilterComposer get trigger {
-    final i3.$BangTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangTable>('bang'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangTableFilterComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangTable>('bang'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $BangHistoryOrderingComposer
@@ -1082,37 +667,20 @@ class $BangHistoryOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<int> get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<DateTime> get searchDate => $composableBuilder(
     column: $table.searchDate,
     builder: (column) => i0.ColumnOrderings(column),
   );
-
-  i3.$BangTableOrderingComposer get trigger {
-    final i3.$BangTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangTable>('bang'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangTableOrderingComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangTable>('bang'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $BangHistoryAnnotationComposer
@@ -1129,37 +697,16 @@ class $BangHistoryAnnotationComposer
     builder: (column) => column,
   );
 
+  i0.GeneratedColumn<String> get trigger =>
+      $composableBuilder(column: $table.trigger, builder: (column) => column);
+
+  i0.GeneratedColumnWithTypeConverter<i2.BangGroup, int> get group =>
+      $composableBuilder(column: $table.group, builder: (column) => column);
+
   i0.GeneratedColumn<DateTime> get searchDate => $composableBuilder(
     column: $table.searchDate,
     builder: (column) => column,
   );
-
-  i3.$BangTableAnnotationComposer get trigger {
-    final i3.$BangTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.trigger,
-      referencedTable: i6.ReadDatabaseContainer(
-        $db,
-      ).resultSet<i3.BangTable>('bang'),
-      getReferencedColumn: (t) => t.trigger,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i3.$BangTableAnnotationComposer(
-            $db: $db,
-            $table: i6.ReadDatabaseContainer(
-              $db,
-            ).resultSet<i3.BangTable>('bang'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $BangHistoryTableManager
@@ -1173,9 +720,16 @@ class $BangHistoryTableManager
           i3.$BangHistoryAnnotationComposer,
           $BangHistoryCreateCompanionBuilder,
           $BangHistoryUpdateCompanionBuilder,
-          (i3.BangHistoryData, i3.$BangHistoryReferences),
+          (
+            i3.BangHistoryData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i3.BangHistory,
+              i3.BangHistoryData
+            >,
+          ),
           i3.BangHistoryData,
-          i0.PrefetchHooks Function({bool trigger})
+          i0.PrefetchHooks Function()
         > {
   $BangHistoryTableManager(i0.GeneratedDatabase db, i3.BangHistory table)
     : super(
@@ -1192,11 +746,13 @@ class $BangHistoryTableManager
               ({
                 i0.Value<String> searchQuery = const i0.Value.absent(),
                 i0.Value<String> trigger = const i0.Value.absent(),
+                i0.Value<i2.BangGroup> group = const i0.Value.absent(),
                 i0.Value<DateTime> searchDate = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangHistoryCompanion(
                 searchQuery: searchQuery,
                 trigger: trigger,
+                group: group,
                 searchDate: searchDate,
                 rowid: rowid,
               ),
@@ -1204,63 +760,20 @@ class $BangHistoryTableManager
               ({
                 required String searchQuery,
                 required String trigger,
+                required i2.BangGroup group,
                 required DateTime searchDate,
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangHistoryCompanion.insert(
                 searchQuery: searchQuery,
                 trigger: trigger,
+                group: group,
                 searchDate: searchDate,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  i3.$BangHistoryReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({trigger = false}) {
-            return i0.PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends i0.TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (trigger) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.trigger,
-                                referencedTable: i3.$BangHistoryReferences
-                                    ._triggerTable(db),
-                                referencedColumn: i3.$BangHistoryReferences
-                                    ._triggerTable(db)
-                                    .trigger,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -1275,9 +788,16 @@ typedef $BangHistoryProcessedTableManager =
       i3.$BangHistoryAnnotationComposer,
       $BangHistoryCreateCompanionBuilder,
       $BangHistoryUpdateCompanionBuilder,
-      (i3.BangHistoryData, i3.$BangHistoryReferences),
+      (
+        i3.BangHistoryData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i3.BangHistory,
+          i3.BangHistoryData
+        >,
+      ),
       i3.BangHistoryData,
-      i0.PrefetchHooks Function({bool trigger})
+      i0.PrefetchHooks Function()
     >;
 typedef $BangFtsCreateCompanionBuilder =
     i3.BangFtsCompanion Function({
@@ -1436,7 +956,7 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
     false,
     type: i0.DriftSqlType.string,
     requiredDuringInsert: true,
-    $customConstraints: 'PRIMARY KEY NOT NULL',
+    $customConstraints: 'NOT NULL',
   );
   late final i0.GeneratedColumnWithTypeConverter<i2.BangGroup, int> group =
       i0.GeneratedColumn<int>(
@@ -1516,7 +1036,7 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
   String get actualTableName => $name;
   static const String $name = 'bang';
   @override
-  Set<i0.GeneratedColumn> get $primaryKey => {trigger};
+  Set<i0.GeneratedColumn> get $primaryKey => {trigger, group};
   @override
   i1.Bang map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -1569,6 +1089,10 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
       const i0.EnumIndexConverter<i2.BangGroup>(i2.BangGroup.values);
   static i0.TypeConverter<Set<i1.BangFormat>?, String?> $converterformat =
       const i4.BangFormatConverter();
+  @override
+  List<String> get customConstraints => const [
+    'PRIMARY KEY("trigger", "group")',
+  ];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -1907,9 +1431,17 @@ class BangFrequency extends i0.Table
     false,
     type: i0.DriftSqlType.string,
     requiredDuringInsert: true,
-    $customConstraints:
-        'PRIMARY KEY NOT NULL REFERENCES bang("trigger")ON DELETE CASCADE',
+    $customConstraints: 'NOT NULL',
   );
+  late final i0.GeneratedColumnWithTypeConverter<i2.BangGroup, int> group =
+      i0.GeneratedColumn<int>(
+        'group',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<i2.BangGroup>(i3.BangFrequency.$convertergroup);
   late final i0.GeneratedColumn<int> frequency = i0.GeneratedColumn<int>(
     'frequency',
     aliasedName,
@@ -1928,14 +1460,19 @@ class BangFrequency extends i0.Table
         $customConstraints: 'NOT NULL',
       );
   @override
-  List<i0.GeneratedColumn> get $columns => [trigger, frequency, lastUsed];
+  List<i0.GeneratedColumn> get $columns => [
+    trigger,
+    group,
+    frequency,
+    lastUsed,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'bang_frequency';
   @override
-  Set<i0.GeneratedColumn> get $primaryKey => {trigger};
+  Set<i0.GeneratedColumn> get $primaryKey => {trigger, group};
   @override
   i3.BangFrequencyData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -1944,6 +1481,12 @@ class BangFrequency extends i0.Table
         i0.DriftSqlType.string,
         data['${effectivePrefix}trigger'],
       )!,
+      group: i3.BangFrequency.$convertergroup.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.int,
+          data['${effectivePrefix}group'],
+        )!,
+      ),
       frequency: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.int,
         data['${effectivePrefix}frequency'],
@@ -1960,6 +1503,13 @@ class BangFrequency extends i0.Table
     return BangFrequency(attachedDatabase, alias);
   }
 
+  static i0.JsonTypeConverter2<i2.BangGroup, int, int> $convertergroup =
+      const i0.EnumIndexConverter<i2.BangGroup>(i2.BangGroup.values);
+  @override
+  List<String> get customConstraints => const [
+    'PRIMARY KEY("trigger", "group")',
+    'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+  ];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -1967,10 +1517,12 @@ class BangFrequency extends i0.Table
 class BangFrequencyData extends i0.DataClass
     implements i0.Insertable<i3.BangFrequencyData> {
   final String trigger;
+  final i2.BangGroup group;
   final int frequency;
   final DateTime lastUsed;
   const BangFrequencyData({
     required this.trigger,
+    required this.group,
     required this.frequency,
     required this.lastUsed,
   });
@@ -1978,6 +1530,11 @@ class BangFrequencyData extends i0.DataClass
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
     final map = <String, i0.Expression>{};
     map['trigger'] = i0.Variable<String>(trigger);
+    {
+      map['group'] = i0.Variable<int>(
+        i3.BangFrequency.$convertergroup.toSql(group),
+      );
+    }
     map['frequency'] = i0.Variable<int>(frequency);
     map['last_used'] = i0.Variable<DateTime>(lastUsed);
     return map;
@@ -1990,6 +1547,9 @@ class BangFrequencyData extends i0.DataClass
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return BangFrequencyData(
       trigger: serializer.fromJson<String>(json['trigger']),
+      group: i3.BangFrequency.$convertergroup.fromJson(
+        serializer.fromJson<int>(json['group']),
+      ),
       frequency: serializer.fromJson<int>(json['frequency']),
       lastUsed: serializer.fromJson<DateTime>(json['last_used']),
     );
@@ -1999,6 +1559,9 @@ class BangFrequencyData extends i0.DataClass
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'trigger': serializer.toJson<String>(trigger),
+      'group': serializer.toJson<int>(
+        i3.BangFrequency.$convertergroup.toJson(group),
+      ),
       'frequency': serializer.toJson<int>(frequency),
       'last_used': serializer.toJson<DateTime>(lastUsed),
     };
@@ -2006,16 +1569,19 @@ class BangFrequencyData extends i0.DataClass
 
   i3.BangFrequencyData copyWith({
     String? trigger,
+    i2.BangGroup? group,
     int? frequency,
     DateTime? lastUsed,
   }) => i3.BangFrequencyData(
     trigger: trigger ?? this.trigger,
+    group: group ?? this.group,
     frequency: frequency ?? this.frequency,
     lastUsed: lastUsed ?? this.lastUsed,
   );
   BangFrequencyData copyWithCompanion(i3.BangFrequencyCompanion data) {
     return BangFrequencyData(
       trigger: data.trigger.present ? data.trigger.value : this.trigger,
+      group: data.group.present ? data.group.value : this.group,
       frequency: data.frequency.present ? data.frequency.value : this.frequency,
       lastUsed: data.lastUsed.present ? data.lastUsed.value : this.lastUsed,
     );
@@ -2025,6 +1591,7 @@ class BangFrequencyData extends i0.DataClass
   String toString() {
     return (StringBuffer('BangFrequencyData(')
           ..write('trigger: $trigger, ')
+          ..write('group: $group, ')
           ..write('frequency: $frequency, ')
           ..write('lastUsed: $lastUsed')
           ..write(')'))
@@ -2032,43 +1599,50 @@ class BangFrequencyData extends i0.DataClass
   }
 
   @override
-  int get hashCode => Object.hash(trigger, frequency, lastUsed);
+  int get hashCode => Object.hash(trigger, group, frequency, lastUsed);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is i3.BangFrequencyData &&
           other.trigger == this.trigger &&
+          other.group == this.group &&
           other.frequency == this.frequency &&
           other.lastUsed == this.lastUsed);
 }
 
 class BangFrequencyCompanion extends i0.UpdateCompanion<i3.BangFrequencyData> {
   final i0.Value<String> trigger;
+  final i0.Value<i2.BangGroup> group;
   final i0.Value<int> frequency;
   final i0.Value<DateTime> lastUsed;
   final i0.Value<int> rowid;
   const BangFrequencyCompanion({
     this.trigger = const i0.Value.absent(),
+    this.group = const i0.Value.absent(),
     this.frequency = const i0.Value.absent(),
     this.lastUsed = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
   BangFrequencyCompanion.insert({
     required String trigger,
+    required i2.BangGroup group,
     required int frequency,
     required DateTime lastUsed,
     this.rowid = const i0.Value.absent(),
   }) : trigger = i0.Value(trigger),
+       group = i0.Value(group),
        frequency = i0.Value(frequency),
        lastUsed = i0.Value(lastUsed);
   static i0.Insertable<i3.BangFrequencyData> custom({
     i0.Expression<String>? trigger,
+    i0.Expression<int>? group,
     i0.Expression<int>? frequency,
     i0.Expression<DateTime>? lastUsed,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
       if (trigger != null) 'trigger': trigger,
+      if (group != null) 'group': group,
       if (frequency != null) 'frequency': frequency,
       if (lastUsed != null) 'last_used': lastUsed,
       if (rowid != null) 'rowid': rowid,
@@ -2077,12 +1651,14 @@ class BangFrequencyCompanion extends i0.UpdateCompanion<i3.BangFrequencyData> {
 
   i3.BangFrequencyCompanion copyWith({
     i0.Value<String>? trigger,
+    i0.Value<i2.BangGroup>? group,
     i0.Value<int>? frequency,
     i0.Value<DateTime>? lastUsed,
     i0.Value<int>? rowid,
   }) {
     return i3.BangFrequencyCompanion(
       trigger: trigger ?? this.trigger,
+      group: group ?? this.group,
       frequency: frequency ?? this.frequency,
       lastUsed: lastUsed ?? this.lastUsed,
       rowid: rowid ?? this.rowid,
@@ -2094,6 +1670,11 @@ class BangFrequencyCompanion extends i0.UpdateCompanion<i3.BangFrequencyData> {
     final map = <String, i0.Expression>{};
     if (trigger.present) {
       map['trigger'] = i0.Variable<String>(trigger.value);
+    }
+    if (group.present) {
+      map['group'] = i0.Variable<int>(
+        i3.BangFrequency.$convertergroup.toSql(group.value),
+      );
     }
     if (frequency.present) {
       map['frequency'] = i0.Variable<int>(frequency.value);
@@ -2111,6 +1692,7 @@ class BangFrequencyCompanion extends i0.UpdateCompanion<i3.BangFrequencyData> {
   String toString() {
     return (StringBuffer('BangFrequencyCompanion(')
           ..write('trigger: $trigger, ')
+          ..write('group: $group, ')
           ..write('frequency: $frequency, ')
           ..write('lastUsed: $lastUsed, ')
           ..write('rowid: $rowid')
@@ -2140,8 +1722,17 @@ class BangHistory extends i0.Table
     false,
     type: i0.DriftSqlType.string,
     requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL REFERENCES bang("trigger")',
+    $customConstraints: 'NOT NULL',
   );
+  late final i0.GeneratedColumnWithTypeConverter<i2.BangGroup, int> group =
+      i0.GeneratedColumn<int>(
+        'group',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<i2.BangGroup>(i3.BangHistory.$convertergroup);
   late final i0.GeneratedColumn<DateTime> searchDate =
       i0.GeneratedColumn<DateTime>(
         'search_date',
@@ -2152,7 +1743,12 @@ class BangHistory extends i0.Table
         $customConstraints: 'NOT NULL',
       );
   @override
-  List<i0.GeneratedColumn> get $columns => [searchQuery, trigger, searchDate];
+  List<i0.GeneratedColumn> get $columns => [
+    searchQuery,
+    trigger,
+    group,
+    searchDate,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2172,6 +1768,12 @@ class BangHistory extends i0.Table
         i0.DriftSqlType.string,
         data['${effectivePrefix}trigger'],
       )!,
+      group: i3.BangHistory.$convertergroup.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.int,
+          data['${effectivePrefix}group'],
+        )!,
+      ),
       searchDate: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.dateTime,
         data['${effectivePrefix}search_date'],
@@ -2184,6 +1786,12 @@ class BangHistory extends i0.Table
     return BangHistory(attachedDatabase, alias);
   }
 
+  static i0.JsonTypeConverter2<i2.BangGroup, int, int> $convertergroup =
+      const i0.EnumIndexConverter<i2.BangGroup>(i2.BangGroup.values);
+  @override
+  List<String> get customConstraints => const [
+    'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")',
+  ];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -2192,10 +1800,12 @@ class BangHistoryData extends i0.DataClass
     implements i0.Insertable<i3.BangHistoryData> {
   final String searchQuery;
   final String trigger;
+  final i2.BangGroup group;
   final DateTime searchDate;
   const BangHistoryData({
     required this.searchQuery,
     required this.trigger,
+    required this.group,
     required this.searchDate,
   });
   @override
@@ -2203,6 +1813,11 @@ class BangHistoryData extends i0.DataClass
     final map = <String, i0.Expression>{};
     map['search_query'] = i0.Variable<String>(searchQuery);
     map['trigger'] = i0.Variable<String>(trigger);
+    {
+      map['group'] = i0.Variable<int>(
+        i3.BangHistory.$convertergroup.toSql(group),
+      );
+    }
     map['search_date'] = i0.Variable<DateTime>(searchDate);
     return map;
   }
@@ -2215,6 +1830,9 @@ class BangHistoryData extends i0.DataClass
     return BangHistoryData(
       searchQuery: serializer.fromJson<String>(json['search_query']),
       trigger: serializer.fromJson<String>(json['trigger']),
+      group: i3.BangHistory.$convertergroup.fromJson(
+        serializer.fromJson<int>(json['group']),
+      ),
       searchDate: serializer.fromJson<DateTime>(json['search_date']),
     );
   }
@@ -2224,6 +1842,9 @@ class BangHistoryData extends i0.DataClass
     return <String, dynamic>{
       'search_query': serializer.toJson<String>(searchQuery),
       'trigger': serializer.toJson<String>(trigger),
+      'group': serializer.toJson<int>(
+        i3.BangHistory.$convertergroup.toJson(group),
+      ),
       'search_date': serializer.toJson<DateTime>(searchDate),
     };
   }
@@ -2231,10 +1852,12 @@ class BangHistoryData extends i0.DataClass
   i3.BangHistoryData copyWith({
     String? searchQuery,
     String? trigger,
+    i2.BangGroup? group,
     DateTime? searchDate,
   }) => i3.BangHistoryData(
     searchQuery: searchQuery ?? this.searchQuery,
     trigger: trigger ?? this.trigger,
+    group: group ?? this.group,
     searchDate: searchDate ?? this.searchDate,
   );
   BangHistoryData copyWithCompanion(i3.BangHistoryCompanion data) {
@@ -2243,6 +1866,7 @@ class BangHistoryData extends i0.DataClass
           ? data.searchQuery.value
           : this.searchQuery,
       trigger: data.trigger.present ? data.trigger.value : this.trigger,
+      group: data.group.present ? data.group.value : this.group,
       searchDate: data.searchDate.present
           ? data.searchDate.value
           : this.searchDate,
@@ -2254,50 +1878,58 @@ class BangHistoryData extends i0.DataClass
     return (StringBuffer('BangHistoryData(')
           ..write('searchQuery: $searchQuery, ')
           ..write('trigger: $trigger, ')
+          ..write('group: $group, ')
           ..write('searchDate: $searchDate')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(searchQuery, trigger, searchDate);
+  int get hashCode => Object.hash(searchQuery, trigger, group, searchDate);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is i3.BangHistoryData &&
           other.searchQuery == this.searchQuery &&
           other.trigger == this.trigger &&
+          other.group == this.group &&
           other.searchDate == this.searchDate);
 }
 
 class BangHistoryCompanion extends i0.UpdateCompanion<i3.BangHistoryData> {
   final i0.Value<String> searchQuery;
   final i0.Value<String> trigger;
+  final i0.Value<i2.BangGroup> group;
   final i0.Value<DateTime> searchDate;
   final i0.Value<int> rowid;
   const BangHistoryCompanion({
     this.searchQuery = const i0.Value.absent(),
     this.trigger = const i0.Value.absent(),
+    this.group = const i0.Value.absent(),
     this.searchDate = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
   BangHistoryCompanion.insert({
     required String searchQuery,
     required String trigger,
+    required i2.BangGroup group,
     required DateTime searchDate,
     this.rowid = const i0.Value.absent(),
   }) : searchQuery = i0.Value(searchQuery),
        trigger = i0.Value(trigger),
+       group = i0.Value(group),
        searchDate = i0.Value(searchDate);
   static i0.Insertable<i3.BangHistoryData> custom({
     i0.Expression<String>? searchQuery,
     i0.Expression<String>? trigger,
+    i0.Expression<int>? group,
     i0.Expression<DateTime>? searchDate,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
       if (searchQuery != null) 'search_query': searchQuery,
       if (trigger != null) 'trigger': trigger,
+      if (group != null) 'group': group,
       if (searchDate != null) 'search_date': searchDate,
       if (rowid != null) 'rowid': rowid,
     });
@@ -2306,12 +1938,14 @@ class BangHistoryCompanion extends i0.UpdateCompanion<i3.BangHistoryData> {
   i3.BangHistoryCompanion copyWith({
     i0.Value<String>? searchQuery,
     i0.Value<String>? trigger,
+    i0.Value<i2.BangGroup>? group,
     i0.Value<DateTime>? searchDate,
     i0.Value<int>? rowid,
   }) {
     return i3.BangHistoryCompanion(
       searchQuery: searchQuery ?? this.searchQuery,
       trigger: trigger ?? this.trigger,
+      group: group ?? this.group,
       searchDate: searchDate ?? this.searchDate,
       rowid: rowid ?? this.rowid,
     );
@@ -2325,6 +1959,11 @@ class BangHistoryCompanion extends i0.UpdateCompanion<i3.BangHistoryData> {
     }
     if (trigger.present) {
       map['trigger'] = i0.Variable<String>(trigger.value);
+    }
+    if (group.present) {
+      map['group'] = i0.Variable<int>(
+        i3.BangHistory.$convertergroup.toSql(group.value),
+      );
     }
     if (searchDate.present) {
       map['search_date'] = i0.Variable<DateTime>(searchDate.value);
@@ -2340,6 +1979,7 @@ class BangHistoryCompanion extends i0.UpdateCompanion<i3.BangHistoryData> {
     return (StringBuffer('BangHistoryCompanion(')
           ..write('searchQuery: $searchQuery, ')
           ..write('trigger: $trigger, ')
+          ..write('group: $group, ')
           ..write('searchDate: $searchDate, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2562,7 +2202,7 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i5.BangData>
   @override
   Map<i0.SqlDialect, String> get createViewStatements => {
     i0.SqlDialect.sqlite:
-        'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger"',
+        'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"',
   };
   @override
   BangDataView get asDslTable => this;
@@ -2713,7 +2353,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
 
   i0.Selectable<i5.BangData> queryBangs({required String query}) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
+      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
       variables: [i0.Variable<String>(query)],
       readsFrom: {bangFrequency, bangFts, bang},
     ).map(
@@ -2735,7 +2375,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
 
   i0.Selectable<i5.BangData> queryBangsBasic({required String query}) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1 ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
+      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1 ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
       variables: [i0.Variable<String>(query)],
       readsFrom: {bangFrequency, bangFts, bang},
     ).map(

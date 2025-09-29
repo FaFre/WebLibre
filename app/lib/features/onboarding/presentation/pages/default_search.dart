@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -50,12 +51,12 @@ class DefaultSearchPage extends HookConsumerWidget {
       ),
     );
 
-    Future<void> updateSearchProvider(String trigger) async {
+    Future<void> updateSearchProvider(BangKey key) async {
       await ref
           .read(saveGeneralSettingsControllerProvider.notifier)
           .save(
             (currentSettings) =>
-                currentSettings.copyWith.defaultSearchProvider(trigger),
+                currentSettings.copyWith.defaultSearchProvider(key),
           );
     }
 
@@ -101,7 +102,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                       selected: activeBang?.trigger == bang.trigger,
                       onSelected: (selected) async {
                         if (selected) {
-                          await updateSearchProvider(bang.trigger);
+                          await updateSearchProvider(bang.toKey());
                         }
                       },
                     ),
@@ -111,7 +112,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                     avatar: const Icon(Icons.search),
                     onPressed: () async {
                       final trigger = await const BangSearchRoute()
-                          .push<String?>(context);
+                          .push<BangKey?>(context);
 
                       if (trigger != null) {
                         await updateSearchProvider(trigger);

@@ -22,11 +22,16 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'general_settings.g.dart';
 
-const _fallbackSearchProvider = 'wikipedia';
+final _fallbackSearchProvider = BangKey(
+  group: BangGroup.general,
+  trigger: 'wikipedia',
+);
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
@@ -54,7 +59,8 @@ class GeneralSettings with FastEquatable {
   final bool enableReadability;
   final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
-  final String defaultSearchProvider;
+  @BangKeyConverter()
+  final BangKey? defaultSearchProvider;
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool createChildTabsOption;
   final bool showExtensionShortcut;
@@ -87,7 +93,7 @@ class GeneralSettings with FastEquatable {
     bool? enableReadability,
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
-    String? defaultSearchProvider,
+    BangKey? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? createChildTabsOption,
     bool? showExtensionShortcut,

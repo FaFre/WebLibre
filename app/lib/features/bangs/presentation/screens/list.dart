@@ -60,7 +60,7 @@ class BangListScreen extends HookConsumerWidget {
                     onTap: () {
                       ref
                           .read(selectedBangTriggerProvider().notifier)
-                          .setTrigger(bang.trigger);
+                          .setTrigger(bang.toKey());
 
                       final settings = ref.read(
                         generalSettingsWithDefaultsProvider,

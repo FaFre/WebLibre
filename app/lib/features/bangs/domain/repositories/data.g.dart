@@ -42,7 +42,7 @@ final class BangDataRepositoryProvider
 }
 
 String _$bangDataRepositoryHash() =>
-    r'5e25ce123d4667a0b12316f5b771b6776c40f280';
+    r'93f1338da86c693f524df377fe01d0ecf7f5ff80';
 
 abstract class _$BangDataRepository extends $Notifier<void> {
   void build();

@@ -19,6 +19,8 @@
  */
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 
 part 'bang_data.g.dart';
@@ -29,6 +31,9 @@ class BangData extends Bang {
   final DateTime? lastUsed;
 
   final BrowserIcon? icon;
+
+  @override
+  BangGroup get group => super.group!;
 
   BangData({
     required super.websiteName,
@@ -42,6 +47,8 @@ class BangData extends Bang {
     this.lastUsed,
     this.icon,
   }) : frequency = frequency ?? 0;
+
+  BangKey toKey() => BangKey(group: group, trigger: trigger);
 
   @override
   List<Object?> get hashParameters => [

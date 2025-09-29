@@ -148,7 +148,7 @@ class SiteSearch extends HookConsumerWidget {
 
                 ref
                     .read(selectedBangTriggerProvider(domain: domain).notifier)
-                    .setTrigger(bang.trigger);
+                    .setTrigger(bang.toKey());
               },
               onDeleted: (bang) {
                 if (ref.read(selectedBangTriggerProvider(domain: domain)) ==

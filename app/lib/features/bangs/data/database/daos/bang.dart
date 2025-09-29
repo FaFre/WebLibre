@@ -48,8 +48,12 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
     );
   }
 
-  SingleOrNullSelectable<BangData> getBangData(String trigger) {
-    return select(db.bangDataView)..where((t) => t.trigger.equals(trigger));
+  SingleOrNullSelectable<BangData> getBangData(
+    BangGroup group,
+    String trigger,
+  ) {
+    return select(db.bangDataView)
+      ..where((t) => t.group.equalsValue(group) & t.trigger.equals(trigger));
   }
 
   Selectable<BangData> getBangDataList({
@@ -102,10 +106,11 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
     return selectable;
   }
 
-  Future<int> increaseBangFrequency(String trigger) {
+  Future<int> increaseBangFrequency(BangGroup group, String trigger) {
     return db.bangFrequency.insertOne(
       BangFrequencyCompanion.insert(
         trigger: trigger,
+        group: group,
         frequency: 1,
         lastUsed: DateTime.now(),
       ),
@@ -130,17 +135,23 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
     }
   }
 
-  Future<int> addSearchEntry(String trigger, String searchQuery) {
+  Future<int> addSearchEntry(
+    BangGroup group,
+    String trigger,
+    String searchQuery,
+  ) {
     return db.bangHistory.insertOne(
       BangHistoryCompanion.insert(
         searchQuery: searchQuery,
         trigger: trigger,
+        group: group,
         searchDate: DateTime.now(),
       ),
       onConflict: DoUpdate(
         target: [db.bangHistory.searchQuery],
         (old) => BangHistoryCompanion(
           trigger: Value(trigger),
+          group: Value(group),
           searchDate: Value(DateTime.now()),
         ),
       ),

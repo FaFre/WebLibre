@@ -138,7 +138,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
 
                     ref
                         .read(selectedBangTriggerProvider().notifier)
-                        .setTrigger(bang.trigger);
+                        .setTrigger(bang.toKey());
                   },
                   onDeleted: (bang) async {
                     if (ref.read(selectedBangTriggerProvider()) ==

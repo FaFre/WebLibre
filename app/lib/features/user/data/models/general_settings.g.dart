@@ -17,7 +17,7 @@ abstract class _$GeneralSettingsCWProxy {
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   );
 
-  GeneralSettings defaultSearchProvider(String defaultSearchProvider);
+  GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider);
 
   GeneralSettings defaultSearchSuggestionsProvider(
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
@@ -53,7 +53,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enableReadability,
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
-    String defaultSearchProvider,
+    BangKey? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
     bool showExtensionShortcut,
@@ -90,7 +90,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
 
   @override
-  GeneralSettings defaultSearchProvider(String defaultSearchProvider) =>
+  GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider) =>
       call(defaultSearchProvider: defaultSearchProvider);
 
   @override
@@ -178,11 +178,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
       defaultSearchProvider:
-          defaultSearchProvider == const $CopyWithPlaceholder() ||
-              defaultSearchProvider == null
+          defaultSearchProvider == const $CopyWithPlaceholder()
           ? _value.defaultSearchProvider
           // ignore: cast_nullable_to_non_nullable
-          : defaultSearchProvider as String,
+          : defaultSearchProvider as BangKey?,
       defaultSearchSuggestionsProvider:
           defaultSearchSuggestionsProvider == const $CopyWithPlaceholder() ||
               defaultSearchSuggestionsProvider == null
@@ -261,7 +260,9 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
           (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
               .toSet(),
-      defaultSearchProvider: json['defaultSearchProvider'] as String?,
+      defaultSearchProvider: const BangKeyConverter().fromJson(
+        json['defaultSearchProvider'] as String?,
+      ),
       defaultSearchSuggestionsProvider: $enumDecodeNullable(
         _$SearchSuggestionProvidersEnumMap,
         json['defaultSearchSuggestionsProvider'],
@@ -298,7 +299,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),
-  'defaultSearchProvider': instance.defaultSearchProvider,
+  'defaultSearchProvider': const BangKeyConverter().toJson(
+    instance.defaultSearchProvider,
+  ),
   'defaultSearchSuggestionsProvider':
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,
