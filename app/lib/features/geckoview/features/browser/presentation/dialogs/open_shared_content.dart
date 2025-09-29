@@ -25,6 +25,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
@@ -69,8 +70,16 @@ class OpenSharedContent extends HookConsumerWidget {
               child: ContainerChips(
                 displayMenu: false,
                 selectedContainer: selectedContainer.value,
-                onSelected: (container) {
-                  selectedContainer.value = container;
+                onSelected: (container) async {
+                  if (container != null) {
+                    if (await ref
+                        .read(selectedContainerProvider.notifier)
+                        .authenticateContainer(container)) {
+                      selectedContainer.value = container;
+                    }
+                  } else {
+                    selectedContainer.value = container;
+                  }
                 },
                 onDeleted: (container) {
                   selectedContainer.value = null;

@@ -100,8 +100,16 @@ class TabSearch extends HookConsumerWidget {
                 ContainerChips(
                   displayMenu: false,
                   selectedContainer: selectedContainer.value,
-                  onSelected: (container) {
-                    selectedContainer.value = container;
+                  onSelected: (container) async {
+                    if (container != null) {
+                      if (await ref
+                          .read(selectedContainerProvider.notifier)
+                          .authenticateContainer(container)) {
+                        selectedContainer.value = container;
+                      }
+                    } else {
+                      selectedContainer.value = container;
+                    }
                   },
                   onDeleted: (container) {
                     selectedContainer.value = null;
