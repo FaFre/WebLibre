@@ -3,27 +3,18 @@
     "s": "Kagi Search",
     "d": "kagi.com",
     "t": "k",
-    "u": "/search?q={{{s}}}"
-  },
-  {
-    "s": "Kagi Search",
-    "d": "kagi.com",
-    "t": "kagi",
+    "ts": [
+      "kagi"
+    ],
     "u": "/search?q={{{s}}}"
   },
   {
     "s": "Kagi News",
     "d": "kagi.com",
     "t": "n",
-    "u": "/news?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi News",
-    "d": "kagi.com",
-    "t": "news",
+    "ts": [
+      "news"
+    ],
     "u": "/news?q={{{s}}}",
     "fmt": [
       "url_encode_placeholder"
@@ -33,33 +24,11 @@
     "s": "Kagi Videos",
     "d": "kagi.com",
     "t": "v",
-    "u": "/videos?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Videos",
-    "d": "kagi.com",
-    "t": "video",
-    "u": "/videos?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Videos",
-    "d": "kagi.com",
-    "t": "videos",
-    "u": "/videos?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Videos",
-    "d": "kagi.com",
-    "t": "vids",
+    "ts": [
+      "video",
+      "videos",
+      "vids"
+    ],
     "u": "/videos?q={{{s}}}",
     "fmt": [
       "url_encode_placeholder"
@@ -69,61 +38,11 @@
     "s": "Kagi Maps",
     "d": "kagi.com",
     "t": "m",
+    "ts": [
+      "map",
+      "maps"
+    ],
     "u": "/maps?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Maps",
-    "d": "kagi.com",
-    "t": "map",
-    "u": "/maps?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Maps",
-    "d": "kagi.com",
-    "t": "maps",
-    "u": "/maps?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Translate",
-    "d": "translate.kagi.com",
-    "t": "kt",
-    "u": "https://translate.kagi.com/?text={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Translate",
-    "d": "translate.kagi.com",
-    "t": "translate",
-    "u": "https://translate.kagi.com/?text={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Translate",
-    "d": "translate.kagi.com",
-    "t": "tr",
-    "u": "https://translate.kagi.com/?text={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Translate (Proofread)",
-    "d": "translate.kagi.com",
-    "t": "proofread",
-    "u": "https://translate.kagi.com/proofread?q={{{s}}}",
     "fmt": [
       "url_encode_placeholder"
     ]
@@ -132,60 +51,14 @@
     "s": "Kagi Images",
     "d": "kagi.com",
     "t": "i",
-    "u": "/images?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Images",
-    "d": "kagi.com",
-    "t": "image",
-    "u": "/images?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Images",
-    "d": "kagi.com",
-    "t": "images",
-    "u": "/images?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Images",
-    "d": "kagi.com",
-    "t": "img",
-    "u": "/images?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Images",
-    "d": "kagi.com",
-    "t": "imgs",
-    "u": "/images?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Images",
-    "d": "kagi.com",
-    "t": "pics",
-    "u": "/images?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Images",
-    "d": "kagi.com",
-    "t": "pictures",
+    "ts": [
+      "image",
+      "images",
+      "img",
+      "imgs",
+      "pics",
+      "pictures"
+    ],
     "u": "/images?q={{{s}}}",
     "fmt": [
       "url_encode_placeholder"
@@ -204,24 +77,10 @@
     "s": "Kagi Podcasts",
     "d": "kagi.com",
     "t": "p",
-    "u": "/podcasts?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Podcasts",
-    "d": "kagi.com",
-    "t": "podcast",
-    "u": "/podcasts?q={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Podcasts",
-    "d": "kagi.com",
-    "t": "podcasts",
+    "ts": [
+      "podcast",
+      "podcasts"
+    ],
     "u": "/podcasts?q={{{s}}}",
     "fmt": [
       "url_encode_placeholder"
@@ -231,12 +90,9 @@
     "s": "Kagi Search (verbatim)",
     "d": "kagi.com",
     "t": "vrb",
-    "u": "/search?q={{{s}}}&verbatim=1"
-  },
-  {
-    "s": "Kagi Search (verbatim)",
-    "d": "kagi.com",
-    "t": "verbatim",
+    "ts": [
+      "verbatim"
+    ],
     "u": "/search?q={{{s}}}&verbatim=1"
   },
   {
@@ -252,15 +108,9 @@
     "s": "Kagi FastGPT",
     "d": "kagi.com",
     "t": "fast",
-    "u": "/fastgpt?query={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi FastGPT",
-    "d": "kagi.com",
-    "t": "fgpt",
+    "ts": [
+      "fgpt"
+    ],
     "u": "/fastgpt?query={{{s}}}",
     "fmt": [
       "url_encode_placeholder"
@@ -270,94 +120,10 @@
     "s": "Kagi Quick Answer",
     "d": "kagi.com",
     "t": "q",
+    "ts": [
+      "quick"
+    ],
     "u": "/search?q={{{s}}}&qa=true"
-  },
-  {
-    "s": "Kagi Quick Answer",
-    "d": "kagi.com",
-    "t": "quick",
-    "u": "/search?q={{{s}}}&qa=true"
-  },
-  {
-    "s": "Kagi Universal Summarizer",
-    "d": "kagi.com",
-    "t": "sum",
-    "u": "https://kagi.com/summarizer?url={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer",
-    "d": "kagi.com",
-    "t": "summarize",
-    "u": "https://kagi.com/summarizer?url={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer",
-    "d": "kagi.com",
-    "t": "summarise",
-    "u": "https://kagi.com/summarizer?url={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer (Key Moments)",
-    "d": "kagi.com",
-    "t": "sumt",
-    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer (Key Moments)",
-    "d": "kagi.com",
-    "t": "sumk",
-    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer (Key Moments)",
-    "d": "kagi.com",
-    "t": "sumkey",
-    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer (Key Moments)",
-    "d": "kagi.com",
-    "t": "summarizekey",
-    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer (Key Moments)",
-    "d": "kagi.com",
-    "t": "summarisekey",
-    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=takeaway",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Universal Summarizer (Summary)",
-    "d": "kagi.com",
-    "t": "summ",
-    "u": "https://kagi.com/summarizer?url={{{s}}}&summary=summary",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
   },
   {
     "s": "Search in International",
@@ -434,6 +200,13 @@
     "d": "kagi.com",
     "t": "cy",
     "u": "/search?q={{{s}}}&r=cy",
+    "c": "Region search"
+  },
+  {
+    "s": "Search in Finland",
+    "d": "kagi.com",
+    "t": "fi",
+    "u": "/search?q={{{s}}}&r=fi",
     "c": "Region search"
   },
   {
@@ -871,63 +644,49 @@
     "c": "Region search"
   },
   {
-    "s": "Kagi",
+    "s": "Kagi (past day)",
     "d": "kagi.com",
     "t": "recent",
+    "ts": [
+      "day",
+      "24"
+    ],
     "u": "/search?q={{{s}}}&dr=1"
   },
   {
-    "s": "Kagi",
-    "d": "kagi.com",
-    "t": "day",
-    "u": "/search?q={{{s}}}&dr=1"
-  },
-  {
-    "s": "Kagi",
-    "d": "kagi.com",
-    "t": "24",
-    "u": "/search?q={{{s}}}&dr=1"
-  },
-  {
-    "s": "Kagi",
+    "s": "Kagi (past week)",
     "d": "kagi.com",
     "t": "week",
     "u": "/search?q={{{s}}}&dr=2"
   },
   {
-    "s": "Kagi",
+    "s": "Kagi (past month)",
     "d": "kagi.com",
     "t": "month",
     "u": "/search?q={{{s}}}&dr=3"
   },
   {
-    "s": "Kagi",
+    "s": "Kagi (past year)",
     "d": "kagi.com",
     "t": "year",
     "u": "/search?q={{{s}}}&dr=4"
   },
   {
-    "s": "Kagi",
+    "s": "Kagi (calculator)",
     "d": "kagi.com",
     "t": "calc",
+    "ts": [
+      "calculator"
+    ],
     "u": "/search?q=calc+{{{s}}}"
   },
   {
-    "s": "Kagi",
-    "d": "kagi.com",
-    "t": "calculator",
-    "u": "/search?q=calc+{{{s}}}"
-  },
-  {
-    "s": "Kagi",
+    "s": "Kagi (timer)",
     "d": "kagi.com",
     "t": "tim",
-    "u": "/search?q=timer+{{{s}}}"
-  },
-  {
-    "s": "Kagi",
-    "d": "kagi.com",
-    "t": "timer",
+    "ts": [
+      "timer"
+    ],
     "u": "/search?q=timer+{{{s}}}"
   },
   {
@@ -943,51 +702,6 @@
     "u": "/search?q={{{s}}}+filetype:pdf",
     "c": "Online Services",
     "sc": "Search"
-  },
-  {
-    "s": "Kagi Knowledgebase",
-    "d": "help.kagi.com",
-    "t": "help",
-    "u": "https://help.kagi.com/kagi?search={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Orion Knowledgebase",
-    "d": "help.kagi.com",
-    "t": "orion",
-    "u": "https://help.kagi.com/orion?search={{{s}}}",
-    "fmt": [
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Knowledgebase - Search API",
-    "d": "help.kagi.com",
-    "t": "api",
-    "u": "https://help.kagi.com/kagi/api/search.html#{{{s}}}"
-  },
-  {
-    "s": "Kagi Feedback",
-    "d": "kagifeedback.org",
-    "t": "kf",
-    "u": "https://kagifeedback.org/?q={{{s}}}",
-    "fmt": [
-      "open_base_path",
-      "url_encode_placeholder"
-    ]
-  },
-  {
-    "s": "Kagi Feedback (Discussions)",
-    "d": "kagifeedback.org",
-    "t": "kfd",
-    "u": "https://kagifeedback.org/?q={{{s}}}",
-    "ad": "kagifeedback.org/d",
-    "fmt": [
-      "open_base_path",
-      "url_encode_placeholder"
-    ]
   },
   {
     "s": "News in International",
@@ -3306,295 +3020,429 @@
     "s": "Kagi Assistant (claude-3-haiku)",
     "d": "kagi.com",
     "t": "claude-3-haiku",
-    "u": "/assistant?profile=claude-3-haiku&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (claude-3-haiku)",
-    "d": "kagi.com",
-    "t": "haiku",
-    "u": "/assistant?profile=claude-3-haiku&q={{{s}}}"
+    "ts": [
+      "haiku"
+    ],
+    "u": "/assistant?profile=claude-3-haiku&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (claude-4-sonnet)",
     "d": "kagi.com",
     "t": "claude-4-sonnet",
-    "u": "/assistant?profile=claude-4-sonnet&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (claude-4-sonnet)",
-    "d": "kagi.com",
-    "t": "sonnet",
-    "u": "/assistant?profile=claude-4-sonnet&q={{{s}}}"
+    "ts": [
+      "sonnet"
+    ],
+    "u": "/assistant?profile=claude-4-sonnet&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (claude-4-opus)",
     "d": "kagi.com",
     "t": "claude-4-opus",
-    "u": "/assistant?profile=claude-4-opus&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (claude-4-opus)",
-    "d": "kagi.com",
-    "t": "opus",
-    "u": "/assistant?profile=claude-4-opus&q={{{s}}}"
+    "ts": [
+      "opus"
+    ],
+    "u": "/assistant?profile=claude-4-opus&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (claude-4-sonnet-thinking)",
     "d": "kagi.com",
     "t": "claude-4-sonnet-thinking",
-    "u": "/assistant?profile=claude-4-sonnet-thinking&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (claude-4-sonnet-thinking)",
-    "d": "kagi.com",
-    "t": "sonnett",
-    "u": "/assistant?profile=claude-4-sonnet-thinking&q={{{s}}}"
+    "ts": [
+      "sonnett"
+    ],
+    "u": "/assistant?profile=claude-4-sonnet-thinking&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (claude-4-opus-thinking)",
     "d": "kagi.com",
     "t": "opust",
-    "u": "/assistant?profile=claude-4-opus-thinking&q={{{s}}}"
+    "u": "/assistant?profile=claude-4-opus-thinking&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gpt-4-1)",
     "d": "kagi.com",
     "t": "gpt-4-1",
-    "u": "/assistant?profile=gpt-4-1&q={{{s}}}"
+    "u": "/assistant?profile=gpt-4-1&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (o4-mini)",
     "d": "kagi.com",
     "t": "o4-mini",
-    "u": "/assistant?profile=o4-mini&q={{{s}}}"
+    "u": "/assistant?profile=o4-mini&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (o3)",
     "d": "kagi.com",
     "t": "o3",
-    "u": "/assistant?profile=o3&q={{{s}}}"
+    "u": "/assistant?profile=o3&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (o3-pro)",
     "d": "kagi.com",
     "t": "o3-pro",
-    "u": "/assistant?profile=o3-pro&q={{{s}}}"
+    "u": "/assistant?profile=o3-pro&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gpt-4o)",
     "d": "kagi.com",
     "t": "gpt-4o",
-    "u": "/assistant?profile=gpt-4o&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (gpt-4o)",
-    "d": "kagi.com",
-    "t": "4o",
-    "u": "/assistant?profile=gpt-4o&q={{{s}}}"
+    "ts": [
+      "4o"
+    ],
+    "u": "/assistant?profile=gpt-4o&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (chatgpt-4o)",
     "d": "kagi.com",
     "t": "chatgpt-4o",
-    "u": "/assistant?profile=chatgpt-4o&q={{{s}}}"
+    "u": "/assistant?profile=chatgpt-4o&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gpt-4o-mini)",
     "d": "kagi.com",
     "t": "gpt-4o-mini",
-    "u": "/assistant?profile=gpt-4o-mini&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (gpt-4o-mini)",
-    "d": "kagi.com",
-    "t": "4om",
-    "u": "/assistant?profile=gpt-4o-mini&q={{{s}}}"
+    "ts": [
+      "4om"
+    ],
+    "u": "/assistant?profile=gpt-4o-mini&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gpt-4-1-mini)",
     "d": "kagi.com",
     "t": "gpt-4-1-mini",
-    "u": "/assistant?profile=gpt-4-1-mini&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (gpt-4-1-mini)",
-    "d": "kagi.com",
-    "t": "41m",
-    "u": "/assistant?profile=gpt-4-1-mini&q={{{s}}}"
+    "ts": [
+      "41m"
+    ],
+    "u": "/assistant?profile=gpt-4-1-mini&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gpt-4-1-nano)",
     "d": "kagi.com",
     "t": "gpt-4-1-nano",
-    "u": "/assistant?profile=gpt-4-1-nano&q={{{s}}}"
+    "ts": [
+      "41n"
+    ],
+    "u": "/assistant?profile=gpt-4-1-nano&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
-    "s": "Kagi Assistant (gpt-4-1-nano)",
+    "s": "Kagi Assistant (gpt-5)",
     "d": "kagi.com",
-    "t": "41n",
-    "u": "/assistant?profile=gpt-4-1-nano&q={{{s}}}"
+    "t": "gpt-5",
+    "u": "/assistant?profile=gpt-5&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant (gpt-5-mini)",
+    "d": "kagi.com",
+    "t": "gpt-5-mini",
+    "ts": [
+      "5m"
+    ],
+    "u": "/assistant?profile=gpt-5-mini&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
+  },
+  {
+    "s": "Kagi Assistant (gpt-5-nano)",
+    "d": "kagi.com",
+    "t": "gpt-5-nano",
+    "ts": [
+      "5n"
+    ],
+    "u": "/assistant?profile=gpt-5-nano&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (mistral-medium)",
     "d": "kagi.com",
     "t": "mistral-medium",
-    "u": "/assistant?profile=mistral-medium&q={{{s}}}"
+    "u": "/assistant?profile=mistral-medium&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (mistral-small)",
     "d": "kagi.com",
     "t": "mistral-small",
-    "u": "/assistant?profile=mistral-small&q={{{s}}}"
+    "u": "/assistant?profile=mistral-small&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (mistral-large)",
     "d": "kagi.com",
     "t": "mistral-large",
-    "u": "/assistant?profile=mistral-large&q={{{s}}}"
+    "u": "/assistant?profile=mistral-large&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (magistral-medium)",
     "d": "kagi.com",
     "t": "magistral-medium",
-    "u": "/assistant?profile=magistral-medium&q={{{s}}}"
+    "u": "/assistant?profile=magistral-medium&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (magistral-small)",
     "d": "kagi.com",
     "t": "magistral-small",
-    "u": "/assistant?profile=magistral-small&q={{{s}}}"
+    "u": "/assistant?profile=magistral-small&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gemini-flash)",
     "d": "kagi.com",
     "t": "gemini-flash",
-    "u": "/assistant?profile=gemini-flash&q={{{s}}}"
+    "u": "/assistant?profile=gemini-flash&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gemini-2-5-flash)",
     "d": "kagi.com",
     "t": "gemini-2-5-flash",
-    "u": "/assistant?profile=gemini-2-5-flash&q={{{s}}}"
+    "u": "/assistant?profile=gemini-2-5-flash&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gemini-2-5-flash-thinking)",
     "d": "kagi.com",
     "t": "gemini-2-5-flash-thinking",
-    "u": "/assistant?profile=gemini-2-5-flash-thinking&q={{{s}}}"
+    "u": "/assistant?profile=gemini-2-5-flash-thinking&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gemini-2-5-pro)",
     "d": "kagi.com",
     "t": "gemini-2-5-pro",
-    "u": "/assistant?profile=gemini-2-5-pro&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (gemini-2-5-pro)",
-    "d": "kagi.com",
-    "t": "gemini-pro",
-    "u": "/assistant?profile=gemini-2-5-pro&q={{{s}}}"
+    "ts": [
+      "gemini-pro"
+    ],
+    "u": "/assistant?profile=gemini-2-5-pro&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (gemma-3-27b)",
     "d": "kagi.com",
     "t": "gemma-3-27b",
-    "u": "/assistant?profile=gemma-3-27b&q={{{s}}}"
+    "u": "/assistant?profile=gemma-3-27b&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (llama-4-maverick)",
     "d": "kagi.com",
     "t": "llama-4-maverick",
-    "u": "/assistant?profile=llama-4-maverick&q={{{s}}}"
+    "u": "/assistant?profile=llama-4-maverick&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (llama-4-scout)",
     "d": "kagi.com",
     "t": "llama-4-scout",
-    "u": "/assistant?profile=llama-4-scout&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (llama-4-scout)",
-    "d": "kagi.com",
-    "t": "llama",
-    "u": "/assistant?profile=llama-4-scout&q={{{s}}}"
+    "ts": [
+      "llama"
+    ],
+    "u": "/assistant?profile=llama-4-scout&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (qwen-3-235b-a22b-thinking)",
     "d": "kagi.com",
     "t": "qwen-3-235b-a22b-thinking",
-    "u": "/assistant?profile=qwen-3-235b-a22b-thinking&q={{{s}}}"
+    "u": "/assistant?profile=qwen-3-235b-a22b-thinking&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (qwen-3-235b-a22b)",
     "d": "kagi.com",
     "t": "qwen-3-235b-a22b",
-    "u": "/assistant?profile=qwen-3-235b-a22b&q={{{s}}}"
+    "u": "/assistant?profile=qwen-3-235b-a22b&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (qwen-3-32b-thinking)",
     "d": "kagi.com",
     "t": "qwen-3-32b-thinking",
-    "u": "/assistant?profile=qwen-3-32b-thinking&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (qwen-3-32b-thinking)",
-    "d": "kagi.com",
-    "t": "qwent",
-    "u": "/assistant?profile=qwen-3-32b-thinking&q={{{s}}}"
+    "ts": [
+      "qwent"
+    ],
+    "u": "/assistant?profile=qwen-3-32b-thinking&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (qwen-3-32b)",
     "d": "kagi.com",
     "t": "qwen-3-32b",
-    "u": "/assistant?profile=qwen-3-32b&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (qwen-3-32b)",
-    "d": "kagi.com",
-    "t": "qwen",
-    "u": "/assistant?profile=qwen-3-32b&q={{{s}}}"
+    "ts": [
+      "qwen"
+    ],
+    "u": "/assistant?profile=qwen-3-32b&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (deepseek)",
     "d": "kagi.com",
     "t": "deepseek",
-    "u": "/assistant?profile=deepseek&q={{{s}}}"
+    "u": "/assistant?profile=deepseek&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (deepseek-r1)",
     "d": "kagi.com",
     "t": "deepseek-r1",
-    "u": "/assistant?profile=deepseek-r1&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (deepseek-r1)",
-    "d": "kagi.com",
-    "t": "r1",
-    "u": "/assistant?profile=deepseek-r1&q={{{s}}}"
+    "ts": [
+      "r1"
+    ],
+    "u": "/assistant?profile=deepseek-r1&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (deepseek-r1-distill-llama-70b)",
     "d": "kagi.com",
     "t": "deepseek-r1-distill-llama-70b",
-    "u": "/assistant?profile=deepseek-r1-distill-llama-70b&q={{{s}}}"
-  },
-  {
-    "s": "Kagi Assistant (deepseek-r1-distill-llama-70b)",
-    "d": "kagi.com",
-    "t": "r1-llama",
-    "u": "/assistant?profile=deepseek-r1-distill-llama-70b&q={{{s}}}"
+    "ts": [
+      "r1-llama"
+    ],
+    "u": "/assistant?profile=deepseek-r1-distill-llama-70b&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (grok-3-mini)",
     "d": "kagi.com",
     "t": "grok-3-mini",
-    "u": "/assistant?profile=grok-3-mini&q={{{s}}}"
+    "u": "/assistant?profile=grok-3-mini&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (grok-3)",
     "d": "kagi.com",
     "t": "grok-3",
-    "u": "/assistant?profile=grok-3&q={{{s}}}"
+    "u": "/assistant?profile=grok-3&q={{{s}}}",
+    "fmt": [
+      "url_encode_placeholder",
+      "url_encode_space_to_plus"
+    ]
   },
   {
     "s": "Kagi Assistant (Ki)",
