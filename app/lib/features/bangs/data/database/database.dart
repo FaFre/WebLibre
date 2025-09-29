@@ -21,12 +21,13 @@ import 'package:drift/drift.dart';
 import 'package:weblibre/features/bangs/data/database/daos/bang.dart';
 import 'package:weblibre/features/bangs/data/database/daos/sync.dart';
 import 'package:weblibre/features/bangs/data/database/database.drift.dart';
+import 'package:weblibre/features/bangs/data/database/database.steps.dart';
 import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
 @DriftDatabase(include: {'definitions.drift'}, daos: [BangDao, SyncDao])
 class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
   @override
-  final int schemaVersion = 1;
+  final int schemaVersion = 2;
 
   @override
   final int ftsTokenLimit = 6;
@@ -38,6 +39,11 @@ class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON;');
     },
+    onUpgrade: stepByStep(
+      from1To2: (m, schema) async {
+        //Too many changes, we switch to a new database
+      },
+    ),
   );
 
   BangDatabase(super.e);
