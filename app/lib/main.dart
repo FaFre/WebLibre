@@ -91,6 +91,7 @@ void main() async {
             await GeckoBrowserService().initialize(
               kDebugMode ? LogLevel.debug : LogLevel.warn,
               engineSettings.contentBlocking,
+              engineSettings.addonCollection,
             );
 
             await ref

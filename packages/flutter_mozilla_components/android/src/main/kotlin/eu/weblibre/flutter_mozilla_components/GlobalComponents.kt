@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
+import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
@@ -60,7 +61,8 @@ object GlobalComponents {
         tabContentEvents: GeckoTabContentEvents,
         extensionEvents: BrowserExtensionEvents,
         logLevel: Log.Priority,
-        contentBlocking: ContentBlocking
+        contentBlocking: ContentBlocking,
+        addonCollection: AddonCollection?,
     ) {
         Logger.debug("Creating new components")
 
@@ -71,6 +73,7 @@ object GlobalComponents {
             selectionAction,
             logLevel,
             contentBlocking,
+            addonCollection,
             addonEvents,
             tabContentEvents,
             extensionEvents,

@@ -2104,6 +2104,40 @@ data class ShareInternetResourceState (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class AddonCollection (
+  val serverURL: String,
+  val collectionUser: String,
+  val collectionName: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): AddonCollection {
+      val serverURL = pigeonVar_list[0] as String
+      val collectionUser = pigeonVar_list[1] as String
+      val collectionName = pigeonVar_list[2] as String
+      return AddonCollection(serverURL, collectionUser, collectionName)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      serverURL,
+      collectionUser,
+      collectionName,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is AddonCollection) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class GeckoPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -2402,6 +2436,11 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
           ShareInternetResourceState.fromList(it)
         }
       }
+      188.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AddonCollection.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -2643,6 +2682,10 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(187)
         writeValue(stream, value.toList())
       }
+      is AddonCollection -> {
+        stream.write(188)
+        writeValue(stream, value.toList())
+      }
       else -> super.writeValue(stream, value)
     }
   }
@@ -2652,7 +2695,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
   fun getGeckoVersion(): String
-  fun initialize(logLevel: LogLevel, contentBlocking: ContentBlocking)
+  fun initialize(logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?)
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
 
@@ -2687,8 +2730,9 @@ interface GeckoBrowserApi {
             val args = message as List<Any?>
             val logLevelArg = args[0] as LogLevel
             val contentBlockingArg = args[1] as ContentBlocking
+            val addonCollectionArg = args[2] as AddonCollection?
             val wrapped: List<Any?> = try {
-              api.initialize(logLevelArg, contentBlockingArg)
+              api.initialize(logLevelArg, contentBlockingArg, addonCollectionArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

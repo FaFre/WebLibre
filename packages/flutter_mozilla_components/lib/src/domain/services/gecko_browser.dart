@@ -17,8 +17,12 @@ class GeckoBrowserService {
     return _api.getGeckoVersion();
   }
 
-  Future<void> initialize(LogLevel logLevel, ContentBlocking contentBlocking) {
-    return _api.initialize(logLevel, contentBlocking);
+  Future<void> initialize(
+    LogLevel logLevel,
+    ContentBlocking contentBlocking,
+    AddonCollection? addonCollection,
+  ) {
+    return _api.initialize(logLevel, contentBlocking, addonCollection);
   }
 
   Future<bool> showNativeFragment() {

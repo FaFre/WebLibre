@@ -47,3 +47,11 @@ String? validateUrl(
 
   return 'Inavlid URL';
 }
+
+String? validateRequired(String? value, {String message = 'Value required'}) {
+  if (value.isNotEmpty) {
+    return null;
+  }
+
+  return message;
+}

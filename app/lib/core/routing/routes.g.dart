@@ -112,6 +112,13 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       path: 'developer',
       name: 'DeveloperSettingsRoute',
       factory: $DeveloperSettingsRoute._fromState,
+      routes: [
+        GoRouteData.$route(
+          path: 'addon_collection',
+          name: 'AddonCollectionRoute',
+          factory: $AddonCollectionRoute._fromState,
+        ),
+      ],
     ),
   ],
 );
@@ -253,6 +260,28 @@ mixin $DeveloperSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/developer');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AddonCollectionRoute on GoRouteData {
+  static AddonCollectionRoute _fromState(GoRouterState state) =>
+      AddonCollectionRoute();
+
+  @override
+  String get location =>
+      GoRouteData.$location('/settings/developer/addon_collection');
 
   @override
   void go(BuildContext context) => context.go(location);

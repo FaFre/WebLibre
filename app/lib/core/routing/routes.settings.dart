@@ -47,6 +47,12 @@ part of 'routes.dart';
     TypedGoRoute<DeveloperSettingsRoute>(
       name: 'DeveloperSettingsRoute',
       path: 'developer',
+      routes: [
+        TypedGoRoute<AddonCollectionRoute>(
+          name: 'AddonCollectionRoute',
+          path: 'addon_collection',
+        ),
+      ],
     ),
   ],
 )
@@ -82,6 +88,13 @@ class DeveloperSettingsRoute extends GoRouteData with $DeveloperSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const DeveloperSettingsScreen();
+  }
+}
+
+class AddonCollectionRoute extends GoRouteData with $AddonCollectionRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const AddonCollectionScreen();
   }
 }
 

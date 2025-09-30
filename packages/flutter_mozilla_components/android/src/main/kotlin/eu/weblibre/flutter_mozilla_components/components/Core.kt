@@ -60,12 +60,13 @@ import mozilla.components.feature.webnotifications.WebNotificationFeature
 import mozilla.components.support.base.worker.Frequency
 import java.util.concurrent.TimeUnit
 
-private const val DAY_IN_MINUTES = 24 * 60L
+private const val AMO_COLLECTION_MAX_CACHE_AGE = 24 * 60L
 
-class Core(private val context: Context,
-           private val components: Components,
-           private val flutterEvents: GeckoStateEvents,
-           private val extensionEvents: BrowserExtensionEvents
+class Core(
+    private val context: Context,
+    private val components: Components,
+    private val flutterEvents: GeckoStateEvents,
+    private val extensionEvents: BrowserExtensionEvents
 ) {
     val prefs by lazy {
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -137,22 +138,33 @@ class Core(private val context: Context,
     val addonUpdater by lazy {
         DefaultAddonUpdater(
             context,
-            Frequency(1, TimeUnit.DAYS),
+            Frequency(12, TimeUnit.HOURS),
             components.notificationsDelegate
         )
     }
 
     val addonsProvider by lazy {
-        AMOAddonsProvider(
-            context,
-            client,
-            collectionName = "7dfae8669acc4312a65e8ba5553036",
-            maxCacheAgeInMinutes = DAY_IN_MINUTES,
-        )
+        if (components.addonCollection != null)
+            AMOAddonsProvider(
+                context,
+                client,
+                serverURL = components.addonCollection.serverURL,
+                collectionUser = components.addonCollection.collectionUser,
+                collectionName = components.addonCollection.collectionName,
+                maxCacheAgeInMinutes = AMO_COLLECTION_MAX_CACHE_AGE
+                ) else
+            AMOAddonsProvider(
+                context,
+                client,
+                maxCacheAgeInMinutes = AMO_COLLECTION_MAX_CACHE_AGE
+            )
     }
 
     val supportedAddonsChecker by lazy {
-        DefaultSupportedAddonsChecker(context, Frequency(1, TimeUnit.DAYS))
+        DefaultSupportedAddonsChecker(
+            context,
+            Frequency(12, TimeUnit.HOURS)
+        )
     }
 
     val fileUploadsDirCleaner: FileUploadsDirCleaner by lazy {
@@ -164,7 +176,7 @@ class Core(private val context: Context,
         BrowserStore(
             middleware = listOf(
                 FlutterEventMiddleware(flutterEvents),
-                DownloadMiddleware(context, DownloadService::class.java, {false}),
+                DownloadMiddleware(context, DownloadService::class.java, { false }),
                 ThumbnailsMiddleware(thumbnailStorage),
                 ReaderViewMiddleware(),
                 UndoMiddleware(),
@@ -227,7 +239,7 @@ class Core(private val context: Context,
      */
     val historyStorage by lazy { lazyHistoryStorage.value }
 
-    val permissionStorage by lazy { PermissionStorage( geckoSitePermissionsStorage ) }
+    val permissionStorage by lazy { PermissionStorage(geckoSitePermissionsStorage) }
 
     /**
      * Constructs a [TrackingProtectionPolicy] based on current preferences.
@@ -241,7 +253,7 @@ class Core(private val context: Context,
      * @return the constructed tracking protection policy based on preferences.
      */
     private fun createTrackingProtectionPolicy(
-        trackingPolicy: EngineSession. TrackingProtectionPolicyForSessionTypes,
+        trackingPolicy: EngineSession.TrackingProtectionPolicyForSessionTypes,
         normalMode: Boolean = true,
         privateMode: Boolean = true,
     ): TrackingProtectionPolicy {

@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_selection.dart';
 import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
+import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/developer_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';

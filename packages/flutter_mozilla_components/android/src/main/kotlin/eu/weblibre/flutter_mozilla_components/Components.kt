@@ -14,6 +14,7 @@ import eu.weblibre.flutter_mozilla_components.components.Features
 import eu.weblibre.flutter_mozilla_components.components.Search
 import eu.weblibre.flutter_mozilla_components.components.Services
 import eu.weblibre.flutter_mozilla_components.components.UseCases
+import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
@@ -37,6 +38,7 @@ class Components(private val context: Context,
                  val selectionAction: SelectionActionDelegate,
                  val logLevel: Log.Priority,
                  val contentBlocking: ContentBlocking,
+                 val addonCollection: AddonCollection?,
                  private val addonEvents: GeckoAddonEvents,
                  private val tabContentEvents: GeckoTabContentEvents,
                  private val extensionEvents: BrowserExtensionEvents

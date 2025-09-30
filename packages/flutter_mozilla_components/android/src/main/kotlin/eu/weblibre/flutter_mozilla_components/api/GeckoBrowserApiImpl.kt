@@ -15,6 +15,7 @@ import eu.weblibre.flutter_mozilla_components.GeckoViewFactory
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
+import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
@@ -140,7 +141,11 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         return GeckoViewBuildConfig.MOZ_APP_VERSION + "-" + GeckoViewBuildConfig.MOZ_APP_BUILDID
     }
 
-    override fun initialize(logLevel: LogLevel, contentBlocking: ContentBlocking) {
+    override fun initialize(
+        logLevel: LogLevel,
+        contentBlocking: ContentBlocking,
+        addonCollection: AddonCollection?
+    ) {
         synchronized(this) {
             if(!isGeckoInitialized) {
                 val geckoLogging = GeckoLogging(_flutterPluginBinding.binaryMessenger)
@@ -154,7 +159,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
                 Log.addSink(PriorityAwareLogSink(level, geckoLogging))
 
-                setupGeckoEngine(level, contentBlocking)
+                setupGeckoEngine(level, contentBlocking, addonCollection)
                 isGeckoInitialized = true
             }
         }
@@ -170,7 +175,11 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         return false
     }
 
-    private fun setupGeckoEngine(logLevel: Log.Priority, contentBlocking: ContentBlocking) {
+    private fun setupGeckoEngine(
+        logLevel: Log.Priority,
+        contentBlocking: ContentBlocking,
+        addonCollection: AddonCollection?
+    ) {
         val selectionActionEvents = GeckoSelectionActionEvents(_flutterPluginBinding.binaryMessenger)
 
         val selectionActionDelegate = DefaultSelectionActionDelegate(selectionActionEvents) { actions ->
@@ -201,7 +210,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             tabContentEvents,
             extensionEvents,
             logLevel,
-            contentBlocking
+            contentBlocking,
+            addonCollection
         )
 
         GeckoEngineSettingsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoEngineSettingsApiImpl())

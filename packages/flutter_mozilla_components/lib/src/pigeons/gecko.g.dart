@@ -2664,6 +2664,57 @@ class ShareInternetResourceState {
 ;
 }
 
+class AddonCollection {
+  AddonCollection({
+    required this.serverURL,
+    required this.collectionUser,
+    required this.collectionName,
+  });
+
+  String serverURL;
+
+  String collectionUser;
+
+  String collectionName;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      serverURL,
+      collectionUser,
+      collectionName,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static AddonCollection decode(Object result) {
+    result as List<Object?>;
+    return AddonCollection(
+      serverURL: result[0]! as String,
+      collectionUser: result[1]! as String,
+      collectionName: result[2]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! AddonCollection || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -2849,6 +2900,9 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is ShareInternetResourceState) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
+    }    else if (value is AddonCollection) {
+      buffer.putUint8(188);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -2993,6 +3047,8 @@ class _PigeonCodec extends StandardMessageCodec {
         return DownloadState.decode(readValue(buffer)!);
       case 187: 
         return ShareInternetResourceState.decode(readValue(buffer)!);
+      case 188: 
+        return AddonCollection.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -3040,14 +3096,14 @@ class GeckoBrowserApi {
     }
   }
 
-  Future<void> initialize(LogLevel logLevel, ContentBlocking contentBlocking) async {
+  Future<void> initialize(LogLevel logLevel, ContentBlocking contentBlocking, AddonCollection? addonCollection) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[logLevel, contentBlocking]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[logLevel, contentBlocking, addonCollection]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {

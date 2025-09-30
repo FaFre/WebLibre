@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:nullability/nullability.dart';
 
 part 'engine_settings.g.dart';
 
@@ -60,6 +63,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
 
   final BounceTrackingProtectionMode bounceTrackingProtectionMode;
 
+  @JsonKey(fromJson: _addonCollectionFromJson, toJson: _addonCollectionToJson)
+  final AddonCollection? addonCollection;
+
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   ContentBlocking get contentBlocking => ContentBlocking(
@@ -85,6 +91,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.enterpriseRootsEnabled,
     required this.queryParameterStripping,
     required this.bounceTrackingProtectionMode,
+    required this.addonCollection,
   });
 
   EngineSettings.withDefaults({
@@ -102,6 +109,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     BounceTrackingProtectionMode? bounceTrackingProtectionMode,
     super.userAgent,
     bool? enterpriseRootsEnabled,
+    this.addonCollection,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
@@ -129,6 +137,14 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
        );
 
+  static AddonCollection? _addonCollectionFromJson(String? json) =>
+      json.mapNotNull(
+        (collection) => AddonCollection.decode(jsonDecode(collection) as List),
+      );
+
+  static String? _addonCollectionToJson(AddonCollection? collection) =>
+      collection.mapNotNull((collection) => jsonEncode(collection.encode()));
+
   factory EngineSettings.fromJson(Map<String, dynamic> json) =>
       _$EngineSettingsFromJson(json);
 
@@ -136,19 +152,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-    super.javascriptEnabled,
-    super.trackingProtectionPolicy,
-    super.httpsOnlyMode,
-    super.globalPrivacyControlEnabled,
-    super.preferredColorScheme,
-    super.cookieBannerHandlingMode,
-    super.cookieBannerHandlingModePrivateBrowsing,
-    super.cookieBannerHandlingGlobalRules,
-    super.cookieBannerHandlingGlobalRulesSubFrames,
-    super.webContentIsolationStrategy,
-    super.userAgent,
     queryParameterStripping,
     bounceTrackingProtectionMode,
-    super.enterpriseRootsEnabled,
+    addonCollection,
   ];
 }

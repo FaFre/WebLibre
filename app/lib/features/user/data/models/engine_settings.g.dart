@@ -51,6 +51,8 @@ abstract class _$EngineSettingsCWProxy {
     BounceTrackingProtectionMode bounceTrackingProtectionMode,
   );
 
+  EngineSettings addonCollection(AddonCollection? addonCollection);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -73,6 +75,7 @@ abstract class _$EngineSettingsCWProxy {
     bool? enterpriseRootsEnabled,
     QueryParameterStripping queryParameterStripping,
     BounceTrackingProtectionMode bounceTrackingProtectionMode,
+    AddonCollection? addonCollection,
   });
 }
 
@@ -154,6 +157,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   ) => call(bounceTrackingProtectionMode: bounceTrackingProtectionMode);
 
   @override
+  EngineSettings addonCollection(AddonCollection? addonCollection) =>
+      call(addonCollection: addonCollection);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -178,6 +185,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? enterpriseRootsEnabled = const $CopyWithPlaceholder(),
     Object? queryParameterStripping = const $CopyWithPlaceholder(),
     Object? bounceTrackingProtectionMode = const $CopyWithPlaceholder(),
+    Object? addonCollection = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -251,6 +259,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.bounceTrackingProtectionMode
           // ignore: cast_nullable_to_non_nullable
           : bounceTrackingProtectionMode as BounceTrackingProtectionMode,
+      addonCollection: addonCollection == const $CopyWithPlaceholder()
+          ? _value.addonCollection
+          // ignore: cast_nullable_to_non_nullable
+          : addonCollection as AddonCollection?,
     );
   }
 }
@@ -308,6 +320,9 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
       ),
       userAgent: json['userAgent'] as String?,
       enterpriseRootsEnabled: json['enterpriseRootsEnabled'] as bool?,
+      addonCollection: EngineSettings._addonCollectionFromJson(
+        json['addonCollection'] as String?,
+      ),
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
@@ -337,6 +352,9 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'bounceTrackingProtectionMode':
       _$BounceTrackingProtectionModeEnumMap[instance
           .bounceTrackingProtectionMode]!,
+  'addonCollection': EngineSettings._addonCollectionToJson(
+    instance.addonCollection,
+  ),
 };
 
 const _$TrackingProtectionPolicyEnumMap = {

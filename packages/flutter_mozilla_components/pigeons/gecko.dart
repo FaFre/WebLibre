@@ -827,6 +827,18 @@ class ShareInternetResourceState {
 
 enum LogLevel { debug, info, warn, error }
 
+class AddonCollection {
+  final String serverURL;
+  final String collectionUser;
+  final String collectionName;
+
+  AddonCollection({
+    required this.serverURL,
+    required this.collectionUser,
+    required this.collectionName,
+  });
+}
+
 @ConfigurePigeon(
   PigeonOptions(
     dartOut: 'lib/src/pigeons/gecko.g.dart',
@@ -842,7 +854,11 @@ enum LogLevel { debug, info, warn, error }
 @HostApi()
 abstract class GeckoBrowserApi {
   String getGeckoVersion();
-  void initialize(LogLevel logLevel, ContentBlocking contentBlocking);
+  void initialize(
+    LogLevel logLevel,
+    ContentBlocking contentBlocking,
+    AddonCollection? addonCollection,
+  );
   bool showNativeFragment();
   void onTrimMemory(int level);
 }

@@ -94,6 +94,10 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'addonCollection': settings['addonCollection']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 

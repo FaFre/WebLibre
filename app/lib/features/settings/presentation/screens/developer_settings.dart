@@ -29,6 +29,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:universal_io/io.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -198,6 +199,17 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                     label: const Text('Copy'),
                   ),
                 ),
+              ListTile(
+                leading: const Icon(MdiIcons.puzzle),
+                title: const Text('Custom Extension Collection'),
+                subtitle: const Text(
+                  'Custom Add-on Collections are curated lists of extensions that users can create and share.',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await AddonCollectionRoute().push(context);
+                },
+              ),
             ],
           );
         },
