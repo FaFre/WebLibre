@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+const double _epsilon = 1e-10;
+
 /// Performs K-Means clustering with K-Means++ initialization of centroids.
 /// If an existing cluster is specified with [anchorIndices], then one of the centroids
 /// is the average of the embeddings of the items in the cluster.
@@ -292,7 +294,7 @@ List<double> _computeCentroid(
 bool _arePointsEqual(List<double> point1, List<double> point2) {
   if (point1.length != point2.length) return false;
   for (int i = 0; i < point1.length; i++) {
-    if (point1[i] != point2[i]) return false;
+    if ((point1[i] - point2[i]).abs() > _epsilon) return false;
   }
   return true;
 }
