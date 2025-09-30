@@ -88,11 +88,10 @@ double _getCentroidInertia(
     // Compute sum of squared distances to centroid
     for (final index in cluster) {
       final point = embeddings[index];
-      double distanceSquared = 0.0;
       for (int i = 0; i < dimensions; i++) {
-        distanceSquared += math.pow(point[i] - centroid[i], 2);
+        final diff = point[i] - centroid[i];
+        totalDistance += diff * diff;
       }
-      totalDistance += distanceSquared;
     }
   }
 

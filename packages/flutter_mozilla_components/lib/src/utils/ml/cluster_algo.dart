@@ -93,7 +93,7 @@ List<List<double>> initializeCentroidsSorted({
     } else {
       centerId = (randomFunc() * nSamples).floor();
     }
-    centers[0] = List<double>.from(X[centerId]);
+    centers[0] = X[centerId];
   } else {
     centers[0] = vectorNormalize(
       vectorMean(anchorIndices.map((a) => X[a]).toList()),
@@ -158,7 +158,7 @@ List<List<double>> initializeCentroidsSorted({
     sumOfDistances = candidatesSumOfDistances[bestCandidateIdx];
 
     // Pick best candidate
-    centers[c] = List<double>.from(X[bestCandidate]);
+    centers[c] = X[bestCandidate];
   }
 
   return centers;
@@ -192,7 +192,8 @@ double euclideanDistance(
 }) {
   double sum = 0;
   for (int i = 0; i < point1.length; i++) {
-    sum += math.pow(point1[i] - point2[i], 2);
+    final diff = point1[i] - point2[i];
+    sum += diff * diff;
   }
   return squareResult ? sum : math.sqrt(sum);
 }
@@ -231,7 +232,8 @@ List<double> euclideanDistancesSquared(
   return X.map((row) {
     double distSq = 0;
     for (int i = 0; i < row.length; i++) {
-      distSq += math.pow(row[i] - point[i], 2);
+      final diff = row[i] - point[i];
+      distSq += diff * diff;
     }
     return distSq;
   }).toList();
