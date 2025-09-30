@@ -48,4 +48,4 @@ final class BangDatabaseProvider
   }
 }
 
-String _$bangDatabaseHash() => r'35142ef6c747e7c65c3417a2b6fc1c6f41d0411b';
+String _$bangDatabaseHash() => r'e46ec1582f1a21337a302bef1b7963c2e11468d9';

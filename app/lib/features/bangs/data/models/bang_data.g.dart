@@ -21,6 +21,8 @@ abstract class _$BangDataCWProxy {
 
   BangData format(Set<BangFormat>? format);
 
+  BangData additionalTriggers(Set<String>? additionalTriggers);
+
   BangData frequency(int? frequency);
 
   BangData lastUsed(DateTime? lastUsed);
@@ -42,6 +44,7 @@ abstract class _$BangDataCWProxy {
     String? category,
     String? subCategory,
     Set<BangFormat>? format,
+    Set<String>? additionalTriggers,
     int? frequency,
     DateTime? lastUsed,
     BrowserIcon? icon,
@@ -77,6 +80,10 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
   BangData format(Set<BangFormat>? format) => call(format: format);
 
   @override
+  BangData additionalTriggers(Set<String>? additionalTriggers) =>
+      call(additionalTriggers: additionalTriggers);
+
+  @override
   BangData frequency(int? frequency) => call(frequency: frequency);
 
   @override
@@ -101,6 +108,7 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
     Object? category = const $CopyWithPlaceholder(),
     Object? subCategory = const $CopyWithPlaceholder(),
     Object? format = const $CopyWithPlaceholder(),
+    Object? additionalTriggers = const $CopyWithPlaceholder(),
     Object? frequency = const $CopyWithPlaceholder(),
     Object? lastUsed = const $CopyWithPlaceholder(),
     Object? icon = const $CopyWithPlaceholder(),
@@ -136,6 +144,10 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
           ? _value.format
           // ignore: cast_nullable_to_non_nullable
           : format as Set<BangFormat>?,
+      additionalTriggers: additionalTriggers == const $CopyWithPlaceholder()
+          ? _value.additionalTriggers
+          // ignore: cast_nullable_to_non_nullable
+          : additionalTriggers as Set<String>?,
       frequency: frequency == const $CopyWithPlaceholder()
           ? _value.frequency
           // ignore: cast_nullable_to_non_nullable

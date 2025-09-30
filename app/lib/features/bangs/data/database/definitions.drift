@@ -1,4 +1,5 @@
 import 'package:weblibre/features/bangs/data/database/drift/converters/bang_format.dart';
+import 'package:weblibre/features/bangs/data/database/drift/converters/trigger_list.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
@@ -13,8 +14,46 @@ CREATE TABLE bang (
   category TEXT,
   sub_category TEXT,
   format TEXT MAPPED BY `const BangFormatConverter()`,
+  additional_triggers TEXT MAPPED BY `const TriggerListConverter()`,
   PRIMARY KEY ("trigger", "group")
 ) WITH Bang;
+
+CREATE TABLE bang_triggers (
+  "trigger" TEXT NOT NULL,
+  "group" ENUM(BangGroup) NOT NULL,
+  additional_trigger TEXT NOT NULL,
+  PRIMARY KEY ("trigger", "group", additional_trigger),
+  FOREIGN KEY ("trigger", "group") REFERENCES bang ("trigger", "group") ON DELETE CASCADE
+);
+CREATE INDEX idx_bang_triggers_lookup ON bang_triggers (additional_trigger, "group");
+
+-- Trigger to populate bang_triggers when inserting a new bang
+CREATE TRIGGER bang_triggers_after_insert AFTER INSERT ON bang 
+WHEN new.additional_triggers IS NOT NULL
+BEGIN
+  INSERT INTO bang_triggers("trigger", "group", additional_trigger)
+  SELECT 
+    new."trigger",
+    new."group",
+    json_each.value
+  FROM json_each(new.additional_triggers);
+END;
+
+-- Trigger to update bang_triggers when updating a bang
+CREATE TRIGGER bang_triggers_after_update AFTER UPDATE ON bang BEGIN
+  -- Delete old additional triggers
+  DELETE FROM bang_triggers 
+  WHERE "trigger" = old."trigger" AND "group" = old."group";
+
+  -- Insert new additional triggers if they exist
+  INSERT INTO bang_triggers("trigger", "group", additional_trigger)
+  SELECT 
+    new."trigger",
+    new."group",
+    json_each.value
+  FROM json_each(new.additional_triggers)
+  WHERE new.additional_triggers IS NOT NULL;
+END;
 
 CREATE TABLE bang_sync (
   "group" ENUM(BangGroup) PRIMARY KEY NOT NULL,
@@ -43,6 +82,13 @@ CREATE VIRTUAL TABLE bang_fts
     trigger,
     website_name,
     content=bang,
+    prefix='2 3'
+  );
+
+CREATE VIRTUAL TABLE bang_triggers_fts 
+	USING fts5(
+    additional_trigger,
+    content=bang_triggers,
     prefix='2 3'
   );
 
@@ -76,59 +122,137 @@ CREATE TRIGGER bang_after_update AFTER UPDATE ON bang BEGIN
     VALUES (new.rowid, new."trigger", new.website_name);
 END;
 
-optimizeFtsIndex:
+CREATE TRIGGER bang_triggers_after_insert_fts AFTER INSERT ON bang_triggers BEGIN
+  INSERT INTO 
+    bang_triggers_fts(rowid, additional_trigger) 
+    VALUES (new.rowid, new.additional_trigger);
+END;
+CREATE TRIGGER bang_triggers_after_delete_fts AFTER DELETE ON bang_triggers BEGIN
+  INSERT INTO 
+    bang_triggers_fts(bang_triggers_fts, rowid, additional_trigger) 
+    VALUES('delete', old.rowid, old.additional_trigger);
+END;
+CREATE TRIGGER bang_triggers_after_update_fts AFTER UPDATE ON bang_triggers BEGIN
+  INSERT INTO 
+    bang_triggers_fts(bang_triggers_fts, rowid, additional_trigger) 
+    VALUES('delete', old.rowid, old.additional_trigger);
+  INSERT INTO 
+    bang_triggers_fts(rowid, additional_trigger) 
+    VALUES (new.rowid, new.additional_trigger);
+END;
+
+optimizeBangFtsIndex:
   INSERT INTO bang_fts(bang_fts) VALUES ('optimize');
+
+optimizeTriggerFtsIndex:
+  INSERT INTO bang_triggers_fts(bang_triggers_fts) VALUES ('optimize');
 
 queryBangs WITH BangData:
   WITH weights AS (
     SELECT 
-      -- Customize these weights (higher = more important)
-      10.0 AS "trigger",       -- Title matches are most important
-      5.0 AS website_name           -- URL matches are quite important
+      10.0 AS "trigger",
+      8.0 AS additional_trigger,
+      5.0 AS website_name
+  ),
+  bang_results AS (
+    SELECT 
+      b.*,
+      bf.frequency,
+      bf.last_used,
+      bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
+    FROM 
+      bang_fts(:query) fts
+    INNER JOIN
+      bang b ON b.rowid = fts.rowid
+    LEFT JOIN
+      bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
+    CROSS JOIN weights
+  ),
+  trigger_results AS (
+    SELECT 
+      b.*,
+      bf.frequency,
+      bf.last_used,
+      bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank
+    FROM 
+      bang_triggers_fts(:query) tfts
+    INNER JOIN
+      bang_triggers bt ON bt.rowid = tfts.rowid
+    INNER JOIN
+      bang b ON b."trigger" = bt."trigger" AND b."group" = bt."group"
+    LEFT JOIN
+      bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
+    CROSS JOIN weights
+  ),
+  combined_results AS (
+    SELECT * FROM bang_results
+    UNION ALL
+    SELECT * FROM trigger_results
   )
   SELECT 
-    b.*,
-    bf.frequency,
-    bf.last_used,
-    bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
-  FROM 
-    bang_fts(:query) fts
-  INNER JOIN
-    bang b ON b.rowid = fts.rowid
-  LEFT JOIN
-    bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
-  CROSS JOIN 
-    weights
+    *,
+    MIN(weighted_rank) AS weighted_rank
+  FROM combined_results
+  GROUP BY "trigger", "group"
   ORDER BY 
-  	weighted_rank ASC,
-  	bf.frequency NULLS LAST;
+    weighted_rank ASC,
+    frequency NULLS LAST;
 
 queryBangsBasic WITH BangData:
   WITH weights AS (
     SELECT 
-      -- Customize these weights (higher = more important)
-      10.0 AS "trigger",       -- Title matches are most important
-      5.0 AS website_name           -- URL matches are quite important
+      10.0 AS "trigger",
+      8.0 AS additional_trigger,
+      5.0 AS website_name
+  ),
+  bang_results AS (
+    SELECT 
+      b.*,
+      bf.frequency,
+      bf.last_used,
+      bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
+    FROM 
+      bang_fts fts
+    INNER JOIN
+      bang b ON b.rowid = fts.rowid
+    LEFT JOIN
+      bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
+    CROSS JOIN weights
+    WHERE 
+      fts."trigger" LIKE :query OR
+      fts.website_name LIKE :query
+  ),
+  trigger_results AS (
+    SELECT 
+      b.*,
+      bf.frequency,
+      bf.last_used,
+      bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank
+    FROM 
+      bang_triggers_fts tfts
+    INNER JOIN
+      bang_triggers bt ON bt.rowid = tfts.rowid
+    INNER JOIN
+      bang b ON b."trigger" = bt."trigger" AND b."group" = bt."group"
+    LEFT JOIN
+      bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
+    CROSS JOIN weights
+    WHERE 
+      tfts.additional_trigger LIKE :query
+  ),
+  combined_results AS (
+    SELECT * FROM bang_results
+    UNION ALL
+    SELECT * FROM trigger_results
   )
   SELECT 
-    b.*,
-    bf.frequency,
-    bf.last_used,
-    bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
-  FROM 
-    bang_fts fts
-  INNER JOIN
-    bang b ON b.rowid = fts.rowid
-  LEFT JOIN
-    bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
-  CROSS JOIN 
-    weights
-  WHERE 
-  	fts."trigger" LIKE :query OR
-  	fts.website_name LIKE :query
+    *,
+    MIN(weighted_rank) AS weighted_rank
+  FROM combined_results
+  GROUP BY "trigger", "group"
   ORDER BY 
-  	weighted_rank ASC,
-  	bf.frequency NULLS LAST;
+    weighted_rank ASC,
+    frequency NULLS LAST;
 
 categoriesJson:
   WITH categories AS (

@@ -79,6 +79,10 @@ class Bang with FastEquatable implements Insertable<Bang> {
   @JsonKey(name: 'fmt')
   final Set<BangFormat>? format;
 
+  ///Additional triggers that invoke this bang
+  @JsonKey(name: 'ts')
+  final Set<String>? additionalTriggers;
+
   String formatQuery(String input) {
     return (format == null ||
             format!.contains(BangFormat.urlEncodePlaceholder) == true)
@@ -121,6 +125,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
     this.category,
     this.subCategory,
     this.format,
+    this.additionalTriggers,
   });
 
   factory Bang.fromJson(Map<String, dynamic> json) => _$BangFromJson(json);
@@ -137,6 +142,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
     category,
     subCategory,
     format,
+    additionalTriggers,
   ];
 
   @override
@@ -150,6 +156,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
       category: Value.absentIfNull(category),
       subCategory: Value.absentIfNull(subCategory),
       format: Value.absentIfNull(format),
+      additionalTriggers: Value.absentIfNull(additionalTriggers),
     ).toColumns(nullToAbsent);
   }
 }

@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -106,12 +107,16 @@ class BangDetails extends HookConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '!${bangData.trigger}',
-                      style: theme.textTheme.titleSmall,
-                      textAlign: TextAlign.right,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    child: Tooltip(
+                      message:
+                          'Triggers: ${bangData.trigger}${bangData.additionalTriggers.mapNotNull((triggers) => ', ${triggers.map((trigger) => '!$trigger').join(', ')}') ?? ''}',
+                      child: Text(
+                        '!${bangData.trigger}',
+                        style: theme.textTheme.titleSmall,
+                        textAlign: TextAlign.right,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ],

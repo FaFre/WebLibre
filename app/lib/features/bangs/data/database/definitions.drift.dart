@@ -7,10 +7,12 @@ import 'package:weblibre/features/bangs/data/database/definitions.drift.dart'
     as i3;
 import 'package:weblibre/features/bangs/data/database/drift/converters/bang_format.dart'
     as i4;
-import 'package:weblibre/features/bangs/data/models/bang_data.dart' as i5;
-import 'package:drift/internal/modular.dart' as i6;
+import 'package:weblibre/features/bangs/data/database/drift/converters/trigger_list.dart'
+    as i5;
+import 'package:weblibre/features/bangs/data/models/bang_data.dart' as i6;
+import 'package:drift/internal/modular.dart' as i7;
 import 'package:weblibre/features/bangs/data/models/search_history_entry.dart'
-    as i7;
+    as i8;
 
 typedef $BangTableCreateCompanionBuilder =
     i3.BangCompanion Function({
@@ -22,6 +24,7 @@ typedef $BangTableCreateCompanionBuilder =
       i0.Value<String?> category,
       i0.Value<String?> subCategory,
       i0.Value<Set<i1.BangFormat>?> format,
+      i0.Value<Set<String>?> additionalTriggers,
       i0.Value<int> rowid,
     });
 typedef $BangTableUpdateCompanionBuilder =
@@ -34,6 +37,7 @@ typedef $BangTableUpdateCompanionBuilder =
       i0.Value<String?> category,
       i0.Value<String?> subCategory,
       i0.Value<Set<i1.BangFormat>?> format,
+      i0.Value<Set<String>?> additionalTriggers,
       i0.Value<int> rowid,
     });
 
@@ -91,6 +95,12 @@ class $BangTableFilterComposer
     column: $table.format,
     builder: (column) => i0.ColumnWithTypeConverterFilters(column),
   );
+
+  i0.ColumnWithTypeConverterFilters<Set<String>?, Set<String>, String>
+  get additionalTriggers => $composableBuilder(
+    column: $table.additionalTriggers,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
 }
 
 class $BangTableOrderingComposer
@@ -141,6 +151,11 @@ class $BangTableOrderingComposer
     column: $table.format,
     builder: (column) => i0.ColumnOrderings(column),
   );
+
+  i0.ColumnOrderings<String> get additionalTriggers => $composableBuilder(
+    column: $table.additionalTriggers,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
 }
 
 class $BangTableAnnotationComposer
@@ -181,6 +196,12 @@ class $BangTableAnnotationComposer
 
   i0.GeneratedColumnWithTypeConverter<Set<i1.BangFormat>?, String> get format =>
       $composableBuilder(column: $table.format, builder: (column) => column);
+
+  i0.GeneratedColumnWithTypeConverter<Set<String>?, String>
+  get additionalTriggers => $composableBuilder(
+    column: $table.additionalTriggers,
+    builder: (column) => column,
+  );
 }
 
 class $BangTableTableManager
@@ -222,6 +243,8 @@ class $BangTableTableManager
                 i0.Value<String?> category = const i0.Value.absent(),
                 i0.Value<String?> subCategory = const i0.Value.absent(),
                 i0.Value<Set<i1.BangFormat>?> format = const i0.Value.absent(),
+                i0.Value<Set<String>?> additionalTriggers =
+                    const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangCompanion(
                 trigger: trigger,
@@ -232,6 +255,7 @@ class $BangTableTableManager
                 category: category,
                 subCategory: subCategory,
                 format: format,
+                additionalTriggers: additionalTriggers,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -244,6 +268,8 @@ class $BangTableTableManager
                 i0.Value<String?> category = const i0.Value.absent(),
                 i0.Value<String?> subCategory = const i0.Value.absent(),
                 i0.Value<Set<i1.BangFormat>?> format = const i0.Value.absent(),
+                i0.Value<Set<String>?> additionalTriggers =
+                    const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangCompanion.insert(
                 trigger: trigger,
@@ -254,6 +280,7 @@ class $BangTableTableManager
                 category: category,
                 subCategory: subCategory,
                 format: format,
+                additionalTriggers: additionalTriggers,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -276,6 +303,179 @@ typedef $BangTableProcessedTableManager =
       $BangTableUpdateCompanionBuilder,
       (i1.Bang, i0.BaseReferences<i0.GeneratedDatabase, i3.BangTable, i1.Bang>),
       i1.Bang,
+      i0.PrefetchHooks Function()
+    >;
+typedef $BangTriggersCreateCompanionBuilder =
+    i3.BangTriggersCompanion Function({
+      required String trigger,
+      required i2.BangGroup group,
+      required String additionalTrigger,
+      i0.Value<int> rowid,
+    });
+typedef $BangTriggersUpdateCompanionBuilder =
+    i3.BangTriggersCompanion Function({
+      i0.Value<String> trigger,
+      i0.Value<i2.BangGroup> group,
+      i0.Value<String> additionalTrigger,
+      i0.Value<int> rowid,
+    });
+
+class $BangTriggersFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.BangTriggers> {
+  $BangTriggersFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnWithTypeConverterFilters<i2.BangGroup, i2.BangGroup, int>
+  get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
+  i0.ColumnFilters<String> get additionalTrigger => $composableBuilder(
+    column: $table.additionalTrigger,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $BangTriggersOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.BangTriggers> {
+  $BangTriggersOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get trigger => $composableBuilder(
+    column: $table.trigger,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<int> get group => $composableBuilder(
+    column: $table.group,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get additionalTrigger => $composableBuilder(
+    column: $table.additionalTrigger,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $BangTriggersAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.BangTriggers> {
+  $BangTriggersAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get trigger =>
+      $composableBuilder(column: $table.trigger, builder: (column) => column);
+
+  i0.GeneratedColumnWithTypeConverter<i2.BangGroup, int> get group =>
+      $composableBuilder(column: $table.group, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get additionalTrigger => $composableBuilder(
+    column: $table.additionalTrigger,
+    builder: (column) => column,
+  );
+}
+
+class $BangTriggersTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i3.BangTriggers,
+          i3.BangTrigger,
+          i3.$BangTriggersFilterComposer,
+          i3.$BangTriggersOrderingComposer,
+          i3.$BangTriggersAnnotationComposer,
+          $BangTriggersCreateCompanionBuilder,
+          $BangTriggersUpdateCompanionBuilder,
+          (
+            i3.BangTrigger,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i3.BangTriggers,
+              i3.BangTrigger
+            >,
+          ),
+          i3.BangTrigger,
+          i0.PrefetchHooks Function()
+        > {
+  $BangTriggersTableManager(i0.GeneratedDatabase db, i3.BangTriggers table)
+    : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i3.$BangTriggersFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i3.$BangTriggersOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i3.$BangTriggersAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> trigger = const i0.Value.absent(),
+                i0.Value<i2.BangGroup> group = const i0.Value.absent(),
+                i0.Value<String> additionalTrigger = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.BangTriggersCompanion(
+                trigger: trigger,
+                group: group,
+                additionalTrigger: additionalTrigger,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String trigger,
+                required i2.BangGroup group,
+                required String additionalTrigger,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.BangTriggersCompanion.insert(
+                trigger: trigger,
+                group: group,
+                additionalTrigger: additionalTrigger,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $BangTriggersProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i3.BangTriggers,
+      i3.BangTrigger,
+      i3.$BangTriggersFilterComposer,
+      i3.$BangTriggersOrderingComposer,
+      i3.$BangTriggersAnnotationComposer,
+      $BangTriggersCreateCompanionBuilder,
+      $BangTriggersUpdateCompanionBuilder,
+      (
+        i3.BangTrigger,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i3.BangTriggers,
+          i3.BangTrigger
+        >,
+      ),
+      i3.BangTrigger,
       i0.PrefetchHooks Function()
     >;
 typedef $BangSyncCreateCompanionBuilder =
@@ -944,6 +1144,142 @@ typedef $BangFtsProcessedTableManager =
       i3.BangFt,
       i0.PrefetchHooks Function()
     >;
+typedef $BangTriggersFtsCreateCompanionBuilder =
+    i3.BangTriggersFtsCompanion Function({
+      required String additionalTrigger,
+      i0.Value<int> rowid,
+    });
+typedef $BangTriggersFtsUpdateCompanionBuilder =
+    i3.BangTriggersFtsCompanion Function({
+      i0.Value<String> additionalTrigger,
+      i0.Value<int> rowid,
+    });
+
+class $BangTriggersFtsFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.BangTriggersFts> {
+  $BangTriggersFtsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get additionalTrigger => $composableBuilder(
+    column: $table.additionalTrigger,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $BangTriggersFtsOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.BangTriggersFts> {
+  $BangTriggersFtsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get additionalTrigger => $composableBuilder(
+    column: $table.additionalTrigger,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $BangTriggersFtsAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.BangTriggersFts> {
+  $BangTriggersFtsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get additionalTrigger => $composableBuilder(
+    column: $table.additionalTrigger,
+    builder: (column) => column,
+  );
+}
+
+class $BangTriggersFtsTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i3.BangTriggersFts,
+          i3.BangTriggersFt,
+          i3.$BangTriggersFtsFilterComposer,
+          i3.$BangTriggersFtsOrderingComposer,
+          i3.$BangTriggersFtsAnnotationComposer,
+          $BangTriggersFtsCreateCompanionBuilder,
+          $BangTriggersFtsUpdateCompanionBuilder,
+          (
+            i3.BangTriggersFt,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i3.BangTriggersFts,
+              i3.BangTriggersFt
+            >,
+          ),
+          i3.BangTriggersFt,
+          i0.PrefetchHooks Function()
+        > {
+  $BangTriggersFtsTableManager(
+    i0.GeneratedDatabase db,
+    i3.BangTriggersFts table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i3.$BangTriggersFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i3.$BangTriggersFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i3.$BangTriggersFtsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> additionalTrigger = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.BangTriggersFtsCompanion(
+                additionalTrigger: additionalTrigger,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String additionalTrigger,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.BangTriggersFtsCompanion.insert(
+                additionalTrigger: additionalTrigger,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $BangTriggersFtsProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i3.BangTriggersFts,
+      i3.BangTriggersFt,
+      i3.$BangTriggersFtsFilterComposer,
+      i3.$BangTriggersFtsOrderingComposer,
+      i3.$BangTriggersFtsAnnotationComposer,
+      $BangTriggersFtsCreateCompanionBuilder,
+      $BangTriggersFtsUpdateCompanionBuilder,
+      (
+        i3.BangTriggersFt,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i3.BangTriggersFts,
+          i3.BangTriggersFt
+        >,
+      ),
+      i3.BangTriggersFt,
+      i0.PrefetchHooks Function()
+    >;
 
 class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
   @override
@@ -1019,6 +1355,15 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
     requiredDuringInsert: false,
     $customConstraints: '',
   ).withConverter<Set<i1.BangFormat>?>(i3.BangTable.$converterformat);
+  late final i0.GeneratedColumnWithTypeConverter<Set<String>?, String>
+  additionalTriggers = i0.GeneratedColumn<String>(
+    'additional_triggers',
+    aliasedName,
+    true,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  ).withConverter<Set<String>?>(i3.BangTable.$converteradditionalTriggers);
   @override
   List<i0.GeneratedColumn> get $columns => [
     trigger,
@@ -1029,6 +1374,7 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
     category,
     subCategory,
     format,
+    additionalTriggers,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1077,6 +1423,12 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
           data['${effectivePrefix}format'],
         ),
       ),
+      additionalTriggers: i3.BangTable.$converteradditionalTriggers.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.string,
+          data['${effectivePrefix}additional_triggers'],
+        ),
+      ),
     );
   }
 
@@ -1089,6 +1441,8 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
       const i0.EnumIndexConverter<i2.BangGroup>(i2.BangGroup.values);
   static i0.TypeConverter<Set<i1.BangFormat>?, String?> $converterformat =
       const i4.BangFormatConverter();
+  static i0.TypeConverter<Set<String>?, String?> $converteradditionalTriggers =
+      const i5.TriggerListConverter();
   @override
   List<String> get customConstraints => const [
     'PRIMARY KEY("trigger", "group")',
@@ -1106,6 +1460,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
   final i0.Value<String?> category;
   final i0.Value<String?> subCategory;
   final i0.Value<Set<i1.BangFormat>?> format;
+  final i0.Value<Set<String>?> additionalTriggers;
   final i0.Value<int> rowid;
   const BangCompanion({
     this.trigger = const i0.Value.absent(),
@@ -1116,6 +1471,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     this.category = const i0.Value.absent(),
     this.subCategory = const i0.Value.absent(),
     this.format = const i0.Value.absent(),
+    this.additionalTriggers = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
   BangCompanion.insert({
@@ -1127,6 +1483,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     this.category = const i0.Value.absent(),
     this.subCategory = const i0.Value.absent(),
     this.format = const i0.Value.absent(),
+    this.additionalTriggers = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   }) : trigger = i0.Value(trigger),
        group = i0.Value(group),
@@ -1142,6 +1499,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     i0.Expression<String>? category,
     i0.Expression<String>? subCategory,
     i0.Expression<String>? format,
+    i0.Expression<String>? additionalTriggers,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
@@ -1153,6 +1511,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
       if (category != null) 'category': category,
       if (subCategory != null) 'sub_category': subCategory,
       if (format != null) 'format': format,
+      if (additionalTriggers != null) 'additional_triggers': additionalTriggers,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1166,6 +1525,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     i0.Value<String?>? category,
     i0.Value<String?>? subCategory,
     i0.Value<Set<i1.BangFormat>?>? format,
+    i0.Value<Set<String>?>? additionalTriggers,
     i0.Value<int>? rowid,
   }) {
     return i3.BangCompanion(
@@ -1177,6 +1537,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
       category: category ?? this.category,
       subCategory: subCategory ?? this.subCategory,
       format: format ?? this.format,
+      additionalTriggers: additionalTriggers ?? this.additionalTriggers,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1212,6 +1573,13 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
         i3.BangTable.$converterformat.toSql(format.value),
       );
     }
+    if (additionalTriggers.present) {
+      map['additional_triggers'] = i0.Variable<String>(
+        i3.BangTable.$converteradditionalTriggers.toSql(
+          additionalTriggers.value,
+        ),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = i0.Variable<int>(rowid.value);
     }
@@ -1229,11 +1597,276 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
           ..write('category: $category, ')
           ..write('subCategory: $subCategory, ')
           ..write('format: $format, ')
+          ..write('additionalTriggers: $additionalTriggers, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
+
+class BangTriggers extends i0.Table
+    with i0.TableInfo<BangTriggers, i3.BangTrigger> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  BangTriggers(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> trigger = i0.GeneratedColumn<String>(
+    'trigger',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumnWithTypeConverter<i2.BangGroup, int> group =
+      i0.GeneratedColumn<int>(
+        'group',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<i2.BangGroup>(i3.BangTriggers.$convertergroup);
+  late final i0.GeneratedColumn<String> additionalTrigger =
+      i0.GeneratedColumn<String>(
+        'additional_trigger',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [trigger, group, additionalTrigger];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bang_triggers';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {
+    trigger,
+    group,
+    additionalTrigger,
+  };
+  @override
+  i3.BangTrigger map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i3.BangTrigger(
+      trigger: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}trigger'],
+      )!,
+      group: i3.BangTriggers.$convertergroup.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.int,
+          data['${effectivePrefix}group'],
+        )!,
+      ),
+      additionalTrigger: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}additional_trigger'],
+      )!,
+    );
+  }
+
+  @override
+  BangTriggers createAlias(String alias) {
+    return BangTriggers(attachedDatabase, alias);
+  }
+
+  static i0.JsonTypeConverter2<i2.BangGroup, int, int> $convertergroup =
+      const i0.EnumIndexConverter<i2.BangGroup>(i2.BangGroup.values);
+  @override
+  List<String> get customConstraints => const [
+    'PRIMARY KEY("trigger", "group", additional_trigger)',
+    'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+  ];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class BangTrigger extends i0.DataClass
+    implements i0.Insertable<i3.BangTrigger> {
+  final String trigger;
+  final i2.BangGroup group;
+  final String additionalTrigger;
+  const BangTrigger({
+    required this.trigger,
+    required this.group,
+    required this.additionalTrigger,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['trigger'] = i0.Variable<String>(trigger);
+    {
+      map['group'] = i0.Variable<int>(
+        i3.BangTriggers.$convertergroup.toSql(group),
+      );
+    }
+    map['additional_trigger'] = i0.Variable<String>(additionalTrigger);
+    return map;
+  }
+
+  factory BangTrigger.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return BangTrigger(
+      trigger: serializer.fromJson<String>(json['trigger']),
+      group: i3.BangTriggers.$convertergroup.fromJson(
+        serializer.fromJson<int>(json['group']),
+      ),
+      additionalTrigger: serializer.fromJson<String>(
+        json['additional_trigger'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'trigger': serializer.toJson<String>(trigger),
+      'group': serializer.toJson<int>(
+        i3.BangTriggers.$convertergroup.toJson(group),
+      ),
+      'additional_trigger': serializer.toJson<String>(additionalTrigger),
+    };
+  }
+
+  i3.BangTrigger copyWith({
+    String? trigger,
+    i2.BangGroup? group,
+    String? additionalTrigger,
+  }) => i3.BangTrigger(
+    trigger: trigger ?? this.trigger,
+    group: group ?? this.group,
+    additionalTrigger: additionalTrigger ?? this.additionalTrigger,
+  );
+  BangTrigger copyWithCompanion(i3.BangTriggersCompanion data) {
+    return BangTrigger(
+      trigger: data.trigger.present ? data.trigger.value : this.trigger,
+      group: data.group.present ? data.group.value : this.group,
+      additionalTrigger: data.additionalTrigger.present
+          ? data.additionalTrigger.value
+          : this.additionalTrigger,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BangTrigger(')
+          ..write('trigger: $trigger, ')
+          ..write('group: $group, ')
+          ..write('additionalTrigger: $additionalTrigger')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(trigger, group, additionalTrigger);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i3.BangTrigger &&
+          other.trigger == this.trigger &&
+          other.group == this.group &&
+          other.additionalTrigger == this.additionalTrigger);
+}
+
+class BangTriggersCompanion extends i0.UpdateCompanion<i3.BangTrigger> {
+  final i0.Value<String> trigger;
+  final i0.Value<i2.BangGroup> group;
+  final i0.Value<String> additionalTrigger;
+  final i0.Value<int> rowid;
+  const BangTriggersCompanion({
+    this.trigger = const i0.Value.absent(),
+    this.group = const i0.Value.absent(),
+    this.additionalTrigger = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  BangTriggersCompanion.insert({
+    required String trigger,
+    required i2.BangGroup group,
+    required String additionalTrigger,
+    this.rowid = const i0.Value.absent(),
+  }) : trigger = i0.Value(trigger),
+       group = i0.Value(group),
+       additionalTrigger = i0.Value(additionalTrigger);
+  static i0.Insertable<i3.BangTrigger> custom({
+    i0.Expression<String>? trigger,
+    i0.Expression<int>? group,
+    i0.Expression<String>? additionalTrigger,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (trigger != null) 'trigger': trigger,
+      if (group != null) 'group': group,
+      if (additionalTrigger != null) 'additional_trigger': additionalTrigger,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i3.BangTriggersCompanion copyWith({
+    i0.Value<String>? trigger,
+    i0.Value<i2.BangGroup>? group,
+    i0.Value<String>? additionalTrigger,
+    i0.Value<int>? rowid,
+  }) {
+    return i3.BangTriggersCompanion(
+      trigger: trigger ?? this.trigger,
+      group: group ?? this.group,
+      additionalTrigger: additionalTrigger ?? this.additionalTrigger,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (trigger.present) {
+      map['trigger'] = i0.Variable<String>(trigger.value);
+    }
+    if (group.present) {
+      map['group'] = i0.Variable<int>(
+        i3.BangTriggers.$convertergroup.toSql(group.value),
+      );
+    }
+    if (additionalTrigger.present) {
+      map['additional_trigger'] = i0.Variable<String>(additionalTrigger.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BangTriggersCompanion(')
+          ..write('trigger: $trigger, ')
+          ..write('group: $group, ')
+          ..write('additionalTrigger: $additionalTrigger, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+i0.Index get idxBangTriggersLookup => i0.Index(
+  'idx_bang_triggers_lookup',
+  'CREATE INDEX idx_bang_triggers_lookup ON bang_triggers (additional_trigger, "group")',
+);
+i0.Trigger get bangTriggersAfterInsert => i0.Trigger(
+  'CREATE TRIGGER bang_triggers_after_insert AFTER INSERT ON bang WHEN new.additional_triggers IS NOT NULL BEGIN INSERT INTO bang_triggers ("trigger", "group", additional_trigger) SELECT new."trigger", new."group", json_each.value FROM json_each(new.additional_triggers);END',
+  'bang_triggers_after_insert',
+);
+i0.Trigger get bangTriggersAfterUpdate => i0.Trigger(
+  'CREATE TRIGGER bang_triggers_after_update AFTER UPDATE ON bang BEGIN DELETE FROM bang_triggers WHERE "trigger" = old."trigger" AND "group" = old."group";INSERT INTO bang_triggers ("trigger", "group", additional_trigger) SELECT new."trigger", new."group", json_each.value FROM json_each(new.additional_triggers)WHERE new.additional_triggers IS NOT NULL;END',
+  'bang_triggers_after_update',
+);
 
 class BangSync extends i0.Table with i0.TableInfo<BangSync, i3.BangSyncData> {
   @override
@@ -2176,7 +2809,167 @@ class BangFtsCompanion extends i0.UpdateCompanion<i3.BangFt> {
   }
 }
 
-class BangDataView extends i0.ViewInfo<i3.BangDataView, i5.BangData>
+class BangTriggersFts extends i0.Table
+    with
+        i0.TableInfo<BangTriggersFts, i3.BangTriggersFt>,
+        i0.VirtualTableInfo<BangTriggersFts, i3.BangTriggersFt> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  BangTriggersFts(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> additionalTrigger =
+      i0.GeneratedColumn<String>(
+        'additional_trigger',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: '',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [additionalTrigger];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bang_triggers_fts';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => const {};
+  @override
+  i3.BangTriggersFt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i3.BangTriggersFt(
+      additionalTrigger: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}additional_trigger'],
+      )!,
+    );
+  }
+
+  @override
+  BangTriggersFts createAlias(String alias) {
+    return BangTriggersFts(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+  @override
+  String get moduleAndArgs =>
+      'fts5(additional_trigger, content=bang_triggers, prefix=\'2 3\')';
+}
+
+class BangTriggersFt extends i0.DataClass
+    implements i0.Insertable<i3.BangTriggersFt> {
+  final String additionalTrigger;
+  const BangTriggersFt({required this.additionalTrigger});
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['additional_trigger'] = i0.Variable<String>(additionalTrigger);
+    return map;
+  }
+
+  factory BangTriggersFt.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return BangTriggersFt(
+      additionalTrigger: serializer.fromJson<String>(
+        json['additional_trigger'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'additional_trigger': serializer.toJson<String>(additionalTrigger),
+    };
+  }
+
+  i3.BangTriggersFt copyWith({String? additionalTrigger}) => i3.BangTriggersFt(
+    additionalTrigger: additionalTrigger ?? this.additionalTrigger,
+  );
+  BangTriggersFt copyWithCompanion(i3.BangTriggersFtsCompanion data) {
+    return BangTriggersFt(
+      additionalTrigger: data.additionalTrigger.present
+          ? data.additionalTrigger.value
+          : this.additionalTrigger,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BangTriggersFt(')
+          ..write('additionalTrigger: $additionalTrigger')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => additionalTrigger.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i3.BangTriggersFt &&
+          other.additionalTrigger == this.additionalTrigger);
+}
+
+class BangTriggersFtsCompanion extends i0.UpdateCompanion<i3.BangTriggersFt> {
+  final i0.Value<String> additionalTrigger;
+  final i0.Value<int> rowid;
+  const BangTriggersFtsCompanion({
+    this.additionalTrigger = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  BangTriggersFtsCompanion.insert({
+    required String additionalTrigger,
+    this.rowid = const i0.Value.absent(),
+  }) : additionalTrigger = i0.Value(additionalTrigger);
+  static i0.Insertable<i3.BangTriggersFt> custom({
+    i0.Expression<String>? additionalTrigger,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (additionalTrigger != null) 'additional_trigger': additionalTrigger,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i3.BangTriggersFtsCompanion copyWith({
+    i0.Value<String>? additionalTrigger,
+    i0.Value<int>? rowid,
+  }) {
+    return i3.BangTriggersFtsCompanion(
+      additionalTrigger: additionalTrigger ?? this.additionalTrigger,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (additionalTrigger.present) {
+      map['additional_trigger'] = i0.Variable<String>(additionalTrigger.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BangTriggersFtsCompanion(')
+          ..write('additionalTrigger: $additionalTrigger, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class BangDataView extends i0.ViewInfo<i3.BangDataView, i6.BangData>
     implements i0.HasResultSet {
   final String? _alias;
   @override
@@ -2192,6 +2985,7 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i5.BangData>
     category,
     subCategory,
     format,
+    additionalTriggers,
     frequency,
     lastUsed,
   ];
@@ -2207,9 +3001,9 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i5.BangData>
   @override
   BangDataView get asDslTable => this;
   @override
-  i5.BangData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  i6.BangData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return i5.BangData(
+    return i6.BangData(
       websiteName: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
         data['${effectivePrefix}website_name'],
@@ -2244,6 +3038,12 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i5.BangData>
         attachedDatabase.typeMapping.read(
           i0.DriftSqlType.string,
           data['${effectivePrefix}format'],
+        ),
+      ),
+      additionalTriggers: i3.BangTable.$converteradditionalTriggers.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.string,
+          data['${effectivePrefix}additional_triggers'],
         ),
       ),
       frequency: attachedDatabase.typeMapping.read(
@@ -2310,6 +3110,13 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i5.BangData>
     true,
     type: i0.DriftSqlType.string,
   ).withConverter<Set<i1.BangFormat>?>(i3.BangTable.$converterformat);
+  late final i0.GeneratedColumnWithTypeConverter<Set<String>?, String>
+  additionalTriggers = i0.GeneratedColumn<String>(
+    'additional_triggers',
+    aliasedName,
+    true,
+    type: i0.DriftSqlType.string,
+  ).withConverter<Set<String>?>(i3.BangTable.$converteradditionalTriggers);
   late final i0.GeneratedColumn<int> frequency = i0.GeneratedColumn<int>(
     'frequency',
     aliasedName,
@@ -2346,10 +3153,22 @@ i0.Trigger get bangAfterUpdate => i0.Trigger(
   'CREATE TRIGGER bang_after_update AFTER UPDATE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
   'bang_after_update',
 );
+i0.Trigger get bangTriggersAfterInsertFts => i0.Trigger(
+  'CREATE TRIGGER bang_triggers_after_insert_fts AFTER INSERT ON bang_triggers BEGIN INSERT INTO bang_triggers_fts ("rowid", additional_trigger) VALUES (new."rowid", new.additional_trigger);END',
+  'bang_triggers_after_insert_fts',
+);
+i0.Trigger get bangTriggersAfterDeleteFts => i0.Trigger(
+  'CREATE TRIGGER bang_triggers_after_delete_fts AFTER DELETE ON bang_triggers BEGIN INSERT INTO bang_triggers_fts (bang_triggers_fts, "rowid", additional_trigger) VALUES (\'delete\', old."rowid", old.additional_trigger);END',
+  'bang_triggers_after_delete_fts',
+);
+i0.Trigger get bangTriggersAfterUpdateFts => i0.Trigger(
+  'CREATE TRIGGER bang_triggers_after_update_fts AFTER UPDATE ON bang_triggers BEGIN INSERT INTO bang_triggers_fts (bang_triggers_fts, "rowid", additional_trigger) VALUES (\'delete\', old."rowid", old.additional_trigger);INSERT INTO bang_triggers_fts ("rowid", additional_trigger) VALUES (new."rowid", new.additional_trigger);END',
+  'bang_triggers_after_update_fts',
+);
 
-class DefinitionsDrift extends i6.ModularAccessor {
+class DefinitionsDrift extends i7.ModularAccessor {
   DefinitionsDrift(i0.GeneratedDatabase db) : super(db);
-  Future<int> optimizeFtsIndex() {
+  Future<int> optimizeBangFtsIndex() {
     return customInsert(
       'INSERT INTO bang_fts (bang_fts) VALUES (\'optimize\')',
       variables: [],
@@ -2357,13 +3176,21 @@ class DefinitionsDrift extends i6.ModularAccessor {
     );
   }
 
-  i0.Selectable<i5.BangData> queryBangs({required String query}) {
+  Future<int> optimizeTriggerFtsIndex() {
+    return customInsert(
+      'INSERT INTO bang_triggers_fts (bang_triggers_fts) VALUES (\'optimize\')',
+      variables: [],
+      updates: {bangTriggersFts},
+    );
+  }
+
+  i0.Selectable<i6.BangData> queryBangs({required String query}) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
+      'WITH weights AS (SELECT 10.0 AS "trigger", 8.0 AS additional_trigger, 5.0 AS website_name), bang_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights), trigger_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank FROM bang_triggers_fts(?1)AS tfts INNER JOIN bang_triggers AS bt ON bt."rowid" = tfts."rowid" INNER JOIN bang AS b ON b."trigger" = bt."trigger" AND b."group" = bt."group" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights), combined_results AS (SELECT * FROM bang_results UNION ALL SELECT * FROM trigger_results) SELECT *, MIN(weighted_rank) AS weighted_rank FROM combined_results GROUP BY "trigger", "group" ORDER BY weighted_rank ASC, frequency NULLS LAST',
       variables: [i0.Variable<String>(query)],
-      readsFrom: {bangFrequency, bangFts, bang},
+      readsFrom: {bangFrequency, bangFts, bang, bangTriggersFts, bangTriggers},
     ).map(
-      (i0.QueryRow row) => i5.BangData(
+      (i0.QueryRow row) => i6.BangData(
         websiteName: row.read<String>('website_name'),
         domain: row.read<String>('domain'),
         trigger: row.read<String>('trigger'),
@@ -2374,19 +3201,22 @@ class DefinitionsDrift extends i6.ModularAccessor {
         format: i3.BangTable.$converterformat.fromSql(
           row.readNullable<String>('format'),
         ),
+        additionalTriggers: i3.BangTable.$converteradditionalTriggers.fromSql(
+          row.readNullable<String>('additional_triggers'),
+        ),
         frequency: row.readNullable<int>('frequency'),
         lastUsed: row.readNullable<DateTime>('last_used'),
       ),
     );
   }
 
-  i0.Selectable<i5.BangData> queryBangsBasic({required String query}) {
+  i0.Selectable<i6.BangData> queryBangsBasic({required String query}) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS "trigger", 5.0 AS website_name) SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1 ORDER BY weighted_rank ASC, bf.frequency NULLS LAST',
+      'WITH weights AS (SELECT 10.0 AS "trigger", 8.0 AS additional_trigger, 5.0 AS website_name), bang_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1), trigger_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank FROM bang_triggers_fts AS tfts INNER JOIN bang_triggers AS bt ON bt."rowid" = tfts."rowid" INNER JOIN bang AS b ON b."trigger" = bt."trigger" AND b."group" = bt."group" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE tfts.additional_trigger LIKE ?1), combined_results AS (SELECT * FROM bang_results UNION ALL SELECT * FROM trigger_results) SELECT *, MIN(weighted_rank) AS weighted_rank FROM combined_results GROUP BY "trigger", "group" ORDER BY weighted_rank ASC, frequency NULLS LAST',
       variables: [i0.Variable<String>(query)],
-      readsFrom: {bangFrequency, bangFts, bang},
+      readsFrom: {bangFrequency, bangFts, bang, bangTriggersFts, bangTriggers},
     ).map(
-      (i0.QueryRow row) => i5.BangData(
+      (i0.QueryRow row) => i6.BangData(
         websiteName: row.read<String>('website_name'),
         domain: row.read<String>('domain'),
         trigger: row.read<String>('trigger'),
@@ -2396,6 +3226,9 @@ class DefinitionsDrift extends i6.ModularAccessor {
         subCategory: row.readNullable<String>('sub_category'),
         format: i3.BangTable.$converterformat.fromSql(
           row.readNullable<String>('format'),
+        ),
+        additionalTriggers: i3.BangTable.$converteradditionalTriggers.fromSql(
+          row.readNullable<String>('additional_triggers'),
         ),
         frequency: row.readNullable<int>('frequency'),
         lastUsed: row.readNullable<DateTime>('last_used'),
@@ -2411,7 +3244,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('categories_json'));
   }
 
-  i0.Selectable<i7.SearchHistoryEntry> searchHistoryEntries({
+  i0.Selectable<i8.SearchHistoryEntry> searchHistoryEntries({
     required int limit,
   }) {
     return customSelect(
@@ -2419,7 +3252,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
       variables: [i0.Variable<int>(limit)],
       readsFrom: {bangHistory},
     ).map(
-      (i0.QueryRow row) => i7.SearchHistoryEntry(
+      (i0.QueryRow row) => i8.SearchHistoryEntry(
         searchQuery: row.read<String>('search_query'),
         trigger: row.read<String>('trigger'),
         searchDate: row.read<DateTime>('search_date'),
@@ -2436,16 +3269,22 @@ class DefinitionsDrift extends i6.ModularAccessor {
     );
   }
 
-  i3.BangFts get bangFts => i6.ReadDatabaseContainer(
+  i3.BangFts get bangFts => i7.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.BangFts>('bang_fts');
-  i3.BangTable get bang => i6.ReadDatabaseContainer(
+  i3.BangTriggersFts get bangTriggersFts => i7.ReadDatabaseContainer(
+    attachedDatabase,
+  ).resultSet<i3.BangTriggersFts>('bang_triggers_fts');
+  i3.BangTable get bang => i7.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.BangTable>('bang');
-  i3.BangFrequency get bangFrequency => i6.ReadDatabaseContainer(
+  i3.BangFrequency get bangFrequency => i7.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.BangFrequency>('bang_frequency');
-  i3.BangHistory get bangHistory => i6.ReadDatabaseContainer(
+  i3.BangTriggers get bangTriggers => i7.ReadDatabaseContainer(
+    attachedDatabase,
+  ).resultSet<i3.BangTriggers>('bang_triggers');
+  i3.BangHistory get bangHistory => i7.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.BangHistory>('bang_history');
 }

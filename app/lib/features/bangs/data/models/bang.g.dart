@@ -23,6 +23,8 @@ abstract class _$BangCWProxy {
 
   Bang format(Set<BangFormat>? format);
 
+  Bang additionalTriggers(Set<String>? additionalTriggers);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Bang(...).copyWith.fieldName(value)`.
   ///
@@ -39,6 +41,7 @@ abstract class _$BangCWProxy {
     String? category,
     String? subCategory,
     Set<BangFormat>? format,
+    Set<String>? additionalTriggers,
   });
 }
 
@@ -74,6 +77,10 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
   Bang format(Set<BangFormat>? format) => call(format: format);
 
   @override
+  Bang additionalTriggers(Set<String>? additionalTriggers) =>
+      call(additionalTriggers: additionalTriggers);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Bang(...).copyWith.fieldName(value)`.
   ///
@@ -90,6 +97,7 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
     Object? category = const $CopyWithPlaceholder(),
     Object? subCategory = const $CopyWithPlaceholder(),
     Object? format = const $CopyWithPlaceholder(),
+    Object? additionalTriggers = const $CopyWithPlaceholder(),
   }) {
     return Bang(
       websiteName:
@@ -126,6 +134,10 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
           ? _value.format
           // ignore: cast_nullable_to_non_nullable
           : format as Set<BangFormat>?,
+      additionalTriggers: additionalTriggers == const $CopyWithPlaceholder()
+          ? _value.additionalTriggers
+          // ignore: cast_nullable_to_non_nullable
+          : additionalTriggers as Set<String>?,
     );
   }
 }
@@ -151,6 +163,9 @@ Bang _$BangFromJson(Map<String, dynamic> json) => Bang(
   format: (json['fmt'] as List<dynamic>?)
       ?.map((e) => $enumDecode(_$BangFormatEnumMap, e))
       .toSet(),
+  additionalTriggers: (json['ts'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toSet(),
 );
 
 Map<String, dynamic> _$BangToJson(Bang instance) => <String, dynamic>{
@@ -161,6 +176,7 @@ Map<String, dynamic> _$BangToJson(Bang instance) => <String, dynamic>{
   'c': instance.category,
   'sc': instance.subCategory,
   'fmt': instance.format?.map((e) => _$BangFormatEnumMap[e]!).toList(),
+  'ts': instance.additionalTriggers?.toList(),
 };
 
 const _$BangFormatEnumMap = {

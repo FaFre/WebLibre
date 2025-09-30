@@ -13,10 +13,12 @@ abstract class $BangDatabase extends i0.GeneratedDatabase {
   $BangDatabase(i0.QueryExecutor e) : super(e);
   $BangDatabaseManager get managers => $BangDatabaseManager(this);
   late final i1.BangTable bang = i1.BangTable(this);
+  late final i1.BangTriggers bangTriggers = i1.BangTriggers(this);
   late final i1.BangSync bangSync = i1.BangSync(this);
   late final i1.BangFrequency bangFrequency = i1.BangFrequency(this);
   late final i1.BangHistory bangHistory = i1.BangHistory(this);
   late final i1.BangFts bangFts = i1.BangFts(this);
+  late final i1.BangTriggersFts bangTriggersFts = i1.BangTriggersFts(this);
   late final i1.BangDataView bangDataView = i1.BangDataView(this);
   late final i2.BangDao bangDao = i2.BangDao(this as i3.BangDatabase);
   late final i4.SyncDao syncDao = i4.SyncDao(this as i3.BangDatabase);
@@ -29,49 +31,100 @@ abstract class $BangDatabase extends i0.GeneratedDatabase {
   @override
   List<i0.DatabaseSchemaEntity> get allSchemaEntities => [
     bang,
+    bangTriggers,
+    i1.idxBangTriggersLookup,
+    i1.bangTriggersAfterInsert,
+    i1.bangTriggersAfterUpdate,
     bangSync,
     bangFrequency,
     bangHistory,
     bangFts,
+    bangTriggersFts,
     bangDataView,
     i1.bangAfterInsert,
     i1.bangAfterDelete,
     i1.bangAfterUpdate,
+    i1.bangTriggersAfterInsertFts,
+    i1.bangTriggersAfterDeleteFts,
+    i1.bangTriggersAfterUpdateFts,
   ];
   @override
-  i0.StreamQueryUpdateRules get streamUpdateRules =>
-      const i0.StreamQueryUpdateRules([
-        i0.WritePropagation(
-          on: i0.TableUpdateQuery.onTableName(
-            'bang',
-            limitUpdateKind: i0.UpdateKind.delete,
-          ),
-          result: [
-            i0.TableUpdate('bang_frequency', kind: i0.UpdateKind.delete),
-          ],
-        ),
-        i0.WritePropagation(
-          on: i0.TableUpdateQuery.onTableName(
-            'bang',
-            limitUpdateKind: i0.UpdateKind.insert,
-          ),
-          result: [i0.TableUpdate('bang_fts', kind: i0.UpdateKind.insert)],
-        ),
-        i0.WritePropagation(
-          on: i0.TableUpdateQuery.onTableName(
-            'bang',
-            limitUpdateKind: i0.UpdateKind.delete,
-          ),
-          result: [i0.TableUpdate('bang_fts', kind: i0.UpdateKind.insert)],
-        ),
-        i0.WritePropagation(
-          on: i0.TableUpdateQuery.onTableName(
-            'bang',
-            limitUpdateKind: i0.UpdateKind.update,
-          ),
-          result: [i0.TableUpdate('bang_fts', kind: i0.UpdateKind.insert)],
-        ),
-      ]);
+  i0.StreamQueryUpdateRules
+  get streamUpdateRules => const i0.StreamQueryUpdateRules([
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: i0.UpdateKind.delete,
+      ),
+      result: [i0.TableUpdate('bang_triggers', kind: i0.UpdateKind.delete)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: i0.UpdateKind.insert,
+      ),
+      result: [i0.TableUpdate('bang_triggers', kind: i0.UpdateKind.insert)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: i0.UpdateKind.update,
+      ),
+      result: [
+        i0.TableUpdate('bang_triggers', kind: i0.UpdateKind.delete),
+        i0.TableUpdate('bang_triggers', kind: i0.UpdateKind.insert),
+      ],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: i0.UpdateKind.delete,
+      ),
+      result: [i0.TableUpdate('bang_frequency', kind: i0.UpdateKind.delete)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: i0.UpdateKind.insert,
+      ),
+      result: [i0.TableUpdate('bang_fts', kind: i0.UpdateKind.insert)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: i0.UpdateKind.delete,
+      ),
+      result: [i0.TableUpdate('bang_fts', kind: i0.UpdateKind.insert)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: i0.UpdateKind.update,
+      ),
+      result: [i0.TableUpdate('bang_fts', kind: i0.UpdateKind.insert)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang_triggers',
+        limitUpdateKind: i0.UpdateKind.insert,
+      ),
+      result: [i0.TableUpdate('bang_triggers_fts', kind: i0.UpdateKind.insert)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang_triggers',
+        limitUpdateKind: i0.UpdateKind.delete,
+      ),
+      result: [i0.TableUpdate('bang_triggers_fts', kind: i0.UpdateKind.insert)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang_triggers',
+        limitUpdateKind: i0.UpdateKind.update,
+      ),
+      result: [i0.TableUpdate('bang_triggers_fts', kind: i0.UpdateKind.insert)],
+    ),
+  ]);
 }
 
 class $BangDatabaseManager {
@@ -79,6 +132,8 @@ class $BangDatabaseManager {
   $BangDatabaseManager(this._db);
   i1.$BangTableTableManager get bang =>
       i1.$BangTableTableManager(_db, _db.bang);
+  i1.$BangTriggersTableManager get bangTriggers =>
+      i1.$BangTriggersTableManager(_db, _db.bangTriggers);
   i1.$BangSyncTableManager get bangSync =>
       i1.$BangSyncTableManager(_db, _db.bangSync);
   i1.$BangFrequencyTableManager get bangFrequency =>
@@ -87,6 +142,8 @@ class $BangDatabaseManager {
       i1.$BangHistoryTableManager(_db, _db.bangHistory);
   i1.$BangFtsTableManager get bangFts =>
       i1.$BangFtsTableManager(_db, _db.bangFts);
+  i1.$BangTriggersFtsTableManager get bangTriggersFts =>
+      i1.$BangTriggersFtsTableManager(_db, _db.bangTriggersFts);
 }
 
 extension DefineFunctions on i6.CommonDatabase {
