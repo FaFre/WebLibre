@@ -134,6 +134,45 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     return neighbors;
   }
 
+  Future<List<List<String>>?> suggestClusters({
+    required List<String> unassignedDocumentsInput,
+  }) async {
+    if (!ref.read(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.enableLocalAiFeatures,
+      ),
+    )) {
+      return null;
+    }
+
+    final processedDocuments = <String, String>{};
+    final unassignedDocumentsProcessed = unassignedDocumentsInput.map((doc) {
+      final processed = preprocessText(doc);
+      if (processed != doc) {
+        processedDocuments[processed] = doc;
+      }
+
+      return processed;
+    }).toList();
+
+    final embeddings = await generateDocumentEmbeddings(
+      unassignedDocumentsProcessed,
+    );
+
+    final clusters = embeddings.mapNotNull(
+      (embeddings) => clusterEmbeddings(embeddings: embeddings.values.toList())
+          .map(
+            (cluster) =>
+                cluster.map((i) => embeddings.keys.elementAt(i)).toList(),
+          )
+          .toList(),
+    );
+
+    print(clusters);
+
+    return null;
+  }
+
   Future<Map<String, List<double>>?> generateDocumentEmbeddings(
     List<String> documents,
   ) async {
@@ -194,6 +233,32 @@ Future<String?> containerTopic(Ref ref, String containerId) async {
   }
 
   return topic;
+}
+
+@Riverpod()
+Future<List<List<String>>?> suggestClusters(Ref ref) async {
+  final unassignedTitles = await ref.watch(
+    containerTabsDataProvider(null).selectAsync(
+      (tabData) => EquatableValue(
+        tabData
+            .where((tab) => tab.title.isNotEmpty)
+            .map((tab) => (tab.id, tab.title!))
+            .toSet(),
+      ),
+    ),
+  );
+
+  if (unassignedTitles.value.isNotEmpty) {
+    await ref
+        .read(geckoInferenceRepositoryProvider.notifier)
+        .suggestClusters(
+          unassignedDocumentsInput: unassignedTitles.value
+              .map((tab) => tab.$2)
+              .toList(),
+        );
+  }
+
+  return null;
 }
 
 @Riverpod()
