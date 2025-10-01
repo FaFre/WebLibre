@@ -23,6 +23,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_suggestions.dart';
@@ -85,126 +86,119 @@ class ContainerChips extends HookConsumerWidget {
           height: 48,
           child: Row(
             children: [
-              if (selectedContainer != null || availableContainers.isNotEmpty)
-                Expanded(
-                  child: SelectableChips(
-                    deleteIcon: false,
-                    itemId: (container) => container.id,
-                    itemAvatar: (container) => Container(
-                      width: 20.0,
-                      height: 20.0,
-                      decoration: BoxDecoration(
-                        color: container.color,
-                        shape: BoxShape.circle,
+              Expanded(
+                child: SelectableChips(
+                  deleteIcon: false,
+                  itemId: (container) => container.id,
+                  itemAvatar: (container) => Container(
+                    width: 20.0,
+                    height: 20.0,
+                    decoration: BoxDecoration(
+                      color: container.color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  itemLabel: (container) =>
+                      ContainerTitle(container: container),
+                  itemBadgeCount: (container) => container.tabCount,
+                  itemWrap: (child, container) {
+                    return TabDragContainerTarget(
+                      container: container,
+                      child: child,
+                    );
+                  },
+                  prefixListItems: [
+                    TabDragContainerTarget(
+                      container: null,
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final tabCount = ref.watch(
+                            containerTabCountProvider(
+                              // ignore: provider_parameters
+                              ContainerFilterById(containerId: null),
+                            ).select((value) => value.value ?? 0),
+                          );
+
+                          return FilterChip(
+                            avatar: const Icon(MdiIcons.folderHidden),
+                            labelPadding: (tabCount > 0)
+                                ? null
+                                : const EdgeInsets.only(right: 2.0),
+                            label: (tabCount > 0)
+                                ? Text(tabCount.toString())
+                                : const SizedBox.shrink(),
+                            selected: selectedContainer == null,
+                            showCheckmark: false,
+                            onSelected: (value) {
+                              if (value) {
+                                onSelected?.call(null);
+                              }
+                            },
+                          );
+                        },
                       ),
                     ),
-                    itemLabel: (container) =>
-                        ContainerTitle(container: container),
-                    itemBadgeCount: (container) => container.tabCount,
-                    itemWrap: (child, container) {
-                      return TabDragContainerTarget(
-                        container: container,
-                        child: child,
-                      );
-                    },
-                    prefixListItems: [
-                      TabDragContainerTarget(
-                        container: null,
-                        child: Consumer(
-                          builder: (context, ref, child) {
-                            final tabCount = ref.watch(
-                              containerTabCountProvider(
-                                // ignore: provider_parameters
-                                ContainerFilterById(containerId: null),
-                              ).select((value) => value.value ?? 0),
-                            );
+                    if (showGroupSuggestions)
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final tabSuggestionsEnabled = ref.watch(
+                            tabSuggestionsControllerProvider,
+                          );
+                          final enableAiFeatures = ref.watch(
+                            generalSettingsWithDefaultsProvider.select(
+                              (settings) => settings.enableLocalAiFeatures,
+                            ),
+                          );
 
-                            return FilterChip(
-                              avatar: const Icon(MdiIcons.folderHidden),
-                              labelPadding: (tabCount > 0)
-                                  ? null
-                                  : const EdgeInsets.only(right: 2.0),
-                              label: (tabCount > 0)
-                                  ? Text(tabCount.toString())
-                                  : const SizedBox.shrink(),
-                              selected: selectedContainer == null,
-                              showCheckmark: false,
-                              onSelected: (value) {
-                                if (value) {
-                                  onSelected?.call(null);
-                                }
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      if (showGroupSuggestions)
-                        Consumer(
-                          builder: (context, ref, child) {
-                            final tabSuggestionsEnabled = ref.watch(
-                              tabSuggestionsControllerProvider,
-                            );
-                            final enableAiFeatures = ref.watch(
-                              generalSettingsWithDefaultsProvider.select(
-                                (settings) => settings.enableLocalAiFeatures,
-                              ),
-                            );
+                          if (!enableAiFeatures || !tabSuggestionsEnabled) {
+                            return const SizedBox.shrink();
+                          }
 
-                            if (!enableAiFeatures || !tabSuggestionsEnabled) {
+                          final suggestions = ref.watch(
+                            suggestClustersProvider,
+                          );
+
+                          return suggestions.when(
+                            data: (data) {
+                              if (data.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return FilterChip(
+                                avatar: const Icon(MdiIcons.autoFix),
+                                label: Text(data!.length.toString()),
+                                showCheckmark: false,
+                                onSelected: (_) async {
+                                  await ContainerDraftRoute().push(context);
+                                },
+                              );
+                            },
+                            error: (error, stackTrace) {
+                              logger.e(
+                                'Error suggesting containers',
+                                error: error,
+                                stackTrace: stackTrace,
+                              );
                               return const SizedBox.shrink();
-                            }
-
-                            final suggestions = ref.watch(
-                              suggestClustersProvider,
-                            );
-
-                            return suggestions.when(
-                              data: (data) {
-                                if (data.isEmpty) {
-                                  return const SizedBox.shrink();
-                                }
-
-                                return FilterChip(
-                                  avatar: const Icon(MdiIcons.autoFix),
-                                  label: Text(data!.length.toString()),
-                                  showCheckmark: false,
-                                  onSelected: (value) {},
-                                );
-                              },
-                              error: (error, stackTrace) {
-                                logger.e(
-                                  'Error suggesting containers',
-                                  error: error,
-                                  stackTrace: stackTrace,
-                                );
-                                return const SizedBox.shrink();
-                              },
-                              loading: () {
-                                return const SizedBox.shrink();
-                              },
-                            );
-                          },
-                        ),
-                    ],
-                    availableItems: availableContainers,
-                    selectedItem: selectedContainer,
-                    onSelected: onSelected,
-                    onDeleted: onDeleted,
-                  ),
-                )
-              else
-                Visibility(
-                  visible: displayMenu,
-                  child: Expanded(
-                    child: Text(
-                      "Press '>' to manage Containers.",
-                      style: TextStyle(
-                        color: Theme.of(context).hintColor,
-                        fontStyle: FontStyle.italic,
+                            },
+                            loading: () {
+                              return const FilterChip(
+                                avatar: Icon(MdiIcons.autoFix),
+                                label: Skeletonizer(child: Text('0')),
+                                showCheckmark: false,
+                                onSelected: null,
+                              );
+                            },
+                          );
+                        },
                       ),
-                    ),
-                  ),
+                  ],
+                  availableItems: availableContainers,
+                  selectedItem: selectedContainer,
+                  onSelected: onSelected,
+                  onDeleted: onDeleted,
                 ),
+              ),
               if (displayMenu)
                 IconButton(
                   visualDensity: VisualDensity.compact,

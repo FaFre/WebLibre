@@ -33,6 +33,10 @@ part of 'routes.dart';
       name: 'ContextMenuRoute',
       path: 'context_menu',
     ),
+    TypedGoRoute<ContainerDraftRoute>(
+      name: 'ContainerDraftRoute',
+      path: 'container_draft',
+    ),
     TypedGoRoute<ContainerListRoute>(
       name: 'ContainerListRoute',
       path: 'containers',
@@ -104,6 +108,13 @@ class TorProxyRoute extends GoRouteData with $TorProxyRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const TorProxyScreen();
+  }
+}
+
+class ContainerDraftRoute extends GoRouteData with $ContainerDraftRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ContainerDraftSuggestionsScreen();
   }
 }
 
