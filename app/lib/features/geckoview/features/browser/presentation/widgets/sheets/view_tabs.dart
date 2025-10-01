@@ -50,6 +50,39 @@ import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+int calculateCrossAxisItemCount({
+  required double screenWidth,
+  required double horizontalPadding,
+  required double crossAxisSpacing,
+}) {
+  final totalHorizontalPadding = horizontalPadding * 2;
+  final availableWidth =
+      screenWidth - totalHorizontalPadding - crossAxisSpacing;
+
+  final crossAxisCount = availableWidth ~/ 180.0;
+
+  return crossAxisCount;
+}
+
+double calculateItemHeight({
+  required double screenWidth,
+  required double childAspectRatio,
+  required double horizontalPadding,
+  required double mainAxisSpacing,
+  required double crossAxisSpacing,
+  required int crossAxisCount,
+}) {
+  final totalHorizontalPadding = horizontalPadding * 2;
+  final totalCrossAxisSpacing = crossAxisSpacing * (crossAxisCount - 1);
+  final availableWidth =
+      screenWidth - totalHorizontalPadding - totalCrossAxisSpacing;
+  final itemWidth = availableWidth / crossAxisCount;
+  final itemHeight = itemWidth / childAspectRatio;
+  final totalItemHeight = itemHeight + mainAxisSpacing;
+
+  return totalItemHeight;
+}
+
 class _TabDraggable extends HookConsumerWidget {
   final TabEntity entity;
   final String? suggestedContainerId;
@@ -84,7 +117,17 @@ class _TabDraggable extends HookConsumerWidget {
               key: ValueKey(entity.tabId),
               tabId: entity.tabId,
               activeTabId: activeTab,
-              containerId: suggestedContainerId!,
+              onTap: () async {
+                final containerData = await ref
+                    .read(containerRepositoryProvider.notifier)
+                    .getContainerData(suggestedContainerId!);
+
+                if (containerData != null) {
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .assignContainer(entity.tabId, containerData);
+                }
+              },
             )
           : SingleTabPreview(
               key: ValueKey(entity.tabId),
@@ -331,39 +374,6 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
     super.key,
   });
 
-  int _calculateCrossAxisItemCount({
-    required double screenWidth,
-    required double horizontalPadding,
-    required double crossAxisSpacing,
-  }) {
-    final totalHorizontalPadding = horizontalPadding * 2;
-    final availableWidth =
-        screenWidth - totalHorizontalPadding - crossAxisSpacing;
-
-    final crossAxisCount = availableWidth ~/ 180.0;
-
-    return crossAxisCount;
-  }
-
-  double _calculateItemHeight({
-    required double screenWidth,
-    required double childAspectRatio,
-    required double horizontalPadding,
-    required double mainAxisSpacing,
-    required double crossAxisSpacing,
-    required int crossAxisCount,
-  }) {
-    final totalHorizontalPadding = horizontalPadding * 2;
-    final totalCrossAxisSpacing = crossAxisSpacing * (crossAxisCount - 1);
-    final availableWidth =
-        screenWidth - totalHorizontalPadding - totalCrossAxisSpacing;
-    final itemWidth = availableWidth / crossAxisCount;
-    final itemHeight = itemWidth / childAspectRatio;
-    final totalItemHeight = itemHeight + mainAxisSpacing;
-
-    return totalItemHeight;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Stack(
@@ -423,7 +433,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
               final activeTab = ref.watch(selectedTabProvider);
 
               final crossAxisCount = useMemoized(() {
-                final calculatedCount = _calculateCrossAxisItemCount(
+                final calculatedCount = calculateCrossAxisItemCount(
                   screenWidth: screenWidth,
                   horizontalPadding: 4.0,
                   crossAxisSpacing: 8.0,
@@ -433,7 +443,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
               }, [screenWidth, itemCount]);
 
               final itemHeight = useMemoized(
-                () => _calculateItemHeight(
+                () => calculateItemHeight(
                   screenWidth: screenWidth,
                   childAspectRatio: 0.75,
                   horizontalPadding: 4.0,
@@ -628,37 +638,6 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
     super.key,
   });
 
-  int _calculateCrossAxisItemCount({
-    required double screenWidth,
-    required double horizontalPadding,
-    required double crossAxisSpacing,
-  }) {
-    final totalHorizontalPadding = horizontalPadding * 2;
-    final availableWidth =
-        screenWidth - totalHorizontalPadding - crossAxisSpacing;
-
-    final crossAxisCount = availableWidth ~/ 180.0;
-
-    return crossAxisCount;
-  }
-
-  Size _calculateItemSize({
-    required double screenWidth,
-    required double childAspectRatio,
-    required double horizontalPadding,
-    required double crossAxisSpacing,
-    required int crossAxisCount,
-  }) {
-    final totalHorizontalPadding = horizontalPadding * 2;
-    final totalCrossAxisSpacing = crossAxisSpacing * (crossAxisCount - 1);
-    final availableWidth =
-        screenWidth - totalHorizontalPadding - totalCrossAxisSpacing;
-    final itemWidth = availableWidth / crossAxisCount;
-    final itemHeight = itemWidth / childAspectRatio;
-
-    return Size(itemWidth, itemHeight);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Stack(
@@ -670,6 +649,8 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
             Expanded(
               child: HookConsumer(
                 builder: (context, ref, child) {
+                  final screenWidth = MediaQuery.of(context).size.width;
+
                   final filteredTabEntities = ref.watch(
                     seamlessFilteredTabEntitiesProvider(
                       searchPartition: TabSearchPartition.preview,
@@ -682,40 +663,32 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
 
                   final activeTab = ref.watch(selectedTabProvider);
 
-                  final crossAxisCount = useMemoized(
-                    () {
-                      final calculatedCount = _calculateCrossAxisItemCount(
-                        screenWidth: MediaQuery.of(context).size.width,
-                        horizontalPadding: 4.0,
-                        crossAxisSpacing: 8.0,
-                      );
+                  final crossAxisCount = useMemoized(() {
+                    final calculatedCount = calculateCrossAxisItemCount(
+                      screenWidth: screenWidth,
+                      horizontalPadding: 4.0,
+                      crossAxisSpacing: 8.0,
+                    );
 
-                      return math.max(
-                        math.min(
-                          calculatedCount,
-                          filteredTabEntities.value.length,
-                        ),
-                        2,
-                      );
-                    },
-                    [
-                      MediaQuery.of(context).size.width,
-                      filteredTabEntities.value.length,
-                    ],
-                  );
+                    return math.max(
+                      math.min(
+                        calculatedCount,
+                        filteredTabEntities.value.length,
+                      ),
+                      2,
+                    );
+                  }, [screenWidth, filteredTabEntities.value.length]);
 
-                  final itemSize = useMemoized(
-                    () =>
-                        _calculateItemSize(
-                          screenWidth: MediaQuery.of(context).size.width,
-                          childAspectRatio: 0.75,
-                          horizontalPadding: 4.0,
-                          crossAxisSpacing: 8.0,
-                          crossAxisCount: crossAxisCount,
-                        ) +
-                        //mainAxisSpacing
-                        const Offset(0, 8.0),
-                    [MediaQuery.of(context).size.width, crossAxisCount],
+                  final itemHeight = useMemoized(
+                    () => calculateItemHeight(
+                      screenWidth: screenWidth,
+                      childAspectRatio: 0.75,
+                      horizontalPadding: 4.0,
+                      crossAxisSpacing: 8.0,
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 8.0,
+                    ),
+                    [screenWidth, crossAxisCount],
                   );
 
                   useEffect(() {
@@ -724,7 +697,7 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
                     );
 
                     if (index > -1) {
-                      final offset = (index ~/ 2) * itemSize.height;
+                      final offset = (index ~/ 2) * itemHeight;
 
                       if (offset != sheetScrollController.offset) {
                         unawaited(

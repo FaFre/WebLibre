@@ -33,7 +33,6 @@ import 'package:weblibre/features/geckoview/features/find_in_page/domain/entitie
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -380,46 +379,30 @@ class SingleTabPreview extends HookConsumerWidget {
   }
 }
 
-class SuggestedSingleTabPreview extends HookConsumerWidget {
+class SuggestedSingleTabPreview extends StatelessWidget {
   final String tabId;
-  final String containerId;
 
   final String? activeTabId;
 
+  final void Function()? onTap;
+
   const SuggestedSingleTabPreview({
     required this.tabId,
-    required this.containerId,
     required this.activeTabId,
+    this.onTap,
     super.key,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final hasTabState = ref.watch(
-      tabStateProvider(tabId).select((value) => value != null),
-    );
-
-    if (!hasTabState) {
-      return const SizedBox.shrink();
-    }
-
+  Widget build(BuildContext context) {
     return Opacity(
       opacity: 0.5,
       child: TabPreview(
         tabId: tabId,
         isActive: tabId == activeTabId,
-        onTap: () async {
-          final containerData = await ref
-              .read(containerRepositoryProvider.notifier)
-              .getContainerData(containerId);
-
-          if (containerData != null) {
-            await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .assignContainer(tabId, containerData);
-          }
-        },
+        onTap: onTap,
         trailingChild: const IconButton(
+          visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
           icon: Icon(MdiIcons.creation),
           onPressed: null,
         ),
