@@ -47,11 +47,11 @@ class TabStates extends _$TabStates {
         state[contentState.id] ?? TabState.$default(contentState.id);
     final url = Uri.parse(contentState.url);
 
-    // Determine title based on priority: new non-empty title > existing title if URL unchanged > new title
+    // Determine title based on priority: new non-empty title > existing title if URL authority unchanged > new title
     final String resolvedTitle;
     if (contentState.title.isNotEmpty) {
       resolvedTitle = contentState.title;
-    } else if (current.url == url) {
+    } else if (current.url.authority == url.authority) {
       resolvedTitle = current.title;
     } else {
       resolvedTitle = contentState.title;
