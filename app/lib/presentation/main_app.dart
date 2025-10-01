@@ -19,18 +19,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
-import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class MainApp extends HookConsumerWidget {
@@ -49,71 +39,6 @@ class MainApp extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final initializationResult = ref.watch(appInitializationServiceProvider);
     final router = ref.watch(routerProvider);
-
-    ref.listen(
-      engineBoundIntentStreamProvider,
-      (previous, next) {
-        next.whenData((sharedContent) async {
-          final router = await ref.read(routerProvider.future);
-          final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-          switch (settings.tabIntentOpenSetting) {
-            case TabIntentOpenSetting.regular:
-            case TabIntentOpenSetting.private:
-              switch (sharedContent) {
-                case SharedUrl():
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: sharedContent.url,
-                        private:
-                            settings.tabIntentOpenSetting ==
-                            TabIntentOpenSetting.private,
-                        launchedFromIntent: true,
-                      );
-                case SharedText():
-                  final defaultSearchBang =
-                      ref.read(selectedBangDataProvider()) ??
-                      await ref.read(defaultSearchBangDataProvider.future);
-
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: defaultSearchBang?.getTemplateUrl(
-                          sharedContent.text,
-                        ),
-                        private:
-                            settings.tabIntentOpenSetting ==
-                            TabIntentOpenSetting.private,
-                        launchedFromIntent: true,
-                      );
-              }
-            case TabIntentOpenSetting.ask:
-              switch (sharedContent) {
-                case SharedUrl():
-                  final route = OpenSharedContentRoute(sharedContent.url);
-                  await router.push(route.location, extra: route.$extra);
-                case SharedText():
-                  final route = SearchRoute(
-                    tabType:
-                        ref.read(selectedTabTypeProvider) ??
-                        settings.defaultCreateTabType,
-                    searchText: sharedContent.text,
-                    launchedFromIntent: true, //launched from intent
-                  );
-                  await router.push(route.location);
-              }
-          }
-        });
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to engineBoundIntentStreamProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
 
     return initializationResult.fold(
       (initializationState) {

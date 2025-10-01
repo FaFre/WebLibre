@@ -21,12 +21,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:quick_actions/quick_actions.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/browser_extension.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -34,10 +38,14 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
+import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
@@ -84,6 +92,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   @override
   Widget build(BuildContext context) {
+    final initializationCompleter = useMemoized(() => Completer());
+
     useOnInitialization(() async {
       await ref
           .read(generalSettingsRepositoryProvider.notifier)
@@ -138,6 +148,73 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       }
     });
 
+    ref.listen(
+      engineBoundIntentStreamProvider,
+      (previous, next) async {
+        await initializationCompleter.future;
+
+        next.whenData((sharedContent) async {
+          final router = await ref.read(routerProvider.future);
+          final settings = ref.read(generalSettingsWithDefaultsProvider);
+
+          switch (settings.tabIntentOpenSetting) {
+            case TabIntentOpenSetting.regular:
+            case TabIntentOpenSetting.private:
+              switch (sharedContent) {
+                case SharedUrl():
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(
+                        url: sharedContent.url,
+                        private:
+                            settings.tabIntentOpenSetting ==
+                            TabIntentOpenSetting.private,
+                        launchedFromIntent: true,
+                      );
+                case SharedText():
+                  final defaultSearchBang =
+                      ref.read(selectedBangDataProvider()) ??
+                      await ref.read(defaultSearchBangDataProvider.future);
+
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(
+                        url: defaultSearchBang?.getTemplateUrl(
+                          sharedContent.text,
+                        ),
+                        private:
+                            settings.tabIntentOpenSetting ==
+                            TabIntentOpenSetting.private,
+                        launchedFromIntent: true,
+                      );
+              }
+            case TabIntentOpenSetting.ask:
+              switch (sharedContent) {
+                case SharedUrl():
+                  final route = OpenSharedContentRoute(sharedContent.url);
+                  await router.push(route.location, extra: route.$extra);
+                case SharedText():
+                  final route = SearchRoute(
+                    tabType:
+                        ref.read(selectedTabTypeProvider) ??
+                        settings.defaultCreateTabType,
+                    searchText: sharedContent.text,
+                    launchedFromIntent: true, //launched from intent
+                  );
+                  await router.push(route.location);
+              }
+          }
+        });
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to engineBoundIntentStreamProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
     return Visibility(
       visible: hasTab,
       replacement: SizedBox.expand(child: Container(color: Colors.grey[800])),
@@ -159,6 +236,47 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         },
         postInitializationStep: () async {
           await widget.postInitializationStep?.call();
+
+          if (!initializationCompleter.isCompleted) {
+            const quickActions = QuickActions();
+
+            //Debounce: https://github.com/flutter/flutter/issues/131121
+            DateTime? lastAction;
+            await quickActions.initialize((type) async {
+              if (lastAction == null ||
+                  DateTime.now().difference(lastAction!) >
+                      const Duration(seconds: 5)) {
+                if (type == 'new_tab') {
+                  lastAction = DateTime.now();
+
+                  final router = await ref.read(routerProvider.future);
+                  const route = SearchRoute(tabType: TabType.regular);
+
+                  await router.push(route.location);
+                } else if (type == 'new_private_tab') {
+                  lastAction = DateTime.now();
+
+                  final router = await ref.read(routerProvider.future);
+                  const route = SearchRoute(tabType: TabType.private);
+
+                  await router.push(route.location);
+                } else {
+                  throw UnimplementedError();
+                }
+              }
+            });
+
+            await quickActions.setShortcutItems([
+              //TODO: add icons
+              const ShortcutItem(type: 'new_tab', localizedTitle: 'New Tab'),
+              const ShortcutItem(
+                type: 'new_private_tab',
+                localizedTitle: 'New Private Tab',
+              ),
+            ]);
+
+            initializationCompleter.complete();
+          }
         },
       ),
     );

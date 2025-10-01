@@ -54,6 +54,7 @@ dependencies:
   pluggable_transports_proxy:
     path: ../packages/pluggable_transports_proxy
   pretty_qr_code: ^3.5.0
+  quick_actions: ^1.1.0
   riverpod: ^3.0.0
   riverpod_annotation: ^3.0.0
   rss_dart: ^1.0.13
