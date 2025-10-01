@@ -33,6 +33,8 @@ import 'package:weblibre/utils/lru_cache.dart';
 
 part 'gecko_inference.g.dart';
 
+typedef SuggestedContainer = ({List<String> tabIds, String? topic});
+
 @Riverpod(keepAlive: true)
 class GeckoInferenceRepository extends _$GeckoInferenceRepository {
   final _service = GeckoMlService();
@@ -134,7 +136,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     return neighbors;
   }
 
-  Future<List<({String? topic, List<String> tabIds})>?> suggestClusters({
+  Future<List<SuggestedContainer>?> suggestClusters({
     required Map<String, String> unassignedDocumentsInput,
   }) async {
     if (!ref.read(
@@ -173,16 +175,21 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     final clusterResult = await clusters.mapNotNull(
       (cluster) => Future.wait(
         cluster.map((clusterTitles) async {
-          final topic = await predictDocumentTopic(clusterTitles.toSet());
+          final originalTitles = clusterTitles
+              .map((title) => processedDocuments[title] ?? title)
+              .toSet();
+
+          final topic = await predictDocumentTopic(originalTitles);
 
           return (
             topic: topic,
-            tabIds: clusterTitles.map((title) {
-              final originalTitle = processedDocuments[title] ?? title;
-              return unassignedDocumentsInput.entries
-                  .firstWhere((entry) => entry.value == originalTitle)
-                  .key;
-            }).toList(),
+            tabIds: originalTitles
+                .map(
+                  (title) => unassignedDocumentsInput.entries
+                      .firstWhere((entry) => entry.value == title)
+                      .key,
+                )
+                .toList(),
           );
         }),
       ),
@@ -254,9 +261,7 @@ Future<String?> containerTopic(Ref ref, String containerId) async {
 }
 
 @Riverpod()
-Future<List<({List<String> tabIds, String? topic})>?> suggestClusters(
-  Ref ref,
-) async {
+Future<List<SuggestedContainer>?> suggestClusters(Ref ref) async {
   final unassignedTitles = await ref.watch(
     containerTabsDataProvider(null).selectAsync(
       (tabData) => EquatableValue(
