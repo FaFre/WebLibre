@@ -156,15 +156,9 @@ class ContainerListScreen extends HookConsumerWidget {
               .unusedRandomContainerColor();
 
           if (context.mounted) {
-            final result = await ContainerCreateRoute(
+            await ContainerCreateRoute(
               ContainerData(id: uuid.v7(), color: initialColor),
-            ).push<ContainerData?>(context);
-
-            if (result != null) {
-              await ref
-                  .read(containerRepositoryProvider.notifier)
-                  .addContainer(result);
-            }
+            ).push(context);
           }
         },
         label: const Text('Container'),

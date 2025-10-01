@@ -134,7 +134,7 @@ class ContainerEditScreen extends HookConsumerWidget {
               }
 
               if (context.mounted) {
-                context.pop();
+                context.pop(container);
               }
             },
             icon: const Icon(Icons.check),
