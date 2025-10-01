@@ -77,24 +77,27 @@ class _TabDraggable extends HookConsumerWidget {
       }),
     );
 
-    final tab = (suggestedContainerId != null)
-        ? SuggestedSingleTabPreview(
-            key: ValueKey(entity.tabId),
-            tabId: entity.tabId,
-            activeTabId: activeTab,
-            containerId: suggestedContainerId!,
-          )
-        : SingleTabPreview(
-            key: ValueKey(entity.tabId),
-            tabId: entity.tabId,
-            activeTabId: activeTab,
-            onClose: onClose,
-            sourceSearchQuery: switch (entity) {
-              DefaultTabEntity _ => null,
-              final SearchResultTabEntity entity => entity.searchQuery,
-              TabTreeEntity _ => throw UnimplementedError(),
-            },
-          );
+    // Cache the tab widget to avoid rebuilding
+    final tab = useMemoized(() {
+      return (suggestedContainerId != null)
+          ? SuggestedSingleTabPreview(
+              key: ValueKey(entity.tabId),
+              tabId: entity.tabId,
+              activeTabId: activeTab,
+              containerId: suggestedContainerId!,
+            )
+          : SingleTabPreview(
+              key: ValueKey(entity.tabId),
+              tabId: entity.tabId,
+              activeTabId: activeTab,
+              onClose: onClose,
+              sourceSearchQuery: switch (entity) {
+                DefaultTabEntity _ => null,
+                final SearchResultTabEntity entity => entity.searchQuery,
+                TabTreeEntity _ => throw UnimplementedError(),
+              },
+            );
+    }, [entity.tabId, activeTab, suggestedContainerId]);
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -381,7 +384,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           ],
           body: HookConsumer(
             builder: (context, ref, child) {
-              final gridViewKey = useMemoized(() => GlobalKey());
+              final screenWidth = MediaQuery.of(context).size.width;
 
               final containerId = ref.watch(selectedContainerProvider);
 
@@ -421,24 +424,24 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
               final crossAxisCount = useMemoized(() {
                 final calculatedCount = _calculateCrossAxisItemCount(
-                  screenWidth: MediaQuery.of(context).size.width,
+                  screenWidth: screenWidth,
                   horizontalPadding: 4.0,
                   crossAxisSpacing: 8.0,
                 );
 
                 return math.max(math.min(calculatedCount, itemCount), 2);
-              }, [MediaQuery.of(context).size.width, itemCount]);
+              }, [screenWidth, itemCount]);
 
               final itemHeight = useMemoized(
                 () => _calculateItemHeight(
-                  screenWidth: MediaQuery.of(context).size.width,
+                  screenWidth: screenWidth,
                   childAspectRatio: 0.75,
                   horizontalPadding: 4.0,
                   mainAxisSpacing: 8.0,
                   crossAxisSpacing: 8.0,
                   crossAxisCount: crossAxisCount,
                 ),
-                [MediaQuery.of(context).size.width, crossAxisCount],
+                [screenWidth, crossAxisCount],
               );
 
               final lastScroll = useRef<String?>(null);
@@ -472,28 +475,6 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
                 return null;
               }, [filteredTabEntities, activeTab]);
-
-              final tabs = useMemoized(() {
-                return [
-                  ...filteredTabEntities.value.map(
-                    (entity) => CustomDraggable(
-                      key: Key(entity.tabId),
-                      data: TabDragData(entity.tabId),
-                      child: _TabDraggable(entity: entity, onClose: onClose),
-                    ),
-                  ),
-                  ...suggestedTabEntities.value.map(
-                    (entity) => CustomDraggable(
-                      key: Key('suggested_${entity.tabId}'),
-                      child: _TabDraggable(
-                        entity: entity,
-                        onClose: onClose,
-                        suggestedContainerId: containerId,
-                      ),
-                    ),
-                  ),
-                ];
-              }, [filteredTabEntities, suggestedTabEntities]);
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -563,7 +544,6 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                       },
                       childBuilder: (itemBuilder) {
                         return GridView.builder(
-                          key: gridViewKey,
                           controller: controller,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             //Sync values for itemHeight calculation _calculateItemHeight
@@ -573,8 +553,37 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                             crossAxisCount: crossAxisCount,
                           ),
                           itemCount: itemCount,
-                          itemBuilder: (context, index) =>
-                              itemBuilder(tabs[index], index),
+                          itemBuilder: (context, index) {
+                            final Widget tab;
+                            if (index < filteredTabEntities.value.length) {
+                              final entity = filteredTabEntities.value[index];
+                              tab = CustomDraggable(
+                                key: Key(entity.tabId),
+                                data: TabDragData(entity.tabId),
+                                child: _TabDraggable(
+                                  entity: entity,
+                                  onClose: onClose,
+                                ),
+                              );
+                            } else {
+                              final suggestedIndex =
+                                  index - filteredTabEntities.value.length;
+                              final entity =
+                                  suggestedTabEntities.value[suggestedIndex];
+                              tab = CustomDraggable(
+                                key: Key('suggested_${entity.tabId}'),
+                                child: _TabDraggable(
+                                  entity: entity,
+                                  onClose: onClose,
+                                  suggestedContainerId: ref.watch(
+                                    selectedContainerProvider,
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return itemBuilder(tab, index);
+                          },
                         );
                       },
                     );
