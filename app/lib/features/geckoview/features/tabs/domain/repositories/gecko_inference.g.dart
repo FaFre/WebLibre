@@ -42,7 +42,7 @@ final class GeckoInferenceRepositoryProvider
 }
 
 String _$geckoInferenceRepositoryHash() =>
-    r'1f08047bee912a475bfd0851f8a9868a41bca836';
+    r'eb174c9f80f3537bc075ebbffcef787ec55ad217';
 
 abstract class _$GeckoInferenceRepository extends $Notifier<void> {
   void build();
@@ -138,13 +138,13 @@ const suggestClustersProvider = SuggestClustersProvider._();
 final class SuggestClustersProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<List<String>>?>,
-          List<List<String>>?,
-          FutureOr<List<List<String>>?>
+          AsyncValue<List<({List<String> tabIds, String? topic})>?>,
+          List<({List<String> tabIds, String? topic})>?,
+          FutureOr<List<({List<String> tabIds, String? topic})>?>
         >
     with
-        $FutureModifier<List<List<String>>?>,
-        $FutureProvider<List<List<String>>?> {
+        $FutureModifier<List<({List<String> tabIds, String? topic})>?>,
+        $FutureProvider<List<({List<String> tabIds, String? topic})>?> {
   const SuggestClustersProvider._()
     : super(
         from: null,
@@ -161,17 +161,16 @@ final class SuggestClustersProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<List<String>>?> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+  $FutureProviderElement<List<({List<String> tabIds, String? topic})>?>
+  $createElement($ProviderPointer pointer) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<List<String>>?> create(Ref ref) {
+  FutureOr<List<({List<String> tabIds, String? topic})>?> create(Ref ref) {
     return suggestClusters(ref);
   }
 }
 
-String _$suggestClustersHash() => r'9d212158b80ba53afe305db938ab399b1e931d88';
+String _$suggestClustersHash() => r'592058ed092384c37a185dcd5657276a3dde5b4e';
 
 @ProviderFor(containerTabSuggestions)
 const containerTabSuggestionsProvider = ContainerTabSuggestionsFamily._();

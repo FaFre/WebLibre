@@ -23,16 +23,21 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/tab_drag_container_target.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 class ContainerChips extends HookConsumerWidget {
   final bool displayMenu;
+  final bool showGroupSuggestions;
 
   final ContainerData? selectedContainer;
   final bool Function(ContainerDataWithCount)? containerFilter;
@@ -48,6 +53,7 @@ class ContainerChips extends HookConsumerWidget {
     this.containerFilter,
     this.searchTextListenable,
     this.displayMenu = true,
+    this.showGroupSuggestions = false,
   });
 
   @override
@@ -132,6 +138,53 @@ class ContainerChips extends HookConsumerWidget {
                           },
                         ),
                       ),
+                      if (showGroupSuggestions)
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final tabSuggestionsEnabled = ref.watch(
+                              tabSuggestionsControllerProvider,
+                            );
+                            final enableAiFeatures = ref.watch(
+                              generalSettingsWithDefaultsProvider.select(
+                                (settings) => settings.enableLocalAiFeatures,
+                              ),
+                            );
+
+                            if (!enableAiFeatures || !tabSuggestionsEnabled) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final suggestions = ref.watch(
+                              suggestClustersProvider,
+                            );
+
+                            return suggestions.when(
+                              data: (data) {
+                                if (data.isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+
+                                return FilterChip(
+                                  avatar: const Icon(MdiIcons.autoFix),
+                                  label: Text(data!.length.toString()),
+                                  showCheckmark: false,
+                                  onSelected: (value) {},
+                                );
+                              },
+                              error: (error, stackTrace) {
+                                logger.e(
+                                  'Error suggesting containers',
+                                  error: error,
+                                  stackTrace: stackTrace,
+                                );
+                                return const SizedBox.shrink();
+                              },
+                              loading: () {
+                                return const SizedBox.shrink();
+                              },
+                            );
+                          },
+                        ),
                     ],
                     availableItems: availableContainers,
                     selectedItem: selectedContainer,

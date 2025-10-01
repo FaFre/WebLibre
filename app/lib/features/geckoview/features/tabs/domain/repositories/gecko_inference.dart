@@ -134,8 +134,8 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     return neighbors;
   }
 
-  Future<List<List<String>>?> suggestClusters({
-    required List<String> unassignedDocumentsInput,
+  Future<List<({String? topic, List<String> tabIds})>?> suggestClusters({
+    required Map<String, String> unassignedDocumentsInput,
   }) async {
     if (!ref.read(
       generalSettingsWithDefaultsProvider.select(
@@ -146,7 +146,9 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     }
 
     final processedDocuments = <String, String>{};
-    final unassignedDocumentsProcessed = unassignedDocumentsInput.map((doc) {
+    final unassignedDocumentsProcessed = unassignedDocumentsInput.values.map((
+      doc,
+    ) {
       final processed = preprocessText(doc);
       if (processed != doc) {
         processedDocuments[processed] = doc;
@@ -168,9 +170,25 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
           .toList(),
     );
 
-    print(clusters);
+    final clusterResult = await clusters.mapNotNull(
+      (cluster) => Future.wait(
+        cluster.map((clusterTitles) async {
+          final topic = await predictDocumentTopic(clusterTitles.toSet());
 
-    return null;
+          return (
+            topic: topic,
+            tabIds: clusterTitles.map((title) {
+              final originalTitle = processedDocuments[title] ?? title;
+              return unassignedDocumentsInput.entries
+                  .firstWhere((entry) => entry.value == originalTitle)
+                  .key;
+            }).toList(),
+          );
+        }),
+      ),
+    );
+
+    return clusterResult;
   }
 
   Future<Map<String, List<double>>?> generateDocumentEmbeddings(
@@ -236,26 +254,25 @@ Future<String?> containerTopic(Ref ref, String containerId) async {
 }
 
 @Riverpod()
-Future<List<List<String>>?> suggestClusters(Ref ref) async {
+Future<List<({List<String> tabIds, String? topic})>?> suggestClusters(
+  Ref ref,
+) async {
   final unassignedTitles = await ref.watch(
     containerTabsDataProvider(null).selectAsync(
       (tabData) => EquatableValue(
-        tabData
-            .where((tab) => tab.title.isNotEmpty)
-            .map((tab) => (tab.id, tab.title!))
-            .toSet(),
+        Map.fromEntries(
+          tabData
+              .where((tab) => tab.title.isNotEmpty)
+              .map((tab) => MapEntry(tab.id, tab.title!)),
+        ),
       ),
     ),
   );
 
   if (unassignedTitles.value.isNotEmpty) {
-    await ref
+    return await ref
         .read(geckoInferenceRepositoryProvider.notifier)
-        .suggestClusters(
-          unassignedDocumentsInput: unassignedTitles.value
-              .map((tab) => tab.$2)
-              .toList(),
-        );
+        .suggestClusters(unassignedDocumentsInput: unassignedTitles.value);
   }
 
   return null;

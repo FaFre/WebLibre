@@ -279,6 +279,7 @@ class _TabSheetHeader extends HookConsumerWidget {
                     );
 
                     return ContainerChips(
+                      showGroupSuggestions: true,
                       selectedContainer: selectedContainer,
                       onSelected: (container) async {
                         if (container != null) {
