@@ -42,51 +42,59 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
   unawaited(
     service.setActions([
       NewTabAction((text) async {
-        final router = await ref.read(routerProvider.future);
-        final settings = ref.read(generalSettingsWithDefaultsProvider);
-        final route = SearchRoute(
-          tabType:
-              // ignore: only_use_keep_alive_inside_keep_alive
-              ref.read(selectedTabTypeProvider) ??
-              settings.defaultCreateTabType,
-          searchText: text,
-        );
+        if (ref.mounted) {
+          final router = await ref.read(routerProvider.future);
+          if (ref.mounted) {
+            final settings = ref.read(generalSettingsWithDefaultsProvider);
+            final route = SearchRoute(
+              tabType:
+                  // ignore: only_use_keep_alive_inside_keep_alive
+                  ref.read(selectedTabTypeProvider) ??
+                  settings.defaultCreateTabType,
+              searchText: text,
+            );
 
-        await router.push(route.location);
+            await router.push(route.location);
+          }
+        }
       }),
       DefaultSearchAction((text) async {
-        final defaultSearchBang = await ref.read(
-          defaultSearchBangDataProvider.future,
-        );
+        if (ref.mounted) {
+          final defaultSearchBang = await ref.read(
+            defaultSearchBangDataProvider.future,
+          );
 
-        if (defaultSearchBang != null) {
-          // ignore: only_use_keep_alive_inside_keep_alive
-          final currentTab = ref.read(selectedTabStateProvider);
-          final isPrivate =
-              currentTab?.isPrivate ??
-              ref
-                      .read(generalSettingsWithDefaultsProvider)
-                      .defaultCreateTabType ==
-                  TabType.private;
+          if (ref.mounted && defaultSearchBang != null) {
+            // ignore: only_use_keep_alive_inside_keep_alive
+            final currentTab = ref.read(selectedTabStateProvider);
+            final isPrivate =
+                currentTab?.isPrivate ??
+                ref
+                        .read(generalSettingsWithDefaultsProvider)
+                        .defaultCreateTabType ==
+                    TabType.private;
 
-          await ref
-              .read(tabRepositoryProvider.notifier)
-              .addTab(
-                url: defaultSearchBang.getTemplateUrl(text),
-                parentId: currentTab?.id,
-                private: isPrivate,
-              );
-        } else {
-          logger.e('No default search bang found');
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .addTab(
+                  url: defaultSearchBang.getTemplateUrl(text),
+                  parentId: currentTab?.id,
+                  private: isPrivate,
+                );
+          } else {
+            logger.e('No default search bang found');
+          }
         }
       }),
       FindInPageAction((text) async {
-        final tabId = ref.read(selectedTabProvider);
-        if (tabId != null) {
-          // ignore: only_use_keep_alive_inside_keep_alive
-          await ref
-              .read(findInPageControllerProvider(tabId).notifier)
-              .findAll(text: text);
+        if (ref.mounted) {
+          final tabId = ref.read(selectedTabProvider);
+          if (tabId != null) {
+            // ignore: only_use_keep_alive_inside_keep_alive
+            await ref
+                .read(findInPageControllerProvider(tabId).notifier)
+                .findAll(text: text);
+          }
         }
       }),
       ShareAction((text) async {

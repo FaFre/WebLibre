@@ -26,16 +26,14 @@ part 'router.g.dart';
 
 @Riverpod(keepAlive: true)
 Future<GoRouter> router(Ref ref) async {
+  final onboardingRepository = ref.read(onboardingRepositoryProvider.notifier);
+
   String? initialLocation;
 
-  final onboardingMandatory = await ref
-      .read(onboardingRepositoryProvider.notifier)
-      .isOutdated();
+  final onboardingMandatory = await onboardingRepository.isOutdated();
 
   if (onboardingMandatory) {
-    final current = await ref
-        .read(onboardingRepositoryProvider.notifier)
-        .getCurrentRevision();
+    final current = await onboardingRepository.getCurrentRevision();
 
     final route = OnboardingRoute(
       currentRevision: current ?? -1,

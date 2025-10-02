@@ -104,18 +104,17 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
   Future<void> updateSettings(
     UpdateEngineSettingsFunc updateWithCurrent,
   ) async {
+    final db = ref.read(userDatabaseProvider);
+
     final current = await fetchSettings();
 
     final oldJson = current.toJson();
     final newJson = updateWithCurrent(current).toJson();
 
-    return ref.read(userDatabaseProvider).transaction(() async {
+    return db.transaction(() async {
       for (final MapEntry(:key, :value) in newJson.entries) {
         if (oldJson[key] != value) {
-          await ref
-              .read(userDatabaseProvider)
-              .settingDao
-              .updateSetting(key, _partitionKey, value);
+          await db.settingDao.updateSetting(key, _partitionKey, value);
         }
       }
     });

@@ -66,6 +66,8 @@ class TabRepository extends _$TabRepository {
     Value<ContainerData?>? container,
     bool launchedFromIntent = false,
   }) async {
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+
     final assingedContainer =
         container ??
         Value<ContainerData?>(
@@ -73,27 +75,24 @@ class TabRepository extends _$TabRepository {
           await ref.read(selectedContainerProvider.notifier).fetchData(),
         );
 
-    final newTabId = await ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .upsertContainerTabTransactional(
-          () {
-            return _tabsService.addTab(
-              url: url,
-              selectTab: selectTab,
-              startLoading: startLoading,
-              parentId: parentId,
-              flags: flags,
-              contextId: assingedContainer.value?.metadata.contextualIdentity,
-              source: source,
-              private: private,
-              historyMetadata: historyMetadata,
-              additionalHeaders: additionalHeaders,
-            );
-          },
-          parentId: Value(parentId),
-          containerId: Value(assingedContainer.value?.id),
+    final newTabId = await tabDao.upsertContainerTabTransactional(
+      () {
+        return _tabsService.addTab(
+          url: url,
+          selectTab: selectTab,
+          startLoading: startLoading,
+          parentId: parentId,
+          flags: flags,
+          contextId: assingedContainer.value?.metadata.contextualIdentity,
+          source: source,
+          private: private,
+          historyMetadata: historyMetadata,
+          additionalHeaders: additionalHeaders,
         );
+      },
+      parentId: Value(parentId),
+      containerId: Value(assingedContainer.value?.id),
+    );
 
     if (launchedFromIntent) {
       _tabFromIntent.add(newTabId);
@@ -107,26 +106,25 @@ class TabRepository extends _$TabRepository {
     String? containerId,
     bool selectTab = true,
   }) async {
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+
     final containerData = await containerId.mapNotNull(
       (containerId) => ref
           .read(containerRepositoryProvider.notifier)
           .getContainerData(containerId),
     );
 
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .upsertContainerTabTransactional(
-          () {
-            return _tabsService.duplicateTab(
-              selectTabId: selectTabId,
-              newContextId: containerData?.metadata.contextualIdentity,
-              selectNewTab: selectTab,
-            );
-          },
-          parentId: const Value.absent(),
-          containerId: Value(containerData?.id),
+    return await tabDao.upsertContainerTabTransactional(
+      () {
+        return _tabsService.duplicateTab(
+          selectTabId: selectTabId,
+          newContextId: containerData?.metadata.contextualIdentity,
+          selectNewTab: selectTab,
         );
+      },
+      parentId: const Value.absent(),
+      containerId: Value(containerData?.id),
+    );
   }
 
   Future<bool> selectPreviouslyOpenedTab(String tabId) async {
@@ -136,7 +134,7 @@ class TabRepository extends _$TabRepository {
         .previousTabByTimestamp(tabId: tabId)
         .getSingleOrNull();
 
-    if (previousTabId != null) {
+    if (ref.mounted && previousTabId != null) {
       return selectTab(previousTabId);
     }
 
@@ -158,7 +156,7 @@ class TabRepository extends _$TabRepository {
         )
         .getSingleOrNull();
 
-    if (previousTabId != null) {
+    if (ref.mounted && previousTabId != null) {
       return selectTab(previousTabId);
     }
 
@@ -180,7 +178,7 @@ class TabRepository extends _$TabRepository {
         )
         .getSingleOrNull();
 
-    if (previousTabId != null) {
+    if (ref.mounted && previousTabId != null) {
       return selectTab(previousTabId);
     }
 
@@ -192,11 +190,15 @@ class TabRepository extends _$TabRepository {
         .read(tabDataRepositoryProvider.notifier)
         .getContainerTabId(tabId);
 
+    if (!ref.mounted) return false;
+
     final containerData = await containerId.mapNotNull(
       (containerId) => ref
           .read(containerRepositoryProvider.notifier)
           .getContainerData(containerId),
     );
+
+    if (!ref.mounted) return false;
 
     if (containerData != null) {
       if (containerData.metadata.authSettings.authenticationRequired) {
@@ -234,10 +236,14 @@ class TabRepository extends _$TabRepository {
         .read(tabDataRepositoryProvider.notifier)
         .getContainerTabId(tabId);
 
+    if (!ref.mounted) return;
+
     final sameContainerTabs = await ref
         .read(containerRepositoryProvider.notifier)
         .getContainerTabIds(currentContainerId)
         .then((tabs) => tabs.where((tab) => tab != tabId).toList());
+
+    if (!ref.mounted) return;
 
     final previousTabId = await ref
         .read(tabDatabaseProvider)
@@ -257,6 +263,8 @@ class TabRepository extends _$TabRepository {
       }
     }
 
+    if (!ref.mounted) return;
+
     final previousOrderedTabId = await ref
         .read(tabDatabaseProvider)
         .definitionsDrift
@@ -270,6 +278,8 @@ class TabRepository extends _$TabRepository {
     if (previousOrderedTabId != null) {
       return _tabsService.selectTab(tabId: previousOrderedTabId);
     }
+
+    if (!ref.mounted) return;
 
     final nextOrderedTabId = await ref
         .read(tabDatabaseProvider)
@@ -285,6 +295,8 @@ class TabRepository extends _$TabRepository {
       return _tabsService.selectTab(tabId: nextOrderedTabId);
     }
 
+    if (!ref.mounted) return;
+
     final unassignedTabs = await ref
         .read(containerRepositoryProvider.notifier)
         .getContainerTabIds(null)
@@ -293,6 +305,8 @@ class TabRepository extends _$TabRepository {
     if (unassignedTabs.isNotEmpty) {
       return _tabsService.selectTab(tabId: unassignedTabs.first);
     }
+
+    if (!ref.mounted) return;
 
     //We only take containers without authentication!
     final availableContainers = await ref
@@ -304,6 +318,8 @@ class TabRepository extends _$TabRepository {
           (container) =>
               container.metadata.authSettings.authenticationRequired == false,
         );
+
+    if (!ref.mounted) return;
 
     final nextContainerTabs = await nextAvailableContainerUnauthenticated
         .mapNotNull(
@@ -317,7 +333,7 @@ class TabRepository extends _$TabRepository {
       return _tabsService.selectTab(tabId: nextContainerTabs!.first);
     }
 
-    if (availableContainers.isNotEmpty) {
+    if (ref.mounted && availableContainers.isNotEmpty) {
       //Last resort push new tab to avoid any authenticated tab is selected
       // ignore: avoid_redundant_argument_values
       await addTab(selectTab: true, private: false);

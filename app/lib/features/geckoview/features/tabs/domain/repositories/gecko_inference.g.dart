@@ -112,7 +112,7 @@ final class ContainerTopicProvider
   }
 }
 
-String _$containerTopicHash() => r'dd2af0571a84f9cc2536af6a1079e7ee58e2a0a5';
+String _$containerTopicHash() => r'ddb306605a0e38b1d750bf4412cbd595f8f264cc';
 
 final class ContainerTopicFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<String?>, String> {
@@ -171,7 +171,7 @@ final class SuggestClustersProvider
   }
 }
 
-String _$suggestClustersHash() => r'3b7da171b3596f708a8039658578251ae61655ea';
+String _$suggestClustersHash() => r'694b401ddd6ce68084f79883e67fda4b44607ef0';
 
 @ProviderFor(containerTabSuggestions)
 const containerTabSuggestionsProvider = ContainerTabSuggestionsFamily._();
@@ -230,7 +230,7 @@ final class ContainerTabSuggestionsProvider
 }
 
 String _$containerTabSuggestionsHash() =>
-    r'ab8e596f0c7e8562bf998c701145e48eb1e520d5';
+    r'9e7e9b9d245959fcf8c87cb8822313ded801ebc0';
 
 final class ContainerTabSuggestionsFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<String>?>, String?> {

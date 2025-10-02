@@ -25,7 +25,7 @@ import 'package:weblibre/data/models/received_intent_parameter.dart';
 part 'home_widget.g.dart';
 
 @Riverpod(keepAlive: true)
-FutureOr<bool> widgetPinnable(Ref ref) async {
+Future<bool> widgetPinnable(Ref ref) async {
   return await HomeWidget.isRequestPinWidgetSupported() ?? false;
 }
 

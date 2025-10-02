@@ -53,6 +53,7 @@ class EngineBoundIntentStream extends _$EngineBoundIntentStream {
   @override
   Stream<SharedContent> build() {
     _streamController = StreamController();
+
     ref.onDispose(() async {
       await _streamController.close();
     });

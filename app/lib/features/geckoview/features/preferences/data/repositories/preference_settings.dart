@@ -52,8 +52,8 @@ Future<PreferenceSettingGroup> _preferenceSettingGroup(
   Ref ref,
   PreferencePartition partition,
   String groupName,
-) {
-  return ref.watch(
+) async {
+  return await ref.watch(
     _preferenceSettingGroupsProvider(partition).selectAsync(
       (groups) =>
           groups[groupName] ?? (throw Exception('Unknown setting group')),
@@ -104,6 +104,10 @@ class UnifiedPreferenceSettingsRepository
   Map<String, PreferenceSettingGroup>? _statelessGroups;
 
   Future<void> apply() async {
+    final preferenceRepository = ref.read(
+      _preferenceRepositoryProvider.notifier,
+    );
+
     _statelessGroups = await ref.read(
       _preferenceSettingGroupsProvider(partition).future,
     );
@@ -117,10 +121,14 @@ class UnifiedPreferenceSettingsRepository
         ),
     };
 
-    await ref.read(_preferenceRepositoryProvider.notifier).applyPrefs(prefs);
+    await preferenceRepository.applyPrefs(prefs);
   }
 
   Future<void> reset() async {
+    final preferenceRepository = ref.read(
+      _preferenceRepositoryProvider.notifier,
+    );
+
     _statelessGroups = await ref.read(
       _preferenceSettingGroupsProvider(partition).future,
     );
@@ -130,7 +138,7 @@ class UnifiedPreferenceSettingsRepository
         .flattened
         .toList();
 
-    await ref.read(_preferenceRepositoryProvider.notifier).resetPrefs(prefs);
+    await preferenceRepository.resetPrefs(prefs);
   }
 
   @override
@@ -167,6 +175,10 @@ class PreferenceSettingsGroupRepository
   PreferenceSettingGroup? _statelessSettingGroup;
 
   Future<void> apply({List<String>? filter}) async {
+    final preferenceRepository = ref.read(
+      _preferenceRepositoryProvider.notifier,
+    );
+
     _statelessSettingGroup ??= await ref.read(
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
@@ -184,10 +196,14 @@ class PreferenceSettingsGroupRepository
               .map((e) => MapEntry(e.key, e.value.value)),
     );
 
-    await ref.read(_preferenceRepositoryProvider.notifier).applyPrefs(prefs);
+    await preferenceRepository.applyPrefs(prefs);
   }
 
   Future<void> reset({List<String>? filter}) async {
+    final preferenceRepository = ref.read(
+      _preferenceRepositoryProvider.notifier,
+    );
+
     _statelessSettingGroup ??= await ref.read(
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
@@ -199,9 +215,9 @@ class PreferenceSettingsGroupRepository
       throw Exception('Preference not part of group');
     }
 
-    await ref
-        .read(_preferenceRepositoryProvider.notifier)
-        .resetPrefs(filter ?? _statelessSettingGroup!.settings.keys.toList());
+    await preferenceRepository.resetPrefs(
+      filter ?? _statelessSettingGroup!.settings.keys.toList(),
+    );
   }
 
   @override

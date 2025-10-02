@@ -5,11 +5,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
-Future<PackageInfo> packageInfo(Ref ref) {
-  return PackageInfo.fromPlatform();
+Future<PackageInfo> packageInfo(Ref ref) async {
+  return await PackageInfo.fromPlatform();
 }
 
 @Riverpod()
-Future<String> geckoVersion(Ref ref) {
-  return GeckoBrowserService().getGeckoVersion();
+Future<String> geckoVersion(Ref ref) async {
+  return await GeckoBrowserService().getGeckoVersion();
 }

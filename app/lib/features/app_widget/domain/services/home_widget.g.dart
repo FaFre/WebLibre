@@ -40,7 +40,7 @@ final class WidgetPinnableProvider
   }
 }
 
-String _$widgetPinnableHash() => r'f91041f0f051ad0f00dd765cafea5571ca8c8088';
+String _$widgetPinnableHash() => r'3181e5e3e69e7e796e6429ca7507bbbc239f6c21';
 
 @ProviderFor(appWidgetLaunchStream)
 const appWidgetLaunchStreamProvider = AppWidgetLaunchStreamProvider._();

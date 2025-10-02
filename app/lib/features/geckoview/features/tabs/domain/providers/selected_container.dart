@@ -37,7 +37,7 @@ enum SetContainerResult { failed, success, successHasProxy }
 class SelectedContainer extends _$SelectedContainer {
   Future<ContainerData?> fetchData() async {
     if (state != null) {
-      return ref
+      return await ref
           .read(containerRepositoryProvider.notifier)
           .getContainerData(state!);
     }
@@ -72,7 +72,7 @@ class SelectedContainer extends _$SelectedContainer {
         .read(containerRepositoryProvider.notifier)
         .getContainerData(id);
 
-    if (container != null) {
+    if (ref.mounted && container != null) {
       final passAuth = await authenticateContainer(container);
       if (passAuth) {
         if (container.metadata.useProxy) {
@@ -127,7 +127,7 @@ class SelectedContainer extends _$SelectedContainer {
               .read(tabDataRepositoryProvider.notifier)
               .getContainerTabId(next);
 
-          if (tabContainerId != stateOrNull) {
+          if (ref.mounted && tabContainerId != stateOrNull) {
             if (tabContainerId != null) {
               await setContainerId(tabContainerId);
             } else {

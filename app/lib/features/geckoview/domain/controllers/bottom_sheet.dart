@@ -55,6 +55,7 @@ class BottomSheetExtend extends _$BottomSheetExtend {
   @override
   Stream<double> build() {
     _extentStreamController = StreamController();
+
     ref.onDispose(() async {
       await _extentStreamController.close();
     });

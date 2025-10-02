@@ -247,6 +247,8 @@ class TorProxyService extends _$TorProxyService {
 
     await _tor.initializeService();
 
+    if (!ref.mounted) return null;
+
     ref.listen(
       fireImmediately: true,
       browserViewLifecycleProvider,

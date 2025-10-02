@@ -193,7 +193,7 @@ final class _PreferenceSettingGroupProvider
 }
 
 String _$_preferenceSettingGroupHash() =>
-    r'64d80a37928d7e5aea7d3d567dde8ade7292cd5f';
+    r'df85cf2207411a89b4c379e24989857f81d04011';
 
 final class _PreferenceSettingGroupFamily extends $Family
     with
@@ -341,7 +341,7 @@ final class UnifiedPreferenceSettingsRepositoryProvider
 }
 
 String _$unifiedPreferenceSettingsRepositoryHash() =>
-    r'35aa16ffa7aa1453c8331ed7470ef85a68d27178';
+    r'23c0da1fdc975bbfb88b3cf82f242dbe0d50cd87';
 
 final class UnifiedPreferenceSettingsRepositoryFamily extends $Family
     with
@@ -455,7 +455,7 @@ final class PreferenceSettingsGroupRepositoryProvider
 }
 
 String _$preferenceSettingsGroupRepositoryHash() =>
-    r'60f416ffe1cde4d535fb5b643a80aead20836bae';
+    r'05db908036ffa999886f4e9dc4429aa85f8957f9';
 
 final class PreferenceSettingsGroupRepositoryFamily extends $Family
     with

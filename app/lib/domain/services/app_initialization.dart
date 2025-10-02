@@ -64,8 +64,14 @@ class AppInitializationService extends _$AppInitializationService {
       final errors = <ErrorMessage>[];
 
       await ref.read(formatProvider.future);
+      if (!ref.mounted) {
+        return (initialized: false, stage: null, errors: errors);
+      }
 
       await _initPackageInfo();
+      if (!ref.mounted) {
+        return (initialized: false, stage: null, errors: errors);
+      }
 
       final bangSyncResults = await _initBangs();
       for (final MapEntry(value: result) in bangSyncResults.entries) {

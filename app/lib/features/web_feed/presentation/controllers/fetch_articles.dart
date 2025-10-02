@@ -29,24 +29,19 @@ class FetchArticlesController extends _$FetchArticlesController {
   Future<void> fetchAllArticles() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final feeds = await ref
-          .read(feedRepositoryProvider.notifier)
-          .getAllFeeds();
+      final feedRepository = ref.read(feedRepositoryProvider.notifier);
+
+      final feeds = await feedRepository.getAllFeeds();
 
       await Future.wait(
         feeds.map((feed) async {
           try {
-            final result = await ref
-                .read(feedReaderProvider.notifier)
-                .parseFeed(feed.url);
+            final feedReader = ref.read(feedReaderProvider.notifier);
 
-            await ref
-                .read(feedRepositoryProvider.notifier)
-                .upsertArticles(result.articleData);
+            final result = await feedReader.parseFeed(feed.url);
 
-            await ref
-                .read(feedRepositoryProvider.notifier)
-                .touchFeedFetched(feed.url);
+            await feedRepository.upsertArticles(result.articleData);
+            await feedRepository.touchFeedFetched(feed.url);
           } catch (e, s) {
             logger.e(
               'Failed fetching feed ${feed.url}',
@@ -62,13 +57,12 @@ class FetchArticlesController extends _$FetchArticlesController {
   Future<void> fetchFeedArticles(Uri uri) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      final feedRepository = ref.read(feedRepositoryProvider.notifier);
+
       final result = await ref.read(feedReaderProvider.notifier).parseFeed(uri);
 
-      await ref
-          .read(feedRepositoryProvider.notifier)
-          .upsertArticles(result.articleData);
-
-      await ref.read(feedRepositoryProvider.notifier).touchFeedFetched(uri);
+      await feedRepository.upsertArticles(result.articleData);
+      await feedRepository.touchFeedFetched(uri);
     });
   }
 

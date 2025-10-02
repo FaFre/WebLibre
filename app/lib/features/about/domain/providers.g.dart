@@ -46,7 +46,7 @@ final class PackageInfoProvider
   }
 }
 
-String _$packageInfoHash() => r'cc57db7b4684ab0d5df0f050b8ea045a3658e89a';
+String _$packageInfoHash() => r'44d37547139567a5f03c1942c1d62ff1abb07248';
 
 @ProviderFor(geckoVersion)
 const geckoVersionProvider = GeckoVersionProvider._();
@@ -79,4 +79,4 @@ final class GeckoVersionProvider
   }
 }
 
-String _$geckoVersionHash() => r'3a8639b5d1d07c60a789cf705ede09a91cbaee63';
+String _$geckoVersionHash() => r'1ad2af96ba1999660c208a0095530d901d589228';

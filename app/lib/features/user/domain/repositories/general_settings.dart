@@ -116,12 +116,12 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   Future<void> updateSettings(
     UpdateGeneralSettingsFunc updateWithCurrent,
   ) async {
+    final db = ref.read(userDatabaseProvider);
+
     final current = await fetchSettings();
 
     final oldJson = current.toJson();
     final newJson = updateWithCurrent(current).toJson();
-
-    final db = ref.read(userDatabaseProvider);
 
     return db.transaction(() async {
       for (final MapEntry(:key, :value) in newJson.entries) {

@@ -249,11 +249,13 @@ Future<String?> containerTopic(Ref ref, String containerId) async {
     ),
   );
 
+  if (!ref.mounted) return null;
+
   final topic = await ref
       .read(geckoInferenceRepositoryProvider.notifier)
       .predictDocumentTopic(titles.value);
 
-  if (topic.isNotEmpty) {
+  if (ref.mounted && topic.isNotEmpty) {
     ref.keepAlive();
   }
 
@@ -274,7 +276,7 @@ Future<List<SuggestedContainer>?> suggestClusters(Ref ref) async {
     ),
   );
 
-  if (unassignedTitles.value.isNotEmpty) {
+  if (ref.mounted && unassignedTitles.value.isNotEmpty) {
     return await ref
         .read(geckoInferenceRepositoryProvider.notifier)
         .suggestClusters(unassignedDocumentsInput: unassignedTitles.value);
@@ -294,6 +296,8 @@ Future<List<String>?> containerTabSuggestions(
 
   final container = await ref.watch(containerDataProvider(containerId).future);
 
+  if (!ref.mounted) return null;
+
   final assignedTitles = await ref.watch(
     containerTabsDataProvider(containerId).selectAsync(
       (tabData) => EquatableValue(
@@ -304,6 +308,8 @@ Future<List<String>?> containerTabSuggestions(
       ),
     ),
   );
+
+  if (!ref.mounted) return null;
 
   final unassignedTitles = await ref.watch(
     containerTabsDataProvider(null).selectAsync(
@@ -316,7 +322,9 @@ Future<List<String>?> containerTabSuggestions(
     ),
   );
 
-  if (assignedTitles.value.isNotEmpty && unassignedTitles.value.isNotEmpty) {
+  if (ref.mounted &&
+      assignedTitles.value.isNotEmpty &&
+      unassignedTitles.value.isNotEmpty) {
     final topic =
         container?.name ??
         await ref
@@ -325,7 +333,7 @@ Future<List<String>?> containerTabSuggestions(
               assignedTitles.value.map((tab) => tab.$2).toSet(),
             );
 
-    if (topic != null) {
+    if (ref.mounted && topic != null) {
       final suggestedTitles = await ref
           .read(geckoInferenceRepositoryProvider.notifier)
           .suggestDocuments(

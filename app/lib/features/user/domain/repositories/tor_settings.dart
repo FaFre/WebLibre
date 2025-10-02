@@ -69,12 +69,12 @@ class TorSettingsRepository extends _$TorSettingsRepository {
   }
 
   Future<void> updateSettings(UpdateTorSettingsFunc updateWithCurrent) async {
+    final db = ref.read(userDatabaseProvider);
+
     final current = await fetchSettings();
 
     final oldJson = current.toJson();
     final newJson = updateWithCurrent(current).toJson();
-
-    final db = ref.read(userDatabaseProvider);
 
     return db.transaction(() async {
       for (final MapEntry(:key, :value) in newJson.entries) {

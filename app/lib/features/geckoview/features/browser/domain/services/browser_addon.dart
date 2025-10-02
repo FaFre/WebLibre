@@ -52,6 +52,8 @@ class BrowserAddonService extends _$BrowserAddonService {
   Future<bool> install(String addonGuid) async {
     try {
       final xpiUrl = await getAddonXpiUrl(addonGuid);
+      if (!ref.mounted) return false;
+
       await ref.read(addonServiceProvider).installAddon(xpiUrl);
 
       return true;
