@@ -28,7 +28,7 @@ import 'package:weblibre/features/search/util/tokenized_filter.dart';
 
 part 'providers.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 Stream<List<ContainerDataWithCount>> containersWithCount(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
   return db.definitionsDrift.containersWithCount().watch();
