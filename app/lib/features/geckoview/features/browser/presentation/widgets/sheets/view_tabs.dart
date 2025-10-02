@@ -425,7 +425,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
               final itemCount =
                   filteredTabEntities.value.length +
                   //Limit to 3 sugegstions for now
-                  math.max<int>(suggestedTabEntities.value.length, 3);
+                  math.min<int>(suggestedTabEntities.value.length, 3);
 
               final activeTab = ref.watch(selectedTabProvider);
 
