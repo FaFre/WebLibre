@@ -19,6 +19,7 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:nullability/nullability.dart';
 
 class _BadgeWrapper extends StatelessWidget {
   final Widget child;
@@ -35,6 +36,20 @@ class _BadgeWrapper extends StatelessWidget {
             textColor: Theme.of(context).colorScheme.onPrimaryContainer,
             child: child,
           )
+        : child;
+  }
+}
+
+class _GestureWrapper extends StatelessWidget {
+  final Widget child;
+  final GestureLongPressCallback? onLongPress;
+
+  const _GestureWrapper({required this.child, this.onLongPress});
+
+  @override
+  Widget build(BuildContext context) {
+    return onLongPress != null
+        ? InkWell(onLongPress: onLongPress, child: child)
         : child;
   }
 }
@@ -56,6 +71,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
 
   final void Function(T item)? onSelected;
   final void Function(T item)? onDeleted;
+  final void Function(T item)? onLongPress;
 
   const SelectableChips({
     required this.itemId,
@@ -71,6 +87,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.deleteIcon = true,
     this.onSelected,
     this.onDeleted,
+    this.onLongPress,
     super.key,
   });
 
@@ -110,26 +127,32 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
               padding: const EdgeInsets.only(right: 8.0, top: 4.0),
               child: _BadgeWrapper(
                 count: itemBadgeCount?.call(item),
-                child: FilterChip(
-                  selected:
-                      selectedItem != null &&
-                      itemId(item) == itemId(selectedItem as S),
-                  showCheckmark: false,
-                  onSelected: (value) {
-                    if (value) {
-                      onSelected?.call(item);
-                    } else {
-                      onDeleted?.call(item);
-                    }
-                  },
-                  onDeleted: deleteIcon
-                      ? () {
-                          onDeleted?.call(item);
-                        }
-                      : null,
-                  label: itemLabel.call(item),
-                  avatar: itemAvatar?.call(item),
-                  tooltip: itemTooltip?.call(item),
+                child: _GestureWrapper(
+                  onLongPress: onLongPress.mapNotNull(
+                    (callback) =>
+                        () => callback(item),
+                  ),
+                  child: FilterChip(
+                    selected:
+                        selectedItem != null &&
+                        itemId(item) == itemId(selectedItem as S),
+                    showCheckmark: false,
+                    onSelected: (value) {
+                      if (value) {
+                        onSelected?.call(item);
+                      } else {
+                        onDeleted?.call(item);
+                      }
+                    },
+                    onDeleted: deleteIcon
+                        ? () {
+                            onDeleted?.call(item);
+                          }
+                        : null,
+                    label: itemLabel.call(item),
+                    avatar: itemAvatar?.call(item),
+                    tooltip: itemTooltip?.call(item),
+                  ),
                 ),
               ),
             );

@@ -44,6 +44,7 @@ class ContainerChips extends HookConsumerWidget {
   final bool Function(ContainerDataWithCount)? containerFilter;
   final void Function(ContainerDataWithCount?)? onSelected;
   final void Function(ContainerDataWithCount)? onDeleted;
+  final void Function(ContainerDataWithCount)? onLongPress;
 
   final ValueListenable<TextEditingValue>? searchTextListenable;
 
@@ -51,6 +52,7 @@ class ContainerChips extends HookConsumerWidget {
     required this.selectedContainer,
     required this.onSelected,
     required this.onDeleted,
+    this.onLongPress,
     this.containerFilter,
     this.searchTextListenable,
     this.displayMenu = true,
@@ -197,6 +199,7 @@ class ContainerChips extends HookConsumerWidget {
                   selectedItem: selectedContainer,
                   onSelected: onSelected,
                   onDeleted: onDeleted,
+                  onLongPress: onLongPress,
                 ),
               ),
               if (displayMenu)
