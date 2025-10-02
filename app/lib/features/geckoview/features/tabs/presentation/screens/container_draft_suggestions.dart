@@ -1,9 +1,13 @@
 import 'dart:math' as math;
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
@@ -64,8 +68,35 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                       itemId: (container) => container,
                       itemAvatar: (container) =>
                           const Icon(MdiIcons.creation, size: 20),
-                      itemLabel: (container) =>
-                          Text(container.topic ?? 'Untitled'),
+                      itemLabel: (container) => HookConsumer(
+                        builder: (context, ref, child) {
+                          final items = useListenableSelector(
+                            selectedContainerTabs,
+                            () => selectedContainerTabs.value[container],
+                          );
+
+                          final topic = items.isNotEmpty
+                              ? ref.watch(
+                                  tabsTopicProvider(EquatableValue(items!)),
+                                )
+                              : AsyncValue.data(container.topic);
+
+                          return topic.when(
+                            data: (topic) => Text(topic ?? 'Untitled'),
+                            error: (error, stackTrace) {
+                              logger.e(
+                                'Failed predicting selected tabs topic',
+                                error: error,
+                                stackTrace: stackTrace,
+                              );
+
+                              return Text(container.topic ?? 'Untitled');
+                            },
+                            loading: () =>
+                                const Skeletonizer(child: Text('Untitled')),
+                          );
+                        },
+                      ),
                       itemBadgeCount: (container) => container.tabIds.length,
                       availableItems: suggestions!,
                       selectedItem: selectedContainer.value,
@@ -150,7 +181,19 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                 final initialContainer = ContainerData(
                   id: uuid.v7(),
                   color: initialColor,
-                  name: selectedContainer.value?.topic,
+                  name:
+                      (ref.exists(
+                        tabsTopicProvider(EquatableValue(selectedTabs!)),
+                      ))
+                      ? ref
+                                .read(
+                                  tabsTopicProvider(
+                                    EquatableValue(selectedTabs),
+                                  ),
+                                )
+                                .value ??
+                            selectedContainer.value?.topic
+                      : selectedContainer.value?.topic,
                 );
 
                 if (context.mounted) {
@@ -159,7 +202,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                   ).push<ContainerData?>(context);
 
                   if (result != null) {
-                    for (final tab in selectedTabs!) {
+                    for (final tab in selectedTabs) {
                       await ref
                           .read(tabDataRepositoryProvider.notifier)
                           .assignContainer(tab, result);

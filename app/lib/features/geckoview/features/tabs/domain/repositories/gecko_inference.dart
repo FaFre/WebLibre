@@ -27,6 +27,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/lru_cache.dart';
@@ -251,6 +252,33 @@ Future<String?> containerTopic(Ref ref, String containerId) async {
 
   if (!ref.mounted) return null;
 
+  final topic = await ref.watch(topicSuggestionProvider(titles).future);
+
+  if (ref.mounted && topic.isNotEmpty) {
+    ref.keepAlive();
+  }
+
+  return topic;
+}
+
+@Riverpod()
+AsyncValue<String?> tabsTopic(Ref ref, EquatableValue<Set<String>> tabIds) {
+  final tabTitles = ref.watch(
+    tabStatesProvider.select((states) {
+      return EquatableValue(
+        tabIds.value.map((tabId) => states[tabId]?.title).nonNulls.toSet(),
+      );
+    }),
+  );
+
+  return ref.watch(topicSuggestionProvider(tabTitles));
+}
+
+@Riverpod()
+Future<String?> topicSuggestion(
+  Ref ref,
+  EquatableValue<Set<String>> titles,
+) async {
   final topic = await ref
       .read(geckoInferenceRepositoryProvider.notifier)
       .predictDocumentTopic(titles.value);
