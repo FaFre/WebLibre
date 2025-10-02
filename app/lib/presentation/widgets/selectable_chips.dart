@@ -60,6 +60,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final S? selectedItem;
   final int maxCount;
   final bool deleteIcon;
+  final bool sortSelectedFirst;
 
   final K Function(S item) itemId;
   final Widget Function(T item) itemLabel;
@@ -88,20 +89,23 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.onSelected,
     this.onDeleted,
     this.onLongPress,
+    this.sortSelectedFirst = true,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     var items = availableItems.take(maxCount).toList();
-    if (selectedItem case final T selectedItem) {
-      final selectedIndex = items.indexWhere(
-        (item) => itemId(item) == itemId(selectedItem),
-      );
-      if (selectedIndex < 0) {
-        items = [selectedItem, ...items];
-      } else {
-        items = [items.removeAt(selectedIndex), ...items];
+    if (sortSelectedFirst) {
+      if (selectedItem case final T selectedItem) {
+        final selectedIndex = items.indexWhere(
+          (item) => itemId(item) == itemId(selectedItem),
+        );
+        if (selectedIndex < 0) {
+          items = [selectedItem, ...items];
+        } else {
+          items = [items.removeAt(selectedIndex), ...items];
+        }
       }
     }
 

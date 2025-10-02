@@ -60,6 +60,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                     height: 48,
                     child: SelectableChips(
                       deleteIcon: false,
+                      sortSelectedFirst: false,
                       itemId: (container) => container,
                       itemAvatar: (container) =>
                           const Icon(MdiIcons.creation, size: 20),
