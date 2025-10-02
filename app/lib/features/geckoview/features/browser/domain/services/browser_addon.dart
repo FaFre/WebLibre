@@ -26,7 +26,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 
 part 'browser_addon.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class BrowserAddonService extends _$BrowserAddonService {
   Future<Uri> getAddonXpiUrl(String guid) async {
     final url = 'https://addons.mozilla.org/api/v5/addons/addon/$guid/';
@@ -65,7 +65,5 @@ class BrowserAddonService extends _$BrowserAddonService {
   }
 
   @override
-  void build() {
-    return;
-  }
+  void build() {}
 }

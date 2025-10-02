@@ -20,7 +20,7 @@ final class BuiltinBridgesRepositoryProvider
   }) : super(
          retry: null,
          name: r'builtinBridgesRepositoryProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -60,7 +60,7 @@ final class BuiltinBridgesRepositoryProvider
 }
 
 String _$builtinBridgesRepositoryHash() =>
-    r'05fc40a7742fc266aeb76b4e3f1d9bdfdb8d448f';
+    r'b06ff04774d6d5b0aa7c4f93469ca514536ad85e';
 
 final class BuiltinBridgesRepositoryFamily extends $Family
     with
@@ -77,7 +77,7 @@ final class BuiltinBridgesRepositoryFamily extends $Family
         name: r'builtinBridgesRepositoryProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   BuiltinBridgesRepositoryProvider call(MoatService service) =>

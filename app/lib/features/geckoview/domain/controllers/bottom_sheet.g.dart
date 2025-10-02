@@ -74,7 +74,7 @@ final class BottomSheetExtendProvider
         argument: null,
         retry: null,
         name: r'bottomSheetExtendProvider',
-        isAutoDispose: false,
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -87,7 +87,7 @@ final class BottomSheetExtendProvider
   BottomSheetExtend create() => BottomSheetExtend();
 }
 
-String _$bottomSheetExtendHash() => r'7e11b9047c15bdeb4dfcb488a8573daadb64e25c';
+String _$bottomSheetExtendHash() => r'fbefffbad011502d7ed6ec3bd2fdcdb03995f149';
 
 abstract class _$BottomSheetExtend extends $StreamNotifier<double> {
   Stream<double> build();

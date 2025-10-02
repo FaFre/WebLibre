@@ -24,7 +24,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'tab_session.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class TabSession extends _$TabSession {
   late GeckoSessionService _sessionService;
 
@@ -72,7 +72,7 @@ class TabSession extends _$TabSession {
   }
 }
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 Raw<TabSession> selectedTabSessionNotifier(Ref ref) {
   return ref.watch(tabSessionProvider(tabId: null).notifier);
 }

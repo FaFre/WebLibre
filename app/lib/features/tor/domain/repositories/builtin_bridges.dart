@@ -24,7 +24,7 @@ import 'package:weblibre/features/tor/data/services/builtin_bridges.dart';
 
 part 'builtin_bridges.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class BuiltinBridgesRepository extends _$BuiltinBridgesRepository {
   Future<void> updateIfNecessary() async {
     final lastUpdate = await ref

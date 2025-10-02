@@ -19,7 +19,7 @@ final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
   }) : super(
          retry: null,
          name: r'tabSessionProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -57,7 +57,7 @@ final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
   }
 }
 
-String _$tabSessionHash() => r'33d68f3860b3bc9a92db386535c7482bf4416008';
+String _$tabSessionHash() => r'1b42eb21212df2c88be9f2cb10bc4ca5df437b3b';
 
 final class TabSessionFamily extends $Family
     with $ClassFamilyOverride<TabSession, void, void, void, String?> {
@@ -67,7 +67,7 @@ final class TabSessionFamily extends $Family
         name: r'tabSessionProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   TabSessionProvider call({required String? tabId}) =>
@@ -112,7 +112,7 @@ final class SelectedTabSessionNotifierProvider
         argument: null,
         retry: null,
         name: r'selectedTabSessionProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -140,4 +140,4 @@ final class SelectedTabSessionNotifierProvider
 }
 
 String _$selectedTabSessionNotifierHash() =>
-    r'aef19991d5b05a2bb28e8a6ccb57dc75c2f3148f';
+    r'3945a3a3faf615e1c95819abda276f3e251d5b4c';

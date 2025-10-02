@@ -20,7 +20,7 @@ final class BrowserAddonServiceProvider
         argument: null,
         retry: null,
         name: r'browserAddonServiceProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class BrowserAddonServiceProvider
 }
 
 String _$browserAddonServiceHash() =>
-    r'3f2166251f02fe8c103cca93c02eb982b2800577';
+    r'e7a94f86edc900339518ea0cc0e6fdbd9eccd065';
 
 abstract class _$BrowserAddonService extends $Notifier<void> {
   void build();

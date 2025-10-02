@@ -9,7 +9,7 @@ Future<PackageInfo> packageInfo(Ref ref) async {
   return await PackageInfo.fromPlatform();
 }
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 Future<String> geckoVersion(Ref ref) async {
   return await GeckoBrowserService().getGeckoVersion();
 }

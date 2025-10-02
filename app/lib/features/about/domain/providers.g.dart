@@ -60,7 +60,7 @@ final class GeckoVersionProvider
         argument: null,
         retry: null,
         name: r'geckoVersionProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -79,4 +79,4 @@ final class GeckoVersionProvider
   }
 }
 
-String _$geckoVersionHash() => r'1ad2af96ba1999660c208a0095530d901d589228';
+String _$geckoVersionHash() => r'1cdaaebc674da967a2765c5bf85a7442425c47ce';

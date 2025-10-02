@@ -42,7 +42,7 @@ class BottomSheetController extends _$BottomSheetController {
   }
 }
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 class BottomSheetExtend extends _$BottomSheetExtend {
   late StreamController<double> _extentStreamController;
 
