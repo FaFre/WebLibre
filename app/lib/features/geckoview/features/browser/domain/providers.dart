@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_enti
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
 
@@ -113,6 +114,16 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
   Ref ref,
   String? containerId,
 ) {
+  final enableAiFeatures = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.enableLocalAiFeatures,
+    ),
+  );
+
+  if (!enableAiFeatures) {
+    return EquatableValue([]);
+  }
+
   final excludedTabIds = ref.watch(
     containerTabIdsProvider(
       // ignore: provider_parameters

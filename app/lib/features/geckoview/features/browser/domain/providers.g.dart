@@ -448,7 +448,7 @@ final class SuggestedTabEntitiesProvider
 }
 
 String _$suggestedTabEntitiesHash() =>
-    r'84a85520dc589e4bcc4afa2a63691ad08be25ddd';
+    r'534e78a9d1ddc5bace24dc0d9e5efee1292107c5';
 
 final class SuggestedTabEntitiesFamily extends $Family
     with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {

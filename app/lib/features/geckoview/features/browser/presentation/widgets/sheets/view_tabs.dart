@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:fading_scroll/fading_scroll.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -350,6 +351,9 @@ class _TabSheetHeader extends HookConsumerWidget {
                             .read(selectedContainerProvider.notifier)
                             .clearContainer();
                       },
+                      onLongPress: (container) async {
+                        await ContainerEditRoute(container).push(context);
+                      },
                     );
                   },
                 ),
@@ -413,22 +417,15 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
               final tabSuggestionsEnabled = ref.watch(
                 tabSuggestionsControllerProvider,
               );
-              final enableAiFeatures = ref.watch(
-                generalSettingsWithDefaultsProvider.select(
-                  (settings) => settings.enableLocalAiFeatures,
-                ),
-              );
-              final suggestedTabEntities = ref.watch(
-                suggestedTabEntitiesProvider(
-                  (enableAiFeatures && tabSuggestionsEnabled)
-                      ? containerId
-                      : null,
-                ),
-              );
+
+              final suggestedTabEntities = tabSuggestionsEnabled
+                  ? ref.watch(suggestedTabEntitiesProvider(containerId))
+                  : EquatableValue(<TabEntity>[]);
 
               final itemCount =
                   filteredTabEntities.value.length +
-                  suggestedTabEntities.value.length;
+                  //Limit to 3 sugegstions for now
+                  math.max<int>(suggestedTabEntities.value.length, 3);
 
               final activeTab = ref.watch(selectedTabProvider);
 
@@ -580,6 +577,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                                   index - filteredTabEntities.value.length;
                               final entity =
                                   suggestedTabEntities.value[suggestedIndex];
+
                               tab = CustomDraggable(
                                 key: Key('suggested_${entity.tabId}'),
                                 child: _TabDraggable(
