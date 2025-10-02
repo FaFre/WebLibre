@@ -43,7 +43,7 @@ import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 class SiteSearch extends HookConsumerWidget {
   final String domain;
   final List<BangData> availableBangs;
-  final String? initialText;
+  final TextEditingController? controller;
   final bool searchInNewTab;
   final Widget? label;
 
@@ -51,14 +51,14 @@ class SiteSearch extends HookConsumerWidget {
     required this.domain,
     required this.availableBangs,
     super.key,
-    this.initialText,
+    this.controller,
     this.searchInNewTab = false,
     this.label,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchTextController = useTextEditingController(text: initialText);
+    final searchTextController = controller ?? useTextEditingController();
     final searchFocusNode = useFocusNode();
 
     useListenableCallback(searchTextController, () {

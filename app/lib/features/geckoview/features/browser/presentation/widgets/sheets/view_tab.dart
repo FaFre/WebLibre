@@ -39,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/share_tile.dart';
 import 'package:weblibre/presentation/widgets/website_feed_tile.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
@@ -76,6 +77,48 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     final headerKey = useMemoized(() => GlobalKey());
     final textFieldKey = useMemoized(() => GlobalKey());
 
+    final scrolledTo = useRef(0.0);
+
+    final searchTextController = useTextEditingController(
+      text: initialTabState.url.toString(),
+    );
+
+    Future<void> scroll() async {
+      if (!context.mounted) return;
+
+      final header = headerKey.currentContext?.findRenderObject();
+      final text = textFieldKey.currentContext?.findRenderObject();
+
+      if (header case final RenderBox headerBox) {
+        if (text case final RenderBox textBox) {
+          final totalHeight =
+              headerBox.size.height +
+              textBox.size.height +
+              kToolbarHeight +
+              MediaQuery.of(context).viewInsets.bottom;
+
+          final relative = (totalHeight / MediaQuery.of(context).size.height)
+              .clamp(0.0, 1.0);
+
+          if (draggableScrollableController.size < relative &&
+              relative > scrolledTo.value) {
+            await draggableScrollableController.animateTo(
+              relative,
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeInOut,
+            );
+            scrolledTo.value = relative;
+          }
+        }
+      }
+    }
+
+    useListenableCallback(searchTextController, () {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await scroll();
+      });
+    });
+
     final availableBangs = ref.watch(
       bangListProvider(
         domain: initialTabState.url.host,
@@ -83,33 +126,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
       ).select((value) => value.value ?? const []),
     );
 
-    final scrolledTo = useRef(0.0);
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!context.mounted) return;
-
-        final header = headerKey.currentContext?.findRenderObject();
-        final text = textFieldKey.currentContext?.findRenderObject();
-
-        if (header case final RenderBox headerBox) {
-          if (text case final RenderBox textBox) {
-            final totalHeight =
-                headerBox.size.height + textBox.size.height + kToolbarHeight;
-
-            final relative = (totalHeight / MediaQuery.of(context).size.height)
-                .clamp(0.0, 1.0);
-
-            if (draggableScrollableController.size < relative &&
-                relative > scrolledTo.value) {
-              await draggableScrollableController.animateTo(
-                relative,
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeInOut,
-              );
-              scrolledTo.value = relative;
-            }
-          }
-        }
+        await scroll();
       });
 
       return null;
@@ -196,7 +215,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                   key: textFieldKey,
                   domain: initialTabState.url.host,
                   availableBangs: availableBangs,
-                  initialText: initialTabState.url.toString(),
+                  controller: searchTextController,
                   label: const Text('Address'),
                 ),
               ),
