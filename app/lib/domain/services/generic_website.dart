@@ -346,59 +346,23 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         return cachedIcon;
       }
 
-      // ignore: only_use_keep_alive_inside_keep_alive
-      final result = await ref.read(
-        pageInfoProvider(url, isImageRequest: true).future,
-      );
+      if (ref.mounted) {
+        // ignore: only_use_keep_alive_inside_keep_alive
+        final result = await ref.read(
+          pageInfoProvider(url, isImageRequest: true).future,
+        );
 
-      if (result.favicon case final BrowserIcon favicon) {
-        //If it was a `isImageRequest` hit, we need to cache it at this point
-        if (!_browserIconCache.contains(url.origin)) {
-          _browserIconCache.set(url.origin, favicon);
+        if (result.favicon case final BrowserIcon favicon) {
+          //If it was a `isImageRequest` hit, we need to cache it at this point
+          if (!_browserIconCache.contains(url.origin)) {
+            _browserIconCache.set(url.origin, favicon);
+          }
+
+          return favicon;
         }
-
-        return favicon;
       }
     }
 
     return null;
   }
-
-  // Future<Uri?> tryUpgradeToHttps(Uri httpUri) async {
-  //   if (httpUri.isScheme('https')) {
-  //     return httpUri;
-  //   } else if (httpUri.isScheme('http')) {
-  //     final cached = _httpsCache[httpUri.host];
-  //     if (cached != null) {
-  //       return cached ? httpUri.replace(scheme: 'https') : null;
-  //     }
-
-  //     var sslAvailable = false;
-
-  //     try {
-  //       final context = SecurityContext.defaultContext;
-
-  //       final socket = await SecureSocket.connect(
-  //         httpUri.host,
-  //         443,
-  //         context: context,
-  //         timeout: const Duration(seconds: 3),
-  //       );
-
-  //       await socket.close();
-
-  //       sslAvailable = true;
-  //     } catch (_) {
-  //       sslAvailable = false;
-  //     }
-
-  //     _httpsCache[httpUri.host] = sslAvailable;
-
-  //     if (sslAvailable) {
-  //       return httpUri.replace(scheme: 'https');
-  //     }
-  //   }
-
-  //   return null;
-  // }
 }
