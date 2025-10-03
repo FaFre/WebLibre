@@ -145,41 +145,39 @@ class DohSettingsScreen extends HookConsumerWidget {
               child: RadioListTile(
                 value: true,
                 enabled: false,
-                title: Column(
-                  children: [
-                    const Text('Custom'),
-                    Form(
-                      key: formKey,
-                      child: TextFormField(
-                        controller: customProviderController,
-                        keyboardType: TextInputType.url,
-                        validator: (value) {
-                          return validateUrl(
-                            value,
-                            onlyHttpProtocol: true,
-                            eagerParsing: false,
-                          );
-                        },
-                        onSaved: (newProvider) async {
-                          if (newProvider != null) {
-                            await ref
-                                .read(
-                                  saveEngineSettingsControllerProvider.notifier,
-                                )
-                                .save(
-                                  (currentSettings) => currentSettings.copyWith
-                                      .dohProviderUrl(newProvider),
-                                );
-                          }
-                        },
-                        onFieldSubmitted: (_) {
-                          if (formKey.currentState?.validate() == true) {
-                            formKey.currentState?.save();
-                          }
-                        },
-                      ),
+                title: Form(
+                  key: formKey,
+                  child: TextFormField(
+                    controller: customProviderController,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(
+                      label: Text('Custom Resolver URL'),
+                      hintText: 'https://example.com/dns-query',
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
-                  ],
+                    validator: (value) {
+                      return validateUrl(
+                        value,
+                        onlyHttpProtocol: true,
+                        eagerParsing: false,
+                      );
+                    },
+                    onSaved: (newProvider) async {
+                      if (newProvider != null) {
+                        await ref
+                            .read(saveEngineSettingsControllerProvider.notifier)
+                            .save(
+                              (currentSettings) => currentSettings.copyWith
+                                  .dohProviderUrl(newProvider),
+                            );
+                      }
+                    },
+                    onFieldSubmitted: (_) {
+                      if (formKey.currentState?.validate() == true) {
+                        formKey.currentState?.save();
+                      }
+                    },
+                  ),
                 ),
               ),
             ),
