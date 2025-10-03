@@ -52,23 +52,6 @@
         "DNS": {
             "description": "Improve DNS and Proxy/SOCKS security",
             "preferences": {
-                "network.trr.mode": {
-                    "value": 3,
-                    "title": "Enable DNS over HTTPS",
-                    "requireUserOptIn": true
-                },
-                "network.trr.uri": {
-                    "value": "https://dns.quad9.net/dns-query",
-                    "title": "Use quad9 for Trusted Recursive Resolver (TRR)",
-                    "description": "Quad9 is a privacy-focused DNS resolver that provides malware blocking and security features.",
-                    "requireUserOptIn": true
-                },
-                "network.trr.custom.uri": {
-                    "value": "https://dns.quad9.net/dns-query",
-                    "title": "Use quad9 for custom Trusted Recursive Resolver (TRR)",
-                    "description": "Quad9 is a privacy-focused DNS resolver that provides malware blocking and security features.",
-                    "requireUserOptIn": true
-                },
                 "network.dns.native_https_query": {
                     "value": true,
                     "title": "Enable native DNS HTTPS Query",

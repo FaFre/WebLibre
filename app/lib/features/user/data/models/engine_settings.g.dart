@@ -53,6 +53,14 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings addonCollection(AddonCollection? addonCollection);
 
+  EngineSettings dohSettingsMode(DohSettingsMode dohSettingsMode);
+
+  EngineSettings dohProviderUrl(String dohProviderUrl);
+
+  EngineSettings dohDefaultProviderUrl(String dohDefaultProviderUrl);
+
+  EngineSettings dohExceptionsList(List<String> dohExceptionsList);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -76,6 +84,10 @@ abstract class _$EngineSettingsCWProxy {
     QueryParameterStripping queryParameterStripping,
     BounceTrackingProtectionMode bounceTrackingProtectionMode,
     AddonCollection? addonCollection,
+    DohSettingsMode dohSettingsMode,
+    String dohProviderUrl,
+    String dohDefaultProviderUrl,
+    List<String> dohExceptionsList,
   });
 }
 
@@ -161,6 +173,22 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
       call(addonCollection: addonCollection);
 
   @override
+  EngineSettings dohSettingsMode(DohSettingsMode dohSettingsMode) =>
+      call(dohSettingsMode: dohSettingsMode);
+
+  @override
+  EngineSettings dohProviderUrl(String dohProviderUrl) =>
+      call(dohProviderUrl: dohProviderUrl);
+
+  @override
+  EngineSettings dohDefaultProviderUrl(String dohDefaultProviderUrl) =>
+      call(dohDefaultProviderUrl: dohDefaultProviderUrl);
+
+  @override
+  EngineSettings dohExceptionsList(List<String> dohExceptionsList) =>
+      call(dohExceptionsList: dohExceptionsList);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -186,6 +214,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? queryParameterStripping = const $CopyWithPlaceholder(),
     Object? bounceTrackingProtectionMode = const $CopyWithPlaceholder(),
     Object? addonCollection = const $CopyWithPlaceholder(),
+    Object? dohSettingsMode = const $CopyWithPlaceholder(),
+    Object? dohProviderUrl = const $CopyWithPlaceholder(),
+    Object? dohDefaultProviderUrl = const $CopyWithPlaceholder(),
+    Object? dohExceptionsList = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -263,6 +295,30 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.addonCollection
           // ignore: cast_nullable_to_non_nullable
           : addonCollection as AddonCollection?,
+      dohSettingsMode:
+          dohSettingsMode == const $CopyWithPlaceholder() ||
+              dohSettingsMode == null
+          ? _value.dohSettingsMode
+          // ignore: cast_nullable_to_non_nullable
+          : dohSettingsMode as DohSettingsMode,
+      dohProviderUrl:
+          dohProviderUrl == const $CopyWithPlaceholder() ||
+              dohProviderUrl == null
+          ? _value.dohProviderUrl
+          // ignore: cast_nullable_to_non_nullable
+          : dohProviderUrl as String,
+      dohDefaultProviderUrl:
+          dohDefaultProviderUrl == const $CopyWithPlaceholder() ||
+              dohDefaultProviderUrl == null
+          ? _value.dohDefaultProviderUrl
+          // ignore: cast_nullable_to_non_nullable
+          : dohDefaultProviderUrl as String,
+      dohExceptionsList:
+          dohExceptionsList == const $CopyWithPlaceholder() ||
+              dohExceptionsList == null
+          ? _value.dohExceptionsList
+          // ignore: cast_nullable_to_non_nullable
+          : dohExceptionsList as List<String>,
     );
   }
 }
@@ -323,6 +379,15 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
       addonCollection: EngineSettings._addonCollectionFromJson(
         json['addonCollection'] as String?,
       ),
+      dohSettingsMode: $enumDecodeNullable(
+        _$DohSettingsModeEnumMap,
+        json['dohSettingsMode'],
+      ),
+      dohProviderUrl: json['dohProviderUrl'] as String?,
+      dohDefaultProviderUrl: json['dohDefaultProviderUrl'] as String?,
+      dohExceptionsList: (json['dohExceptionsList'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
@@ -355,6 +420,10 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'addonCollection': EngineSettings._addonCollectionToJson(
     instance.addonCollection,
   ),
+  'dohSettingsMode': _$DohSettingsModeEnumMap[instance.dohSettingsMode]!,
+  'dohProviderUrl': instance.dohProviderUrl,
+  'dohDefaultProviderUrl': instance.dohDefaultProviderUrl,
+  'dohExceptionsList': instance.dohExceptionsList,
 };
 
 const _$TrackingProtectionPolicyEnumMap = {
@@ -399,4 +468,11 @@ const _$BounceTrackingProtectionModeEnumMap = {
   BounceTrackingProtectionMode.enabled: 'enabled',
   BounceTrackingProtectionMode.enabledStandby: 'enabledStandby',
   BounceTrackingProtectionMode.enabledDryRun: 'enabledDryRun',
+};
+
+const _$DohSettingsModeEnumMap = {
+  DohSettingsMode.geckoDefault: 'geckoDefault',
+  DohSettingsMode.increased: 'increased',
+  DohSettingsMode.max: 'max',
+  DohSettingsMode.off: 'off',
 };

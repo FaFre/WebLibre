@@ -262,6 +262,18 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
+              ListTile(
+                title: const Text('DNS over HTTPS'),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 16.0,
+                ),
+                leading: const Icon(MdiIcons.dns),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await DohSettingsRoute().push(context);
+                },
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,

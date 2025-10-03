@@ -38,6 +38,8 @@ export 'src/pigeons/gecko.g.dart'
         ContentBlocking,
         CookieBannerHandlingMode,
         CookieSameSiteStatus,
+        DohSettings,
+        DohSettingsMode,
         EmailHitResult,
         GeckoEngineSettings,
         GeckoSuggestion,

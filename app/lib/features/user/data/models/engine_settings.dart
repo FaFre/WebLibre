@@ -27,6 +27,21 @@ import 'package:nullability/nullability.dart';
 
 part 'engine_settings.g.dart';
 
+enum BuiltInDohProviders {
+  quad9('Quad9', 'https://dns.quad9.net/dns-query'),
+  mullvad('Mullvad', 'https://dns.mullvad.net/dns-query'),
+  adguard('AdGuard', 'https://dns.adguard-dns.com/dns-query'),
+  ffmuc('Freifunk München', 'https://doh.ffmuc.net/dns-query');
+
+  final String name;
+  final String url;
+
+  static bool isBuiltin(String url) =>
+      BuiltInDohProviders.values.any((provider) => provider.url == url);
+
+  const BuiltInDohProviders(this.name, this.url);
+}
+
 @CopyWith()
 @JsonSerializable(includeIfNull: true, constructor: 'withDefaults')
 class EngineSettings extends GeckoEngineSettings with FastEquatable {
@@ -66,6 +81,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @JsonKey(fromJson: _addonCollectionFromJson, toJson: _addonCollectionToJson)
   final AddonCollection? addonCollection;
 
+  final DohSettingsMode dohSettingsMode;
+  final String dohProviderUrl;
+  final String dohDefaultProviderUrl;
+  final List<String> dohExceptionsList;
+
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  DohSettings get dohSettings => DohSettings(
+    dohSettingsMode: dohSettingsMode,
+    dohProviderUrl: dohProviderUrl,
+    dohDefaultProviderUrl: dohDefaultProviderUrl,
+    dohExceptionsList: dohExceptionsList,
+  );
+
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   ContentBlocking get contentBlocking => ContentBlocking(
@@ -92,6 +121,10 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.queryParameterStripping,
     required this.bounceTrackingProtectionMode,
     required this.addonCollection,
+    required this.dohSettingsMode,
+    required this.dohProviderUrl,
+    required this.dohDefaultProviderUrl,
+    required this.dohExceptionsList,
   });
 
   EngineSettings.withDefaults({
@@ -110,11 +143,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.userAgent,
     bool? enterpriseRootsEnabled,
     this.addonCollection,
+    DohSettingsMode? dohSettingsMode,
+    String? dohProviderUrl,
+    String? dohDefaultProviderUrl,
+    List<String>? dohExceptionsList,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
            bounceTrackingProtectionMode ??
            BounceTrackingProtectionMode.disabled,
+       dohSettingsMode = dohSettingsMode ?? DohSettingsMode.increased,
+       dohProviderUrl = dohProviderUrl ?? BuiltInDohProviders.quad9.url,
+       dohDefaultProviderUrl =
+           dohDefaultProviderUrl ?? BuiltInDohProviders.quad9.url,
+       dohExceptionsList = dohExceptionsList ?? [],
        super(
          javascriptEnabled: javascriptEnabled ?? true,
          trackingProtectionPolicy:
@@ -155,5 +197,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     queryParameterStripping,
     bounceTrackingProtectionMode,
     addonCollection,
+    dohSettingsMode,
+    dohProviderUrl,
+    dohDefaultProviderUrl,
+    dohExceptionsList,
   ];
 }

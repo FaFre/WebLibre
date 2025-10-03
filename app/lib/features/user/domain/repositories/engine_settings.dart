@@ -98,6 +98,22 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'dohSettingsMode': settings['dohSettingsMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'dohProviderUrl': settings['dohProviderUrl']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'dohDefaultProviderUrl': settings['dohDefaultProviderUrl']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'dohExceptionsList': settings['dohExceptionsList']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 

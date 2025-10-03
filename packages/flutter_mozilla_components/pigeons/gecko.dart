@@ -635,6 +635,22 @@ class ContentBlocking {
   );
 }
 
+enum DohSettingsMode { geckoDefault, increased, max, off }
+
+class DohSettings {
+  final DohSettingsMode dohSettingsMode;
+  final String dohProviderUrl;
+  final String dohDefaultProviderUrl;
+  final List<String> dohExceptionsList;
+
+  DohSettings(
+    this.dohSettingsMode,
+    this.dohProviderUrl,
+    this.dohDefaultProviderUrl,
+    this.dohExceptionsList,
+  );
+}
+
 class GeckoEngineSettings {
   final bool? javascriptEnabled;
   final TrackingProtectionPolicy? trackingProtectionPolicy;
@@ -649,6 +665,7 @@ class GeckoEngineSettings {
   final String? userAgent;
   final ContentBlocking? contentBlocking;
   final bool? enterpriseRootsEnabled;
+  final DohSettings? dohSettings;
 
   GeckoEngineSettings(
     this.javascriptEnabled,
@@ -664,6 +681,7 @@ class GeckoEngineSettings {
     this.userAgent,
     this.contentBlocking,
     this.enterpriseRootsEnabled,
+    this.dohSettings,
   );
 }
 

@@ -125,6 +125,9 @@ class EngineSettingsReplicationService
             if (previous.value?.contentBlocking != settings.contentBlocking) {
               await _service.contentBlocking(settings.contentBlocking);
             }
+            if (previous.value?.dohSettings != settings.dohSettings) {
+              await _service.dohSettings(settings.dohSettings);
+            }
           } else {
             await _service.setDefaultSettings(settings);
             initialSettingsSent = true;

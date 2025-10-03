@@ -90,4 +90,8 @@ class GeckoEngineSettingsService {
       GeckoEngineSettings(contentBlocking: state),
     );
   }
+
+  Future<void> dohSettings(DohSettings state) {
+    return _api.updateRuntimeSettings(GeckoEngineSettings(dohSettings: state));
+  }
 }

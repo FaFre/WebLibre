@@ -42,6 +42,7 @@ part of 'routes.dart';
             ),
           ],
         ),
+        TypedGoRoute<DohSettingsRoute>(name: 'DohSettingsRoute', path: 'doh'),
       ],
     ),
     TypedGoRoute<DeveloperSettingsRoute>(
@@ -74,6 +75,13 @@ class BangSettingsRoute extends GoRouteData with $BangSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BangSettingsScreen();
+  }
+}
+
+class DohSettingsRoute extends GoRouteData with $DohSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DohSettingsScreen();
   }
 }
 

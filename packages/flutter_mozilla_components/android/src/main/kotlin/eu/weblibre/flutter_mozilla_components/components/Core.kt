@@ -103,7 +103,7 @@ class Core(
             cookieBannerHandlingModePrivateBrowsing = EngineSession.CookieBannerHandlingMode.REJECT_ALL,
             cookieBannerHandlingGlobalRules = true,
             cookieBannerHandlingGlobalRulesSubFrames = true,
-            webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE
+            webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE,
         )
     }
 

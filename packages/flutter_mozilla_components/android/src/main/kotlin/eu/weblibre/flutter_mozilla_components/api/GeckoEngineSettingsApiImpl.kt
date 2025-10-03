@@ -9,6 +9,7 @@ package eu.weblibre.flutter_mozilla_components.api
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
+import eu.weblibre.flutter_mozilla_components.pigeons.DohSettingsMode
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
@@ -132,6 +133,17 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         if(settings.enterpriseRootsEnabled != null) {
             components.core.engineSettings.enterpriseRootsEnabled = settings.enterpriseRootsEnabled;
         }
+        if(settings.dohSettings != null) {
+            components.core.engineSettings.dohSettingsMode = when(settings.dohSettings.dohSettingsMode) {
+                DohSettingsMode.GECKO_DEFAULT -> Engine.DohSettingsMode.DEFAULT
+                DohSettingsMode.INCREASED -> Engine.DohSettingsMode.INCREASED
+                DohSettingsMode.MAX -> Engine.DohSettingsMode.MAX
+                DohSettingsMode.OFF -> Engine.DohSettingsMode.OFF
+            }
+            components.core.engineSettings.dohProviderUrl = settings.dohSettings.dohProviderUrl
+            components.core.engineSettings.dohDefaultProviderUrl = settings.dohSettings.dohDefaultProviderUrl
+            components.core.engineSettings.dohExceptionsList = settings.dohSettings.dohExceptionsList
+        }
     }
 
     override fun updateRuntimeSettings(settings: GeckoEngineSettings) {
@@ -196,13 +208,24 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             components.core.engine.settings.queryParameterStrippingAllowList = settings.contentBlocking.queryParameterStrippingAllowList
             components.core.engine.settings.queryParameterStrippingStripList = settings.contentBlocking.queryParameterStrippingStripList
 
-            //TODO: Add bounce tracking protection when available
+            components.core.engine.settings
 
             reloadSession = true
         }
         if(settings.enterpriseRootsEnabled != null) {
             components.core.engine.settings.enterpriseRootsEnabled = components.core.engineSettings.enterpriseRootsEnabled
             reloadSession = true
+        }
+        if(settings.dohSettings != null) {
+            components.core.engine.settings.dohSettingsMode = when(settings.dohSettings.dohSettingsMode) {
+                DohSettingsMode.GECKO_DEFAULT -> Engine.DohSettingsMode.DEFAULT
+                DohSettingsMode.INCREASED -> Engine.DohSettingsMode.INCREASED
+                DohSettingsMode.MAX -> Engine.DohSettingsMode.MAX
+                DohSettingsMode.OFF -> Engine.DohSettingsMode.OFF
+            }
+            components.core.engine.settings.dohProviderUrl = settings.dohSettings.dohProviderUrl
+            components.core.engine.settings.dohDefaultProviderUrl = settings.dohSettings.dohDefaultProviderUrl
+            components.core.engine.settings.dohExceptionsList = settings.dohSettings.dohExceptionsList
         }
 
         if(reloadSession) {

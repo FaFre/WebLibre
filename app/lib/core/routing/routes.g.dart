@@ -106,6 +106,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
             ),
           ],
         ),
+        GoRouteData.$route(
+          path: 'doh',
+          name: 'DohSettingsRoute',
+          factory: $DohSettingsRoute._fromState,
+        ),
       ],
     ),
     GoRouteData.$route(
@@ -239,6 +244,26 @@ mixin $WebEngineHardeningGroupRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/settings/web_engine/hardening/group/${Uri.encodeComponent(_self.group)}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $DohSettingsRoute on GoRouteData {
+  static DohSettingsRoute _fromState(GoRouterState state) => DohSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/web_engine/doh');
 
   @override
   void go(BuildContext context) => context.go(location);

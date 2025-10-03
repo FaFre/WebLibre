@@ -42,6 +42,7 @@ import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/developer_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';
