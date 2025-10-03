@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 
 part 'bottom_sheet.g.dart';
@@ -39,29 +37,5 @@ class BottomSheetController extends _$BottomSheetController {
 
   void dismiss() {
     state = null;
-  }
-}
-
-@Riverpod()
-class BottomSheetExtend extends _$BottomSheetExtend {
-  late StreamController<double> _extentStreamController;
-
-  void add(double extent) {
-    if (!_extentStreamController.isClosed) {
-      _extentStreamController.add(extent);
-    }
-  }
-
-  @override
-  Stream<double> build() {
-    _extentStreamController = StreamController();
-
-    ref.onDispose(() async {
-      await _extentStreamController.close();
-    });
-
-    return _extentStreamController.stream.sampleTime(
-      const Duration(milliseconds: 50),
-    );
   }
 }

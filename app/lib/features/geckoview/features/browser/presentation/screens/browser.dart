@@ -400,10 +400,6 @@ class BrowserScreen extends HookConsumerWidget {
                             .read(bottomSheetControllerProvider.notifier)
                             .dismiss();
                         return true;
-                      } else {
-                        ref
-                            .read(bottomSheetExtendProvider.notifier)
-                            .add(notification.extent);
                       }
 
                       return false;
