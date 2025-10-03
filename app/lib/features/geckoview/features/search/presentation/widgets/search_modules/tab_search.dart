@@ -171,7 +171,9 @@ class TabSearch extends HookConsumerWidget {
                 }
 
                 if (context.mounted) {
-                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
 
                   context.pop();
                 }

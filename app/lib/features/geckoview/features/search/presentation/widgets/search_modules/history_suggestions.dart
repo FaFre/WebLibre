@@ -127,7 +127,7 @@ class HistorySuggestions extends HookConsumerWidget {
                                     .read(
                                       bottomSheetControllerProvider.notifier,
                                     )
-                                    .dismiss();
+                                    .requestDismiss();
 
                                 context.pop();
                               }

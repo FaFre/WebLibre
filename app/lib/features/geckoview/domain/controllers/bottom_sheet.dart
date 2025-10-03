@@ -30,12 +30,19 @@ class BottomSheetController extends _$BottomSheetController {
     return null;
   }
 
+  ///We depend on a listener that updates/syncs UI to open the sheet
   // ignore: use_setters_to_change_properties api decision
   void show(Sheet sheet) {
     state = sheet;
   }
 
-  void dismiss() {
+  ///We depend on a listener that updates/syncs UI to close the sheet
+  void requestDismiss() {
+    state = null;
+  }
+
+  ///This is called by UI when the sheet gets closed
+  void closed() {
     state = null;
   }
 }

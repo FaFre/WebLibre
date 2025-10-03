@@ -85,7 +85,7 @@ class SiteSearch extends HookConsumerWidget {
               .read(tabSessionProvider(tabId: null).notifier)
               .loadUrl(url: newUrl);
 
-          ref.read(bottomSheetControllerProvider.notifier).dismiss();
+          ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
         } else if (bang != null) {
           final isPrivate =
               ref.read(selectedTabStateProvider)?.isPrivate ??
@@ -112,7 +112,7 @@ class SiteSearch extends HookConsumerWidget {
                 .loadUrl(url: searchUri);
           }
 
-          ref.read(bottomSheetControllerProvider.notifier).dismiss();
+          ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
         }
       }
     }

@@ -154,7 +154,9 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 isActive: displayedSheet is ViewTabsSheet,
                 onTap: () {
                   if (displayedSheet case ViewTabsSheet()) {
-                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
                   } else {
                     ref
                         .read(bottomSheetControllerProvider.notifier)

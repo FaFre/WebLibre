@@ -228,7 +228,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                     ClipboardData(text: initialTabState.url.toString()),
                   );
 
-                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
                 },
               ),
               ListTile(
@@ -260,7 +262,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                       },
                     );
 
-                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
                   }
                 },
               ),
@@ -283,7 +287,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                       },
                     );
 
-                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
                   }
                 },
               ),
@@ -306,7 +312,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                     }
                   }
 
-                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
                 },
               ),
               Consumer(
@@ -318,7 +326,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                         .read(tabDataRepositoryProvider.notifier)
                         .unassignContainer(initialTabState.id);
 
-                    ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
                   },
                 ),
                 builder: (context, ref, child) {
@@ -340,7 +350,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                     ShareParams(uri: initialTabState.url),
                   );
 
-                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
                 },
                 onTapQr: () async {
                   await showQrCode(context, initialTabState.url.toString());
@@ -376,7 +388,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                     });
                   }
 
-                  ref.read(bottomSheetControllerProvider.notifier).dismiss();
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
                 },
               ),
               WebsiteFeedTile(initialTabState),
