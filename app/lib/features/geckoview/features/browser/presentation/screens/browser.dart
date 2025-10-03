@@ -103,7 +103,7 @@ class BrowserScreen extends HookConsumerWidget {
       [],
     );
 
-    final sheetController = useRef<PersistentBottomSheetController?>(null);
+    final sheetController = useState<PersistentBottomSheetController?>(null);
 
     return PopScope(
       //We need this for BackButtonListener to work downstream
