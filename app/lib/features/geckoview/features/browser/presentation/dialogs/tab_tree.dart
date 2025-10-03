@@ -25,61 +25,13 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:go_router/go_router.dart';
 import 'package:graphview/GraphView.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/utils/ui_helper.dart';
-
-class BuchheimWalkerAlgorithmWithFocus extends BuchheimWalkerAlgorithm {
-  bool _hasScrolled = false;
-
-  final Size childSize;
-  final TransformationController transforamtionController;
-  final dynamic initialNodeId;
-
-  BuchheimWalkerAlgorithmWithFocus(
-    super.configuration,
-    super.renderer, {
-    required this.childSize,
-    required this.transforamtionController,
-    this.initialNodeId,
-  });
-
-  @override
-  void setFocusedNode(Node node) {
-    final scale = transforamtionController.value.getMaxScaleOnAxis();
-    final newPosition =
-        (node.position - Offset(childSize.width / 2, childSize.height / 2)) *
-        scale;
-
-    transforamtionController.value = transforamtionController.value.clone()
-      ..setTranslation(Vector3(-newPosition.dx, -newPosition.dy, 0));
-  }
-
-  @override
-  Size run(Graph? graph, double shiftX, double shiftY) {
-    final size = super.run(graph, shiftX, shiftY);
-
-    if (initialNodeId != null && !_hasScrolled) {
-      final node = graph?.nodes.firstWhereOrNull(
-        (element) => element.key?.value == initialNodeId,
-      );
-
-      if (node != null && node.position != Offset.zero) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          setFocusedNode(node);
-        });
-
-        _hasScrolled = true;
-      }
-    }
-
-    return size;
-  }
-}
 
 class TabTreeDialog extends HookConsumerWidget {
   final String tabId;
@@ -93,8 +45,6 @@ class TabTreeDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transforamtionController = useTransformationController();
-
     final selectedTabId = ref.watch(selectedTabProvider);
     final tabs = ref.watch(tabDescendantsProvider(tabId));
 
@@ -115,6 +65,8 @@ class TabTreeDialog extends HookConsumerWidget {
       return graph;
     }, [EquatableValue(tabs.value), selectedTabId]);
 
+    final graphViewController = useMemoized(() => GraphViewController());
+
     final graphAlgo = useMemoized(() {
       final config = BuchheimWalkerConfiguration()
         ..siblingSeparation = 100
@@ -122,13 +74,7 @@ class TabTreeDialog extends HookConsumerWidget {
         ..subtreeSeparation = 150
         ..orientation = BuchheimWalkerConfiguration.ORIENTATION_TOP_BOTTOM;
 
-      return BuchheimWalkerAlgorithmWithFocus(
-        config,
-        TreeEdgeRenderer(config),
-        childSize: childSize,
-        transforamtionController: transforamtionController,
-        initialNodeId: selectedTabId,
-      );
+      return BuchheimWalkerAlgorithm(config, TreeEdgeRenderer(config));
     }, [selectedTabId]);
 
     return Dialog.fullscreen(
@@ -146,57 +92,54 @@ class TabTreeDialog extends HookConsumerWidget {
         floatingActionButton: FloatingActionButton(
           child: const Icon(MdiIcons.target),
           onPressed: () {
-            final node = graph.nodes.firstWhereOrNull(
-              (element) => element.key?.value == selectedTabId,
-            );
-
-            if (node != null) {
-              graphAlgo.setFocusedNode(node);
-            } else {
-              showErrorMessage(
-                context,
-                'The current tab is not part of this tree',
+            if (selectedTabId != null) {
+              final node = graph.nodes.firstWhereOrNull(
+                (element) => element.key?.value == selectedTabId,
               );
+
+              if (node != null) {
+                graphViewController.animateToNode(ValueKey(selectedTabId));
+              } else {
+                showErrorMessage(
+                  context,
+                  'The current tab is not part of this tree',
+                );
+              }
             }
           },
         ),
         extendBodyBehindAppBar: true,
-        body: InteractiveViewer(
-          transformationController: transforamtionController,
-          constrained: false,
-          boundaryMargin: const EdgeInsets.all(250),
-          minScale: 0.1,
-          maxScale: 5.0,
-          child: Skeletonizer(
-            enabled: !tabs.hasValue || tabs.value?.isEmpty == true,
-            child: Skeleton.replace(
-              replacement: const Bone.square(),
-              child: GraphView(
-                graph: graph,
-                algorithm: graphAlgo,
-                paint: Paint()
-                  ..color = Theme.of(context).colorScheme.outline
-                  ..strokeWidth = 1
-                  ..style = PaintingStyle.stroke,
-                builder: (Node node) {
-                  final id = node.key!.value as String;
-                  return SizedBox.fromSize(
-                    size: childSize,
-                    child: SingleTabPreview(
-                      key: ValueKey(id),
-                      tabId: id,
-                      activeTabId: selectedTabId,
-                      onClose: () {
-                        context.pop();
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .requestDismiss();
-                      },
-                      sourceSearchQuery: null,
-                    ),
-                  );
-                },
-              ),
+        body: Skeletonizer(
+          enabled: !tabs.hasValue || tabs.value?.isEmpty == true,
+          child: Skeleton.replace(
+            replacement: const Bone.square(),
+            child: GraphView.builder(
+              graph: graph,
+              algorithm: graphAlgo,
+              controller: graphViewController,
+              initialNode: selectedTabId.mapNotNull((tabId) => ValueKey(tabId)),
+              paint: Paint()
+                ..color = Theme.of(context).colorScheme.outline
+                ..strokeWidth = 1
+                ..style = PaintingStyle.stroke,
+              builder: (Node node) {
+                final id = node.key!.value as String;
+                return SizedBox.fromSize(
+                  size: childSize,
+                  child: SingleTabPreview(
+                    key: ValueKey(id),
+                    tabId: id,
+                    activeTabId: selectedTabId,
+                    onClose: () {
+                      context.pop();
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .requestDismiss();
+                    },
+                    sourceSearchQuery: null,
+                  ),
+                );
+              },
             ),
           ),
         ),
