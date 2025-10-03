@@ -23,7 +23,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/she
 
 part 'bottom_sheet.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class BottomSheetController extends _$BottomSheetController {
   @override
   Sheet? build() {

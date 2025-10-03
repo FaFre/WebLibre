@@ -22,7 +22,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'overlay.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class OverlayController extends _$OverlayController {
   @override
   WidgetBuilder? build() {

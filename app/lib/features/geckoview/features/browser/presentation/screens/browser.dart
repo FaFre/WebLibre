@@ -107,331 +107,342 @@ class BrowserScreen extends HookConsumerWidget {
 
     final sheetController = useRef<PersistentBottomSheetController?>(null);
 
-    return PopScope(
-      //We need this for BackButtonListener to work downstream
-      //No direct pop result will be handled here
-      canPop: false,
-      child: Theme(
-        data: themeData,
-        child: Scaffold(
-          extendBodyBehindAppBar: tabInFullScreen,
-          bottomNavigationBar: HookConsumer(
-            builder: (context, ref, child) {
-              final tabId = ref.watch(selectedTabProvider);
-              final displayedSheet = ref.watch(bottomSheetControllerProvider);
+    return TickerMode(
+      //Lets not pause riverpod subscriptions for nnow
+      enabled: true,
+      child: PopScope(
+        //We need this for BackButtonListener to work downstream
+        //No direct pop result will be handled here
+        canPop: false,
+        child: Theme(
+          data: themeData,
+          child: Scaffold(
+            extendBodyBehindAppBar: tabInFullScreen,
+            bottomNavigationBar: HookConsumer(
+              builder: (context, ref, child) {
+                final tabId = ref.watch(selectedTabProvider);
+                final displayedSheet = ref.watch(bottomSheetControllerProvider);
 
-              final tabInFullScreen = ref.watch(
-                selectedTabStateProvider.select(
-                  (value) => value?.isFullScreen ?? false,
-                ),
-              );
-
-              final autoHideTabBar = ref.watch(
-                generalSettingsWithDefaultsProvider.select(
-                  (value) => value.autoHideTabBar,
-                ),
-              );
-
-              if (!autoHideTabBar) {
-                return Visibility(
-                  visible: !tabInFullScreen,
-                  child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+                final tabInFullScreen = ref.watch(
+                  selectedTabStateProvider.select(
+                    (value) => value?.isFullScreen ?? false,
+                  ),
                 );
-              }
 
-              final appBarVisible = useValueListenable(showAppBar);
-              final diffAcc = useRef(0.0);
+                final autoHideTabBar = ref.watch(
+                  generalSettingsWithDefaultsProvider.select(
+                    (value) => value.autoHideTabBar,
+                  ),
+                );
 
-              void resetHiddenState() {
-                showAppBar.value = true;
-                diffAcc.value = 0.0;
-              }
-
-              useEffect(() {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  resetHiddenState();
-                });
-
-                return null;
-              }, [tabId]);
-
-              useOnAppLifecycleStateChange((previous, current) {
-                if (current == AppLifecycleState.resumed) {
-                  resetHiddenState();
+                if (!autoHideTabBar) {
+                  return Visibility(
+                    visible: !tabInFullScreen,
+                    child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+                  );
                 }
-              });
 
-              ref.listen(
-                tabStateProvider(tabId).select((value) => value?.isLoading),
-                (previous, next) {
-                  if (next == true) {
+                final appBarVisible = useValueListenable(showAppBar);
+                final diffAcc = useRef(0.0);
+
+                void resetHiddenState() {
+                  showAppBar.value = true;
+                  diffAcc.value = 0.0;
+                }
+
+                useEffect(() {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    resetHiddenState();
+                  });
+
+                  return null;
+                }, [tabId]);
+
+                useOnAppLifecycleStateChange((previous, current) {
+                  if (current == AppLifecycleState.resumed) {
                     resetHiddenState();
                   }
-                },
-              );
+                });
 
-              ref.listen(
-                tabStateProvider(tabId).select((value) => value?.historyState),
-                (previous, next) {
-                  if (next != null && previous != null) {
-                    if (previous != next) {
+                ref.listen(
+                  tabStateProvider(tabId).select((value) => value?.isLoading),
+                  (previous, next) {
+                    if (next == true) {
                       resetHiddenState();
                     }
-                  }
-                },
-              );
+                  },
+                );
 
-              ref.listen(
-                tabScrollYProvider(tabId, const Duration(milliseconds: 50)),
-                (previous, next) {
-                  if (previous?.value != null && next.value != null) {
-                    final diff = previous!.value! - next.value!;
-                    if (diff < 0) {
-                      if (diffAcc.value > 0) {
-                        diffAcc.value = 0.0;
-                      }
-
-                      diffAcc.value += diff;
-                      if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
-                        showAppBar.value = false;
-                      }
-                    } else if (diff > 0) {
-                      if (diffAcc.value < 0) {
-                        diffAcc.value = 0.0;
-                      }
-
-                      diffAcc.value += diff;
-                      if (diffAcc.value.abs() > (kToolbarHeight / 2)) {
+                ref.listen(
+                  tabStateProvider(
+                    tabId,
+                  ).select((value) => value?.historyState),
+                  (previous, next) {
+                    if (next != null && previous != null) {
+                      if (previous != next) {
                         resetHiddenState();
                       }
                     }
+                  },
+                );
+
+                ref.listen(
+                  tabScrollYProvider(tabId, const Duration(milliseconds: 50)),
+                  (previous, next) {
+                    if (previous?.value != null && next.value != null) {
+                      final diff = previous!.value! - next.value!;
+                      if (diff < 0) {
+                        if (diffAcc.value > 0) {
+                          diffAcc.value = 0.0;
+                        }
+
+                        diffAcc.value += diff;
+                        if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
+                          showAppBar.value = false;
+                        }
+                      } else if (diff > 0) {
+                        if (diffAcc.value < 0) {
+                          diffAcc.value = 0.0;
+                        }
+
+                        diffAcc.value += diff;
+                        if (diffAcc.value.abs() > (kToolbarHeight / 2)) {
+                          resetHiddenState();
+                        }
+                      }
+                    }
+                  },
+                );
+
+                return Visibility(
+                  visible: !tabInFullScreen && appBarVisible,
+                  child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+                );
+              },
+            ),
+            body: Consumer(
+              child: DragTarget<TabDragData>(
+                onMove: (details) {
+                  ref
+                      .read(willAcceptDropProvider.notifier)
+                      .setData(DeleteDropData(details.data.tabId));
+                },
+                onLeave: (data) {
+                  ref.read(willAcceptDropProvider.notifier).clear();
+                },
+                onAcceptWithDetails: (details) async {
+                  ref.read(willAcceptDropProvider.notifier).clear();
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .closeTab(details.data.tabId);
+
+                  if (context.mounted) {
+                    ui_helper.showTabUndoClose(
+                      context,
+                      ref.read(tabRepositoryProvider.notifier).undoClose,
+                    );
                   }
                 },
-              );
+                builder: (context, _, _) {
+                  return OverlayPortal(
+                    controller: overlayController,
+                    overlayChildBuilder: (context) {
+                      return overlayBuilder!.call(context);
+                    },
+                    child: Listener(
+                      onPointerDown: sheetDisplayed
+                          ? (_) {
+                              ref
+                                  .read(bottomSheetControllerProvider.notifier)
+                                  .dismiss();
+                            }
+                          : null,
+                      child: BackButtonListener(
+                        onBackButtonPressed: () async {
+                          final tabState = ref.read(selectedTabStateProvider);
 
-              return Visibility(
-                visible: !tabInFullScreen && appBarVisible,
-                child: BrowserBottomAppBar(displayedSheet: displayedSheet),
-              );
-            },
-          ),
-          body: Consumer(
-            child: DragTarget<TabDragData>(
-              onMove: (details) {
-                ref
-                    .read(willAcceptDropProvider.notifier)
-                    .setData(DeleteDropData(details.data.tabId));
-              },
-              onLeave: (data) {
-                ref.read(willAcceptDropProvider.notifier).clear();
-              },
-              onAcceptWithDetails: (details) async {
-                ref.read(willAcceptDropProvider.notifier).clear();
-                await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .closeTab(details.data.tabId);
+                          final tabCount = ref.read(
+                            tabListProvider.select((tabs) => tabs.value.length),
+                          );
 
-                if (context.mounted) {
-                  ui_helper.showTabUndoClose(
-                    context,
-                    ref.read(tabRepositoryProvider.notifier).undoClose,
-                  );
-                }
-              },
-              builder: (context, _, _) {
-                return OverlayPortal(
-                  controller: overlayController,
-                  overlayChildBuilder: (context) {
-                    return overlayBuilder!.call(context);
-                  },
-                  child: Listener(
-                    onPointerDown: sheetDisplayed
-                        ? (_) {
+                          //Don't do anything if a child route is active
+                          if (GoRouterState.of(context).topRoute?.name !=
+                              BrowserRoute.name) {
+                            return false;
+                          }
+
+                          if (sheetDisplayed) {
                             ref
                                 .read(bottomSheetControllerProvider.notifier)
                                 .dismiss();
+                            return true;
                           }
-                        : null,
-                    child: BackButtonListener(
-                      onBackButtonPressed: () async {
-                        final tabState = ref.read(selectedTabStateProvider);
 
-                        final tabCount = ref.read(
-                          tabListProvider.select((tabs) => tabs.value.length),
-                        );
+                          if (overlayBuilder != null) {
+                            ref
+                                .read(overlayControllerProvider.notifier)
+                                .dismiss();
+                            return true;
+                          }
 
-                        //Don't do anything if a child route is active
-                        if (GoRouterState.of(context).topRoute?.name !=
-                            BrowserRoute.name) {
-                          return false;
-                        }
+                          if (tabState?.isFullScreen == true) {
+                            await ref
+                                .read(selectedTabSessionProvider)
+                                .exitFullscreen();
+                            return true;
+                          }
 
-                        if (sheetDisplayed) {
+                          //Make sure app bar is visible
+                          showAppBar.value = true;
+
+                          if (tabState?.isLoading == true) {
+                            lastBackButtonPress.value = null;
+
+                            final controller = ref.read(
+                              selectedTabSessionProvider,
+                            );
+
+                            await controller.stopLoading();
+                            return true;
+                          } else if (tabState?.readerableState.active == true) {
+                            lastBackButtonPress.value = null;
+
+                            await ref
+                                .read(
+                                  readerableScreenControllerProvider.notifier,
+                                )
+                                .toggleReaderView(false);
+
+                            return true;
+                          } else if (tabState?.historyState.canGoBack == true) {
+                            lastBackButtonPress.value = null;
+
+                            final controller = ref.read(
+                              selectedTabSessionProvider,
+                            );
+
+                            await controller.goBack();
+                            return true;
+                          }
+
+                          //Go router has routes to go back to
+                          if (context.canPop()) {
+                            return true;
+                          }
+
+                          if (ref
+                              .read(tabRepositoryProvider.notifier)
+                              .hasLaunchedFromIntent(tabState?.id)) {
+                            //Mark back as unhandled and navigator will pop
+                            await SystemNavigator.pop();
+                            return false;
+                          }
+
+                          if (lastBackButtonPress.value != null &&
+                              DateTime.now().difference(
+                                    lastBackButtonPress.value!,
+                                  ) <
+                                  _backButtonPressTimeout) {
+                            lastBackButtonPress.value = null;
+
+                            if (tabState != null && tabCount > 1) {
+                              await ref
+                                  .read(tabRepositoryProvider.notifier)
+                                  .closeTab(tabState.id);
+
+                              if (context.mounted) {
+                                ui_helper.showTabUndoClose(
+                                  context,
+                                  ref
+                                      .read(tabRepositoryProvider.notifier)
+                                      .undoClose,
+                                );
+                              }
+
+                              return true;
+                            } else {
+                              //Mark back as unhandled and navigator will pop
+                              await SystemNavigator.pop();
+                              return false;
+                            }
+                          } else {
+                            lastBackButtonPress.value = DateTime.now();
+                            ui_helper.showTabBackButtonMessage(
+                              context,
+                              tabCount,
+                              _backButtonPressTimeout,
+                            );
+
+                            return true;
+                          }
+                        },
+                        child: _BrowserView(
+                          sheetDisplayed: sheetDisplayed,
+                          isFullscreen: tabInFullScreen,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              builder: (context, ref, child) {
+                ref.listen(bottomSheetControllerProvider, (previous, next) {
+                  if (sheetController.value != null) {
+                    sheetController.value!.close();
+                    sheetController.value = null;
+                  }
+
+                  if (next != null) {
+                    final relativeSafeArea = MediaQuery.of(
+                      context,
+                    ).relativeSafeArea();
+                    sheetController
+                        .value = Scaffold.of(context).showBottomSheet((
+                      context,
+                    ) {
+                      bool dismissOnThreshold(
+                        DraggableScrollableNotification notification,
+                      ) {
+                        if (notification.extent <= 0.1) {
                           ref
                               .read(bottomSheetControllerProvider.notifier)
                               .dismiss();
                           return true;
                         }
 
-                        if (overlayBuilder != null) {
-                          ref
-                              .read(overlayControllerProvider.notifier)
-                              .dismiss();
-                          return true;
-                        }
-
-                        if (tabState?.isFullScreen == true) {
-                          await ref
-                              .read(selectedTabSessionProvider)
-                              .exitFullscreen();
-                          return true;
-                        }
-
-                        //Make sure app bar is visible
-                        showAppBar.value = true;
-
-                        if (tabState?.isLoading == true) {
-                          lastBackButtonPress.value = null;
-
-                          final controller = ref.read(
-                            selectedTabSessionProvider,
-                          );
-
-                          await controller.stopLoading();
-                          return true;
-                        } else if (tabState?.readerableState.active == true) {
-                          lastBackButtonPress.value = null;
-
-                          await ref
-                              .read(readerableScreenControllerProvider.notifier)
-                              .toggleReaderView(false);
-
-                          return true;
-                        } else if (tabState?.historyState.canGoBack == true) {
-                          lastBackButtonPress.value = null;
-
-                          final controller = ref.read(
-                            selectedTabSessionProvider,
-                          );
-
-                          await controller.goBack();
-                          return true;
-                        }
-
-                        //Go router has routes to go back to
-                        if (context.canPop()) {
-                          return true;
-                        }
-
-                        if (ref
-                            .read(tabRepositoryProvider.notifier)
-                            .hasLaunchedFromIntent(tabState?.id)) {
-                          //Mark back as unhandled and navigator will pop
-                          await SystemNavigator.pop();
-                          return false;
-                        }
-
-                        if (lastBackButtonPress.value != null &&
-                            DateTime.now().difference(
-                                  lastBackButtonPress.value!,
-                                ) <
-                                _backButtonPressTimeout) {
-                          lastBackButtonPress.value = null;
-
-                          if (tabState != null && tabCount > 1) {
-                            await ref
-                                .read(tabRepositoryProvider.notifier)
-                                .closeTab(tabState.id);
-
-                            if (context.mounted) {
-                              ui_helper.showTabUndoClose(
-                                context,
-                                ref
-                                    .read(tabRepositoryProvider.notifier)
-                                    .undoClose,
-                              );
-                            }
-
-                            return true;
-                          } else {
-                            //Mark back as unhandled and navigator will pop
-                            await SystemNavigator.pop();
-                            return false;
-                          }
-                        } else {
-                          lastBackButtonPress.value = DateTime.now();
-                          ui_helper.showTabBackButtonMessage(
-                            context,
-                            tabCount,
-                            _backButtonPressTimeout,
-                          );
-
-                          return true;
-                        }
-                      },
-                      child: _BrowserView(
-                        sheetDisplayed: sheetDisplayed,
-                        isFullscreen: tabInFullScreen,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            builder: (context, ref, child) {
-              ref.listen(bottomSheetControllerProvider, (previous, next) {
-                if (sheetController.value != null) {
-                  sheetController.value!.close();
-                  sheetController.value = null;
-                }
-
-                if (next != null) {
-                  final relativeSafeArea = MediaQuery.of(
-                    context,
-                  ).relativeSafeArea();
-                  sheetController.value = Scaffold.of(context).showBottomSheet((
-                    context,
-                  ) {
-                    bool dismissOnThreshold(
-                      DraggableScrollableNotification notification,
-                    ) {
-                      if (notification.extent <= 0.1) {
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .dismiss();
-                        return true;
+                        return false;
                       }
 
-                      return false;
-                    }
-
-                    final sheet = switch (next) {
-                      ViewTabsSheet() =>
-                        NotificationListener<DraggableScrollableNotification>(
-                          key: ValueKey(next),
-                          onNotification: dismissOnThreshold,
-                          child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
-                        ),
-                      final EditUrlSheet parameter =>
-                        NotificationListener<DraggableScrollableNotification>(
-                          key: ValueKey(parameter),
-                          onNotification: dismissOnThreshold,
-                          child: _ViewUrlSheet(
-                            initialTabState: parameter.tabState,
-                            maxChildSize: relativeSafeArea,
+                      final sheet = switch (next) {
+                        ViewTabsSheet() =>
+                          NotificationListener<DraggableScrollableNotification>(
+                            key: ValueKey(next),
+                            onNotification: dismissOnThreshold,
+                            child: _ViewTabsSheet(
+                              maxChildSize: relativeSafeArea,
+                            ),
                           ),
-                        ),
-                    };
+                        final EditUrlSheet parameter =>
+                          NotificationListener<DraggableScrollableNotification>(
+                            key: ValueKey(parameter),
+                            onNotification: dismissOnThreshold,
+                            child: _ViewUrlSheet(
+                              initialTabState: parameter.tabState,
+                              maxChildSize: relativeSafeArea,
+                            ),
+                          ),
+                      };
 
-                    return sheet;
-                  });
-                }
-              });
+                      return sheet;
+                    });
+                  }
+                });
 
-              return child!;
-            },
+                return child!;
+              },
+            ),
+            floatingActionButton: ReaderAppearanceButton(),
           ),
-          floatingActionButton: ReaderAppearanceButton(),
         ),
       ),
     );

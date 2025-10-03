@@ -20,7 +20,7 @@ final class OverlayControllerProvider
         argument: null,
         retry: null,
         name: r'overlayControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class OverlayControllerProvider
   }
 }
 
-String _$overlayControllerHash() => r'7b7885e07ae557c14199b6942b5d6392592ab747';
+String _$overlayControllerHash() => r'd0cd7c4cf867397f10f801ec2f7733be56520fb3';
 
 abstract class _$OverlayController extends $Notifier<WidgetBuilder?> {
   WidgetBuilder? build();

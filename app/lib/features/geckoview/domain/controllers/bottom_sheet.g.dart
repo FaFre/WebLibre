@@ -20,7 +20,7 @@ final class BottomSheetControllerProvider
         argument: null,
         retry: null,
         name: r'bottomSheetControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class BottomSheetControllerProvider
 }
 
 String _$bottomSheetControllerHash() =>
-    r'0b0ea53a96b80b8c1cba79b1d5913274b7127d5b';
+    r'94b9467731de45d4edd24028d76279e17fc26d02';
 
 abstract class _$BottomSheetController extends $Notifier<Sheet?> {
   Sheet? build();
