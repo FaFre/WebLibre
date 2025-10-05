@@ -49,64 +49,29 @@ class DohSettingsScreen extends HookConsumerWidget {
                       );
                 }
               },
-              child: const RadioListTile.adaptive(
-                value: DohSettingsMode.geckoDefault,
-                title: Text('Default Protection'),
-                subtitle: Text('DoH used only when default DNS fails'),
-              ),
-            ),
-            RadioGroup(
-              groupValue: dohSettings.dohSettingsMode,
-              onChanged: (value) async {
-                if (value != null) {
-                  await ref
-                      .read(saveEngineSettingsControllerProvider.notifier)
-                      .save(
-                        (currentSettings) =>
-                            currentSettings.copyWith.dohSettingsMode(value),
-                      );
-                }
-              },
-              child: const RadioListTile.adaptive(
-                value: DohSettingsMode.increased,
-                title: Text('Increased Protection'),
-                subtitle: Text('DoH preferred, default DNS as fallback'),
-              ),
-            ),
-            RadioGroup(
-              groupValue: dohSettings.dohSettingsMode,
-              onChanged: (value) async {
-                if (value != null) {
-                  await ref
-                      .read(saveEngineSettingsControllerProvider.notifier)
-                      .save(
-                        (currentSettings) =>
-                            currentSettings.copyWith.dohSettingsMode(value),
-                      );
-                }
-              },
-              child: const RadioListTile.adaptive(
-                value: DohSettingsMode.max,
-                title: Text('Max Protection'),
-                subtitle: Text('DoH only, no fallback'),
-              ),
-            ),
-            RadioGroup(
-              groupValue: dohSettings.dohSettingsMode,
-              onChanged: (value) async {
-                if (value != null) {
-                  await ref
-                      .read(saveEngineSettingsControllerProvider.notifier)
-                      .save(
-                        (currentSettings) =>
-                            currentSettings.copyWith.dohSettingsMode(value),
-                      );
-                }
-              },
-              child: const RadioListTile.adaptive(
-                value: DohSettingsMode.off,
-                title: Text('Off'),
-                subtitle: Text('Use your default DNS resolver'),
+              child: const Column(
+                children: [
+                  RadioListTile.adaptive(
+                    value: DohSettingsMode.geckoDefault,
+                    title: Text('Default Protection'),
+                    subtitle: Text('DoH used only when default DNS fails'),
+                  ),
+                  RadioListTile.adaptive(
+                    value: DohSettingsMode.increased,
+                    title: Text('Increased Protection'),
+                    subtitle: Text('DoH preferred, default DNS as fallback'),
+                  ),
+                  RadioListTile.adaptive(
+                    value: DohSettingsMode.max,
+                    title: Text('Max Protection'),
+                    subtitle: Text('DoH only, no fallback'),
+                  ),
+                  RadioListTile.adaptive(
+                    value: DohSettingsMode.off,
+                    title: Text('Off'),
+                    subtitle: Text('Use your default DNS resolver'),
+                  ),
+                ],
               ),
             ),
             const ListTile(

@@ -420,34 +420,23 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                               );
                         }
                       },
-                      child: const RadioListTile.adaptive(
-                        value: TabBarSwipeAction.switchLastOpened,
-                        title: Text('Switch to Last Used Tab'),
-                        subtitle: Text(
-                          'Swipe to toggle between current and previously opened tab',
-                        ),
-                      ),
-                    ),
-                    RadioGroup(
-                      groupValue: generalSettings.tabBarSwipeAction,
-                      onChanged: (value) async {
-                        if (value != null) {
-                          await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .tabBarSwipeAction(value),
-                              );
-                        }
-                      },
-                      child: const RadioListTile.adaptive(
-                        value: TabBarSwipeAction.navigateOrderedTabs,
-                        title: Text('Navigate Sequential Tabs'),
-                        subtitle: Text(
-                          'Swipe left/right to move through tabs in order',
-                        ),
+                      child: const Column(
+                        children: [
+                          RadioListTile.adaptive(
+                            value: TabBarSwipeAction.switchLastOpened,
+                            title: Text('Switch to Last Used Tab'),
+                            subtitle: Text(
+                              'Swipe to toggle between current and previously opened tab',
+                            ),
+                          ),
+                          RadioListTile.adaptive(
+                            value: TabBarSwipeAction.navigateOrderedTabs,
+                            title: Text('Navigate Sequential Tabs'),
+                            subtitle: Text(
+                              'Swipe left/right to move through tabs in order',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

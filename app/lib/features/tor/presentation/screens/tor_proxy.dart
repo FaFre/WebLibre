@@ -167,38 +167,26 @@ class TorProxyScreen extends HookConsumerWidget {
                                         );
                                   }
                                 },
-                                child: const RadioListTile.adaptive(
-                                  value: TorRegularTabProxyMode.container,
-                                  title: Text('Container-Based Routing'),
-                                  subtitle: Text(
-                                    'Route only tabs in Tor containers through the Tor network. Private tabs remain unaffected.',
-                                  ),
+                                child: const Column(
+                                  children: [
+                                    RadioListTile.adaptive(
+                                      value: TorRegularTabProxyMode.container,
+                                      title: Text('Container-Based Routing'),
+                                      subtitle: Text(
+                                        'Route only tabs in Tor containers through the Tor network. Private tabs remain unaffected.',
+                                      ),
+                                    ),
+                                    RadioListTile.adaptive(
+                                      value: TorRegularTabProxyMode.all,
+                                      title: Text('Global Routing'),
+                                      subtitle: Text(
+                                        'Route all regular tabs through the Tor network. Private tabs remain unaffected.',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              RadioGroup(
-                                groupValue: torSettings.proxyRegularTabsMode,
-                                onChanged: (value) async {
-                                  if (value != null) {
-                                    await ref
-                                        .read(
-                                          saveTorSettingsControllerProvider
-                                              .notifier,
-                                        )
-                                        .save(
-                                          (currentSettings) => currentSettings
-                                              .copyWith
-                                              .proxyRegularTabsMode(value),
-                                        );
-                                  }
-                                },
-                                child: const RadioListTile.adaptive(
-                                  value: TorRegularTabProxyMode.all,
-                                  title: Text('Global Routing'),
-                                  subtitle: Text(
-                                    'Route all regular tabs through the Tor network. Private tabs remain unaffected.',
-                                  ),
-                                ),
-                              ),
+
                               SwitchListTile.adaptive(
                                 inactiveThumbColor: Colors.white,
                                 activeThumbColor: const Color(0xFF68B030),
@@ -337,75 +325,45 @@ class TorProxyScreen extends HookConsumerWidget {
                                           );
                                     }
                                   },
-                                  child: RadioListTile.adaptive(
-                                    value: TorConnectionConfig.direct,
-                                    enabled: !torProxyPort.isLoading,
-                                    contentPadding: const EdgeInsets.only(
-                                      left: 56,
-                                      right: 24,
-                                    ),
-                                    title: const Text('Direct Connection'),
-                                    subtitle: const Text(
-                                      'The best way to connect to Tor if Tor is not blocked',
-                                    ),
-                                  ),
-                                ),
-                                RadioGroup(
-                                  groupValue: torSettings.config,
-                                  onChanged: (value) async {
-                                    if (value != null) {
-                                      await ref
-                                          .read(
-                                            saveTorSettingsControllerProvider
-                                                .notifier,
-                                          )
-                                          .save(
-                                            (currentSettings) => currentSettings
-                                                .copyWith
-                                                .config(value),
-                                          );
-                                    }
-                                  },
-                                  child: RadioListTile.adaptive(
-                                    value: TorConnectionConfig.obfs4,
-                                    enabled: !torProxyPort.isLoading,
-                                    contentPadding: const EdgeInsets.only(
-                                      left: 56,
-                                      right: 24,
-                                    ),
-                                    title: const Text('obfs4'),
-                                    subtitle: const Text(
-                                      'Suitable for light censorship and high bandwidth needs',
-                                    ),
-                                  ),
-                                ),
-                                RadioGroup(
-                                  groupValue: torSettings.config,
-                                  onChanged: (value) async {
-                                    if (value != null) {
-                                      await ref
-                                          .read(
-                                            saveTorSettingsControllerProvider
-                                                .notifier,
-                                          )
-                                          .save(
-                                            (currentSettings) => currentSettings
-                                                .copyWith
-                                                .config(value),
-                                          );
-                                    }
-                                  },
-                                  child: RadioListTile.adaptive(
-                                    value: TorConnectionConfig.snowflake,
-                                    enabled: !torProxyPort.isLoading,
-                                    contentPadding: const EdgeInsets.only(
-                                      left: 56,
-                                      right: 24,
-                                    ),
-                                    title: const Text('Snowflake'),
-                                    subtitle: const Text(
-                                      'Suitable for heavy censorship',
-                                    ),
+                                  child: Column(
+                                    children: [
+                                      RadioListTile.adaptive(
+                                        value: TorConnectionConfig.direct,
+                                        enabled: !torProxyPort.isLoading,
+                                        contentPadding: const EdgeInsets.only(
+                                          left: 56,
+                                          right: 24,
+                                        ),
+                                        title: const Text('Direct Connection'),
+                                        subtitle: const Text(
+                                          'The best way to connect to Tor if Tor is not blocked',
+                                        ),
+                                      ),
+                                      RadioListTile.adaptive(
+                                        value: TorConnectionConfig.obfs4,
+                                        enabled: !torProxyPort.isLoading,
+                                        contentPadding: const EdgeInsets.only(
+                                          left: 56,
+                                          right: 24,
+                                        ),
+                                        title: const Text('obfs4'),
+                                        subtitle: const Text(
+                                          'Suitable for light censorship and high bandwidth needs',
+                                        ),
+                                      ),
+                                      RadioListTile.adaptive(
+                                        value: TorConnectionConfig.snowflake,
+                                        enabled: !torProxyPort.isLoading,
+                                        contentPadding: const EdgeInsets.only(
+                                          left: 56,
+                                          right: 24,
+                                        ),
+                                        title: const Text('Snowflake'),
+                                        subtitle: const Text(
+                                          'Suitable for heavy censorship',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 CheckboxListTile.adaptive(

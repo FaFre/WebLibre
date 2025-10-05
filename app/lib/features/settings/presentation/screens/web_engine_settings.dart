@@ -298,63 +298,35 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                                   .trackingProtectionPolicy(value),
                             );
                       },
-                      child:
-                          const RadioListTile<
-                            TrackingProtectionPolicy
-                          >.adaptive(
+                      child: const Column(
+                        children: [
+                          RadioListTile<TrackingProtectionPolicy>.adaptive(
                             value: TrackingProtectionPolicy.none,
                             title: Text('Disabled'),
                           ),
-                    ),
-                    RadioGroup(
-                      groupValue: engineSettings.trackingProtectionPolicy,
-                      onChanged: (value) async {
-                        await ref
-                            .read(saveEngineSettingsControllerProvider.notifier)
-                            .save(
-                              (currentSettings) => currentSettings.copyWith
-                                  .trackingProtectionPolicy(value),
-                            );
-                      },
-                      child: const RadioListTile<TrackingProtectionPolicy>.adaptive(
-                        value: TrackingProtectionPolicy.recommended,
-                        title: Text('Standard'),
-                        subtitle: Text(
-                          'Pages will load normally, but block fewer trackers.',
-                        ),
-                      ),
-                    ),
-                    RadioGroup(
-                      groupValue: engineSettings.trackingProtectionPolicy,
-                      onChanged: (value) async {
-                        await ref
-                            .read(saveEngineSettingsControllerProvider.notifier)
-                            .save(
-                              (currentSettings) => currentSettings.copyWith
-                                  .trackingProtectionPolicy(value),
-                            );
-                      },
-                      child: const RadioListTile<TrackingProtectionPolicy>.adaptive(
-                        value: TrackingProtectionPolicy.strict,
-                        title: Text('Strict'),
-                        subtitle: Text(
-                          'Stronger tracking protection and faster performance, but some sites may not work properly.',
-                        ),
-                      ),
-                    ),
-                    RadioGroup(
-                      groupValue: engineSettings.trackingProtectionPolicy,
-                      onChanged: (_) {},
-                      child:
-                          const RadioListTile<
-                            TrackingProtectionPolicy
-                          >.adaptive(
+                          RadioListTile<TrackingProtectionPolicy>.adaptive(
+                            value: TrackingProtectionPolicy.recommended,
+                            title: Text('Standard'),
+                            subtitle: Text(
+                              'Pages will load normally, but block fewer trackers.',
+                            ),
+                          ),
+                          RadioListTile<TrackingProtectionPolicy>.adaptive(
+                            value: TrackingProtectionPolicy.strict,
+                            title: Text('Strict'),
+                            subtitle: Text(
+                              'Stronger tracking protection and faster performance, but some sites may not work properly.',
+                            ),
+                          ),
+                          RadioListTile<TrackingProtectionPolicy>.adaptive(
                             value: TrackingProtectionPolicy.custom,
                             title: Text('Custom'),
                             subtitle: Text(
                               'Choose which trackers and scripts to block.',
                             ),
                           ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
