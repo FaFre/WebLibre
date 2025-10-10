@@ -1,172 +1,105 @@
 [
     {
-        "name": "AudioContext",
-        "id": 48,
+        "name": "IsAlwaysEnabledForPrecompute",
+        "id": 0,
+        "description": "In certain cases, we precompute the value of ShouldRFP for e.g. a Document. This document will still need to check whether an individual target is allowed, but the initial question of 'Does this document have any RFP applied to it ever?' can still be precomputed. This enum value will always be included in FPP.",
         "keywords": [
-            "sound",
-            "audio",
-            "web audio api",
-            "music",
-            "noise",
-            "frequency",
-            "volume",
-            "oscillator",
-            "synthesis",
-            "playback"
+            "precompute",
+            "document rfp",
+            "fingerprinting check",
+            "optimization",
+            "performance",
+            "caching",
+            "initial check",
+            "rfp enabled",
+            "document level",
+            "early detection"
         ]
     },
     {
-        "name": "AudioSampleRate",
-        "id": 38,
+        "name": "TouchEvents",
+        "id": 1,
         "keywords": [
-            "sound",
-            "audio",
-            "frequency",
-            "sampling",
-            "bitrate",
-            "quality",
-            "resolution",
-            "fidelity",
-            "digital audio",
-            "recording"
-        ]
-    },
-    {
-        "name": "CanvasExtractionBeforeUserInputIsBlocked",
-        "id": 11,
-        "keywords": [
-            "canvas",
-            "extraction",
+            "touch events",
+            "touchscreen",
+            "mobile interaction",
+            "gesture recognition",
+            "multitouch",
             "user input",
-            "blocking",
-            "security",
-            "fingerprinting",
-            "html5",
-            "drawing",
-            "graphics",
-            "interaction"
+            "event handling",
+            "touch interfaces",
+            "mobile devices",
+            "interaction design"
         ]
     },
     {
-        "name": "CanvasExtractionFromThirdPartiesIsBlocked",
-        "id": 10,
+        "name": "PointerEvents",
+        "id": 2,
         "keywords": [
-            "canvas",
-            "third-party",
-            "blocking",
-            "security",
-            "cross-origin",
-            "iframe",
-            "embedded content",
-            "scripts",
-            "resources",
-            "isolation"
-        ]
-    },
-    {
-        "name": "CanvasImageExtractionPrompt",
-        "id": 9,
-        "description": "Canvas targets: For unusual combinations of these, see comments in IsImageExtractionAllowed",
-        "keywords": [
-            "canvas",
-            "image extraction",
-            "prompt",
-            "user permission",
-            "security",
-            "privacy",
-            "data access",
-            "content rendering",
-            "pixel data",
-            "screenshot"
-        ]
-    },
-    {
-        "name": "CanvasRandomization",
-        "id": 8,
-        "description": "Add random noises to image data extracted from canvas.",
-        "keywords": [
-            "canvas",
-            "randomization",
-            "noise",
-            "image data",
-            "fingerprinting protection",
-            "obfuscation",
-            "privacy",
-            "data masking",
-            "pixel manipulation",
-            "entropy"
-        ]
-    },
-    {
-        "name": "CSSColorInfo",
-        "id": 52,
-        "description": "`color`/`color-gamut` CSS media features",
-        "keywords": [
-            "css",
-            "color",
-            "gamut",
-            "media features",
-            "display capabilities",
-            "screen",
-            "visual",
-            "rendering",
-            "color space",
-            "color profile"
-        ]
-    },
-    {
-        "name": "CSSDeviceSize",
-        "id": 51,
-        "description": "`device-height`/`device-width` CSS media features",
-        "keywords": [
-            "css",
-            "device size",
-            "height",
-            "width",
-            "screen dimensions",
-            "responsive design",
-            "media queries",
-            "viewport",
-            "layout",
-            "resolution"
-        ]
-    },
-    {
-        "name": "CSSInvertedColors",
-        "id": 55,
-        "description": "`inverted-colors` CSS media feature",
-        "keywords": [
-            "css",
-            "inverted colors",
-            "accessibility",
-            "visual preferences",
-            "contrast",
-            "display modes",
-            "user settings",
-            "color scheme",
-            "readability",
-            "system preferences"
-        ]
-    },
-    {
-        "name": "CSSPointerCapabilities",
-        "id": 57,
-        "keywords": [
-            "css",
-            "pointer",
-            "input devices",
+            "pointer events",
             "touch",
             "mouse",
-            "stylus",
-            "interaction",
-            "hardware capabilities",
+            "pen",
+            "input devices",
+            "user interaction",
+            "event handling",
+            "gestures",
+            "click events",
+            "multitouch"
+        ]
+    },
+    {
+        "name": "KeyboardEvents",
+        "id": 3,
+        "keywords": [
+            "keyboard",
+            "input",
+            "events",
+            "user interaction",
+            "key presses",
+            "shortcuts",
+            "accessibility",
+            "text entry",
+            "input devices",
+            "event handling"
+        ]
+    },
+    {
+        "name": "ScreenOrientation",
+        "id": 4,
+        "keywords": [
+            "screen orientation",
+            "portrait",
+            "landscape",
+            "device rotation",
+            "responsive design",
+            "mobile devices",
+            "tablets",
+            "layout adjustment",
+            "ui adaptation",
+            "viewport"
+        ]
+    },
+    {
+        "name": "SpeechSynthesis",
+        "id": 5,
+        "description": "SpeechSynthesis part of the Web Speech API",
+        "keywords": [
+            "speech synthesis",
+            "text-to-speech",
+            "web speech api",
+            "accessibility",
+            "voice output",
+            "audio generation",
+            "language processing",
             "user interface",
-            "responsiveness"
+            "assistive technology",
+            "localization"
         ]
     },
     {
         "name": "CSSPrefersColorScheme",
-        "id": 5,
+        "id": 6,
         "description": "`prefers-color-scheme` CSS media feature",
         "keywords": [
             "dark mode",
@@ -182,25 +115,8 @@
         ]
     },
     {
-        "name": "CSSPrefersContrast",
-        "id": 7,
-        "description": "`prefers-contrast` CSS media feature",
-        "keywords": [
-            "contrast",
-            "accessibility",
-            "visual preference",
-            "readability",
-            "color difference",
-            "user settings",
-            "display options",
-            "visibility",
-            "legibility",
-            "visual impairment"
-        ]
-    },
-    {
         "name": "CSSPrefersReducedMotion",
-        "id": 6,
+        "id": 7,
         "description": "`prefers-reduced-motion` CSS media feature",
         "keywords": [
             "reduced motion",
@@ -216,206 +132,91 @@
         ]
     },
     {
-        "name": "CSSPrefersReducedTransparency",
-        "id": 54,
-        "description": "`prefers-reduced-transparency` CSS media feature",
+        "name": "CSSPrefersContrast",
+        "id": 8,
+        "description": "`prefers-contrast` CSS media feature",
         "keywords": [
-            "transparency",
-            "opacity",
-            "visual preference",
+            "contrast",
             "accessibility",
+            "visual preference",
+            "readability",
+            "color difference",
             "user settings",
             "display options",
-            "clarity",
-            "readability",
-            "performance",
-            "battery life"
+            "visibility",
+            "legibility",
+            "visual impairment"
         ]
     },
     {
-        "name": "CSSResolution",
-        "id": 53,
-        "description": "`resolution` CSS media feature",
+        "name": "CanvasRandomization",
+        "id": 9,
+        "description": "Add random noises to image data extracted from canvas.",
         "keywords": [
-            "resolution",
-            "dpi",
-            "screen density",
-            "pixel ratio",
-            "display quality",
-            "media queries",
-            "responsive design",
-            "image quality",
-            "rendering",
-            "sharpness"
+            "canvas",
+            "randomization",
+            "noise",
+            "image data",
+            "fingerprinting protection",
+            "obfuscation",
+            "privacy",
+            "data masking",
+            "pixel manipulation",
+            "entropy"
         ]
     },
     {
-        "name": "CSSVideoDynamicRange",
-        "id": 56,
-        "description": "`video-dynamic-range` CSS media feature",
+        "name": "CanvasImageExtractionPrompt",
+        "id": 10,
+        "description": "Canvas targets: For unusual combinations of these, see comments in IsImageExtractionAllowed",
         "keywords": [
-            "video",
-            "dynamic range",
-            "hdr",
-            "sdr",
-            "display capabilities",
-            "color depth",
-            "brightness",
-            "contrast",
-            "visual quality",
-            "media playback"
+            "canvas",
+            "image extraction",
+            "prompt",
+            "user permission",
+            "security",
+            "privacy",
+            "data access",
+            "content rendering",
+            "pixel data",
+            "screenshot"
         ]
     },
     {
-        "name": "DeviceSensors",
-        "id": 44,
+        "name": "CanvasExtractionFromThirdPartiesIsBlocked",
+        "id": 11,
         "keywords": [
-            "sensors",
-            "accelerometer",
-            "gyroscope",
-            "magnetometer",
-            "ambient light",
-            "proximity",
-            "orientation",
-            "motion",
-            "hardware capabilities",
-            "device features"
+            "canvas",
+            "third-party",
+            "blocking",
+            "security",
+            "cross-origin",
+            "iframe",
+            "embedded content",
+            "scripts",
+            "resources",
+            "isolation"
         ]
     },
     {
-        "name": "DOMStyleOsxFontSmoothing",
-        "id": 50,
+        "name": "CanvasExtractionBeforeUserInputIsBlocked",
+        "id": 12,
         "keywords": [
-            "font smoothing",
-            "macos",
-            "typography",
-            "rendering",
-            "antialiasing",
-            "text display",
-            "readability",
-            "visual quality",
-            "system fonts",
-            "font rendering"
-        ]
-    },
-    {
-        "name": "FontVisibilityBaseSystem",
-        "id": 42,
-        "description": "Visibility level of font families available to CSS font-matching",
-        "keywords": [
-            "fonts",
-            "system fonts",
-            "css",
-            "font matching",
-            "typography",
-            "text rendering",
-            "font families",
-            "font availability",
-            "styling",
-            "visual design"
-        ]
-    },
-    {
-        "name": "FontVisibilityLangPack",
-        "id": 43,
-        "keywords": [
-            "fonts",
-            "language packs",
-            "localization",
-            "internationalization",
-            "character sets",
-            "typography",
-            "text rendering",
-            "multilingual support",
-            "unicode",
-            "glyphs"
-        ]
-    },
-    {
-        "name": "FontVisibilityRestrictGenerics",
-        "id": 61,
-        "description": "Are font visibility restrictions applied when resolving a CSS <generic-family>? (This may block the fonts selected in Preferences from actually being used.)",
-        "keywords": [
-            "fonts",
-            "generic family",
-            "css",
-            "font restrictions",
-            "typography",
-            "text rendering",
-            "font fallback",
-            "styling",
-            "preferences",
-            "font selection"
-        ]
-    },
-    {
-        "name": "FrameRate",
-        "id": 45,
-        "keywords": [
-            "frame rate",
-            "fps",
-            "animation",
-            "video playback",
-            "performance",
-            "smoothness",
-            "rendering",
-            "display refresh rate",
-            "motion",
-            "visual quality"
-        ]
-    },
-    {
-        "name": "Gamepad",
-        "id": 23,
-        "keywords": [
-            "gamepad",
-            "controller",
-            "input device",
-            "gaming",
-            "joystick",
-            "buttons",
-            "axes",
-            "hardware interface",
-            "user interaction",
-            "game development"
-        ]
-    },
-    {
-        "name": "HttpUserAgent",
-        "id": 24,
-        "keywords": [
-            "user agent",
-            "http headers",
-            "browser identification",
-            "client info",
-            "web requests",
-            "compatibility",
-            "server communication",
-            "device detection",
-            "networking",
-            "web standards"
-        ]
-    },
-    {
-        "name": "JSDateTimeUTC",
-        "id": 21,
-        "description": "Enforces UTC time zone, disable to make your real time zone available to web sites.",
-        "keywords": [
-            "date",
-            "time",
-            "utc",
-            "timezone",
-            "javascript",
-            "localization",
-            "time conversion",
-            "system clock",
-            "internationalization",
-            "timestamp"
+            "canvas",
+            "extraction",
+            "user input",
+            "blocking",
+            "security",
+            "fingerprinting",
+            "html5",
+            "drawing",
+            "graphics",
+            "interaction"
         ]
     },
     {
         "name": "JSLocale",
-        "id": 12,
+        "id": 13,
         "keywords": [
             "locale",
             "language",
@@ -430,104 +231,8 @@
         ]
     },
     {
-        "name": "JSMathFdlibm",
-        "id": 22,
-        "keywords": [
-            "math",
-            "floating-point",
-            "precision",
-            "numerical computation",
-            "javascript",
-            "algorithms",
-            "scientific computing",
-            "arithmetic",
-            "calculation",
-            "performance"
-        ]
-    },
-    {
-        "name": "KeyboardEvents",
-        "id": 2,
-        "keywords": [
-            "keyboard",
-            "input",
-            "events",
-            "user interaction",
-            "key presses",
-            "shortcuts",
-            "accessibility",
-            "text entry",
-            "input devices",
-            "event handling"
-        ]
-    },
-    {
-        "name": "MediaCapabilities",
-        "id": 37,
-        "keywords": [
-            "media",
-            "capabilities",
-            "video playback",
-            "audio playback",
-            "codec support",
-            "streaming",
-            "performance",
-            "hardware acceleration",
-            "decoding",
-            "encoding"
-        ]
-    },
-    {
-        "name": "MediaDevices",
-        "id": 36,
-        "keywords": [
-            "media devices",
-            "camera",
-            "microphone",
-            "audio input",
-            "video input",
-            "hardware access",
-            "streaming",
-            "webrtc",
-            "multimedia",
-            "user permissions"
-        ]
-    },
-    {
-        "name": "MediaError",
-        "id": 49,
-        "keywords": [
-            "media error",
-            "playback issues",
-            "debugging",
-            "error handling",
-            "video problems",
-            "audio problems",
-            "streaming errors",
-            "codec issues",
-            "network errors",
-            "media support"
-        ]
-    },
-    {
-        "name": "MouseEventScreenPoint",
-        "id": 41,
-        "keywords": [
-            "mouse events",
-            "screen coordinates",
-            "pointer position",
-            "user interaction",
-            "input tracking",
-            "cursor location",
-            "event handling",
-            "ui",
-            "graphics",
-            "coordinates"
-        ]
-    },
-    {
         "name": "NavigatorAppVersion",
-        "id": 13,
+        "id": 14,
         "description": "Various 'client identification' values of the navigator object",
         "keywords": [
             "navigator",
@@ -544,7 +249,7 @@
     },
     {
         "name": "NavigatorBuildID",
-        "id": 14,
+        "id": 15,
         "keywords": [
             "navigator",
             "build id",
@@ -559,24 +264,8 @@
         ]
     },
     {
-        "name": "NavigatorConnection",
-        "id": 39,
-        "keywords": [
-            "network information",
-            "connection type",
-            "bandwidth",
-            "data saver",
-            "online status",
-            "network quality",
-            "latency",
-            "mobile data",
-            "wifi",
-            "cellular"
-        ]
-    },
-    {
         "name": "NavigatorHWConcurrency",
-        "id": 15,
+        "id": 16,
         "keywords": [
             "hardware concurrency",
             "cpu cores",
@@ -592,7 +281,7 @@
     },
     {
         "name": "NavigatorOscpu",
-        "id": 16,
+        "id": 17,
         "keywords": [
             "operating system",
             "cpu",
@@ -608,7 +297,7 @@
     },
     {
         "name": "NavigatorPlatform",
-        "id": 17,
+        "id": 18,
         "keywords": [
             "platform",
             "operating system",
@@ -624,7 +313,7 @@
     },
     {
         "name": "NavigatorUserAgent",
-        "id": 18,
+        "id": 19,
         "keywords": [
             "user agent",
             "browser identification",
@@ -639,89 +328,153 @@
         ]
     },
     {
-        "name": "PointerEvents",
-        "id": 1,
+        "name": "PointerId",
+        "id": 20,
         "keywords": [
+            "pointer id",
+            "input tracking",
+            "touch identifier",
+            "multitouch",
+            "event tracking",
             "pointer events",
-            "touch",
-            "mouse",
-            "pen",
-            "input devices",
-            "user interaction",
-            "event handling",
-            "gestures",
-            "click events",
-            "multitouch"
+            "unique identifier",
+            "input device",
+            "gesture recognition",
+            "interaction tracking"
         ]
     },
     {
-        "name": "ReduceTimerPrecision",
-        "id": 34,
-        "description": "See also Reduce Timer Precision (RTP) Caller Type",
+        "name": "StreamVideoFacingMode",
+        "id": 21,
         "keywords": [
-            "timer precision",
-            "performance",
-            "security",
-            "timing attacks",
-            "javascript",
-            "event loop",
-            "scheduling",
-            "animation",
-            "benchmarking",
-            "power saving"
+            "video facing mode",
+            "camera direction",
+            "front camera",
+            "rear camera",
+            "webrtc",
+            "video capture",
+            "media streams",
+            "device orientation",
+            "mobile video",
+            "user-facing"
         ]
     },
     {
-        "name": "RoundWindowSize",
-        "id": 46,
+        "name": "JSDateTimeUTC",
+        "id": 22,
+        "description": "Enforces UTC time zone, disable to make your real time zone available to web sites.",
+        "keywords": [
+            "date",
+            "time",
+            "utc",
+            "timezone",
+            "javascript",
+            "localization",
+            "time conversion",
+            "system clock",
+            "internationalization",
+            "timestamp"
+        ]
+    },
+    {
+        "name": "JSMathFdlibm",
+        "id": 23,
+        "keywords": [
+            "math",
+            "floating-point",
+            "precision",
+            "numerical computation",
+            "javascript",
+            "algorithms",
+            "scientific computing",
+            "arithmetic",
+            "calculation",
+            "performance"
+        ]
+    },
+    {
+        "name": "Gamepad",
+        "id": 24,
+        "keywords": [
+            "gamepad",
+            "controller",
+            "input device",
+            "gaming",
+            "joystick",
+            "buttons",
+            "axes",
+            "hardware interface",
+            "user interaction",
+            "game development"
+        ]
+    },
+    {
+        "name": "HttpUserAgent",
+        "id": 25,
+        "keywords": [
+            "user agent",
+            "http headers",
+            "browser identification",
+            "client info",
+            "web requests",
+            "compatibility",
+            "server communication",
+            "device detection",
+            "networking",
+            "web standards"
+        ]
+    },
+    {
+        "name": "WindowOuterSize",
+        "id": 26,
         "keywords": [
             "window size",
-            "rounding",
-            "screen dimensions",
+            "outer dimensions",
+            "browser chrome",
+            "screen space",
             "viewport",
-            "layout",
+            "ui layout",
             "responsive design",
+            "window resizing",
             "display properties",
-            "ui",
-            "browser window",
-            "css units"
-        ]
-    },
-    {
-        "name": "ScreenAvailRect",
-        "id": 30,
-        "keywords": [
-            "screen size",
-            "available space",
-            "viewport dimensions",
-            "display area",
-            "screen resolution",
-            "device pixels",
-            "layout",
-            "responsive design",
-            "ui scaling",
             "screen real estate"
         ]
     },
     {
-        "name": "ScreenOrientation",
-        "id": 3,
+        "name": "WindowScreenXY",
+        "id": 27,
         "keywords": [
-            "screen orientation",
-            "portrait",
-            "landscape",
-            "device rotation",
-            "responsive design",
-            "mobile devices",
-            "tablets",
-            "layout adjustment",
-            "ui adaptation",
-            "viewport"
+            "window position",
+            "screen coordinates",
+            "viewport location",
+            "browser window",
+            "ui positioning",
+            "screen real estate",
+            "multi-monitor",
+            "window management",
+            "layout",
+            "coordinates"
+        ]
+    },
+    {
+        "name": "WindowInnerScreenXY",
+        "id": 28,
+        "keywords": [
+            "window position",
+            "screen coordinates",
+            "viewport location",
+            "browser window",
+            "ui positioning",
+            "screen real estate",
+            "multi-monitor",
+            "window management",
+            "layout",
+            "coordinates"
         ]
     },
     {
         "name": "ScreenPixelDepth",
-        "id": 28,
+        "id": 29,
         "keywords": [
             "pixel depth",
             "color depth",
@@ -737,7 +490,7 @@
     },
     {
         "name": "ScreenRect",
-        "id": 29,
+        "id": 30,
         "keywords": [
             "screen dimensions",
             "display size",
@@ -752,123 +505,24 @@
         ]
     },
     {
-        "name": "SiteSpecificZoom",
-        "id": 60,
+        "name": "ScreenAvailRect",
+        "id": 31,
         "keywords": [
-            "zoom level",
-            "website specific",
-            "text size",
-            "content scaling",
-            "accessibility",
-            "user preferences",
-            "readability",
+            "screen size",
+            "available space",
+            "viewport dimensions",
+            "display area",
+            "screen resolution",
+            "device pixels",
+            "layout",
             "responsive design",
-            "ui customization",
-            "visual adjustment"
-        ]
-    },
-    {
-        "name": "SpeechSynthesis",
-        "id": 4,
-        "description": "SpeechSynthesis part of the Web Speech API",
-        "keywords": [
-            "speech synthesis",
-            "text-to-speech",
-            "web speech api",
-            "accessibility",
-            "voice output",
-            "audio generation",
-            "language processing",
-            "user interface",
-            "assistive technology",
-            "localization"
-        ]
-    },
-    {
-        "name": "StreamTrackLabel",
-        "id": 19,
-        "description": "Audio/VideoStreamTrack labels",
-        "keywords": [
-            "media streams",
-            "audio tracks",
-            "video tracks",
-            "webrtc",
-            "multimedia",
-            "streaming",
-            "labels",
-            "track identification",
-            "media sources",
-            "content management"
-        ]
-    },
-    {
-        "name": "StreamVideoFacingMode",
-        "id": 20,
-        "keywords": [
-            "video facing mode",
-            "camera direction",
-            "front camera",
-            "rear camera",
-            "webrtc",
-            "video capture",
-            "media streams",
-            "device orientation",
-            "mobile video",
-            "user-facing"
-        ]
-    },
-    {
-        "name": "TouchEvents",
-        "id": 0,
-        "keywords": [
-            "touch events",
-            "touchscreen",
-            "mobile interaction",
-            "gesture recognition",
-            "multitouch",
-            "user input",
-            "event handling",
-            "touch interfaces",
-            "mobile devices",
-            "interaction design"
-        ]
-    },
-    {
-        "name": "UseStandinsForNativeColors",
-        "id": 47,
-        "keywords": [
-            "native colors",
-            "color scheme",
-            "system colors",
-            "ui theming",
-            "css variables",
-            "visual design",
-            "accessibility",
-            "contrast",
-            "color management",
-            "user preferences"
-        ]
-    },
-    {
-        "name": "VideoElementMozFrameDelay",
-        "id": 32,
-        "description": "mozFrameDelay",
-        "keywords": [
-            "video playback",
-            "frame delay",
-            "performance metrics",
-            "video rendering",
-            "mozilla specific",
-            "media elements",
-            "streaming quality",
-            "frame timing",
-            "video analysis",
-            "playback smoothness"
+            "ui scaling",
+            "screen real estate"
         ]
     },
     {
         "name": "VideoElementMozFrames",
-        "id": 31,
+        "id": 32,
         "description": "HTMLVideoElement mozParsedFrames, mozDecodedFrames, mozPresentedFrames, mozPaintedFrames",
         "keywords": [
             "video frames",
@@ -884,8 +538,25 @@
         ]
     },
     {
-        "name": "VideoElementPlaybackQuality",
+        "name": "VideoElementMozFrameDelay",
         "id": 33,
+        "description": "mozFrameDelay",
+        "keywords": [
+            "video playback",
+            "frame delay",
+            "performance metrics",
+            "video rendering",
+            "mozilla specific",
+            "media elements",
+            "streaming quality",
+            "frame timing",
+            "video analysis",
+            "playback smoothness"
+        ]
+    },
+    {
+        "name": "VideoElementPlaybackQuality",
+        "id": 34,
         "description": "getVideoPlaybackQuality()",
         "keywords": [
             "video quality",
@@ -901,8 +572,401 @@
         ]
     },
     {
-        "name": "WebGLRenderCapability",
+        "name": "ReduceTimerPrecision",
+        "id": 35,
+        "description": "See also Reduce Timer Precision (RTP) Caller Type",
+        "keywords": [
+            "timer precision",
+            "performance",
+            "security",
+            "timing attacks",
+            "javascript",
+            "event loop",
+            "scheduling",
+            "animation",
+            "benchmarking",
+            "power saving"
+        ]
+    },
+    {
+        "name": "WidgetEvents",
+        "id": 36,
+        "description": "Hide keyboard and pointer WidgetEvents",
+        "keywords": [
+            "widget events",
+            "user interface",
+            "input handling",
+            "keyboard events",
+            "pointer events",
+            "event masking",
+            "ui components",
+            "interaction",
+            "accessibility",
+            "event bubbling"
+        ]
+    },
+    {
+        "name": "MediaDevices",
+        "id": 37,
+        "keywords": [
+            "media devices",
+            "camera",
+            "microphone",
+            "audio input",
+            "video input",
+            "hardware access",
+            "streaming",
+            "webrtc",
+            "multimedia",
+            "user permissions"
+        ]
+    },
+    {
+        "name": "MediaCapabilities",
+        "id": 38,
+        "keywords": [
+            "media",
+            "capabilities",
+            "video playback",
+            "audio playback",
+            "codec support",
+            "streaming",
+            "performance",
+            "hardware acceleration",
+            "decoding",
+            "encoding"
+        ]
+    },
+    {
+        "name": "AudioSampleRate",
+        "id": 39,
+        "keywords": [
+            "sound",
+            "audio",
+            "frequency",
+            "sampling",
+            "bitrate",
+            "quality",
+            "resolution",
+            "fidelity",
+            "digital audio",
+            "recording"
+        ]
+    },
+    {
+        "name": "NetworkConnection",
+        "id": 40,
+        "keywords": [
+            "network information",
+            "connection type",
+            "bandwidth",
+            "data saver",
+            "online status",
+            "network quality",
+            "latency",
+            "mobile data",
+            "wifi",
+            "cellular"
+        ]
+    },
+    {
+        "name": "WindowDevicePixelRatio",
+        "id": 41,
+        "keywords": [
+            "device pixel ratio",
+            "screen density",
+            "retina displays",
+            "high dpi",
+            "responsive images",
+            "css pixels",
+            "physical pixels",
+            "scaling",
+            "resolution",
+            "display quality"
+        ]
+    },
+    {
+        "name": "MouseEventScreenPoint",
+        "id": 42,
+        "keywords": [
+            "mouse events",
+            "screen coordinates",
+            "pointer position",
+            "user interaction",
+            "input tracking",
+            "cursor location",
+            "event handling",
+            "ui",
+            "graphics",
+            "coordinates"
+        ]
+    },
+    {
+        "name": "FontVisibilityBaseSystem",
+        "id": 43,
+        "description": "Visibility level of font families available to CSS font-matching",
+        "keywords": [
+            "fonts",
+            "system fonts",
+            "css",
+            "font matching",
+            "typography",
+            "text rendering",
+            "font families",
+            "font availability",
+            "styling",
+            "visual design"
+        ]
+    },
+    {
+        "name": "FontVisibilityLangPack",
+        "id": 44,
+        "keywords": [
+            "fonts",
+            "language packs",
+            "localization",
+            "internationalization",
+            "character sets",
+            "typography",
+            "text rendering",
+            "multilingual support",
+            "unicode",
+            "glyphs"
+        ]
+    },
+    {
+        "name": "DeviceSensors",
+        "id": 45,
+        "keywords": [
+            "sensors",
+            "accelerometer",
+            "gyroscope",
+            "magnetometer",
+            "ambient light",
+            "proximity",
+            "orientation",
+            "motion",
+            "hardware capabilities",
+            "device features"
+        ]
+    },
+    {
+        "name": "FrameRate",
+        "id": 46,
+        "keywords": [
+            "frame rate",
+            "fps",
+            "animation",
+            "video playback",
+            "performance",
+            "smoothness",
+            "rendering",
+            "display refresh rate",
+            "motion",
+            "visual quality"
+        ]
+    },
+    {
+        "name": "RoundWindowSize",
+        "id": 47,
+        "keywords": [
+            "window size",
+            "rounding",
+            "screen dimensions",
+            "viewport",
+            "layout",
+            "responsive design",
+            "display properties",
+            "ui",
+            "browser window",
+            "css units"
+        ]
+    },
+    {
+        "name": "UseStandinsForNativeColors",
+        "id": 48,
+        "keywords": [
+            "native colors",
+            "color scheme",
+            "system colors",
+            "ui theming",
+            "css variables",
+            "visual design",
+            "accessibility",
+            "contrast",
+            "color management",
+            "user preferences"
+        ]
+    },
+    {
+        "name": "AudioContext",
+        "id": 49,
+        "keywords": [
+            "sound",
+            "audio",
+            "web audio api",
+            "music",
+            "noise",
+            "frequency",
+            "volume",
+            "oscillator",
+            "synthesis",
+            "playback"
+        ]
+    },
+    {
+        "name": "MediaError",
+        "id": 50,
+        "keywords": [
+            "media error",
+            "playback issues",
+            "debugging",
+            "error handling",
+            "video problems",
+            "audio problems",
+            "streaming errors",
+            "codec issues",
+            "network errors",
+            "media support"
+        ]
+    },
+    {
+        "name": "DOMStyleOsxFontSmoothing",
+        "id": 51,
+        "keywords": [
+            "font smoothing",
+            "macos",
+            "typography",
+            "rendering",
+            "antialiasing",
+            "text display",
+            "readability",
+            "visual quality",
+            "system fonts",
+            "font rendering"
+        ]
+    },
+    {
+        "name": "CSSDeviceSize",
+        "id": 52,
+        "description": "`device-height`/`device-width` CSS media features",
+        "keywords": [
+            "css",
+            "device size",
+            "height",
+            "width",
+            "screen dimensions",
+            "responsive design",
+            "media queries",
+            "viewport",
+            "layout",
+            "resolution"
+        ]
+    },
+    {
+        "name": "CSSColorInfo",
+        "id": 53,
+        "description": "`color`/`color-gamut` CSS media features",
+        "keywords": [
+            "css",
+            "color",
+            "gamut",
+            "media features",
+            "display capabilities",
+            "screen",
+            "visual",
+            "rendering",
+            "color space",
+            "color profile"
+        ]
+    },
+    {
+        "name": "CSSResolution",
+        "id": 54,
+        "description": "`resolution` CSS media feature",
+        "keywords": [
+            "resolution",
+            "dpi",
+            "screen density",
+            "pixel ratio",
+            "display quality",
+            "media queries",
+            "responsive design",
+            "image quality",
+            "rendering",
+            "sharpness"
+        ]
+    },
+    {
+        "name": "CSSPrefersReducedTransparency",
+        "id": 55,
+        "description": "`prefers-reduced-transparency` CSS media feature",
+        "keywords": [
+            "transparency",
+            "opacity",
+            "visual preference",
+            "accessibility",
+            "user settings",
+            "display options",
+            "clarity",
+            "readability",
+            "performance",
+            "battery life"
+        ]
+    },
+    {
+        "name": "CSSInvertedColors",
+        "id": 56,
+        "description": "`inverted-colors` CSS media feature",
+        "keywords": [
+            "css",
+            "inverted colors",
+            "accessibility",
+            "visual preferences",
+            "contrast",
+            "display modes",
+            "user settings",
+            "color scheme",
+            "readability",
+            "system preferences"
+        ]
+    },
+    {
+        "name": "CSSVideoDynamicRange",
+        "id": 57,
+        "description": "`video-dynamic-range` CSS media feature",
+        "keywords": [
+            "video",
+            "dynamic range",
+            "hdr",
+            "sdr",
+            "display capabilities",
+            "color depth",
+            "brightness",
+            "contrast",
+            "visual quality",
+            "media playback"
+        ]
+    },
+    {
+        "name": "CSSPointerCapabilities",
         "id": 58,
+        "keywords": [
+            "css",
+            "pointer",
+            "input devices",
+            "touch",
+            "mouse",
+            "stylus",
+            "interaction",
+            "hardware capabilities",
+            "user interface",
+            "responsiveness"
+        ]
+    },
+    {
+        "name": "WebGLRenderCapability",
+        "id": 59,
         "description": "WebGL",
         "keywords": [
             "webgl",
@@ -919,7 +983,7 @@
     },
     {
         "name": "WebGLRenderInfo",
-        "id": 59,
+        "id": 60,
         "keywords": [
             "webgl info",
             "renderer information",
@@ -934,84 +998,261 @@
         ]
     },
     {
-        "name": "WidgetEvents",
-        "id": 35,
-        "description": "Hide keyboard and pointer WidgetEvents",
+        "name": "SiteSpecificZoom",
+        "id": 61,
         "keywords": [
-            "widget events",
-            "user interface",
-            "input handling",
-            "keyboard events",
-            "pointer events",
-            "event masking",
-            "ui components",
-            "interaction",
+            "zoom level",
+            "website specific",
+            "text size",
+            "content scaling",
             "accessibility",
-            "event bubbling"
-        ]
-    },
-    {
-        "name": "WindowDevicePixelRatio",
-        "id": 40,
-        "keywords": [
-            "device pixel ratio",
-            "screen density",
-            "retina displays",
-            "high dpi",
-            "responsive images",
-            "css pixels",
-            "physical pixels",
-            "scaling",
-            "resolution",
-            "display quality"
-        ]
-    },
-    {
-        "name": "WindowInnerScreenXY",
-        "id": 27,
-        "keywords": [
-            "window position",
-            "screen coordinates",
-            "viewport location",
-            "browser window",
-            "ui positioning",
-            "screen real estate",
-            "multi-monitor",
-            "window management",
-            "layout",
-            "coordinates"
-        ]
-    },
-    {
-        "name": "WindowOuterSize",
-        "id": 25,
-        "keywords": [
-            "window size",
-            "outer dimensions",
-            "browser chrome",
-            "screen space",
-            "viewport",
-            "ui layout",
+            "user preferences",
+            "readability",
             "responsive design",
-            "window resizing",
-            "display properties",
-            "screen real estate"
+            "ui customization",
+            "visual adjustment"
         ]
     },
     {
-        "name": "WindowScreenXY",
-        "id": 26,
+        "name": "FontVisibilityRestrictGenerics",
+        "id": 62,
+        "description": "Are font visibility restrictions applied when resolving a CSS <generic-family>? (This may block the fonts selected in Preferences from actually being used.)",
         "keywords": [
-            "window position",
-            "screen coordinates",
-            "viewport location",
-            "browser window",
-            "ui positioning",
-            "screen real estate",
-            "multi-monitor",
-            "window management",
-            "layout",
-            "coordinates"
+            "fonts",
+            "generic family",
+            "css",
+            "font restrictions",
+            "typography",
+            "text rendering",
+            "font fallback",
+            "styling",
+            "preferences",
+            "font selection"
+        ]
+    },
+    {
+        "name": "WebVTT",
+        "id": 63,
+        "keywords": [
+            "webvtt",
+            "subtitles",
+            "captions",
+            "video text tracks",
+            "accessibility",
+            "media playback",
+            "closed captions",
+            "timed text",
+            "video metadata",
+            "localization"
+        ]
+    },
+    {
+        "name": "WebGPULimits",
+        "id": 64,
+        "keywords": [
+            "webgpu",
+            "gpu limits",
+            "hardware capabilities",
+            "graphics api",
+            "resource limits",
+            "performance constraints",
+            "device capabilities",
+            "buffer sizes",
+            "texture limits",
+            "compute limits"
+        ]
+    },
+    {
+        "name": "WebGPUIsFallbackAdapter",
+        "id": 65,
+        "keywords": [
+            "webgpu",
+            "fallback adapter",
+            "software rendering",
+            "gpu availability",
+            "hardware acceleration",
+            "compatibility mode",
+            "graphics fallback",
+            "device detection",
+            "performance tier",
+            "adapter selection"
+        ]
+    },
+    {
+        "name": "WebGPUSubgroupSizes",
+        "id": 66,
+        "keywords": [
+            "webgpu",
+            "subgroup sizes",
+            "compute shaders",
+            "gpu architecture",
+            "parallel processing",
+            "workgroup",
+            "thread groups",
+            "gpu optimization",
+            "shader performance",
+            "hardware features"
+        ]
+    },
+    {
+        "name": "JSLocalePrompt",
+        "id": 67,
+        "keywords": [
+            "locale prompt",
+            "language selection",
+            "user permission",
+            "localization",
+            "internationalization",
+            "privacy",
+            "user consent",
+            "regional settings",
+            "language preference",
+            "locale access"
+        ]
+    },
+    {
+        "name": "ScreenAvailToResolution",
+        "id": 68,
+        "keywords": [
+            "screen available",
+            "resolution mapping",
+            "display dimensions",
+            "viewport calculation",
+            "screen metrics",
+            "available space",
+            "resolution conversion",
+            "display properties",
+            "screen geometry",
+            "layout calculation"
+        ]
+    },
+    {
+        "name": "UseHardcodedFontSubstitutes",
+        "id": 69,
+        "keywords": [
+            "font substitution",
+            "hardcoded fonts",
+            "font fallback",
+            "typography",
+            "font replacement",
+            "text rendering",
+            "font mapping",
+            "system fonts",
+            "font availability",
+            "cross-platform fonts"
+        ]
+    },
+    {
+        "name": "DiskStorageLimit",
+        "id": 70,
+        "keywords": [
+            "disk storage",
+            "storage quota",
+            "local storage",
+            "indexeddb",
+            "cache storage",
+            "storage limits",
+            "disk space",
+            "data persistence",
+            "storage api",
+            "quota management"
+        ]
+    },
+    {
+        "name": "WebCodecs",
+        "id": 71,
+        "keywords": [
+            "webcodecs",
+            "video encoding",
+            "video decoding",
+            "audio encoding",
+            "audio decoding",
+            "media processing",
+            "codec api",
+            "streaming",
+            "media manipulation",
+            "hardware acceleration"
+        ]
+    },
+    {
+        "name": "MaxTouchPoints",
+        "id": 72,
+        "keywords": [
+            "max touch points",
+            "multitouch",
+            "touch capability",
+            "input devices",
+            "touchscreen",
+            "simultaneous touches",
+            "gesture support",
+            "device capabilities",
+            "touch interface",
+            "interaction limits"
+        ]
+    },
+    {
+        "name": "MaxTouchPointsCollapse",
+        "id": 73,
+        "keywords": [
+            "touch points collapse",
+            "multitouch reduction",
+            "touch simplification",
+            "input normalization",
+            "touch capability masking",
+            "fingerprinting protection",
+            "touch event handling",
+            "privacy protection",
+            "device obfuscation",
+            "touch limits"
+        ]
+    },
+    {
+        "name": "NavigatorHWConcurrencyTiered",
+        "id": 74,
+        "keywords": [
+            "hardware concurrency",
+            "tiered reporting",
+            "cpu cores",
+            "processor count",
+            "performance tiers",
+            "capability grouping",
+            "fingerprinting protection",
+            "core count masking",
+            "parallel processing",
+            "privacy protection"
+        ]
+    },
+    {
+        "name": "WebGLRandomization",
+        "id": 75,
+        "keywords": [
+            "webgl randomization",
+            "gpu fingerprinting",
+            "graphics obfuscation",
+            "privacy protection",
+            "renderer masking",
+            "webgl privacy",
+            "fingerprinting defense",
+            "graphics noise",
+            "gpu data masking",
+            "canvas protection"
+        ]
+    },
+    {
+        "name": "EfficientCanvasRandomization",
+        "id": 76,
+        "description": "See also CanvasRandomization = 9 above",
+        "keywords": [
+            "canvas randomization",
+            "efficient noise",
+            "performance optimization",
+            "fingerprinting protection",
+            "image data masking",
+            "privacy protection",
+            "optimized obfuscation",
+            "pixel manipulation",
+            "canvas privacy",
+            "low overhead"
         ]
     }
 ]
