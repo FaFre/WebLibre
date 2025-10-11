@@ -666,6 +666,7 @@ class GeckoEngineSettings {
   final ContentBlocking? contentBlocking;
   final bool? enterpriseRootsEnabled;
   final DohSettings? dohSettings;
+  final String? fingerprintingProtectionOverrides;
 
   GeckoEngineSettings(
     this.javascriptEnabled,
@@ -682,6 +683,7 @@ class GeckoEngineSettings {
     this.contentBlocking,
     this.enterpriseRootsEnabled,
     this.dohSettings,
+    this.fingerprintingProtectionOverrides,
   );
 }
 

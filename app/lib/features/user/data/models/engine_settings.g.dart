@@ -61,6 +61,10 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings dohExceptionsList(List<String> dohExceptionsList);
 
+  EngineSettings fingerprintingProtectionOverrides(
+    String? fingerprintingProtectionOverrides,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -88,6 +92,7 @@ abstract class _$EngineSettingsCWProxy {
     String dohProviderUrl,
     String dohDefaultProviderUrl,
     List<String> dohExceptionsList,
+    String? fingerprintingProtectionOverrides,
   });
 }
 
@@ -189,6 +194,13 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
       call(dohExceptionsList: dohExceptionsList);
 
   @override
+  EngineSettings fingerprintingProtectionOverrides(
+    String? fingerprintingProtectionOverrides,
+  ) => call(
+    fingerprintingProtectionOverrides: fingerprintingProtectionOverrides,
+  );
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -218,6 +230,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? dohProviderUrl = const $CopyWithPlaceholder(),
     Object? dohDefaultProviderUrl = const $CopyWithPlaceholder(),
     Object? dohExceptionsList = const $CopyWithPlaceholder(),
+    Object? fingerprintingProtectionOverrides = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -319,6 +332,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.dohExceptionsList
           // ignore: cast_nullable_to_non_nullable
           : dohExceptionsList as List<String>,
+      fingerprintingProtectionOverrides:
+          fingerprintingProtectionOverrides == const $CopyWithPlaceholder()
+          ? _value.fingerprintingProtectionOverrides
+          // ignore: cast_nullable_to_non_nullable
+          : fingerprintingProtectionOverrides as String?,
     );
   }
 }
@@ -388,12 +406,16 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
       dohExceptionsList: (json['dohExceptionsList'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      fingerprintingProtectionOverrides:
+          json['fingerprintingProtectionOverrides'] as String?,
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
   EngineSettings instance,
 ) => <String, dynamic>{
   'userAgent': instance.userAgent,
+  'fingerprintingProtectionOverrides':
+      instance.fingerprintingProtectionOverrides,
   'javascriptEnabled': instance.javascriptEnabled,
   'trackingProtectionPolicy':
       _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,

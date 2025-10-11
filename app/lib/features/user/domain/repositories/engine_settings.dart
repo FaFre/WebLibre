@@ -114,6 +114,11 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'fingerprintingProtectionOverrides':
+          settings['fingerprintingProtectionOverrides']?.readAs(
+            DriftSqlType.string,
+            db.typeMapping,
+          ),
     });
   }
 

@@ -111,6 +111,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
           name: 'DohSettingsRoute',
           factory: $DohSettingsRoute._fromState,
         ),
+        GoRouteData.$route(
+          path: 'fingerprint',
+          name: 'FingerprintSettingsRoute',
+          factory: $FingerprintSettingsRoute._fromState,
+        ),
       ],
     ),
     GoRouteData.$route(
@@ -264,6 +269,28 @@ mixin $DohSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/web_engine/doh');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $FingerprintSettingsRoute on GoRouteData {
+  static FingerprintSettingsRoute _fromState(GoRouterState state) =>
+      FingerprintSettingsRoute();
+
+  @override
+  String get location =>
+      GoRouteData.$location('/settings/web_engine/fingerprint');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -24,6 +24,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 
 part 'engine_settings.g.dart';
 
@@ -125,6 +126,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.dohProviderUrl,
     required this.dohDefaultProviderUrl,
     required this.dohExceptionsList,
+    required super.fingerprintingProtectionOverrides,
   });
 
   EngineSettings.withDefaults({
@@ -147,6 +149,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     String? dohProviderUrl,
     String? dohDefaultProviderUrl,
     List<String>? dohExceptionsList,
+    String? fingerprintingProtectionOverrides,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
@@ -177,6 +180,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
              webContentIsolationStrategy ??
              WebContentIsolationStrategy.isolateHighValue,
          enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
+         fingerprintingProtectionOverrides:
+             fingerprintingProtectionOverrides ??
+             FingerprintOverrides.defaults().toString(),
        );
 
   static AddonCollection? _addonCollectionFromJson(String? json) =>
@@ -201,5 +207,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     dohProviderUrl,
     dohDefaultProviderUrl,
     dohExceptionsList,
+    fingerprintingProtectionOverrides,
   ];
 }

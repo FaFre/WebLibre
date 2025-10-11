@@ -128,6 +128,12 @@ class EngineSettingsReplicationService
             if (previous.value?.dohSettings != settings.dohSettings) {
               await _service.dohSettings(settings.dohSettings);
             }
+            if (previous.value?.fingerprintingProtectionOverrides !=
+                settings.fingerprintingProtectionOverrides) {
+              await _service.fingerprintingProtectionOverrides(
+                settings.fingerprintingProtectionOverrides,
+              );
+            }
           } else {
             await _service.setDefaultSettings(settings);
             initialSettingsSent = true;

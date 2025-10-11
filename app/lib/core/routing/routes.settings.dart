@@ -43,6 +43,10 @@ part of 'routes.dart';
           ],
         ),
         TypedGoRoute<DohSettingsRoute>(name: 'DohSettingsRoute', path: 'doh'),
+        TypedGoRoute<FingerprintSettingsRoute>(
+          name: 'FingerprintSettingsRoute',
+          path: 'fingerprint',
+        ),
       ],
     ),
     TypedGoRoute<DeveloperSettingsRoute>(
@@ -82,6 +86,14 @@ class DohSettingsRoute extends GoRouteData with $DohSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const DohSettingsScreen();
+  }
+}
+
+class FingerprintSettingsRoute extends GoRouteData
+    with $FingerprintSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const FingerprintSettingsScreen();
   }
 }
 

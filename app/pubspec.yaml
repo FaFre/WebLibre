@@ -33,7 +33,7 @@ dependencies:
   google_fonts: ^6.3.2
   graphview: ^1.5.0
   home_widget: ^0.8.0
-  hooks_riverpod: ^3.0.2
+  hooks_riverpod: ^3.0.3
   html: ^0.15.6
   http: ^1.5.0
   http_parser: ^4.1.2
@@ -55,8 +55,8 @@ dependencies:
     path: ../packages/pluggable_transports_proxy
   pretty_qr_code: ^3.5.0
   quick_actions: ^1.1.0
-  riverpod: ^3.0.2
-  riverpod_annotation: ^3.0.2
+  riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.3
   rss_dart: ^1.0.13
   rxdart: ^0.28.0
   share_plus: ^12.0.0
@@ -69,7 +69,7 @@ dependencies:
   speech_to_text_google_dialog: 
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git
-  sqlite3: ^2.9.1
+  sqlite3: ^2.9.2
   sqlite3_flutter_libs: ^0.5.40
   synchronized: ^3.4.0
   text_scroll: ^0.2.1
@@ -96,8 +96,8 @@ dev_dependencies:
   go_router_builder: ^4.1.0
   json_serializable: ^6.11.1
   lint: ^2.8.0
-  riverpod_generator: ^3.0.2
-  riverpod_lint: ^3.0.2
+  riverpod_generator: ^3.0.3
+  riverpod_lint: ^3.0.3
 
 flutter:
   uses-material-design: true

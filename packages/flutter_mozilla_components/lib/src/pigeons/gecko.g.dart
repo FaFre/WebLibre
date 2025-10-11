@@ -2043,6 +2043,7 @@ class GeckoEngineSettings {
     this.contentBlocking,
     this.enterpriseRootsEnabled,
     this.dohSettings,
+    this.fingerprintingProtectionOverrides,
   });
 
   bool? javascriptEnabled;
@@ -2073,6 +2074,8 @@ class GeckoEngineSettings {
 
   DohSettings? dohSettings;
 
+  String? fingerprintingProtectionOverrides;
+
   List<Object?> _toList() {
     return <Object?>[
       javascriptEnabled,
@@ -2089,6 +2092,7 @@ class GeckoEngineSettings {
       contentBlocking,
       enterpriseRootsEnabled,
       dohSettings,
+      fingerprintingProtectionOverrides,
     ];
   }
 
@@ -2112,6 +2116,7 @@ class GeckoEngineSettings {
       contentBlocking: result[11] as ContentBlocking?,
       enterpriseRootsEnabled: result[12] as bool?,
       dohSettings: result[13] as DohSettings?,
+      fingerprintingProtectionOverrides: result[14] as String?,
     );
   }
 

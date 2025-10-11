@@ -144,6 +144,9 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             components.core.engineSettings.dohDefaultProviderUrl = settings.dohSettings.dohDefaultProviderUrl
             components.core.engineSettings.dohExceptionsList = settings.dohSettings.dohExceptionsList
         }
+        if(settings.fingerprintingProtectionOverrides != null) {
+            components.core.engineSettings.fingerprintingProtectionOverrides = settings.fingerprintingProtectionOverrides
+        }
     }
 
     override fun updateRuntimeSettings(settings: GeckoEngineSettings) {
@@ -226,6 +229,9 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             components.core.engine.settings.dohProviderUrl = settings.dohSettings.dohProviderUrl
             components.core.engine.settings.dohDefaultProviderUrl = settings.dohSettings.dohDefaultProviderUrl
             components.core.engine.settings.dohExceptionsList = settings.dohSettings.dohExceptionsList
+        }
+        if(settings.fingerprintingProtectionOverrides != null) {
+            components.core.engine.settings.fingerprintingProtectionOverrides = settings.fingerprintingProtectionOverrides
         }
 
         if(reloadSession) {

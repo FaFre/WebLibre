@@ -475,6 +475,18 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   await WebEngineHardeningRoute().push(context);
                 },
               ),
+              ListTile(
+                title: const Text('Fingerprint Protection'),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 16.0,
+                ),
+                leading: const Icon(MdiIcons.fingerprint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await FingerprintSettingsRoute().push(context);
+                },
+              ),
             ],
           );
         },

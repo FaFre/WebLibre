@@ -94,4 +94,10 @@ class GeckoEngineSettingsService {
   Future<void> dohSettings(DohSettings state) {
     return _api.updateRuntimeSettings(GeckoEngineSettings(dohSettings: state));
   }
+
+  Future<void> fingerprintingProtectionOverrides(String? state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(fingerprintingProtectionOverrides: state),
+    );
+  }
 }

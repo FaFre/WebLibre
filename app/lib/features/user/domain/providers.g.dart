@@ -117,3 +117,46 @@ final class IncognitoModeEnabledProvider
 
 String _$incognitoModeEnabledHash() =>
     r'36957b70a5261f9d3ad228e07cc8dd5c8f616082';
+
+@ProviderFor(fingerprintOverrideSettings)
+const fingerprintOverrideSettingsProvider =
+    FingerprintOverrideSettingsProvider._();
+
+final class FingerprintOverrideSettingsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Result<FingerprintOverrides>>,
+          Result<FingerprintOverrides>,
+          FutureOr<Result<FingerprintOverrides>>
+        >
+    with
+        $FutureModifier<Result<FingerprintOverrides>>,
+        $FutureProvider<Result<FingerprintOverrides>> {
+  const FingerprintOverrideSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'fingerprintOverrideSettingsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$fingerprintOverrideSettingsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Result<FingerprintOverrides>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Result<FingerprintOverrides>> create(Ref ref) {
+    return fingerprintOverrideSettings(ref);
+  }
+}
+
+String _$fingerprintOverrideSettingsHash() =>
+    r'd4d40ec425098fb1f5a2f0c4944f058829a41a0a';

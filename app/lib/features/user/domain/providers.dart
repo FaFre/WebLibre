@@ -17,11 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:exceptions/exceptions.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
+import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/services/fingerprinting.dart';
 
 part 'providers.g.dart';
 
@@ -46,4 +51,25 @@ bool incognitoModeEnabled(Ref ref) {
       (value) => value.deleteBrowsingDataOnQuit != null,
     ),
   );
+}
+
+@Riverpod()
+Future<Result<FingerprintOverrides>> fingerprintOverrideSettings(
+  Ref ref,
+) async {
+  final fingerprintTargets = await ref.watch(fingerprintTargetsProvider.future);
+  final fingerprintTargetSet = fingerprintTargets.map((e) => e.name).toSet();
+
+  final overrides = ref.watch(
+    engineSettingsWithDefaultsProvider.select(
+      (settings) =>
+          settings.fingerprintingProtectionOverrides.mapNotNull(
+            (settings) =>
+                FingerprintOverrides.parse(settings, fingerprintTargetSet),
+          ) ??
+          Result.success(FingerprintOverrides.defaults()),
+    ),
+  );
+
+  return overrides;
 }
