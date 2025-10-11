@@ -221,7 +221,12 @@ class BrowserScreen extends HookConsumerWidget {
             builder: (context, ref, child) {
               ref.listen(bottomSheetControllerProvider, (previous, next) {
                 if (sheetController.value != null) {
-                  sheetController.value!.close();
+                  try {
+                    sheetController.value!.close();
+                  } catch (_) {
+                    //silently drop closing errors
+                  }
+
                   sheetController.value = null;
                 }
 
