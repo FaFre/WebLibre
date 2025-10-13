@@ -81,6 +81,11 @@ class BrowserBottomAppBar extends HookConsumerWidget {
       padding: EdgeInsets.zero,
       child: GestureDetector(
         onTap: () {
+          if (displayedSheet case EditUrlSheet()) {
+            ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+            return;
+          }
+
           final tabState = ref.read(selectedTabStateProvider);
 
           if (tabState != null) {

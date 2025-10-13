@@ -42,7 +42,9 @@ class BottomSheetController extends _$BottomSheetController {
   }
 
   ///This is called by UI when the sheet gets closed
-  void closed() {
-    state = null;
+  void closed(Sheet sheet) {
+    if (sheet == stateOrNull) {
+      state = null;
+    }
   }
 }

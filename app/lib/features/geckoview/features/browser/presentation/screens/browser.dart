@@ -226,8 +226,6 @@ class BrowserScreen extends HookConsumerWidget {
                   } catch (_) {
                     //silently drop closing errors
                   }
-
-                  sheetController.value = null;
                 }
 
                 if (next != null) {
@@ -273,11 +271,15 @@ class BrowserScreen extends HookConsumerWidget {
 
                   unawaited(
                     controller.closed.whenComplete(() {
-                      ref.read(bottomSheetControllerProvider.notifier).closed();
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .closed(next);
                     }),
                   );
 
                   sheetController.value = controller;
+                } else {
+                  sheetController.value = null;
                 }
               });
 

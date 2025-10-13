@@ -42,7 +42,7 @@ final class BottomSheetControllerProvider
 }
 
 String _$bottomSheetControllerHash() =>
-    r'21c353d433c8a964d63915cc4ebf5767e16210b1';
+    r'54112ccef72ad7777c746b9f2dc02da1e383c127';
 
 abstract class _$BottomSheetController extends $Notifier<Sheet?> {
   Sheet? build();
