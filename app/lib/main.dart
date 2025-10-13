@@ -30,6 +30,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
@@ -77,6 +78,8 @@ void main() async {
       observers: const [ErrorObserver()],
       child: HookConsumer(
         builder: (context, ref, child) {
+          final rootKey = ref.watch(appStateKeyProvider);
+
           final themeMode = ref.watch(
             generalSettingsWithDefaultsProvider.select(
               (value) => value.themeMode,
@@ -146,6 +149,7 @@ void main() async {
               }
 
               return MainApp(
+                key: rootKey,
                 theme: ThemeData(
                   useMaterial3: true,
                   colorScheme: lightColorScheme,

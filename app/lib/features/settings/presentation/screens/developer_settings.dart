@@ -29,6 +29,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:universal_io/io.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
@@ -221,6 +222,25 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                 onTap: () async {
                   await AddonCollectionRoute().push(context);
                 },
+              ),
+              CustomListTile(
+                title: 'Reset UI',
+                subtitle: 'Rebuild the entire app UI',
+                prefix: Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(
+                    Icons.bug_report,
+                    size: 24,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                suffix: FilledButton.icon(
+                  onPressed: () {
+                    ref.read(appStateKeyProvider.notifier).reset();
+                  },
+                  icon: const Icon(Icons.restore),
+                  label: const Text('Reset'),
+                ),
               ),
             ],
           );
