@@ -41,7 +41,7 @@ final class TabListProvider
   }
 }
 
-String _$tabListHash() => r'0b9ca1e089a59895df4cbf28691c2849a7004f08';
+String _$tabListHash() => r'e93d68e7c362454e803711e5c38abcc8f188b427';
 
 abstract class _$TabList extends $Notifier<EquatableValue<List<String>>> {
   EquatableValue<List<String>> build();
