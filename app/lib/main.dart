@@ -23,6 +23,7 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService, GeckoLoggingService, LogLevel;
 import 'package:home_widget/home_widget.dart';
@@ -79,6 +80,25 @@ void main() async {
       child: HookConsumer(
         builder: (context, ref, child) {
           final rootKey = ref.watch(appStateKeyProvider);
+
+          final pauseTime = useRef<DateTime?>(null);
+          useOnAppLifecycleStateChange((previous, current) {
+            switch (current) {
+              case AppLifecycleState.resumed:
+                if (pauseTime.value != null &&
+                    DateTime.now().difference(pauseTime.value!) >
+                        const Duration(minutes: 10)) {
+                  //Rebuild widget tree after long time of inactivity
+                  ref.read(appStateKeyProvider.notifier).reset();
+                }
+                pauseTime.value = null;
+              case AppLifecycleState.detached:
+              case AppLifecycleState.inactive:
+              case AppLifecycleState.hidden:
+              case AppLifecycleState.paused:
+                pauseTime.value = DateTime.now();
+            }
+          });
 
           final themeMode = ref.watch(
             generalSettingsWithDefaultsProvider.select(
