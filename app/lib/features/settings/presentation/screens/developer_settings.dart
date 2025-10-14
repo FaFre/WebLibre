@@ -225,7 +225,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
               ),
               CustomListTile(
                 title: 'Reset UI',
-                subtitle: 'Rebuild the entire app UI',
+                subtitle: 'Rebuild the entire browser UI',
                 prefix: Padding(
                   padding: const EdgeInsets.only(right: 16.0),
                   child: Icon(
