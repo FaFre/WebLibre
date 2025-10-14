@@ -1,0 +1,23 @@
+GeckoView 143.0.4
+
+**New Features**
+- Added AI feature to group related unassigned tabs into new containers
+- Added setting to control how externally opened links are handled (now defaults to prompt)
+- Added DoH (DNS over HTTPS) setting with predefined or custom DNS resolver options
+- Added browser history view with options to view and delete history data
+- Added tab bar swipe action setting with options: "Switch to last used Tab" and "Navigate Sequential Tabs"
+- Added quick actions to open tabs via long press on home screen app icon
+- Added developer setting to support third-party CA certificates
+- Added support for custom addon collections
+- Added developer setting to customize fingerprint protection measures
+
+**Improvements**
+- Rewrote large portions of the Tor Plugin with option to route all traffic and fixed potential IP leaks (through browser side effects like loading favicons)
+- Increased Tor background service timeout from 15 minutes to 1 hour without interaction
+- Localhost URLs now default to `http` instead of `https` for better compatibility
+- Display scrollable breadcrumb representation of URLs wherever possible for improved visibility
+- Updated built-in Bangs
+- Large portions of UI rewritten and improved
+
+**Breaking Changes**
+- New database structure for bangs; saved bang frequency sorting has been reset
