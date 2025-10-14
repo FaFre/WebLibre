@@ -80,7 +80,7 @@
             android:checked="true"
             android:clickable="true"
             android:focusable="true"
-            android:text="@string/mozac_feature_addons_settings_allow_in_private_browsing"
+            android:text="@string/mozac_feature_addons_settings_allow_in_private_browsing_2"
             android:padding="16dp"
             android:textSize="18sp"/>
 

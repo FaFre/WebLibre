@@ -42,7 +42,7 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "eu.weblibre.gecko"
         // https://api.flutter.dev/flutter/widgets/AndroidView-class.html
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion = 26
         targetSdk = 36
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName

@@ -1,5 +1,5 @@
 ## 0.9.25
-### GeckoView 143.0.4
+### GeckoView 144.0
 
 **New Features**
 - Added AI feature to group related unassigned tabs into new containers
