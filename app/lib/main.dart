@@ -41,6 +41,111 @@ import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
 
+class _MainWidget extends HookConsumerWidget {
+  const _MainWidget();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rootKey = ref.watch(appStateKeyProvider);
+
+    final pauseTime = useRef<DateTime?>(null);
+    useOnAppLifecycleStateChange((previous, current) {
+      switch (current) {
+        case AppLifecycleState.resumed:
+          if (pauseTime.value != null &&
+              DateTime.now().difference(pauseTime.value!) >
+                  const Duration(minutes: 15)) {
+            //Rebuild widget tree after long time of inactivity
+            ref.read(appStateKeyProvider.notifier).reset();
+            logger.i('UI reset');
+          }
+          pauseTime.value = null;
+        case AppLifecycleState.detached:
+        case AppLifecycleState.inactive:
+        case AppLifecycleState.hidden:
+        case AppLifecycleState.paused:
+          pauseTime.value ??= DateTime.now();
+      }
+    });
+
+    final themeMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select((value) => value.themeMode),
+    );
+
+    useOnInitialization(() async {
+      final engineSettings = await ref
+          .read(engineSettingsRepositoryProvider.notifier)
+          .fetchSettings();
+
+      await GeckoBrowserService().initialize(
+        kDebugMode ? LogLevel.debug : LogLevel.warn,
+        engineSettings.contentBlocking,
+        engineSettings.addonCollection,
+      );
+
+      await ref.read(appInitializationServiceProvider.notifier).initialize();
+
+      await BackgroundFetch.configure(
+        BackgroundFetchConfig(
+          minimumFetchInterval: 15,
+          enableHeadless: true,
+          stopOnTerminate: false,
+          requiredNetworkType: NetworkType.ANY,
+          startOnBoot: true,
+        ),
+        (String taskId) async {
+          try {
+            await ref
+                .read(fetchArticlesControllerProvider.notifier)
+                .fetchAllArticles();
+
+            logger.i('Fetched articles in foreground');
+          } catch (e, s) {
+            logger.e('Failed fetching articles', error: e, stackTrace: s);
+          } finally {
+            await BackgroundFetch.finish(taskId);
+          }
+        },
+      );
+    });
+
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        ColorScheme lightColorScheme;
+        ColorScheme darkColorScheme;
+
+        if (lightDynamic != null && darkDynamic != null) {
+          // On Android S+ devices, use the provided dynamic color scheme.
+          // (Recommended) Harmonize the dynamic color scheme' built-in semantic colors.
+          lightColorScheme = lightDynamic.harmonized();
+
+          // Repeat for the dark color scheme.
+          darkColorScheme = darkDynamic.harmonized();
+        } else {
+          // Otherwise, use fallback schemes.
+          lightColorScheme = ColorScheme.fromSeed(
+            seedColor: ref.read(lightSeedColorFallbackProvider),
+          );
+          darkColorScheme = ColorScheme.fromSeed(
+            seedColor: ref.read(darkSeedColorFallbackProvider),
+            brightness: Brightness.dark,
+          );
+        }
+
+        return MainApp(
+          key: rootKey,
+          theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorScheme: darkColorScheme,
+          ),
+          themeMode: themeMode,
+        );
+      },
+    );
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -75,115 +180,6 @@ void main() async {
   await HomeWidget.setAppGroupId('weblibre');
 
   runApp(
-    ProviderScope(
-      observers: const [ErrorObserver()],
-      child: HookConsumer(
-        builder: (context, ref, child) {
-          final rootKey = ref.watch(appStateKeyProvider);
-
-          final pauseTime = useRef<DateTime?>(null);
-          useOnAppLifecycleStateChange((previous, current) {
-            switch (current) {
-              case AppLifecycleState.resumed:
-                if (pauseTime.value != null &&
-                    DateTime.now().difference(pauseTime.value!) >
-                        const Duration(minutes: 10)) {
-                  //Rebuild widget tree after long time of inactivity
-                  ref.read(appStateKeyProvider.notifier).reset();
-                }
-                pauseTime.value = null;
-              case AppLifecycleState.detached:
-              case AppLifecycleState.inactive:
-              case AppLifecycleState.hidden:
-              case AppLifecycleState.paused:
-                pauseTime.value = DateTime.now();
-            }
-          });
-
-          final themeMode = ref.watch(
-            generalSettingsWithDefaultsProvider.select(
-              (value) => value.themeMode,
-            ),
-          );
-
-          useOnInitialization(() async {
-            final engineSettings = await ref
-                .read(engineSettingsRepositoryProvider.notifier)
-                .fetchSettings();
-
-            await GeckoBrowserService().initialize(
-              kDebugMode ? LogLevel.debug : LogLevel.warn,
-              engineSettings.contentBlocking,
-              engineSettings.addonCollection,
-            );
-
-            await ref
-                .read(appInitializationServiceProvider.notifier)
-                .initialize();
-
-            await BackgroundFetch.configure(
-              BackgroundFetchConfig(
-                minimumFetchInterval: 15,
-                enableHeadless: true,
-                stopOnTerminate: false,
-                requiredNetworkType: NetworkType.ANY,
-                startOnBoot: true,
-              ),
-              (String taskId) async {
-                try {
-                  await ref
-                      .read(fetchArticlesControllerProvider.notifier)
-                      .fetchAllArticles();
-
-                  logger.i('Fetched articles in foreground');
-                } catch (e, s) {
-                  logger.e('Failed fetching articles', error: e, stackTrace: s);
-                } finally {
-                  await BackgroundFetch.finish(taskId);
-                }
-              },
-            );
-          });
-
-          return DynamicColorBuilder(
-            builder: (lightDynamic, darkDynamic) {
-              ColorScheme lightColorScheme;
-              ColorScheme darkColorScheme;
-
-              if (lightDynamic != null && darkDynamic != null) {
-                // On Android S+ devices, use the provided dynamic color scheme.
-                // (Recommended) Harmonize the dynamic color scheme' built-in semantic colors.
-                lightColorScheme = lightDynamic.harmonized();
-
-                // Repeat for the dark color scheme.
-                darkColorScheme = darkDynamic.harmonized();
-              } else {
-                // Otherwise, use fallback schemes.
-                lightColorScheme = ColorScheme.fromSeed(
-                  seedColor: ref.read(lightSeedColorFallbackProvider),
-                );
-                darkColorScheme = ColorScheme.fromSeed(
-                  seedColor: ref.read(darkSeedColorFallbackProvider),
-                  brightness: Brightness.dark,
-                );
-              }
-
-              return MainApp(
-                key: rootKey,
-                theme: ThemeData(
-                  useMaterial3: true,
-                  colorScheme: lightColorScheme,
-                ),
-                darkTheme: ThemeData(
-                  useMaterial3: true,
-                  colorScheme: darkColorScheme,
-                ),
-                themeMode: themeMode,
-              );
-            },
-          );
-        },
-      ),
-    ),
+    const ProviderScope(observers: [ErrorObserver()], child: _MainWidget()),
   );
 }
