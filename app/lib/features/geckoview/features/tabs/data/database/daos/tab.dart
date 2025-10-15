@@ -127,14 +127,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           containerId: containerId,
           orderKey: currentOrderKey,
         ),
-        onConflict: DoUpdate(
-          (old) => TabCompanion(
-            parentId: parentId,
-            containerId: containerId,
-            orderKey: Value.absentIfNull(orderKey.value),
-          ),
-          where: (old) => old.containerId.isNull(),
-        ),
+        mode: InsertMode.insertOrIgnore,
       );
 
       return tabId;
