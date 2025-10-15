@@ -212,7 +212,9 @@ class BrowserScreen extends HookConsumerWidget {
               );
 
               return Visibility(
-                visible: !tabInFullScreen && appBarVisible,
+                visible:
+                    sheetController.value != null ||
+                    (!tabInFullScreen && appBarVisible),
                 child: BrowserBottomAppBar(displayedSheet: displayedSheet),
               );
             },
