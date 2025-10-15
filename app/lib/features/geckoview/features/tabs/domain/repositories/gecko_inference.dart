@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:exceptions/exceptions.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_mozilla_components/ml_utils.dart';
@@ -27,6 +28,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -62,36 +64,44 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     }
   }
 
-  Future<String?> predictDocumentTopic(Set<String> titles) async {
+  Future<Result<String?>> predictDocumentTopic(Set<String> titles) async {
     if (!ref.read(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
       ),
     )) {
-      return null;
+      return Result.success(null);
     }
 
     if (titles.isNotEmpty) {
       if (_topicCache.get(titles) case final String title) {
-        return title;
+        return Result.success(title);
       }
 
       try {
         final title = await _engineLock.synchronized(() async {
           await _initialLoadComplete.future;
 
-          final title = await _service.predictDocumentTopic(titles);
+          final title = await Result.fromAsync(
+            () async => await _service.predictDocumentTopic(titles),
+          );
+          title.onSuccess((title) => _topicCache.set(titles, title));
 
-          return _topicCache.set(titles, title);
+          return title;
         }, timeout: const Duration(seconds: 120));
 
         return title;
       } on TimeoutException {
-        return null;
+        return Result.failure(
+          const ErrorMessage(
+            source: 'Document Title Prediction',
+            message: 'Timeout',
+          ),
+        );
       }
     }
 
-    return null;
+    return Result.success(null);
   }
 
   Future<List<String>?> suggestDocuments({
@@ -126,15 +136,30 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
       ...assignedDocumentsProcessed,
     ]);
 
-    final neighbors = embeddings.mapNotNull(
-      (embeddings) => findNearestNeighborsRecursive(
-        embeddings: embeddings,
-        assignedDocuments: assignedDocumentsProcessed,
-        unassignedDocuments: unassignedDocumentsProcessed,
-      ).map((neighbor) => processedDocuments[neighbor] ?? neighbor).toList(),
-    );
+    return embeddings.fold(
+      (embeddings) {
+        final neighbors = embeddings.mapNotNull(
+          (embeddings) =>
+              findNearestNeighborsRecursive(
+                    embeddings: embeddings,
+                    assignedDocuments: assignedDocumentsProcessed,
+                    unassignedDocuments: unassignedDocumentsProcessed,
+                  )
+                  .map((neighbor) => processedDocuments[neighbor] ?? neighbor)
+                  .toList(),
+        );
 
-    return neighbors;
+        return neighbors;
+      },
+      onFailure: (errorMessage) {
+        logger.e(
+          errorMessage.message,
+          error: errorMessage.details,
+          stackTrace: errorMessage.stackTrace,
+        );
+        return null;
+      },
+    );
   }
 
   Future<List<SuggestedContainer>?> suggestClusters({
@@ -164,42 +189,66 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
       unassignedDocumentsProcessed,
     );
 
-    final clusters = embeddings.mapNotNull(
-      (embeddings) => clusterEmbeddings(embeddings: embeddings.values.toList())
-          .map(
-            (cluster) =>
-                cluster.map((i) => embeddings.keys.elementAt(i)).toList(),
-          )
-          .toList(),
+    return embeddings.fold(
+      (embeddings) async {
+        final clusters = embeddings.mapNotNull(
+          (embeddings) =>
+              clusterEmbeddings(embeddings: embeddings.values.toList())
+                  .map(
+                    (cluster) => cluster
+                        .map((i) => embeddings.keys.elementAt(i))
+                        .toList(),
+                  )
+                  .toList(),
+        );
+
+        final clusterResult = await clusters.mapNotNull(
+          (cluster) => Future.wait(
+            cluster.map((clusterTitles) async {
+              final originalTitles = clusterTitles
+                  .map((title) => processedDocuments[title] ?? title)
+                  .toSet();
+
+              final topic = await predictDocumentTopic(originalTitles);
+
+              return (
+                topic: topic.fold(
+                  (topic) => topic,
+                  onFailure: (errorMessage) {
+                    logger.e(
+                      errorMessage.message,
+                      error: errorMessage.details,
+                      stackTrace: errorMessage.stackTrace,
+                    );
+                    return null;
+                  },
+                ),
+                tabIds: originalTitles
+                    .map(
+                      (title) => unassignedDocumentsInput.entries
+                          .firstWhere((entry) => entry.value == title)
+                          .key,
+                    )
+                    .toList(),
+              );
+            }),
+          ),
+        );
+
+        return clusterResult;
+      },
+      onFailure: (errorMessage) {
+        logger.e(
+          errorMessage.message,
+          error: errorMessage.details,
+          stackTrace: errorMessage.stackTrace,
+        );
+        return null;
+      },
     );
-
-    final clusterResult = await clusters.mapNotNull(
-      (cluster) => Future.wait(
-        cluster.map((clusterTitles) async {
-          final originalTitles = clusterTitles
-              .map((title) => processedDocuments[title] ?? title)
-              .toSet();
-
-          final topic = await predictDocumentTopic(originalTitles);
-
-          return (
-            topic: topic,
-            tabIds: originalTitles
-                .map(
-                  (title) => unassignedDocumentsInput.entries
-                      .firstWhere((entry) => entry.value == title)
-                      .key,
-                )
-                .toList(),
-          );
-        }),
-      ),
-    );
-
-    return clusterResult;
   }
 
-  Future<Map<String, List<double>>?> generateDocumentEmbeddings(
+  Future<Result<Map<String, List<double>>?>> generateDocumentEmbeddings(
     List<String> documents,
   ) async {
     try {
@@ -216,24 +265,30 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
         final generatedEmbeddings = await _engineLock.synchronized(() async {
           await _initialLoadComplete.future;
 
-          final embeddings = await _service.generateDocumentEmbeddings(
-            documents,
+          final embeddings = await Result.fromAsync(
+            () async => await _service.generateDocumentEmbeddings(documents),
           );
 
           return embeddings;
         }, timeout: const Duration(seconds: 120));
 
+        if (!generatedEmbeddings.isSuccess) {
+          return Result.failure(generatedEmbeddings.error!);
+        }
+
         for (var i = 0; i < embeddingsToGenerate.length; i++) {
-          embeddings[embeddingsToGenerate[i]] = generatedEmbeddings[i];
+          embeddings[embeddingsToGenerate[i]] = generatedEmbeddings.value[i];
         }
       }
 
-      return {
+      return Result.success({
         for (final MapEntry(:key, :value) in embeddings.entries)
           if (value != null) key: value,
-      };
+      });
     } on TimeoutException {
-      return null;
+      return Result.failure(
+        const ErrorMessage(source: 'Document Embeddings', message: 'Timeout'),
+      );
     }
   }
 
@@ -283,11 +338,23 @@ Future<String?> topicSuggestion(
       .read(geckoInferenceRepositoryProvider.notifier)
       .predictDocumentTopic(titles.value);
 
-  if (ref.mounted && topic.isNotEmpty) {
-    ref.keepAlive();
-  }
+  return topic.fold(
+    (topic) {
+      if (ref.mounted && topic.isNotEmpty) {
+        ref.keepAlive();
+      }
 
-  return topic;
+      return topic;
+    },
+    onFailure: (errorMessage) {
+      logger.e(
+        errorMessage.message,
+        error: errorMessage.details,
+        stackTrace: errorMessage.stackTrace,
+      );
+      return null;
+    },
+  );
 }
 
 @Riverpod()
@@ -359,6 +426,19 @@ Future<List<String>?> containerTabSuggestions(
             .read(geckoInferenceRepositoryProvider.notifier)
             .predictDocumentTopic(
               assignedTitles.value.map((tab) => tab.$2).toSet(),
+            )
+            .then(
+              (result) => result.fold(
+                (value) => value,
+                onFailure: (errorMessage) {
+                  logger.e(
+                    errorMessage.message,
+                    error: errorMessage.details,
+                    stackTrace: errorMessage.stackTrace,
+                  );
+                  return null;
+                },
+              ),
             );
 
     if (ref.mounted && topic != null) {
