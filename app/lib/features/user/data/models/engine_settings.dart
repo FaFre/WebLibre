@@ -200,6 +200,18 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
+    javascriptEnabled,
+    trackingProtectionPolicy,
+    httpsOnlyMode,
+    globalPrivacyControlEnabled,
+    preferredColorScheme,
+    cookieBannerHandlingMode,
+    cookieBannerHandlingModePrivateBrowsing,
+    cookieBannerHandlingGlobalRules,
+    cookieBannerHandlingGlobalRulesSubFrames,
+    webContentIsolationStrategy,
+    userAgent,
+    enterpriseRootsEnabled,
     queryParameterStripping,
     bounceTrackingProtectionMode,
     addonCollection,

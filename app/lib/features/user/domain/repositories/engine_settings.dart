@@ -18,8 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -110,10 +112,9 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
-      'dohExceptionsList': settings['dohExceptionsList']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
+      'dohExceptionsList': settings['dohExceptionsList']
+          ?.readAs(DriftSqlType.string, db.typeMapping)
+          .mapNotNull(jsonDecode),
       'fingerprintingProtectionOverrides':
           settings['fingerprintingProtectionOverrides']?.readAs(
             DriftSqlType.string,
