@@ -1,3 +1,12 @@
+## 0.9.26
+### GeckoView 144.0
+
+**Bug Fixes**
+- Ensure tab bar remains visible when bottom sheet is active
+- Handle AI engine errors gracefully
+- Fix container assignment when opening links
+- Fix settings toggle not refreshing UI
+
 ## 0.9.25
 ### GeckoView 144.0
 
