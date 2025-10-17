@@ -48,16 +48,8 @@ final _contentParserTransformer =
 
 @Riverpod()
 class EngineBoundIntentStream extends _$EngineBoundIntentStream {
-  late StreamController<SharedContent> _streamController;
-
   @override
   Stream<SharedContent> build() {
-    _streamController = StreamController();
-
-    ref.onDispose(() async {
-      await _streamController.close();
-    });
-
     final engineReady = ref.watch(engineReadyStateProvider);
     if (!engineReady) {
       return const Stream.empty();
@@ -69,7 +61,6 @@ class EngineBoundIntentStream extends _$EngineBoundIntentStream {
     return MergeStream([
       sharingItentStream.transform(_contentParserTransformer),
       appWidgetLaunchStream.transform(_contentParserTransformer),
-      _streamController.stream,
     ]);
   }
 
