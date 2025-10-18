@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
@@ -63,7 +62,7 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
       }
 
       return result;
-    } on PlatformException catch (e, s) {
+    } on LocalAuthException catch (e, s) {
       logger.e('Could not authenticate', error: e, stackTrace: s);
       return false;
     }

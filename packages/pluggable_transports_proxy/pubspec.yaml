@@ -21,7 +21,7 @@ dev_dependencies:
     sdk: flutter
   json_serializable: ^6.11.1
   lint: ^2.8.0
-  pigeon: ^26.0.1
+  pigeon: ^26.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

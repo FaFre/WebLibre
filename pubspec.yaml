@@ -11,7 +11,7 @@ workspace:
   - packages/simple_intent_receiver/example
   - packages/tor
 dev_dependencies:
-  melos: ^7.1.1
+  melos: ^7.2.0
 
 melos:
   name: weblibre_project
