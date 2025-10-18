@@ -4,34 +4,25 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import 'dart:convert';
-
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 
 final _apiInstance = GeckoPrefApi();
 
 class GeckoPrefService {
-  Future<Map<String, Object>> getAllPrefs() {
-    return _apiInstance.getPrefs(null);
+  Future<List<String>> getPrefList() {
+    return _apiInstance.getPrefList();
   }
 
-  Future<Map<String, Object>> getPrefs(List<String> prefs) {
+  Future<Map<String, GeckoPrefValue>> getAllPrefs() async {
+    return _apiInstance.getPrefs(await getPrefList());
+  }
+
+  Future<Map<String, GeckoPrefValue>> getPrefs(List<String> prefs) {
     return _apiInstance.getPrefs(prefs);
   }
 
-  Future<Map<String, Object>> applyPrefs(Map<String, Object> prefs) {
-    final buffer = prefs.entries.map((pref) {
-      final value = switch (pref.value) {
-        final bool x => '$x',
-        final int x => '$x',
-        final String x => jsonEncode(x),
-        _ => throw Exception('Unknow pref type'),
-      };
-
-      return 'user_pref("${pref.key}", $value);';
-    }).join();
-
-    return _apiInstance.applyPrefs(buffer);
+  Future<Map<String, GeckoPrefValue>> applyPrefs(Map<String, Object> prefs) {
+    return _apiInstance.applyPrefs(prefs);
   }
 
   Future<void> resetPrefs(List<String> prefs) {

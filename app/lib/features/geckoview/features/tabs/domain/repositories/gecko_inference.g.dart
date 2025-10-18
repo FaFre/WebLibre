@@ -42,7 +42,7 @@ final class GeckoInferenceRepositoryProvider
 }
 
 String _$geckoInferenceRepositoryHash() =>
-    r'5f99fd1e46a8ae291b63df044fe11917cd5d415c';
+    r'c4f52d2edfb8c5763577a17697202016645177da';
 
 abstract class _$GeckoInferenceRepository extends $Notifier<void> {
   void build();
@@ -268,7 +268,7 @@ final class TopicSuggestionProvider
   }
 }
 
-String _$topicSuggestionHash() => r'5401b1cd91e53be6ad1b4c7a39a5253d380e05d4';
+String _$topicSuggestionHash() => r'97480102ecfe9458d25cb4666cf4577333e26d66';
 
 final class TopicSuggestionFamily extends $Family
     with
@@ -390,7 +390,7 @@ final class ContainerTabSuggestionsProvider
 }
 
 String _$containerTabSuggestionsHash() =>
-    r'9e7e9b9d245959fcf8c87cb8822313ded801ebc0';
+    r'1b681736215826886241aea834f99ebfb9761197';
 
 final class ContainerTabSuggestionsFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<String>?>, String?> {

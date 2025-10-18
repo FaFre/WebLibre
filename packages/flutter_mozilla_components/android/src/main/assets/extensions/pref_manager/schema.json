@@ -4,74 +4,18 @@
     "description": "Experimental API for updating Geckoview preferences",
     "functions": [
       {
-        "name": "getPrefs",
+        "name": "getPrefList",
         "type": "function",
-        "description": "Retrieves preferences and their values",
+        "description": "Retrieves list of all preferences",
         "async": true,
-        "parameters": [
-          {
-            "name": "prefNames",
-            "type": "array",
-            "optional": true,
-            "description": "Array of preference names to retrieve. If empty or null, retrieves all preferences",
-            "items": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "returns": {
-          "type": "object",
+          "array": "object",
           "description": "Object containing the preferences as key-value pairs",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Preference values can be boolean, number, or string"
+          "items": {
+            "type": "string"
           }
         }
-      },
-      {
-        "name": "parsePrefsAndApply",
-        "type": "function",
-        "description": "Reads and sets preferences from an encoded preferences file content",
-        "async": true,
-        "parameters": [
-          {
-            "name": "prefsFileContent",
-            "type": "object",
-            "isInstanceOf": "Uint8Array",
-            "description": "Encoded content of the preferences file to parse (Uint8Array)"
-          },
-          {
-            "name": "predicate",
-            "type": "function",
-            "optional": true,
-            "description": "Optional filter function to determine which preferences to include"
-          }
-        ],
-        "returns": {
-          "type": "object",
-          "description": "Object containing the parsed preferences as key-value pairs",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Preference values can be boolean, number, or string"
-          }
-        }
-      },
-      {
-        "name": "resetPrefs",
-        "type": "function",
-        "description": "Resets multiple or all preferences to their default values",
-        "async": true,
-        "parameters": [
-          {
-            "name": "prefNames",
-            "type": "array",
-            "optional": true,
-            "description": "Array of preference names to reset. If empty or null, resets all preferences",
-            "items": {
-              "type": "string"
-            }
-          }
-        ]
       }
     ]
   }

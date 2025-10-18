@@ -19,6 +19,7 @@
  */
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'preference_setting.g.dart';
@@ -55,9 +56,9 @@ class PreferenceSetting with FastEquatable {
   final Object value;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final Object? actualValue;
+  final GeckoPrefValue? current;
 
-  bool get isActive => value == actualValue;
+  bool get isActive => value == current?.value;
 
   final String? title;
   final String? description;
@@ -69,7 +70,7 @@ class PreferenceSetting with FastEquatable {
     required this.value,
     required this.title,
     required this.description,
-    this.actualValue,
+    this.current,
     this.requireUserOptIn = false,
     this.shouldBeDefault = false,
   });
@@ -82,7 +83,7 @@ class PreferenceSetting with FastEquatable {
   @override
   List<Object?> get hashParameters => [
     value,
-    actualValue,
+    current,
     title,
     description,
     requireUserOptIn,

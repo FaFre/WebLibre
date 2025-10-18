@@ -1075,14 +1075,30 @@ abstract class GeckoIconsApi {
   IconResult loadIcon(IconRequest request);
 }
 
+class GeckoPrefValue {
+  final Object? value;
+  final Object? defaultValue;
+  final Object? userValue;
+  final bool hasUserChangedValue;
+
+  GeckoPrefValue(
+    this.value,
+    this.defaultValue,
+    this.userValue,
+    this.hasUserChangedValue,
+  );
+}
+
 @HostApi()
 abstract class GeckoPrefApi {
   @async
-  Map<String, Object> getPrefs(List<String>? preferenceFilter);
+  List<String> getPrefList();
   @async
-  Map<String, Object> applyPrefs(String prefBuffer);
+  Map<String, GeckoPrefValue> getPrefs(List<String> preferenceFilter);
   @async
-  void resetPrefs(List<String>? preferenceNames);
+  Map<String, GeckoPrefValue> applyPrefs(Map<String, Object> prefs);
+  @async
+  void resetPrefs(List<String> preferenceNames);
 }
 
 @HostApi()

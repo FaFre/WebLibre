@@ -65,7 +65,7 @@ Future<PreferenceSettingGroup> _preferenceSettingGroup(
 class _PreferenceRepository extends _$PreferenceRepository {
   final _prefManager = GeckoPrefService();
   // Use BehaviorSubject instead of StreamController
-  late BehaviorSubject<Map<String, Object>> _prefSubject;
+  late BehaviorSubject<Map<String, GeckoPrefValue>> _prefSubject;
 
   Future<void> _updatePrefs() async {
     final prefs = await _prefManager.getAllPrefs();
@@ -83,8 +83,8 @@ class _PreferenceRepository extends _$PreferenceRepository {
   }
 
   @override
-  Raw<Stream<Map<String, Object>>> build() {
-    _prefSubject = BehaviorSubject<Map<String, Object>>();
+  Raw<Stream<Map<String, GeckoPrefValue>>> build() {
+    _prefSubject = BehaviorSubject<Map<String, GeckoPrefValue>>();
 
     ref.onDispose(() async {
       await _prefSubject.close();
@@ -157,10 +157,8 @@ class UnifiedPreferenceSettingsRepository
           groupName,
           group.copyWith.settings(
             group.settings.map(
-              (prefName, setting) => MapEntry(
-                prefName,
-                setting.copyWith.actualValue(prefs[prefName]),
-              ),
+              (prefName, setting) =>
+                  MapEntry(prefName, setting.copyWith.current(prefs[prefName])),
             ),
           ),
         ),
@@ -234,7 +232,7 @@ class PreferenceSettingsGroupRepository
     yield* prefStream.map(
       (prefs) => _statelessSettingGroup!.copyWith.settings(
         _statelessSettingGroup!.settings.map(
-          (key, value) => MapEntry(key, value.copyWith.actualValue(prefs[key])),
+          (key, value) => MapEntry(key, value.copyWith.current(prefs[key])),
         ),
       ),
     );

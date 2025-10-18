@@ -2194,6 +2194,43 @@ data class AddonCollection (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class GeckoPrefValue (
+  val value: Any? = null,
+  val defaultValue: Any? = null,
+  val userValue: Any? = null,
+  val hasUserChangedValue: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GeckoPrefValue {
+      val value = pigeonVar_list[0]
+      val defaultValue = pigeonVar_list[1]
+      val userValue = pigeonVar_list[2]
+      val hasUserChangedValue = pigeonVar_list[3] as Boolean
+      return GeckoPrefValue(value, defaultValue, userValue, hasUserChangedValue)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      value,
+      defaultValue,
+      userValue,
+      hasUserChangedValue,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is GeckoPrefValue) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class GeckoPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -2507,6 +2544,11 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
           AddonCollection.fromList(it)
         }
       }
+      191.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          GeckoPrefValue.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -2758,6 +2800,10 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       is AddonCollection -> {
         stream.write(190)
+        writeValue(stream, value.toList())
+      }
+      is GeckoPrefValue -> {
+        stream.write(191)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -3714,9 +3760,10 @@ interface GeckoIconsApi {
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoPrefApi {
-  fun getPrefs(preferenceFilter: List<String>?, callback: (Result<Map<String, Any>>) -> Unit)
-  fun applyPrefs(prefBuffer: String, callback: (Result<Map<String, Any>>) -> Unit)
-  fun resetPrefs(preferenceNames: List<String>?, callback: (Result<Unit>) -> Unit)
+  fun getPrefList(callback: (Result<List<String>>) -> Unit)
+  fun getPrefs(preferenceFilter: List<String>, callback: (Result<Map<String, GeckoPrefValue>>) -> Unit)
+  fun applyPrefs(prefs: Map<String, Any>, callback: (Result<Map<String, GeckoPrefValue>>) -> Unit)
+  fun resetPrefs(preferenceNames: List<String>, callback: (Result<Unit>) -> Unit)
 
   companion object {
     /** The codec used by GeckoPrefApi. */
@@ -3728,12 +3775,30 @@ interface GeckoPrefApi {
     fun setUp(binaryMessenger: BinaryMessenger, api: GeckoPrefApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.getPrefList$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.getPrefList{ result: Result<List<String>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.getPrefs$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val preferenceFilterArg = args[0] as List<String>?
-            api.getPrefs(preferenceFilterArg) { result: Result<Map<String, Any>> ->
+            val preferenceFilterArg = args[0] as List<String>
+            api.getPrefs(preferenceFilterArg) { result: Result<Map<String, GeckoPrefValue>> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))
@@ -3752,8 +3817,8 @@ interface GeckoPrefApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val prefBufferArg = args[0] as String
-            api.applyPrefs(prefBufferArg) { result: Result<Map<String, Any>> ->
+            val prefsArg = args[0] as Map<String, Any>
+            api.applyPrefs(prefsArg) { result: Result<Map<String, GeckoPrefValue>> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))
@@ -3772,7 +3837,7 @@ interface GeckoPrefApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val preferenceNamesArg = args[0] as List<String>?
+            val preferenceNamesArg = args[0] as List<String>
             api.resetPrefs(preferenceNamesArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {

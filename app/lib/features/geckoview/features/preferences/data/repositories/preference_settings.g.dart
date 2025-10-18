@@ -229,7 +229,7 @@ final class _PreferenceRepositoryProvider
     extends
         $NotifierProvider<
           _PreferenceRepository,
-          Raw<Stream<Map<String, Object>>>
+          Raw<Stream<Map<String, GeckoPrefValue>>>
         > {
   const _PreferenceRepositoryProvider._()
     : super(
@@ -250,22 +250,21 @@ final class _PreferenceRepositoryProvider
   _PreferenceRepository create() => _PreferenceRepository();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Raw<Stream<Map<String, Object>>> value) {
+  Override overrideWithValue(Raw<Stream<Map<String, GeckoPrefValue>>> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<Raw<Stream<Map<String, Object>>>>(
-        value,
-      ),
+      providerOverride:
+          $SyncValueProvider<Raw<Stream<Map<String, GeckoPrefValue>>>>(value),
     );
   }
 }
 
 String _$_preferenceRepositoryHash() =>
-    r'b2b7f75b3d30842b3006bb18af89f7ff90ba4ce7';
+    r'9a98b95677d4070def531ea1e5b900892045a1ef';
 
 abstract class _$PreferenceRepository
-    extends $Notifier<Raw<Stream<Map<String, Object>>>> {
-  Raw<Stream<Map<String, Object>>> build();
+    extends $Notifier<Raw<Stream<Map<String, GeckoPrefValue>>>> {
+  Raw<Stream<Map<String, GeckoPrefValue>>> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -273,17 +272,17 @@ abstract class _$PreferenceRepository
     final ref =
         this.ref
             as $Ref<
-              Raw<Stream<Map<String, Object>>>,
-              Raw<Stream<Map<String, Object>>>
+              Raw<Stream<Map<String, GeckoPrefValue>>>,
+              Raw<Stream<Map<String, GeckoPrefValue>>>
             >;
     final element =
         ref.element
             as $ClassProviderElement<
               AnyNotifier<
-                Raw<Stream<Map<String, Object>>>,
-                Raw<Stream<Map<String, Object>>>
+                Raw<Stream<Map<String, GeckoPrefValue>>>,
+                Raw<Stream<Map<String, GeckoPrefValue>>>
               >,
-              Raw<Stream<Map<String, Object>>>,
+              Raw<Stream<Map<String, GeckoPrefValue>>>,
               Object?,
               Object?
             >;
@@ -341,7 +340,7 @@ final class UnifiedPreferenceSettingsRepositoryProvider
 }
 
 String _$unifiedPreferenceSettingsRepositoryHash() =>
-    r'23c0da1fdc975bbfb88b3cf82f242dbe0d50cd87';
+    r'800e74a051113b4ebc3631b6ade55d66cb7e1af1';
 
 final class UnifiedPreferenceSettingsRepositoryFamily extends $Family
     with
@@ -455,7 +454,7 @@ final class PreferenceSettingsGroupRepositoryProvider
 }
 
 String _$preferenceSettingsGroupRepositoryHash() =>
-    r'05db908036ffa999886f4e9dc4429aa85f8957f9';
+    r'8e025cdea5cef8a6ea029db6f9ebcd86abf906d8';
 
 final class PreferenceSettingsGroupRepositoryFamily extends $Family
     with

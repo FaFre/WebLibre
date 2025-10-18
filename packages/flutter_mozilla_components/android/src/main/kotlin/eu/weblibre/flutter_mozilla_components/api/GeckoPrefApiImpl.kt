@@ -6,13 +6,22 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.feature.PrefManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefValue
+import mozilla.components.ExperimentalAndroidComponentsApi
+import mozilla.components.concept.engine.preferences.Branch
+import mozilla.components.support.ktx.android.org.json.toList
 import org.json.JSONObject
 import org.json.JSONArray
 
 class GeckoPrefApiImpl : GeckoPrefApi {
+    private val components by lazy {
+        requireNotNull(GlobalComponents.components) { "Components not initialized" }
+    }
+
     private fun List<String>?.toJson(): JSONArray {
         return JSONArray().apply {
             this@toJson?.forEach { put(it) }
@@ -36,44 +45,119 @@ class GeckoPrefApiImpl : GeckoPrefApi {
         return map
     }
 
+    override fun getPrefList(callback: (Result<List<String>>) -> Unit) {
+        PrefManagerFeature.scheduleRequest("getPrefList", Unit, object : ResultConsumer<JSONObject> {
+            override fun success(result: JSONObject) {
+                callback(Result.success(result.getJSONArray("result").toList()))
+            }
+
+            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
+            }
+        })
+    }
+
+    @OptIn(ExperimentalAndroidComponentsApi::class)
     override fun getPrefs(
-        preferenceFilter: List<String>?,
-        callback: (Result<Map<String, Any>>) -> Unit
+        preferenceFilter: List<String>,
+        callback: (Result<Map<String, GeckoPrefValue>>) -> Unit
     ) {
-        PrefManagerFeature.scheduleRequest("getPrefs", preferenceFilter.toJson(), object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(result.getJSONObject("result").toMap()))
+        components.core.engine.getBrowserPrefs(
+            preferenceFilter, onSuccess = {
+                callback(
+                    Result.success(
+                        it.associate {
+                            it.pref to GeckoPrefValue(
+                                value = it.value,
+                                defaultValue = it.defaultValue,
+                                userValue = it.userValue,
+                                hasUserChangedValue = it.hasUserChangedValue,
+                            )
+                        })
+                )
+            },
+            onError = {
+                callback(Result.failure(Exception("${it.message} ${it.cause}")))
             }
-
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
+        )
     }
 
-    override fun applyPrefs(prefBuffer: String, callback: (Result<Map<String, Any>>) -> Unit) {
-        PrefManagerFeature.scheduleRequest("parsePrefsAndApply", prefBuffer, object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(result.getJSONObject("result").toMap()))
+    @OptIn(ExperimentalAndroidComponentsApi::class)
+    override fun applyPrefs(
+        prefs: Map<String, Any>,
+        callback: (Result<Map<String, GeckoPrefValue>>) -> Unit
+    ) {
+        var fault: Boolean = false;
+
+        for (pref in prefs) {
+            when (pref.value) {
+                is String -> components.core.engine.setBrowserPref(
+                    pref.key,
+                    pref.value as String,
+                    Branch.USER,
+                    onSuccess = {},
+                    onError = {
+                        callback(Result.failure(Exception("${it.message} ${it.cause}")))
+                        fault = true
+                    }
+                )
+
+                is Boolean -> components.core.engine.setBrowserPref(
+                    pref.key,
+                    pref.value as Boolean,
+                    Branch.USER,
+                    onSuccess = {},
+                    onError = {
+                        callback(Result.failure(Exception("${it.message} ${it.cause}")))
+                        fault = true
+                    }
+                )
+
+                is Long -> components.core.engine.setBrowserPref(
+                    pref.key,
+                    (pref.value as Long).toInt(),
+                    Branch.USER,
+                    onSuccess = {},
+                    onError = {
+                        callback(Result.failure(Exception("${it.message} ${it.cause}")))
+                        fault = true
+                    }
+                )
+
+                else -> {
+                    callback(Result.failure(Exception("Unsupported value type: ${pref.value::class.simpleName}")))
+                    fault = true
+                }
             }
 
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
+            if (fault) {
+                return;
             }
-        })
+        }
+
+        getPrefs(
+            prefs.keys.toList(),
+            callback = callback
+        )
     }
 
-    override fun resetPrefs(preferenceNames: List<String>?, callback: (Result<Unit>) -> Unit) {
-        PrefManagerFeature.scheduleRequest("resetPrefs", preferenceNames.toJson(), object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(Unit))
-            }
+    @OptIn(ExperimentalAndroidComponentsApi::class)
+    override fun resetPrefs(preferenceNames: List<String>, callback: (Result<Unit>) -> Unit) {
+        var fault: Boolean = false;
 
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
+        for (pref in preferenceNames) {
+            components.core.engine.clearBrowserUserPref(
+                pref = pref,
+                onSuccess = {},
+                onError = {
+                    callback(Result.failure(Exception("${it.message} ${it.cause}")))
+                    fault = true
+                }
+            )
+
+            if (fault) {
+                return;
             }
-        })
+        }
     }
-
-
 }

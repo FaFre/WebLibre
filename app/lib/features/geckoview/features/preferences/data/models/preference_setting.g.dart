@@ -80,7 +80,7 @@ abstract class _$PreferenceSettingCWProxy {
 
   PreferenceSetting description(String? description);
 
-  PreferenceSetting actualValue(Object? actualValue);
+  PreferenceSetting current(GeckoPrefValue? current);
 
   PreferenceSetting requireUserOptIn(bool requireUserOptIn);
 
@@ -97,7 +97,7 @@ abstract class _$PreferenceSettingCWProxy {
     Object value,
     String? title,
     String? description,
-    Object? actualValue,
+    GeckoPrefValue? current,
     bool requireUserOptIn,
     bool shouldBeDefault,
   });
@@ -121,8 +121,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
       call(description: description);
 
   @override
-  PreferenceSetting actualValue(Object? actualValue) =>
-      call(actualValue: actualValue);
+  PreferenceSetting current(GeckoPrefValue? current) => call(current: current);
 
   @override
   PreferenceSetting requireUserOptIn(bool requireUserOptIn) =>
@@ -144,7 +143,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
     Object? value = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
-    Object? actualValue = const $CopyWithPlaceholder(),
+    Object? current = const $CopyWithPlaceholder(),
     Object? requireUserOptIn = const $CopyWithPlaceholder(),
     Object? shouldBeDefault = const $CopyWithPlaceholder(),
   }) {
@@ -161,10 +160,10 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
           ? _value.description
           // ignore: cast_nullable_to_non_nullable
           : description as String?,
-      actualValue: actualValue == const $CopyWithPlaceholder()
-          ? _value.actualValue
+      current: current == const $CopyWithPlaceholder()
+          ? _value.current
           // ignore: cast_nullable_to_non_nullable
-          : actualValue as Object?,
+          : current as GeckoPrefValue?,
       requireUserOptIn:
           requireUserOptIn == const $CopyWithPlaceholder() ||
               requireUserOptIn == null
