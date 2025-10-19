@@ -9,15 +9,17 @@ package eu.weblibre.flutter_mozilla_components.api
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.feature.PrefManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPref
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefValue
 import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.preferences.Branch
+import mozilla.components.concept.engine.preferences.BrowserPrefObserverDelegate
+import mozilla.components.concept.engine.preferences.BrowserPreference
 import mozilla.components.support.ktx.android.org.json.toList
 import org.json.JSONObject
 import org.json.JSONArray
 
-class GeckoPrefApiImpl : GeckoPrefApi {
+class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
@@ -46,28 +48,32 @@ class GeckoPrefApiImpl : GeckoPrefApi {
     }
 
     override fun getPrefList(callback: (Result<List<String>>) -> Unit) {
-        PrefManagerFeature.scheduleRequest("getPrefList", Unit, object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(result.getJSONArray("result").toList()))
-            }
+        PrefManagerFeature.scheduleRequest(
+            "getPrefList",
+            Unit,
+            object : ResultConsumer<JSONObject> {
+                override fun success(result: JSONObject) {
+                    callback(Result.success(result.getJSONArray("result").toList()))
+                }
 
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
+                override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                    callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
+                }
+            })
     }
 
     @OptIn(ExperimentalAndroidComponentsApi::class)
     override fun getPrefs(
         preferenceFilter: List<String>,
-        callback: (Result<Map<String, GeckoPrefValue>>) -> Unit
+        callback: (Result<Map<String, GeckoPref>>) -> Unit
     ) {
         components.core.engine.getBrowserPrefs(
             preferenceFilter, onSuccess = {
                 callback(
                     Result.success(
                         it.associate {
-                            it.pref to GeckoPrefValue(
+                            it.pref to GeckoPref(
+                                name = it.pref,
                                 value = it.value,
                                 defaultValue = it.defaultValue,
                                 userValue = it.userValue,
@@ -85,7 +91,7 @@ class GeckoPrefApiImpl : GeckoPrefApi {
     @OptIn(ExperimentalAndroidComponentsApi::class)
     override fun applyPrefs(
         prefs: Map<String, Any>,
-        callback: (Result<Map<String, GeckoPrefValue>>) -> Unit
+        callback: (Result<Map<String, GeckoPref>>) -> Unit
     ) {
         var fault: Boolean = false;
 
@@ -148,7 +154,7 @@ class GeckoPrefApiImpl : GeckoPrefApi {
         for (pref in preferenceNames) {
             components.core.engine.clearBrowserUserPref(
                 pref = pref,
-                onSuccess = {},
+                onSuccess = { },
                 onError = {
                     callback(Result.failure(Exception("${it.message} ${it.cause}")))
                     fault = true
@@ -159,5 +165,49 @@ class GeckoPrefApiImpl : GeckoPrefApi {
                 return;
             }
         }
+
+        callback(Result.success(Unit))
+    }
+
+    override fun startObserveChanges() {
+        components.core.engine.registerPrefObserverDelegate(this);
+    }
+
+    override fun stopObserveChanges() {
+        components.core.engine.unregisterPrefObserverDelegate();
+    }
+
+    override fun registerPrefForObservation(name: String, callback: (Result<Unit>) -> Unit) {
+        components.core.engine.registerPrefForObservation(
+            name,
+            onSuccess = {
+                callback(Result.success(Unit))
+            },
+            onError = {
+                callback(Result.failure(Exception("${it.message} ${it.cause}")))
+            })
+    }
+
+    override fun unregisterPrefForObservation(name: String, callback: (Result<Unit>) -> Unit) {
+        components.core.engine.unregisterPrefForObservation(
+            name,
+            onSuccess = {
+                callback(Result.success(Unit))
+            },
+            onError = {
+                callback(Result.failure(Exception("${it.message} ${it.cause}")))
+            })
+    }
+
+    override fun onPreferenceChange(observedPreference: BrowserPreference<*>) {
+        components.flutterEvents.onPreferenceChange(
+            System.currentTimeMillis(), GeckoPref(
+                name = observedPreference.pref,
+                value = observedPreference.value,
+                defaultValue = observedPreference.defaultValue,
+                userValue = observedPreference.userValue,
+                hasUserChangedValue = observedPreference.hasUserChangedValue,
+            )
+        ) { _ -> }
     }
 }

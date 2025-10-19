@@ -1075,13 +1075,15 @@ abstract class GeckoIconsApi {
   IconResult loadIcon(IconRequest request);
 }
 
-class GeckoPrefValue {
+class GeckoPref {
+  final String name;
   final Object? value;
   final Object? defaultValue;
   final Object? userValue;
   final bool hasUserChangedValue;
 
-  GeckoPrefValue(
+  GeckoPref(
+    this.name,
     this.value,
     this.defaultValue,
     this.userValue,
@@ -1094,11 +1096,18 @@ abstract class GeckoPrefApi {
   @async
   List<String> getPrefList();
   @async
-  Map<String, GeckoPrefValue> getPrefs(List<String> preferenceFilter);
+  Map<String, GeckoPref> getPrefs(List<String> preferenceFilter);
   @async
-  Map<String, GeckoPrefValue> applyPrefs(Map<String, Object> prefs);
+  Map<String, GeckoPref> applyPrefs(Map<String, Object> prefs);
   @async
   void resetPrefs(List<String> preferenceNames);
+
+  void startObserveChanges();
+  void stopObserveChanges();
+  @async
+  void registerPrefForObservation(String name);
+  @async
+  void unregisterPrefForObservation(String name);
 }
 
 @HostApi()
@@ -1198,6 +1207,7 @@ abstract class GeckoStateEvents {
   void onLongPress(int timestamp, String id, HitResult hitResult);
 
   void onScrollChange(int timestamp, String tabId, int scrollY);
+  void onPreferenceChange(int timestamp, GeckoPref value);
 }
 
 @FlutterApi()

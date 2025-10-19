@@ -80,7 +80,7 @@ abstract class _$PreferenceSettingCWProxy {
 
   PreferenceSetting description(String? description);
 
-  PreferenceSetting current(GeckoPrefValue? current);
+  PreferenceSetting current(GeckoPref? current);
 
   PreferenceSetting requireUserOptIn(bool requireUserOptIn);
 
@@ -97,7 +97,7 @@ abstract class _$PreferenceSettingCWProxy {
     Object value,
     String? title,
     String? description,
-    GeckoPrefValue? current,
+    GeckoPref? current,
     bool requireUserOptIn,
     bool shouldBeDefault,
   });
@@ -121,7 +121,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
       call(description: description);
 
   @override
-  PreferenceSetting current(GeckoPrefValue? current) => call(current: current);
+  PreferenceSetting current(GeckoPref? current) => call(current: current);
 
   @override
   PreferenceSetting requireUserOptIn(bool requireUserOptIn) =>
@@ -163,7 +163,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
       current: current == const $CopyWithPlaceholder()
           ? _value.current
           // ignore: cast_nullable_to_non_nullable
-          : current as GeckoPrefValue?,
+          : current as GeckoPref?,
       requireUserOptIn:
           requireUserOptIn == const $CopyWithPlaceholder() ||
               requireUserOptIn == null

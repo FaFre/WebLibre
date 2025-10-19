@@ -22,6 +22,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -134,8 +135,20 @@ class EngineSettingsReplicationService
                 settings.fingerprintingProtectionOverrides,
               );
             }
+            if (previous.value?.enablePdfJs != settings.enablePdfJs) {
+              // ignore: only_use_keep_alive_inside_keep_alive
+              await ref
+                  .read(preferenceFixatorProvider.notifier)
+                  .register('pdfjs.disabled', !settings.enablePdfJs);
+            }
           } else {
             await _service.setDefaultSettings(settings);
+
+            // ignore: only_use_keep_alive_inside_keep_alive
+            await ref
+                .read(preferenceFixatorProvider.notifier)
+                .register('pdfjs.disabled', !settings.enablePdfJs);
+
             initialSettingsSent = true;
           }
         }

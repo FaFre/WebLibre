@@ -65,7 +65,7 @@ Future<PreferenceSettingGroup> _preferenceSettingGroup(
 class _PreferenceRepository extends _$PreferenceRepository {
   final _prefManager = GeckoPrefService();
   // Use BehaviorSubject instead of StreamController
-  late BehaviorSubject<Map<String, GeckoPrefValue>> _prefSubject;
+  late BehaviorSubject<Map<String, GeckoPref>> _prefSubject;
 
   Future<void> _updatePrefs() async {
     final prefs = await _prefManager.getAllPrefs();
@@ -83,8 +83,8 @@ class _PreferenceRepository extends _$PreferenceRepository {
   }
 
   @override
-  Raw<Stream<Map<String, GeckoPrefValue>>> build() {
-    _prefSubject = BehaviorSubject<Map<String, GeckoPrefValue>>();
+  Raw<Stream<Map<String, GeckoPref>>> build() {
+    _prefSubject = BehaviorSubject<Map<String, GeckoPref>>();
 
     ref.onDispose(() async {
       await _prefSubject.close();

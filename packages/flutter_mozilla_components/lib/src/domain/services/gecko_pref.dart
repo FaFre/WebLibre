@@ -13,19 +13,35 @@ class GeckoPrefService {
     return _apiInstance.getPrefList();
   }
 
-  Future<Map<String, GeckoPrefValue>> getAllPrefs() async {
+  Future<Map<String, GeckoPref>> getAllPrefs() async {
     return _apiInstance.getPrefs(await getPrefList());
   }
 
-  Future<Map<String, GeckoPrefValue>> getPrefs(List<String> prefs) {
+  Future<Map<String, GeckoPref>> getPrefs(List<String> prefs) {
     return _apiInstance.getPrefs(prefs);
   }
 
-  Future<Map<String, GeckoPrefValue>> applyPrefs(Map<String, Object> prefs) {
+  Future<Map<String, GeckoPref>> applyPrefs(Map<String, Object> prefs) {
     return _apiInstance.applyPrefs(prefs);
   }
 
   Future<void> resetPrefs(List<String> prefs) {
     return _apiInstance.resetPrefs(prefs);
+  }
+
+  Future<void> startObserveChanges() {
+    return _apiInstance.startObserveChanges();
+  }
+
+  Future<void> stopObserveChanges() {
+    return _apiInstance.stopObserveChanges();
+  }
+
+  Future<void> registerPrefForObservation(String name) {
+    return _apiInstance.registerPrefForObservation(name);
+  }
+
+  Future<void> unregisterPrefForObservation(String name) {
+    return _apiInstance.unregisterPrefForObservation(name);
   }
 }

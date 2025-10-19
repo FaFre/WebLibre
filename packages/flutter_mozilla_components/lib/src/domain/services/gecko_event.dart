@@ -39,6 +39,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _findResultsSubject = PublishSubject<FindResultsEvent>();
   final _longPressSubject = PublishSubject<LongPressEvent>();
   final _scrollEventSubject = PublishSubject<ScrollEvent>();
+  final _prefUpdateSubject = PublishSubject<GeckoPref>();
 
   final _tabAddedSubject = PublishSubject<String>();
 
@@ -59,6 +60,7 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<FindResultsEvent> get findResultsEvent => _findResultsSubject.stream;
   Stream<LongPressEvent> get longPressEvent => _longPressSubject.stream;
   Stream<ScrollEvent> get scrollEvent => _scrollEventSubject.stream;
+  Stream<GeckoPref> get prefUpdateEvent => _prefUpdateSubject.stream;
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
 
@@ -177,6 +179,11 @@ class GeckoEventService extends GeckoStateEvents {
     ));
   }
 
+  @override
+  void onPreferenceChange(int timestamp, GeckoPref value) {
+    _prefUpdateSubject.addWhenMoreRecent(timestamp, value.name, value);
+  }
+
   GeckoEventService.setUp({
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
@@ -189,6 +196,8 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   void dispose() {
+    unawaited(_viewStateSubject.close());
+    unawaited(_engineStateSubject.close());
     unawaited(_tabListSubject.close());
     unawaited(_selectedTabSubject.close());
     unawaited(_tabContentSubject.close());
@@ -196,10 +205,12 @@ class GeckoEventService extends GeckoStateEvents {
     unawaited(_readerableSubject.close());
     unawaited(_securityInfoSubject.close());
     unawaited(_iconChangeSubject.close());
+    unawaited(_iconUpdateSubject.close());
     unawaited(_thumbnailSubject.close());
     unawaited(_findResultsSubject.close());
     unawaited(_longPressSubject.close());
     unawaited(_scrollEventSubject.close());
     unawaited(_tabAddedSubject.close());
+    unawaited(_prefUpdateSubject.close());
   }
 }

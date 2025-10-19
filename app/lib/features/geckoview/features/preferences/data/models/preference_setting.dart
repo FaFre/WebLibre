@@ -56,7 +56,7 @@ class PreferenceSetting with FastEquatable {
   final Object value;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
-  final GeckoPrefValue? current;
+  final GeckoPref? current;
 
   bool get isActive => value == current?.value;
 

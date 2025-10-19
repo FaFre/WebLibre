@@ -42,7 +42,7 @@ export 'src/pigeons/gecko.g.dart'
         DohSettingsMode,
         EmailHitResult,
         GeckoEngineSettings,
-        GeckoPrefValue,
+        GeckoPref,
         GeckoSuggestion,
         GeckoSuggestionType,
         GeoHitResult,

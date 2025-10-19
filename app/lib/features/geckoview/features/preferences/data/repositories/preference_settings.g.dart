@@ -229,7 +229,7 @@ final class _PreferenceRepositoryProvider
     extends
         $NotifierProvider<
           _PreferenceRepository,
-          Raw<Stream<Map<String, GeckoPrefValue>>>
+          Raw<Stream<Map<String, GeckoPref>>>
         > {
   const _PreferenceRepositoryProvider._()
     : super(
@@ -250,21 +250,22 @@ final class _PreferenceRepositoryProvider
   _PreferenceRepository create() => _PreferenceRepository();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Raw<Stream<Map<String, GeckoPrefValue>>> value) {
+  Override overrideWithValue(Raw<Stream<Map<String, GeckoPref>>> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride:
-          $SyncValueProvider<Raw<Stream<Map<String, GeckoPrefValue>>>>(value),
+      providerOverride: $SyncValueProvider<Raw<Stream<Map<String, GeckoPref>>>>(
+        value,
+      ),
     );
   }
 }
 
 String _$_preferenceRepositoryHash() =>
-    r'9a98b95677d4070def531ea1e5b900892045a1ef';
+    r'0f6812988a23407f6648e32fb1585984d2433bbc';
 
 abstract class _$PreferenceRepository
-    extends $Notifier<Raw<Stream<Map<String, GeckoPrefValue>>>> {
-  Raw<Stream<Map<String, GeckoPrefValue>>> build();
+    extends $Notifier<Raw<Stream<Map<String, GeckoPref>>>> {
+  Raw<Stream<Map<String, GeckoPref>>> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -272,17 +273,17 @@ abstract class _$PreferenceRepository
     final ref =
         this.ref
             as $Ref<
-              Raw<Stream<Map<String, GeckoPrefValue>>>,
-              Raw<Stream<Map<String, GeckoPrefValue>>>
+              Raw<Stream<Map<String, GeckoPref>>>,
+              Raw<Stream<Map<String, GeckoPref>>>
             >;
     final element =
         ref.element
             as $ClassProviderElement<
               AnyNotifier<
-                Raw<Stream<Map<String, GeckoPrefValue>>>,
-                Raw<Stream<Map<String, GeckoPrefValue>>>
+                Raw<Stream<Map<String, GeckoPref>>>,
+                Raw<Stream<Map<String, GeckoPref>>>
               >,
-              Raw<Stream<Map<String, GeckoPrefValue>>>,
+              Raw<Stream<Map<String, GeckoPref>>>,
               Object?,
               Object?
             >;

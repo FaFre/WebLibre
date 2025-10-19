@@ -2788,13 +2788,16 @@ class AddonCollection {
 ;
 }
 
-class GeckoPrefValue {
-  GeckoPrefValue({
+class GeckoPref {
+  GeckoPref({
+    required this.name,
     this.value,
     this.defaultValue,
     this.userValue,
     required this.hasUserChangedValue,
   });
+
+  String name;
 
   Object? value;
 
@@ -2806,6 +2809,7 @@ class GeckoPrefValue {
 
   List<Object?> _toList() {
     return <Object?>[
+      name,
       value,
       defaultValue,
       userValue,
@@ -2816,20 +2820,21 @@ class GeckoPrefValue {
   Object encode() {
     return _toList();  }
 
-  static GeckoPrefValue decode(Object result) {
+  static GeckoPref decode(Object result) {
     result as List<Object?>;
-    return GeckoPrefValue(
-      value: result[0],
-      defaultValue: result[1],
-      userValue: result[2],
-      hasUserChangedValue: result[3]! as bool,
+    return GeckoPref(
+      name: result[0]! as String,
+      value: result[1],
+      defaultValue: result[2],
+      userValue: result[3],
+      hasUserChangedValue: result[4]! as bool,
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! GeckoPrefValue || other.runtimeType != runtimeType) {
+    if (other is! GeckoPref || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -3038,7 +3043,7 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is AddonCollection) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPrefValue) {
+    }    else if (value is GeckoPref) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
     } else {
@@ -3193,7 +3198,7 @@ class _PigeonCodec extends StandardMessageCodec {
       case 190: 
         return AddonCollection.decode(readValue(buffer)!);
       case 191: 
-        return GeckoPrefValue.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -4357,7 +4362,7 @@ class GeckoPrefApi {
     }
   }
 
-  Future<Map<String, GeckoPrefValue>> getPrefs(List<String> preferenceFilter) async {
+  Future<Map<String, GeckoPref>> getPrefs(List<String> preferenceFilter) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.getPrefs$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -4381,11 +4386,11 @@ class GeckoPrefApi {
         message: 'Host platform returned null value for non-null return value.',
       );
     } else {
-      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!.cast<String, GeckoPrefValue>();
+      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!.cast<String, GeckoPref>();
     }
   }
 
-  Future<Map<String, GeckoPrefValue>> applyPrefs(Map<String, Object> prefs) async {
+  Future<Map<String, GeckoPref>> applyPrefs(Map<String, Object> prefs) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.applyPrefs$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -4409,7 +4414,7 @@ class GeckoPrefApi {
         message: 'Host platform returned null value for non-null return value.',
       );
     } else {
-      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!.cast<String, GeckoPrefValue>();
+      return (pigeonVar_replyList[0] as Map<Object?, Object?>?)!.cast<String, GeckoPref>();
     }
   }
 
@@ -4421,6 +4426,98 @@ class GeckoPrefApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[preferenceNames]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> startObserveChanges() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.startObserveChanges$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> stopObserveChanges() async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.stopObserveChanges$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> registerPrefForObservation(String name) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.registerPrefForObservation$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[name]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> unregisterPrefForObservation(String name) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.unregisterPrefForObservation$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[name]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -4808,6 +4905,8 @@ abstract class GeckoStateEvents {
   void onLongPress(int timestamp, String id, HitResult hitResult);
 
   void onScrollChange(int timestamp, String tabId, int scrollY);
+
+  void onPreferenceChange(int timestamp, GeckoPref value);
 
   static void setUp(GeckoStateEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -5243,6 +5342,34 @@ abstract class GeckoStateEvents {
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onScrollChange was null, expected non-null int.');
           try {
             api.onScrollChange(arg_timestamp!, arg_tabId!, arg_scrollY!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_timestamp = (args[0] as int?);
+          assert(arg_timestamp != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange was null, expected non-null int.');
+          final GeckoPref? arg_value = (args[1] as GeckoPref?);
+          assert(arg_value != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange was null, expected non-null GeckoPref.');
+          try {
+            api.onPreferenceChange(arg_timestamp!, arg_value!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
