@@ -65,6 +65,8 @@ abstract class _$EngineSettingsCWProxy {
     String? fingerprintingProtectionOverrides,
   );
 
+  EngineSettings enablePdfJs(bool enablePdfJs);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -93,6 +95,7 @@ abstract class _$EngineSettingsCWProxy {
     String dohDefaultProviderUrl,
     List<String> dohExceptionsList,
     String? fingerprintingProtectionOverrides,
+    bool enablePdfJs,
   });
 }
 
@@ -201,6 +204,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   );
 
   @override
+  EngineSettings enablePdfJs(bool enablePdfJs) =>
+      call(enablePdfJs: enablePdfJs);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -231,6 +238,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? dohDefaultProviderUrl = const $CopyWithPlaceholder(),
     Object? dohExceptionsList = const $CopyWithPlaceholder(),
     Object? fingerprintingProtectionOverrides = const $CopyWithPlaceholder(),
+    Object? enablePdfJs = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -337,6 +345,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.fingerprintingProtectionOverrides
           // ignore: cast_nullable_to_non_nullable
           : fingerprintingProtectionOverrides as String?,
+      enablePdfJs:
+          enablePdfJs == const $CopyWithPlaceholder() || enablePdfJs == null
+          ? _value.enablePdfJs
+          // ignore: cast_nullable_to_non_nullable
+          : enablePdfJs as bool,
     );
   }
 }
@@ -408,6 +421,7 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
           .toList(),
       fingerprintingProtectionOverrides:
           json['fingerprintingProtectionOverrides'] as String?,
+      enablePdfJs: json['enablePdfJs'] as bool?,
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
@@ -446,6 +460,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'dohProviderUrl': instance.dohProviderUrl,
   'dohDefaultProviderUrl': instance.dohDefaultProviderUrl,
   'dohExceptionsList': instance.dohExceptionsList,
+  'enablePdfJs': instance.enablePdfJs,
 };
 
 const _$TrackingProtectionPolicyEnumMap = {

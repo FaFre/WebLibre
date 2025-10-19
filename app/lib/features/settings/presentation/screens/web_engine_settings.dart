@@ -463,6 +463,22 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
+              SwitchListTile.adaptive(
+                title: const Text('Built-in PDF Viewer'),
+                subtitle: const Text(
+                  'Open PDF files directly in the browser without downloading',
+                ),
+                secondary: const Icon(MdiIcons.filePdfBox),
+                value: engineSettings.enablePdfJs,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveEngineSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) =>
+                            currentSettings.copyWith.enablePdfJs(value),
+                      );
+                },
+              ),
               ListTile(
                 title: const Text('Web Engine Hardening'),
                 contentPadding: const EdgeInsets.symmetric(

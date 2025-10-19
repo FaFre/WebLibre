@@ -106,6 +106,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bounceTrackingProtectionMode: bounceTrackingProtectionMode,
   );
 
+  final bool enablePdfJs;
+
   EngineSettings({
     required super.javascriptEnabled,
     required super.trackingProtectionPolicy,
@@ -127,6 +129,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.dohDefaultProviderUrl,
     required this.dohExceptionsList,
     required super.fingerprintingProtectionOverrides,
+    required this.enablePdfJs,
   });
 
   EngineSettings.withDefaults({
@@ -150,6 +153,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     String? dohDefaultProviderUrl,
     List<String>? dohExceptionsList,
     String? fingerprintingProtectionOverrides,
+    bool? enablePdfJs,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
@@ -160,6 +164,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
        dohDefaultProviderUrl =
            dohDefaultProviderUrl ?? BuiltInDohProviders.quad9.url,
        dohExceptionsList = dohExceptionsList ?? [],
+       enablePdfJs = enablePdfJs ?? true,
        super(
          javascriptEnabled: javascriptEnabled ?? true,
          trackingProtectionPolicy:
@@ -220,5 +225,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     dohDefaultProviderUrl,
     dohExceptionsList,
     fingerprintingProtectionOverrides,
+    enablePdfJs,
   ];
 }

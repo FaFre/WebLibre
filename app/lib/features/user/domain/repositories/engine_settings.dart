@@ -120,6 +120,10 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
             DriftSqlType.string,
             db.typeMapping,
           ),
+      'enablePdfJs': settings['enablePdfJs']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 
