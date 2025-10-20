@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
@@ -146,6 +147,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         }
         if(settings.fingerprintingProtectionOverrides != null) {
             components.core.engineSettings.fingerprintingProtectionOverrides = settings.fingerprintingProtectionOverrides
+        }
+        if(settings.locales != null) {
+//            components.core.engineSettings.automaticLanguageAdjustment = false
+            components.core.runtime.settings.locales = settings.locales.toTypedArray()
         }
     }
 

@@ -116,6 +116,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
           name: 'FingerprintSettingsRoute',
           factory: $FingerprintSettingsRoute._fromState,
         ),
+        GoRouteData.$route(
+          path: 'locales',
+          name: 'LocaleSettingsRoute',
+          factory: $LocaleSettingsRoute._fromState,
+        ),
       ],
     ),
     GoRouteData.$route(
@@ -291,6 +296,27 @@ mixin $FingerprintSettingsRoute on GoRouteData {
   @override
   String get location =>
       GoRouteData.$location('/settings/web_engine/fingerprint');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $LocaleSettingsRoute on GoRouteData {
+  static LocaleSettingsRoute _fromState(GoRouterState state) =>
+      LocaleSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/web_engine/locales');
 
   @override
   void go(BuildContext context) => context.go(location);

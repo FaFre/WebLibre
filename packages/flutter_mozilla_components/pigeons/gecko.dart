@@ -667,6 +667,7 @@ class GeckoEngineSettings {
   final bool? enterpriseRootsEnabled;
   final DohSettings? dohSettings;
   final String? fingerprintingProtectionOverrides;
+  final List<String>? locales;
 
   GeckoEngineSettings(
     this.javascriptEnabled,
@@ -684,6 +685,7 @@ class GeckoEngineSettings {
     this.enterpriseRootsEnabled,
     this.dohSettings,
     this.fingerprintingProtectionOverrides,
+    this.locales,
   );
 }
 

@@ -2044,6 +2044,7 @@ class GeckoEngineSettings {
     this.enterpriseRootsEnabled,
     this.dohSettings,
     this.fingerprintingProtectionOverrides,
+    this.locales,
   });
 
   bool? javascriptEnabled;
@@ -2076,6 +2077,8 @@ class GeckoEngineSettings {
 
   String? fingerprintingProtectionOverrides;
 
+  List<String>? locales;
+
   List<Object?> _toList() {
     return <Object?>[
       javascriptEnabled,
@@ -2093,6 +2096,7 @@ class GeckoEngineSettings {
       enterpriseRootsEnabled,
       dohSettings,
       fingerprintingProtectionOverrides,
+      locales,
     ];
   }
 
@@ -2117,6 +2121,7 @@ class GeckoEngineSettings {
       enterpriseRootsEnabled: result[12] as bool?,
       dohSettings: result[13] as DohSettings?,
       fingerprintingProtectionOverrides: result[14] as String?,
+      locales: (result[15] as List<Object?>?)?.cast<String>(),
     );
   }
 

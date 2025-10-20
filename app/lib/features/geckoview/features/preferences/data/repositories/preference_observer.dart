@@ -25,8 +25,6 @@ class PreferenceChangeListener extends _$PreferenceChangeListener {
 @Riverpod()
 class PreferenceFixator extends _$PreferenceFixator {
   Future<void> register(String name, Object value) async {
-    await GeckoPrefService().applyPrefs({name: value});
-
     state = {...state}
       ..update(
         name,
@@ -36,6 +34,8 @@ class PreferenceFixator extends _$PreferenceFixator {
           return value;
         },
       );
+
+    await GeckoPrefService().applyPrefs({name: value});
   }
 
   Future<void> unregister(String name) async {

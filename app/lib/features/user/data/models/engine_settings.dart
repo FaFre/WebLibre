@@ -21,6 +21,7 @@ import 'dart:convert';
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nullability/nullability.dart';
@@ -74,6 +75,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
       super.webContentIsolationStrategy!;
   @override
   bool get enterpriseRootsEnabled => super.enterpriseRootsEnabled!;
+
+  @override
+  List<String> get locales => super.locales!;
 
   final QueryParameterStripping queryParameterStripping;
 
@@ -130,6 +134,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.dohExceptionsList,
     required super.fingerprintingProtectionOverrides,
     required this.enablePdfJs,
+    required super.locales,
   });
 
   EngineSettings.withDefaults({
@@ -154,6 +159,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     List<String>? dohExceptionsList,
     String? fingerprintingProtectionOverrides,
     bool? enablePdfJs,
+    List<String>? locales,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
@@ -188,6 +194,11 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          fingerprintingProtectionOverrides:
              fingerprintingProtectionOverrides ??
              FingerprintOverrides.defaults().toString(),
+         locales:
+             locales ??
+             WidgetsBinding.instance.platformDispatcher.locales
+                 .map((x) => x.toLanguageTag())
+                 .toList(),
        );
 
   static AddonCollection? _addonCollectionFromJson(String? json) =>
@@ -226,5 +237,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     dohExceptionsList,
     fingerprintingProtectionOverrides,
     enablePdfJs,
+    locales,
   ];
 }

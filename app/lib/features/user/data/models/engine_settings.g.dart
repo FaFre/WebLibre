@@ -67,6 +67,8 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings enablePdfJs(bool enablePdfJs);
 
+  EngineSettings locales(List<String>? locales);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -96,6 +98,7 @@ abstract class _$EngineSettingsCWProxy {
     List<String> dohExceptionsList,
     String? fingerprintingProtectionOverrides,
     bool enablePdfJs,
+    List<String>? locales,
   });
 }
 
@@ -208,6 +211,9 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
       call(enablePdfJs: enablePdfJs);
 
   @override
+  EngineSettings locales(List<String>? locales) => call(locales: locales);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -239,6 +245,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? dohExceptionsList = const $CopyWithPlaceholder(),
     Object? fingerprintingProtectionOverrides = const $CopyWithPlaceholder(),
     Object? enablePdfJs = const $CopyWithPlaceholder(),
+    Object? locales = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -350,6 +357,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.enablePdfJs
           // ignore: cast_nullable_to_non_nullable
           : enablePdfJs as bool,
+      locales: locales == const $CopyWithPlaceholder()
+          ? _value.locales
+          // ignore: cast_nullable_to_non_nullable
+          : locales as List<String>?,
     );
   }
 }
@@ -422,6 +433,9 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
       fingerprintingProtectionOverrides:
           json['fingerprintingProtectionOverrides'] as String?,
       enablePdfJs: json['enablePdfJs'] as bool?,
+      locales: (json['locales'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
@@ -448,6 +462,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
       _$WebContentIsolationStrategyEnumMap[instance
           .webContentIsolationStrategy]!,
   'enterpriseRootsEnabled': instance.enterpriseRootsEnabled,
+  'locales': instance.locales,
   'queryParameterStripping':
       _$QueryParameterStrippingEnumMap[instance.queryParameterStripping]!,
   'bounceTrackingProtectionMode':

@@ -14,6 +14,7 @@ import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.interceptor.AppRequestInterceptor
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.EngineProvider
+import eu.weblibre.flutter_mozilla_components.EngineProvider.getOrCreateRuntime
 import eu.weblibre.flutter_mozilla_components.PermissionStorage
 import eu.weblibre.flutter_mozilla_components.services.MediaSessionService
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
@@ -58,6 +59,7 @@ import mozilla.components.feature.session.middleware.undo.UndoMiddleware
 import mozilla.components.feature.sitepermissions.OnDiskSitePermissionsStorage
 import mozilla.components.feature.webnotifications.WebNotificationFeature
 import mozilla.components.support.base.worker.Frequency
+import org.mozilla.geckoview.GeckoRuntime
 import java.util.concurrent.TimeUnit
 
 private const val AMO_COLLECTION_MAX_CACHE_AGE = 24 * 60L
@@ -105,6 +107,10 @@ class Core(
             cookieBannerHandlingGlobalRulesSubFrames = true,
             webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE,
         )
+    }
+
+    val runtime: GeckoRuntime by lazy {
+        getOrCreateRuntime(context)
     }
 
     val engine: Engine by lazy {

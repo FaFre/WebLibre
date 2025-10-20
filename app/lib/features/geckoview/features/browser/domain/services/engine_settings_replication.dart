@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
@@ -141,6 +142,18 @@ class EngineSettingsReplicationService
                   .read(preferenceFixatorProvider.notifier)
                   .register('pdfjs.disabled', !settings.enablePdfJs);
             }
+            if (!const DeepCollectionEquality.unordered().equals(
+              previous.value?.locales,
+              settings.locales,
+            )) {
+              // ignore: only_use_keep_alive_inside_keep_alive
+              await ref
+                  .read(preferenceFixatorProvider.notifier)
+                  .register(
+                    'intl.accept_languages',
+                    settings.locales.join(','),
+                  );
+            }
           } else {
             await _service.setDefaultSettings(settings);
 
@@ -148,6 +161,11 @@ class EngineSettingsReplicationService
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('pdfjs.disabled', !settings.enablePdfJs);
+
+            // ignore: only_use_keep_alive_inside_keep_alive
+            await ref
+                .read(preferenceFixatorProvider.notifier)
+                .register('intl.accept_languages', settings.locales.join(','));
 
             initialSettingsSent = true;
           }

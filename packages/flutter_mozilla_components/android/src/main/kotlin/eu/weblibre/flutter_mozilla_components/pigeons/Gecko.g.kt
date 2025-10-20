@@ -1678,7 +1678,8 @@ data class GeckoEngineSettings (
   val contentBlocking: ContentBlocking? = null,
   val enterpriseRootsEnabled: Boolean? = null,
   val dohSettings: DohSettings? = null,
-  val fingerprintingProtectionOverrides: String? = null
+  val fingerprintingProtectionOverrides: String? = null,
+  val locales: List<String>? = null
 )
  {
   companion object {
@@ -1698,7 +1699,8 @@ data class GeckoEngineSettings (
       val enterpriseRootsEnabled = pigeonVar_list[12] as Boolean?
       val dohSettings = pigeonVar_list[13] as DohSettings?
       val fingerprintingProtectionOverrides = pigeonVar_list[14] as String?
-      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides)
+      val locales = pigeonVar_list[15] as List<String>?
+      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides, locales)
     }
   }
   fun toList(): List<Any?> {
@@ -1718,6 +1720,7 @@ data class GeckoEngineSettings (
       enterpriseRootsEnabled,
       dohSettings,
       fingerprintingProtectionOverrides,
+      locales,
     )
   }
   override fun equals(other: Any?): Boolean {

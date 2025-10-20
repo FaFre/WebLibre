@@ -73,6 +73,7 @@ object EngineProvider {
             //builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
             builder.consoleOutput(components.logLevel == Log.Priority.DEBUG)
             builder.contentBlocking(contentBlocking.build())
+            builder.locales(arrayOf("en-US", "en")) // Will be overridden later
 
             runtime = GeckoRuntime.create(context, builder.build())
         }

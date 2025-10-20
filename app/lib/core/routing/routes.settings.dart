@@ -47,6 +47,10 @@ part of 'routes.dart';
           name: 'FingerprintSettingsRoute',
           path: 'fingerprint',
         ),
+        TypedGoRoute<LocaleSettingsRoute>(
+          name: 'LocaleSettingsRoute',
+          path: 'locales',
+        ),
       ],
     ),
     TypedGoRoute<DeveloperSettingsRoute>(
@@ -94,6 +98,13 @@ class FingerprintSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const FingerprintSettingsScreen();
+  }
+}
+
+class LocaleSettingsRoute extends GoRouteData with $LocaleSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const LocaleSettingsScreen();
   }
 }
 

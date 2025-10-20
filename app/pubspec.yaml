@@ -11,6 +11,7 @@ dependencies:
   background_fetch: ^1.4.0
   collection: ^1.19.1
   copy_with_extension: ^9.1.1
+  country_flags: ^4.1.0
   drift: ^2.29.0
   dynamic_color: ^1.8.1
   exceptions: ^0.6.1
@@ -42,6 +43,8 @@ dependencies:
   lexo_rank:
     git:
       url: https://github.com/FaFre/lexo_rank.git
+  locale_resolver:
+    path: ../packages/locale_resolver
   local_auth: ^3.0.0
   logger: ^2.6.2
   markdown: ^7.3.0

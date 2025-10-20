@@ -87,7 +87,7 @@ final class PreferenceFixatorProvider
   }
 }
 
-String _$preferenceFixatorHash() => r'dfa323859c660d3db74dba7297e2a33b758ed78a';
+String _$preferenceFixatorHash() => r'c76245d5c420e2e3f6c026f23c017c939b69ef59';
 
 abstract class _$PreferenceFixator extends $Notifier<Map<String, Object>> {
   Map<String, Object> build();

@@ -203,6 +203,18 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
+              ListTile(
+                title: const Text('Browser Languages'),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 16.0,
+                ),
+                leading: const Icon(MdiIcons.translate),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await LocaleSettingsRoute().push(context);
+                },
+              ),
               SwitchListTile.adaptive(
                 title: const Text('Global Privacy Control (GPC)'),
                 secondary: const Icon(MdiIcons.incognitoCircleOff),

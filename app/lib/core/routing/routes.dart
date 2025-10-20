@@ -45,6 +45,7 @@ import 'package:weblibre/features/settings/presentation/screens/developer_settin
 import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/fingerprint_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/locale_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
