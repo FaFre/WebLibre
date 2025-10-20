@@ -2,14 +2,14 @@ group = "com.foundationdevices.tor"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "1.9.22"
+    ext.kotlin_version = "2.1.20"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.7.0")
+        classpath("com.android.tools.build:gradle:8.11.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -27,7 +27,7 @@ apply plugin: "kotlin-android"
 android {
     namespace = "com.foundationdevices.tor"
 
-    compileSdk = 35
+    compileSdk = 36
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
