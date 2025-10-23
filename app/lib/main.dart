@@ -54,7 +54,7 @@ class _MainWidget extends HookConsumerWidget {
         case AppLifecycleState.resumed:
           if (pauseTime.value != null &&
               DateTime.now().difference(pauseTime.value!) >
-                  const Duration(minutes: 15)) {
+                  const Duration(minutes: 5)) {
             //Rebuild widget tree after long time of inactivity
             ref.read(appStateKeyProvider.notifier).reset();
             logger.i('UI reset');
