@@ -21,12 +21,18 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
 import androidx.fragment.app.Fragment
+import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
+import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
+import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
+import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
 import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.state.WebExtensionState
+import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature
@@ -43,6 +49,7 @@ import mozilla.components.feature.session.SwipeRefreshFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsRules
 import mozilla.components.feature.sitepermissions.SitePermissionsRules.AutoplayAction
+import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.feature.webauthn.WebAuthnFeature
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.PermissionsFeature
@@ -52,6 +59,7 @@ import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.locale.ActivityContextWrapper
+import mozilla.components.support.webextensions.WebExtensionPopupObserver
 
 /**
  * Base fragment extended by [BrowserFragment] and [ExternalAppBrowserFragment].
@@ -76,6 +84,13 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
 
     private var pictureInPictureFeature: PictureInPictureFeature? = null
+
+    private val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
+    private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
+    val readerViewFeature = ViewBoundFeatureWrapper<ReaderViewIntegration>()
+    private val readabilityExtractFeature = ViewBoundFeatureWrapper<ReadabilityExtractFeature>()
+    private val webExtensionPopupObserver = ViewBoundFeatureWrapper<WebExtensionPopupObserver>()
+    private val webExtToolbarFeature = ViewBoundFeatureWrapper<WebExtensionToolbarFeature>()
 
     // Registers a photo picker activity launcher in single-select mode.
     private val singleMediaPicker =
@@ -160,184 +175,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     @CallSuper
     @Suppress("LongMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        sessionFeature.set(
-            feature = SessionFeature(
-                components.core.store,
-                components.useCases.sessionUseCases.goBack,
-                components.useCases.sessionUseCases.goForward,
-                components.engineView!!,
-                sessionId,
-            ),
-            owner = this,
-            view = view,
-        )
-
-        swipeRefreshFeature.set(
-            feature = SwipeRefreshFeature(
-                components.core.store,
-                components.useCases.sessionUseCases.reload,
-                binding.swipeToRefresh,
-            ),
-            owner = this,
-            view = view,
-        )
-
-        shareResourceFeature.set(
-            ShareResourceFeature(
-                context = requireContext().applicationContext,
-                httpClient = components.core.client,
-                store = components.core.store,
-                tabId = sessionId,
-            ),
-            owner = this,
-            view = view,
-        )
-
-        downloadsFeature.set(
-            feature = DownloadsFeature(
-                requireContext().applicationContext,
-                store = components.core.store,
-                useCases = components.useCases.downloadsUseCases,
-                fragmentManager = childFragmentManager,
-                onDownloadStopped = { download, id, status ->
-                    Logger.debug("Download done. ID#$id $download with status $status")
-                },
-                downloadManager = FetchDownloadManager(
-                    requireContext().applicationContext,
-                    components.core.store,
-                    DownloadService::class,
-                    notificationsDelegate = components.notificationsDelegate,
-                ),
-                tabId = sessionId,
-                onNeedToRequestPermissions = { permissions ->
-                    requestDownloadPermissionsLauncher.launch(permissions)
-                },
-            ),
-            owner = this,
-            view = view,
-        )
-
-        appLinksFeature.set(
-            feature = AppLinksFeature(
-                context = requireContext(),
-                store = components.core.store,
-                sessionId = sessionId,
-                fragmentManager = parentFragmentManager,
-                launchInApp = { components.core.prefs.getBoolean(context?.getPreferenceKey(R.string.pref_key_launch_external_app), false) },
-                loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
-            ),
-            owner = this,
-            view = view,
-        )
-
-        promptFeature.set(
-            feature = PromptFeature(
-                fragment = this,
-                store = components.core.store,
-                customTabId = sessionId,
-                tabsUseCases = components.useCases.tabsUseCases,
-                fragmentManager = parentFragmentManager,
-                fileUploadsDirCleaner = components.core.fileUploadsDirCleaner,
-                onNeedToRequestPermissions = { permissions ->
-                    requestPromptsPermissionsLauncher.launch(permissions)
-                },
-                androidPhotoPicker = AndroidPhotoPicker(
-                    requireContext(),
-                    singleMediaPicker,
-                    multipleMediaPicker,
-                ),
-            ),
-            owner = this,
-            view = view,
-        )
-
-        sitePermissionsFeature.set(
-            feature = SitePermissionsFeature(
-                context = requireContext(),
-                sessionId = sessionId,
-                storage = components.core.geckoSitePermissionsStorage,
-                fragmentManager = parentFragmentManager,
-                sitePermissionsRules = SitePermissionsRules(
-                    autoplayAudible = AutoplayAction.BLOCKED,
-                    autoplayInaudible = AutoplayAction.BLOCKED,
-                    camera = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    location = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    notification = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    microphone = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    persistentStorage = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    mediaKeySystemAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    crossOriginStorageAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    localDeviceAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    localNetworkAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                ),
-                onNeedToRequestPermissions = { permissions ->
-                    requestSitePermissionsLauncher.launch(permissions)
-                },
-                onShouldShowRequestPermissionRationale = { shouldShowRequestPermissionRationale(it) },
-                store = components.core.store,
-            ),
-            owner = this,
-            view = view,
-        )
-
-        webExtensionPromptFeature.set(
-            feature = WebExtensionPromptFeature(
-                store = components.core.store,
-                context = requireContext(),
-                fragmentManager = parentFragmentManager,
-            ),
-            owner = this,
-            view = view
-        )
-
-        fullScreenFeature.set(
-            feature = FullScreenFeature(
-                store = components.core.store,
-                sessionUseCases = components.useCases.sessionUseCases,
-                tabId = sessionId,
-                fullScreenChanged = ::fullScreenChanged,
-                viewportFitChanged = ::viewportFitChanged
-            ),
-            owner = this,
-            view = binding.root,
-        )
-
-        mediaSessionFullscreenFeature.set(
-            feature = MediaSessionFullscreenFeature(
-                requireActivity(),
-                components.core.store,
-                sessionId,
-            ),
-            owner = this,
-            view = binding.root,
-        )
-
-        pictureInPictureFeature = PictureInPictureFeature(
-            store = components.core.store,
-            activity = requireActivity(),
-            tabId = sessionId,
-        )
-
-        secureWindowFeature.set(
-            feature = SecureWindowFeature(
-                window = requireActivity().window,
-                store = components.core.store,
-                customTabId = sessionId,
-            ),
-            owner = this,
-            view = binding.root,
-        )
-
-        webAuthnFeature.set(
-            feature = WebAuthnFeature(
-                engine = components.core.engine,
-                activity = requireActivity(),
-                exitFullScreen = components.useCases.sessionUseCases.exitFullscreen::invoke,
-                currentTab = { components.core.store.state.selectedTabId },
-            ),
-            owner = this,
-            view = view
-        )
+        view.post {
+            if (GlobalComponents.components != null) {
+                createAndSetupEngine(view)
+            } else {
+                // Retry or handle error
+                view.postDelayed({ createAndSetupEngine(view) }, 100)
+            }
+        }
     }
 
     private fun restartApp(context: Context) {
@@ -354,7 +199,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         Runtime.getRuntime().exit(0)
     }
 
-    private fun createAndSetupEngine() {
+    private fun createAndSetupEngine(view: View) {
         try {
             // Set layout parameters
             val layoutParams = FrameLayout.LayoutParams(
@@ -372,19 +217,249 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             binding.swipeToRefresh.addView(engineNativeView)
 
             components.engineView = engineView
+
+            sessionFeature.set(
+                feature = SessionFeature(
+                    components.core.store,
+                    components.useCases.sessionUseCases.goBack,
+                    components.useCases.sessionUseCases.goForward,
+                    components.engineView!!,
+                    sessionId,
+                ),
+                owner = this,
+                view = view,
+            )
+
+            swipeRefreshFeature.set(
+                feature = SwipeRefreshFeature(
+                    components.core.store,
+                    components.useCases.sessionUseCases.reload,
+                    binding.swipeToRefresh,
+                ),
+                owner = this,
+                view = view,
+            )
+
+            shareResourceFeature.set(
+                ShareResourceFeature(
+                    context = requireContext().applicationContext,
+                    httpClient = components.core.client,
+                    store = components.core.store,
+                    tabId = sessionId,
+                ),
+                owner = this,
+                view = view,
+            )
+
+            downloadsFeature.set(
+                feature = DownloadsFeature(
+                    requireContext().applicationContext,
+                    store = components.core.store,
+                    useCases = components.useCases.downloadsUseCases,
+                    fragmentManager = childFragmentManager,
+                    onDownloadStopped = { download, id, status ->
+                        Logger.debug("Download done. ID#$id $download with status $status")
+                    },
+                    downloadManager = FetchDownloadManager(
+                        requireContext().applicationContext,
+                        components.core.store,
+                        DownloadService::class,
+                        notificationsDelegate = components.notificationsDelegate,
+                    ),
+                    tabId = sessionId,
+                    onNeedToRequestPermissions = { permissions ->
+                        requestDownloadPermissionsLauncher.launch(permissions)
+                    },
+                ),
+                owner = this,
+                view = view,
+            )
+
+            appLinksFeature.set(
+                feature = AppLinksFeature(
+                    context = requireContext(),
+                    store = components.core.store,
+                    sessionId = sessionId,
+                    fragmentManager = parentFragmentManager,
+                    launchInApp = { components.core.prefs.getBoolean(context?.getPreferenceKey(R.string.pref_key_launch_external_app), false) },
+                    loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
+                ),
+                owner = this,
+                view = view,
+            )
+
+            promptFeature.set(
+                feature = PromptFeature(
+                    fragment = this,
+                    store = components.core.store,
+                    customTabId = sessionId,
+                    tabsUseCases = components.useCases.tabsUseCases,
+                    fragmentManager = parentFragmentManager,
+                    fileUploadsDirCleaner = components.core.fileUploadsDirCleaner,
+                    onNeedToRequestPermissions = { permissions ->
+                        requestPromptsPermissionsLauncher.launch(permissions)
+                    },
+                    androidPhotoPicker = AndroidPhotoPicker(
+                        requireContext(),
+                        singleMediaPicker,
+                        multipleMediaPicker,
+                    ),
+                ),
+                owner = this,
+                view = view,
+            )
+
+            sitePermissionsFeature.set(
+                feature = SitePermissionsFeature(
+                    context = requireContext(),
+                    sessionId = sessionId,
+                    storage = components.core.geckoSitePermissionsStorage,
+                    fragmentManager = parentFragmentManager,
+                    sitePermissionsRules = SitePermissionsRules(
+                        autoplayAudible = AutoplayAction.BLOCKED,
+                        autoplayInaudible = AutoplayAction.BLOCKED,
+                        camera = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        location = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        notification = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        microphone = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        persistentStorage = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        mediaKeySystemAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        crossOriginStorageAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        localDeviceAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                        localNetworkAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
+                    ),
+                    onNeedToRequestPermissions = { permissions ->
+                        requestSitePermissionsLauncher.launch(permissions)
+                    },
+                    onShouldShowRequestPermissionRationale = { shouldShowRequestPermissionRationale(it) },
+                    store = components.core.store,
+                ),
+                owner = this,
+                view = view,
+            )
+
+            webExtensionPromptFeature.set(
+                feature = WebExtensionPromptFeature(
+                    store = components.core.store,
+                    context = requireContext(),
+                    fragmentManager = parentFragmentManager,
+                ),
+                owner = this,
+                view = view
+            )
+
+            fullScreenFeature.set(
+                feature = FullScreenFeature(
+                    store = components.core.store,
+                    sessionUseCases = components.useCases.sessionUseCases,
+                    tabId = sessionId,
+                    fullScreenChanged = ::fullScreenChanged,
+                    viewportFitChanged = ::viewportFitChanged
+                ),
+                owner = this,
+                view = binding.root,
+            )
+
+            mediaSessionFullscreenFeature.set(
+                feature = MediaSessionFullscreenFeature(
+                    requireActivity(),
+                    components.core.store,
+                    sessionId,
+                ),
+                owner = this,
+                view = binding.root,
+            )
+
+            pictureInPictureFeature = PictureInPictureFeature(
+                store = components.core.store,
+                activity = requireActivity(),
+                tabId = sessionId,
+            )
+
+            secureWindowFeature.set(
+                feature = SecureWindowFeature(
+                    window = requireActivity().window,
+                    store = components.core.store,
+                    customTabId = sessionId,
+                ),
+                owner = this,
+                view = binding.root,
+            )
+
+            webAuthnFeature.set(
+                feature = WebAuthnFeature(
+                    engine = components.core.engine,
+                    activity = requireActivity(),
+                    exitFullScreen = components.useCases.sessionUseCases.exitFullscreen::invoke,
+                    currentTab = { components.core.store.state.selectedTabId },
+                ),
+                owner = this,
+                view = view
+            )
+
+            readerViewFeature.set(
+                feature = ReaderViewIntegration(
+                    requireContext(),
+                    components.core.engine,
+                    components.core.store,
+                    binding.readerViewBar,
+                    components.events.readerViewEvents,
+                    components.readerViewController,
+                ),
+                owner = this,
+                view = view,
+            )
+
+            readabilityExtractFeature.set(
+                feature = components.features.readabilityExtractFeature,
+                owner = this,
+                view = view,
+            )
+
+            windowFeature.set(
+                feature = WindowFeature(components.core.store, components.useCases.tabsUseCases),
+                owner = this,
+                view = view,
+            )
+
+            thumbnailsFeature.set(
+                feature = BrowserThumbnails(requireContext(), components.engineView!!, components.core.store),
+                owner = this,
+                view = view,
+            )
+
+            webExtensionPopupObserver.set(
+                feature = WebExtensionPopupObserver(components.core.store, ::openPopup),
+                owner = this,
+                view = view,
+            )
+
+            webExtToolbarFeature.set(
+                feature = components.features.webExtensionToolbarFeature,
+                owner = this,
+                view = view,
+            )
+
+            components.core.historyStorage.registerStorageMaintenanceWorker()
+
         } catch (e: Exception) {
             Log.e("EngineCreation", "Failed to create engine: ${e.message}", e)
             context?.let { restartApp(it) }
         }
     }
 
+    private fun openPopup(webExtensionState: WebExtensionState) {
+        val intent = Intent(requireContext().applicationContext, WebExtensionActionPopupActivity::class.java)
+        intent.putExtra("web_extension_id", webExtensionState.id)
+        intent.putExtra("web_extension_name", webExtensionState.name)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+    }
+
     @CallSuper
     @Suppress("LongMethod")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentBrowserBinding.inflate(inflater, container, false)
-
-        createAndSetupEngine()
-
         return binding.root
     }
 
