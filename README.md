@@ -30,7 +30,7 @@ WebLibre is an independent browser project built on the foundation of [Mozilla's
 
 ## Join the WebLibre Community
 
-We'd love to see you over on [Matrix](https://matrix.to/#/#weblibre:unredacted.org) and [Discord](https://discord.gg/y5fjdCdJ) to share ideas, get support, and help shape the future of this project.
+We'd love to see you over on [Matrix](https://matrix.to/#/#weblibre:unredacted.org) to share ideas, get support, and help shape the future of this project.
 
 **Your voice matters.** Since WebLibre respects your privacy by design—no tracking, no telemetry—we depend on community feedback to improve. Whether you've discovered a bug, have a feature request, or want to share your experience, we'd love to hear from you!
 
