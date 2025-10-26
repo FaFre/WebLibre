@@ -29,6 +29,7 @@ import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -409,6 +410,37 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                     },
                     leadingIcon: const Icon(Icons.search),
                     child: const Text('Find in page'),
+                  ),
+                if (selectedTabId != null)
+                  Consumer(
+                    builder: (context, childRef, child) {
+                      final enabled = childRef.watch(
+                        desktopModeProvider(selectedTabId),
+                      );
+
+                      return MenuItemButton(
+                        onPressed: () {
+                          ref
+                              .read(desktopModeProvider(selectedTabId).notifier)
+                              .toggle();
+                        },
+                        leadingIcon: const Icon(MdiIcons.monitor),
+                        trailingIcon: Checkbox(
+                          value: enabled,
+                          onChanged: (value) {
+                            if (value != null) {
+                              ref
+                                  .read(
+                                    desktopModeProvider(selectedTabId).notifier,
+                                  )
+                                  .enabled(value);
+                              trippleDotMenuController.close();
+                            }
+                          },
+                        ),
+                        child: const Text('Desktop Mode'),
+                      );
+                    },
                   ),
                 if (selectedTabId != null) const Divider(),
                 if (selectedTabId != null)

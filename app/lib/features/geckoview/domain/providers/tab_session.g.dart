@@ -57,7 +57,7 @@ final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
   }
 }
 
-String _$tabSessionHash() => r'1b42eb21212df2c88be9f2cb10bc4ca5df437b3b';
+String _$tabSessionHash() => r'f0a3aca70719afd37cad260c5d36621455252bfb';
 
 final class TabSessionFamily extends $Family
     with $ClassFamilyOverride<TabSession, void, void, void, String?> {

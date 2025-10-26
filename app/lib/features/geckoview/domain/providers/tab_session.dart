@@ -64,6 +64,10 @@ class TabSession extends _$TabSession {
     return _sessionService.requestScreenshot(requireImageResult);
   }
 
+  Future<void> requestDesktopSite(bool enable) {
+    return _sessionService.requestDesktopSite(enable: enable);
+  }
+
   @override
   void build({required String? tabId}) {
     _sessionService = (tabId != null)
