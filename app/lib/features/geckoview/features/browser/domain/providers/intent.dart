@@ -58,10 +58,25 @@ class EngineBoundIntentStream extends _$EngineBoundIntentStream {
     final sharingItentStream = ref.watch(sharingIntentStreamProvider);
     final appWidgetLaunchStream = ref.watch(appWidgetLaunchStreamProvider);
 
-    return MergeStream([
-      sharingItentStream.transform(_contentParserTransformer),
-      appWidgetLaunchStream.transform(_contentParserTransformer),
-    ]);
+    // Create a broadcast stream controller to buffer events
+    final controller = StreamController<SharedContent>.broadcast();
+
+    final subscription =
+        MergeStream([
+          sharingItentStream.transform(_contentParserTransformer),
+          appWidgetLaunchStream.transform(_contentParserTransformer),
+        ]).listen(
+          controller.add,
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+
+    ref.onDispose(() async {
+      await subscription.cancel();
+      await controller.close();
+    });
+
+    return controller.stream;
   }
 
   @override
