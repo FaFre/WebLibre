@@ -1,3 +1,18 @@
+## 0.9.27
+### GeckoView 144.0
+
+**New Features**
+- Added setting to disable internal PDF viewer (pdfjs)
+- Added setting to define and select browser locales
+
+**Improvements**
+- Migrated from experimental API extension to new Gecko Preference API for most operations
+
+**Bug Fixes**
+- Fixed UI issues
+- Fixed engine crash after prolonged background inactivity
+- Fixed intent stream lifecycle issue
+
 ## 0.9.26
 ### GeckoView 144.0
 
