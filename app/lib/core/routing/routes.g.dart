@@ -710,27 +710,32 @@ mixin $TabTreeRoute on GoRouteData {
 
 mixin $OpenSharedContentRoute on GoRouteData {
   static OpenSharedContentRoute _fromState(GoRouterState state) =>
-      OpenSharedContentRoute(state.extra as Uri);
+      OpenSharedContentRoute(
+        sharedUrl: state.uri.queryParameters['shared-url'] ?? 'about:blank',
+      );
 
   OpenSharedContentRoute get _self => this as OpenSharedContentRoute;
 
   @override
-  String get location => GoRouteData.$location('/open_content');
+  String get location => GoRouteData.$location(
+    '/open_content',
+    queryParams: {
+      if (_self.sharedUrl != 'about:blank') 'shared-url': _self.sharedUrl,
+    },
+  );
 
   @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+  void go(BuildContext context) => context.go(location);
 
   @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
+      context.pushReplacement(location);
 
   @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
+  void replace(BuildContext context) => context.replace(location);
 }
 
 T? _$convertMapValue<T>(

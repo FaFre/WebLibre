@@ -181,13 +181,17 @@ class TabTreeRoute extends GoRouteData with $TabTreeRoute {
 }
 
 class OpenSharedContentRoute extends GoRouteData with $OpenSharedContentRoute {
-  final Uri $extra;
+  final String sharedUrl;
 
-  const OpenSharedContentRoute(this.$extra);
+  const OpenSharedContentRoute({this.sharedUrl = 'about:blank'});
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(builder: (_) => OpenSharedContent(sharedUrl: $extra));
+    return DialogPage(
+      builder: (_) => OpenSharedContent(
+        sharedUrl: Uri.tryParse(sharedUrl) ?? Uri.parse('about:blank'),
+      ),
+    );
   }
 }
 

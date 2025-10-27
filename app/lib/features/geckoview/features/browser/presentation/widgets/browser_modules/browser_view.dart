@@ -192,8 +192,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             case TabIntentOpenSetting.ask:
               switch (sharedContent) {
                 case SharedUrl():
-                  final route = OpenSharedContentRoute(sharedContent.url);
-                  await router.push(route.location, extra: route.$extra);
+                  final route = OpenSharedContentRoute(
+                    sharedUrl: sharedContent.url.toString(),
+                  );
+                  await router.push(route.location);
                 case SharedText():
                   final route = SearchRoute(
                     tabType:
