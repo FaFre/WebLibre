@@ -218,6 +218,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     return Visibility(
       visible: hasTab,
+      maintainState: true,
       replacement: SizedBox.expand(child: Container(color: Colors.grey[800])),
       child: GeckoView(
         preInitializationStep: () async {
