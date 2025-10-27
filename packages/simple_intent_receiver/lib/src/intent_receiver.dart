@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:simple_intent_receiver/src/pigeons/intent.g.dart';
 
 class IntentReceiver extends IntentEvents {
-  final _controller = StreamController<Intent>();
+  final _controller = StreamController<Intent>.broadcast();
   int? _lastAdded;
 
   Stream<Intent> get events => _controller.stream;
