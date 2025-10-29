@@ -84,30 +84,21 @@ Future<void> showSuggestNewTabMessage(
 }) async {
   final clipboardUrl = await tryGetUriFromClipboard();
 
-  final snackBar = (clipboardUrl != null)
-      ? SnackBar(
-          content: const Text('Want to open link from clipboard?'),
-          action: SnackBarAction(
-            label: 'Open',
-            onPressed: () {
-              onAdd(clipboardUrl.toString());
-            },
-          ),
-          duration: duration,
-        )
-      : SnackBar(
-          content: const Text('Want to open a new tab?'),
-          action: SnackBarAction(
-            label: 'New Tab',
-            onPressed: () {
-              onAdd(null);
-            },
-          ),
-          duration: duration,
-        );
+  if (clipboardUrl != null) {
+    final snackBar = SnackBar(
+      content: const Text('Want to open link from clipboard?'),
+      action: SnackBarAction(
+        label: 'Open',
+        onPressed: () {
+          onAdd(clipboardUrl.toString());
+        },
+      ),
+      duration: duration,
+    );
 
-  if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 }
 
