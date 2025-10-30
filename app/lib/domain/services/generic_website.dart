@@ -18,21 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:exceptions/exceptions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
-import 'package:http/io_client.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:socks5_proxy/socks_client.dart';
-import 'package:universal_io/io.dart';
 import 'package:weblibre/core/http_error_handler.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
-import 'package:weblibre/extensions/http_encoding.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/web_feed/utils/feed_finder.dart';
@@ -211,54 +210,42 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   Future<Result<WebPageInfo>> fetchPageInfo({
     required Uri url,
     required bool isImageRequest,
-    required int? proxyPort,
   }) {
     return Result.fromAsync(() async {
-      final result = await compute((args) async {
-        final [String urlString, bool isImageRequest, int? proxyPort] = args;
+      late final Map<String, Object?> result;
+      final client = GeckoFetchService();
+      try {
+        final response = await client
+            .fetch(url: url)
+            .timeout(const Duration(seconds: 15));
 
-        final httpClient = HttpClient();
-        if (proxyPort != null) {
-          SocksTCPClient.assignToHttpClient(httpClient, [
-            ProxySettings(InternetAddress.loopbackIPv4, proxyPort),
-          ]);
-        }
-
-        final client = IOClient(httpClient);
-        try {
-          final baseUri = Uri.parse(urlString);
-          final response = await client
-              .get(baseUri)
-              .timeout(const Duration(seconds: 15));
-
-          //When this is a request for an icon and we hit an image, directly return it
-          if (isImageRequest) {
-            final contentType = response.headers['content-type'];
-            if (contentType?.contains('image/') == true) {
-              return {
-                'imageBytes': [response.bodyBytes],
-              };
-            }
+        //When this is a request for an icon and we hit an image, directly return it
+        if (isImageRequest) {
+          final contentType = response.headers
+              .firstWhereOrNull((header) => header.key == 'content-type')
+              ?.value;
+          if (contentType?.contains('image/') == true) {
+            result = {
+              'imageBytes': [response.body],
+            };
           }
-
-          final document = html_parser.parse(response.bodyUnicodeFallback);
-
-          final title = document.querySelector('title')?.text;
-          final resources = _extractIcons(baseUri, document);
-          final feeds = await FeedFinder(
-            url: baseUri,
-            document: document,
-          ).parse();
-
-          return {
-            'title': title,
-            'resources': resources.map(_serializeResource).toList(),
-            'feeds': feeds.map((uri) => uri.toString()).toList(),
-          };
-        } finally {
-          client.close();
         }
-      }, <dynamic>[url.toString(), isImageRequest, proxyPort]);
+
+        final document = html_parser.parse(utf8.decode(response.body));
+
+        final title = document.querySelector('title')?.text;
+        final resources = _extractIcons(url, document);
+        final feeds = await FeedFinder(url: url, document: document).parse();
+
+        result = {
+          'title': title,
+          'resources': resources.map(_serializeResource).toList(),
+          'feeds': feeds.map((uri) => uri.toString()).toList(),
+        };
+      } catch (e, s) {
+        logger.e('Error fetching page $url', error: e, stackTrace: s);
+        result = {};
+      }
 
       if (result['imageBytes'] case final Uint8List imageBytes) {
         return WebPageInfo(
