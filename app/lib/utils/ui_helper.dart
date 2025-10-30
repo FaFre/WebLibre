@@ -61,6 +61,7 @@ void showTabOpenedMessage(
   BuildContext context, {
   String? tabName,
   void Function()? onShow,
+  Duration duration = const Duration(seconds: 3),
 }) {
   final message = switch (tabName.whenNotEmpty) {
     String() => "New tab '$tabName' opened in background",
@@ -72,6 +73,7 @@ void showTabOpenedMessage(
     action: onShow.mapNotNull(
       (onPressed) => SnackBarAction(label: 'Show', onPressed: onPressed),
     ),
+    duration: duration,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -106,6 +108,7 @@ void showTabSwitchMessage(
   BuildContext context, {
   String? tabName,
   void Function()? onSwitch,
+  Duration duration = const Duration(seconds: 3),
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -119,6 +122,7 @@ void showTabSwitchMessage(
     action: onSwitch.mapNotNull(
       (onPressed) => SnackBarAction(label: 'Switch', onPressed: onPressed),
     ),
+    duration: duration,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
