@@ -217,6 +217,27 @@ enum LogLevel {
   error,
 }
 
+enum GeckoFetchMethod {
+  get,
+  head,
+  post,
+  put,
+  delete,
+  connect,
+  options,
+  trace,
+}
+
+enum GeckoFetchRedircet {
+  follow,
+  manual,
+}
+
+enum GeckoFetchCookiePolicy {
+  include,
+  omit,
+}
+
 /// Translation options that map to the Gecko Translations Options.
 ///
 /// @property downloadModel If the necessary models should be downloaded on request. If false, then
@@ -2854,6 +2875,209 @@ class GeckoPref {
 ;
 }
 
+class GeckoHeader {
+  GeckoHeader({
+    required this.key,
+    required this.value,
+  });
+
+  String key;
+
+  String value;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      key,
+      value,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static GeckoHeader decode(Object result) {
+    result as List<Object?>;
+    return GeckoHeader(
+      key: result[0]! as String,
+      value: result[1]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! GeckoHeader || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+class GeckoFetchRequest {
+  GeckoFetchRequest({
+    required this.url,
+    required this.method,
+    required this.headers,
+    this.connectTimeoutMillis,
+    this.readTimeoutMillis,
+    this.body,
+    required this.redirect,
+    required this.cookiePolicy,
+    required this.useCaches,
+    required this.private,
+    required this.useOhttp,
+    this.referrerUrl,
+    required this.conservative,
+  });
+
+  String url;
+
+  GeckoFetchMethod method;
+
+  List<GeckoHeader> headers;
+
+  int? connectTimeoutMillis;
+
+  int? readTimeoutMillis;
+
+  String? body;
+
+  GeckoFetchRedircet redirect;
+
+  GeckoFetchCookiePolicy cookiePolicy;
+
+  bool useCaches;
+
+  bool private;
+
+  bool useOhttp;
+
+  String? referrerUrl;
+
+  bool conservative;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      url,
+      method,
+      headers,
+      connectTimeoutMillis,
+      readTimeoutMillis,
+      body,
+      redirect,
+      cookiePolicy,
+      useCaches,
+      private,
+      useOhttp,
+      referrerUrl,
+      conservative,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static GeckoFetchRequest decode(Object result) {
+    result as List<Object?>;
+    return GeckoFetchRequest(
+      url: result[0]! as String,
+      method: result[1]! as GeckoFetchMethod,
+      headers: (result[2] as List<Object?>?)!.cast<GeckoHeader>(),
+      connectTimeoutMillis: result[3] as int?,
+      readTimeoutMillis: result[4] as int?,
+      body: result[5] as String?,
+      redirect: result[6]! as GeckoFetchRedircet,
+      cookiePolicy: result[7]! as GeckoFetchCookiePolicy,
+      useCaches: result[8]! as bool,
+      private: result[9]! as bool,
+      useOhttp: result[10]! as bool,
+      referrerUrl: result[11] as String?,
+      conservative: result[12]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! GeckoFetchRequest || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+class GeckoFetchResponse {
+  GeckoFetchResponse({
+    required this.url,
+    required this.status,
+    required this.headers,
+    required this.body,
+  });
+
+  String url;
+
+  int status;
+
+  List<GeckoHeader> headers;
+
+  Uint8List body;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      url,
+      status,
+      headers,
+      body,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static GeckoFetchResponse decode(Object result) {
+    result as List<Object?>;
+    return GeckoFetchResponse(
+      url: result[0]! as String,
+      status: result[1]! as int,
+      headers: (result[2] as List<Object?>?)!.cast<GeckoHeader>(),
+      body: result[3]! as Uint8List,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! GeckoFetchResponse || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -2919,137 +3143,155 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is LogLevel) {
       buffer.putUint8(147);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    }    else if (value is GeckoFetchMethod) {
       buffer.putUint8(148);
-      writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+      writeValue(buffer, value.index);
+    }    else if (value is GeckoFetchRedircet) {
       buffer.putUint8(149);
-      writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+      writeValue(buffer, value.index);
+    }    else if (value is GeckoFetchCookiePolicy) {
       buffer.putUint8(150);
-      writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+      writeValue(buffer, value.index);
+    }    else if (value is TranslationOptions) {
       buffer.putUint8(151);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    }    else if (value is ReaderState) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(156);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(157);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableBrowserState) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(158);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is TabState) {
       buffer.putUint8(159);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(160);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is RecoverableBrowserState) {
       buffer.putUint8(161);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(162);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(163);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is Resource) {
       buffer.putUint8(164);
       writeValue(buffer, value.encode());
-    }    else if (value is VisitInfo) {
+    }    else if (value is IconResult) {
       buffer.putUint8(165);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(166);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is Cookie) {
       buffer.putUint8(167);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is VisitInfo) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is ReaderableState) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    }    else if (value is ContentBlocking) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    }    else if (value is DohSettings) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is TabContent) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is ContentBlocking) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    }    else if (value is DohSettings) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    }    else if (value is AutocompleteResult) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    }    else if (value is UnknownHitResult) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    }    else if (value is ImageHitResult) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    }    else if (value is VideoHitResult) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    }    else if (value is AudioHitResult) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    }    else if (value is ImageSrcHitResult) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    }    else if (value is PhoneHitResult) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    }    else if (value is EmailHitResult) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonCollection) {
+    }    else if (value is GeoHitResult) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPref) {
+    }    else if (value is DownloadState) {
       buffer.putUint8(191);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareInternetResourceState) {
+      buffer.putUint8(192);
+      writeValue(buffer, value.encode());
+    }    else if (value is AddonCollection) {
+      buffer.putUint8(193);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeckoPref) {
+      buffer.putUint8(194);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeckoHeader) {
+      buffer.putUint8(195);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeckoFetchRequest) {
+      buffer.putUint8(196);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeckoFetchResponse) {
+      buffer.putUint8(197);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -3117,93 +3359,108 @@ class _PigeonCodec extends StandardMessageCodec {
         final int? value = readValue(buffer) as int?;
         return value == null ? null : LogLevel.values[value];
       case 148: 
-        return TranslationOptions.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : GeckoFetchMethod.values[value];
       case 149: 
-        return ReaderState.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : GeckoFetchRedircet.values[value];
       case 150: 
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : GeckoFetchCookiePolicy.values[value];
       case 151: 
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 152: 
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 153: 
-        return ExternalPackage.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 154: 
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 155: 
-        return SourceValue.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 156: 
-        return TabState.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 157: 
-        return RecoverableTab.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 158: 
-        return RecoverableBrowserState.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 159: 
-        return IconRequest.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 160: 
-        return ResourceSize.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 161: 
-        return Resource.decode(readValue(buffer)!);
+        return RecoverableBrowserState.decode(readValue(buffer)!);
       case 162: 
-        return IconResult.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 163: 
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 164: 
-        return Cookie.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 165: 
-        return VisitInfo.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 166: 
-        return HistoryItem.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 167: 
-        return HistoryState.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 168: 
-        return ReaderableState.decode(readValue(buffer)!);
+        return VisitInfo.decode(readValue(buffer)!);
       case 169: 
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 170: 
-        return TabContentState.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 171: 
-        return FindResultState.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 172: 
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 173: 
-        return WebExtensionData.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 174: 
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 175: 
-        return TabContent.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 176: 
-        return ContentBlocking.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 177: 
-        return DohSettings.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 178: 
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 179: 
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 180: 
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 181: 
-        return ImageHitResult.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 182: 
-        return VideoHitResult.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 183: 
-        return AudioHitResult.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 184: 
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 185: 
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 186: 
-        return EmailHitResult.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 187: 
-        return GeoHitResult.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 188: 
-        return DownloadState.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 189: 
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 190: 
-        return AddonCollection.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 191: 
+        return DownloadState.decode(readValue(buffer)!);
+      case 192: 
+        return ShareInternetResourceState.decode(readValue(buffer)!);
+      case 193: 
+        return AddonCollection.decode(readValue(buffer)!);
+      case 194: 
         return GeckoPref.decode(readValue(buffer)!);
+      case 195: 
+        return GeckoHeader.decode(readValue(buffer)!);
+      case 196: 
+        return GeckoFetchRequest.decode(readValue(buffer)!);
+      case 197: 
+        return GeckoFetchResponse.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -6313,6 +6570,48 @@ abstract class BrowserExtensionEvents {
           }
         });
       }
+    }
+  }
+}
+
+class GeckoFetchApi {
+  /// Constructor for [GeckoFetchApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoFetchApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<GeckoFetchResponse> fetch(GeckoFetchRequest request) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoFetchApi.fetch$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[request]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as GeckoFetchResponse?)!;
     }
   }
 }

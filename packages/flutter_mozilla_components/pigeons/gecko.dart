@@ -1338,3 +1338,68 @@ abstract class GeckoDownloadsApi {
 abstract class BrowserExtensionEvents {
   void onFeedRequested(int timestamp, String url);
 }
+
+class GeckoHeader {
+  final String key;
+  final String value;
+
+  GeckoHeader({required this.key, required this.value});
+}
+
+enum GeckoFetchMethod { get, head, post, put, delete, connect, options, trace }
+
+enum GeckoFetchRedircet { follow, manual }
+
+enum GeckoFetchCookiePolicy { include, omit }
+
+class GeckoFetchRequest {
+  final String url;
+  final GeckoFetchMethod method;
+  final List<GeckoHeader> headers;
+  final int? connectTimeoutMillis;
+  final int? readTimeoutMillis;
+  final String? body;
+  final GeckoFetchRedircet redirect;
+  final GeckoFetchCookiePolicy cookiePolicy;
+  final bool useCaches;
+  final bool private;
+  final bool useOhttp;
+  final String? referrerUrl;
+  final bool conservative;
+
+  GeckoFetchRequest({
+    required this.url,
+    required this.method,
+    required this.headers,
+    required this.connectTimeoutMillis,
+    required this.readTimeoutMillis,
+    required this.body,
+    required this.redirect,
+    required this.cookiePolicy,
+    required this.useCaches,
+    required this.private,
+    required this.useOhttp,
+    required this.referrerUrl,
+    required this.conservative,
+  });
+}
+
+class GeckoFetchResponse {
+  final String url;
+  final int status;
+  final List<GeckoHeader> headers;
+  final Uint8List body;
+
+  GeckoFetchResponse({
+    required this.url,
+    required this.status,
+    required this.headers,
+    required this.body,
+  });
+}
+
+@HostApi()
+abstract class GeckoFetchApi {
+  @async
+  GeckoFetchResponse fetch(GeckoFetchRequest request);
+}

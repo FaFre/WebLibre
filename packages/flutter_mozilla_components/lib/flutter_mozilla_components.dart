@@ -16,6 +16,7 @@ export 'src/domain/services/gecko_delete_browser_data.dart';
 export 'src/domain/services/gecko_downloads.dart';
 export 'src/domain/services/gecko_engine_settings.dart';
 export 'src/domain/services/gecko_event.dart';
+export 'src/domain/services/gecko_fetch_service.dart';
 export 'src/domain/services/gecko_find_in_page.dart';
 export 'src/domain/services/gecko_history.dart';
 export 'src/domain/services/gecko_icon.dart';
@@ -42,6 +43,7 @@ export 'src/pigeons/gecko.g.dart'
         DohSettingsMode,
         EmailHitResult,
         GeckoEngineSettings,
+        GeckoFetchResponse,
         GeckoPref,
         GeckoSuggestion,
         GeckoSuggestionType,
