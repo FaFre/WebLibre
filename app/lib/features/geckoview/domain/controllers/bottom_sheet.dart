@@ -18,21 +18,51 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 
 part 'bottom_sheet.g.dart';
 
 @Riverpod(keepAlive: true)
 class BottomSheetController extends _$BottomSheetController {
+  DateTime? _pauseTime;
+  bool _resetDue = false;
+
   @override
   Sheet? build() {
+    ref.listen(browserViewLifecycleProvider, (previous, current) {
+      switch (current) {
+        case AppLifecycleState.resumed:
+          if (_pauseTime != null &&
+              DateTime.now().difference(_pauseTime!) >
+                  const Duration(minutes: 5)) {
+            _resetDue = true;
+          }
+          _pauseTime = null;
+        case AppLifecycleState.detached:
+        case AppLifecycleState.inactive:
+        case AppLifecycleState.hidden:
+        case AppLifecycleState.paused:
+          _pauseTime ??= DateTime.now();
+        default:
+      }
+    });
+
     return null;
   }
 
   ///We depend on a listener that updates/syncs UI to open the sheet
   // ignore: use_setters_to_change_properties api decision
   void show(Sheet sheet) {
+    if (_resetDue) {
+      ref.read(appStateKeyProvider.notifier).reset();
+      _resetDue = false;
+      return;
+    }
+
     state = sheet;
   }
 
