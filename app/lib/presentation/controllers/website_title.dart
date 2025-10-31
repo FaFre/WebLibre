@@ -26,6 +26,11 @@ import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/extensions/ref_cache.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/features/user/data/models/tor_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'website_title.g.dart';
 
@@ -104,9 +109,41 @@ Future<WebPageInfo> pageInfo(
 }) async {
   final link = ref.cacheFor(const Duration(minutes: 2));
 
+  final tabState = ref.read(selectedTabStateProvider);
+
+  int? proxyPort;
+  if (tabState?.id != null) {
+    final containerId = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .getContainerTabId(tabState!.id);
+
+    final containerData = await containerId.mapNotNull(
+      (containerId) => ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainerData(containerId),
+    );
+
+    final torSettings = ref.read(torSettingsWithDefaultsProvider);
+
+    if (containerData?.metadata.useProxy == true ||
+        (tabState.isPrivate == false &&
+            torSettings.proxyRegularTabsMode == TorRegularTabProxyMode.all) ||
+        (tabState.isPrivate == true && torSettings.proxyPrivateTabsTor)) {
+      proxyPort = await ref.read(torProxyServiceProvider.future);
+
+      if (proxyPort == null) {
+        throw Exception('Could not proxy request');
+      }
+    }
+  }
+
   final result = await ref
       .watch(genericWebsiteServiceProvider.notifier)
-      .fetchPageInfo(url: url, isImageRequest: isImageRequest);
+      .fetchPageInfo(
+        url: url,
+        isImageRequest: isImageRequest,
+        proxyPort: proxyPort,
+      );
 
   if (!result.isSuccess) {
     link.close();
