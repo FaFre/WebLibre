@@ -20,7 +20,6 @@
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/extensions/ref_cache.dart';
@@ -47,33 +46,33 @@ class CompletePageInfo extends _$CompletePageInfo {
       return AsyncData(cached);
     }
 
-    ref.listen(
-      fireImmediately: true,
-      pageInfoProvider(cached.url, isImageRequest: false),
-      (previous, next) {
-        if (next.hasValue) {
-          final current = stateOrNull?.value ?? cached;
+    // ref.listen(
+    //   fireImmediately: true,
+    //   pageInfoProvider(cached.url, isImageRequest: false),
+    //   (previous, next) {
+    //     if (next.hasValue) {
+    //       final current = stateOrNull?.value ?? cached;
 
-          state = AsyncData(
-            current.copyWith(
-              //Cached is preferred as this comes from gecko and is more likely to be correct compared to manual request
-              favicon: current.favicon ?? next.value!.favicon,
-              feeds: current.feeds ?? next.value!.feeds,
-              title: current.title.whenNotEmpty ?? next.value!.title,
-            ),
-          );
-        } else {
-          state = next;
-        }
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to pageInfoProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
+    //       state = AsyncData(
+    //         current.copyWith(
+    //           //Cached is preferred as this comes from gecko and is more likely to be correct compared to manual request
+    //           favicon: current.favicon ?? next.value!.favicon,
+    //           feeds: current.feeds ?? next.value!.feeds,
+    //           title: current.title.whenNotEmpty ?? next.value!.title,
+    //         ),
+    //       );
+    //     } else {
+    //       state = next;
+    //     }
+    //   },
+    //   onError: (error, stackTrace) {
+    //     logger.e(
+    //       'Error listening to pageInfoProvider',
+    //       error: error,
+    //       stackTrace: stackTrace,
+    //     );
+    //   },
+    // );
 
     ref.listen(
       fireImmediately: true,
