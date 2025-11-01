@@ -1,3 +1,6 @@
 {
-    "dart.runPubGetOnPubspecChanges": "never"
+    "dart.runPubGetOnPubspecChanges": "never",
+    "rust-analyzer.linkedProjects": [
+        "./packages/tor/rust/Cargo.toml"
+    ]
 }
