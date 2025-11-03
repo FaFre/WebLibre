@@ -1,3 +1,17 @@
+## 0.9.28
+### GeckoView 144.0.2
+
+**New Features**
+- Added support for requesting sites in Desktop Mode
+
+**Improvements**
+- Enhanced favicon caching
+- Tor-related updates and improvements
+- UI refinements
+
+**Bug Fixes**
+- Fixed URL launch intent issues
+
 ## 0.9.27
 ### GeckoView 144.0
 
