@@ -169,7 +169,8 @@ class TorProxyService extends _$TorProxyService {
             config = await moat.getDefaultBridges();
           }
 
-          if (config == null && torSettings.requireBridge) {
+          if (config == null &&
+              (torSettings.requireBridge || !torSettings.fetchRemoteBridges)) {
             config = MoatService.convertBuiltinToSettings(
               // ignore: only_use_keep_alive_inside_keep_alive
               await ref
