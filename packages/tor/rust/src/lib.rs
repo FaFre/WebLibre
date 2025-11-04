@@ -54,7 +54,8 @@ fn build_tor_client_config(
         .storage()
         .state_dir(CfgPath::new(config.state_dir.clone()))
         .cache_dir(CfgPath::new(config.cache_dir.clone()));
-    cfg_builder.address_filter().allow_onion_addrs(true);
+
+    cfg_builder.address_filter().allow_onion_addrs(false);
 
     if config.obfs4_port > 0 {
         let mut transport = TransportConfigBuilder::default();
