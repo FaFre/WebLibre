@@ -158,15 +158,23 @@ class BrowserBottomAppBar extends HookConsumerWidget {
               selectedTabId: selectedTabId,
               child: TabsActionButton(
                 isActive: displayedSheet is ViewTabsSheet,
-                onTap: () {
-                  if (displayedSheet case ViewTabsSheet()) {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
+                onTap: () async {
+                  final tabViewBottomSheet = ref
+                      .read(generalSettingsWithDefaultsProvider)
+                      .tabViewBottomSheet;
+
+                  if (tabViewBottomSheet) {
+                    if (displayedSheet case ViewTabsSheet()) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .requestDismiss();
+                    } else {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .show(ViewTabsSheet());
+                    }
                   } else {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .show(ViewTabsSheet());
+                    await TabViewRoute().push(context);
                   }
                 },
                 onLongPress: () {

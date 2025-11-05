@@ -21,10 +21,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
@@ -175,7 +175,7 @@ class TabSearch extends HookConsumerWidget {
                       .read(bottomSheetControllerProvider.notifier)
                       .requestDismiss();
 
-                  context.pop();
+                  BrowserRoute().go(context);
                 }
               },
             );

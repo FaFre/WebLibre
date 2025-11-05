@@ -100,6 +100,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.int,
         db.typeMapping,
       ),
+      'tabViewBottomSheet': settings['tabViewBottomSheet']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

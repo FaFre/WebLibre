@@ -43,7 +43,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/view_tabs.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
@@ -572,7 +572,17 @@ class _ViewUrlSheet extends HookConsumerWidget {
             sheetScrollController: scrollController,
             draggableScrollableController: draggableScrollableController,
             onClose: () {
-              ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+              final tabViewBottomSheet = ref
+                  .read(generalSettingsWithDefaultsProvider)
+                  .tabViewBottomSheet;
+
+              if (tabViewBottomSheet) {
+                ref
+                    .read(bottomSheetControllerProvider.notifier)
+                    .requestDismiss();
+              } else {
+                BrowserRoute().go(context);
+              }
             },
             initialHeight: initialHeight,
           ),
@@ -605,16 +615,18 @@ class _ViewTabsSheet extends HookConsumerWidget {
             topRight: Radius.circular(28),
           ),
           child: treeModeEnabled
-              ? ViewTabTreesSheetWidget(
-                  sheetScrollController: scrollController,
+              ? ViewTabTreesWidget(
+                  scrollController: scrollController,
+                  showNewTabFab: true,
                   onClose: () {
                     ref
                         .read(bottomSheetControllerProvider.notifier)
                         .requestDismiss();
                   },
                 )
-              : ViewTabsSheetWidget(
-                  sheetScrollController: scrollController,
+              : ViewTabsWidget(
+                  scrollController: scrollController,
+                  showNewTabFab: true,
                   draggableScrollableController: draggableScrollableController,
                   onClose: () {
                     ref

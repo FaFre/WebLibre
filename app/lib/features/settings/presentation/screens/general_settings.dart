@@ -392,6 +392,22 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                       );
                 },
               ),
+              SwitchListTile.adaptive(
+                title: const Text('Bottom Sheet Tab View'),
+                subtitle: const Text(
+                  'Display tabs in a bottom sheet instead of fullscreen',
+                ),
+                secondary: const Icon(MdiIcons.dockBottom),
+                value: generalSettings.tabViewBottomSheet,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) =>
+                            currentSettings.copyWith.tabViewBottomSheet(value),
+                      );
+                },
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,

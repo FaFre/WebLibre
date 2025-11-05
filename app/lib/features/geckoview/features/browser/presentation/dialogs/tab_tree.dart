@@ -27,10 +27,12 @@ import 'package:graphview/GraphView.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class TabTreeDialog extends HookConsumerWidget {
@@ -131,10 +133,17 @@ class TabTreeDialog extends HookConsumerWidget {
                     tabId: id,
                     activeTabId: selectedTabId,
                     onClose: () {
-                      context.pop();
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .requestDismiss();
+                      final tabViewBottomSheet = ref
+                          .read(generalSettingsWithDefaultsProvider)
+                          .tabViewBottomSheet;
+
+                      if (tabViewBottomSheet) {
+                        ref
+                            .read(bottomSheetControllerProvider.notifier)
+                            .requestDismiss();
+                      }
+
+                      BrowserRoute().go(context);
                     },
                     sourceSearchQuery: null,
                   ),

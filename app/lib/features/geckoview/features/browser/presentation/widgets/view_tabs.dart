@@ -27,6 +27,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
@@ -160,13 +161,13 @@ class _TabDraggable extends HookConsumerWidget {
   }
 }
 
-class _TabSheetHeader extends HookConsumerWidget {
+class _TabViewHeader extends HookConsumerWidget {
   static const headerSize = 124.0;
 
   final bool treeViewEnabled;
   final VoidCallback onClose;
 
-  const _TabSheetHeader({required this.onClose, required this.treeViewEnabled});
+  const _TabViewHeader({required this.onClose, required this.treeViewEnabled});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -366,15 +367,17 @@ class _TabSheetHeader extends HookConsumerWidget {
   }
 }
 
-class ViewTabsSheetWidget extends HookConsumerWidget {
-  final ScrollController sheetScrollController;
-  final DraggableScrollableController draggableScrollableController;
+class ViewTabsWidget extends HookConsumerWidget {
+  final ScrollController scrollController;
+  final DraggableScrollableController? draggableScrollableController;
   final VoidCallback onClose;
+  final bool showNewTabFab;
 
-  const ViewTabsSheetWidget({
+  const ViewTabsWidget({
     required this.onClose,
-    required this.sheetScrollController,
-    required this.draggableScrollableController,
+    required this.scrollController,
+    this.draggableScrollableController,
+    required this.showNewTabFab,
     super.key,
   });
 
@@ -387,13 +390,18 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverToBoxAdapter(
-              child: DraggableScrollableHeader(
-                controller: draggableScrollableController,
-                child: _TabSheetHeader(
-                  onClose: onClose,
-                  treeViewEnabled: false,
-                ),
-              ),
+              child:
+                  draggableScrollableController.mapNotNull(
+                    (draggableScrollableController) =>
+                        DraggableScrollableHeader(
+                          controller: draggableScrollableController,
+                          child: _TabViewHeader(
+                            onClose: onClose,
+                            treeViewEnabled: false,
+                          ),
+                        ),
+                  ) ??
+                  _TabViewHeader(onClose: onClose, treeViewEnabled: false),
             ),
           ],
           body: HookConsumer(
@@ -455,7 +463,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
 
               useEffect(() {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (sheetScrollController.hasClients) {
+                  if (scrollController.hasClients) {
                     if (lastScroll.value != activeTab) {
                       final index = filteredTabEntities.value.indexWhere(
                         (entity) => entity.tabId == activeTab,
@@ -464,11 +472,11 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                       if (index > -1) {
                         final offset = (index ~/ 2) * itemHeight;
 
-                        if (offset != sheetScrollController.offset) {
+                        if (offset != scrollController.offset) {
                           lastScroll.value = activeTab;
 
                           unawaited(
-                            sheetScrollController.animateTo(
+                            scrollController.animateTo(
                               offset,
                               duration: const Duration(milliseconds: 200),
                               curve: Curves.easeInOut,
@@ -487,7 +495,7 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: FadingScroll(
                   fadingSize: 5,
-                  controller: sheetScrollController,
+                  controller: scrollController,
                   builder: (context, controller) {
                     return ReorderableBuilder.builder(
                       //Rebuild when cross axis count changes
@@ -601,38 +609,41 @@ class ViewTabsSheetWidget extends HookConsumerWidget {
             },
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(
-            top: _TabSheetHeader.headerSize + 4,
-            right: 4,
-          ),
-          child: FloatingActionButton.small(
-            onPressed: () async {
-              final settings = ref.read(generalSettingsWithDefaultsProvider);
+        if (showNewTabFab)
+          Padding(
+            padding: const EdgeInsets.only(
+              top: _TabViewHeader.headerSize + 4,
+              right: 4,
+            ),
+            child: FloatingActionButton.small(
+              onPressed: () async {
+                final settings = ref.read(generalSettingsWithDefaultsProvider);
 
-              await SearchRoute(
-                tabType:
-                    ref.read(selectedTabTypeProvider) ??
-                    settings.defaultCreateTabType,
-              ).push(context);
+                await SearchRoute(
+                  tabType:
+                      ref.read(selectedTabTypeProvider) ??
+                      settings.defaultCreateTabType,
+                ).push(context);
 
-              onClose();
-            },
-            child: const Icon(Icons.add),
+                onClose();
+              },
+              child: const Icon(Icons.add),
+            ),
           ),
-        ),
       ],
     );
   }
 }
 
-class ViewTabTreesSheetWidget extends HookConsumerWidget {
-  final ScrollController sheetScrollController;
+class ViewTabTreesWidget extends HookConsumerWidget {
+  final ScrollController scrollController;
   final VoidCallback onClose;
+  final bool showNewTabFab;
 
-  const ViewTabTreesSheetWidget({
+  const ViewTabTreesWidget({
     required this.onClose,
-    required this.sheetScrollController,
+    required this.scrollController,
+    required this.showNewTabFab,
     super.key,
   });
 
@@ -643,7 +654,7 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
       children: [
         Column(
           children: [
-            _TabSheetHeader(onClose: onClose, treeViewEnabled: true),
+            _TabViewHeader(onClose: onClose, treeViewEnabled: true),
             Expanded(
               child: HookConsumer(
                 builder: (context, ref, child) {
@@ -697,9 +708,9 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
                     if (index > -1) {
                       final offset = (index ~/ 2) * itemHeight;
 
-                      if (offset != sheetScrollController.offset) {
+                      if (offset != scrollController.offset) {
                         unawaited(
-                          sheetScrollController.animateTo(
+                          scrollController.animateTo(
                             offset,
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeInOut,
@@ -728,7 +739,7 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: GridView.builder(
-                      controller: sheetScrollController,
+                      controller: scrollController,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         //Sync values for itemHeight calculation _calculateItemHeight
                         childAspectRatio: 0.75,
@@ -745,26 +756,27 @@ class ViewTabTreesSheetWidget extends HookConsumerWidget {
             ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.only(
-            top: _TabSheetHeader.headerSize + 4,
-            right: 4,
-          ),
-          child: FloatingActionButton.small(
-            onPressed: () async {
-              final settings = ref.read(generalSettingsWithDefaultsProvider);
+        if (showNewTabFab)
+          Padding(
+            padding: const EdgeInsets.only(
+              top: _TabViewHeader.headerSize + 4,
+              right: 4,
+            ),
+            child: FloatingActionButton.small(
+              onPressed: () async {
+                final settings = ref.read(generalSettingsWithDefaultsProvider);
 
-              await SearchRoute(
-                tabType:
-                    ref.read(selectedTabTypeProvider) ??
-                    settings.defaultCreateTabType,
-              ).push(context);
+                await SearchRoute(
+                  tabType:
+                      ref.read(selectedTabTypeProvider) ??
+                      settings.defaultCreateTabType,
+                ).push(context);
 
-              onClose();
-            },
-            child: const Icon(Icons.add),
+                onClose();
+              },
+              child: const Icon(Icons.add),
+            ),
           ),
-        ),
       ],
     );
   }

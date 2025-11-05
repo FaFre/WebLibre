@@ -396,6 +396,11 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: $HistoryRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'tab_view',
+      name: 'TabViewRoute',
+      factory: $TabViewRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'context_menu',
       name: 'ContextMenuRoute',
       factory: $ContextMenuRoute._fromState,
@@ -530,6 +535,26 @@ mixin $HistoryRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/history');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TabViewRoute on GoRouteData {
+  static TabViewRoute _fromState(GoRouterState state) => TabViewRoute();
+
+  @override
+  String get location => GoRouteData.$location('/tab_view');
 
   @override
   void go(BuildContext context) => context.go(location);

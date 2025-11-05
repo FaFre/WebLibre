@@ -41,6 +41,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
 
+  GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -63,6 +65,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
     Duration historyAutoCleanInterval,
+    bool tabViewBottomSheet,
   });
 }
 
@@ -132,6 +135,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(historyAutoCleanInterval: historyAutoCleanInterval);
 
   @override
+  GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet) =>
+      call(tabViewBottomSheet: tabViewBottomSheet);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -154,6 +161,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
+    Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -236,6 +244,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.historyAutoCleanInterval
           // ignore: cast_nullable_to_non_nullable
           : historyAutoCleanInterval as Duration,
+      tabViewBottomSheet:
+          tabViewBottomSheet == const $CopyWithPlaceholder() ||
+              tabViewBottomSheet == null
+          ? _value.tabViewBottomSheet
+          // ignore: cast_nullable_to_non_nullable
+          : tabViewBottomSheet as bool,
     );
   }
 }
@@ -288,6 +302,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
           : Duration(
               microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
             ),
+      tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -314,6 +329,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
+  'tabViewBottomSheet': instance.tabViewBottomSheet,
 };
 
 const _$ThemeModeEnumMap = {

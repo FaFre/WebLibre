@@ -20,7 +20,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
@@ -120,7 +119,7 @@ class SearchScreen extends HookConsumerWidget {
         if (context.mounted) {
           ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
 
-          context.pop();
+          BrowserRoute().go(context);
         }
       }
     }
@@ -226,7 +225,7 @@ class SearchScreen extends HookConsumerWidget {
                                 .read(bottomSheetControllerProvider.notifier)
                                 .requestDismiss();
 
-                            context.pop();
+                            BrowserRoute().go(context);
                           }
                         }
                       }

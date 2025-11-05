@@ -29,6 +29,7 @@ import 'package:weblibre/features/bangs/presentation/screens/search.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/open_shared_content.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/tab_tree.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/browser.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/screens/tab_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/context_menu_dialog.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/screens/history.dart';

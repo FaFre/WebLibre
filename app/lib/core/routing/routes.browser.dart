@@ -29,6 +29,7 @@ part of 'routes.dart';
     ),
     TypedGoRoute<TorProxyRoute>(name: 'TorProxyRoute', path: 'tor_proxy'),
     TypedGoRoute<HistoryRoute>(name: 'HistoryRoute', path: 'history'),
+    TypedGoRoute<TabViewRoute>(name: 'TabViewRoute', path: 'tab_view'),
     TypedGoRoute<ContextMenuRoute>(
       name: 'ContextMenuRoute',
       path: 'context_menu',
@@ -199,5 +200,12 @@ class HistoryRoute extends GoRouteData with $HistoryRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const HistoryScreen();
+  }
+}
+
+class TabViewRoute extends GoRouteData with $TabViewRoute {
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(builder: (_) => const TabViewScreen());
   }
 }

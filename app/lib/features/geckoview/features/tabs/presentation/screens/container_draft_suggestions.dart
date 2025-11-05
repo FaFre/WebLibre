@@ -10,7 +10,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/core/uuid.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tabs.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/view_tabs.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
