@@ -24,47 +24,47 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/widgets/rounded_text.dart';
 
-class WebsiteFeedTile extends HookConsumerWidget {
-  final TabState initialTabState;
+class WebsiteFeedMenuButton extends HookConsumerWidget {
+  final String tabId;
 
-  const WebsiteFeedTile(this.initialTabState, {super.key});
+  const WebsiteFeedMenuButton(this.tabId, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pageInfoAsync = ref.watch(completePageInfoProvider(initialTabState));
+    final feedsAsync = ref.watch(websiteFeedProviderProvider(tabId));
 
     return Skeletonizer(
-      enabled: pageInfoAsync.isLoading && initialTabState.feeds == null,
-      child: pageInfoAsync.when(
+      enabled: feedsAsync.isLoading && feedsAsync.value?.value == null,
+      child: feedsAsync.when(
         skipLoadingOnReload: true,
-        data: (info) {
-          if (info.feeds.isEmpty) {
+        data: (feeds) {
+          if (feeds.value.isEmpty) {
             return const SizedBox.shrink();
           }
 
-          return ListTile(
-            leading: const Icon(Icons.rss_feed),
-            title: const Text('Available Web Feeds'),
-            trailing: RoundedBackground(
+          return MenuItemButton(
+            leadingIcon: const Icon(Icons.rss_feed),
+            closeOnActivate: false,
+            trailingIcon: RoundedBackground(
               child: Text(
-                info.feeds!.length.toString(),
+                feeds.value!.length.toString(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ),
-            onTap: () async {
+            onPressed: () async {
               await SelectFeedDialogRoute(
                 feedsJson: jsonEncode(
-                  info.feeds!.map((feed) => feed.toString()).toList(),
+                  feeds.value!.map((feed) => feed.toString()).toList(),
                 ),
               ).push(context);
             },
+            child: const Text('Available Web Feeds'),
           );
         },
         error: (error, stackTrace) {
@@ -77,11 +77,10 @@ class WebsiteFeedTile extends HookConsumerWidget {
           //   onRetry: () => ref.refresh(pageInfoProvider(url)),
           // );
         },
-        loading: () => const ListTile(
-          leading: Icon(Icons.rss_feed),
-          contentPadding: EdgeInsets.zero,
-          title: Text('Available Web Feeds'),
-          trailing: Bone.icon(),
+        loading: () => const MenuItemButton(
+          leadingIcon: Icon(Icons.rss_feed),
+          trailingIcon: Bone.icon(),
+          child: Text('Available Web Feeds'),
         ),
       ),
     );

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -45,34 +46,6 @@ class CompletePageInfo extends _$CompletePageInfo {
         !_supportedFetchSchemes.contains(cached.url.scheme)) {
       return AsyncData(cached);
     }
-
-    // ref.listen(
-    //   fireImmediately: true,
-    //   pageInfoProvider(cached.url, isImageRequest: false),
-    //   (previous, next) {
-    //     if (next.hasValue) {
-    //       final current = stateOrNull?.value ?? cached;
-
-    //       state = AsyncData(
-    //         current.copyWith(
-    //           //Cached is preferred as this comes from gecko and is more likely to be correct compared to manual request
-    //           favicon: current.favicon ?? next.value!.favicon,
-    //           feeds: current.feeds ?? next.value!.feeds,
-    //           title: current.title.whenNotEmpty ?? next.value!.title,
-    //         ),
-    //       );
-    //     } else {
-    //       state = next;
-    //     }
-    //   },
-    //   onError: (error, stackTrace) {
-    //     logger.e(
-    //       'Error listening to pageInfoProvider',
-    //       error: error,
-    //       stackTrace: stackTrace,
-    //     );
-    //   },
-    // );
 
     ref.listen(
       fireImmediately: true,
@@ -149,4 +122,20 @@ Future<WebPageInfo> pageInfo(
   }
 
   return result.value;
+}
+
+@Riverpod()
+AsyncValue<EquatableValue<Set<Uri>?>> websiteFeedProvider(
+  Ref ref,
+  String tabId,
+) {
+  final tabState = ref.watch(tabStateProvider(tabId))!;
+  final feeds = ref.watch(
+    pageInfoProvider(
+      tabState.url,
+      isImageRequest: false,
+    ).select((value) => value.whenData((data) => EquatableValue(data.feeds))),
+  );
+
+  return feeds;
 }

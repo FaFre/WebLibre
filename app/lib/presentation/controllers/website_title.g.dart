@@ -189,3 +189,92 @@ final class PageInfoFamily extends $Family
   @override
   String toString() => r'pageInfoProvider';
 }
+
+@ProviderFor(websiteFeedProvider)
+const websiteFeedProviderProvider = WebsiteFeedProviderFamily._();
+
+final class WebsiteFeedProviderProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<EquatableValue<Set<Uri>?>>,
+          AsyncValue<EquatableValue<Set<Uri>?>>,
+          AsyncValue<EquatableValue<Set<Uri>?>>
+        >
+    with $Provider<AsyncValue<EquatableValue<Set<Uri>?>>> {
+  const WebsiteFeedProviderProvider._({
+    required WebsiteFeedProviderFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'websiteFeedProviderProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$websiteFeedProviderHash();
+
+  @override
+  String toString() {
+    return r'websiteFeedProviderProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<EquatableValue<Set<Uri>?>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AsyncValue<EquatableValue<Set<Uri>?>> create(Ref ref) {
+    final argument = this.argument as String;
+    return websiteFeedProvider(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<EquatableValue<Set<Uri>?>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<AsyncValue<EquatableValue<Set<Uri>?>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WebsiteFeedProviderProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$websiteFeedProviderHash() =>
+    r'b8ad81b883acee41f420af9aeca254fbd29b3107';
+
+final class WebsiteFeedProviderFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          AsyncValue<EquatableValue<Set<Uri>?>>,
+          String
+        > {
+  const WebsiteFeedProviderFamily._()
+    : super(
+        retry: null,
+        name: r'websiteFeedProviderProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WebsiteFeedProviderProvider call(String tabId) =>
+      WebsiteFeedProviderProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'websiteFeedProviderProvider';
+}
