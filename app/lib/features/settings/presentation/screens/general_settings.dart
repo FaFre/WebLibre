@@ -347,6 +347,22 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                     : null,
               ),
               SwitchListTile.adaptive(
+                title: const Text('Reader Mode in Tab Bar'),
+                subtitle: const Text(
+                  'Show reader mode button in the tab bar instead of only in the tab menu',
+                ),
+                secondary: const Icon(MdiIcons.bookHeart),
+                value: generalSettings.tabBarReaderView,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) =>
+                            currentSettings.copyWith.tabBarReaderView(value),
+                      );
+                },
+              ),
+              SwitchListTile.adaptive(
                 title: const Text('Create Child Tabs'),
                 subtitle: const Text(
                   'Display a button to create a child tab under the current tab (tree view only)',

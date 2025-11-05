@@ -71,6 +71,7 @@ class GeneralSettings with FastEquatable {
   final TabBarSwipeAction tabBarSwipeAction;
   final Duration historyAutoCleanInterval;
   final bool tabViewBottomSheet;
+  final bool tabBarReaderView;
 
   GeneralSettings({
     required this.themeMode,
@@ -88,6 +89,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarSwipeAction,
     required this.historyAutoCleanInterval,
     required this.tabViewBottomSheet,
+    required this.tabBarReaderView,
   });
 
   GeneralSettings.withDefaults({
@@ -106,6 +108,7 @@ class GeneralSettings with FastEquatable {
     TabBarSwipeAction? tabBarSwipeAction,
     Duration? historyAutoCleanInterval,
     bool? tabViewBottomSheet,
+    bool? tabBarReaderView,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -122,7 +125,8 @@ class GeneralSettings with FastEquatable {
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
        historyAutoCleanInterval =
            historyAutoCleanInterval ?? const Duration(days: 90),
-       tabViewBottomSheet = tabViewBottomSheet ?? false;
+       tabViewBottomSheet = tabViewBottomSheet ?? false,
+       tabBarReaderView = tabBarReaderView ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -146,5 +150,6 @@ class GeneralSettings with FastEquatable {
     tabBarSwipeAction,
     historyAutoCleanInterval,
     tabViewBottomSheet,
+    tabBarReaderView,
   ];
 }

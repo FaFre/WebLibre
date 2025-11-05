@@ -43,6 +43,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet);
 
+  GeneralSettings tabBarReaderView(bool tabBarReaderView);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -66,6 +68,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarSwipeAction tabBarSwipeAction,
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
+    bool tabBarReaderView,
   });
 }
 
@@ -139,6 +142,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabViewBottomSheet: tabViewBottomSheet);
 
   @override
+  GeneralSettings tabBarReaderView(bool tabBarReaderView) =>
+      call(tabBarReaderView: tabBarReaderView);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -162,6 +169,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
+    Object? tabBarReaderView = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -250,6 +258,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabViewBottomSheet
           // ignore: cast_nullable_to_non_nullable
           : tabViewBottomSheet as bool,
+      tabBarReaderView:
+          tabBarReaderView == const $CopyWithPlaceholder() ||
+              tabBarReaderView == null
+          ? _value.tabBarReaderView
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarReaderView as bool,
     );
   }
 }
@@ -303,6 +317,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
               microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
             ),
       tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
+      tabBarReaderView: json['tabBarReaderView'] as bool?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -330,6 +345,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
+  'tabBarReaderView': instance.tabBarReaderView,
 };
 
 const _$ThemeModeEnumMap = {

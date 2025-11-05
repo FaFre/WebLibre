@@ -27,6 +27,11 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/widgets/animate_gradient_shader.dart';
 
 class ReaderButton extends HookConsumerWidget {
+  final Widget Function(bool isLoading, bool readerActive, Widget icon)
+  buttonBuilder;
+
+  const ReaderButton({super.key, required this.buttonBuilder});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -65,21 +70,10 @@ class ReaderButton extends HookConsumerWidget {
           (enforceReadability && enableReadability),
       child: readerChanging.when(
         skipLoadingOnReload: true,
-        data: (_) => InkWell(
-          onTap: readerChanging.isLoading
-              ? null
-              : () async {
-                  await ref
-                      .read(readerableScreenControllerProvider.notifier)
-                      .toggleReaderView(!readerabilityState.active);
-                },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 15.0,
-              horizontal: 8.0,
-            ),
-            child: icon,
-          ),
+        data: (_) => buttonBuilder(
+          readerChanging.isLoading,
+          readerabilityState.active,
+          icon,
         ),
         error: (error, stackTrace) => SizedBox.shrink(),
         loading: () => AnimateGradientShader(
@@ -91,13 +85,7 @@ class ReaderButton extends HookConsumerWidget {
             colorScheme.secondary,
             colorScheme.secondaryContainer,
           ],
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 15.0,
-              horizontal: 8.0,
-            ),
-            child: icon,
-          ),
+          child: buttonBuilder(true, readerabilityState.active, icon),
         ),
       ),
     );

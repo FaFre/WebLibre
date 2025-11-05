@@ -17,33 +17,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:ui' as ui;
 
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/site_search.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/certificate_tile.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
-import 'package:weblibre/presentation/widgets/share_tile.dart';
-import 'package:weblibre/presentation/widgets/website_feed_tile.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class ClampingScrollPhysicsWithoutImplicit extends ClampingScrollPhysics {
   const ClampingScrollPhysicsWithoutImplicit({super.parent});
@@ -220,188 +205,6 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                 ),
               ),
               const Divider(),
-              ListTile(
-                leading: const Icon(MdiIcons.contentCopy),
-                title: const Text('Copy address'),
-                onTap: () async {
-                  await Clipboard.setData(
-                    ClipboardData(text: initialTabState.url.toString()),
-                  );
-
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                },
-              ),
-              ListTile(
-                onTap: () async {
-                  await ui_helper.launchUrlFeedback(
-                    context,
-                    initialTabState.url,
-                  );
-                },
-                leading: const Icon(Icons.open_in_browser),
-                title: const Text('Launch External'),
-              ),
-              ListTile(
-                leading: const Icon(MdiIcons.tabPlus),
-                title: const Text('Clone tab'),
-                onTap: () async {
-                  final tabId = await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: initialTabState.url,
-                        private: false,
-                        selectTab: false,
-                      );
-
-                  if (context.mounted) {
-                    //save reference before pop `ref` gets disposed
-                    final repo = ref.read(tabRepositoryProvider.notifier);
-
-                    ui_helper.showTabSwitchMessage(
-                      context,
-                      onSwitch: () async {
-                        await repo.selectTab(tabId);
-                      },
-                    );
-
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(MdiIcons.tabUnselected),
-                title: const Text('Clone as private tab'),
-                onTap: () async {
-                  final tabId = await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: initialTabState.url,
-                        private: true,
-                        selectTab: false,
-                      );
-
-                  if (context.mounted) {
-                    //save reference before pop `ref` gets disposed
-                    final repo = ref.read(tabRepositoryProvider.notifier);
-
-                    ui_helper.showTabSwitchMessage(
-                      context,
-                      onSwitch: () async {
-                        await repo.selectTab(tabId);
-                      },
-                    );
-
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(MdiIcons.folderArrowUpDownOutline),
-                title: const Text('Assign container'),
-                onTap: () async {
-                  final targetContainerId = await ContainerSelectionRoute()
-                      .push<String?>(context);
-
-                  if (targetContainerId != null) {
-                    final containerData = await ref
-                        .read(containerRepositoryProvider.notifier)
-                        .getContainerData(targetContainerId);
-
-                    if (containerData != null) {
-                      await ref
-                          .read(tabDataRepositoryProvider.notifier)
-                          .assignContainer(initialTabState.id, containerData);
-                    }
-                  }
-
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                },
-              ),
-              Consumer(
-                child: ListTile(
-                  leading: const Icon(MdiIcons.folderCancelOutline),
-                  title: const Text('Unassign container'),
-                  onTap: () async {
-                    await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .unassignContainer(initialTabState.id);
-
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
-                  },
-                ),
-                builder: (context, ref, child) {
-                  final containerId = ref.watch(
-                    watchContainerTabIdProvider(
-                      initialTabState.id,
-                    ).select((value) => value.value),
-                  );
-
-                  return Visibility(
-                    visible: containerId != null,
-                    child: child!,
-                  );
-                },
-              ),
-              ShareTile(
-                onTap: () async {
-                  await SharePlus.instance.share(
-                    ShareParams(uri: initialTabState.url),
-                  );
-
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                },
-                onTapQr: () async {
-                  await showQrCode(context, initialTabState.url.toString());
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.mobile_screen_share),
-                title: const Text('Share screenshot'),
-                onTap: () async {
-                  final screenshot = await ref
-                      .read(selectedTabSessionProvider)
-                      .requestScreenshot();
-
-                  if (screenshot != null) {
-                    ui.decodeImageFromList(screenshot, (result) async {
-                      final png = await result.toByteData(
-                        format: ui.ImageByteFormat.png,
-                      );
-
-                      if (png != null) {
-                        final file = XFile.fromData(
-                          png.buffer.asUint8List(),
-                          mimeType: 'image/png',
-                        );
-
-                        await SharePlus.instance.share(
-                          ShareParams(
-                            files: [file],
-                            subject: initialTabState.title,
-                          ),
-                        );
-                      }
-                    });
-                  }
-
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                },
-              ),
-              WebsiteFeedTile(initialTabState),
             ],
           );
         },

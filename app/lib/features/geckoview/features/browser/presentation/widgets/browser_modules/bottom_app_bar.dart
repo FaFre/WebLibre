@@ -24,12 +24,11 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -40,8 +39,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
@@ -62,6 +61,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
 
     final tabMenuController = useMenuController();
     final extensionMenuController = useMenuController();
+    final hamburgerMenuController = useMenuController();
     final trippleDotMenuController = useMenuController();
 
     final selectedTabId = ref.watch(selectedTabProvider);
@@ -138,7 +138,48 @@ class BrowserBottomAppBar extends HookConsumerWidget {
               : null,
           actions: [
             if (selectedTabId != null && displayedSheet is! ViewTabsSheet)
-              ReaderButton(),
+              Consumer(
+                builder: (context, ref, child) {
+                  final tabBarReaderView = ref.watch(
+                    generalSettingsWithDefaultsProvider.select(
+                      (value) => value.tabBarReaderView,
+                    ),
+                  );
+
+                  final readerabilityStateActive = ref.watch(
+                    selectedTabStateProvider.select(
+                      (state) =>
+                          (state?.readerableState ?? ReaderableState.$default())
+                              .active,
+                    ),
+                  );
+
+                  return Visibility(
+                    visible: tabBarReaderView || readerabilityStateActive,
+                    child: ReaderButton(
+                      buttonBuilder: (isLoading, readerActive, icon) => InkWell(
+                        onTap: isLoading
+                            ? null
+                            : () async {
+                                await ref
+                                    .read(
+                                      readerableScreenControllerProvider
+                                          .notifier,
+                                    )
+                                    .toggleReaderView(!readerActive);
+                              },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15.0,
+                            horizontal: 8.0,
+                          ),
+                          child: icon,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             if (showExtensionShortcut)
               ExtensionShortcutMenu(
                 controller: extensionMenuController,
@@ -151,6 +192,27 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                     }
                   },
                   icon: const Icon(MdiIcons.puzzle),
+                ),
+              ),
+            if (selectedTabId != null)
+              TabMenu(
+                controller: trippleDotMenuController,
+                selectedTabId: selectedTabId,
+                child: InkWell(
+                  onTap: () {
+                    if (trippleDotMenuController.isOpen) {
+                      trippleDotMenuController.close();
+                    } else {
+                      trippleDotMenuController.open();
+                    }
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 15.0,
+                    ),
+                    child: Icon(MdiIcons.dotsHorizontal),
+                  ),
                 ),
               ),
             TabCreationMenu(
@@ -187,7 +249,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
               ),
             ),
             MenuAnchor(
-              controller: trippleDotMenuController,
+              controller: hamburgerMenuController,
               builder: (context, controller, child) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 4.0),
@@ -204,7 +266,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                         vertical: 15.0,
                         horizontal: 8.0,
                       ),
-                      child: Icon(Icons.more_vert),
+                      child: Icon(Icons.menu),
                     ),
                   ),
                 );
@@ -380,86 +442,12 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 if (selectedTabId != null)
                   MenuItemButton(
                     onPressed: () async {
-                      final tabState = ref.read(
-                        tabStateProvider(selectedTabId),
-                      );
-
-                      if (tabState?.url case final Uri url) {
-                        await ui_helper.launchUrlFeedback(context, url);
-                      }
-                    },
-                    leadingIcon: const Icon(Icons.open_in_browser),
-                    child: const Text('Launch External'),
-                  ),
-                if (selectedTabId != null)
-                  MenuItemButton(
-                    onPressed: () async {
-                      final tabState = ref.read(
-                        tabStateProvider(selectedTabId),
-                      );
-
-                      if (tabState?.url case final Uri url) {
-                        await SharePlus.instance.share(ShareParams(uri: url));
-                      }
-                    },
-                    leadingIcon: const Icon(Icons.share),
-                    child: const Text('Share'),
-                  ),
-                if (selectedTabId != null) const Divider(),
-                if (selectedTabId != null)
-                  MenuItemButton(
-                    onPressed: () {
-                      final tabId = ref.read(selectedTabProvider);
-                      if (tabId != null) {
-                        ref
-                            .read(findInPageControllerProvider(tabId).notifier)
-                            .show();
-                      }
-                    },
-                    leadingIcon: const Icon(Icons.search),
-                    child: const Text('Find in page'),
-                  ),
-                if (selectedTabId != null)
-                  Consumer(
-                    builder: (context, childRef, child) {
-                      final enabled = childRef.watch(
-                        desktopModeProvider(selectedTabId),
-                      );
-
-                      return MenuItemButton(
-                        onPressed: () {
-                          ref
-                              .read(desktopModeProvider(selectedTabId).notifier)
-                              .toggle();
-                        },
-                        leadingIcon: const Icon(MdiIcons.monitor),
-                        trailingIcon: Checkbox(
-                          value: enabled,
-                          onChanged: (value) {
-                            if (value != null) {
-                              ref
-                                  .read(
-                                    desktopModeProvider(selectedTabId).notifier,
-                                  )
-                                  .enabled(value);
-                              trippleDotMenuController.close();
-                            }
-                          },
-                        ),
-                        child: const Text('Desktop Mode'),
-                      );
-                    },
-                  ),
-                if (selectedTabId != null) const Divider(),
-                if (selectedTabId != null)
-                  MenuItemButton(
-                    onPressed: () async {
                       final controller = ref.read(
                         tabSessionProvider(tabId: selectedTabId).notifier,
                       );
 
                       await controller.reload();
-                      trippleDotMenuController.close();
+                      hamburgerMenuController.close();
                     },
                     leadingIcon: const Icon(Icons.refresh),
                     child: const Text('Reload'),
@@ -513,7 +501,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                         await controller.goBack();
                                       }
 
-                                      trippleDotMenuController.close();
+                                      hamburgerMenuController.close();
                                     },
                                     icon: const Icon(Icons.arrow_back),
                                   )
@@ -523,7 +511,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                           .read(tabRepositoryProvider.notifier)
                                           .closeTab(selectedTabId);
 
-                                      trippleDotMenuController.close();
+                                      hamburgerMenuController.close();
 
                                       if (context.mounted) {
                                         ui_helper.showTabUndoClose(
@@ -551,7 +539,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                                       );
 
                                       await controller.goForward();
-                                      trippleDotMenuController.close();
+                                      hamburgerMenuController.close();
                                     }
                                   : null,
                               icon: const Icon(Icons.arrow_forward),
