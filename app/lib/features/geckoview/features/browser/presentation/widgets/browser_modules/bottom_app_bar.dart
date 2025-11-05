@@ -211,7 +211,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                       horizontal: 8.0,
                       vertical: 15.0,
                     ),
-                    child: Icon(MdiIcons.dotsHorizontal),
+                    child: Icon(MdiIcons.dotsVertical),
                   ),
                 ),
               ),
