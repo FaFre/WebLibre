@@ -21,6 +21,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -54,8 +55,13 @@ class TabMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final showFeeds = useState(false);
+
     return MenuAnchor(
       controller: controller,
+      onClose: () {
+        showFeeds.value = false;
+      },
       builder: (context, controller, child) {
         return child!;
       },
@@ -284,7 +290,18 @@ class TabMenu extends HookConsumerWidget {
             }
           },
         ),
-        WebsiteFeedMenuButton(selectedTabId),
+        Visibility(
+          visible: showFeeds.value,
+          replacement: MenuItemButton(
+            closeOnActivate: false,
+            leadingIcon: const Icon(Icons.rss_feed),
+            child: const Text('Fetch Feeds'),
+            onPressed: () {
+              showFeeds.value = true;
+            },
+          ),
+          child: WebsiteFeedMenuButton(selectedTabId),
+        ),
       ],
       child: child,
     );

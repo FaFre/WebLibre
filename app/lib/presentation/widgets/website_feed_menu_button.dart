@@ -79,7 +79,6 @@ class WebsiteFeedMenuButton extends HookConsumerWidget {
         },
         loading: () => const MenuItemButton(
           leadingIcon: Icon(Icons.rss_feed),
-          trailingIcon: Bone.icon(),
           child: Text('Available Web Feeds'),
         ),
       ),
