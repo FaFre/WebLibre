@@ -334,7 +334,10 @@ class TabRepository extends _$TabRepository {
       return _tabsService.selectTab(tabId: nextContainerTabs!.first);
     }
 
-    if (ref.mounted && availableContainers.isNotEmpty) {
+    if (ref.mounted &&
+        availableContainers.any(
+          (container) => container.metadata.authSettings.authenticationRequired,
+        )) {
       //Last resort push new tab to avoid any authenticated tab is selected
       // ignore: avoid_redundant_argument_values
       await addTab(selectTab: true, private: false);
