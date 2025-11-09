@@ -139,6 +139,75 @@ final class TabStateFamily extends $Family
   String toString() => r'tabStateProvider';
 }
 
+@ProviderFor(isTabTunneled)
+const isTabTunneledProvider = IsTabTunneledFamily._();
+
+final class IsTabTunneledProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  const IsTabTunneledProvider._({
+    required IsTabTunneledFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabTunneledProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabTunneledHash();
+
+  @override
+  String toString() {
+    return r'isTabTunneledProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    final argument = this.argument as String?;
+    return isTabTunneled(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabTunneledProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabTunneledHash() => r'fd8ca366b0835eef8aea7ad64453e6a6f2e69e82';
+
+final class IsTabTunneledFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
+  const IsTabTunneledFamily._()
+    : super(
+        retry: null,
+        name: r'isTabTunneledProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  IsTabTunneledProvider call(String? tabId) =>
+      IsTabTunneledProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabTunneledProvider';
+}
+
 @ProviderFor(selectedTabState)
 const selectedTabStateProvider = SelectedTabStateProvider._();
 

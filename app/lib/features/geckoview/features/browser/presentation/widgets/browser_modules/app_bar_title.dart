@@ -35,6 +35,7 @@ class AppBarTitle extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     final tabState = ref.watch(selectedTabStateProvider);
+    final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
 
     if (tabState == null) {
       return const SizedBox.shrink();
@@ -98,6 +99,11 @@ class AppBarTitle extends HookConsumerWidget {
               ),
               Row(
                 children: [
+                  if (isTabTuneledAsync.hasValue &&
+                      isTabTuneledAsync.value == true) ...[
+                    const Icon(MdiIcons.tunnelOutline, size: 14),
+                    const SizedBox(width: 4),
+                  ],
                   icon,
                   const SizedBox(width: 4),
                   Expanded(

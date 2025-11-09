@@ -35,8 +35,12 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
+import 'package:weblibre/features/user/data/models/tor_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'tab_state.g.dart';
 
@@ -236,6 +240,37 @@ TabState? tabState(Ref ref, String? tabId) {
   }
 
   return ref.watch(tabStatesProvider.select((tabs) => tabs[tabId]));
+}
+
+@Riverpod()
+Future<bool> isTabTunneled(Ref ref, String? tabId) async {
+  final tabState = ref.watch(tabStateProvider(tabId));
+  final torSettings = ref.watch(torSettingsWithDefaultsProvider);
+
+  if (tabState != null) {
+    if (tabState.isPrivate) {
+      return torSettings.proxyPrivateTabsTor;
+    } else {
+      switch (torSettings.proxyRegularTabsMode) {
+        case TorRegularTabProxyMode.container:
+          final containerId = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .getContainerTabId(tabState.id);
+
+          final containerData = await containerId.mapNotNull(
+            (containerId) => ref
+                .read(containerRepositoryProvider.notifier)
+                .getContainerData(containerId),
+          );
+
+          return containerData?.metadata.useProxy ?? false;
+        case TorRegularTabProxyMode.all:
+          return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 @Riverpod()
