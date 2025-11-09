@@ -1131,6 +1131,7 @@ abstract class GeckoContainerProxyApi {
   void setProxyPort(int port);
   void addContainerProxy(String contextId);
   void removeContainerProxy(String contextId);
+  void setSiteAssignments(Map<String, String> assignments);
 
   @async
   bool healthcheck();
@@ -1183,6 +1184,22 @@ abstract class GeckoCookieApi {
   );
 }
 
+class ContainerSiteAssignment {
+  final String requestId;
+  final String? tabId;
+  final String? originUrl;
+  final String url;
+  final bool blocked;
+
+  ContainerSiteAssignment({
+    required this.requestId,
+    required this.tabId,
+    required this.originUrl,
+    required this.url,
+    required this.blocked,
+  });
+}
+
 @FlutterApi()
 abstract class GeckoStateEvents {
   void onViewReadyStateChange(int timestamp, bool state);
@@ -1210,6 +1227,11 @@ abstract class GeckoStateEvents {
 
   void onScrollChange(int timestamp, String tabId, int scrollY);
   void onPreferenceChange(int timestamp, GeckoPref value);
+
+  void onContainerSiteAssignment(
+    int timestamp,
+    ContainerSiteAssignment details,
+  );
 }
 
 @FlutterApi()

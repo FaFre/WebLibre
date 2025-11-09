@@ -114,7 +114,7 @@ class Core(
     }
 
     val engine: Engine by lazy {
-        EngineProvider.createEngine(context, engineSettings, extensionEvents)
+        EngineProvider.createEngine(context, engineSettings, extensionEvents, flutterEvents)
     }
 
     /**
@@ -158,7 +158,7 @@ class Core(
                 collectionUser = components.addonCollection.collectionUser,
                 collectionName = components.addonCollection.collectionName,
                 maxCacheAgeInMinutes = AMO_COLLECTION_MAX_CACHE_AGE
-                ) else
+            ) else
             AMOAddonsProvider(
                 context,
                 client,

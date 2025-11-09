@@ -98,6 +98,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata useProxy(bool useProxy);
 
+  ContainerMetadata assignedSites(List<Uri>? assignedSites);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -110,6 +112,7 @@ abstract class _$ContainerMetadataCWProxy {
     String? contextualIdentity,
     ContainerAuthSettings authSettings,
     bool useProxy,
+    List<Uri>? assignedSites,
   });
 }
 
@@ -135,6 +138,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata useProxy(bool useProxy) => call(useProxy: useProxy);
 
   @override
+  ContainerMetadata assignedSites(List<Uri>? assignedSites) =>
+      call(assignedSites: assignedSites);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -147,6 +154,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? contextualIdentity = const $CopyWithPlaceholder(),
     Object? authSettings = const $CopyWithPlaceholder(),
     Object? useProxy = const $CopyWithPlaceholder(),
+    Object? assignedSites = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
       iconData: iconData == const $CopyWithPlaceholder()
@@ -166,6 +174,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.useProxy
           // ignore: cast_nullable_to_non_nullable
           : useProxy as bool,
+      assignedSites: assignedSites == const $CopyWithPlaceholder()
+          ? _value.assignedSites
+          // ignore: cast_nullable_to_non_nullable
+          : assignedSites as List<Uri>?,
     );
   }
 }
@@ -299,18 +311,23 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
               json['authSettings'] as Map<String, dynamic>,
             ),
       useProxy: json['useProxy'] as bool? ?? false,
+      assignedSites: (json['assignedSites'] as List<dynamic>?)
+          ?.map((e) => Uri.parse(e as String))
+          .toList(),
     );
 
-Map<String, dynamic> _$ContainerMetadataToJson(ContainerMetadata instance) =>
-    <String, dynamic>{
-      'iconData': _$JsonConverterToJson<Map<String, dynamic>, IconData>(
-        instance.iconData,
-        const IconDataJsonConverter().toJson,
-      ),
-      'contextualIdentity': instance.contextualIdentity,
-      'authSettings': instance.authSettings.toJson(),
-      'useProxy': instance.useProxy,
-    };
+Map<String, dynamic> _$ContainerMetadataToJson(
+  ContainerMetadata instance,
+) => <String, dynamic>{
+  'iconData': _$JsonConverterToJson<Map<String, dynamic>, IconData>(
+    instance.iconData,
+    const IconDataJsonConverter().toJson,
+  ),
+  'contextualIdentity': instance.contextualIdentity,
+  'authSettings': instance.authSettings.toJson(),
+  'useProxy': instance.useProxy,
+  'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
@@ -321,3 +338,44 @@ Json? _$JsonConverterToJson<Json, Value>(
   Value? value,
   Json? Function(Value value) toJson,
 ) => value == null ? null : toJson(value);
+
+ContainerData _$ContainerDataFromJson(
+  Map<String, dynamic> json,
+) => ContainerData(
+  id: json['id'] as String,
+  name: json['name'] as String?,
+  color: const ColorJsonConverter().fromJson((json['color'] as num).toInt()),
+  metadata: json['metadata'] == null
+      ? null
+      : ContainerMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$ContainerDataToJson(ContainerData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'color': const ColorJsonConverter().toJson(instance.color),
+      'metadata': instance.metadata.toJson(),
+    };
+
+ContainerDataWithCount _$ContainerDataWithCountFromJson(
+  Map<String, dynamic> json,
+) => ContainerDataWithCount(
+  id: json['id'] as String,
+  name: json['name'] as String?,
+  color: const ColorJsonConverter().fromJson((json['color'] as num).toInt()),
+  metadata: json['metadata'] == null
+      ? null
+      : ContainerMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+  tabCount: (json['tabCount'] as num?)?.toInt(),
+);
+
+Map<String, dynamic> _$ContainerDataWithCountToJson(
+  ContainerDataWithCount instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'color': const ColorJsonConverter().toJson(instance.color),
+  'metadata': instance.metadata.toJson(),
+  'tabCount': instance.tabCount,
+};

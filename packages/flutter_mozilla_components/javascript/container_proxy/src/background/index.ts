@@ -8,7 +8,7 @@ const store = new Store()
 
 interface Message {
     id: String | undefined;
-    action: 'setProxyPort' | 'addContainerProxy' | 'removeContainerProxy' | 'healthcheck';
+    action: 'setProxyPort' | 'addContainerProxy' | 'removeContainerProxy' | 'healthcheck' | 'setSiteAssignments';
     args: any;
 }
 
@@ -42,6 +42,11 @@ port.onMessage.addListener((raw: unknown): void => {
             store.removeContainerProxyRelation(message.args, "tor")
             console.log('removed container relation ' + message.args)
             break
+        case "setSiteAssignments":
+            const entries = new Map(Object.entries(message.args))
+            console.log('set site assignments ' + JSON.stringify(message.args))
+            store.setSiteAssignments(entries);
+            break
         case "healthcheck":
             port.postMessage({
                 "type": "healthcheck",
@@ -54,4 +59,4 @@ port.onMessage.addListener((raw: unknown): void => {
 });
 
 const backgroundListener = new BackgroundMain({ store })
-backgroundListener.run(browser)
+backgroundListener.run(browser, port)

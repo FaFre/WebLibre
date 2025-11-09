@@ -40,6 +40,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _longPressSubject = PublishSubject<LongPressEvent>();
   final _scrollEventSubject = PublishSubject<ScrollEvent>();
   final _prefUpdateSubject = PublishSubject<GeckoPref>();
+  final _siteAssignementSubject = PublishSubject<ContainerSiteAssignment>();
 
   final _tabAddedSubject = PublishSubject<String>();
 
@@ -61,6 +62,8 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<LongPressEvent> get longPressEvent => _longPressSubject.stream;
   Stream<ScrollEvent> get scrollEvent => _scrollEventSubject.stream;
   Stream<GeckoPref> get prefUpdateEvent => _prefUpdateSubject.stream;
+  Stream<ContainerSiteAssignment> get siteAssignementEvent =>
+      _siteAssignementSubject.stream;
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
 
@@ -184,6 +187,18 @@ class GeckoEventService extends GeckoStateEvents {
     _prefUpdateSubject.addWhenMoreRecent(timestamp, value.name, value);
   }
 
+  @override
+  void onContainerSiteAssignment(
+    int timestamp,
+    ContainerSiteAssignment details,
+  ) {
+    _siteAssignementSubject.addWhenMoreRecent(
+      timestamp,
+      details.requestId,
+      details,
+    );
+  }
+
   GeckoEventService.setUp({
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
@@ -212,5 +227,6 @@ class GeckoEventService extends GeckoStateEvents {
     unawaited(_scrollEventSubject.close());
     unawaited(_tabAddedSubject.close());
     unawaited(_prefUpdateSubject.close());
+    unawaited(_siteAssignementSubject.close());
   }
 }

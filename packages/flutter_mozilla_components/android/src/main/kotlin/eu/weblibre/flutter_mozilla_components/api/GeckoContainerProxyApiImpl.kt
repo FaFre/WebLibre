@@ -25,6 +25,10 @@ class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
         ContainerProxyFeature.scheduleRequest("removeContainerProxy", contextId)
     }
 
+    override fun setSiteAssignments(assignments: Map<String, String>) {
+        ContainerProxyFeature.scheduleRequest("setSiteAssignments", JSONObject(assignments))
+    }
+
     override fun healthcheck(callback: (Result<Boolean>) -> Unit) {
         ContainerProxyFeature.scheduleRequestWithResponse("healthcheck", Unit, object :
             ResultConsumer<JSONObject> {

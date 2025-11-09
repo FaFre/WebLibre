@@ -49,6 +49,6 @@ Future<GoRouter> router(Ref ref) async {
   return GoRouter(
     debugLogDiagnostics: true,
     routes: $appRoutes,
-    initialLocation: initialLocation,
+    initialLocation: initialLocation ?? BrowserRoute().location,
   );
 }

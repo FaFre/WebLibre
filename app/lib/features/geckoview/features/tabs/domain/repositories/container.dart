@@ -20,6 +20,7 @@
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
@@ -30,7 +31,16 @@ part 'container.g.dart';
 
 @Riverpod(keepAlive: true)
 class ContainerRepository extends _$ContainerRepository {
-  Future<void> addContainer(ContainerData container) {
+  Future<void> addContainer(ContainerData container) async {
+    if (container.metadata.assignedSites.isNotEmpty) {
+      if (!await areSitesAvailable(
+        container.metadata.assignedSites!,
+        container.id,
+      )) {
+        throw Exception('Sites already assigned to another container');
+      }
+    }
+
     return ref.read(tabDatabaseProvider).containerDao.addContainer(container);
   }
 
@@ -42,7 +52,16 @@ class ContainerRepository extends _$ContainerRepository {
         .get();
   }
 
-  Future<void> replaceContainer(ContainerData container) {
+  Future<void> replaceContainer(ContainerData container) async {
+    if (container.metadata.assignedSites.isNotEmpty) {
+      if (!await areSitesAvailable(
+        container.metadata.assignedSites!,
+        container.id,
+      )) {
+        throw Exception('Sites already assigned to another container');
+      }
+    }
+
     return ref
         .read(tabDatabaseProvider)
         .containerDao
@@ -98,12 +117,12 @@ class ContainerRepository extends _$ContainerRepository {
         .getSingle();
   }
 
-  Future<String> getOrderKeyAfterTab(String tabId, String? containerId) {
+  Future<String?> getOrderKeyAfterTab(String tabId, String? containerId) {
     return ref
         .read(tabDatabaseProvider)
         .containerDao
         .generateOrderKeyAfterTabId(containerId, tabId)
-        .getSingle();
+        .getSingleOrNull();
   }
 
   Future<String> getOrderKeyBeforeTab(String tabId, String? containerId) {
@@ -124,6 +143,33 @@ class ContainerRepository extends _$ContainerRepository {
     } while (usedColors.contains(randomColor));
 
     return randomColor;
+  }
+
+  Future<bool> isSiteAssignedToContainer(Uri uri) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .isSiteAssignedToContainer(uri)
+        .getSingle();
+  }
+
+  Future<bool> areSitesAvailable(
+    Iterable<Uri> origins,
+    String ignoreContainerId,
+  ) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .areSitesAvailable(origins, ignoreContainerId)
+        .getSingle();
+  }
+
+  Future<String?> siteAssignedContainerId(Uri uri) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .siteAssignedContainerId(uri)
+        .getSingle();
   }
 
   @override

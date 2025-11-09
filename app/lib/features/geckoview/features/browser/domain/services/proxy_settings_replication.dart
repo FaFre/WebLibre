@@ -53,7 +53,7 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
     ref.listen(
       fireImmediately: true,
-      containersWithCountProvider.select(
+      watchContainersWithCountProvider.select(
         (value) => EquatableValue(value.value),
       ),
       (previous, next) async {
@@ -134,5 +134,14 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
         );
       },
     );
+
+    // ignore: only_use_keep_alive_inside_keep_alive
+    ref.listen(watchAllAssignedSitesProvider, (previous, next) async {
+      if (next.hasValue) {
+        await ref
+            .read(torProxyRepositoryProvider.notifier)
+            .setSiteAssignments(next.requireValue);
+      }
+    });
   }
 }

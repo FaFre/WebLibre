@@ -62,11 +62,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Future<String> _generateOrderKey({
     required Value<String?> parentId,
     required Value<String?> containerId,
-  }) {
+  }) async {
     if (parentId.value.isNotEmpty) {
-      return db.containerDao
-          .generateOrderKeyAfterTabId(containerId.value, parentId.value!)
-          .getSingle();
+      return await db.containerDao
+              .generateOrderKeyAfterTabId(containerId.value, parentId.value!)
+              .getSingleOrNull() ??
+          await db.containerDao
+              .generateLeadingOrderKey(containerId.value)
+              .getSingle();
     } else {
       return db.containerDao
           .generateLeadingOrderKey(containerId.value)

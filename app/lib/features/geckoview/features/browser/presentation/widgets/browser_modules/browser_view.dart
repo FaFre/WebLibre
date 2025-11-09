@@ -143,7 +143,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       if (next.value.mapNotNull(Uri.tryParse) case final Uri url) {
         if (GoRouterState.of(context).topRoute?.name != FeedAddRoute.name) {
           if (ref.read(addFeedDialogBlockingProvider.notifier).canPush(url)) {
-            await FeedAddRoute($extra: url).push(context);
+            await FeedAddRoute(uri: url.toString()).push(context);
           }
         }
       }

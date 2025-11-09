@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -40,7 +42,7 @@ class ContainerListScreen extends HookConsumerWidget {
       appBar: AppBar(title: const Text('Containers')),
       body: HookConsumer(
         builder: (context, ref, child) {
-          final containersAsync = ref.watch(containersWithCountProvider);
+          final containersAsync = ref.watch(watchContainersWithCountProvider);
           final selectedContainer = ref.watch(selectedContainerProvider);
 
           return Skeletonizer(
@@ -128,7 +130,9 @@ class ContainerListScreen extends HookConsumerWidget {
                           container,
                           isSelected: container.id == selectedContainer,
                           onTap: () async {
-                            await ContainerEditRoute(container).push(context);
+                            await ContainerEditRoute(
+                              containerData: jsonEncode(container.toJson()),
+                            ).push(context);
                           },
                         ),
                       );
@@ -157,7 +161,9 @@ class ContainerListScreen extends HookConsumerWidget {
 
           if (context.mounted) {
             await ContainerCreateRoute(
-              ContainerData(id: uuid.v7(), color: initialColor),
+              containerData: jsonEncode(
+                ContainerData(id: uuid.v7(), color: initialColor).toJson(),
+              ),
             ).push(context);
           }
         },

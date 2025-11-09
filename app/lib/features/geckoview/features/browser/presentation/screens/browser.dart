@@ -83,7 +83,9 @@ class BrowserScreen extends HookConsumerWidget {
     useOnStreamChange(
       eventService.longPressEvent,
       onData: (event) async {
-        await ContextMenuRoute(event.hitResult.toJson()).push(context);
+        await ContextMenuRoute(
+          hitResult: event.hitResult.toJson(),
+        ).push(context);
       },
     );
 

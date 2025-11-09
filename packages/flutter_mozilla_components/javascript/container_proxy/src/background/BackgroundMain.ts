@@ -5,6 +5,7 @@ import { ProxyType } from '../domain/ProxyType'
 import BlockingResponse = browser.webRequest.BlockingResponse
 import _OnAuthRequiredDetails = browser.webRequest._OnAuthRequiredDetails
 import _OnRequestDetails = browser.proxy._OnRequestDetails
+import _OnBeforeRequestDetails = browser.webRequest._OnBeforeRequestDetails
 
 const localhosts = new Set(['localhost', '127.0.0.1', '[::1]'])
 
@@ -127,13 +128,79 @@ export default class BackgroundMain {
     return doNotProxy
   }
 
-  run(browser: { proxy: any }): void {
-    const filter = { urls: ['<all_urls>'] }
+  async onBeforeRequest(options: _OnBeforeRequestDetails, port: browser.runtime.Port): Promise<browser.webRequest.BlockingResponse> {
+    const tab = (options.tabId > -1) ? (await browser.tabs.get(options.tabId)) : null
 
-    browser.proxy.onRequest.addListener(this.onRequest.bind(this), filter)
+    if (options.frameId !== 0 || tab === null) {
+      return {};
+    }
+
+    const url = URL.parse(options.url);
+    if (url !== null && this.store.isSiteOriginAssigned(url)) {
+      let cookieStoreId: string
+
+      if (tab.cookieStoreId?.startsWith(containerIdentifier) === true) {
+        cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
+      } else if (tab.cookieStoreId === privateIdentifier) {
+        // Handle private tabs - use 'private' as identifier
+        cookieStoreId = 'private'
+      } else {
+        cookieStoreId = 'general'
+      }
+
+      if (this.store.isSiteOriginInSameContext(url, cookieStoreId)) {
+        if (tab.highlighted) {
+          port.postMessage({
+            "type": "assignedSiteRequested",
+            "id": options.requestId,
+            "status": "success",
+            "result": {
+              "originUrl": options.originUrl,
+              "url": options.url,
+              "blocked": false
+            }
+          });
+
+          return {};
+        } else {
+          //When tab not selected, block the request
+          return {
+            cancel: true,
+          };
+        }
+      } else {
+        //Only send events when tab is selected
+        if (tab.highlighted) {
+          port.postMessage({
+            "type": "assignedSiteRequested",
+            "id": options.requestId,
+            "status": "success",
+            "result": {
+              "originUrl": options.originUrl,
+              "url": options.url,
+              "blocked": true
+            }
+          });
+        }
+
+        return {
+          cancel: true,
+        };
+      }
+    }
+
+    return {};
+  }
+
+  run(browser: { proxy: any, webRequest: any }, port: browser.runtime.Port): void {
+    browser.proxy.onRequest.addListener(this.onRequest.bind(this), { urls: ['<all_urls>'] })
 
     browser.proxy.onError.addListener((e: Error) => {
       console.error('Proxy error', e)
     })
+
+    browser.webRequest.onBeforeRequest.addListener((options: _OnBeforeRequestDetails) => {
+      return this.onBeforeRequest(options, port);
+    }, { urls: ["<all_urls>"], types: ["main_frame"] }, ["blocking"])
   }
 }

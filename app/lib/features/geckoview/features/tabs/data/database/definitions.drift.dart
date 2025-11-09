@@ -13,6 +13,8 @@ import 'package:weblibre/data/database/converters/uri.dart' as i6;
 import 'package:drift/internal/modular.dart' as i7;
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart'
     as i8;
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart'
+    as i9;
 
 typedef $ContainerCreateCompanionBuilder =
     i3.ContainerCompanion Function({
@@ -2275,6 +2277,50 @@ class DefinitionsDrift extends i7.ModularAccessor {
       ],
       readsFrom: {tab},
     ).map((i0.QueryRow row) => row.readNullable<String>('next_tab_id'));
+  }
+
+  i0.Selectable<bool> isSiteAssignedToContainer({String? uri}) {
+    return customSelect(
+      'SELECT EXISTS (SELECT 1 AS _c0 FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE json_each.value = ?1) AS existing',
+      variables: [i0.Variable<String>(uri)],
+      readsFrom: {container},
+    ).map((i0.QueryRow row) => row.read<bool>('existing'));
+  }
+
+  i0.Selectable<bool> areSitesAvailable({
+    required String uriList,
+    required String ignoreContainerId,
+  }) {
+    return customSelect(
+      'SELECT NOT EXISTS (SELECT 1 AS _c0 FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE json_each.value IN (SELECT value FROM json_each(?1)) AND container.id IS NOT ?2) AS existing',
+      variables: [
+        i0.Variable<String>(uriList),
+        i0.Variable<String>(ignoreContainerId),
+      ],
+      readsFrom: {container},
+    ).map((i0.QueryRow row) => row.read<bool>('existing'));
+  }
+
+  i0.Selectable<String> siteAssignedContainerId({String? uri}) {
+    return customSelect(
+      'SELECT id FROM container WHERE EXISTS (SELECT 1 AS _c0 FROM json_each(container.metadata, \'\$.assignedSites\')WHERE value = ?1)',
+      variables: [i0.Variable<String>(uri)],
+      readsFrom: {container},
+    ).map((i0.QueryRow row) => row.read<String>('id'));
+  }
+
+  i0.Selectable<i9.SiteAssignment> allAssignedSites() {
+    return customSelect(
+      'SELECT container.id, COALESCE(container.metadata ->> \'\$.contextualIdentity\', \'general\') AS contextualIdentity, value AS assigned_site FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE value IS NOT NULL',
+      variables: [],
+      readsFrom: {container},
+    ).map(
+      (i0.QueryRow row) => i9.SiteAssignment(
+        id: row.read<String>('id'),
+        contextualIdentity: row.read<String>('contextualIdentity'),
+        assignedSite: row.readNullable<String>('assigned_site'),
+      ),
+    );
   }
 
   i3.TabFts get tabFts => i7.ReadDatabaseContainer(

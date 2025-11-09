@@ -2875,6 +2875,67 @@ class GeckoPref {
 ;
 }
 
+class ContainerSiteAssignment {
+  ContainerSiteAssignment({
+    required this.requestId,
+    this.tabId,
+    this.originUrl,
+    required this.url,
+    required this.blocked,
+  });
+
+  String requestId;
+
+  String? tabId;
+
+  String? originUrl;
+
+  String url;
+
+  bool blocked;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      requestId,
+      tabId,
+      originUrl,
+      url,
+      blocked,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ContainerSiteAssignment decode(Object result) {
+    result as List<Object?>;
+    return ContainerSiteAssignment(
+      requestId: result[0]! as String,
+      tabId: result[1] as String?,
+      originUrl: result[2] as String?,
+      url: result[3]! as String,
+      blocked: result[4]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ContainerSiteAssignment || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 class GeckoHeader {
   GeckoHeader({
     required this.key,
@@ -3284,14 +3345,17 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is GeckoPref) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoHeader) {
+    }    else if (value is ContainerSiteAssignment) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchRequest) {
+    }    else if (value is GeckoHeader) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchResponse) {
+    }    else if (value is GeckoFetchRequest) {
       buffer.putUint8(197);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeckoFetchResponse) {
+      buffer.putUint8(198);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -3456,10 +3520,12 @@ class _PigeonCodec extends StandardMessageCodec {
       case 194: 
         return GeckoPref.decode(readValue(buffer)!);
       case 195: 
-        return GeckoHeader.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 196: 
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 197: 
+        return GeckoFetchRequest.decode(readValue(buffer)!);
+      case 198: 
         return GeckoFetchResponse.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -4990,6 +5056,29 @@ class GeckoContainerProxyApi {
     }
   }
 
+  Future<void> setSiteAssignments(Map<String, String> assignments) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setSiteAssignments$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[assignments]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
   Future<bool> healthcheck() async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.healthcheck$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -5169,6 +5258,8 @@ abstract class GeckoStateEvents {
   void onScrollChange(int timestamp, String tabId, int scrollY);
 
   void onPreferenceChange(int timestamp, GeckoPref value);
+
+  void onContainerSiteAssignment(int timestamp, ContainerSiteAssignment details);
 
   static void setUp(GeckoStateEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -5632,6 +5723,34 @@ abstract class GeckoStateEvents {
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange was null, expected non-null GeckoPref.');
           try {
             api.onPreferenceChange(arg_timestamp!, arg_value!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_timestamp = (args[0] as int?);
+          assert(arg_timestamp != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment was null, expected non-null int.');
+          final ContainerSiteAssignment? arg_details = (args[1] as ContainerSiteAssignment?);
+          assert(arg_details != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment was null, expected non-null ContainerSiteAssignment.');
+          try {
+            api.onContainerSiteAssignment(arg_timestamp!, arg_details!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

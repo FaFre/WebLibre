@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 
 part 'tor_proxy.g.dart';
 
@@ -32,6 +33,23 @@ class TorProxyRepository extends _$TorProxyRepository {
       await _waitHealthcheck().timeout(const Duration(seconds: 10));
 
       return _service.removeContainerProxy(contextId);
+    });
+  }
+
+  Future<void> setSiteAssignments(List<SiteAssignment> assignements) {
+    return _serviceLock.synchronized(() async {
+      await _waitHealthcheck().timeout(const Duration(seconds: 10));
+
+      return _service.setSiteAssignments(
+        Map.fromEntries(
+          assignements.map(
+            (e) => MapEntry(
+              e.assignedSite.origin,
+              e.contextualIdentity ?? 'general',
+            ),
+          ),
+        ),
+      );
     });
   }
 

@@ -21,7 +21,7 @@ part of 'routes.dart';
 
 @TypedGoRoute<BrowserRoute>(
   name: BrowserRoute.name,
-  path: '/',
+  path: '/browser',
   routes: [
     TypedGoRoute<SearchRoute>(
       name: 'SearchRoute',
@@ -44,11 +44,11 @@ part of 'routes.dart';
       routes: [
         TypedGoRoute<ContainerCreateRoute>(
           name: 'ContainerCreateRoute',
-          path: 'create',
+          path: 'create/:containerData',
         ),
         TypedGoRoute<ContainerEditRoute>(
           name: 'ContainerEditRoute',
-          path: 'edit',
+          path: 'edit/:containerData',
         ),
       ],
     ),
@@ -135,37 +135,45 @@ class ContainerSelectionRoute extends GoRouteData
 }
 
 class ContainerEditRoute extends GoRouteData with $ContainerEditRoute {
-  final ContainerDataWithCount $extra;
+  final String containerData;
 
-  ContainerEditRoute(this.$extra);
+  ContainerEditRoute({required this.containerData});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ContainerEditScreen.edit(initialContainer: $extra);
+    return ContainerEditScreen.edit(
+      initialContainer: ContainerData.fromJson(
+        jsonDecode(containerData) as Map<String, dynamic>,
+      ),
+    );
   }
 }
 
 class ContainerCreateRoute extends GoRouteData with $ContainerCreateRoute {
-  final ContainerData $extra;
+  final String containerData;
 
-  ContainerCreateRoute(this.$extra);
+  ContainerCreateRoute({required this.containerData});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ContainerEditScreen.create(initialContainer: $extra);
+    return ContainerEditScreen.create(
+      initialContainer: ContainerData.fromJson(
+        jsonDecode(containerData) as Map<String, dynamic>,
+      ),
+    );
   }
 }
 
 class ContextMenuRoute extends GoRouteData with $ContextMenuRoute {
-  final String $extra;
+  final String hitResult;
 
-  const ContextMenuRoute(this.$extra);
+  const ContextMenuRoute({required this.hitResult});
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(
       builder: (_) =>
-          ContextMenuDialog(hitResult: HitResultJson.fromJson($extra)),
+          ContextMenuDialog(hitResult: HitResultJson.fromJson(hitResult)),
     );
   }
 }

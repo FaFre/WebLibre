@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -38,7 +40,7 @@ class ContainerSelectionScreen extends HookConsumerWidget {
       appBar: AppBar(title: const Text('Select Container')),
       body: HookConsumer(
         builder: (context, ref, child) {
-          final containersAsync = ref.watch(containersWithCountProvider);
+          final containersAsync = ref.watch(watchContainersWithCountProvider);
 
           return Skeletonizer(
             enabled: containersAsync.isLoading,
@@ -84,7 +86,9 @@ class ContainerSelectionScreen extends HookConsumerWidget {
 
           if (context.mounted) {
             await ContainerCreateRoute(
-              ContainerData(id: uuid.v7(), color: initialColor),
+              containerData: jsonEncode(
+                ContainerData(id: uuid.v7(), color: initialColor).toJson(),
+              ),
             ).push(context);
           }
         },

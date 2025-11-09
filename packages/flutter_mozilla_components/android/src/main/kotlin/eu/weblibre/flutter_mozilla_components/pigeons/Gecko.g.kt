@@ -2278,6 +2278,46 @@ data class GeckoPref (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class ContainerSiteAssignment (
+  val requestId: String,
+  val tabId: String? = null,
+  val originUrl: String? = null,
+  val url: String,
+  val blocked: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ContainerSiteAssignment {
+      val requestId = pigeonVar_list[0] as String
+      val tabId = pigeonVar_list[1] as String?
+      val originUrl = pigeonVar_list[2] as String?
+      val url = pigeonVar_list[3] as String
+      val blocked = pigeonVar_list[4] as Boolean
+      return ContainerSiteAssignment(requestId, tabId, originUrl, url, blocked)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      requestId,
+      tabId,
+      originUrl,
+      url,
+      blocked,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ContainerSiteAssignment) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class GeckoHeader (
   val key: String,
   val value: String
@@ -2743,15 +2783,20 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       195.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       196.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       197.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          GeckoFetchRequest.fromList(it)
+        }
+      }
+      198.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeckoFetchResponse.fromList(it)
         }
@@ -3025,16 +3070,20 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(194)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is ContainerSiteAssignment -> {
         stream.write(195)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is GeckoHeader -> {
         stream.write(196)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is GeckoFetchRequest -> {
         stream.write(197)
+        writeValue(stream, value.toList())
+      }
+      is GeckoFetchResponse -> {
+        stream.write(198)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -4257,6 +4306,7 @@ interface GeckoContainerProxyApi {
   fun setProxyPort(port: Long)
   fun addContainerProxy(contextId: String)
   fun removeContainerProxy(contextId: String)
+  fun setSiteAssignments(assignments: Map<String, String>)
   fun healthcheck(callback: (Result<Boolean>) -> Unit)
 
   companion object {
@@ -4312,6 +4362,24 @@ interface GeckoContainerProxyApi {
             val contextIdArg = args[0] as String
             val wrapped: List<Any?> = try {
               api.removeContainerProxy(contextIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setSiteAssignments$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val assignmentsArg = args[0] as Map<String, String>
+            val wrapped: List<Any?> = try {
+              api.setSiteAssignments(assignmentsArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
@@ -4733,6 +4801,23 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(timestampArg, valueArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onContainerSiteAssignment(timestampArg: Long, detailsArg: ContainerSiteAssignment, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(timestampArg, detailsArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

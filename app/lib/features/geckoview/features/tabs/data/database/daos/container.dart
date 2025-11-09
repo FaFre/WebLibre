@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
@@ -24,6 +25,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/con
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 
 @DriftAccessor()
 class ContainerDao extends DatabaseAccessor<TabDatabase>
@@ -115,7 +117,7 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
-  SingleSelectable<String> generateOrderKeyAfterTabId(
+  SingleOrNullSelectable<String> generateOrderKeyAfterTabId(
     String? containerId,
     String tabId,
   ) {
@@ -133,5 +135,27 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
       containerId: containerId,
       tabId: tabId,
     );
+  }
+
+  SingleSelectable<bool> isSiteAssignedToContainer(Uri uri) {
+    return db.definitionsDrift.isSiteAssignedToContainer(uri: uri.origin);
+  }
+
+  SingleSelectable<bool> areSitesAvailable(
+    Iterable<Uri> origins,
+    String ignoredContainerId,
+  ) {
+    return db.definitionsDrift.areSitesAvailable(
+      ignoreContainerId: ignoredContainerId,
+      uriList: jsonEncode(origins.map((value) => value.origin).toList()),
+    );
+  }
+
+  SingleSelectable<String> siteAssignedContainerId(Uri uri) {
+    return db.definitionsDrift.siteAssignedContainerId(uri: uri.origin);
+  }
+
+  Selectable<SiteAssignment> allAssignedSites() {
+    return db.definitionsDrift.allAssignedSites();
   }
 }

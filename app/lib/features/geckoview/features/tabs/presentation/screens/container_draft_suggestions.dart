@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:fast_equatable/fast_equatable.dart';
@@ -198,7 +199,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
 
                 if (context.mounted) {
                   final result = await ContainerCreateRoute(
-                    initialContainer,
+                    containerData: jsonEncode(initialContainer.toJson()),
                   ).push<ContainerData?>(context);
 
                   if (result != null) {

@@ -388,6 +388,73 @@ class TabRepository extends _$TabRepository {
       );
     });
 
+    final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen((
+      event,
+    ) async {
+      if (event.tabId != null) {
+        // ignore: only_use_keep_alive_inside_keep_alive
+        final tabState = ref.read(tabStateProvider(event.tabId));
+        if (tabState != null) {
+          final uri = Uri.parse(event.url);
+          final originUri = event.originUrl.mapNotNull(Uri.parse);
+
+          final targetContainerId = await ref
+              .read(containerRepositoryProvider.notifier)
+              .siteAssignedContainerId(Uri.parse(uri.origin));
+          final containerData = await targetContainerId.mapNotNull(
+            (id) => ref
+                .read(containerRepositoryProvider.notifier)
+                .getContainerData(id),
+          );
+
+          if (containerData != null) {
+            final tabIsEmpty =
+                tabState.url == TabState.$default(tabState.id).url &&
+                tabState.historyState.items.isEmpty;
+
+            if (event.blocked || tabIsEmpty) {
+              await addTab(
+                url: uri,
+                private: tabState.isPrivate,
+                container: Value(containerData),
+                parentId: tabState.id,
+              );
+
+              if (tabIsEmpty) {
+                await closeTab(tabState.id);
+              }
+            } else {
+              final tabContainerId = await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .getContainerTabId(tabState.id);
+
+              if (targetContainerId != tabContainerId) {
+                if (originUri == null) {
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .assignContainer(tabState.id, containerData);
+                } else if (tabState.url == originUri) {
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .assignContainer(
+                        tabState.id,
+                        containerData,
+                        closeOldTab: false,
+                      );
+                } else {
+                  logger.w(
+                    'Could not match origin url for assignment ${tabState.url} to request ${event.originUrl}',
+                  );
+                }
+              }
+            }
+          }
+        } else {
+          logger.w('Could not get tab for assignement ${tabState?.url}');
+        }
+      }
+    });
+
     final tabContentSub = tabContentService.tabContentStream.listen((
       content,
     ) async {
@@ -468,6 +535,7 @@ class TabRepository extends _$TabRepository {
       tabStateDebouncer.dispose();
       await tabAddedSub.cancel();
       await tabContentSub.cancel();
+      await containerSiteAssignementSub.cancel();
     });
   }
 }

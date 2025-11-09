@@ -17,15 +17,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
@@ -74,6 +77,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
     final authSettings = useState(initialContainer.metadata.authSettings);
     final useProxy = useState(initialContainer.metadata.useProxy);
+    final assignedSites = useState(initialContainer.metadata.assignedSites);
 
     final textController = useTextEditingController(
       text: initialContainer.name,
@@ -101,6 +105,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                   contextualIdentity: contextualIdentity.value,
                   authSettings: authSettings.value,
                   useProxy: useProxy.value && contextualIdentity.value != null,
+                  assignedSites: assignedSites.value,
                 ),
               );
 
@@ -299,6 +304,26 @@ class ContainerEditScreen extends HookConsumerWidget {
                           },
                         ),
                       ),
+                    ListTile(
+                      leading: const Icon(Icons.web),
+                      title: const Text('Assigned Sites'),
+                      trailing: const Icon(Icons.chevron_right),
+                      contentPadding: EdgeInsets.zero,
+                      onTap: () async {
+                        final result = await showDialog<Set<Uri>>(
+                          context: context,
+                          builder: (context) => ContainerSitesScreen(
+                            initialSites: assignedSites.value?.toSet() ?? {},
+                          ),
+                        );
+
+                        if (result.isEmpty) {
+                          assignedSites.value = null;
+                        } else {
+                          assignedSites.value = result!.toList();
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),

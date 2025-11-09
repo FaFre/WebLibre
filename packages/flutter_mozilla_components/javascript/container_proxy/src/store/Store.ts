@@ -79,6 +79,24 @@ export class Store {
   private proxies: ProxyDao[] = []
   private relations: { [key: string]: string[] } = {}
 
+  private siteAssignments: Map<string, string> = new Map<string, string>()
+
+  setSiteAssignments(sites: Map<string, unknown>): void {
+    this.siteAssignments = new Map(
+      Array.from(sites, ([key, value]) => {
+        return [URL.parse(key)!.origin, value as string]
+      })
+    );
+  }
+
+  isSiteOriginAssigned(uri: URL): boolean {
+    return this.siteAssignments.has(uri.origin)
+  }
+
+  isSiteOriginInSameContext(uri: URL, contextId: string): boolean {
+    return this.siteAssignments.get(uri.origin) === contextId;
+  }
+
   getAllProxies(): ProxySettings[] {
     const proxyDaos = this.getAllProxyDaos()
     return proxyDaos.map(tryFromDao).filter(p => p !== undefined) as ProxySettings[]

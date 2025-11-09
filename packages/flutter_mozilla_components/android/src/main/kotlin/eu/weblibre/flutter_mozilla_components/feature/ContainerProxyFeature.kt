@@ -7,6 +7,9 @@
 package eu.weblibre.flutter_mozilla_components.feature
 
 import androidx.annotation.VisibleForTesting
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.pigeons.ContainerSiteAssignment
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -16,19 +19,26 @@ import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.engine.webextension.WebExtensionRuntime
 import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.support.ktx.android.org.json.tryGetString
 import mozilla.components.support.webextensions.BuiltInWebExtensionController
 import org.json.JSONObject
+import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
 object ContainerProxyFeature {
     private val logger = Logger("container_proxy")
 
     private const val CONTAINER_PROXY_REPORTER_EXTENSION_ID = "container-proxy@weblibre.eu"
-    private const val CONTAINER_PROXY_REPORTER_EXTENSION_URL = "resource://android/assets/extensions/container_proxy/"
+    private const val CONTAINER_PROXY_REPORTER_EXTENSION_URL =
+        "resource://android/assets/extensions/container_proxy/"
     private const val CONTAINER_PROXY_REPORTER_MESSAGING_ID = "containerProxy"
 
     private var nextRequestId: Int = 0
     private val requestHandlers = HashMap<Int, ResultConsumer<JSONObject>>()
     private val mutex = Mutex()
+
+    private val components by lazy {
+        requireNotNull(GlobalComponents.components) { "Components not initialized" }
+    }
 
     @VisibleForTesting
     // This is an internal var to make it mutable for unit testing purposes only
@@ -74,7 +84,9 @@ object ContainerProxyFeature {
         }
     }
 
-    private class ContainerProxyBackgroundMessageHandler() : MessageHandler {
+    private class ContainerProxyBackgroundMessageHandler(
+        private var events: GeckoStateEvents
+    ) : MessageHandler {
         override fun onPortMessage(message: Any, port: Port) {
             runBlocking {
                 withContext(Dispatchers.Default) {
@@ -94,6 +106,25 @@ object ContainerProxyFeature {
                                     message.getString("error")
                                 )
                             }
+                        } else if (type == "assignedSiteRequested") {
+                            val requestId = messageJSON.getString("id")
+                            val status = messageJSON.getString("status")
+                            val details = messageJSON.getJSONObject("result")
+
+                            if (status == "success") {
+                                runOnUiThread {
+                                    events.onContainerSiteAssignment(
+                                        System.currentTimeMillis(),
+                                        ContainerSiteAssignment(
+                                            requestId = requestId,
+                                            tabId = components.core.store.state.selectedTabId,
+                                            originUrl = details.tryGetString("originUrl"),
+                                            url = details.getString("url"),
+                                            blocked = details.getBoolean("blocked")
+                                        )
+                                    ) { _ -> }
+                                }
+                            }
                         }
                     }
                 }
@@ -108,9 +139,9 @@ object ContainerProxyFeature {
      * @param productName a custom product name used to automatically label reports. Defaults to
      * "android-components".
      */
-    fun install(runtime: WebExtensionRuntime) {
+    fun install(runtime: WebExtensionRuntime, events: GeckoStateEvents) {
         extensionController.registerBackgroundMessageHandler(
-            ContainerProxyBackgroundMessageHandler()
+            ContainerProxyBackgroundMessageHandler(events)
         )
         extensionController.install(
             runtime,

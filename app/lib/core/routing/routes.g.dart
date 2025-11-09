@@ -376,7 +376,7 @@ mixin $AddonCollectionRoute on GoRouteData {
 }
 
 RouteBase get $browserRoute => GoRouteData.$route(
-  path: '/',
+  path: '/browser',
   name: 'BrowserRoute',
   factory: $BrowserRoute._fromState,
   routes: [
@@ -416,12 +416,12 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: $ContainerListRoute._fromState,
       routes: [
         GoRouteData.$route(
-          path: 'create',
+          path: 'create/:containerData',
           name: 'ContainerCreateRoute',
           factory: $ContainerCreateRoute._fromState,
         ),
         GoRouteData.$route(
-          path: 'edit',
+          path: 'edit/:containerData',
           name: 'ContainerEditRoute',
           factory: $ContainerEditRoute._fromState,
         ),
@@ -449,7 +449,7 @@ mixin $BrowserRoute on GoRouteData {
   static BrowserRoute _fromState(GoRouterState state) => BrowserRoute();
 
   @override
-  String get location => GoRouteData.$location('/');
+  String get location => GoRouteData.$location('/browser');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -483,7 +483,7 @@ mixin $SearchRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-    '/search/${Uri.encodeComponent(_$TabTypeEnumMap[_self.tabType]!)}/${Uri.encodeComponent(_self.searchText)}',
+    '/browser/search/${Uri.encodeComponent(_$TabTypeEnumMap[_self.tabType]!)}/${Uri.encodeComponent(_self.searchText)}',
     queryParams: {
       if (_self.launchedFromIntent != false)
         'launched-from-intent': _self.launchedFromIntent.toString(),
@@ -514,7 +514,7 @@ mixin $TorProxyRoute on GoRouteData {
   static TorProxyRoute _fromState(GoRouterState state) => TorProxyRoute();
 
   @override
-  String get location => GoRouteData.$location('/tor_proxy');
+  String get location => GoRouteData.$location('/browser/tor_proxy');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -534,7 +534,7 @@ mixin $HistoryRoute on GoRouteData {
   static HistoryRoute _fromState(GoRouterState state) => HistoryRoute();
 
   @override
-  String get location => GoRouteData.$location('/history');
+  String get location => GoRouteData.$location('/browser/history');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -554,7 +554,7 @@ mixin $TabViewRoute on GoRouteData {
   static TabViewRoute _fromState(GoRouterState state) => TabViewRoute();
 
   @override
-  String get location => GoRouteData.$location('/tab_view');
+  String get location => GoRouteData.$location('/browser/tab_view');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -572,27 +572,28 @@ mixin $TabViewRoute on GoRouteData {
 
 mixin $ContextMenuRoute on GoRouteData {
   static ContextMenuRoute _fromState(GoRouterState state) =>
-      ContextMenuRoute(state.extra as String);
+      ContextMenuRoute(hitResult: state.uri.queryParameters['hit-result']!);
 
   ContextMenuRoute get _self => this as ContextMenuRoute;
 
   @override
-  String get location => GoRouteData.$location('/context_menu');
+  String get location => GoRouteData.$location(
+    '/browser/context_menu',
+    queryParams: {'hit-result': _self.hitResult},
+  );
 
   @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+  void go(BuildContext context) => context.go(location);
 
   @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
+      context.pushReplacement(location);
 
   @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
+  void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $ContainerDraftRoute on GoRouteData {
@@ -600,7 +601,7 @@ mixin $ContainerDraftRoute on GoRouteData {
       ContainerDraftRoute();
 
   @override
-  String get location => GoRouteData.$location('/container_draft');
+  String get location => GoRouteData.$location('/browser/container_draft');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -621,7 +622,7 @@ mixin $ContainerListRoute on GoRouteData {
       ContainerListRoute();
 
   @override
-  String get location => GoRouteData.$location('/containers');
+  String get location => GoRouteData.$location('/browser/containers');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -639,52 +640,54 @@ mixin $ContainerListRoute on GoRouteData {
 
 mixin $ContainerCreateRoute on GoRouteData {
   static ContainerCreateRoute _fromState(GoRouterState state) =>
-      ContainerCreateRoute(state.extra as ContainerData);
+      ContainerCreateRoute(
+        containerData: state.pathParameters['containerData']!,
+      );
 
   ContainerCreateRoute get _self => this as ContainerCreateRoute;
 
   @override
-  String get location => GoRouteData.$location('/containers/create');
+  String get location => GoRouteData.$location(
+    '/browser/containers/create/${Uri.encodeComponent(_self.containerData)}',
+  );
 
   @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+  void go(BuildContext context) => context.go(location);
 
   @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
+      context.pushReplacement(location);
 
   @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
+  void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $ContainerEditRoute on GoRouteData {
   static ContainerEditRoute _fromState(GoRouterState state) =>
-      ContainerEditRoute(state.extra as ContainerDataWithCount);
+      ContainerEditRoute(containerData: state.pathParameters['containerData']!);
 
   ContainerEditRoute get _self => this as ContainerEditRoute;
 
   @override
-  String get location => GoRouteData.$location('/containers/edit');
+  String get location => GoRouteData.$location(
+    '/browser/containers/edit/${Uri.encodeComponent(_self.containerData)}',
+  );
 
   @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+  void go(BuildContext context) => context.go(location);
 
   @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
+      context.pushReplacement(location);
 
   @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
+  void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $ContainerSelectionRoute on GoRouteData {
@@ -692,7 +695,7 @@ mixin $ContainerSelectionRoute on GoRouteData {
       ContainerSelectionRoute();
 
   @override
-  String get location => GoRouteData.$location('/select_container');
+  String get location => GoRouteData.$location('/browser/select_container');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -716,7 +719,7 @@ mixin $TabTreeRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-    '/tab_tree/${Uri.encodeComponent(_self.rootTabId)}',
+    '/browser/tab_tree/${Uri.encodeComponent(_self.rootTabId)}',
   );
 
   @override
@@ -743,7 +746,7 @@ mixin $OpenSharedContentRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-    '/open_content',
+    '/browser/open_content',
     queryParams: {
       if (_self.sharedUrl != 'about:blank') 'shared-url': _self.sharedUrl,
     },
@@ -974,27 +977,28 @@ mixin $FeedListRoute on GoRouteData {
 
 mixin $FeedAddRoute on GoRouteData {
   static FeedAddRoute _fromState(GoRouterState state) =>
-      FeedAddRoute($extra: state.extra as Uri?);
+      FeedAddRoute(uri: state.uri.queryParameters['uri']);
 
   FeedAddRoute get _self => this as FeedAddRoute;
 
   @override
-  String get location => GoRouteData.$location('/feeds/add');
+  String get location => GoRouteData.$location(
+    '/feeds/add',
+    queryParams: {if (_self.uri != null) 'uri': _self.uri},
+  );
 
   @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+  void go(BuildContext context) => context.go(location);
 
   @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
+      context.pushReplacement(location);
 
   @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
+  void replace(BuildContext context) => context.replace(location);
 }
 
 mixin $FeedArticleListRoute on GoRouteData {

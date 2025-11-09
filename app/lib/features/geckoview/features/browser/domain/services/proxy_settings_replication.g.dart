@@ -42,7 +42,7 @@ final class ProxySettingsReplicationProvider
 }
 
 String _$proxySettingsReplicationHash() =>
-    r'f58752de40db3b59553f86b56ab6c4558dda988d';
+    r'9ded7af1d745e25c59e22edecea582e25230e5e7';
 
 abstract class _$ProxySettingsReplication extends $Notifier<void> {
   void build();

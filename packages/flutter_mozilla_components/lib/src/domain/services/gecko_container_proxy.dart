@@ -23,6 +23,10 @@ class GeckoContainerProxyService {
     return _apiInstance.removeContainerProxy(contextId);
   }
 
+  Future<void> setSiteAssignments(Map<String, String> assignments) {
+    return _apiInstance.setSiteAssignments(assignments);
+  }
+
   Future<bool> healthcheck() async {
     try {
       return await _apiInstance.healthcheck().timeout(

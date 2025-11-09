@@ -67,7 +67,7 @@ class FeedListScreen extends HookConsumerWidget {
         label: const Text('Feed'),
         icon: const Icon(Icons.add),
         onPressed: () async {
-          await const FeedAddRoute().push(context);
+          await const FeedAddRoute(uri: null).push(context);
         },
       ),
     );

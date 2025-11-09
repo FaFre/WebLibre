@@ -90,15 +90,18 @@ class FeedEditRoute extends GoRouteData with $FeedEditRoute {
 }
 
 class FeedAddRoute extends GoRouteData with $FeedAddRoute {
-  final Uri? $extra;
+  final String? uri;
 
   static const name = 'FeedAddRoute';
 
-  const FeedAddRoute({this.$extra});
+  const FeedAddRoute({required this.uri});
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(builder: (_) => AddFeedDialog(initialUri: $extra));
+    return DialogPage(
+      builder: (_) =>
+          AddFeedDialog(initialUri: uri.mapNotNull((uri) => Uri.tryParse(uri))),
+    );
   }
 }
 

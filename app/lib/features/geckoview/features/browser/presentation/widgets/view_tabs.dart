@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:fading_scroll/fading_scroll.dart';
@@ -353,7 +354,9 @@ class _TabViewHeader extends HookConsumerWidget {
                             .clearContainer();
                       },
                       onLongPress: (container) async {
-                        await ContainerEditRoute(container).push(context);
+                        await ContainerEditRoute(
+                          containerData: jsonEncode(container.toJson()),
+                        ).push(context);
                       },
                     );
                   },
@@ -540,10 +543,11 @@ class ViewTabsWidget extends HookConsumerWidget {
                           );
                         } else {
                           if (newIndex < oldIndex) {
-                            key = await containerRepository.getOrderKeyAfterTab(
-                              filteredTabEntities.value[newIndex - 1].tabId,
-                              containerId,
-                            );
+                            key = (await containerRepository
+                                .getOrderKeyAfterTab(
+                                  filteredTabEntities.value[newIndex - 1].tabId,
+                                  containerId,
+                                ))!;
                           } else {
                             key = await containerRepository
                                 .getOrderKeyBeforeTab(

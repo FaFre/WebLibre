@@ -23,6 +23,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/util/tokenized_filter.dart';
 
@@ -117,4 +118,9 @@ Stream<String?> watchContainerTabId(Ref ref, String tabId) {
       .tabDao
       .getTabContainerId(tabId)
       .watchSingleOrNull();
+}
+
+@Riverpod()
+Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
+  return ref.read(tabDatabaseProvider).containerDao.allAssignedSites().watch();
 }

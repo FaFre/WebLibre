@@ -21,6 +21,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/data/database/converters/color.dart';
 import 'package:weblibre/data/database/converters/icon_data.dart';
 
 part 'container_data.g.dart';
@@ -72,11 +73,14 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool useProxy;
 
+  final List<Uri>? assignedSites;
+
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
     required this.authSettings,
     required this.useProxy,
+    required this.assignedSites,
   });
 
   ContainerMetadata.withDefaults({
@@ -84,11 +88,13 @@ class ContainerMetadata with FastEquatable {
     String? contextualIdentity,
     ContainerAuthSettings? authSettings,
     bool? useProxy,
+    List<Uri>? assignedSites,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
          authSettings: authSettings ?? ContainerAuthSettings.withDefaults(),
          useProxy: useProxy ?? false,
+         assignedSites: assignedSites,
        );
 
   factory ContainerMetadata.fromJson(Map<String, dynamic> json) =>
@@ -102,13 +108,16 @@ class ContainerMetadata with FastEquatable {
     contextualIdentity,
     authSettings,
     useProxy,
+    assignedSites,
   ];
 }
 
+@JsonSerializable()
 @CopyWith()
 class ContainerData with FastEquatable {
   final String id;
   final String? name;
+  @ColorJsonConverter()
   final Color color;
   final ContainerMetadata metadata;
 
@@ -119,10 +128,16 @@ class ContainerData with FastEquatable {
     ContainerMetadata? metadata,
   }) : metadata = metadata ?? ContainerMetadata.withDefaults();
 
+  factory ContainerData.fromJson(Map<String, dynamic> json) =>
+      _$ContainerDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ContainerDataToJson(this);
+
   @override
   List<Object?> get hashParameters => [id, name, color, metadata];
 }
 
+@JsonSerializable()
 class ContainerDataWithCount extends ContainerData {
   final int? tabCount;
 
@@ -133,6 +148,12 @@ class ContainerDataWithCount extends ContainerData {
     super.metadata,
     required this.tabCount,
   });
+
+  factory ContainerDataWithCount.fromJson(Map<String, dynamic> json) =>
+      _$ContainerDataWithCountFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$ContainerDataWithCountToJson(this);
 
   @override
   List<Object?> get hashParameters => [...super.hashParameters, tabCount];
