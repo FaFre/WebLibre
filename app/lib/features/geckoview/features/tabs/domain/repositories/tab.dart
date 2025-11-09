@@ -30,8 +30,9 @@ part 'tab.g.dart';
 class TabDataRepository extends _$TabDataRepository {
   Future<void> assignContainer(
     String tabId,
-    ContainerData targetContainer,
-  ) async {
+    ContainerData targetContainer, {
+    bool closeOldTab = true,
+  }) async {
     final currentContainerId = await getContainerTabId(tabId);
 
     final currentContainerData = await currentContainerId.mapNotNull(
@@ -51,7 +52,9 @@ class TabDataRepository extends _$TabDataRepository {
           .read(tabRepositoryProvider.notifier)
           .duplicateTab(selectTabId: tabId, containerId: targetContainer.id);
 
-      await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+      if (closeOldTab) {
+        await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+      }
     }
   }
 
@@ -108,6 +111,18 @@ class TabDataRepository extends _$TabDataRepository {
         .tabDao
         .getTabContainerId(tabId)
         .getSingleOrNull();
+  }
+
+  Future<Map<String, String?>> getTabDescendants(String tabId) async {
+    final results = await ref
+        .read(tabDatabaseProvider)
+        .definitionsDrift
+        .unorderedTabDescendants(tabId: tabId)
+        .get();
+
+    return Map.fromEntries(
+      results.map((pair) => MapEntry(pair.id, pair.parentId)),
+    );
   }
 
   @override

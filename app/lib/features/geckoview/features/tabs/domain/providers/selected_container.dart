@@ -101,7 +101,7 @@ class SelectedContainer extends _$SelectedContainer {
   String? build() {
     ref.listen(
       fireImmediately: true,
-      containersWithCountProvider,
+      watchContainersWithCountProvider,
       (previous, next) {
         if (stateOrNull != null && next.value != null) {
           if (!next.value!.any((container) => container.id == state)) {

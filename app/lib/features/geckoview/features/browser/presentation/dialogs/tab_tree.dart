@@ -48,13 +48,13 @@ class TabTreeDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTabId = ref.watch(selectedTabProvider);
-    final tabs = ref.watch(tabDescendantsProvider(tabId));
+    final tabs = ref.watch(watchTabDescendantsProvider(tabId));
 
     final graph = useMemoized(() {
       final graph = Graph()..isTree = true;
 
       if (tabs.hasValue) {
-        for (final MapEntry(:key, :value) in tabs.value!.entries) {
+        for (final MapEntry(:key, :value) in tabs.requireValue.entries) {
           if (value != null) {
             final current = Node.Id(key);
             final parent = Node.Id(value);
@@ -84,12 +84,7 @@ class TabTreeDialog extends HookConsumerWidget {
         appBar: AppBar(
           backgroundColor: const Color(0x44000000),
           elevation: 0,
-          leading: IconButton(
-            onPressed: () {
-              context.pop();
-            },
-            icon: const Icon(Icons.close),
-          ),
+          leading: const CloseButton(),
         ),
         floatingActionButton: FloatingActionButton(
           child: const Icon(MdiIcons.target),
@@ -144,6 +139,11 @@ class TabTreeDialog extends HookConsumerWidget {
                       }
 
                       BrowserRoute().go(context);
+                    },
+                    onBeforeDelete: () {
+                      if (graph.nodes.length <= 2) {
+                        context.pop();
+                      }
                     },
                     sourceSearchQuery: null,
                   ),

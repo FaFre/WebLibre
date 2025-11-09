@@ -32,7 +32,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -266,6 +265,7 @@ class SingleTabPreview extends HookConsumerWidget {
   final double deleteThreshold;
 
   final void Function() onClose;
+  final void Function()? onBeforeDelete;
 
   const SingleTabPreview({
     required this.tabId,
@@ -273,6 +273,7 @@ class SingleTabPreview extends HookConsumerWidget {
     required this.onClose,
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
+    this.onBeforeDelete,
     super.key,
   });
 
@@ -364,6 +365,8 @@ class SingleTabPreview extends HookConsumerWidget {
           //       );
           // },
           onDelete: () async {
+            onBeforeDelete?.call();
+
             await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
             if (context.mounted) {
@@ -495,6 +498,8 @@ class TabTreePreview extends HookConsumerWidget {
                   await ref
                       .read(tabRepositoryProvider.notifier)
                       .selectTab(entity.tabId);
+                } else {
+                  onClose();
                 }
               },
               // onDeleteAll: (host) async {
@@ -516,9 +521,9 @@ class TabTreePreview extends HookConsumerWidget {
               //       );
               // },
               onDelete: () async {
-                final tabs = await ref.read(
-                  tabDescendantsProvider(entity.rootId).future,
-                );
+                final tabs = await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .getTabDescendants(entity.rootId);
 
                 await ref
                     .read(tabRepositoryProvider.notifier)

@@ -29,7 +29,7 @@ import 'package:weblibre/features/search/util/tokenized_filter.dart';
 part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
-Stream<List<ContainerDataWithCount>> containersWithCount(Ref ref) {
+Stream<List<ContainerDataWithCount>> watchContainersWithCount(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
   return db.definitionsDrift.containersWithCount().watch();
 }
@@ -40,7 +40,7 @@ AsyncValue<List<ContainerDataWithCount>> matchSortedContainersWithCount(
   String? searchText,
 ) {
   return ref.watch(
-    containersWithCountProvider.select((value) {
+    watchContainersWithCountProvider.select((value) {
       if (searchText.isEmpty) {
         return value;
       }
@@ -57,7 +57,10 @@ AsyncValue<List<ContainerDataWithCount>> matchSortedContainersWithCount(
 }
 
 @Riverpod()
-Stream<List<String>> containerTabIds(Ref ref, ContainerFilter containerFilter) {
+Stream<List<String>> watchContainerTabIds(
+  Ref ref,
+  ContainerFilter containerFilter,
+) {
   final db = ref.watch(tabDatabaseProvider);
 
   switch (containerFilter) {
@@ -71,18 +74,20 @@ Stream<List<String>> containerTabIds(Ref ref, ContainerFilter containerFilter) {
 @Riverpod()
 Future<int> containerTabCount(Ref ref, ContainerFilter containerFilter) {
   return ref.watch(
-    containerTabIdsProvider(containerFilter).selectAsync((tabs) => tabs.length),
+    watchContainerTabIdsProvider(
+      containerFilter,
+    ).selectAsync((tabs) => tabs.length),
   );
 }
 
 @Riverpod()
-Stream<List<TabTreesResult>> tabTrees(Ref ref) {
+Stream<List<TabTreesResult>> watchTabTrees(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
   return db.definitionsDrift.tabTrees().watch();
 }
 
 @Riverpod()
-Stream<Map<String, String?>> tabDescendants(Ref ref, String tabId) {
+Stream<Map<String, String?>> watchTabDescendants(Ref ref, String tabId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.definitionsDrift.unorderedTabDescendants(tabId: tabId).watch().map((
     results,
@@ -94,13 +99,13 @@ Stream<Map<String, String?>> tabDescendants(Ref ref, String tabId) {
 }
 
 @Riverpod()
-Stream<List<TabData>> containerTabsData(Ref ref, String? containerId) {
+Stream<List<TabData>> watchContainerTabsData(Ref ref, String? containerId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.containerDao.getContainerTabsData(containerId).watch();
 }
 
 @Riverpod()
-Stream<ContainerData?> containerData(Ref ref, String containerId) {
+Stream<ContainerData?> watchContainerData(Ref ref, String containerId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.containerDao.getContainerData(containerId).watchSingleOrNull();
 }

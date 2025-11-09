@@ -269,7 +269,7 @@ final class AvailableTabIdsProvider
   }
 }
 
-String _$availableTabIdsHash() => r'6926ca03f97b12ebf9a46a48ed3da1b2cd559a74';
+String _$availableTabIdsHash() => r'aa166b471d45913df5166a3126abeb7c0d791412';
 
 final class AvailableTabIdsFamily extends $Family
     with
@@ -448,7 +448,7 @@ final class SuggestedTabEntitiesProvider
 }
 
 String _$suggestedTabEntitiesHash() =>
-    r'534e78a9d1ddc5bace24dc0d9e5efee1292107c5';
+    r'6fb58bf4b7377f826377c88110c8e4aca9f6d6f9';
 
 final class SuggestedTabEntitiesFamily extends $Family
     with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {
@@ -552,7 +552,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'18b8ec876116eaa6e60fa321faba18a3bd7dd004';
+    r'eb6573514f55b598fbc1a91370079b4b8372c55e';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with

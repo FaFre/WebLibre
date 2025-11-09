@@ -85,7 +85,9 @@ EquatableValue<List<String>> availableTabIds(
   ContainerFilter containerFilter,
 ) {
   final containerTabs = ref.watch(
-    containerTabIdsProvider(containerFilter).select((value) => value.value),
+    watchContainerTabIdsProvider(
+      containerFilter,
+    ).select((value) => value.value),
   );
   final tabList = ref.watch(tabListProvider);
 
@@ -125,7 +127,7 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
   }
 
   final excludedTabIds = ref.watch(
-    containerTabIdsProvider(
+    watchContainerTabIdsProvider(
       // ignore: provider_parameters
       ContainerFilterById(containerId: containerId),
     ).select((value) => EquatableValue(value.value)),
@@ -187,7 +189,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   if (tabSearchResults == null) {
     if (groupTrees) {
       final trees = ref.watch(
-        tabTreesProvider.select(
+        watchTabTreesProvider.select(
           (value) => EquatableValue(
             value.value
                     ?.map(

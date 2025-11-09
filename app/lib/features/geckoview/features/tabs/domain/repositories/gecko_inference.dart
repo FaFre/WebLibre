@@ -299,7 +299,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
 @Riverpod()
 Future<String?> containerTopic(Ref ref, String containerId) async {
   final titles = await ref.watch(
-    containerTabsDataProvider(containerId).selectAsync(
+    watchContainerTabsDataProvider(containerId).selectAsync(
       (tabData) =>
           EquatableValue(tabData.map((tab) => tab.title).nonNulls.toSet()),
     ),
@@ -360,7 +360,7 @@ Future<String?> topicSuggestion(
 @Riverpod()
 Future<List<SuggestedContainer>?> suggestClusters(Ref ref) async {
   final unassignedTitles = await ref.watch(
-    containerTabsDataProvider(null).selectAsync(
+    watchContainerTabsDataProvider(null).selectAsync(
       (tabData) => EquatableValue(
         Map.fromEntries(
           tabData
@@ -389,12 +389,14 @@ Future<List<String>?> containerTabSuggestions(
     return null;
   }
 
-  final container = await ref.watch(containerDataProvider(containerId).future);
+  final container = await ref.watch(
+    watchContainerDataProvider(containerId).future,
+  );
 
   if (!ref.mounted) return null;
 
   final assignedTitles = await ref.watch(
-    containerTabsDataProvider(containerId).selectAsync(
+    watchContainerTabsDataProvider(containerId).selectAsync(
       (tabData) => EquatableValue(
         tabData
             .where((tab) => tab.title.isNotEmpty)
@@ -407,7 +409,7 @@ Future<List<String>?> containerTabSuggestions(
   if (!ref.mounted) return null;
 
   final unassignedTitles = await ref.watch(
-    containerTabsDataProvider(null).selectAsync(
+    watchContainerTabsDataProvider(null).selectAsync(
       (tabData) => EquatableValue(
         tabData
             .where((tab) => tab.title.isNotEmpty)

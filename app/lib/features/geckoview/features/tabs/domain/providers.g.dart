@@ -9,10 +9,10 @@ part of 'providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(containersWithCount)
-const containersWithCountProvider = ContainersWithCountProvider._();
+@ProviderFor(watchContainersWithCount)
+const watchContainersWithCountProvider = WatchContainersWithCountProvider._();
 
-final class ContainersWithCountProvider
+final class WatchContainersWithCountProvider
     extends
         $FunctionalProvider<
           AsyncValue<List<ContainerDataWithCount>>,
@@ -22,19 +22,19 @@ final class ContainersWithCountProvider
     with
         $FutureModifier<List<ContainerDataWithCount>>,
         $StreamProvider<List<ContainerDataWithCount>> {
-  const ContainersWithCountProvider._()
+  const WatchContainersWithCountProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'containersWithCountProvider',
+        name: r'watchContainersWithCountProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$containersWithCountHash();
+  String debugGetCreateSourceHash() => _$watchContainersWithCountHash();
 
   @$internal
   @override
@@ -44,12 +44,12 @@ final class ContainersWithCountProvider
 
   @override
   Stream<List<ContainerDataWithCount>> create(Ref ref) {
-    return containersWithCount(ref);
+    return watchContainersWithCount(ref);
   }
 }
 
-String _$containersWithCountHash() =>
-    r'757bb0102afedc07ef0f80a420b4c87cbdbed3e1';
+String _$watchContainersWithCountHash() =>
+    r'50d8e9b39cb589b0b5f50d79cbe20b8d10d7a504';
 
 @ProviderFor(matchSortedContainersWithCount)
 const matchSortedContainersWithCountProvider =
@@ -118,7 +118,7 @@ final class MatchSortedContainersWithCountProvider
 }
 
 String _$matchSortedContainersWithCountHash() =>
-    r'bc2077602c3c1d86c5b916e4ad920053310993e4';
+    r'e66ca1d96a735155f582975ae05a90503e615882';
 
 final class MatchSortedContainersWithCountFamily extends $Family
     with
@@ -145,10 +145,10 @@ final class MatchSortedContainersWithCountFamily extends $Family
   String toString() => r'matchSortedContainersWithCountProvider';
 }
 
-@ProviderFor(containerTabIds)
-const containerTabIdsProvider = ContainerTabIdsFamily._();
+@ProviderFor(watchContainerTabIds)
+const watchContainerTabIdsProvider = WatchContainerTabIdsFamily._();
 
-final class ContainerTabIdsProvider
+final class WatchContainerTabIdsProvider
     extends
         $FunctionalProvider<
           AsyncValue<List<String>>,
@@ -156,23 +156,23 @@ final class ContainerTabIdsProvider
           Stream<List<String>>
         >
     with $FutureModifier<List<String>>, $StreamProvider<List<String>> {
-  const ContainerTabIdsProvider._({
-    required ContainerTabIdsFamily super.from,
+  const WatchContainerTabIdsProvider._({
+    required WatchContainerTabIdsFamily super.from,
     required ContainerFilter super.argument,
   }) : super(
          retry: null,
-         name: r'containerTabIdsProvider',
+         name: r'watchContainerTabIdsProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$containerTabIdsHash();
+  String debugGetCreateSourceHash() => _$watchContainerTabIdsHash();
 
   @override
   String toString() {
-    return r'containerTabIdsProvider'
+    return r'watchContainerTabIdsProvider'
         ''
         '($argument)';
   }
@@ -186,12 +186,12 @@ final class ContainerTabIdsProvider
   @override
   Stream<List<String>> create(Ref ref) {
     final argument = this.argument as ContainerFilter;
-    return containerTabIds(ref, argument);
+    return watchContainerTabIds(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is ContainerTabIdsProvider && other.argument == argument;
+    return other is WatchContainerTabIdsProvider && other.argument == argument;
   }
 
   @override
@@ -200,24 +200,25 @@ final class ContainerTabIdsProvider
   }
 }
 
-String _$containerTabIdsHash() => r'61716a2ae74ffa590c1498d259382e69e24ad7f1';
+String _$watchContainerTabIdsHash() =>
+    r'25f73fe16fad7ec0121b2bee99ecbd8b6bf47791';
 
-final class ContainerTabIdsFamily extends $Family
+final class WatchContainerTabIdsFamily extends $Family
     with $FunctionalFamilyOverride<Stream<List<String>>, ContainerFilter> {
-  const ContainerTabIdsFamily._()
+  const WatchContainerTabIdsFamily._()
     : super(
         retry: null,
-        name: r'containerTabIdsProvider',
+        name: r'watchContainerTabIdsProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  ContainerTabIdsProvider call(ContainerFilter containerFilter) =>
-      ContainerTabIdsProvider._(argument: containerFilter, from: this);
+  WatchContainerTabIdsProvider call(ContainerFilter containerFilter) =>
+      WatchContainerTabIdsProvider._(argument: containerFilter, from: this);
 
   @override
-  String toString() => r'containerTabIdsProvider';
+  String toString() => r'watchContainerTabIdsProvider';
 }
 
 @ProviderFor(containerTabCount)
@@ -269,7 +270,7 @@ final class ContainerTabCountProvider
   }
 }
 
-String _$containerTabCountHash() => r'586e83429b527b546d43232a58453635ab860d69';
+String _$containerTabCountHash() => r'df4008a9c589936c8a0699b082ab23087ae9b85f';
 
 final class ContainerTabCountFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<int>, ContainerFilter> {
@@ -289,10 +290,10 @@ final class ContainerTabCountFamily extends $Family
   String toString() => r'containerTabCountProvider';
 }
 
-@ProviderFor(tabTrees)
-const tabTreesProvider = TabTreesProvider._();
+@ProviderFor(watchTabTrees)
+const watchTabTreesProvider = WatchTabTreesProvider._();
 
-final class TabTreesProvider
+final class WatchTabTreesProvider
     extends
         $FunctionalProvider<
           AsyncValue<List<TabTreesResult>>,
@@ -302,19 +303,19 @@ final class TabTreesProvider
     with
         $FutureModifier<List<TabTreesResult>>,
         $StreamProvider<List<TabTreesResult>> {
-  const TabTreesProvider._()
+  const WatchTabTreesProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'tabTreesProvider',
+        name: r'watchTabTreesProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$tabTreesHash();
+  String debugGetCreateSourceHash() => _$watchTabTreesHash();
 
   @$internal
   @override
@@ -324,16 +325,16 @@ final class TabTreesProvider
 
   @override
   Stream<List<TabTreesResult>> create(Ref ref) {
-    return tabTrees(ref);
+    return watchTabTrees(ref);
   }
 }
 
-String _$tabTreesHash() => r'd9256293a97d5451c2ab881a30ae99c9e2178999';
+String _$watchTabTreesHash() => r'a2be591acb6818ea8675a12d90e6c4684a0448a8';
 
-@ProviderFor(tabDescendants)
-const tabDescendantsProvider = TabDescendantsFamily._();
+@ProviderFor(watchTabDescendants)
+const watchTabDescendantsProvider = WatchTabDescendantsFamily._();
 
-final class TabDescendantsProvider
+final class WatchTabDescendantsProvider
     extends
         $FunctionalProvider<
           AsyncValue<Map<String, String?>>,
@@ -343,23 +344,23 @@ final class TabDescendantsProvider
     with
         $FutureModifier<Map<String, String?>>,
         $StreamProvider<Map<String, String?>> {
-  const TabDescendantsProvider._({
-    required TabDescendantsFamily super.from,
+  const WatchTabDescendantsProvider._({
+    required WatchTabDescendantsFamily super.from,
     required String super.argument,
   }) : super(
          retry: null,
-         name: r'tabDescendantsProvider',
+         name: r'watchTabDescendantsProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$tabDescendantsHash();
+  String debugGetCreateSourceHash() => _$watchTabDescendantsHash();
 
   @override
   String toString() {
-    return r'tabDescendantsProvider'
+    return r'watchTabDescendantsProvider'
         ''
         '($argument)';
   }
@@ -373,12 +374,12 @@ final class TabDescendantsProvider
   @override
   Stream<Map<String, String?>> create(Ref ref) {
     final argument = this.argument as String;
-    return tabDescendants(ref, argument);
+    return watchTabDescendants(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is TabDescendantsProvider && other.argument == argument;
+    return other is WatchTabDescendantsProvider && other.argument == argument;
   }
 
   @override
@@ -387,30 +388,31 @@ final class TabDescendantsProvider
   }
 }
 
-String _$tabDescendantsHash() => r'c2c3fe18e9b47c64df9ae6c1cfde683f3231d53c';
+String _$watchTabDescendantsHash() =>
+    r'8b20353888a851191d835784e24d7d4a6e898b72';
 
-final class TabDescendantsFamily extends $Family
+final class WatchTabDescendantsFamily extends $Family
     with $FunctionalFamilyOverride<Stream<Map<String, String?>>, String> {
-  const TabDescendantsFamily._()
+  const WatchTabDescendantsFamily._()
     : super(
         retry: null,
-        name: r'tabDescendantsProvider',
+        name: r'watchTabDescendantsProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  TabDescendantsProvider call(String tabId) =>
-      TabDescendantsProvider._(argument: tabId, from: this);
+  WatchTabDescendantsProvider call(String tabId) =>
+      WatchTabDescendantsProvider._(argument: tabId, from: this);
 
   @override
-  String toString() => r'tabDescendantsProvider';
+  String toString() => r'watchTabDescendantsProvider';
 }
 
-@ProviderFor(containerTabsData)
-const containerTabsDataProvider = ContainerTabsDataFamily._();
+@ProviderFor(watchContainerTabsData)
+const watchContainerTabsDataProvider = WatchContainerTabsDataFamily._();
 
-final class ContainerTabsDataProvider
+final class WatchContainerTabsDataProvider
     extends
         $FunctionalProvider<
           AsyncValue<List<TabData>>,
@@ -418,23 +420,23 @@ final class ContainerTabsDataProvider
           Stream<List<TabData>>
         >
     with $FutureModifier<List<TabData>>, $StreamProvider<List<TabData>> {
-  const ContainerTabsDataProvider._({
-    required ContainerTabsDataFamily super.from,
+  const WatchContainerTabsDataProvider._({
+    required WatchContainerTabsDataFamily super.from,
     required String? super.argument,
   }) : super(
          retry: null,
-         name: r'containerTabsDataProvider',
+         name: r'watchContainerTabsDataProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$containerTabsDataHash();
+  String debugGetCreateSourceHash() => _$watchContainerTabsDataHash();
 
   @override
   String toString() {
-    return r'containerTabsDataProvider'
+    return r'watchContainerTabsDataProvider'
         ''
         '($argument)';
   }
@@ -448,12 +450,13 @@ final class ContainerTabsDataProvider
   @override
   Stream<List<TabData>> create(Ref ref) {
     final argument = this.argument as String?;
-    return containerTabsData(ref, argument);
+    return watchContainerTabsData(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is ContainerTabsDataProvider && other.argument == argument;
+    return other is WatchContainerTabsDataProvider &&
+        other.argument == argument;
   }
 
   @override
@@ -462,30 +465,31 @@ final class ContainerTabsDataProvider
   }
 }
 
-String _$containerTabsDataHash() => r'2961c89fc9e16c8e6005342356ecf677fb2ff63c';
+String _$watchContainerTabsDataHash() =>
+    r'4edbb3029f4ffb6181396d81d8076e0395ec2481';
 
-final class ContainerTabsDataFamily extends $Family
+final class WatchContainerTabsDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<List<TabData>>, String?> {
-  const ContainerTabsDataFamily._()
+  const WatchContainerTabsDataFamily._()
     : super(
         retry: null,
-        name: r'containerTabsDataProvider',
+        name: r'watchContainerTabsDataProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  ContainerTabsDataProvider call(String? containerId) =>
-      ContainerTabsDataProvider._(argument: containerId, from: this);
+  WatchContainerTabsDataProvider call(String? containerId) =>
+      WatchContainerTabsDataProvider._(argument: containerId, from: this);
 
   @override
-  String toString() => r'containerTabsDataProvider';
+  String toString() => r'watchContainerTabsDataProvider';
 }
 
-@ProviderFor(containerData)
-const containerDataProvider = ContainerDataFamily._();
+@ProviderFor(watchContainerData)
+const watchContainerDataProvider = WatchContainerDataFamily._();
 
-final class ContainerDataProvider
+final class WatchContainerDataProvider
     extends
         $FunctionalProvider<
           AsyncValue<ContainerData?>,
@@ -493,23 +497,23 @@ final class ContainerDataProvider
           Stream<ContainerData?>
         >
     with $FutureModifier<ContainerData?>, $StreamProvider<ContainerData?> {
-  const ContainerDataProvider._({
-    required ContainerDataFamily super.from,
+  const WatchContainerDataProvider._({
+    required WatchContainerDataFamily super.from,
     required String super.argument,
   }) : super(
          retry: null,
-         name: r'containerDataProvider',
+         name: r'watchContainerDataProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$containerDataHash();
+  String debugGetCreateSourceHash() => _$watchContainerDataHash();
 
   @override
   String toString() {
-    return r'containerDataProvider'
+    return r'watchContainerDataProvider'
         ''
         '($argument)';
   }
@@ -523,12 +527,12 @@ final class ContainerDataProvider
   @override
   Stream<ContainerData?> create(Ref ref) {
     final argument = this.argument as String;
-    return containerData(ref, argument);
+    return watchContainerData(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is ContainerDataProvider && other.argument == argument;
+    return other is WatchContainerDataProvider && other.argument == argument;
   }
 
   @override
@@ -537,24 +541,25 @@ final class ContainerDataProvider
   }
 }
 
-String _$containerDataHash() => r'6adbec128876069189954832af35109b0779148c';
+String _$watchContainerDataHash() =>
+    r'abd0e964a6444ed9be5da649a0f6a77bbbb54042';
 
-final class ContainerDataFamily extends $Family
+final class WatchContainerDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<ContainerData?>, String> {
-  const ContainerDataFamily._()
+  const WatchContainerDataFamily._()
     : super(
         retry: null,
-        name: r'containerDataProvider',
+        name: r'watchContainerDataProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  ContainerDataProvider call(String containerId) =>
-      ContainerDataProvider._(argument: containerId, from: this);
+  WatchContainerDataProvider call(String containerId) =>
+      WatchContainerDataProvider._(argument: containerId, from: this);
 
   @override
-  String toString() => r'containerDataProvider';
+  String toString() => r'watchContainerDataProvider';
 }
 
 @ProviderFor(watchContainerTabId)
@@ -626,3 +631,45 @@ final class WatchContainerTabIdFamily extends $Family
   @override
   String toString() => r'watchContainerTabIdProvider';
 }
+
+@ProviderFor(watchAllAssignedSites)
+const watchAllAssignedSitesProvider = WatchAllAssignedSitesProvider._();
+
+final class WatchAllAssignedSitesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<SiteAssignment>>,
+          List<SiteAssignment>,
+          Stream<List<SiteAssignment>>
+        >
+    with
+        $FutureModifier<List<SiteAssignment>>,
+        $StreamProvider<List<SiteAssignment>> {
+  const WatchAllAssignedSitesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchAllAssignedSitesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchAllAssignedSitesHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<SiteAssignment>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<SiteAssignment>> create(Ref ref) {
+    return watchAllAssignedSites(ref);
+  }
+}
+
+String _$watchAllAssignedSitesHash() =>
+    r'd755451be0ad7e03db36ba39c64f6f0b5c1d9ba3';
