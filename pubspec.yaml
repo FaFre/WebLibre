@@ -13,7 +13,7 @@ workspace:
   - packages/locale_resolver
   - packages/locale_resolver/example
 dev_dependencies:
-  melos: ^7.2.0
+  melos: ^7.3.0
 
 melos:
   name: weblibre_project
