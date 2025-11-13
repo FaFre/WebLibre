@@ -52,21 +52,15 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class BrowserScreen extends HookConsumerWidget {
-  Duration get _backButtonPressTimeout => const Duration(seconds: 2);
-
   const BrowserScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eventService = ref.watch(eventServiceProvider);
 
-    final overlayBuilder = ref.watch(overlayControllerProvider);
-
     final tabInFullScreen = ref.watch(
       selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),
     );
-
-    final lastBackButtonPress = useRef<DateTime?>(null);
 
     final overlayController = useOverlayPortalController();
 
@@ -221,241 +215,246 @@ class BrowserScreen extends HookConsumerWidget {
               );
             },
           ),
-          body: Consumer(
-            builder: (context, ref, child) {
-              ref.listen(bottomSheetControllerProvider, (previous, next) {
-                if (sheetController.value != null) {
-                  try {
-                    sheetController.value!.close();
-                  } catch (_) {
-                    //silently drop closing errors
-                  }
-                }
-
-                if (next != null) {
-                  final relativeSafeArea = MediaQuery.of(
-                    context,
-                  ).relativeSafeArea();
-                  final controller = Scaffold.of(context).showBottomSheet((
-                    context,
-                  ) {
-                    bool dismissOnThreshold(
-                      DraggableScrollableNotification notification,
-                    ) {
-                      if (notification.extent <= 0.1) {
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .requestDismiss();
-                        return true;
-                      }
-
-                      return false;
-                    }
-
-                    final sheet = switch (next) {
-                      ViewTabsSheet() =>
-                        NotificationListener<DraggableScrollableNotification>(
-                          key: ValueKey(next),
-                          onNotification: dismissOnThreshold,
-                          child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
-                        ),
-                      final EditUrlSheet parameter =>
-                        NotificationListener<DraggableScrollableNotification>(
-                          key: ValueKey(parameter),
-                          onNotification: dismissOnThreshold,
-                          child: _ViewUrlSheet(
-                            initialTabState: parameter.tabState,
-                            maxChildSize: relativeSafeArea,
-                          ),
-                        ),
-                    };
-
-                    return sheet;
-                  });
-
-                  unawaited(
-                    controller.closed.whenComplete(() {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .closed(next);
-                    }),
-                  );
-
-                  sheetController.value = controller;
-                } else {
-                  sheetController.value = null;
-                }
-              });
-
-              return DragTarget<TabDragData>(
-                onMove: (details) {
-                  ref
-                      .read(willAcceptDropProvider.notifier)
-                      .setData(DeleteDropData(details.data.tabId));
-                },
-                onLeave: (data) {
-                  ref.read(willAcceptDropProvider.notifier).clear();
-                },
-                onAcceptWithDetails: (details) async {
-                  ref.read(willAcceptDropProvider.notifier).clear();
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .closeTab(details.data.tabId);
-
-                  if (context.mounted) {
-                    ui_helper.showTabUndoClose(
-                      context,
-                      ref.read(tabRepositoryProvider.notifier).undoClose,
-                    );
-                  }
-                },
-                builder: (context, _, _) {
-                  return OverlayPortal(
-                    controller: overlayController,
-                    overlayChildBuilder: (context) {
-                      return overlayBuilder!.call(context);
-                    },
-                    child: Listener(
-                      onPointerDown: sheetController.value != null
-                          ? (_) {
-                              ref
-                                  .read(bottomSheetControllerProvider.notifier)
-                                  .requestDismiss();
-                            }
-                          : null,
-                      child: BackButtonListener(
-                        onBackButtonPressed: () async {
-                          final tabState = ref.read(selectedTabStateProvider);
-
-                          final tabCount = ref.read(
-                            tabListProvider.select((tabs) => tabs.value.length),
-                          );
-
-                          //Don't do anything if a child route is active
-                          if (GoRouterState.of(context).topRoute?.name !=
-                              BrowserRoute.name) {
-                            return false;
-                          }
-
-                          if (ref.read(bottomSheetControllerProvider) != null) {
-                            ref
-                                .read(bottomSheetControllerProvider.notifier)
-                                .requestDismiss();
-                            return true;
-                          }
-
-                          if (overlayBuilder != null) {
-                            ref
-                                .read(overlayControllerProvider.notifier)
-                                .dismiss();
-                            return true;
-                          }
-
-                          if (tabState?.isFullScreen == true) {
-                            await ref
-                                .read(selectedTabSessionProvider)
-                                .exitFullscreen();
-                            return true;
-                          }
-
-                          //Make sure app bar is visible
-                          showAppBar.value = true;
-
-                          if (tabState?.isLoading == true) {
-                            lastBackButtonPress.value = null;
-
-                            final controller = ref.read(
-                              selectedTabSessionProvider,
-                            );
-
-                            await controller.stopLoading();
-                            return true;
-                          } else if (tabState?.readerableState.active == true) {
-                            lastBackButtonPress.value = null;
-
-                            await ref
-                                .read(
-                                  readerableScreenControllerProvider.notifier,
-                                )
-                                .toggleReaderView(false);
-
-                            return true;
-                          } else if (tabState?.historyState.canGoBack == true) {
-                            lastBackButtonPress.value = null;
-
-                            final controller = ref.read(
-                              selectedTabSessionProvider,
-                            );
-
-                            await controller.goBack();
-                            return true;
-                          }
-
-                          //Go router has routes to go back to
-                          if (context.canPop()) {
-                            return true;
-                          }
-
-                          if (ref
-                              .read(tabRepositoryProvider.notifier)
-                              .hasLaunchedFromIntent(tabState?.id)) {
-                            //Mark back as unhandled and navigator will pop
-                            await SystemNavigator.pop();
-                            return false;
-                          }
-
-                          if (lastBackButtonPress.value != null &&
-                              DateTime.now().difference(
-                                    lastBackButtonPress.value!,
-                                  ) <
-                                  _backButtonPressTimeout) {
-                            lastBackButtonPress.value = null;
-
-                            if (tabState != null && tabCount > 1) {
-                              await ref
-                                  .read(tabRepositoryProvider.notifier)
-                                  .closeTab(tabState.id);
-
-                              if (context.mounted) {
-                                ui_helper.showTabUndoClose(
-                                  context,
-                                  ref
-                                      .read(tabRepositoryProvider.notifier)
-                                      .undoClose,
-                                );
-                              }
-
-                              return true;
-                            } else {
-                              //Mark back as unhandled and navigator will pop
-                              await SystemNavigator.pop();
-                              return false;
-                            }
-                          } else {
-                            lastBackButtonPress.value = DateTime.now();
-                            ui_helper.showTabBackButtonMessage(
-                              context,
-                              tabCount,
-                              _backButtonPressTimeout,
-                            );
-
-                            return true;
-                          }
-                        },
-                        child: _BrowserView(
-                          sheetDisplayed: sheetController.value != null,
-                          isFullscreen: tabInFullScreen,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+          body: _Browser(
+            overlayController: overlayController,
+            sheetController: sheetController,
+            showAppBar: showAppBar,
+            tabInFullScreen: tabInFullScreen,
           ),
           floatingActionButton: ReaderAppearanceButton(),
         ),
       ),
+    );
+  }
+}
+
+class _Browser extends HookConsumerWidget {
+  Duration get _backButtonPressTimeout => const Duration(seconds: 2);
+
+  final OverlayPortalController overlayController;
+  final ValueNotifier<PersistentBottomSheetController?> sheetController;
+  final ValueNotifier<bool> showAppBar;
+
+  final bool tabInFullScreen;
+
+  const _Browser({
+    required this.overlayController,
+    required this.sheetController,
+    required this.showAppBar,
+    required this.tabInFullScreen,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lastBackButtonPress = useRef<DateTime?>(null);
+
+    final overlayBuilder = ref.watch(overlayControllerProvider);
+
+    ref.listen(bottomSheetControllerProvider, (previous, next) {
+      if (sheetController.value != null) {
+        try {
+          sheetController.value!.close();
+        } catch (_) {
+          //silently drop closing errors
+        }
+      }
+
+      if (next != null) {
+        final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
+        final controller = Scaffold.of(context).showBottomSheet((context) {
+          bool dismissOnThreshold(
+            DraggableScrollableNotification notification,
+          ) {
+            if (notification.extent <= 0.1) {
+              ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+              return true;
+            }
+
+            return false;
+          }
+
+          final sheet = switch (next) {
+            ViewTabsSheet() =>
+              NotificationListener<DraggableScrollableNotification>(
+                key: ValueKey(next),
+                onNotification: dismissOnThreshold,
+                child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
+              ),
+            final EditUrlSheet parameter =>
+              NotificationListener<DraggableScrollableNotification>(
+                key: ValueKey(parameter),
+                onNotification: dismissOnThreshold,
+                child: _ViewUrlSheet(
+                  initialTabState: parameter.tabState,
+                  maxChildSize: relativeSafeArea,
+                ),
+              ),
+          };
+
+          return sheet;
+        });
+
+        unawaited(
+          controller.closed.whenComplete(() {
+            ref.read(bottomSheetControllerProvider.notifier).closed(next);
+          }),
+        );
+
+        sheetController.value = controller;
+      } else {
+        sheetController.value = null;
+      }
+    });
+
+    return DragTarget<TabDragData>(
+      onMove: (details) {
+        ref
+            .read(willAcceptDropProvider.notifier)
+            .setData(DeleteDropData(details.data.tabId));
+      },
+      onLeave: (data) {
+        ref.read(willAcceptDropProvider.notifier).clear();
+      },
+      onAcceptWithDetails: (details) async {
+        ref.read(willAcceptDropProvider.notifier).clear();
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .closeTab(details.data.tabId);
+
+        if (context.mounted) {
+          ui_helper.showTabUndoClose(
+            context,
+            ref.read(tabRepositoryProvider.notifier).undoClose,
+          );
+        }
+      },
+      builder: (context, _, _) {
+        return OverlayPortal(
+          controller: overlayController,
+          overlayChildBuilder: (context) {
+            return overlayBuilder!.call(context);
+          },
+          child: Listener(
+            onPointerDown: sheetController.value != null
+                ? (_) {
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
+                  }
+                : null,
+            child: BackButtonListener(
+              onBackButtonPressed: () async {
+                final tabState = ref.read(selectedTabStateProvider);
+
+                final tabCount = ref.read(
+                  tabListProvider.select((tabs) => tabs.value.length),
+                );
+
+                //Don't do anything if a child route is active
+                if (GoRouterState.of(context).topRoute?.name !=
+                    BrowserRoute.name) {
+                  return false;
+                }
+
+                if (ref.read(bottomSheetControllerProvider) != null) {
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
+                  return true;
+                }
+
+                if (overlayBuilder != null) {
+                  ref.read(overlayControllerProvider.notifier).dismiss();
+                  return true;
+                }
+
+                if (tabState?.isFullScreen == true) {
+                  await ref.read(selectedTabSessionProvider).exitFullscreen();
+                  return true;
+                }
+
+                //Make sure app bar is visible
+                showAppBar.value = true;
+
+                if (tabState?.isLoading == true) {
+                  lastBackButtonPress.value = null;
+
+                  final controller = ref.read(selectedTabSessionProvider);
+
+                  await controller.stopLoading();
+                  return true;
+                } else if (tabState?.readerableState.active == true) {
+                  lastBackButtonPress.value = null;
+
+                  await ref
+                      .read(readerableScreenControllerProvider.notifier)
+                      .toggleReaderView(false);
+
+                  return true;
+                } else if (tabState?.historyState.canGoBack == true) {
+                  lastBackButtonPress.value = null;
+
+                  final controller = ref.read(selectedTabSessionProvider);
+
+                  await controller.goBack();
+                  return true;
+                }
+
+                //Go router has routes to go back to
+                if (context.canPop()) {
+                  return true;
+                }
+
+                if (ref
+                    .read(tabRepositoryProvider.notifier)
+                    .hasLaunchedFromIntent(tabState?.id)) {
+                  //Mark back as unhandled and navigator will pop
+                  await SystemNavigator.pop();
+                  return false;
+                }
+
+                if (lastBackButtonPress.value != null &&
+                    DateTime.now().difference(lastBackButtonPress.value!) <
+                        _backButtonPressTimeout) {
+                  lastBackButtonPress.value = null;
+
+                  if (tabState != null && tabCount > 1) {
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .closeTab(tabState.id);
+
+                    if (context.mounted) {
+                      ui_helper.showTabUndoClose(
+                        context,
+                        ref.read(tabRepositoryProvider.notifier).undoClose,
+                      );
+                    }
+
+                    return true;
+                  } else {
+                    //Mark back as unhandled and navigator will pop
+                    await SystemNavigator.pop();
+                    return false;
+                  }
+                } else {
+                  lastBackButtonPress.value = DateTime.now();
+                  ui_helper.showTabBackButtonMessage(
+                    context,
+                    tabCount,
+                    _backButtonPressTimeout,
+                  );
+
+                  return true;
+                }
+              },
+              child: _BrowserView(
+                sheetDisplayed: sheetController.value != null,
+                isFullscreen: tabInFullScreen,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
