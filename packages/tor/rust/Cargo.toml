@@ -23,6 +23,10 @@ log = "0.4.28"
 rlimit = "0.10.2"
 anyhow = "1.0.100"
 time = "0.3.44"
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["fmt", "tracing-log", "env-filter"] }
+[target.'cfg(target_os = "android")'.dependencies]
+tracing-android = "0.2.0"
 
 [build-dependencies]
 cbindgen = "=0.24.3"

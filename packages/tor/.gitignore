@@ -35,3 +35,4 @@ build/
 
 rust/target/.rustc_info.json
 rust/target/debug
+rust/target/flycheck0

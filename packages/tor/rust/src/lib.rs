@@ -16,6 +16,14 @@ use tokio::task::JoinHandle;
 use tor_config::Listen;
 use tor_rtcompat::tokio::TokioNativeTlsRuntime;
 use tor_rtcompat::ToplevelBlockOn;
+use tracing::{debug, error, info, warn};
+use tracing_subscriber::fmt::Subscriber;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+
+// static LOG_FILTER: &str = "info,arti_client=debug,tor_chanmgr=debug,tor_proto=debug";
+
+static LOG_FILTER: &str = "info";
 
 pub use crate::error::tor_last_error_message;
 #[cfg(not(target_os = "windows"))]
@@ -129,6 +137,14 @@ pub unsafe extern "C" fn tor_start(
     snowflake_port: u16,
     bridge_lines: *const c_char,
 ) -> Tor {
+    Subscriber::builder()
+        .with_env_filter(LOG_FILTER)
+        .finish()
+        .with(tracing_android::layer("weblibre_tor").unwrap())
+        .init();
+
+    info!("tor_start");
+
     let err_ret = Tor {
         client: ptr::null_mut(),
         proxy: ptr::null_mut(),
