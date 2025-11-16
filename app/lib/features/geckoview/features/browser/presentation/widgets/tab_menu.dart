@@ -24,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
@@ -35,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/dialog
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -212,6 +214,50 @@ class TabMenu extends HookConsumerWidget {
                     .assignContainer(tabState.id, containerData);
               }
             }
+          },
+        ),
+        Consumer(
+          child: MenuItemButton(
+            leadingIcon: const Icon(MdiIcons.webPlus),
+            child: const Text('Assign Site to Container'),
+            onPressed: () async {
+              final targetContainerId = await ContainerSelectionRoute()
+                  .push<String?>(context);
+
+              if (targetContainerId != null) {
+                final containerData = await ref
+                    .read(containerRepositoryProvider.notifier)
+                    .getContainerData(targetContainerId);
+
+                if (containerData != null) {
+                  final tabState = ref.read(tabStateProvider(selectedTabId));
+                  final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+
+                  if (origin != null) {
+                    await ref
+                        .read(containerRepositoryProvider.notifier)
+                        .replaceContainer(
+                          containerData.copyWith.metadata(
+                            containerData.metadata.copyWith.assignedSites([
+                              ...?containerData.metadata.assignedSites,
+                              origin,
+                            ]),
+                          ),
+                        );
+                  }
+                }
+              }
+            },
+          ),
+          builder: (context, ref, child) {
+            final isSiteAssigned = ref.watch(
+              watchIsCurrentSiteAssignedToContainerProvider,
+            );
+
+            return Visibility(
+              visible: isSiteAssigned.hasValue && !isSiteAssigned.requireValue,
+              child: child!,
+            );
           },
         ),
         Consumer(

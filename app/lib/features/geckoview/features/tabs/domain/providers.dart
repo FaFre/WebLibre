@@ -20,6 +20,8 @@
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -123,4 +125,19 @@ Stream<String?> watchContainerTabId(Ref ref, String tabId) {
 @Riverpod()
 Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
   return ref.read(tabDatabaseProvider).containerDao.allAssignedSites().watch();
+}
+
+@Riverpod()
+Stream<bool> watchIsCurrentSiteAssignedToContainer(Ref ref) {
+  final currentUri = ref.watch(
+    selectedTabStateProvider.select(
+      (value) => value?.url ?? TabState.$default('').url,
+    ),
+  );
+
+  return ref
+      .read(tabDatabaseProvider)
+      .containerDao
+      .isSiteAssignedToContainer(currentUri)
+      .watchSingle();
 }

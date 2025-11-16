@@ -673,3 +673,39 @@ final class WatchAllAssignedSitesProvider
 
 String _$watchAllAssignedSitesHash() =>
     r'd755451be0ad7e03db36ba39c64f6f0b5c1d9ba3';
+
+@ProviderFor(watchIsCurrentSiteAssignedToContainer)
+const watchIsCurrentSiteAssignedToContainerProvider =
+    WatchIsCurrentSiteAssignedToContainerProvider._();
+
+final class WatchIsCurrentSiteAssignedToContainerProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  const WatchIsCurrentSiteAssignedToContainerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchIsCurrentSiteAssignedToContainerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$watchIsCurrentSiteAssignedToContainerHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return watchIsCurrentSiteAssignedToContainer(ref);
+  }
+}
+
+String _$watchIsCurrentSiteAssignedToContainerHash() =>
+    r'2942672c75b671fbe84489606e5341f0290502c3';
