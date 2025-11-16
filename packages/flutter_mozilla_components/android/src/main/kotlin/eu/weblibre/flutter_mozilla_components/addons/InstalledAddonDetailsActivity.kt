@@ -21,7 +21,6 @@ import mozilla.components.feature.addons.AddonManagerException
 import mozilla.components.feature.addons.ui.translateName
 import mozilla.components.support.utils.ext.getParcelableExtraCompat
 import eu.weblibre.flutter_mozilla_components.R
-import mozilla.components.feature.addons.R as MozComp
 
 /**
  * An activity to show the details of a installed add-on.
@@ -62,7 +61,7 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
                 scope.launch(Dispatchers.Main) {
                     Toast.makeText(
                         baseContext,
-                        MozComp.string.mozac_feature_addons_failed_to_query_extensions,
+                        R.string.mozac_feature_addons_failed_to_query_extensions,
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
@@ -97,14 +96,14 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
                         switch.setState(true)
                         Toast.makeText(
                             this,
-                            getString(MozComp.string.mozac_feature_addons_successfully_enabled, addon.translateName(this)),
+                            getString(R.string.mozac_feature_addons_successfully_enabled, addon.translateName(this)),
                             Toast.LENGTH_SHORT,
                         ).show()
                     },
                     onError = {
                         Toast.makeText(
                             this,
-                            getString(MozComp.string.mozac_feature_addons_failed_to_enable, addon.translateName(this)),
+                            getString(R.string.mozac_feature_addons_failed_to_enable, addon.translateName(this)),
                             Toast.LENGTH_SHORT,
                         ).show()
                     },
@@ -116,14 +115,14 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
                         switch.setState(false)
                         Toast.makeText(
                             this,
-                            getString(MozComp.string.mozac_feature_addons_successfully_disabled, addon.translateName(this)),
+                            getString(R.string.mozac_feature_addons_successfully_disabled, addon.translateName(this)),
                             Toast.LENGTH_SHORT,
                         ).show()
                     },
                     onError = {
                         Toast.makeText(
                             this,
-                            getString(MozComp.string.mozac_feature_addons_failed_to_disable, addon.translateName(this)),
+                            getString(R.string.mozac_feature_addons_failed_to_disable, addon.translateName(this)),
                             Toast.LENGTH_SHORT,
                         ).show()
                     },
@@ -180,7 +179,7 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
                 onSuccess = {
                     Toast.makeText(
                         this,
-                        getString(MozComp.string.mozac_feature_addons_successfully_uninstalled, addon.translateName(this)),
+                        getString(R.string.mozac_feature_addons_successfully_uninstalled, addon.translateName(this)),
                         Toast.LENGTH_SHORT,
                     ).show()
                     finish()
@@ -188,7 +187,7 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
                 onError = { _, _ ->
                     Toast.makeText(
                         this,
-                        getString(MozComp.string.mozac_feature_addons_failed_to_uninstall, addon.translateName(this)),
+                        getString(R.string.mozac_feature_addons_failed_to_uninstall, addon.translateName(this)),
                         Toast.LENGTH_SHORT,
                     ).show()
                 },

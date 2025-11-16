@@ -3,7 +3,7 @@ version = "1.0-SNAPSHOT"
 
 buildscript {
     ext.kotlin_version = "2.1.20"
-    ext.mozillaComponentsVersion = '144.0.2'
+    ext.mozillaComponentsVersion = '145.0'
 
     repositories {
         google()
