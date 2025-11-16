@@ -152,13 +152,9 @@ class Tor {
     broadcastState();
 
     // Set the state and cache directories.
-    final Directory appSupportDir = await getApplicationSupportDirectory();
-    final stateDir = await Directory(
-      '${appSupportDir.path}/tor_state',
-    ).create();
-    final cacheDir = await Directory(
-      '${appSupportDir.path}/tor_cache',
-    ).create();
+    final appCacheDir = await getApplicationCacheDirectory();
+    final stateDir = await Directory('${appCacheDir.path}/tor_state').create();
+    final cacheDir = await Directory('${appCacheDir.path}/tor_cache').create();
 
     // Generate a random port.
     final newPort = await _getRandomUnusedPort();
