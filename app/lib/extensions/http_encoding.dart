@@ -20,7 +20,6 @@
 import 'dart:convert';
 
 import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
 
 /// This is modified from default latin1 fallback to use utf8
 Encoding _encodingForHeaders(Map<String, String> headers) =>
