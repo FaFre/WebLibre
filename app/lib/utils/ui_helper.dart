@@ -29,13 +29,14 @@ void showErrorMessage(BuildContext context, String message) {
       style: TextStyle(color: Theme.of(context).colorScheme.error),
     ),
     backgroundColor: Theme.of(context).colorScheme.onError,
+    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
 void showInfoMessage(BuildContext context, String message) {
-  final snackBar = SnackBar(content: Text(message));
+  final snackBar = SnackBar(content: Text(message), persist: false);
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
@@ -50,6 +51,7 @@ void showTabBackButtonMessage(
         ? const Text('Navigate BACK again to close current tab')
         : const Text('Navigate BACK again to exit app'),
     duration: duration,
+    persist: false,
   );
 
   ScaffoldMessenger.of(context)
@@ -74,6 +76,7 @@ void showTabOpenedMessage(
       (onPressed) => SnackBarAction(label: 'Show', onPressed: onPressed),
     ),
     duration: duration,
+    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -96,6 +99,7 @@ Future<void> showSuggestNewTabMessage(
         },
       ),
       duration: duration,
+      persist: false,
     );
 
     if (context.mounted) {
@@ -123,6 +127,7 @@ void showTabSwitchMessage(
       (onPressed) => SnackBarAction(label: 'Switch', onPressed: onPressed),
     ),
     duration: duration,
+    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -160,6 +165,7 @@ void showTabUndoClose(
         : const Text('Tab closed'),
     action: SnackBarAction(label: 'Undo', onPressed: onUndo),
     duration: duration,
+    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
