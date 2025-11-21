@@ -2469,7 +2469,7 @@ class BangHistory extends i0.Table
       const i0.EnumIndexConverter<i2.BangGroup>(i2.BangGroup.values);
   @override
   List<String> get customConstraints => const [
-    'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")',
+    'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
   ];
   @override
   bool get dontWriteConstraints => true;

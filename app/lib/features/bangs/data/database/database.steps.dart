@@ -707,9 +707,188 @@ i1.GeneratedColumn<bool> _column_31(String aliasedName) =>
         'CHECK ("searxng_api" IN (0, 1))',
       ),
     );
+
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    bang,
+    bangTriggers,
+    idxBangTriggersLookup,
+    bangTriggersAfterInsert,
+    bangTriggersAfterUpdate,
+    bangSync,
+    bangFrequency,
+    bangHistory,
+    bangFts,
+    bangTriggersFts,
+    bangDataView,
+    bangAfterInsert,
+    bangAfterDelete,
+    bangAfterUpdate,
+    bangTriggersAfterInsertFts,
+    bangTriggersAfterDeleteFts,
+    bangTriggersAfterUpdateFts,
+  ];
+  late final Shape6 bang = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'bang',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("trigger", "group")'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_26,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 bangTriggers = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'bang_triggers',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY("trigger", "group", additional_trigger)',
+        'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+      ],
+      columns: [_column_0, _column_1, _column_28],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxBangTriggersLookup = i1.Index(
+    'idx_bang_triggers_lookup',
+    'CREATE INDEX idx_bang_triggers_lookup ON bang_triggers (additional_trigger, "group")',
+  );
+  final i1.Trigger bangTriggersAfterInsert = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_insert AFTER INSERT ON bang WHEN new.additional_triggers IS NOT NULL BEGIN INSERT INTO bang_triggers ("trigger", "group", additional_trigger) SELECT new."trigger", new."group", json_each.value FROM json_each(new.additional_triggers);END',
+    'bang_triggers_after_insert',
+  );
+  final i1.Trigger bangTriggersAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_update AFTER UPDATE ON bang BEGIN DELETE FROM bang_triggers WHERE "trigger" = old."trigger" AND "group" = old."group";INSERT INTO bang_triggers ("trigger", "group", additional_trigger) SELECT new."trigger", new."group", json_each.value FROM json_each(new.additional_triggers)WHERE new.additional_triggers IS NOT NULL;END',
+    'bang_triggers_after_update',
+  );
+  late final Shape1 bangSync = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'bang_sync',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_8, _column_9],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 bangFrequency = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'bang_frequency',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY("trigger", "group")',
+        'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+      ],
+      columns: [_column_0, _column_1, _column_10, _column_11],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 bangHistory = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'bang_history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+      ],
+      columns: [_column_12, _column_0, _column_1, _column_13],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 bangFts = Shape4(
+    source: i0.VersionedVirtualTable(
+      entityName: 'bang_fts',
+      moduleAndArgs:
+          'fts5(trigger, website_name, content=bang, prefix=\'2 3\')',
+      columns: [_column_14, _column_15],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 bangTriggersFts = Shape8(
+    source: i0.VersionedVirtualTable(
+      entityName: 'bang_triggers_fts',
+      moduleAndArgs:
+          'fts5(additional_trigger, content=bang_triggers, prefix=\'2 3\')',
+      columns: [_column_29],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape9 bangDataView = Shape9(
+    source: i0.VersionedView(
+      entityName: 'bang_data_view',
+      createViewStmt:
+          'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group";',
+      columns: [
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_21,
+        _column_22,
+        _column_23,
+        _column_30,
+        _column_31,
+        _column_24,
+        _column_25,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger bangAfterInsert = i1.Trigger(
+    'CREATE TRIGGER bang_after_insert AFTER INSERT ON bang BEGIN INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
+    'bang_after_insert',
+  );
+  final i1.Trigger bangAfterDelete = i1.Trigger(
+    'CREATE TRIGGER bang_after_delete AFTER DELETE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);END',
+    'bang_after_delete',
+  );
+  final i1.Trigger bangAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER bang_after_update AFTER UPDATE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
+    'bang_after_update',
+  );
+  final i1.Trigger bangTriggersAfterInsertFts = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_insert_fts AFTER INSERT ON bang_triggers BEGIN INSERT INTO bang_triggers_fts ("rowid", additional_trigger) VALUES (new."rowid", new.additional_trigger);END',
+    'bang_triggers_after_insert_fts',
+  );
+  final i1.Trigger bangTriggersAfterDeleteFts = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_delete_fts AFTER DELETE ON bang_triggers BEGIN INSERT INTO bang_triggers_fts (bang_triggers_fts, "rowid", additional_trigger) VALUES (\'delete\', old."rowid", old.additional_trigger);END',
+    'bang_triggers_after_delete_fts',
+  );
+  final i1.Trigger bangTriggersAfterUpdateFts = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_update_fts AFTER UPDATE ON bang_triggers BEGIN INSERT INTO bang_triggers_fts (bang_triggers_fts, "rowid", additional_trigger) VALUES (\'delete\', old."rowid", old.additional_trigger);INSERT INTO bang_triggers_fts ("rowid", additional_trigger) VALUES (new."rowid", new.additional_trigger);END',
+    'bang_triggers_after_update_fts',
+  );
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -723,6 +902,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from2To3(migrator, schema);
         return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -732,6 +916,11 @@ i0.MigrationStepWithVersion migrationSteps({
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
+  step: migrationSteps(
+    from1To2: from1To2,
+    from2To3: from2To3,
+    from3To4: from3To4,
+  ),
 );

@@ -75,7 +75,7 @@ CREATE TABLE bang_history (
   "trigger" TEXT NOT NULL,
   "group" ENUM(BangGroup) NOT NULL,
   search_date DATETIME NOT NULL,
-  FOREIGN KEY ("trigger", "group") REFERENCES bang ("trigger", "group")
+  FOREIGN KEY ("trigger", "group") REFERENCES bang ("trigger", "group") ON DELETE CASCADE
 );
 
 CREATE VIRTUAL TABLE bang_fts 

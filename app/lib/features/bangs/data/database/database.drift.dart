@@ -85,6 +85,13 @@ abstract class $BangDatabase extends i0.GeneratedDatabase {
     i0.WritePropagation(
       on: i0.TableUpdateQuery.onTableName(
         'bang',
+        limitUpdateKind: i0.UpdateKind.delete,
+      ),
+      result: [i0.TableUpdate('bang_history', kind: i0.UpdateKind.delete)],
+    ),
+    i0.WritePropagation(
+      on: i0.TableUpdateQuery.onTableName(
+        'bang',
         limitUpdateKind: i0.UpdateKind.insert,
       ),
       result: [i0.TableUpdate('bang_fts', kind: i0.UpdateKind.insert)],

@@ -30,7 +30,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 @DriftDatabase(include: {'definitions.drift'}, daos: [BangDao, SyncDao])
 class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
   @override
-  final int schemaVersion = 3;
+  final int schemaVersion = 4;
 
   @override
   final int ftsTokenLimit = 6;
@@ -90,6 +90,9 @@ class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
     from2To3: (m, schema) async {
       final bangAtV3 = schema.bang;
       await m.addColumn(bangAtV3, bangAtV3.searxngApi);
+    },
+    from3To4: (m, schema) async {
+      await m.alterTable(TableMigration(schema.bangHistory));
     },
   );
 }
