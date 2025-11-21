@@ -110,9 +110,7 @@ class SearchField extends HookConsumerWidget {
         prefixIcon: (showBangIcon && activeBang != null)
             ? Padding(
                 padding: const EdgeInsetsDirectional.all(12.0),
-                child: UrlIcon([
-                  activeBang!.getTemplateUrl(''),
-                ], iconSize: 24.0),
+                child: UrlIcon([activeBang!.getDefaultUrl()], iconSize: 24.0),
               )
             : null,
         label: label ?? const Text('Search'),

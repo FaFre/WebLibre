@@ -83,9 +83,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                   child: FilterChip(
                     showCheckmark: false,
                     label: Text(activeBang.websiteName),
-                    avatar: UrlIcon([
-                      activeBang.getTemplateUrl(''),
-                    ], iconSize: 20),
+                    avatar: UrlIcon([activeBang.getDefaultUrl()], iconSize: 20),
                     selected: true,
                     onSelected: (value) {},
                   ),
@@ -98,7 +96,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                     (bang) => FilterChip(
                       showCheckmark: false,
                       label: Text(bang.websiteName),
-                      avatar: UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
+                      avatar: UrlIcon([bang.getDefaultUrl()], iconSize: 20),
                       selected: activeBang?.trigger == bang.trigger,
                       onSelected: (selected) async {
                         if (selected) {

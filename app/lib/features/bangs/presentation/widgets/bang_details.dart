@@ -58,7 +58,7 @@ class BangDetails extends HookConsumerWidget {
             children: [
               Row(
                 children: [
-                  UrlIcon([bangData.getTemplateUrl('')], iconSize: 34.0),
+                  UrlIcon([bangData.getDefaultUrl()], iconSize: 34.0),
                   const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(
@@ -87,7 +87,7 @@ class BangDetails extends HookConsumerWidget {
                       visualDensity: VisualDensity.compact,
                     ),
                     onPressed: () async {
-                      final url = Uri.parse(bangData.getTemplateUrl('').origin);
+                      final url = Uri.parse(bangData.getDefaultUrl().origin);
                       final isPrivate =
                           ref
                               .read(generalSettingsWithDefaultsProvider)

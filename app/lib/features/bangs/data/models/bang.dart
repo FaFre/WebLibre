@@ -92,6 +92,9 @@ class Bang with FastEquatable implements Insertable<Bang> {
               : Uri.encodeComponent(input)
         : input;
   }
+  Uri getDefaultUrl() {
+    return getTemplateUrl('');
+  }
 
   Uri getTemplateUrl(String? query) {
     final url = (query != null)

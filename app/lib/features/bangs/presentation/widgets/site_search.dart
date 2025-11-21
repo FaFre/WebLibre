@@ -128,7 +128,7 @@ class SiteSearch extends HookConsumerWidget {
             child: SelectableChips(
               itemId: (bang) => bang.trigger,
               itemAvatar: (bang) =>
-                  UrlIcon([bang.getTemplateUrl('')], iconSize: 20),
+                  UrlIcon([bang.getDefaultUrl()], iconSize: 20),
               itemLabel: (bang) => Text(bang.websiteName),
               itemTooltip: (bang) => bang.trigger,
               availableItems: availableBangs,

@@ -36,7 +36,7 @@ class BangIcon extends ConsumerWidget {
     );
 
     return UrlIcon([
-      if (bang != null) bang.getTemplateUrl(''),
+      if (bang != null) bang.getDefaultUrl(),
     ], iconSize: iconSize);
   }
 }
