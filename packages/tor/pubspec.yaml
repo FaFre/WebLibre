@@ -27,7 +27,7 @@ dependencies:
   plugin_platform_interface: ^2.1.8
 
 dev_dependencies:
-  ffigen: ^20.0.0
+  ffigen: ^20.1.0
   flutter_test:
     sdk: flutter
   lint: ^2.8.0

@@ -16,12 +16,12 @@ dependencies:
   socks5_proxy: ^2.1.1
 
 dev_dependencies:
-  build_runner: ^2.10.2
+  build_runner: ^2.10.4
   flutter_test:
     sdk: flutter
-  json_serializable: ^6.11.1
+  json_serializable: ^6.11.2
   lint: ^2.8.0
-  pigeon: ^26.1.0
+  pigeon: ^26.1.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
