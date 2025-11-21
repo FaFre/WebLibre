@@ -129,6 +129,22 @@ class TabMenu extends HookConsumerWidget {
         ),
         const Divider(),
         MenuItemButton(
+          onPressed: () async {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .closeTab(selectedTabId);
+
+            if (context.mounted) {
+              ui_helper.showTabUndoClose(
+                context,
+                ref.read(tabRepositoryProvider.notifier).undoClose,
+              );
+            }
+          },
+          leadingIcon: const Icon(Icons.close),
+          child: const Text('Close Tab'),
+        ),
+        MenuItemButton(
           leadingIcon: const Icon(MdiIcons.contentCopy),
           child: const Text('Copy address'),
           onPressed: () async {
