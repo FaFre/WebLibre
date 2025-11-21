@@ -10,6 +10,7 @@ import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/utils/form_validators.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class EditBangScreen extends HookConsumerWidget {
   final Bang? initialBang;
@@ -44,6 +45,29 @@ class EditBangScreen extends HookConsumerWidget {
           IconButton(
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
+                final existingBang = await ref
+                    .read(bangDataRepositoryProvider.notifier)
+                    .getBang(
+                      BangKey(
+                        group: BangGroup.user,
+                        trigger: triggerTextController.text,
+                      ),
+                    );
+
+                if ((initialBang == null && existingBang != null) ||
+                    (initialBang != null &&
+                        existingBang != null &&
+                        existingBang.trigger != initialBang!.trigger)) {
+                  if (context.mounted) {
+                    ui_helper.showErrorMessage(
+                      context,
+                      'A Bang with Trigger "${triggerTextController.text}" does already exist',
+                    );
+                  }
+
+                  return;
+                }
+
                 final uri = Uri.parse(urlTextController.text);
 
                 final bang = Bang(

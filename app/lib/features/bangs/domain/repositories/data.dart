@@ -142,6 +142,14 @@ class BangDataRepository extends _$BangDataRepository {
         .deleteWhere((t) => t.trigger.equals(trigger));
   }
 
+  Future<BangData?> getBang(BangKey key) {
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .getBangData(key.group, key.trigger)
+        .getSingleOrNull();
+  }
+
   Future<void> upsertBang(Bang bang) {
     return ref.read(bangDatabaseProvider).bangDao.upsertBang(bang);
   }
