@@ -170,7 +170,7 @@ Bang _$BangFromJson(Map<String, dynamic> json) => Bang(
   domain: json['d'] as String,
   trigger: json['t'] as String,
   urlTemplate: json['u'] as String,
-  searxngApi: json['searxngApi'] as bool,
+  searxngApi: json['searxngApi'] as bool? ?? false,
   category: json['c'] as String?,
   subCategory: json['sc'] as String?,
   format: (json['fmt'] as List<dynamic>?)

@@ -84,6 +84,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
   @JsonKey(name: 'ts')
   final Set<String>? additionalTriggers;
 
+  @JsonKey(defaultValue: false)
   final bool searxngApi;
 
   String formatQuery(String input) {
