@@ -21,6 +21,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
@@ -142,5 +143,13 @@ class BangDataRepository extends _$BangDataRepository {
         .read(bangDatabaseProvider)
         .bangFrequency
         .deleteWhere((t) => t.trigger.equals(trigger));
+  }
+
+  Future<void> upsertBang(Bang bang) {
+    return ref.read(bangDatabaseProvider).bangDao.upsertBang(bang);
+  }
+
+  Future<void> deleteBang(BangGroup group, String trigger) {
+    return ref.read(bangDatabaseProvider).syncDao.deleteBangs(group, [trigger]);
   }
 }

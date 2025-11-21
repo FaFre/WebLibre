@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:drift/internal/versioned_schema.dart';
+import 'package:drift_dev/api/migrations_native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
@@ -35,14 +38,46 @@ class UserDatabase extends $UserDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
+      if (kDebugMode) {
+        // This check pulls in a fair amount of code that's not needed
+        // anywhere else, so we recommend only doing it in debug builds.
+        await validateDatabaseSchema();
+      }
+
       await customStatement('PRAGMA foreign_keys = ON;');
     },
-    onUpgrade: stepByStep(
-      from1To2: (m, schema) async {
-        await m.createTable(schema.riverpod);
-      },
-    ),
+    onUpgrade: (m, from, to) async {
+      // Following the advice from https://drift.simonbinder.eu/Migrations/api/#general-tips
+      await customStatement('PRAGMA foreign_keys = OFF');
+
+      await transaction(
+        () => VersionedSchema.runMigrationSteps(
+          migrator: m,
+          from: from,
+          to: to,
+          steps: _upgrade,
+        ),
+      );
+
+      if (kDebugMode) {
+        final wrongForeignKeys = await customSelect(
+          'PRAGMA foreign_key_check',
+        ).get();
+        assert(
+          wrongForeignKeys.isEmpty,
+          '${wrongForeignKeys.map((e) => e.data)}',
+        );
+      }
+
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
   );
 
   UserDatabase(super.e);
+
+  static final _upgrade = migrationSteps(
+    from1To2: (m, schema) async {
+      await m.createTable(schema.riverpod);
+    },
+  );
 }

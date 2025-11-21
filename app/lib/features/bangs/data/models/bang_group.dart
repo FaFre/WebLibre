@@ -33,14 +33,10 @@ enum BangGroup {
         'https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json',
     bundled: 'assets/bangs/kagi_bangs.json',
   ),
-  custom(
-    remote:
-        'https://raw.githubusercontent.com/FaFre/bangs/refs/heads/custom/data/custom.json',
-    bundled: 'assets/bangs/custom.json',
-  );
+  user(remote: null, bundled: null);
 
-  final String bundled;
-  final String remote;
+  final String? bundled;
+  final String? remote;
 
   const BangGroup({required this.bundled, required this.remote});
 }

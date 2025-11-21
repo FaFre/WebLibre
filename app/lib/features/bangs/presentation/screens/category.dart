@@ -28,11 +28,11 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
-class BangListScreen extends HookConsumerWidget {
+class BangCategoryScreen extends HookConsumerWidget {
   final String? category;
   final String? subCategory;
 
-  const BangListScreen({this.category, this.subCategory, super.key});
+  const BangCategoryScreen({this.category, this.subCategory, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:drift_dev/api/migrations_native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.drift.dart';
@@ -36,7 +38,13 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
-      await customStatement('PRAGMA foreign_keys = ON;');
+      if (kDebugMode) {
+        // This check pulls in a fair amount of code that's not needed
+        // anywhere else, so we recommend only doing it in debug builds.
+        await validateDatabaseSchema();
+      }
+
+      await customStatement('PRAGMA foreign_keys = ON');
       await definitionsDrift.optimizeFtsIndex();
     },
   );

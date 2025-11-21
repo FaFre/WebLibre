@@ -198,13 +198,21 @@ class SearchScreen extends HookConsumerWidget {
                         );
 
                         if (newUrl == null) {
-                          final defaultSearchBang =
+                          final bang =
                               ref.read(selectedBangDataProvider()) ??
                               await ref.read(
                                 defaultSearchBangDataProvider.future,
                               );
 
-                          newUrl = defaultSearchBang?.getTemplateUrl(value);
+                          if (bang != null) {
+                            newUrl = bang.getTemplateUrl(value);
+
+                            if (!privateTabMode) {
+                              await ref
+                                  .read(bangSearchProvider.notifier)
+                                  .triggerBangSearch(bang, value);
+                            }
+                          }
                         }
 
                         if (newUrl != null) {

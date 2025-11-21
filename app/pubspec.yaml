@@ -13,6 +13,7 @@ dependencies:
   copy_with_extension: ^10.0.1
   country_flags: ^4.1.0
   drift: ^2.29.0
+  drift_dev: ^2.29.0
   dynamic_color: ^1.8.1
   exceptions: ^0.6.1
   fading_scroll: ^0.9.1
@@ -91,7 +92,6 @@ dev_dependencies:
   copy_with_extension_gen: ^10.0.1
   custom_lint: ^0.8.1
   dependency_validator: ^5.0.3
-  drift_dev: ^2.29.0
   fast_equatable_lint: ^0.5.0
   flutter_launcher_icons: ^0.14.4
   flutter_test:

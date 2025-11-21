@@ -68,11 +68,6 @@ class BangSettingsScreen extends HookConsumerWidget {
                 title: 'Kagi Bangs',
                 subtitle: 'Sync on-demand from GitHub',
               ),
-              const BangGroupListTile(
-                group: BangGroup.custom,
-                title: 'WebLibre Bangs',
-                subtitle: 'Sync on-demand from GitHub',
-              ),
             ],
           );
         },

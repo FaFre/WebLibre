@@ -15,6 +15,7 @@ CREATE TABLE bang (
   sub_category TEXT,
   format TEXT MAPPED BY `const BangFormatConverter()`,
   additional_triggers TEXT MAPPED BY `const TriggerListConverter()`,
+  searxng_api BOOL NOT NULL DEFAULT FALSE,
   PRIMARY KEY ("trigger", "group")
 ) WITH Bang;
 

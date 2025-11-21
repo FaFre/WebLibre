@@ -21,6 +21,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:drift/drift.dart' show Expression, Insertable, Value;
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/bangs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
@@ -83,6 +84,8 @@ class Bang with FastEquatable implements Insertable<Bang> {
   @JsonKey(name: 'ts')
   final Set<String>? additionalTriggers;
 
+  final bool searxngApi;
+
   String formatQuery(String input) {
     return (format == null ||
             format!.contains(BangFormat.urlEncodePlaceholder) == true)
@@ -92,6 +95,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
               : Uri.encodeComponent(input)
         : input;
   }
+
   Uri getDefaultUrl() {
     return getTemplateUrl('');
   }
@@ -106,6 +110,10 @@ class Bang with FastEquatable implements Insertable<Bang> {
       template = Uri.https(
         domain,
       ).replace(path: template.path, query: template.query);
+    }
+
+    if (format?.contains(BangFormat.openBasePath) == true) {
+      return template.base;
     }
 
     return template;
@@ -124,6 +132,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
     required this.domain,
     required this.trigger,
     required this.urlTemplate,
+    required this.searxngApi,
     this.group,
     this.category,
     this.subCategory,
@@ -146,6 +155,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
     subCategory,
     format,
     additionalTriggers,
+    searxngApi,
   ];
 
   @override

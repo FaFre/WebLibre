@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:drift_dev/api/migrations_native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 import 'package:weblibre/features/web_feed/data/database/daos/article.dart';
 import 'package:weblibre/features/web_feed/data/database/daos/feed.dart';
@@ -36,6 +38,12 @@ class FeedDatabase extends $FeedDatabase with TrigramQueryBuilderMixin {
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
+      if (kDebugMode) {
+        // This check pulls in a fair amount of code that's not needed
+        // anywhere else, so we recommend only doing it in debug builds.
+        await validateDatabaseSchema();
+      }
+
       await customStatement('PRAGMA foreign_keys = ON;');
       await definitionsDrift.optimizeFtsIndex();
     },

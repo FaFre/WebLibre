@@ -64,6 +64,18 @@ class BangSyncRepository extends _$BangSyncRepository {
     required BangDatabase db,
     required BangGroup group,
   }) async {
+    if (group.bundled == null) {
+      return Result.failure(
+        const ErrorMessage(source: 'BangSync', message: 'Not bundled'),
+      );
+    }
+
+    if (group.remote == null) {
+      return Result.failure(
+        const ErrorMessage(source: 'BangSync', message: 'No remote source'),
+      );
+    }
+
     final lastSync = await db.syncDao
         .getLastSyncOfGroup(group)
         .getSingleOrNull();
@@ -78,7 +90,7 @@ class BangSyncRepository extends _$BangSyncRepository {
       return Result.success(null);
     }
 
-    final result = await sourceService.getBundledBangs(group.bundled, group);
+    final result = await sourceService.getBundledBangs(group.bundled!, group);
     return result.flatMapAsync((remoteBangs) async {
       await db.syncDao.syncBangs(
         group: group,
@@ -107,7 +119,7 @@ class BangSyncRepository extends _$BangSyncRepository {
                     bangDataSourceServiceProvider.notifier,
                   ),
                   db: db,
-                  url: Uri.parse(group.remote),
+                  url: Uri.parse(group.remote!),
                   group: group,
                   syncInterval: syncInterval,
                 );
@@ -163,7 +175,7 @@ class BangSyncRepository extends _$BangSyncRepository {
     Set<BangGroup>? groups,
   }) async {
     //Default to all sources
-    groups ??= BangGroup.values.toSet();
+    groups ??= BangGroup.values.where((e) => e.bundled != null).toSet();
 
     //Run isolated operations
     final futures = groups.map(

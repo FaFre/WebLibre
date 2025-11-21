@@ -48,6 +48,10 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
     );
   }
 
+  Future<int> upsertBang(Bang bang) {
+    return db.bang.insertOne(bang, mode: InsertMode.insertOrReplace);
+  }
+
   SingleOrNullSelectable<BangData> getBangData(
     BangGroup group,
     String trigger,

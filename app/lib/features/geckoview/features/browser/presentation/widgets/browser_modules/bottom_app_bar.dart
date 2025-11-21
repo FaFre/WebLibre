@@ -426,7 +426,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 const Divider(),
                 MenuItemButton(
                   onPressed: () async {
-                    await BangCategoriesRoute().push(context);
+                    await const BangMenuRoute().push(context);
                   },
                   leadingIcon: const Icon(MdiIcons.exclamationThick),
                   child: const Text('Bangs'),

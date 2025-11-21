@@ -15,6 +15,8 @@ abstract class _$BangCWProxy {
 
   Bang urlTemplate(String urlTemplate);
 
+  Bang searxngApi(bool searxngApi);
+
   Bang group(BangGroup? group);
 
   Bang category(String? category);
@@ -37,6 +39,7 @@ abstract class _$BangCWProxy {
     String domain,
     String trigger,
     String urlTemplate,
+    bool searxngApi,
     BangGroup? group,
     String? category,
     String? subCategory,
@@ -63,6 +66,9 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
 
   @override
   Bang urlTemplate(String urlTemplate) => call(urlTemplate: urlTemplate);
+
+  @override
+  Bang searxngApi(bool searxngApi) => call(searxngApi: searxngApi);
 
   @override
   Bang group(BangGroup? group) => call(group: group);
@@ -93,6 +99,7 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
     Object? domain = const $CopyWithPlaceholder(),
     Object? trigger = const $CopyWithPlaceholder(),
     Object? urlTemplate = const $CopyWithPlaceholder(),
+    Object? searxngApi = const $CopyWithPlaceholder(),
     Object? group = const $CopyWithPlaceholder(),
     Object? category = const $CopyWithPlaceholder(),
     Object? subCategory = const $CopyWithPlaceholder(),
@@ -118,6 +125,11 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
           ? _value.urlTemplate
           // ignore: cast_nullable_to_non_nullable
           : urlTemplate as String,
+      searxngApi:
+          searxngApi == const $CopyWithPlaceholder() || searxngApi == null
+          ? _value.searxngApi
+          // ignore: cast_nullable_to_non_nullable
+          : searxngApi as bool,
       group: group == const $CopyWithPlaceholder()
           ? _value.group
           // ignore: cast_nullable_to_non_nullable
@@ -158,6 +170,7 @@ Bang _$BangFromJson(Map<String, dynamic> json) => Bang(
   domain: json['d'] as String,
   trigger: json['t'] as String,
   urlTemplate: json['u'] as String,
+  searxngApi: json['searxngApi'] as bool,
   category: json['c'] as String?,
   subCategory: json['sc'] as String?,
   format: (json['fmt'] as List<dynamic>?)
@@ -177,6 +190,7 @@ Map<String, dynamic> _$BangToJson(Bang instance) => <String, dynamic>{
   'sc': instance.subCategory,
   'fmt': instance.format?.map((e) => _$BangFormatEnumMap[e]!).toList(),
   'ts': instance.additionalTriggers?.toList(),
+  'searxngApi': instance.searxngApi,
 };
 
 const _$BangFormatEnumMap = {

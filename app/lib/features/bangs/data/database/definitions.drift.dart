@@ -25,6 +25,7 @@ typedef $BangTableCreateCompanionBuilder =
       i0.Value<String?> subCategory,
       i0.Value<Set<i1.BangFormat>?> format,
       i0.Value<Set<String>?> additionalTriggers,
+      i0.Value<bool> searxngApi,
       i0.Value<int> rowid,
     });
 typedef $BangTableUpdateCompanionBuilder =
@@ -38,6 +39,7 @@ typedef $BangTableUpdateCompanionBuilder =
       i0.Value<String?> subCategory,
       i0.Value<Set<i1.BangFormat>?> format,
       i0.Value<Set<String>?> additionalTriggers,
+      i0.Value<bool> searxngApi,
       i0.Value<int> rowid,
     });
 
@@ -101,6 +103,11 @@ class $BangTableFilterComposer
     column: $table.additionalTriggers,
     builder: (column) => i0.ColumnWithTypeConverterFilters(column),
   );
+
+  i0.ColumnFilters<bool> get searxngApi => $composableBuilder(
+    column: $table.searxngApi,
+    builder: (column) => i0.ColumnFilters(column),
+  );
 }
 
 class $BangTableOrderingComposer
@@ -156,6 +163,11 @@ class $BangTableOrderingComposer
     column: $table.additionalTriggers,
     builder: (column) => i0.ColumnOrderings(column),
   );
+
+  i0.ColumnOrderings<bool> get searxngApi => $composableBuilder(
+    column: $table.searxngApi,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
 }
 
 class $BangTableAnnotationComposer
@@ -202,6 +214,11 @@ class $BangTableAnnotationComposer
     column: $table.additionalTriggers,
     builder: (column) => column,
   );
+
+  i0.GeneratedColumn<bool> get searxngApi => $composableBuilder(
+    column: $table.searxngApi,
+    builder: (column) => column,
+  );
 }
 
 class $BangTableTableManager
@@ -245,6 +262,7 @@ class $BangTableTableManager
                 i0.Value<Set<i1.BangFormat>?> format = const i0.Value.absent(),
                 i0.Value<Set<String>?> additionalTriggers =
                     const i0.Value.absent(),
+                i0.Value<bool> searxngApi = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangCompanion(
                 trigger: trigger,
@@ -256,6 +274,7 @@ class $BangTableTableManager
                 subCategory: subCategory,
                 format: format,
                 additionalTriggers: additionalTriggers,
+                searxngApi: searxngApi,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -270,6 +289,7 @@ class $BangTableTableManager
                 i0.Value<Set<i1.BangFormat>?> format = const i0.Value.absent(),
                 i0.Value<Set<String>?> additionalTriggers =
                     const i0.Value.absent(),
+                i0.Value<bool> searxngApi = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangCompanion.insert(
                 trigger: trigger,
@@ -281,6 +301,7 @@ class $BangTableTableManager
                 subCategory: subCategory,
                 format: format,
                 additionalTriggers: additionalTriggers,
+                searxngApi: searxngApi,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1364,6 +1385,15 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
     requiredDuringInsert: false,
     $customConstraints: '',
   ).withConverter<Set<String>?>(i3.BangTable.$converteradditionalTriggers);
+  late final i0.GeneratedColumn<bool> searxngApi = i0.GeneratedColumn<bool>(
+    'searxng_api',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT FALSE',
+    defaultValue: const i0.CustomExpression('FALSE'),
+  );
   @override
   List<i0.GeneratedColumn> get $columns => [
     trigger,
@@ -1375,6 +1405,7 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
     subCategory,
     format,
     additionalTriggers,
+    searxngApi,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1402,6 +1433,10 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
       urlTemplate: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
         data['${effectivePrefix}url_template'],
+      )!,
+      searxngApi: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}searxng_api'],
       )!,
       group: i3.BangTable.$convertergroup.fromSql(
         attachedDatabase.typeMapping.read(
@@ -1461,6 +1496,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
   final i0.Value<String?> subCategory;
   final i0.Value<Set<i1.BangFormat>?> format;
   final i0.Value<Set<String>?> additionalTriggers;
+  final i0.Value<bool> searxngApi;
   final i0.Value<int> rowid;
   const BangCompanion({
     this.trigger = const i0.Value.absent(),
@@ -1472,6 +1508,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     this.subCategory = const i0.Value.absent(),
     this.format = const i0.Value.absent(),
     this.additionalTriggers = const i0.Value.absent(),
+    this.searxngApi = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
   BangCompanion.insert({
@@ -1484,6 +1521,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     this.subCategory = const i0.Value.absent(),
     this.format = const i0.Value.absent(),
     this.additionalTriggers = const i0.Value.absent(),
+    this.searxngApi = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   }) : trigger = i0.Value(trigger),
        group = i0.Value(group),
@@ -1500,6 +1538,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     i0.Expression<String>? subCategory,
     i0.Expression<String>? format,
     i0.Expression<String>? additionalTriggers,
+    i0.Expression<bool>? searxngApi,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
@@ -1512,6 +1551,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
       if (subCategory != null) 'sub_category': subCategory,
       if (format != null) 'format': format,
       if (additionalTriggers != null) 'additional_triggers': additionalTriggers,
+      if (searxngApi != null) 'searxng_api': searxngApi,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1526,6 +1566,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     i0.Value<String?>? subCategory,
     i0.Value<Set<i1.BangFormat>?>? format,
     i0.Value<Set<String>?>? additionalTriggers,
+    i0.Value<bool>? searxngApi,
     i0.Value<int>? rowid,
   }) {
     return i3.BangCompanion(
@@ -1538,6 +1579,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
       subCategory: subCategory ?? this.subCategory,
       format: format ?? this.format,
       additionalTriggers: additionalTriggers ?? this.additionalTriggers,
+      searxngApi: searxngApi ?? this.searxngApi,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1580,6 +1622,9 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
         ),
       );
     }
+    if (searxngApi.present) {
+      map['searxng_api'] = i0.Variable<bool>(searxngApi.value);
+    }
     if (rowid.present) {
       map['rowid'] = i0.Variable<int>(rowid.value);
     }
@@ -1598,6 +1643,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
           ..write('subCategory: $subCategory, ')
           ..write('format: $format, ')
           ..write('additionalTriggers: $additionalTriggers, ')
+          ..write('searxngApi: $searxngApi, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2986,6 +3032,7 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i6.BangData>
     subCategory,
     format,
     additionalTriggers,
+    searxngApi,
     frequency,
     lastUsed,
   ];
@@ -3026,6 +3073,10 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i6.BangData>
           data['${effectivePrefix}group'],
         )!,
       ),
+      searxngApi: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}searxng_api'],
+      )!,
       category: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
         data['${effectivePrefix}category'],
@@ -3117,6 +3168,15 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i6.BangData>
     true,
     type: i0.DriftSqlType.string,
   ).withConverter<Set<String>?>(i3.BangTable.$converteradditionalTriggers);
+  late final i0.GeneratedColumn<bool> searxngApi = i0.GeneratedColumn<bool>(
+    'searxng_api',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.bool,
+    defaultConstraints: i0.GeneratedColumn.constraintIsAlways(
+      'CHECK ("searxng_api" IN (0, 1))',
+    ),
+  );
   late final i0.GeneratedColumn<int> frequency = i0.GeneratedColumn<int>(
     'frequency',
     aliasedName,
@@ -3196,6 +3256,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
         trigger: row.read<String>('trigger'),
         urlTemplate: row.read<String>('url_template'),
         group: i3.BangTable.$convertergroup.fromSql(row.read<int>('group')),
+        searxngApi: row.read<bool>('searxng_api'),
         category: row.readNullable<String>('category'),
         subCategory: row.readNullable<String>('sub_category'),
         format: i3.BangTable.$converterformat.fromSql(
@@ -3222,6 +3283,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
         trigger: row.read<String>('trigger'),
         urlTemplate: row.read<String>('url_template'),
         group: i3.BangTable.$convertergroup.fromSql(row.read<int>('group')),
+        searxngApi: row.read<bool>('searxng_api'),
         category: row.readNullable<String>('category'),
         subCategory: row.readNullable<String>('sub_category'),
         format: i3.BangTable.$converterformat.fromSql(

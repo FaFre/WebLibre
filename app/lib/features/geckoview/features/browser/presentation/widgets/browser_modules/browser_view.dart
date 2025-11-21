@@ -173,16 +173,14 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         launchedFromIntent: true,
                       );
                 case SharedText():
-                  final defaultSearchBang =
+                  final bang =
                       ref.read(selectedBangDataProvider()) ??
                       await ref.read(defaultSearchBangDataProvider.future);
 
                   await ref
                       .read(tabRepositoryProvider.notifier)
                       .addTab(
-                        url: defaultSearchBang?.getTemplateUrl(
-                          sharedContent.text,
-                        ),
+                        url: bang?.getTemplateUrl(sharedContent.text),
                         private:
                             settings.tabIntentOpenSetting ==
                             TabIntentOpenSetting.private,

@@ -19,27 +19,55 @@
  */
 part of 'routes.dart';
 
-@TypedGoRoute<BangCategoriesRoute>(
+@TypedGoRoute<BangMenuRoute>(
   name: 'BangRoute',
   path: '/bangs',
   routes: [
+    TypedGoRoute<UserBangsRoute>(
+      name: 'UserBangsRoute',
+      path: 'user',
+      routes: [
+        TypedGoRoute<NewUserBangRoute>(name: 'NewUserBangRoute', path: 'new'),
+        TypedGoRoute<EditUserBangRoute>(
+          name: 'EditUserBangRoute',
+          path: 'edit',
+        ),
+      ],
+    ),
     TypedGoRoute<BangSearchRoute>(
       name: 'BangSearchRoute',
       path: 'search/:searchText',
     ),
-    TypedGoRoute<BangCategoryRoute>(
-      name: 'BangCategoryRoute',
-      path: 'category/:category',
+    TypedGoRoute<BangCategoriesRoute>(
+      name: 'BangCategoriesRoute',
+      path: 'categories',
       routes: [
-        TypedGoRoute<BangSubCategoryRoute>(
-          name: 'BangSubCategoryRoute',
-          path: ':subCategory',
+        TypedGoRoute<BangCategoryRoute>(
+          name: 'BangCategoryRoute',
+          path: 'category/:category',
+          routes: [
+            TypedGoRoute<BangSubCategoryRoute>(
+              name: 'BangSubCategoryRoute',
+              path: ':subCategory',
+            ),
+          ],
         ),
       ],
     ),
   ],
 )
+class BangMenuRoute extends GoRouteData with $BangMenuRoute {
+  const BangMenuRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const BangMenuScreen();
+  }
+}
+
 class BangCategoriesRoute extends GoRouteData with $BangCategoriesRoute {
+  const BangCategoriesRoute();
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BangCategoriesScreen();
@@ -53,7 +81,7 @@ class BangCategoryRoute extends GoRouteData with $BangCategoryRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BangListScreen(category: category);
+    return BangCategoryScreen(category: category);
   }
 }
 
@@ -68,7 +96,7 @@ class BangSubCategoryRoute extends GoRouteData with $BangSubCategoryRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BangListScreen(category: category, subCategory: subCategory);
+    return BangCategoryScreen(category: category, subCategory: subCategory);
   }
 }
 
@@ -86,6 +114,39 @@ class BangSearchRoute extends GoRouteData with $BangSearchRoute {
       initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
           ? null
           : searchText,
+    );
+  }
+}
+
+class UserBangsRoute extends GoRouteData with $UserBangsRoute {
+  const UserBangsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const UserBangs();
+  }
+}
+
+class NewUserBangRoute extends GoRouteData with $NewUserBangRoute {
+  const NewUserBangRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const EditBangScreen(initialBang: null);
+  }
+}
+
+class EditUserBangRoute extends GoRouteData with $EditUserBangRoute {
+  final String initialBang;
+
+  const EditUserBangRoute({required this.initialBang});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return EditBangScreen(
+      initialBang: Bang.fromJson(
+        jsonDecode(initialBang) as Map<String, dynamic>,
+      ),
     );
   }
 }

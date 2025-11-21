@@ -15,6 +15,8 @@ abstract class _$BangDataCWProxy {
 
   BangData urlTemplate(String urlTemplate);
 
+  BangData searxngApi(bool searxngApi);
+
   BangData category(String? category);
 
   BangData subCategory(String? subCategory);
@@ -41,6 +43,7 @@ abstract class _$BangDataCWProxy {
     String domain,
     String trigger,
     String urlTemplate,
+    bool searxngApi,
     String? category,
     String? subCategory,
     Set<BangFormat>? format,
@@ -69,6 +72,9 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
 
   @override
   BangData urlTemplate(String urlTemplate) => call(urlTemplate: urlTemplate);
+
+  @override
+  BangData searxngApi(bool searxngApi) => call(searxngApi: searxngApi);
 
   @override
   BangData category(String? category) => call(category: category);
@@ -105,6 +111,7 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
     Object? domain = const $CopyWithPlaceholder(),
     Object? trigger = const $CopyWithPlaceholder(),
     Object? urlTemplate = const $CopyWithPlaceholder(),
+    Object? searxngApi = const $CopyWithPlaceholder(),
     Object? category = const $CopyWithPlaceholder(),
     Object? subCategory = const $CopyWithPlaceholder(),
     Object? format = const $CopyWithPlaceholder(),
@@ -132,6 +139,11 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
           ? _value.urlTemplate
           // ignore: cast_nullable_to_non_nullable
           : urlTemplate as String,
+      searxngApi:
+          searxngApi == const $CopyWithPlaceholder() || searxngApi == null
+          ? _value.searxngApi
+          // ignore: cast_nullable_to_non_nullable
+          : searxngApi as bool,
       category: category == const $CopyWithPlaceholder()
           ? _value.category
           // ignore: cast_nullable_to_non_nullable
