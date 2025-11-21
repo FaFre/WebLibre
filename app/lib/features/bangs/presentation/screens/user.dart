@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
@@ -35,7 +36,12 @@ class UserBangs extends HookConsumerWidget {
                       onPressed: (context) async {
                         await ref
                             .read(bangDataRepositoryProvider.notifier)
-                            .deleteBang(BangGroup.user, bang.trigger);
+                            .deleteBang(
+                              BangKey(
+                                group: BangGroup.user,
+                                trigger: bang.trigger,
+                              ),
+                            );
                       },
                       backgroundColor: Theme.of(
                         context,

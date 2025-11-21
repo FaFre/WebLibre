@@ -106,11 +106,8 @@ class BangDataRepository extends _$BangDataRepository {
         .watch();
   }
 
-  Future<void> increaseFrequency(BangGroup group, String trigger) {
-    return ref
-        .read(bangDatabaseProvider)
-        .bangDao
-        .increaseBangFrequency(group, trigger);
+  Future<void> increaseFrequency(BangKey key) {
+    return ref.read(bangDatabaseProvider).bangDao.increaseBangFrequency(key);
   }
 
   Future<void> addSearchEntry(
@@ -149,7 +146,9 @@ class BangDataRepository extends _$BangDataRepository {
     return ref.read(bangDatabaseProvider).bangDao.upsertBang(bang);
   }
 
-  Future<void> deleteBang(BangGroup group, String trigger) {
-    return ref.read(bangDatabaseProvider).syncDao.deleteBangs(group, [trigger]);
+  Future<void> deleteBang(BangKey key) {
+    return ref.read(bangDatabaseProvider).syncDao.deleteBangs(key.group, [
+      key.trigger,
+    ]);
   }
 }

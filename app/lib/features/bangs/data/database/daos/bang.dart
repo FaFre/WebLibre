@@ -25,6 +25,7 @@ import 'package:weblibre/features/bangs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 
 @DriftAccessor()
 class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
@@ -110,11 +111,11 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
     return selectable;
   }
 
-  Future<int> increaseBangFrequency(BangGroup group, String trigger) {
+  Future<int> increaseBangFrequency(BangKey key) {
     return db.bangFrequency.insertOne(
       BangFrequencyCompanion.insert(
-        trigger: trigger,
-        group: group,
+        trigger: key.trigger,
+        group: key.group,
         frequency: 1,
         lastUsed: DateTime.now(),
       ),

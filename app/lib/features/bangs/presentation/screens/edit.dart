@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/utils/form_validators.dart';
@@ -64,7 +65,12 @@ class EditBangScreen extends HookConsumerWidget {
                     initialBang!.trigger != bang.trigger) {
                   await ref
                       .read(bangDataRepositoryProvider.notifier)
-                      .deleteBang(BangGroup.user, initialBang!.trigger);
+                      .deleteBang(
+                        BangKey(
+                          group: BangGroup.user,
+                          trigger: initialBang!.trigger,
+                        ),
+                      );
                 }
 
                 await ref
@@ -288,7 +294,12 @@ class EditBangScreen extends HookConsumerWidget {
                         if (result == true) {
                           await ref
                               .read(bangDataRepositoryProvider.notifier)
-                              .deleteBang(BangGroup.user, initialBang!.trigger);
+                              .deleteBang(
+                                BangKey(
+                                  group: BangGroup.user,
+                                  trigger: initialBang!.trigger,
+                                ),
+                              );
 
                           if (context.mounted) {
                             context.pop();
