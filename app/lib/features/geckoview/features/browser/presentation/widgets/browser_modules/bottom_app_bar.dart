@@ -433,6 +433,13 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 ),
                 MenuItemButton(
                   onPressed: () async {
+                    await ContainerListRoute().push(context);
+                  },
+                  leadingIcon: const Icon(MdiIcons.folder),
+                  child: const Text('Containers'),
+                ),
+                MenuItemButton(
+                  onPressed: () async {
                     await context.push(FeedListRoute().location);
                   },
                   leadingIcon: const Icon(Icons.rss_feed),
