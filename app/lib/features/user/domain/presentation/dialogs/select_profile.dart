@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -26,10 +27,37 @@ class SelectProfileDialog extends HookConsumerWidget {
               title: Text(profile.name),
               subtitle: isSelected ? const Text('Active') : null,
               onTap: () async {
-                await ref
-                    .read(profileRepositoryProvider.notifier)
-                    .switchProfile(profile.id);
-                await exitApp(ref.container);
+                final result = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    icon: const Icon(Icons.warning),
+                    title: const Text('Switch User'),
+                    content: Text(
+                      "Switching to User '${profile.name}' will require a restart of the Browser",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          context.pop(false);
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.pop(true);
+                        },
+                        child: const Text('Switch Profile'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (result == true) {
+                  await ref
+                      .read(profileRepositoryProvider.notifier)
+                      .switchProfile(profile.id);
+                  await exitApp(ref.container);
+                }
               },
             );
           }).toList(),
