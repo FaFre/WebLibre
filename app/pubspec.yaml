@@ -37,7 +37,6 @@ dependencies:
   hooks_riverpod: ^3.0.3
   html: ^0.15.6
   http: ^1.6.0
-  http_parser: ^4.1.2
   intl: ^0.20.2
   json_annotation: ^4.9.0
   lexo_rank:
