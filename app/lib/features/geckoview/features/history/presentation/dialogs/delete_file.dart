@@ -20,6 +20,7 @@ Future<DeleteDecision?> showDeleteFileDialog(
           final remember = useState(false);
 
           return AlertDialog(
+            icon: const Icon(Icons.warning),
             title: const Text('Delete Downloaded File?'),
             content: Column(
               mainAxisSize: MainAxisSize.min,

@@ -83,6 +83,7 @@ class ProfileEditScreen extends HookConsumerWidget {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
+                            icon: const Icon(Icons.warning),
                             title: const Text('Delete User'),
                             content: const Text(
                               'Are you sure you want to delete this User including all data?',

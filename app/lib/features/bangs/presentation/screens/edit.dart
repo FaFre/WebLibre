@@ -293,6 +293,7 @@ class EditBangScreen extends HookConsumerWidget {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
+                              icon: const Icon(Icons.warning),
                               title: const Text('Delete Bang'),
                               content: const Text(
                                 'Are you sure you want to delete this Bang?',
