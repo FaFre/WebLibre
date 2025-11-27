@@ -280,7 +280,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   child: Consumer(
                     builder: (context, ref, child) {
                       final profile = ref.watch(selectedProfileProvider);
-                      return Text(profile.value?.name ?? 'Profile');
+                      return Text(profile.value?.name ?? 'User');
                     },
                   ),
                 ),

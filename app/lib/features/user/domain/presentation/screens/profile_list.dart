@@ -15,7 +15,7 @@ class ProfileListScreen extends HookConsumerWidget {
     final usersAsync = ref.watch(profileRepositoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profiles')),
+      appBar: AppBar(title: const Text('Users')),
       body: usersAsync.when(
         data: (profiles) => ListView.builder(
           itemCount: profiles.length,
