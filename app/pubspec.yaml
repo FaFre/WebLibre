@@ -29,7 +29,7 @@ dependencies:
     path: ../packages/flutter_mozilla_components
   flutter_reorderable_grid_view: ^5.5.2
   flutter_slidable: ^4.0.3
-  flutter_svg: ^2.2.2
+  flutter_svg: ^2.2.3
   go_router: ^17.0.0
   google_fonts: ^6.3.2
   graphview: ^1.5.1
