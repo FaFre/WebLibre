@@ -442,11 +442,33 @@ RouteBase get $browserRoute => GoRouteData.$route(
       name: 'OpenSharedContentRoute',
       factory: $OpenSharedContentRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: 'profile',
+      name: 'SelectProfileRoute',
+      factory: $SelectProfileRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'profiles',
+      name: 'ProfileListRoute',
+      factory: $ProfileListRoute._fromState,
+      routes: [
+        GoRouteData.$route(
+          path: 'edit',
+          name: 'ProfileEditScreen',
+          factory: $EditProfileRoute._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'create',
+          name: 'CreateProfileRoute',
+          factory: $CreateProfileRoute._fromState,
+        ),
+      ],
+    ),
   ],
 );
 
 mixin $BrowserRoute on GoRouteData {
-  static BrowserRoute _fromState(GoRouterState state) => BrowserRoute();
+  static BrowserRoute _fromState(GoRouterState state) => const BrowserRoute();
 
   @override
   String get location => GoRouteData.$location('/browser');
@@ -511,7 +533,7 @@ const _$TabTypeEnumMap = {
 };
 
 mixin $TorProxyRoute on GoRouteData {
-  static TorProxyRoute _fromState(GoRouterState state) => TorProxyRoute();
+  static TorProxyRoute _fromState(GoRouterState state) => const TorProxyRoute();
 
   @override
   String get location => GoRouteData.$location('/browser/tor_proxy');
@@ -531,7 +553,7 @@ mixin $TorProxyRoute on GoRouteData {
 }
 
 mixin $HistoryRoute on GoRouteData {
-  static HistoryRoute _fromState(GoRouterState state) => HistoryRoute();
+  static HistoryRoute _fromState(GoRouterState state) => const HistoryRoute();
 
   @override
   String get location => GoRouteData.$location('/browser/history');
@@ -551,7 +573,7 @@ mixin $HistoryRoute on GoRouteData {
 }
 
 mixin $TabViewRoute on GoRouteData {
-  static TabViewRoute _fromState(GoRouterState state) => TabViewRoute();
+  static TabViewRoute _fromState(GoRouterState state) => const TabViewRoute();
 
   @override
   String get location => GoRouteData.$location('/browser/tab_view');
@@ -598,7 +620,7 @@ mixin $ContextMenuRoute on GoRouteData {
 
 mixin $ContainerDraftRoute on GoRouteData {
   static ContainerDraftRoute _fromState(GoRouterState state) =>
-      ContainerDraftRoute();
+      const ContainerDraftRoute();
 
   @override
   String get location => GoRouteData.$location('/browser/container_draft');
@@ -619,7 +641,7 @@ mixin $ContainerDraftRoute on GoRouteData {
 
 mixin $ContainerListRoute on GoRouteData {
   static ContainerListRoute _fromState(GoRouterState state) =>
-      ContainerListRoute();
+      const ContainerListRoute();
 
   @override
   String get location => GoRouteData.$location('/browser/containers');
@@ -692,7 +714,7 @@ mixin $ContainerEditRoute on GoRouteData {
 
 mixin $ContainerSelectionRoute on GoRouteData {
   static ContainerSelectionRoute _fromState(GoRouterState state) =>
-      ContainerSelectionRoute();
+      const ContainerSelectionRoute();
 
   @override
   String get location => GoRouteData.$location('/browser/select_container');
@@ -751,6 +773,94 @@ mixin $OpenSharedContentRoute on GoRouteData {
       if (_self.sharedUrl != 'about:blank') 'shared-url': _self.sharedUrl,
     },
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SelectProfileRoute on GoRouteData {
+  static SelectProfileRoute _fromState(GoRouterState state) =>
+      const SelectProfileRoute();
+
+  @override
+  String get location => GoRouteData.$location('/browser/profile');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ProfileListRoute on GoRouteData {
+  static ProfileListRoute _fromState(GoRouterState state) => ProfileListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/browser/profiles');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $EditProfileRoute on GoRouteData {
+  static EditProfileRoute _fromState(GoRouterState state) =>
+      EditProfileRoute(profile: state.uri.queryParameters['profile']!);
+
+  EditProfileRoute get _self => this as EditProfileRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/profiles/edit',
+    queryParams: {'profile': _self.profile},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $CreateProfileRoute on GoRouteData {
+  static CreateProfileRoute _fromState(GoRouterState state) =>
+      CreateProfileRoute();
+
+  @override
+  String get location => GoRouteData.$location('/browser/profiles/create');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -123,10 +123,10 @@ class GeckoAddonService extends GeckoAddonEvents {
     );
   }
 
-  void dispose() {
-    unawaited(_browserExtensionSubject.close());
-    unawaited(_pageExtensionSubject.close());
-    unawaited(_browserIconSubject.close());
-    unawaited(_pageIconSubject.close());
+  Future<void> dispose() async {
+    await _browserExtensionSubject.close();
+    await _pageExtensionSubject.close();
+    await _browserIconSubject.close();
+    await _pageIconSubject.close();
   }
 }

@@ -210,23 +210,23 @@ class GeckoEventService extends GeckoStateEvents {
     );
   }
 
-  void dispose() {
-    unawaited(_viewStateSubject.close());
-    unawaited(_engineStateSubject.close());
-    unawaited(_tabListSubject.close());
-    unawaited(_selectedTabSubject.close());
-    unawaited(_tabContentSubject.close());
-    unawaited(_historySubject.close());
-    unawaited(_readerableSubject.close());
-    unawaited(_securityInfoSubject.close());
-    unawaited(_iconChangeSubject.close());
-    unawaited(_iconUpdateSubject.close());
-    unawaited(_thumbnailSubject.close());
-    unawaited(_findResultsSubject.close());
-    unawaited(_longPressSubject.close());
-    unawaited(_scrollEventSubject.close());
-    unawaited(_tabAddedSubject.close());
-    unawaited(_prefUpdateSubject.close());
-    unawaited(_siteAssignementSubject.close());
+  Future<void> dispose() async {
+    await _viewStateSubject.close();
+    await _engineStateSubject.close();
+    await _tabListSubject.close();
+    await _selectedTabSubject.close();
+    await _tabContentSubject.close();
+    await _historySubject.close();
+    await _readerableSubject.close();
+    await _securityInfoSubject.close();
+    await _iconChangeSubject.close();
+    await _iconUpdateSubject.close();
+    await _thumbnailSubject.close();
+    await _findResultsSubject.close();
+    await _longPressSubject.close();
+    await _scrollEventSubject.close();
+    await _tabAddedSubject.close();
+    await _prefUpdateSubject.close();
+    await _siteAssignementSubject.close();
   }
 }

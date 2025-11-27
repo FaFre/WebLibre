@@ -18,25 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:exceptions/exceptions.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/features/user/domain/services/fingerprinting.dart';
 
 part 'providers.g.dart';
-
-const _authKey = 'pb_auth';
-
-@Riverpod()
-Future<String?> _storedAuthData(Ref ref) {
-  const secureStorage = FlutterSecureStorage();
-  return secureStorage.read(key: _authKey);
-}
 
 @Riverpod()
 Stream<double> iconCacheSizeMegabytes(Ref ref) {
@@ -72,4 +66,10 @@ Future<Result<FingerprintOverrides>> fingerprintOverrideSettings(
   );
 
   return overrides;
+}
+
+@Riverpod(keepAlive: true)
+Future<Profile> selectedProfile(Ref ref) async {
+  final profiles = await ref.watch(profileRepositoryProvider.future);
+  return profiles.firstWhere((p) => p.uuidValue == filesystem.selectedProfile);
 }

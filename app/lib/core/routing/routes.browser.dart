@@ -64,10 +64,27 @@ part of 'routes.dart';
       name: 'OpenSharedContentRoute',
       path: 'open_content',
     ),
+    TypedGoRoute<SelectProfileRoute>(
+      name: 'SelectProfileRoute',
+      path: 'profile',
+    ),
+    TypedGoRoute<ProfileListRoute>(
+      name: 'ProfileListRoute',
+      path: 'profiles',
+      routes: [
+        TypedGoRoute<EditProfileRoute>(name: 'ProfileEditScreen', path: 'edit'),
+        TypedGoRoute<CreateProfileRoute>(
+          name: 'CreateProfileRoute',
+          path: 'create',
+        ),
+      ],
+    ),
   ],
 )
 class BrowserRoute extends GoRouteData with $BrowserRoute {
   static const name = 'BrowserRoute';
+
+  const BrowserRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -106,6 +123,8 @@ class SearchRoute extends GoRouteData with $SearchRoute {
 }
 
 class TorProxyRoute extends GoRouteData with $TorProxyRoute {
+  const TorProxyRoute();
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const TorProxyScreen();
@@ -113,6 +132,8 @@ class TorProxyRoute extends GoRouteData with $TorProxyRoute {
 }
 
 class ContainerDraftRoute extends GoRouteData with $ContainerDraftRoute {
+  const ContainerDraftRoute();
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ContainerDraftSuggestionsScreen();
@@ -120,6 +141,8 @@ class ContainerDraftRoute extends GoRouteData with $ContainerDraftRoute {
 }
 
 class ContainerListRoute extends GoRouteData with $ContainerListRoute {
+  const ContainerListRoute();
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ContainerListScreen();
@@ -128,6 +151,8 @@ class ContainerListRoute extends GoRouteData with $ContainerListRoute {
 
 class ContainerSelectionRoute extends GoRouteData
     with $ContainerSelectionRoute {
+  const ContainerSelectionRoute();
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ContainerSelectionScreen();
@@ -137,7 +162,7 @@ class ContainerSelectionRoute extends GoRouteData
 class ContainerEditRoute extends GoRouteData with $ContainerEditRoute {
   final String containerData;
 
-  ContainerEditRoute({required this.containerData});
+  const ContainerEditRoute({required this.containerData});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -205,6 +230,8 @@ class OpenSharedContentRoute extends GoRouteData with $OpenSharedContentRoute {
 }
 
 class HistoryRoute extends GoRouteData with $HistoryRoute {
+  const HistoryRoute();
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const HistoryScreen();
@@ -212,8 +239,46 @@ class HistoryRoute extends GoRouteData with $HistoryRoute {
 }
 
 class TabViewRoute extends GoRouteData with $TabViewRoute {
+  const TabViewRoute();
+
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const TabViewScreen());
+  }
+}
+
+class SelectProfileRoute extends GoRouteData with $SelectProfileRoute {
+  const SelectProfileRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(builder: (_) => SelectProfileDialog());
+  }
+}
+
+class ProfileListRoute extends GoRouteData with $ProfileListRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ProfileListScreen();
+  }
+}
+
+class CreateProfileRoute extends GoRouteData with $CreateProfileRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ProfileEditScreen(profile: null);
+  }
+}
+
+class EditProfileRoute extends GoRouteData with $EditProfileRoute {
+  final String profile;
+
+  const EditProfileRoute({required this.profile});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProfileEditScreen(
+      profile: Profile.fromJson(jsonDecode(profile) as Map<String, dynamic>),
+    );
   }
 }

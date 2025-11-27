@@ -102,7 +102,7 @@ final class EventServiceProvider
   }
 }
 
-String _$eventServiceHash() => r'166b01f636fbdd4355dbc55a18ca4f83e0006de8';
+String _$eventServiceHash() => r'3a297348fadda05dc60433d7ce8f662b2ff62c26';
 
 @ProviderFor(addonService)
 const addonServiceProvider = AddonServiceProvider._();
@@ -149,7 +149,7 @@ final class AddonServiceProvider
   }
 }
 
-String _$addonServiceHash() => r'c7aca09b99c3810908176f3464f5f90a185aa5e7';
+String _$addonServiceHash() => r'30fedb35c68943159246df79b5f1b62a25767fa0';
 
 @ProviderFor(tabContentService)
 const tabContentServiceProvider = TabContentServiceProvider._();
@@ -196,7 +196,7 @@ final class TabContentServiceProvider
   }
 }
 
-String _$tabContentServiceHash() => r'd9a991add907ecc138c62790883e59d8e9aa9266';
+String _$tabContentServiceHash() => r'12d8322c37ded4ad3344af327d884bbf7f089594';
 
 @ProviderFor(engineSuggestionsService)
 const engineSuggestionsServiceProvider = EngineSuggestionsServiceProvider._();
@@ -244,7 +244,7 @@ final class EngineSuggestionsServiceProvider
 }
 
 String _$engineSuggestionsServiceHash() =>
-    r'f7414b335564578b2c7f6a86baf8bf13f2d5ba2d';
+    r'1ec1192f0c5c86cecc7ad448ee2b039f7a48e32b';
 
 @ProviderFor(EngineReadyState)
 const engineReadyStateProvider = EngineReadyStateProvider._();

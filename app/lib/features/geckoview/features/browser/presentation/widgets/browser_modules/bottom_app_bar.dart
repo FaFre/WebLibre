@@ -24,7 +24,6 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
@@ -45,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/con
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
@@ -236,7 +236,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                           .show(ViewTabsSheet());
                     }
                   } else {
-                    await TabViewRoute().push(context);
+                    await const TabViewRoute().push(context);
                   }
                 },
                 onLongPress: () {
@@ -272,6 +272,19 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 );
               },
               menuChildren: [
+                MenuItemButton(
+                  onPressed: () async {
+                    await const SelectProfileRoute().push(context);
+                  },
+                  leadingIcon: const Icon(Icons.person),
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final profile = ref.watch(selectedProfileProvider);
+                      return Text(profile.value?.name ?? 'Profile');
+                    },
+                  ),
+                ),
+                const Divider(),
                 Consumer(
                   builder: (context, childRef, child) {
                     final pageExtensions = childRef.watch(
@@ -309,25 +322,25 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   leadingIcon: const Icon(Icons.info),
                   child: const Text('About'),
                 ),
-                MenuItemButton(
-                  onPressed: () async {
-                    final isPrivate =
-                        ref
-                            .read(generalSettingsWithDefaultsProvider)
-                            .defaultCreateTabType ==
-                        TabType.private;
+                // MenuItemButton(
+                //   onPressed: () async {
+                //     final isPrivate =
+                //         ref
+                //             .read(generalSettingsWithDefaultsProvider)
+                //             .defaultCreateTabType ==
+                //         TabType.private;
 
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: ref.read(docsUriProvider),
-                          private: isPrivate,
-                          container: const Value(null),
-                        );
-                  },
-                  leadingIcon: const Icon(Icons.help),
-                  child: const Text('Help and feedback'),
-                ),
+                //     await ref
+                //         .read(tabRepositoryProvider.notifier)
+                //         .addTab(
+                //           url: ref.read(docsUriProvider),
+                //           private: isPrivate,
+                //           container: const Value(null),
+                //         );
+                //   },
+                //   leadingIcon: const Icon(Icons.help),
+                //   child: const Text('Help and feedback'),
+                // ),
                 const Divider(),
                 MenuItemButton(
                   onPressed: () async {
@@ -338,7 +351,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 ),
                 MenuItemButton(
                   onPressed: () async {
-                    await HistoryRoute().push(context);
+                    await const HistoryRoute().push(context);
                   },
                   leadingIcon: const Icon(Icons.history),
                   child: const Text('History'),
@@ -403,7 +416,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 ),
                 MenuItemButton(
                   onPressed: () async {
-                    await TorProxyRoute().push(context);
+                    await const TorProxyRoute().push(context);
                   },
                   leadingIcon: const Icon(TorIcons.onionAlt),
                   child: Consumer(
@@ -433,7 +446,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 ),
                 MenuItemButton(
                   onPressed: () async {
-                    await ContainerListRoute().push(context);
+                    await const ContainerListRoute().push(context);
                   },
                   leadingIcon: const Icon(MdiIcons.folder),
                   child: const Text('Containers'),

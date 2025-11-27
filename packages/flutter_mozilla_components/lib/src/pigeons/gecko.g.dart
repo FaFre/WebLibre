@@ -3574,14 +3574,14 @@ class GeckoBrowserApi {
     }
   }
 
-  Future<void> initialize(LogLevel logLevel, ContentBlocking contentBlocking, AddonCollection? addonCollection) async {
+  Future<void> initialize(String profileFolder, LogLevel logLevel, ContentBlocking contentBlocking, AddonCollection? addonCollection) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[logLevel, contentBlocking, addonCollection]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileFolder, logLevel, contentBlocking, addonCollection]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {

@@ -28,7 +28,6 @@ dependencies:
   flutter_mozilla_components:
     path: ../packages/flutter_mozilla_components
   flutter_reorderable_grid_view: ^5.5.2
-  flutter_secure_storage: ^10.0.0-beta.4
   flutter_slidable: ^4.0.3
   flutter_svg: ^2.2.2
   go_router: ^17.0.0
@@ -80,7 +79,6 @@ dependencies:
   timeago: ^3.7.1
   tor:
     path: ../packages/tor
-  universal_io: ^2.3.1
   uri_to_file:
     git:
       url: https://github.com/FaFre/uri-to-file.git

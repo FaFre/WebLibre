@@ -60,7 +60,7 @@ class GeckoSuggestionsService extends GeckoSuggestionEvents {
     );
   }
 
-  void dispose() {
-    unawaited(_suggestionsSubject.close());
+  Future<void> dispose() async {
+    await _suggestionsSubject.close();
   }
 }

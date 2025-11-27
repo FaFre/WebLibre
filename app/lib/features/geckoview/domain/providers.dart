@@ -130,8 +130,8 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
 GeckoEventService eventService(Ref ref) {
   final service = GeckoEventService.setUp();
 
-  ref.onDispose(() {
-    service.dispose();
+  ref.onDispose(() async {
+    await service.dispose();
   });
 
   return service;
@@ -141,8 +141,8 @@ GeckoEventService eventService(Ref ref) {
 GeckoAddonService addonService(Ref ref) {
   final service = GeckoAddonService.setUp();
 
-  ref.onDispose(() {
-    service.dispose();
+  ref.onDispose(() async {
+    await service.dispose();
   });
 
   return service;
@@ -152,8 +152,8 @@ GeckoAddonService addonService(Ref ref) {
 GeckoTabContentService tabContentService(Ref ref) {
   final service = GeckoTabContentService.setUp();
 
-  ref.onDispose(() {
-    service.dispose();
+  ref.onDispose(() async {
+    await service.dispose();
   });
 
   return service;
@@ -163,8 +163,8 @@ GeckoTabContentService tabContentService(Ref ref) {
 GeckoSuggestionsService engineSuggestionsService(Ref ref) {
   final service = GeckoSuggestionsService.setUp();
 
-  ref.onDispose(() {
-    service.dispose();
+  ref.onDispose(() async {
+    await service.dispose();
   });
 
   return service;

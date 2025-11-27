@@ -19,7 +19,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import mozilla.components.concept.engine.EngineView
@@ -32,7 +31,7 @@ import mozilla.components.feature.downloads.FileSizeFormatter
 import mozilla.components.support.base.android.NotificationsDelegate
 import mozilla.components.support.base.log.Log
 
-class Components(private val context: Context,
+class Components(val profileApplicationContext: Context,
                  val flutterEvents: GeckoStateEvents,
                  val readerViewController: ReaderViewController,
                  val selectionAction: SelectionActionDelegate,
@@ -43,24 +42,24 @@ class Components(private val context: Context,
                  private val tabContentEvents: GeckoTabContentEvents,
                  private val extensionEvents: BrowserExtensionEvents
 ) {
-    val core by lazy { Core(context, this, flutterEvents, extensionEvents) }
+    val core by lazy { Core(profileApplicationContext, this, flutterEvents, extensionEvents) }
     val events by lazy { Events(flutterEvents) }
-    val useCases by lazy { UseCases(context, core.engine, core.store) }
-    val services by lazy { Services(context, useCases.tabsUseCases) }
+    val useCases by lazy { UseCases(profileApplicationContext, core.engine, core.store) }
+    val services by lazy { Services(profileApplicationContext, useCases.tabsUseCases) }
     val features by lazy { Features(core.engine, core.store, addonEvents, tabContentEvents) }
-    val search by lazy { Search(context, core, useCases) }
+    val search by lazy { Search(profileApplicationContext, core, useCases) }
 
     var engineView: EngineView? = null
     var engineReportedInitialized = false
 
-    private val notificationManagerCompat = NotificationManagerCompat.from(context)
+    private val notificationManagerCompat = NotificationManagerCompat.from(profileApplicationContext)
     val notificationsDelegate: NotificationsDelegate by lazy {
         NotificationsDelegate(
             notificationManagerCompat,
         )
     }
 
-    val fileSizeFormatter: FileSizeFormatter by lazy { DefaultFileSizeFormatter(context) }
+    val fileSizeFormatter: FileSizeFormatter by lazy { DefaultFileSizeFormatter(profileApplicationContext) }
 
     val dateTimeProvider: DateTimeProvider by lazy { DefaultDateTimeProvider() }
 

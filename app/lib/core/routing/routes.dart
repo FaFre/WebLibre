@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/widgets/dialog_page.dart';
+import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/about/presentation/screens/about.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/presentation/screens/categories.dart';
@@ -57,6 +58,9 @@ import 'package:weblibre/features/settings/presentation/screens/web_engine_harde
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_settings.dart';
 import 'package:weblibre/features/tor/presentation/screens/tor_proxy.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/select_profile.dart';
+import 'package:weblibre/features/user/domain/presentation/screens/profile_edit.dart';
+import 'package:weblibre/features/user/domain/presentation/screens/profile_list.dart';
 import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article_list.dart';

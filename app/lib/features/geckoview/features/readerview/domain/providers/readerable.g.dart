@@ -54,7 +54,7 @@ final class ReaderableServiceProvider
   }
 }
 
-String _$readerableServiceHash() => r'03182c8afc41f5184322a3206473cbfa96df5819';
+String _$readerableServiceHash() => r'0c432ede496d85ed6a7d028af346b129d97f7502';
 
 @ProviderFor(appearanceButtonVisibility)
 const appearanceButtonVisibilityProvider =

@@ -29,6 +29,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:weblibre/core/error_observer.dart';
+import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
@@ -57,6 +58,7 @@ class _MainWidget extends HookConsumerWidget {
           .fetchSettings();
 
       await GeckoBrowserService().initialize(
+        filesystem.relativeProfilePath,
         kDebugMode ? LogLevel.debug : LogLevel.warn,
         engineSettings.contentBlocking,
         engineSettings.addonCollection,
@@ -136,6 +138,8 @@ void main() async {
     logger.e('Unhandled Error', error: error, stackTrace: stack);
     return true;
   };
+
+  await filesystem.init();
 
   await BackgroundFetch.registerHeadlessTask(backgroundFetch);
 

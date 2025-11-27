@@ -16,7 +16,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
@@ -30,7 +29,6 @@ import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
-import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
@@ -242,7 +240,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             shareResourceFeature.set(
                 ShareResourceFeature(
-                    context = requireContext().applicationContext,
+                    context = components.profileApplicationContext,
                     httpClient = components.core.client,
                     store = components.core.store,
                     tabId = sessionId,
@@ -253,7 +251,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             downloadsFeature.set(
                 feature = DownloadsFeature(
-                    requireContext().applicationContext,
+                    components.profileApplicationContext,
                     store = components.core.store,
                     useCases = components.useCases.downloadsUseCases,
                     fragmentManager = childFragmentManager,
@@ -261,7 +259,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                         Logger.debug("Download done. ID#$id $download with status $status")
                     },
                     downloadManager = FetchDownloadManager(
-                        requireContext().applicationContext,
+                        components.profileApplicationContext,
                         components.core.store,
                         DownloadService::class,
                         notificationsDelegate = components.notificationsDelegate,
@@ -449,7 +447,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     }
 
     private fun openPopup(webExtensionState: WebExtensionState) {
-        val intent = Intent(requireContext().applicationContext, WebExtensionActionPopupActivity::class.java)
+        val intent = Intent(components.profileApplicationContext, WebExtensionActionPopupActivity::class.java)
         intent.putExtra("web_extension_id", webExtensionState.id)
         intent.putExtra("web_extension_name", webExtensionState.name)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK

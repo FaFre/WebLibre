@@ -48,7 +48,7 @@ class GeckoReaderableService extends ReaderViewController {
     );
   }
 
-  void dispose() {
-    unawaited(_appearanceVisibility.close());
+  Future<void> dispose() async {
+    await _appearanceVisibility.close();
   }
 }

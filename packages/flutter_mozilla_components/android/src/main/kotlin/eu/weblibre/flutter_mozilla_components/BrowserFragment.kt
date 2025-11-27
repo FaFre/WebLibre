@@ -6,29 +6,19 @@
 
 package eu.weblibre.flutter_mozilla_components
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.CallSuper
-import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity
-import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
-import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
-import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
-import mozilla.components.browser.state.state.WebExtensionState
-import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
-import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
-import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
-import mozilla.components.support.webextensions.WebExtensionPopupObserver
 
 /**
  * Fragment used for browsing the web within the main app.
  */
 class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
     override fun createEngine(components: Components): EngineView {
-        return components.core.engine.createView(requireContext()).apply {
+        return components.core.engine.createView(components.profileApplicationContext).apply {
            selectionActionDelegate = components.selectionAction
         }
     }

@@ -9,39 +9,6 @@ part of 'providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(_storedAuthData)
-const _storedAuthDataProvider = _StoredAuthDataProvider._();
-
-final class _StoredAuthDataProvider
-    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
-    with $FutureModifier<String?>, $FutureProvider<String?> {
-  const _StoredAuthDataProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'_storedAuthDataProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$_storedAuthDataHash();
-
-  @$internal
-  @override
-  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<String?> create(Ref ref) {
-    return _storedAuthData(ref);
-  }
-}
-
-String _$_storedAuthDataHash() => r'5f7e3ef6233a2036f7ce3728131901a46b1e548e';
-
 @ProviderFor(iconCacheSizeMegabytes)
 const iconCacheSizeMegabytesProvider = IconCacheSizeMegabytesProvider._();
 
@@ -160,3 +127,36 @@ final class FingerprintOverrideSettingsProvider
 
 String _$fingerprintOverrideSettingsHash() =>
     r'd4d40ec425098fb1f5a2f0c4944f058829a41a0a';
+
+@ProviderFor(selectedProfile)
+const selectedProfileProvider = SelectedProfileProvider._();
+
+final class SelectedProfileProvider
+    extends $FunctionalProvider<AsyncValue<Profile>, Profile, FutureOr<Profile>>
+    with $FutureModifier<Profile>, $FutureProvider<Profile> {
+  const SelectedProfileProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedProfileProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedProfileHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Profile> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Profile> create(Ref ref) {
+    return selectedProfile(ref);
+  }
+}
+
+String _$selectedProfileHash() => r'c703cad8f30abb4f5f42db0119756ee6791ac477';

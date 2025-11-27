@@ -32,7 +32,7 @@ class GeckoTabContentService extends GeckoTabContentEvents {
     _contentSubject.addWhenMoreRecent(timestamp, content.tabId, content);
   }
 
-  void dispose() {
-    unawaited(_contentSubject.close());
+  Future<void> dispose() async {
+    await _contentSubject.close();
   }
 }

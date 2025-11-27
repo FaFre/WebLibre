@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentActivity
 import eu.weblibre.flutter_mozilla_components.BrowserFragment
 import eu.weblibre.flutter_mozilla_components.GeckoViewFactory
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
@@ -51,7 +52,6 @@ import mozilla.components.browser.state.action.SystemAction
 import mozilla.components.feature.addons.logger
 import mozilla.components.support.base.ext.getStacktraceAsString
 import mozilla.components.support.base.log.Log
-import mozilla.components.support.base.log.sink.AndroidLogSink
 import mozilla.components.support.base.log.sink.LogSink
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.mozilla.geckoview.BuildConfig as GeckoViewBuildConfig
@@ -71,7 +71,7 @@ class PriorityAwareLogSink(
             return
         }
 
-        val level = when(priority) {
+        val level = when (priority) {
             Log.Priority.DEBUG -> LogLevel.DEBUG
             Log.Priority.INFO -> LogLevel.INFO
             Log.Priority.WARN -> LogLevel.WARN
@@ -110,7 +110,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     private var isPlatformViewRegistered = false
 
     private lateinit var _flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
-    private lateinit var _flutterEvents : GeckoStateEvents
+    private lateinit var _flutterEvents: GeckoStateEvents
 
     fun attachBinding(flutterPluginBinding: FlutterPluginBinding) {
         _flutterPluginBinding = flutterPluginBinding
@@ -143,15 +143,16 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     }
 
     override fun initialize(
+        profileFolder: String,
         logLevel: LogLevel,
         contentBlocking: ContentBlocking,
         addonCollection: AddonCollection?
     ) {
         synchronized(this) {
-            if(!isGeckoInitialized) {
+            if (!isGeckoInitialized) {
                 val geckoLogging = GeckoLogging(_flutterPluginBinding.binaryMessenger)
 
-                val level = when(logLevel) {
+                val level = when (logLevel) {
                     LogLevel.DEBUG -> Log.Priority.DEBUG
                     LogLevel.INFO -> Log.Priority.INFO
                     LogLevel.WARN -> Log.Priority.WARN
@@ -160,7 +161,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
                 Log.addSink(PriorityAwareLogSink(level, geckoLogging))
 
-                setupGeckoEngine(level, contentBlocking, addonCollection)
+                setupGeckoEngine(profileFolder, level, contentBlocking, addonCollection)
                 isGeckoInitialized = true
             }
         }
@@ -177,19 +178,24 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     }
 
     private fun setupGeckoEngine(
+        profileFolder: String,
         logLevel: Log.Priority,
         contentBlocking: ContentBlocking,
         addonCollection: AddonCollection?
     ) {
-        val selectionActionEvents = GeckoSelectionActionEvents(_flutterPluginBinding.binaryMessenger)
+        val profileApplicationContext = ProfileContext(_flutterPluginBinding.applicationContext, profileFolder)
 
-        val selectionActionDelegate = DefaultSelectionActionDelegate(selectionActionEvents) { actions ->
-            val processTextAction = "android.intent.action.PROCESS_TEXT"
-            val withoutProcessText = actions.filter { it != processTextAction }.toTypedArray()
-            val processTextActions = actions.filter { it == processTextAction }.toTypedArray()
+        val selectionActionEvents =
+            GeckoSelectionActionEvents(_flutterPluginBinding.binaryMessenger)
 
-            withoutProcessText + processTextActions
-        }
+        val selectionActionDelegate =
+            DefaultSelectionActionDelegate(selectionActionEvents) { actions ->
+                val processTextAction = "android.intent.action.PROCESS_TEXT"
+                val withoutProcessText = actions.filter { it != processTextAction }.toTypedArray()
+                val processTextActions = actions.filter { it == processTextAction }.toTypedArray()
+
+                withoutProcessText + processTextActions
+            }
 
         val readerViewController =
             ReaderViewController(_flutterPluginBinding.binaryMessenger)
@@ -200,10 +206,13 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         val tabContentEvents = GeckoTabContentEvents(_flutterPluginBinding.binaryMessenger)
 
         val suggestionEvents = GeckoSuggestionEvents(_flutterPluginBinding.binaryMessenger)
-        GeckoSuggestionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoSuggestionApiImpl(suggestionEvents))
+        GeckoSuggestionApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoSuggestionApiImpl(suggestionEvents)
+        )
 
         GlobalComponents.setUp(
-            _flutterPluginBinding.applicationContext,
+            profileApplicationContext,
             _flutterEvents,
             readerViewController,
             selectionActionDelegate,
@@ -215,22 +224,39 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             addonCollection
         )
 
-        GeckoEngineSettingsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoEngineSettingsApiImpl())
-        GeckoAddonsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoAddonsApiImpl(_flutterPluginBinding.applicationContext))
+        GeckoEngineSettingsApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoEngineSettingsApiImpl()
+        )
+        GeckoAddonsApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoAddonsApiImpl(profileApplicationContext)
+        )
         GeckoSessionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoSessionApiImpl())
         GeckoTabsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTabsApiImpl())
         GeckoIconsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoIconsApiImpl())
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
         GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl())
         GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
-        GeckoContainerProxyApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoContainerProxyApiImpl())
+        GeckoContainerProxyApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoContainerProxyApiImpl()
+        )
         GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())
-        GeckoSelectionActionController.setUp(_flutterPluginBinding.binaryMessenger, GeckoSelectionActionControllerImpl(
-            selectionActionDelegate
-        ))
-        GeckoDeleteBrowsingDataController.setUp(_flutterPluginBinding.binaryMessenger, GeckoDeleteBrowsingDataControllerImpl())
+        GeckoSelectionActionController.setUp(
+            _flutterPluginBinding.binaryMessenger, GeckoSelectionActionControllerImpl(
+                selectionActionDelegate
+            )
+        )
+        GeckoDeleteBrowsingDataController.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoDeleteBrowsingDataControllerImpl()
+        )
         GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl())
-        GeckoBrowserExtensionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoBrowserExtensionApiImpl())
+        GeckoBrowserExtensionApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoBrowserExtensionApiImpl()
+        )
         GeckoHistoryApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoHistoryApiImpl())
         GeckoFetchApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFetchApiImpl())
 
@@ -239,9 +265,10 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             components.events.readerViewEvents
         )
 
-        val intent = Intent(_flutterPluginBinding.applicationContext, NotificationActivity::class.java)
+        val intent =
+            Intent(profileApplicationContext, NotificationActivity::class.java)
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        _flutterPluginBinding.applicationContext.startActivity(intent)
+        profileApplicationContext.startActivity(intent)
     }
 
     private fun showFragmentCallback(): Boolean {
@@ -289,7 +316,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             return true
         }
 
-        if(!view.isAttachedToWindow) {
+        if (!view.isAttachedToWindow) {
             return true
         }
 

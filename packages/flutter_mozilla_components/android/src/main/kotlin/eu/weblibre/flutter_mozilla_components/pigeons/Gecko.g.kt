@@ -3095,7 +3095,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
   fun getGeckoVersion(): String
-  fun initialize(logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?)
+  fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?)
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
 
@@ -3128,11 +3128,12 @@ interface GeckoBrowserApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val logLevelArg = args[0] as LogLevel
-            val contentBlockingArg = args[1] as ContentBlocking
-            val addonCollectionArg = args[2] as AddonCollection?
+            val profileFolderArg = args[0] as String
+            val logLevelArg = args[1] as LogLevel
+            val contentBlockingArg = args[2] as ContentBlocking
+            val addonCollectionArg = args[3] as AddonCollection?
             val wrapped: List<Any?> = try {
-              api.initialize(logLevelArg, contentBlockingArg, addonCollectionArg)
+              api.initialize(profileFolderArg, logLevelArg, contentBlockingArg, addonCollectionArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

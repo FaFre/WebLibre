@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:io';
+
 import 'package:exceptions/exceptions.dart';
 import 'package:http/http.dart';
-import 'package:universal_io/io.dart';
 
 ErrorMessage handleHttpError(Exception exception, StackTrace stackTrace) {
   return switch (exception) {

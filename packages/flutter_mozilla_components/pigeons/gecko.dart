@@ -877,6 +877,7 @@ class AddonCollection {
 abstract class GeckoBrowserApi {
   String getGeckoVersion();
   void initialize(
+    String profileFolder,
     LogLevel logLevel,
     ContentBlocking contentBlocking,
     AddonCollection? addonCollection,

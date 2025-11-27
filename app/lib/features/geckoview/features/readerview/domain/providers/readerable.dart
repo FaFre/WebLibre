@@ -26,8 +26,8 @@ part 'readerable.g.dart';
 GeckoReaderableService readerableService(Ref ref) {
   final service = GeckoReaderableService.setUp();
 
-  ref.onDispose(() {
-    service.dispose();
+  ref.onDispose(() async {
+    await service.dispose();
   });
 
   return service;

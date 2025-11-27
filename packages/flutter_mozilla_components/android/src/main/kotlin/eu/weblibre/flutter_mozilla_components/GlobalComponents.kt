@@ -37,14 +37,15 @@ object GlobalComponents {
         get() = _components
 
     @DelicateCoroutinesApi
-    private fun restoreBrowserState(newComponents: Components) = GlobalScope.launch(Dispatchers.Main) {
-        newComponents.useCases.tabsUseCases.restore(newComponents.core.sessionStorage)
+    private fun restoreBrowserState(newComponents: Components) =
+        GlobalScope.launch(Dispatchers.Main) {
+            newComponents.useCases.tabsUseCases.restore(newComponents.core.sessionStorage)
 
-        newComponents.core.sessionStorage.autoSave(newComponents.core.store)
-            .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
-            .whenGoingToBackground()
-            .whenSessionsChange()
-    }
+            newComponents.core.sessionStorage.autoSave(newComponents.core.store)
+                .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
+                .whenGoingToBackground()
+                .whenSessionsChange()
+        }
 
     @DelicateCoroutinesApi
     private fun restoreDownloads(newComponents: Components) = GlobalScope.launch(Dispatchers.Main) {
@@ -62,7 +63,7 @@ object GlobalComponents {
         extensionEvents: BrowserExtensionEvents,
         logLevel: Log.Priority,
         contentBlocking: ContentBlocking,
-        addonCollection: AddonCollection?,
+        addonCollection: AddonCollection?
     ) {
         Logger.debug("Creating new components")
 
@@ -77,7 +78,6 @@ object GlobalComponents {
             addonEvents,
             tabContentEvents,
             extensionEvents,
-
         )
         _components = newComponents
 
@@ -103,16 +103,17 @@ object GlobalComponents {
             WebExtensionSupport.initialize(
                 newComponents.core.engine,
                 newComponents.core.store,
-                onNewTabOverride = {
-                        _, engineSession, url ->
-                    newComponents.useCases.tabsUseCases.addTab(url, selectTab = true, engineSession = engineSession)
+                onNewTabOverride = { _, engineSession, url ->
+                    newComponents.useCases.tabsUseCases.addTab(
+                        url,
+                        selectTab = true,
+                        engineSession = engineSession
+                    )
                 },
-                onCloseTabOverride = {
-                        _, sessionId ->
+                onCloseTabOverride = { _, sessionId ->
                     newComponents.useCases.tabsUseCases.removeTab(sessionId)
                 },
-                onSelectTabOverride = {
-                        _, sessionId ->
+                onSelectTabOverride = { _, sessionId ->
                     newComponents.useCases.tabsUseCases.selectTab(sessionId)
                 },
                 onUpdatePermissionRequest = newComponents.core.addonUpdater::onUpdatePermissionRequest,
