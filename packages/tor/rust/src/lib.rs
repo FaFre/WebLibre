@@ -16,6 +16,7 @@ use tokio::task::JoinHandle;
 use tor_config::Listen;
 use tor_rtcompat::tokio::TokioNativeTlsRuntime;
 use tor_rtcompat::ToplevelBlockOn;
+#[allow(unused_imports)]
 use tracing::{debug, error, info, warn};
 use tracing_subscriber::fmt::Subscriber;
 use tracing_subscriber::layer::SubscriberExt;
