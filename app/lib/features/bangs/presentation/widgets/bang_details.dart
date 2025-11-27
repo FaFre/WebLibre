@@ -99,7 +99,7 @@ class BangDetails extends HookConsumerWidget {
                           .addTab(url: url, private: isPrivate);
 
                       if (context.mounted) {
-                        BrowserRoute().go(context);
+                        const BrowserRoute().go(context);
                       }
                     },
                     label: Text(bangData.domain),

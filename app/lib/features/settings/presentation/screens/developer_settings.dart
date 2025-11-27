@@ -27,7 +27,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:universal_io/io.dart';
+
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -35,6 +35,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class DeveloperSettingsScreen extends HookConsumerWidget {
@@ -95,9 +96,10 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                       final restart = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
+                          icon: const Icon(Icons.warning),
                           title: const Text('User Agent Changed'),
                           content: const Text(
-                            'The app needs to restart for the new user agent to take effect',
+                            'The Browser needs to get restarted for the new user agent to take effect',
                           ),
                           actions: [
                             TextButton(
@@ -117,7 +119,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                       );
 
                       if (restart == true) {
-                        exit(0);
+                        await exitApp(ref.container);
                       }
                     }
                   },

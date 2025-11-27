@@ -214,7 +214,7 @@ class TabMenu extends HookConsumerWidget {
           leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
           child: const Text('Assign container'),
           onPressed: () async {
-            final targetContainerId = await ContainerSelectionRoute()
+            final targetContainerId = await const ContainerSelectionRoute()
                 .push<String?>(context);
 
             if (targetContainerId != null) {
@@ -237,7 +237,7 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.webPlus),
             child: const Text('Assign Site to Container'),
             onPressed: () async {
-              final targetContainerId = await ContainerSelectionRoute()
+              final targetContainerId = await const ContainerSelectionRoute()
                   .push<String?>(context);
 
               if (targetContainerId != null) {

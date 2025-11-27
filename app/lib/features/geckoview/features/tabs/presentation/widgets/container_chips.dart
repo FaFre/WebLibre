@@ -171,7 +171,9 @@ class ContainerChips extends HookConsumerWidget {
                                 label: Text(data!.length.toString()),
                                 showCheckmark: false,
                                 onSelected: (_) async {
-                                  await ContainerDraftRoute().push(context);
+                                  await const ContainerDraftRoute().push(
+                                    context,
+                                  );
                                 },
                               );
                             },
@@ -206,7 +208,7 @@ class ContainerChips extends HookConsumerWidget {
                 IconButton(
                   visualDensity: VisualDensity.compact,
                   onPressed: () async {
-                    await ContainerListRoute().push(context);
+                    await const ContainerListRoute().push(context);
                   },
                   icon: const Icon(Icons.chevron_right),
                 ),

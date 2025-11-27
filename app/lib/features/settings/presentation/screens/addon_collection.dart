@@ -1,12 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:universal_io/io.dart';
+
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
 const _defaultServerUrl = 'https://services.addons.mozilla.org';
@@ -53,11 +52,7 @@ class AddonCollectionScreen extends HookConsumerWidget {
                           currentSettings.copyWith.addonCollection(null),
                     );
 
-                unawaited(
-                  Future.delayed(const Duration(seconds: 1)).whenComplete(() {
-                    exit(0);
-                  }),
-                );
+                await exitApp(ref.container);
               },
               icon: const Icon(Icons.delete),
             ),
@@ -122,13 +117,7 @@ class AddonCollectionScreen extends HookConsumerWidget {
                             ),
                           );
 
-                      unawaited(
-                        Future.delayed(const Duration(seconds: 1)).whenComplete(
-                          () {
-                            exit(0);
-                          },
-                        ),
-                      );
+                      await exitApp(ref.container);
                     }
                   },
                   child: const Text('Save & Restart Browser'),

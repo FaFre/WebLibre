@@ -210,7 +210,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                 );
 
                             if (context.mounted) {
-                              BrowserRoute().go(context);
+                              const BrowserRoute().go(context);
                             }
                           },
                           icon: const Icon(Icons.open_in_browser),
@@ -258,7 +258,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                 context,
                                 tabName: title.whenNotEmpty,
                                 onShow: () {
-                                  BrowserRoute().go(context);
+                                  const BrowserRoute().go(context);
                                 },
                               );
                             }

@@ -17,7 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:universal_io/io.dart';
+
+import 'dart:io';
+
 import 'package:weblibre/extensions/uri.dart';
 
 final _domainRegex = RegExp(r'\.[a-zA-Z]{2,}$');

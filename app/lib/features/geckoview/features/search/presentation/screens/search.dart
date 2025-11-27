@@ -119,7 +119,7 @@ class SearchScreen extends HookConsumerWidget {
         if (context.mounted) {
           ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
 
-          BrowserRoute().go(context);
+          const BrowserRoute().go(context);
         }
       }
     }
@@ -233,7 +233,7 @@ class SearchScreen extends HookConsumerWidget {
                                 .read(bottomSheetControllerProvider.notifier)
                                 .requestDismiss();
 
-                            BrowserRoute().go(context);
+                            const BrowserRoute().go(context);
                           }
                         }
                       }

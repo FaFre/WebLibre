@@ -138,7 +138,7 @@ class TabTreeDialog extends HookConsumerWidget {
                             .requestDismiss();
                       }
 
-                      BrowserRoute().go(context);
+                      const BrowserRoute().go(context);
                     },
                     onBeforeDelete: () {
                       if (graph.nodes.length <= 2) {

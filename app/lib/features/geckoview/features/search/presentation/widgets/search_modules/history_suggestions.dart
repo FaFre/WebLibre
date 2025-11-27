@@ -129,7 +129,7 @@ class HistorySuggestions extends HookConsumerWidget {
                                     )
                                     .requestDismiss();
 
-                                BrowserRoute().go(context);
+                                const BrowserRoute().go(context);
                               }
                             }
                           }

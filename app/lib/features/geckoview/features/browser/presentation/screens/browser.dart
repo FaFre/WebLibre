@@ -582,7 +582,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
                     .read(bottomSheetControllerProvider.notifier)
                     .requestDismiss();
               } else {
-                BrowserRoute().go(context);
+                const BrowserRoute().go(context);
               }
             },
             initialHeight: initialHeight,

@@ -24,14 +24,14 @@ class TabViewScreen extends HookConsumerWidget {
                   scrollController: scrollController,
                   showNewTabFab: false,
                   onClose: () {
-                    BrowserRoute().go(context);
+                    const BrowserRoute().go(context);
                   },
                 )
               : ViewTabsWidget(
                   scrollController: scrollController,
                   showNewTabFab: false,
                   onClose: () {
-                    BrowserRoute().go(context);
+                    const BrowserRoute().go(context);
                   },
                 ),
         ),
@@ -46,7 +46,7 @@ class TabViewScreen extends HookConsumerWidget {
             ).push(context);
 
             if (context.mounted) {
-              BrowserRoute().go(context);
+              const BrowserRoute().go(context);
             }
           },
           child: const Icon(Icons.add),

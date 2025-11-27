@@ -175,7 +175,7 @@ class TabSearch extends HookConsumerWidget {
                       .read(bottomSheetControllerProvider.notifier)
                       .requestDismiss();
 
-                  BrowserRoute().go(context);
+                  const BrowserRoute().go(context);
                 }
               },
             );

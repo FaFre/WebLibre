@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:exceptions/exceptions.dart';
@@ -29,7 +30,7 @@ import 'package:http/io_client.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:socks5_proxy/socks_client.dart';
-import 'package:universal_io/io.dart';
+
 import 'package:weblibre/core/http_error_handler.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/extensions/http_encoding.dart';

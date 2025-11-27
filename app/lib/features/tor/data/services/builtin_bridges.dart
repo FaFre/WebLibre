@@ -18,13 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:pluggable_transports_proxy/pluggable_transports_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:universal_io/io.dart';
 
 part 'builtin_bridges.g.dart';
 
