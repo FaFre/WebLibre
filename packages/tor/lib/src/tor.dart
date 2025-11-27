@@ -11,7 +11,7 @@ import 'dart:math';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:tor/src/generated_bindings.dart' as rust;
 
 DynamicLibrary load(String name) {
@@ -152,7 +152,7 @@ class Tor {
     broadcastState();
 
     // Set the state and cache directories.
-    final appCacheDir = await getApplicationCacheDirectory();
+    final appCacheDir = await path_provider.getApplicationCacheDirectory();
     final stateDir = await Directory('${appCacheDir.path}/tor_state').create();
     final cacheDir = await Directory('${appCacheDir.path}/tor_cache').create();
 
@@ -202,7 +202,8 @@ class Tor {
     final lib = rust.NativeLibrary(_lib);
 
     // Set the state and cache directories.
-    final Directory appSupportDir = await getApplicationSupportDirectory();
+    final Directory appSupportDir = await path_provider
+        .getApplicationSupportDirectory();
     final stateDir = await Directory(
       '${appSupportDir.path}/tor_state',
     ).create();
