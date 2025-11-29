@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import java.io.File
 
-class ProfileContext(private val base: Context, private val relativePath: String) :
+class ProfileContext(private val base: Context, val relativePath: String) :
     ContextWrapper(base) {
 
     private val subfolderRoot =

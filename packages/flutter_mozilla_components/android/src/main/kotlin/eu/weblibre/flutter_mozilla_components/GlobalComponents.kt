@@ -54,7 +54,7 @@ object GlobalComponents {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun setUp(
-        applicationContext: Context,
+        applicationContext: ProfileContext,
         flutterEvents: GeckoStateEvents,
         readerViewController: ReaderViewController,
         selectionAction: SelectionActionDelegate,

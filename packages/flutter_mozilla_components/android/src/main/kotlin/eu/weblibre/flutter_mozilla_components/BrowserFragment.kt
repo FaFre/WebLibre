@@ -18,7 +18,8 @@ import mozilla.components.support.base.feature.UserInteractionHandler
  */
 class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
     override fun createEngine(components: Components): EngineView {
-        return components.core.engine.createView(components.profileApplicationContext).apply {
+        val profileContext = ProfileContext(requireContext(), components.profileApplicationContext.relativePath)
+        return components.core.engine.createView(profileContext).apply {
            selectionActionDelegate = components.selectionAction
         }
     }

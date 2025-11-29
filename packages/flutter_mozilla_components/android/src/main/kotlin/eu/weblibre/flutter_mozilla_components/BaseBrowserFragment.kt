@@ -124,7 +124,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         webAuthnFeature
     )
 
-    protected abstract fun createEngine(components: Components) : EngineView
+    protected abstract fun createEngine(components: Components): EngineView
 
     private lateinit var requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>>
@@ -205,8 +205,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
 
+            val profileContext =
+                ProfileContext(requireContext(), components.profileApplicationContext.relativePath)
+
             val engineView = createEngine(components)
             val originalContext = ActivityContextWrapper.getOriginalContext(requireActivity())
+                ?.let { ProfileContext(it, components.profileApplicationContext.relativePath) }
             val engineNativeView = engineView.asView()
             engineNativeView.layoutParams = layoutParams
 
@@ -275,11 +279,16 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             appLinksFeature.set(
                 feature = AppLinksFeature(
-                    context = requireContext(),
+                    context = profileContext,
                     store = components.core.store,
                     sessionId = sessionId,
                     fragmentManager = parentFragmentManager,
-                    launchInApp = { components.core.prefs.getBoolean(context?.getPreferenceKey(R.string.pref_key_launch_external_app), false) },
+                    launchInApp = {
+                        components.core.prefs.getBoolean(
+                            context?.getPreferenceKey(R.string.pref_key_launch_external_app),
+                            false
+                        )
+                    },
                     loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
                 ),
                 owner = this,
@@ -298,7 +307,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                         requestPromptsPermissionsLauncher.launch(permissions)
                     },
                     androidPhotoPicker = AndroidPhotoPicker(
-                        requireContext(),
+                        profileContext,
                         singleMediaPicker,
                         multipleMediaPicker,
                     ),
@@ -309,7 +318,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             sitePermissionsFeature.set(
                 feature = SitePermissionsFeature(
-                    context = requireContext(),
+                    context = profileContext,
                     sessionId = sessionId,
                     storage = components.core.geckoSitePermissionsStorage,
                     fragmentManager = parentFragmentManager,
@@ -329,7 +338,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     onNeedToRequestPermissions = { permissions ->
                         requestSitePermissionsLauncher.launch(permissions)
                     },
-                    onShouldShowRequestPermissionRationale = { shouldShowRequestPermissionRationale(it) },
+                    onShouldShowRequestPermissionRationale = {
+                        shouldShowRequestPermissionRationale(
+                            it
+                        )
+                    },
                     store = components.core.store,
                 ),
                 owner = this,
@@ -339,7 +352,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             webExtensionPromptFeature.set(
                 feature = WebExtensionPromptFeature(
                     store = components.core.store,
-                    context = requireContext(),
+                    context = profileContext,
                     fragmentManager = parentFragmentManager,
                 ),
                 owner = this,
@@ -397,7 +410,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             readerViewFeature.set(
                 feature = ReaderViewIntegration(
-                    requireContext(),
+                    profileContext,
                     components.core.engine,
                     components.core.store,
                     binding.readerViewBar,
@@ -421,7 +434,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             )
 
             thumbnailsFeature.set(
-                feature = BrowserThumbnails(requireContext(), components.engineView!!, components.core.store),
+                feature = BrowserThumbnails(
+                    profileContext,
+                    components.engineView!!,
+                    components.core.store
+                ),
                 owner = this,
                 view = view,
             )
@@ -447,7 +464,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     }
 
     private fun openPopup(webExtensionState: WebExtensionState) {
-        val intent = Intent(components.profileApplicationContext, WebExtensionActionPopupActivity::class.java)
+        val intent = Intent(
+            components.profileApplicationContext,
+            WebExtensionActionPopupActivity::class.java
+        )
         intent.putExtra("web_extension_id", webExtensionState.id)
         intent.putExtra("web_extension_name", webExtensionState.name)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -456,7 +476,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     @CallSuper
     @Suppress("LongMethod")
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentBrowserBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -480,7 +504,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         return backButtonHandler.any { it.onBackPressed() }
     }
 
-    final override fun onHomePressed(): Boolean =pictureInPictureFeature?.onHomePressed() ?: false
+    final override fun onHomePressed(): Boolean = pictureInPictureFeature?.onHomePressed() ?: false
 
     override fun onPictureInPictureModeChanged(enabled: Boolean) {
         pictureInPictureFeature?.onPictureInPictureModeChanged(enabled)
@@ -521,6 +545,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             putString(SESSION_ID_KEY, sessionId)
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
 

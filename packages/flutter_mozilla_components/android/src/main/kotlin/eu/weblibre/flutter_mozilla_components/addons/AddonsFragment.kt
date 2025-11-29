@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ProfileContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,8 +77,11 @@ class AddonsFragment : Fragment(), AddonsManagerAdapterDelegate {
     }
 
     private fun bindRecyclerView(rootView: View) {
+        val profileContext = ProfileContext(requireContext(), components.profileApplicationContext.relativePath)
+
         recyclerView = rootView.findViewById(R.id.add_ons_list)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = LinearLayoutManager(profileContext)
+
         scope.launch {
             try {
                 addons = components.core.addonManager.getAddons()

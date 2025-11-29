@@ -31,7 +31,7 @@ import mozilla.components.feature.downloads.FileSizeFormatter
 import mozilla.components.support.base.android.NotificationsDelegate
 import mozilla.components.support.base.log.Log
 
-class Components(val profileApplicationContext: Context,
+class Components(val profileApplicationContext: ProfileContext,
                  val flutterEvents: GeckoStateEvents,
                  val readerViewController: ReaderViewController,
                  val selectionAction: SelectionActionDelegate,
