@@ -1426,3 +1426,130 @@ abstract class GeckoFetchApi {
   @async
   GeckoFetchResponse fetch(GeckoFetchRequest request);
 }
+
+enum BookmarkNodeType { item, folder, separator }
+
+class BookmarkNode {
+  final BookmarkNodeType type;
+  final String guid;
+  final String? parentGuid;
+  final int? position;
+  final String? title;
+  final String? url;
+  final int dateAdded;
+  final int lastModified;
+  final List<BookmarkNode>? children;
+
+  BookmarkNode({
+    required this.type,
+    required this.guid,
+    required this.parentGuid,
+    required this.position,
+    required this.title,
+    required this.url,
+    required this.dateAdded,
+    required this.lastModified,
+    required this.children,
+  });
+}
+
+/// Class for making alterations to any bookmark node
+class BookmarkInfo {
+  final String? parentGuid;
+  final int? position;
+  final String? title;
+  final String? url;
+
+  BookmarkInfo({
+    required this.parentGuid,
+    required this.position,
+    required this.title,
+    required this.url,
+  });
+}
+
+@HostApi()
+abstract class GeckoBookmarksApi {
+  /// Produces a bookmarks tree for the given guid string.
+  ///
+  /// @param guid The bookmark guid to obtain.
+  /// @param recursive Whether to recurse and obtain all levels of children.
+  /// @return The populated root starting from the guid.
+  @async
+  BookmarkNode? getTree(String guid, bool recursive);
+
+  /// Obtains the details of a bookmark without children, if one exists with that guid. Otherwise, null.
+  ///
+  /// @param guid The bookmark guid to obtain.
+  /// @return The bookmark node or null if it does not exist.
+  @async
+  BookmarkNode? getBookmark(String guid);
+
+  /// Produces a list of all bookmarks with the given URL.
+  ///
+  /// @param url The URL string.
+  /// @return The list of bookmarks that match the URL
+  @async
+  List<BookmarkNode> getBookmarksWithUrl(String url);
+
+  /// Produces a list of the most recently added bookmarks.
+  ///
+  /// @param limit The maximum number of entries to return.
+  /// @param maxAge Optional parameter used to filter out entries older than this number of milliseconds.
+  /// @param currentTime Optional parameter for current time. Defaults toSystem.currentTimeMillis()
+  /// @return The list of bookmarks that have been recently added up to the limit number of items.
+  @async
+  List<BookmarkNode> getRecentBookmarks(
+    int limit,
+    int? maxAge,
+    int currentTime,
+  );
+
+  /// Searches bookmarks with a query string.
+  ///
+  /// @param query The query string to search.
+  /// @param limit The maximum number of entries to return.
+  /// @return The list of matching bookmark nodes up to the limit number of items.
+  @async
+  List<BookmarkNode> searchBookmarks(String query, int limit);
+
+  /// Adds a new bookmark item to a given node.
+  ///
+  /// Sync behavior: will add new bookmark item to remote devices.
+  ///
+  /// @param parentGuid The parent guid of the new node.
+  /// @param url The URL of the bookmark item to add.
+  /// @param title The title of the bookmark item to add.
+  /// @param position The optional position to add the new node or null to append.
+  /// @return The guid of the newly inserted bookmark item.
+  @async
+  String addItem(String parentGuid, String url, String title, int? position);
+
+  /// Adds a new bookmark folder to a given node.
+  ///
+  /// Sync behavior: will add new separator to remote devices.
+  ///
+  /// @param parentGuid The parent guid of the new node.
+  /// @param title The title of the bookmark folder to add.
+  /// @param position The optional position to add the new node or null to append.
+  /// @return The guid of the newly inserted bookmark item.
+  @async
+  String addFolder(String parentGuid, String title, int? position);
+
+  /// Edits the properties of an existing bookmark item and/or moves an existing one underneath a new parent guid.
+  ///
+  /// Sync behavior: will alter bookmark item on remote devices.
+  ///
+  /// @param guid The guid of the item to update.
+  /// @param info The info to change in the bookmark.
+  @async
+  void updateNode(String guid, BookmarkInfo info);
+
+  /// Deletes a bookmark node and all of its children, if any.
+  ///
+  /// Sync behavior: will remove bookmark from remote devices.
+  ///
+  /// @return Whether the bookmark existed or not.
+  @async
+  bool deleteNode(String guid);
+}

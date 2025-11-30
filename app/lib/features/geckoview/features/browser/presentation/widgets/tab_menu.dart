@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
@@ -162,6 +164,22 @@ class TabMenu extends HookConsumerWidget {
             final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
             await ui_helper.launchUrlFeedback(context, tabState.url);
+          },
+        ),
+        MenuItemButton(
+          leadingIcon: const Icon(MdiIcons.bookmarkPlus),
+          child: const Text('Add Bookmark'),
+          onPressed: () async {
+            final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+            await BookmarkEntryAddRoute(
+              bookmarkInfo: jsonEncode(
+                BookmarkInfo(
+                  title: tabState.title,
+                  url: tabState.url.toString(),
+                ).encode(),
+              ),
+            ).push(context);
           },
         ),
         MenuItemButton(

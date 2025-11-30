@@ -27,14 +27,14 @@ class ProfileRepository extends _$ProfileRepository {
       throw Exception('Could not create profile');
     }
 
-    state = await AsyncValue.guard(_readProfiles);
+    ref.invalidateSelf();
 
     return profile;
   }
 
   Future<void> updateProfileMetadata(Profile profile) async {
     await filesystem.updateProfileMetadata(profile);
-    state = await AsyncValue.guard(_readProfiles);
+    ref.invalidateSelf();
   }
 
   Future<bool> deleteProfile(String id) async {
@@ -45,7 +45,7 @@ class ProfileRepository extends _$ProfileRepository {
 
     await filesystem.getProfileDir(uuid).delete(recursive: true);
 
-    state = await AsyncValue.guard(_readProfiles);
+    ref.invalidateSelf();
 
     return true;
   }

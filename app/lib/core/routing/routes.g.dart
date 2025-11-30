@@ -464,6 +464,31 @@ RouteBase get $browserRoute => GoRouteData.$route(
         ),
       ],
     ),
+    GoRouteData.$route(
+      path: 'bookmarks/:entryGuid',
+      name: 'BookmarkListRoute',
+      factory: $BookmarkListRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'createFolder',
+      name: 'BookmarkFolderAddRoute',
+      factory: $BookmarkFolderAddRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'editFolder',
+      name: 'BookmarkFolderEditRoute',
+      factory: $BookmarkFolderEditRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'createEntry',
+      name: 'BookmarkEntryAddRoute',
+      factory: $BookmarkEntryAddRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'editEntry',
+      name: 'BookmarkEntryEditRoute',
+      factory: $BookmarkEntryEditRoute._fromState,
+    ),
   ],
 );
 
@@ -861,6 +886,143 @@ mixin $CreateProfileRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/browser/profiles/create');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BookmarkListRoute on GoRouteData {
+  static BookmarkListRoute _fromState(GoRouterState state) =>
+      BookmarkListRoute(entryGuid: state.pathParameters['entryGuid']!);
+
+  BookmarkListRoute get _self => this as BookmarkListRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/bookmarks/${Uri.encodeComponent(_self.entryGuid)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BookmarkFolderAddRoute on GoRouteData {
+  static BookmarkFolderAddRoute _fromState(GoRouterState state) =>
+      BookmarkFolderAddRoute(
+        parentGuid: state.uri.queryParameters['parent-guid'],
+      );
+
+  BookmarkFolderAddRoute get _self => this as BookmarkFolderAddRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/createFolder',
+    queryParams: {
+      if (_self.parentGuid != null) 'parent-guid': _self.parentGuid,
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BookmarkFolderEditRoute on GoRouteData {
+  static BookmarkFolderEditRoute _fromState(GoRouterState state) =>
+      BookmarkFolderEditRoute(folder: state.uri.queryParameters['folder']!);
+
+  BookmarkFolderEditRoute get _self => this as BookmarkFolderEditRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/editFolder',
+    queryParams: {'folder': _self.folder},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BookmarkEntryAddRoute on GoRouteData {
+  static BookmarkEntryAddRoute _fromState(GoRouterState state) =>
+      BookmarkEntryAddRoute(
+        bookmarkInfo: state.uri.queryParameters['bookmark-info']!,
+      );
+
+  BookmarkEntryAddRoute get _self => this as BookmarkEntryAddRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/createEntry',
+    queryParams: {'bookmark-info': _self.bookmarkInfo},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BookmarkEntryEditRoute on GoRouteData {
+  static BookmarkEntryEditRoute _fromState(GoRouterState state) =>
+      BookmarkEntryEditRoute(
+        bookmarkEntry: state.uri.queryParameters['bookmark-entry']!,
+      );
+
+  BookmarkEntryEditRoute get _self => this as BookmarkEntryEditRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/editEntry',
+    queryParams: {'bookmark-entry': _self.bookmarkEntry},
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -20,6 +20,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/widgets/dialog_page.dart';
@@ -32,6 +33,10 @@ import 'package:weblibre/features/bangs/presentation/screens/edit.dart';
 import 'package:weblibre/features/bangs/presentation/screens/menu.dart';
 import 'package:weblibre/features/bangs/presentation/screens/search.dart';
 import 'package:weblibre/features/bangs/presentation/screens/user.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/screens/bookmark_entry_edit.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/screens/bookmark_folder_edit.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/screens/bookmark_list.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/open_shared_content.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/tab_tree.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/browser.dart';

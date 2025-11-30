@@ -21,6 +21,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
@@ -55,6 +56,7 @@ import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.sink.LogSink
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.mozilla.geckoview.BuildConfig as GeckoViewBuildConfig
+import mozilla.appservices.places.BookmarkRoot
 
 class PriorityAwareLogSink(
     private val minLogPriority: Log.Priority,
@@ -259,6 +261,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         )
         GeckoHistoryApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoHistoryApiImpl())
         GeckoFetchApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFetchApiImpl())
+        GeckoBookmarksApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoBookmarksApiImpl())
 
         ReaderViewEvents.setUp(
             _flutterPluginBinding.binaryMessenger,

@@ -238,6 +238,12 @@ enum GeckoFetchCookiePolicy {
   omit,
 }
 
+enum BookmarkNodeType {
+  item,
+  folder,
+  separator,
+}
+
 /// Translation options that map to the Gecko Translations Options.
 ///
 /// @property downloadModel If the necessary models should be downloaded on request. If false, then
@@ -3139,6 +3145,144 @@ class GeckoFetchResponse {
 ;
 }
 
+class BookmarkNode {
+  BookmarkNode({
+    required this.type,
+    required this.guid,
+    this.parentGuid,
+    this.position,
+    this.title,
+    this.url,
+    required this.dateAdded,
+    required this.lastModified,
+    this.children,
+  });
+
+  BookmarkNodeType type;
+
+  String guid;
+
+  String? parentGuid;
+
+  int? position;
+
+  String? title;
+
+  String? url;
+
+  int dateAdded;
+
+  int lastModified;
+
+  List<BookmarkNode>? children;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      type,
+      guid,
+      parentGuid,
+      position,
+      title,
+      url,
+      dateAdded,
+      lastModified,
+      children,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static BookmarkNode decode(Object result) {
+    result as List<Object?>;
+    return BookmarkNode(
+      type: result[0]! as BookmarkNodeType,
+      guid: result[1]! as String,
+      parentGuid: result[2] as String?,
+      position: result[3] as int?,
+      title: result[4] as String?,
+      url: result[5] as String?,
+      dateAdded: result[6]! as int,
+      lastModified: result[7]! as int,
+      children: (result[8] as List<Object?>?)?.cast<BookmarkNode>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! BookmarkNode || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+/// Class for making alterations to any bookmark node
+class BookmarkInfo {
+  BookmarkInfo({
+    this.parentGuid,
+    this.position,
+    this.title,
+    this.url,
+  });
+
+  String? parentGuid;
+
+  int? position;
+
+  String? title;
+
+  String? url;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      parentGuid,
+      position,
+      title,
+      url,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static BookmarkInfo decode(Object result) {
+    result as List<Object?>;
+    return BookmarkInfo(
+      parentGuid: result[0] as String?,
+      position: result[1] as int?,
+      title: result[2] as String?,
+      url: result[3] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! BookmarkInfo || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -3213,149 +3357,158 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is GeckoFetchCookiePolicy) {
       buffer.putUint8(150);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    }    else if (value is BookmarkNodeType) {
       buffer.putUint8(151);
-      writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+      writeValue(buffer, value.index);
+    }    else if (value is TranslationOptions) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+    }    else if (value is ReaderState) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(156);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(157);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(158);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(159);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is TabState) {
       buffer.putUint8(160);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableBrowserState) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(161);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is RecoverableBrowserState) {
       buffer.putUint8(162);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(163);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(164);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is Resource) {
       buffer.putUint8(165);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is IconResult) {
       buffer.putUint8(166);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(167);
       writeValue(buffer, value.encode());
-    }    else if (value is VisitInfo) {
+    }    else if (value is Cookie) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is VisitInfo) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is ReaderableState) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    }    else if (value is ContentBlocking) {
+    }    else if (value is TabContent) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    }    else if (value is DohSettings) {
+    }    else if (value is ContentBlocking) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is DohSettings) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    }    else if (value is AutocompleteResult) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    }    else if (value is UnknownHitResult) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    }    else if (value is ImageHitResult) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    }    else if (value is VideoHitResult) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    }    else if (value is AudioHitResult) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    }    else if (value is ImageSrcHitResult) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    }    else if (value is PhoneHitResult) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    }    else if (value is EmailHitResult) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    }    else if (value is GeoHitResult) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    }    else if (value is DownloadState) {
       buffer.putUint8(192);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonCollection) {
+    }    else if (value is ShareInternetResourceState) {
       buffer.putUint8(193);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPref) {
+    }    else if (value is AddonCollection) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    }    else if (value is ContainerSiteAssignment) {
+    }    else if (value is GeckoPref) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoHeader) {
+    }    else if (value is ContainerSiteAssignment) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchRequest) {
+    }    else if (value is GeckoHeader) {
       buffer.putUint8(197);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchResponse) {
+    }    else if (value is GeckoFetchRequest) {
       buffer.putUint8(198);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeckoFetchResponse) {
+      buffer.putUint8(199);
+      writeValue(buffer, value.encode());
+    }    else if (value is BookmarkNode) {
+      buffer.putUint8(200);
+      writeValue(buffer, value.encode());
+    }    else if (value is BookmarkInfo) {
+      buffer.putUint8(201);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -3432,101 +3585,108 @@ class _PigeonCodec extends StandardMessageCodec {
         final int? value = readValue(buffer) as int?;
         return value == null ? null : GeckoFetchCookiePolicy.values[value];
       case 151: 
-        return TranslationOptions.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : BookmarkNodeType.values[value];
       case 152: 
-        return ReaderState.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 153: 
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 154: 
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 155: 
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 156: 
-        return ExternalPackage.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 157: 
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 158: 
-        return SourceValue.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 159: 
-        return TabState.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 160: 
-        return RecoverableTab.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 161: 
-        return RecoverableBrowserState.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 162: 
-        return IconRequest.decode(readValue(buffer)!);
+        return RecoverableBrowserState.decode(readValue(buffer)!);
       case 163: 
-        return ResourceSize.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 164: 
-        return Resource.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 165: 
-        return IconResult.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 166: 
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 167: 
-        return Cookie.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 168: 
-        return VisitInfo.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 169: 
-        return HistoryItem.decode(readValue(buffer)!);
+        return VisitInfo.decode(readValue(buffer)!);
       case 170: 
-        return HistoryState.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 171: 
-        return ReaderableState.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 172: 
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 173: 
-        return TabContentState.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 174: 
-        return FindResultState.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 175: 
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 176: 
-        return WebExtensionData.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 177: 
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 178: 
-        return TabContent.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 179: 
-        return ContentBlocking.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 180: 
-        return DohSettings.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 181: 
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 182: 
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 183: 
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 184: 
-        return ImageHitResult.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 185: 
-        return VideoHitResult.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 186: 
-        return AudioHitResult.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 187: 
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 188: 
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 189: 
-        return EmailHitResult.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 190: 
-        return GeoHitResult.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 191: 
-        return DownloadState.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 192: 
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return DownloadState.decode(readValue(buffer)!);
       case 193: 
-        return AddonCollection.decode(readValue(buffer)!);
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       case 194: 
-        return GeckoPref.decode(readValue(buffer)!);
+        return AddonCollection.decode(readValue(buffer)!);
       case 195: 
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       case 196: 
-        return GeckoHeader.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 197: 
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 198: 
+        return GeckoFetchRequest.decode(readValue(buffer)!);
+      case 199: 
         return GeckoFetchResponse.decode(readValue(buffer)!);
+      case 200: 
+        return BookmarkNode.decode(readValue(buffer)!);
+      case 201: 
+        return BookmarkInfo.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -6731,6 +6891,309 @@ class GeckoFetchApi {
       );
     } else {
       return (pigeonVar_replyList[0] as GeckoFetchResponse?)!;
+    }
+  }
+}
+
+class GeckoBookmarksApi {
+  /// Constructor for [GeckoBookmarksApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoBookmarksApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// Produces a bookmarks tree for the given guid string.
+  ///
+  /// @param guid The bookmark guid to obtain.
+  /// @param recursive Whether to recurse and obtain all levels of children.
+  /// @return The populated root starting from the guid.
+  Future<BookmarkNode?> getTree(String guid, bool recursive) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.getTree$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[guid, recursive]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return (pigeonVar_replyList[0] as BookmarkNode?);
+    }
+  }
+
+  /// Obtains the details of a bookmark without children, if one exists with that guid. Otherwise, null.
+  ///
+  /// @param guid The bookmark guid to obtain.
+  /// @return The bookmark node or null if it does not exist.
+  Future<BookmarkNode?> getBookmark(String guid) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.getBookmark$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[guid]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return (pigeonVar_replyList[0] as BookmarkNode?);
+    }
+  }
+
+  /// Produces a list of all bookmarks with the given URL.
+  ///
+  /// @param url The URL string.
+  /// @return The list of bookmarks that match the URL
+  Future<List<BookmarkNode>> getBookmarksWithUrl(String url) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.getBookmarksWithUrl$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as List<Object?>?)!.cast<BookmarkNode>();
+    }
+  }
+
+  /// Produces a list of the most recently added bookmarks.
+  ///
+  /// @param limit The maximum number of entries to return.
+  /// @param maxAge Optional parameter used to filter out entries older than this number of milliseconds.
+  /// @param currentTime Optional parameter for current time. Defaults toSystem.currentTimeMillis()
+  /// @return The list of bookmarks that have been recently added up to the limit number of items.
+  Future<List<BookmarkNode>> getRecentBookmarks(int limit, int? maxAge, int currentTime) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.getRecentBookmarks$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[limit, maxAge, currentTime]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as List<Object?>?)!.cast<BookmarkNode>();
+    }
+  }
+
+  /// Searches bookmarks with a query string.
+  ///
+  /// @param query The query string to search.
+  /// @param limit The maximum number of entries to return.
+  /// @return The list of matching bookmark nodes up to the limit number of items.
+  Future<List<BookmarkNode>> searchBookmarks(String query, int limit) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.searchBookmarks$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[query, limit]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as List<Object?>?)!.cast<BookmarkNode>();
+    }
+  }
+
+  /// Adds a new bookmark item to a given node.
+  ///
+  /// Sync behavior: will add new bookmark item to remote devices.
+  ///
+  /// @param parentGuid The parent guid of the new node.
+  /// @param url The URL of the bookmark item to add.
+  /// @param title The title of the bookmark item to add.
+  /// @param position The optional position to add the new node or null to append.
+  /// @return The guid of the newly inserted bookmark item.
+  Future<String> addItem(String parentGuid, String url, String title, int? position) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.addItem$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[parentGuid, url, title, position]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?)!;
+    }
+  }
+
+  /// Adds a new bookmark folder to a given node.
+  ///
+  /// Sync behavior: will add new separator to remote devices.
+  ///
+  /// @param parentGuid The parent guid of the new node.
+  /// @param title The title of the bookmark folder to add.
+  /// @param position The optional position to add the new node or null to append.
+  /// @return The guid of the newly inserted bookmark item.
+  Future<String> addFolder(String parentGuid, String title, int? position) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.addFolder$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[parentGuid, title, position]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?)!;
+    }
+  }
+
+  /// Edits the properties of an existing bookmark item and/or moves an existing one underneath a new parent guid.
+  ///
+  /// Sync behavior: will alter bookmark item on remote devices.
+  ///
+  /// @param guid The guid of the item to update.
+  /// @param info The info to change in the bookmark.
+  Future<void> updateNode(String guid, BookmarkInfo info) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.updateNode$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[guid, info]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Deletes a bookmark node and all of its children, if any.
+  ///
+  /// Sync behavior: will remove bookmark from remote devices.
+  ///
+  /// @return Whether the bookmark existed or not.
+  Future<bool> deleteNode(String guid) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.deleteNode$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[guid]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
     }
   }
 }

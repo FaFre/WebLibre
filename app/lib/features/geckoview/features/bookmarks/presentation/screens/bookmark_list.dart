@@ -1,0 +1,198 @@
+import 'dart:convert';
+
+import 'package:animated_tree_view/animated_tree_view.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
+import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
+
+class BookmarkListScreen extends HookConsumerWidget {
+  final String entryGuid;
+
+  const BookmarkListScreen({super.key, required this.entryGuid});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bookmarkList = ref.watch(bookmarksProvider<BookmarkItem>(entryGuid));
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Bookmarks')),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: bookmarkList.when(
+            data: (list) {
+              TreeNode<BookmarkItem> addChildren(
+                TreeNode<BookmarkItem>? parent,
+                BookmarkItem item,
+              ) {
+                final node = TreeNode(
+                  key: item.guid,
+                  data: item,
+                  parent: parent,
+                );
+                final targetNode = (parent?..add(node)) ?? node;
+
+                if (item is BookmarkFolder && item.children != null) {
+                  for (final child in item.children!) {
+                    addChildren(node, child);
+                  }
+                }
+
+                return targetNode;
+              }
+
+              final root = (list != null)
+                  ? addChildren(null, list)
+                  : TreeNode<BookmarkItem>.root();
+
+              return TreeView.simple(
+                tree: root,
+                onTreeReady: (controller) {
+                  controller.expandNode(root);
+                },
+                expansionIndicatorBuilder: (context, tree) =>
+                    ChevronIndicator.upDown(
+                      tree: tree,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16.0,
+                        horizontal: 12.0,
+                      ),
+                    ),
+                builder: (context, item) {
+                  return switch (item.data) {
+                    final BookmarkEntry bookmark => ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: UrlIcon([bookmark.url], iconSize: 34.0),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          await BookmarkEntryEditRoute(
+                            bookmarkEntry: jsonEncode(bookmark.toJson()),
+                          ).push(context);
+                        },
+                      ),
+                      title: Text(bookmark.title),
+                      subtitle: UriBreadcrumb(uri: bookmark.url),
+                      onTap: () async {
+                        final result = await OpenSharedContentRoute(
+                          sharedUrl: bookmark.url.toString(),
+                        ).push<bool>(context);
+
+                        if (result == true) {
+                          if (context.mounted) {
+                            const BrowserRoute().go(context);
+                          }
+                        }
+                      },
+                    ),
+                    final BookmarkFolder folder => Padding(
+                      padding: const EdgeInsets.only(right: 42.0),
+                      child: HookBuilder(
+                        builder: (context) {
+                          final controller = useMenuController();
+
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: (item.isExpanded)
+                                ? const Icon(MdiIcons.folderOpen)
+                                : const Icon(MdiIcons.folder),
+                            title: Text(folder.title),
+                            trailing: MenuAnchor(
+                              controller: controller,
+                              builder: (context, controller, child) => InkWell(
+                                onTap: () {
+                                  if (controller.isOpen) {
+                                    controller.close();
+                                  } else {
+                                    controller.open();
+                                  }
+                                },
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                    vertical: 15.0,
+                                  ),
+                                  child: Icon(MdiIcons.dotsVertical),
+                                ),
+                              ),
+                              menuChildren: [
+                                if (!bookmarkRootIds.contains(folder.guid))
+                                  MenuItemButton(
+                                    leadingIcon: const Icon(
+                                      MdiIcons.folderEdit,
+                                    ),
+                                    child: const Text('Edit'),
+                                    onPressed: () async {
+                                      await BookmarkFolderEditRoute(
+                                        folder: jsonEncode(folder.toJson()),
+                                      ).push(context);
+                                    },
+                                  ),
+                                MenuItemButton(
+                                  leadingIcon: const Icon(MdiIcons.folderPlus),
+                                  child: const Text('Add Subfolder'),
+                                  onPressed: () async {
+                                    await BookmarkFolderAddRoute(
+                                      parentGuid: folder.guid,
+                                    ).push(context);
+                                  },
+                                ),
+                                MenuItemButton(
+                                  leadingIcon: const Icon(
+                                    MdiIcons.bookmarkPlus,
+                                  ),
+                                  child: const Text('Add Bookmark'),
+                                  onPressed: () async {
+                                    await BookmarkEntryAddRoute(
+                                      bookmarkInfo: jsonEncode(
+                                        BookmarkInfo(
+                                          parentGuid: folder.guid,
+                                        ).encode(),
+                                      ),
+                                    ).push(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                            onTap: () async {
+                              if (folder.guid != entryGuid) {
+                                await BookmarkListRoute(
+                                  entryGuid: folder.guid,
+                                ).push(context);
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    null => const Center(child: Text('Empty')),
+                  };
+                },
+              );
+            },
+            error: (error, stackTrace) => Center(
+              child: FailureWidget(
+                title: 'Failed to load Bookmarks',
+                exception: error,
+                onRetry: () {
+                  // ignore: unused_result
+                  ref.refresh(bookmarksProvider<BookmarkItem>(entryGuid));
+                },
+              ),
+            ),
+            loading: () => const SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+  }
+}

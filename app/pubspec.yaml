@@ -8,6 +8,7 @@ environment:
   sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
+  animated_tree_view: ^2.3.0
   background_fetch: ^1.5.0
   collection: ^1.19.1
   copy_with_extension: ^10.0.1

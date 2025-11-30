@@ -439,6 +439,15 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                 const Divider(),
                 MenuItemButton(
                   onPressed: () async {
+                    await BookmarkListRoute(
+                      entryGuid: BookmarkRoot.mobile.id,
+                    ).push(context);
+                  },
+                  leadingIcon: const Icon(MdiIcons.bookmarkMultiple),
+                  child: const Text('Bookmarks'),
+                ),
+                MenuItemButton(
+                  onPressed: () async {
                     await const BangMenuRoute().push(context);
                   },
                   leadingIcon: const Icon(MdiIcons.exclamationThick),

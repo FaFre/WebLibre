@@ -53,7 +53,7 @@ class OpenSharedContent extends HookConsumerWidget {
             );
 
         if (context.mounted) {
-          context.pop();
+          context.pop(true);
         }
       }
     }

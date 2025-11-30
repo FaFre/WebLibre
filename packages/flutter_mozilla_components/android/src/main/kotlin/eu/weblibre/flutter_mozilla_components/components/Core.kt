@@ -30,6 +30,7 @@ import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.engine.EngineMiddleware
 import mozilla.components.browser.state.engine.middleware.SessionPrioritizationMiddleware
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.browser.storage.sync.PlacesBookmarksStorage
 import mozilla.components.browser.storage.sync.PlacesHistoryStorage
 import mozilla.components.browser.thumbnails.ThumbnailsMiddleware
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
@@ -239,11 +240,13 @@ class Core(
      * private sessions).
      */
     val lazyHistoryStorage = lazy { PlacesHistoryStorage(context) }
+    val lazyBookmarksStorage = lazy { PlacesBookmarksStorage(context) }
 
     /**
      * A convenience accessor to the [PlacesHistoryStorage].
      */
     val historyStorage by lazy { lazyHistoryStorage.value }
+    val bookmarksStorage by lazy { lazyBookmarksStorage.value }
 
     val permissionStorage by lazy { PermissionStorage(geckoSitePermissionsStorage) }
 
