@@ -52,6 +52,8 @@ class AddFeedDialog extends HookConsumerWidget {
           ),
           controller: textController,
           keyboardType: TextInputType.url,
+          minLines: 1,
+          maxLines: 10,
           validator: (value) {
             return validateUrl(
               value,

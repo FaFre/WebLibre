@@ -226,6 +226,8 @@ class _FeedEditContent extends HookConsumerWidget {
                           prefixIcon: Icon(Icons.image),
                         ),
                         keyboardType: TextInputType.url,
+                        minLines: 1,
+                        maxLines: 10,
                         controller: iconUrlTextController,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
@@ -243,6 +245,8 @@ class _FeedEditContent extends HookConsumerWidget {
                           prefixIcon: Icon(Icons.link),
                         ),
                         keyboardType: TextInputType.url,
+                        minLines: 1,
+                        maxLines: 10,
                         controller: siteLinkTextController,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {
@@ -268,6 +272,8 @@ class _FeedEditContent extends HookConsumerWidget {
                           prefixIcon: Icon(MdiIcons.rss),
                         ),
                         keyboardType: TextInputType.url,
+                        minLines: 1,
+                        maxLines: 10,
                         controller: urlTextController,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         validator: (value) {

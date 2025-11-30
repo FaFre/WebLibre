@@ -136,7 +136,11 @@ class ContainerSitesScreen extends HookConsumerWidget {
 
                     return ListTile(
                       leading: UrlIcon([site], iconSize: 20),
-                      title: Text(site.host),
+                      title: Text(
+                        site.host,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text(site.toString()),
                       trailing: IconButton(
                         onPressed: () {
