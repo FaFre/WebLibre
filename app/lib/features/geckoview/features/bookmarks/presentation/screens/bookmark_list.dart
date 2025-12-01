@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
+import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -21,14 +22,82 @@ class BookmarkListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bookmarkList = ref.watch(bookmarksProvider<BookmarkItem>(entryGuid));
+    final treeKey = useMemoized(() => GlobalKey<TreeViewState>());
+    final bookmarkList = ref.watch(seamlessBookmarksProvider(entryGuid));
+
+    final textFilterEnabled = useState(false);
+    final textFilterController = useTextEditingController();
+
+    useListenableCallback(textFilterController, () {
+      if (ref.exists(seamlessBookmarksProvider(entryGuid))) {
+        ref
+            .read(seamlessBookmarksProvider(entryGuid).notifier)
+            .search(textFilterController.text);
+      }
+    });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Bookmarks')),
+      appBar: AppBar(
+        title: textFilterEnabled.value
+            ? TextField(
+                controller: textFilterController,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.only(top: 12),
+                  border: InputBorder.none,
+                  hintText: 'Filter bookmarks...',
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      if (textFilterController.text.isNotEmpty) {
+                        textFilterController.clear();
+                      } else {
+                        textFilterEnabled.value = false;
+                      }
+                    },
+                    icon: const Icon(Icons.clear),
+                  ),
+                ),
+              )
+            : const Text('Bookmarks'),
+        actions: [
+          if (!textFilterEnabled.value)
+            IconButton(
+              onPressed: () {
+                textFilterEnabled.value = !textFilterEnabled.value;
+              },
+              icon: const Icon(Icons.search),
+            ),
+          MenuAnchor(
+            menuChildren: [
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.expandAll),
+                child: const Text('Expand All Folders'),
+                onPressed: () {
+                  treeKey.currentState?.controller.expandAllChildren(
+                    treeKey.currentState!.controller.tree,
+                    recursive: true,
+                  );
+                },
+              ),
+            ],
+            builder: (context, controller, child) => IconButton(
+              onPressed: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              icon: const Icon(MdiIcons.dotsVertical),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(left: 12.0),
           child: bookmarkList.when(
+            skipLoadingOnReload: true,
             data: (list) {
               TreeNode<BookmarkItem> addChildren(
                 TreeNode<BookmarkItem>? parent,
@@ -55,9 +124,14 @@ class BookmarkListScreen extends HookConsumerWidget {
                   : TreeNode<BookmarkItem>.root();
 
               return TreeView.simple(
+                key: treeKey,
                 tree: root,
                 onTreeReady: (controller) {
-                  controller.expandNode(root);
+                  if (textFilterEnabled.value) {
+                    controller.expandAllChildren(root, recursive: true);
+                  } else {
+                    controller.expandNode(root);
+                  }
                 },
                 expansionIndicatorBuilder: (context, tree) =>
                     ChevronIndicator.upDown(
@@ -70,6 +144,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                 builder: (context, item) {
                   return switch (item.data) {
                     final BookmarkEntry bookmark => ListTile(
+                      key: ValueKey(bookmark.guid),
                       contentPadding: EdgeInsets.zero,
                       leading: UrlIcon([bookmark.url], iconSize: 34.0),
                       trailing: IconButton(
@@ -80,7 +155,11 @@ class BookmarkListScreen extends HookConsumerWidget {
                           ).push(context);
                         },
                       ),
-                      title: Text(bookmark.title),
+                      title: Text(
+                        bookmark.title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: UriBreadcrumb(uri: bookmark.url),
                       onTap: () async {
                         final result = await OpenSharedContentRoute(
@@ -95,6 +174,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                       },
                     ),
                     final BookmarkFolder folder => Padding(
+                      key: ValueKey(folder.guid),
                       padding: const EdgeInsets.only(right: 42.0),
                       child: HookBuilder(
                         builder: (context) {
