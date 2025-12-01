@@ -26,7 +26,7 @@ import 'package:weblibre/features/tor/presentation/widgets/tor_notification.dart
 
 part 'start_tor_proxy.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class StartProxyController extends _$StartProxyController {
   // ignore: document_ignores is used for dialog
   // ignore: avoid_build_context_in_providers
