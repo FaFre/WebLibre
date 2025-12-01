@@ -349,13 +349,6 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   leadingIcon: const Icon(Icons.settings),
                   child: const Text('Settings'),
                 ),
-                MenuItemButton(
-                  onPressed: () async {
-                    await const HistoryRoute().push(context);
-                  },
-                  leadingIcon: const Icon(Icons.history),
-                  child: const Text('History'),
-                ),
                 Consumer(
                   builder: (context, childRef, child) {
                     final browserExtensions = childRef.watch(
@@ -437,6 +430,13 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                   ),
                 ),
                 const Divider(),
+                MenuItemButton(
+                  onPressed: () async {
+                    await const HistoryRoute().push(context);
+                  },
+                  leadingIcon: const Icon(Icons.history),
+                  child: const Text('History'),
+                ),
                 MenuItemButton(
                   onPressed: () async {
                     await BookmarkListRoute(

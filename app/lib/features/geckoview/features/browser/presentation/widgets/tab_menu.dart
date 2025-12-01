@@ -130,41 +130,17 @@ class TabMenu extends HookConsumerWidget {
           },
         ),
         const Divider(),
-        MenuItemButton(
-          onPressed: () async {
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .closeTab(selectedTabId);
-
-            if (context.mounted) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-              );
-            }
-          },
-          leadingIcon: const Icon(Icons.close),
-          child: const Text('Close Tab'),
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.contentCopy),
-          child: const Text('Copy address'),
-          onPressed: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-            await Clipboard.setData(
-              ClipboardData(text: tabState.url.toString()),
-            );
-          },
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.open_in_browser),
-          child: const Text('Launch External'),
-          onPressed: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-            await ui_helper.launchUrlFeedback(context, tabState.url);
-          },
+        Visibility(
+          visible: showFeeds.value,
+          replacement: MenuItemButton(
+            closeOnActivate: false,
+            leadingIcon: const Icon(Icons.rss_feed),
+            child: const Text('Fetch Feeds'),
+            onPressed: () {
+              showFeeds.value = true;
+            },
+          ),
+          child: WebsiteFeedMenuButton(selectedTabId),
         ),
         MenuItemButton(
           leadingIcon: const Icon(MdiIcons.bookmarkPlus),
@@ -182,205 +158,251 @@ class TabMenu extends HookConsumerWidget {
             ).push(context);
           },
         ),
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.tabPlus),
-          child: const Text('Clone tab'),
-          onPressed: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-            final tabId = await ref
-                .read(tabRepositoryProvider.notifier)
-                .addTab(url: tabState.url, private: false, selectTab: false);
-
-            if (context.mounted) {
-              //save reference before pop `ref` gets disposed
-              final repo = ref.read(tabRepositoryProvider.notifier);
-
-              ui_helper.showTabSwitchMessage(
-                context,
-                onSwitch: () async {
-                  await repo.selectTab(tabId);
-                },
-              );
-            }
-          },
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.tabUnselected),
-          child: const Text('Clone as private tab'),
-          onPressed: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-            final tabId = await ref
-                .read(tabRepositoryProvider.notifier)
-                .addTab(url: tabState.url, private: true, selectTab: false);
-
-            if (context.mounted) {
-              //save reference before pop `ref` gets disposed
-              final repo = ref.read(tabRepositoryProvider.notifier);
-
-              ui_helper.showTabSwitchMessage(
-                context,
-                onSwitch: () async {
-                  await repo.selectTab(tabId);
-                },
-              );
-            }
-          },
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
-          child: const Text('Assign container'),
-          onPressed: () async {
-            final targetContainerId = await const ContainerSelectionRoute()
-                .push<String?>(context);
-
-            if (targetContainerId != null) {
-              final containerData = await ref
-                  .read(containerRepositoryProvider.notifier)
-                  .getContainerData(targetContainerId);
-
-              if (containerData != null) {
+        SubmenuButton(
+          menuChildren: [
+            MenuItemButton(
+              leadingIcon: const Icon(MdiIcons.tabPlus),
+              child: const Text('Regular'),
+              onPressed: () async {
                 final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .assignContainer(tabState.id, containerData);
-              }
-            }
-          },
+                final tabId = await ref
+                    .read(tabRepositoryProvider.notifier)
+                    .addTab(
+                      url: tabState.url,
+                      private: false,
+                      selectTab: false,
+                    );
+
+                if (context.mounted) {
+                  //save reference before pop `ref` gets disposed
+                  final repo = ref.read(tabRepositoryProvider.notifier);
+
+                  ui_helper.showTabSwitchMessage(
+                    context,
+                    onSwitch: () async {
+                      await repo.selectTab(tabId);
+                    },
+                  );
+                }
+              },
+            ),
+            MenuItemButton(
+              leadingIcon: const Icon(MdiIcons.tabUnselected),
+              child: const Text('Private'),
+              onPressed: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+                final tabId = await ref
+                    .read(tabRepositoryProvider.notifier)
+                    .addTab(url: tabState.url, private: true, selectTab: false);
+
+                if (context.mounted) {
+                  //save reference before pop `ref` gets disposed
+                  final repo = ref.read(tabRepositoryProvider.notifier);
+
+                  ui_helper.showTabSwitchMessage(
+                    context,
+                    onSwitch: () async {
+                      await repo.selectTab(tabId);
+                    },
+                  );
+                }
+              },
+            ),
+          ],
+          leadingIcon: const Icon(MdiIcons.tabPlus),
+          child: const Text('Clone Tab'),
         ),
-        Consumer(
-          child: MenuItemButton(
-            leadingIcon: const Icon(MdiIcons.webPlus),
-            child: const Text('Assign Site to Container'),
-            onPressed: () async {
-              final targetContainerId = await const ContainerSelectionRoute()
-                  .push<String?>(context);
+        SubmenuButton(
+          menuChildren: [
+            MenuItemButton(
+              leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
+              child: const Text('Assign Container'),
+              onPressed: () async {
+                final targetContainerId = await const ContainerSelectionRoute()
+                    .push<String?>(context);
 
-              if (targetContainerId != null) {
-                final containerData = await ref
-                    .read(containerRepositoryProvider.notifier)
-                    .getContainerData(targetContainerId);
+                if (targetContainerId != null) {
+                  final containerData = await ref
+                      .read(containerRepositoryProvider.notifier)
+                      .getContainerData(targetContainerId);
 
-                if (containerData != null) {
-                  final tabState = ref.read(tabStateProvider(selectedTabId));
-                  final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+                  if (containerData != null) {
+                    final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                  if (origin != null) {
                     await ref
-                        .read(containerRepositoryProvider.notifier)
-                        .replaceContainer(
-                          containerData.copyWith.metadata(
-                            containerData.metadata.copyWith.assignedSites([
-                              ...?containerData.metadata.assignedSites,
-                              origin,
-                            ]),
-                          ),
-                        );
+                        .read(tabDataRepositoryProvider.notifier)
+                        .assignContainer(tabState.id, containerData);
                   }
                 }
-              }
-            },
-          ),
-          builder: (context, ref, child) {
-            final isSiteAssigned = ref.watch(
-              watchIsCurrentSiteAssignedToContainerProvider,
-            );
+              },
+            ),
+            Consumer(
+              child: MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.webPlus),
+                child: const Text('URL relation'),
+                onPressed: () async {
+                  final targetContainerId =
+                      await const ContainerSelectionRoute().push<String?>(
+                        context,
+                      );
 
-            return Visibility(
-              visible: isSiteAssigned.hasValue && !isSiteAssigned.requireValue,
-              child: child!,
-            );
-          },
-        ),
-        Consumer(
-          child: MenuItemButton(
-            leadingIcon: const Icon(MdiIcons.folderCancelOutline),
-            child: const Text('Unassign container'),
-            onPressed: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                  if (targetContainerId != null) {
+                    final containerData = await ref
+                        .read(containerRepositoryProvider.notifier)
+                        .getContainerData(targetContainerId);
 
-              await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .unassignContainer(tabState.id);
-            },
-          ),
-          builder: (context, ref, child) {
-            final containerId = ref.watch(
-              watchContainerTabIdProvider(
-                selectedTabId,
-              ).select((value) => value.value),
-            );
+                    if (containerData != null) {
+                      final tabState = ref.read(
+                        tabStateProvider(selectedTabId),
+                      );
+                      final origin = tabState?.url.origin.mapNotNull(Uri.parse);
 
-            return Visibility(visible: containerId != null, child: child!);
-          },
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.share),
-          onPressed: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                      if (origin != null) {
+                        await ref
+                            .read(containerRepositoryProvider.notifier)
+                            .replaceContainer(
+                              containerData.copyWith.metadata(
+                                containerData.metadata.copyWith.assignedSites([
+                                  ...?containerData.metadata.assignedSites,
+                                  origin,
+                                ]),
+                              ),
+                            );
+                      }
+                    }
+                  }
+                },
+              ),
+              builder: (context, ref, child) {
+                final isSiteAssigned = ref.watch(
+                  watchIsCurrentSiteAssignedToContainerProvider,
+                );
 
-            await SharePlus.instance.share(ShareParams(uri: tabState.url));
-          },
-          trailingIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const VerticalDivider(indent: 4, endIndent: 4),
-              IconButton(
-                icon: const Icon(Icons.qr_code),
+                return Visibility(
+                  visible:
+                      isSiteAssigned.hasValue && !isSiteAssigned.requireValue,
+                  child: child!,
+                );
+              },
+            ),
+            Consumer(
+              child: MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.folderCancelOutline),
+                child: const Text('Unassign Container'),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                  await showQrCode(context, tabState.url.toString());
-                  controller.close();
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .unassignContainer(tabState.id);
                 },
               ),
-            ],
-          ),
-          child: const Text('Share link'),
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.mobile_screen_share),
-          child: const Text('Share screenshot'),
-          onPressed: () async {
-            final screenshot = await ref
-                .read(selectedTabSessionProvider)
-                .requestScreenshot();
-
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-            if (screenshot != null) {
-              ui.decodeImageFromList(screenshot, (result) async {
-                final png = await result.toByteData(
-                  format: ui.ImageByteFormat.png,
+              builder: (context, ref, child) {
+                final containerId = ref.watch(
+                  watchContainerTabIdProvider(
+                    selectedTabId,
+                  ).select((value) => value.value),
                 );
 
-                if (png != null) {
-                  final file = XFile.fromData(
-                    png.buffer.asUint8List(),
-                    mimeType: 'image/png',
-                  );
+                return Visibility(visible: containerId != null, child: child!);
+              },
+            ),
+          ],
+          leadingIcon: const Icon(MdiIcons.folder),
+          child: const Text('Container'),
+        ),
+        SubmenuButton(
+          menuChildren: [
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.open_in_browser),
+              child: const Text('Launch External'),
+              onPressed: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                  await SharePlus.instance.share(
-                    ShareParams(files: [file], subject: tabState.title),
-                  );
+                await ui_helper.launchUrlFeedback(context, tabState.url);
+              },
+            ),
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.mobile_screen_share),
+              child: const Text('Share Screenshot'),
+              onPressed: () async {
+                final screenshot = await ref
+                    .read(selectedTabSessionProvider)
+                    .requestScreenshot();
+
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+                if (screenshot != null) {
+                  ui.decodeImageFromList(screenshot, (result) async {
+                    final png = await result.toByteData(
+                      format: ui.ImageByteFormat.png,
+                    );
+
+                    if (png != null) {
+                      final file = XFile.fromData(
+                        png.buffer.asUint8List(),
+                        mimeType: 'image/png',
+                      );
+
+                      await SharePlus.instance.share(
+                        ShareParams(files: [file], subject: tabState.title),
+                      );
+                    }
+                  });
                 }
-              });
-            }
+              },
+            ),
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.share),
+              onPressed: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+                await SharePlus.instance.share(ShareParams(uri: tabState.url));
+              },
+              child: const Text('Share Link'),
+            ),
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.qr_code),
+              onPressed: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+                await showQrCode(context, tabState.url.toString());
+                controller.close();
+              },
+              child: const Text('Show QR Code'),
+            ),
+          ],
+          leadingIcon: const Icon(Icons.share),
+          child: const Text('Share'),
+        ),
+        MenuItemButton(
+          leadingIcon: const Icon(MdiIcons.contentCopy),
+          child: const Text('Copy Address'),
+          onPressed: () async {
+            final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+            await Clipboard.setData(
+              ClipboardData(text: tabState.url.toString()),
+            );
           },
         ),
-        Visibility(
-          visible: showFeeds.value,
-          replacement: MenuItemButton(
-            closeOnActivate: false,
-            leadingIcon: const Icon(Icons.rss_feed),
-            child: const Text('Fetch Feeds'),
-            onPressed: () {
-              showFeeds.value = true;
-            },
-          ),
-          child: WebsiteFeedMenuButton(selectedTabId),
+        MenuItemButton(
+          onPressed: () async {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .closeTab(selectedTabId);
+
+            if (context.mounted) {
+              ui_helper.showTabUndoClose(
+                context,
+                ref.read(tabRepositoryProvider.notifier).undoClose,
+              );
+            }
+          },
+          leadingIcon: const Icon(Icons.close),
+          child: const Text('Close Tab'),
         ),
       ],
       child: child,
