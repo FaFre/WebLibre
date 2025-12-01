@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
@@ -73,10 +74,12 @@ class BookmarkListScreen extends HookConsumerWidget {
                 leadingIcon: const Icon(MdiIcons.expandAll),
                 child: const Text('Expand All Folders'),
                 onPressed: () {
-                  treeKey.currentState?.controller.expandAllChildren(
-                    treeKey.currentState!.controller.tree,
-                    recursive: true,
-                  );
+                  treeKey.currentState?.controller.mapNotNull((controller) {
+                    controller.expandAllChildren(
+                      controller.tree,
+                      recursive: true,
+                    );
+                  });
                 },
               ),
             ],
