@@ -40,6 +40,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: suggestionsAsync.when(
+            skipLoadingOnReload: true,
             data: (suggestions) {
               final screenWidth = MediaQuery.of(context).size.width;
 
@@ -83,6 +84,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                               : AsyncValue.data(container.topic);
 
                           return topic.when(
+                            skipLoadingOnReload: true,
                             data: (topic) => Text(topic ?? 'Untitled'),
                             error: (error, stackTrace) {
                               logger.e(

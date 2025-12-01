@@ -66,10 +66,12 @@ class FingerprintSettingsScreen extends HookConsumerWidget {
       ),
       body: SafeArea(
         child: settingsAsync.when(
+          skipLoadingOnReload: true,
           data: (result) {
             return result.fold(
               (overrides) {
                 return targetsAsync.when(
+                  skipLoadingOnReload: true,
                   data: (targets) {
                     return ListView.builder(
                       itemCount: targets.length,

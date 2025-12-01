@@ -41,6 +41,7 @@ class SelectFeedDialog extends HookConsumerWidget {
                 final feedAsync = ref.watch(fetchWebFeedProvider(uri));
 
                 return feedAsync.when(
+                  skipLoadingOnReload: true,
                   data: (data) {
                     return ListTile(
                       title: Text(

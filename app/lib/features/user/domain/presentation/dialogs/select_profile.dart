@@ -16,6 +16,7 @@ class SelectProfileDialog extends HookConsumerWidget {
       title: const Text('Manage Users'),
       scrollable: true,
       content: usersAsync.when(
+        skipLoadingOnReload: true,
         data: (profiles) => Column(
           children: profiles.map((profile) {
             final isSelected = filesystem.selectedProfile == profile.uuidValue;

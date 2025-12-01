@@ -71,6 +71,7 @@ class ContainerChips extends HookConsumerWidget {
     );
 
     return containersAsync.when(
+      skipLoadingOnReload: true,
       data: (containers) {
         final availableContainers =
             containerFilter.mapNotNull(
@@ -161,6 +162,7 @@ class ContainerChips extends HookConsumerWidget {
                           );
 
                           return suggestions.when(
+                            skipLoadingOnReload: true,
                             data: (data) {
                               if (data.isEmpty) {
                                 return const SizedBox.shrink();

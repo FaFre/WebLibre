@@ -48,6 +48,7 @@ class ContainerTitle extends HookConsumerWidget {
     );
 
     return topicAsync.when(
+      skipLoadingOnReload: true,
       data: (data) =>
           data.mapNotNull(
             (name) => Text.rich(

@@ -387,6 +387,7 @@ class HistoryScreen extends HookConsumerWidget {
       ),
       body: SafeArea(
         child: historyEntries.when(
+          skipLoadingOnReload: true,
           data: (data) {
             return RefreshIndicator(
               onRefresh: () async {

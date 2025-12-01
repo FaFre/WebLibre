@@ -83,6 +83,7 @@ class FeedSearch extends HookConsumerWidget {
         SliverSkeletonizer(
           enabled: articlesAsync.isLoading,
           child: articlesAsync.when(
+            skipLoadingOnReload: true,
             data: (articles) => SliverList.builder(
               itemCount: articles.length,
               itemBuilder: (context, index) {

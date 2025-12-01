@@ -44,6 +44,7 @@ class WebEngineHardeningGroupScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(groupName)),
       body: settings.when(
+        skipLoadingOnReload: true,
         data: (group) {
           return Column(
             children: [

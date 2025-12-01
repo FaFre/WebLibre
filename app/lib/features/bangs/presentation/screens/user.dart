@@ -23,6 +23,7 @@ class UserBangs extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('User Bangs')),
       body: bangsAsync.when(
+        skipLoadingOnReload: true,
         data: (bangs) {
           return ListView.builder(
             itemCount: bangs.length,

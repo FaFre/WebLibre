@@ -17,6 +17,7 @@ class ProfileListScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Users')),
       body: usersAsync.when(
+        skipLoadingOnReload: true,
         data: (profiles) => ListView.builder(
           itemCount: profiles.length,
           itemBuilder: (context, index) {
