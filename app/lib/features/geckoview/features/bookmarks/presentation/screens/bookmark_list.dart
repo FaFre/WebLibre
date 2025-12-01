@@ -178,7 +178,9 @@ class BookmarkListScreen extends HookConsumerWidget {
                     ),
                     final BookmarkFolder folder => Padding(
                       key: ValueKey(folder.guid),
-                      padding: const EdgeInsets.only(right: 42.0),
+                      padding: (item.isLeaf)
+                          ? const EdgeInsets.only(right: 4.0)
+                          : const EdgeInsets.only(right: 42.0),
                       child: HookBuilder(
                         builder: (context) {
                           final controller = useMenuController();

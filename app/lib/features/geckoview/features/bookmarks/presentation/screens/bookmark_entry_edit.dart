@@ -180,10 +180,11 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                         final isSelected = item.data?.guid == parentGuid.value;
 
                         return Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
+                          padding: const EdgeInsets.only(right: 42.0),
                           child: switch (item.data) {
                             final BookmarkFolder folder => ListTile(
                               key: ValueKey(folder.guid),
+                              contentPadding: EdgeInsets.zero,
                               selected: isSelected,
                               leading: (item.isExpanded)
                                   ? const Icon(MdiIcons.folderOpen)
