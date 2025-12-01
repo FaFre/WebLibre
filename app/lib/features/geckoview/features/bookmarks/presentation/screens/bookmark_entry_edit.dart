@@ -5,6 +5,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
@@ -24,6 +25,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
+    final treeKey = useMemoized(() => GlobalKey<TreeViewState>());
 
     final folderList = ref.watch(
       bookmarksProvider<BookmarkFolder>(BookmarkRoot.mobile.id),
@@ -133,6 +135,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                 const SizedBox(height: 16),
                 Text('Folder', style: Theme.of(context).textTheme.labelMedium),
                 folderList.when(
+                  skipLoadingOnReload: true,
                   data: (list) {
                     TreeNode<BookmarkFolder> addChildren(
                       TreeNode<BookmarkFolder>? parent,
@@ -159,10 +162,11 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                         : TreeNode<BookmarkFolder>.root();
 
                     return TreeView.simple(
+                      key: treeKey,
                       tree: root,
                       shrinkWrap: true,
                       onTreeReady: (controller) {
-                        controller.expandAllChildren(root);
+                        controller.expandAllChildren(root, recursive: true);
                       },
                       expansionIndicatorBuilder: (context, tree) =>
                           ChevronIndicator.upDown(
@@ -179,13 +183,25 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                           padding: const EdgeInsets.only(right: 16.0),
                           child: switch (item.data) {
                             final BookmarkFolder folder => ListTile(
+                              key: ValueKey(folder.guid),
                               selected: isSelected,
                               leading: (item.isExpanded)
                                   ? const Icon(MdiIcons.folderOpen)
                                   : const Icon(MdiIcons.folder),
-                              trailing: isSelected
-                                  ? const Icon(Icons.check)
-                                  : null,
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (isSelected) const Icon(Icons.check),
+                                  IconButton(
+                                    onPressed: () async {
+                                      await BookmarkFolderAddRoute(
+                                        parentGuid: folder.guid,
+                                      ).push(context);
+                                    },
+                                    icon: const Icon(MdiIcons.folderPlus),
+                                  ),
+                                ],
+                              ),
                               title: Text(folder.title),
                               onTap: () {
                                 parentGuid.value = folder.guid;
