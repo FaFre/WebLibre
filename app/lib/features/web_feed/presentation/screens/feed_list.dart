@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
@@ -33,7 +35,37 @@ class FeedListScreen extends HookConsumerWidget {
     final feeds = ref.watch(feedListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Feeds')),
+      appBar: AppBar(
+        title: const Text('Feeds'),
+        actions: [
+          HookBuilder(
+            builder: (context) {
+              final future = useState<Future<void>?>(null);
+              final state = useFuture(future.value);
+
+              if (state.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.0),
+                  ),
+                );
+              }
+
+              return IconButton(
+                onPressed: () {
+                  future.value = ref
+                      .read(fetchArticlesControllerProvider.notifier)
+                      .fetchAllArticles();
+                },
+                icon: const Icon(MdiIcons.cloudSync),
+              );
+            },
+          ),
+        ],
+      ),
       body: feeds.when(
         skipLoadingOnReload: true,
         data: (feeds) {
