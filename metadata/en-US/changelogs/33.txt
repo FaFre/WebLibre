@@ -1,0 +1,16 @@
+GeckoView 145.0
+
+**New Features**
+- Added container site assignments to automatically open specific websites in designated containers
+- Added multi-user profiles with complete separation of browsing data, extensions, and settings
+- Added bookmarks feature
+- Added support for custom search engines via user-defined bangs
+
+**Improvements**
+- Tor now uses built-in bridges as fallback
+- Tor data storage migrated from file directory to cache
+- Arti logging now outputs to logcat
+- Tab overview now defaults to fullscreen mode (configurable in settings)
+- Visual indicator added to tab bar for Tor-tunneled tabs
+- Reorganized menu structure
+- General UI improvements and bug fixes
