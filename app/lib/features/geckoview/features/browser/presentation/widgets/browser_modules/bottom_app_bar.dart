@@ -78,7 +78,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
     final dragStartPosition = useRef(Offset.zero);
 
     return BottomAppBar(
-      height: AppBar().preferredSize.height,
+      height: kToolbarHeight,
       padding: EdgeInsets.zero,
       child: GestureDetector(
         onTap: () {
