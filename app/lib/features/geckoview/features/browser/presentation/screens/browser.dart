@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
@@ -251,59 +252,84 @@ class _Browser extends HookConsumerWidget {
     final overlayBuilder = ref.watch(overlayControllerProvider);
 
     ref.listen(bottomSheetControllerProvider, (previous, next) {
-      if (sheetController.value != null) {
-        try {
-          sheetController.value!.close();
-        } catch (_) {
-          //silently drop closing errors
+      if (!context.mounted) {
+        logger.e('Cannot show sheet, context not mounted');
+        return;
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) {
+          logger.e('Cannot show sheet, context not mounted (post frame)');
+          return;
         }
-      }
 
-      if (next != null) {
-        final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
-        final controller = Scaffold.of(context).showBottomSheet((context) {
-          bool dismissOnThreshold(
-            DraggableScrollableNotification notification,
-          ) {
-            if (notification.extent <= 0.1) {
-              ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-              return true;
-            }
-
-            return false;
+        // Close existing sheet
+        if (sheetController.value != null) {
+          try {
+            final existingController = sheetController.value!;
+            sheetController.value = null;
+            existingController.close();
+          } catch (e) {
+            logger.e('Error closing existing sheet', error: e);
           }
+        }
 
-          final sheet = switch (next) {
-            ViewTabsSheet() =>
-              NotificationListener<DraggableScrollableNotification>(
-                key: ValueKey(next),
-                onNotification: dismissOnThreshold,
-                child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
-              ),
-            final EditUrlSheet parameter =>
-              NotificationListener<DraggableScrollableNotification>(
-                key: ValueKey(parameter),
-                onNotification: dismissOnThreshold,
-                child: _ViewUrlSheet(
-                  initialTabState: parameter.tabState,
-                  maxChildSize: relativeSafeArea,
-                ),
-              ),
-          };
+        // Show new sheet
+        if (next != null) {
+          try {
+            final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
 
-          return sheet;
-        });
+            final controller = Scaffold.of(context).showBottomSheet((context) {
+              logger.i(
+                'Building bottom sheet, relativeSafeArea: $relativeSafeArea, mounted: ${context.mounted}',
+              );
 
-        unawaited(
-          controller.closed.whenComplete(() {
-            ref.read(bottomSheetControllerProvider.notifier).closed(next);
-          }),
-        );
+              bool dismissOnThreshold(
+                DraggableScrollableNotification notification,
+              ) {
+                if (notification.extent <= 0.1) {
+                  logger.i('Dismissing sheet, reached min extend');
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
+                  return true;
+                }
+                return false;
+              }
 
-        sheetController.value = controller;
-      } else {
-        sheetController.value = null;
-      }
+              final sheet = switch (next) {
+                ViewTabsSheet() =>
+                  NotificationListener<DraggableScrollableNotification>(
+                    key: UniqueKey(),
+                    onNotification: dismissOnThreshold,
+                    child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
+                  ),
+                final EditUrlSheet parameter =>
+                  NotificationListener<DraggableScrollableNotification>(
+                    key: UniqueKey(),
+                    onNotification: dismissOnThreshold,
+                    child: _ViewUrlSheet(
+                      initialTabState: parameter.tabState,
+                      maxChildSize: relativeSafeArea,
+                    ),
+                  ),
+              };
+
+              return sheet;
+            });
+
+            unawaited(
+              controller.closed.whenComplete(() {
+                ref.read(bottomSheetControllerProvider.notifier).closed(next);
+              }),
+            );
+
+            sheetController.value = controller;
+          } catch (e) {
+            debugPrint('Failed to show bottom sheet: $e');
+          }
+        }
+      });
     });
 
     return DragTarget<TabDragData>(
