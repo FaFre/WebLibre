@@ -1,6 +1,5 @@
 import BackgroundMain, { doNotProxy } from '../../src/background/BackgroundMain'
 import { Store } from '../../src/store/Store'
-import webExtensionsApiFake from 'webextensions-api-fake'
 
 import { expect } from 'chai'
 import { ProxySettings } from '../../src/domain/ProxySettings'
@@ -8,12 +7,13 @@ const tryFromDao = ProxySettings.tryFromDao
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
+const chrome = require('sinon-chrome/extensions');
+
 const store = new Store()
 
 describe('BackgroundMain', function () {
   beforeEach(() => {
-    // @ts-expect-error
-    global.browser = webExtensionsApiFake()
+    global.browser = chrome
   })
 
   afterEach(() => {

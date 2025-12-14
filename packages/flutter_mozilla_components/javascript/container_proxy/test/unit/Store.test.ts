@@ -1,9 +1,9 @@
 import { ProxyDao, Store } from '../../src/store/Store'
-import webExtensionsApiFake from 'webextensions-api-fake'
 
 import { expect } from 'chai'
 import { ProxySettings } from '../../src/domain/ProxySettings'
 const tryFromDao = ProxySettings.tryFromDao
+const chrome = require('sinon-chrome/extensions');
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
@@ -11,7 +11,7 @@ describe('Store', () => {
   const store = new Store()
 
   beforeEach(() => {
-    (global as any).browser = webExtensionsApiFake()
+    (global as any).browser = chrome
   })
 
   afterEach(() => {

@@ -1,8 +1,8 @@
 {
-  "hash": "1d5bede379cdf6035685",
-  "version": "5.97.1",
-  "time": 557,
-  "builtAt": 1757653694040,
+  "hash": "1ef493e7b8f78773006a",
+  "version": "5.103.0",
+  "time": 651,
+  "builtAt": 1765622345301,
   "publicPath": "auto",
   "outputPath": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/dist",
   "assetsByChunkName": {
@@ -14,14 +14,14 @@
     {
       "type": "asset",
       "name": "readability.min.js",
-      "size": 49805,
+      "size": 49729,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
       "info": {
         "javascriptModule": false,
         "minimized": true,
-        "size": 49805
+        "size": 49729
       },
       "chunkNames": [
         "main"
@@ -43,9 +43,9 @@
       "initial": true,
       "entry": true,
       "recorded": false,
-      "size": 128734,
+      "size": 128760,
       "sizes": {
-        "javascript": 128064,
+        "javascript": 128090,
         "runtime": 670
       },
       "names": [
@@ -59,7 +59,7 @@
         "readability.min.js"
       ],
       "auxiliaryFiles": [],
-      "hash": "917adf20241b61c5c035",
+      "hash": "b87942dfc8d6d4f8c3fd",
       "childrenByOrder": {},
       "id": 792,
       "siblings": [],
@@ -359,10 +359,10 @@
           "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
           "name": "./node_modules/remove-markdown/index.js",
           "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
-          "index": 5,
-          "preOrderIndex": 5,
-          "index2": 4,
-          "postOrderIndex": 4,
+          "index": 4,
+          "preOrderIndex": 4,
+          "index2": 3,
+          "postOrderIndex": 3,
           "cacheable": true,
           "optional": false,
           "orphan": false,
@@ -428,9 +428,9 @@
           "type": "module",
           "moduleType": "javascript/esm",
           "layer": null,
-          "size": 29609,
+          "size": 29635,
           "sizes": {
-            "javascript": 29609
+            "javascript": 29635
           },
           "built": true,
           "codeGenerated": true,
@@ -542,9 +542,9 @@
               "type": "module",
               "moduleType": "javascript/auto",
               "layer": null,
-              "size": 25062,
+              "size": 25088,
               "sizes": {
-                "javascript": 25062
+                "javascript": 25088
               },
               "built": true,
               "codeGenerated": false,
@@ -553,10 +553,10 @@
               "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
               "name": "./node_modules/turndown/lib/turndown.browser.es.js",
               "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
-              "index": 4,
-              "preOrderIndex": 4,
-              "index2": 3,
-              "postOrderIndex": 3,
+              "index": 5,
+              "preOrderIndex": 5,
+              "index2": 4,
+              "postOrderIndex": 4,
               "cacheable": true,
               "optional": false,
               "orphan": false,
@@ -614,7 +614,7 @@
                 "default"
               ],
               "optimizationBailout": [
-                "Statement (VariableDeclaration) with side effects in source code at 78:0-15"
+                "Statement (VariableDeclaration) with side effects in source code at 82:0-15"
               ],
               "depth": 1
             }
@@ -745,9 +745,9 @@
       "type": "module",
       "moduleType": "javascript/esm",
       "layer": null,
-      "size": 29609,
+      "size": 29635,
       "sizes": {
-        "javascript": 29609
+        "javascript": 29635
       },
       "built": true,
       "codeGenerated": true,
@@ -857,9 +857,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 25062,
+          "size": 25088,
           "sizes": {
-            "javascript": 25062
+            "javascript": 25088
           },
           "built": true,
           "codeGenerated": false,
@@ -868,10 +868,10 @@
           "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
           "name": "./node_modules/turndown/lib/turndown.browser.es.js",
           "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
-          "index": 4,
-          "preOrderIndex": 4,
-          "index2": 3,
-          "postOrderIndex": 3,
+          "index": 5,
+          "preOrderIndex": 5,
+          "index2": 4,
+          "postOrderIndex": 4,
           "cacheable": true,
           "optional": false,
           "orphan": false,
@@ -928,7 +928,7 @@
             "default"
           ],
           "optimizationBailout": [
-            "Statement (VariableDeclaration) with side effects in source code at 78:0-15"
+            "Statement (VariableDeclaration) with side effects in source code at 82:0-15"
           ],
           "depth": 1
         }
@@ -1045,85 +1045,6 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 25062,
-      "sizes": {
-        "javascript": 25062
-      },
-      "built": true,
-      "codeGenerated": false,
-      "buildTimeExecuted": false,
-      "cached": false,
-      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
-      "name": "./node_modules/turndown/lib/turndown.browser.es.js",
-      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
-      "index": 4,
-      "preOrderIndex": 4,
-      "index2": 3,
-      "postOrderIndex": 3,
-      "cacheable": true,
-      "optional": false,
-      "orphan": true,
-      "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
-      "issuerName": "./src/index.js",
-      "issuerPath": [
-        {
-          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
-          "name": "./src/index.js",
-          "id": null
-        }
-      ],
-      "failed": false,
-      "errors": 0,
-      "warnings": 0,
-      "id": null,
-      "issuerId": null,
-      "chunks": [],
-      "assets": [],
-      "reasons": [
-        {
-          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
-          "module": "./src/index.js",
-          "moduleName": "./src/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
-          "resolvedModule": "./src/index.js",
-          "type": "harmony side effect evaluation",
-          "active": true,
-          "explanation": "",
-          "userRequest": "turndown",
-          "loc": "14:0-39",
-          "moduleId": null,
-          "resolvedModuleId": null
-        },
-        {
-          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
-          "module": "./src/index.js",
-          "moduleName": "./src/index.js",
-          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
-          "resolvedModule": "./src/index.js",
-          "type": "harmony import specifier",
-          "active": true,
-          "explanation": "",
-          "userRequest": "turndown",
-          "loc": "16:26-41",
-          "moduleId": null,
-          "resolvedModuleId": null
-        }
-      ],
-      "usedExports": [
-        "default"
-      ],
-      "providedExports": [
-        "default"
-      ],
-      "optimizationBailout": [
-        "Statement (VariableDeclaration) with side effects in source code at 78:0-15"
-      ],
-      "depth": 1
-    },
-    {
-      "type": "module",
-      "moduleType": "javascript/auto",
-      "layer": null,
       "size": 4012,
       "sizes": {
         "javascript": 4012
@@ -1135,10 +1056,10 @@
       "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
       "name": "./node_modules/remove-markdown/index.js",
       "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/remove-markdown/index.js",
-      "index": 5,
-      "preOrderIndex": 5,
-      "index2": 4,
-      "postOrderIndex": 4,
+      "index": 4,
+      "preOrderIndex": 4,
+      "index2": 3,
+      "postOrderIndex": 3,
       "cacheable": true,
       "optional": false,
       "orphan": false,
@@ -1196,6 +1117,85 @@
         "CommonJS bailout: module.exports is used directly at 1:0-14",
         "Statement (ExpressionStatement) with side effects in source code at 1:0-92:2",
         "ModuleConcatenation bailout: Module is not an ECMAScript module"
+      ],
+      "depth": 1
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/auto",
+      "layer": null,
+      "size": 25088,
+      "sizes": {
+        "javascript": 25088
+      },
+      "built": true,
+      "codeGenerated": false,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+      "name": "./node_modules/turndown/lib/turndown.browser.es.js",
+      "nameForCondition": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/turndown/lib/turndown.browser.es.js",
+      "index": 5,
+      "preOrderIndex": 5,
+      "index2": 4,
+      "postOrderIndex": 4,
+      "cacheable": true,
+      "optional": false,
+      "orphan": true,
+      "issuer": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+      "issuerName": "./src/index.js",
+      "issuerPath": [
+        {
+          "identifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "name": "./src/index.js",
+          "id": null
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0,
+      "id": null,
+      "issuerId": null,
+      "chunks": [],
+      "assets": [],
+      "reasons": [
+        {
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "module": "./src/index.js",
+          "moduleName": "./src/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModule": "./src/index.js",
+          "type": "harmony side effect evaluation",
+          "active": true,
+          "explanation": "",
+          "userRequest": "turndown",
+          "loc": "14:0-39",
+          "moduleId": null,
+          "resolvedModuleId": null
+        },
+        {
+          "moduleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "module": "./src/index.js",
+          "moduleName": "./src/index.js",
+          "resolvedModuleIdentifier": "/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/node_modules/babel-loader/lib/index.js??ruleSet[1].rules[0].use!/home/fafre/development/repos/lensai/packages/flutter_mozilla_components/javascript/readability/src/index.js",
+          "resolvedModule": "./src/index.js",
+          "type": "harmony import specifier",
+          "active": true,
+          "explanation": "",
+          "userRequest": "turndown",
+          "loc": "16:26-41",
+          "moduleId": null,
+          "resolvedModuleId": null
+        }
+      ],
+      "usedExports": [
+        "default"
+      ],
+      "providedExports": [
+        "default"
+      ],
+      "optimizationBailout": [
+        "Statement (VariableDeclaration) with side effects in source code at 82:0-15"
       ],
       "depth": 1
     },
@@ -1482,11 +1482,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 49805
+          "size": 49729
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 49805,
+      "assetsSize": 49729,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,
@@ -1504,11 +1504,11 @@
       "assets": [
         {
           "name": "readability.min.js",
-          "size": 49805
+          "size": 49729
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 49805,
+      "assetsSize": 49729,
       "auxiliaryAssets": [],
       "filteredAuxiliaryAssets": 0,
       "auxiliaryAssetsSize": 0,
