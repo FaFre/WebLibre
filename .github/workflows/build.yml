@@ -88,12 +88,12 @@ jobs:
 
       - name: Build APK
         working-directory: app
-        run: flutter build apk --release --split-per-abi --no-tree-shake-icons
+        run: flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons
 
       - name: Build App Bundle
         if: steps.build-type.outputs.is_prerelease == 'false'
         working-directory: app
-        run: flutter build appbundle --no-tree-shake-icons
+        run: flutter build appbundle --target-platform android-arm,android-arm64 --no-tree-shake-icons
 
       - name: Create github artifact release (Prerelease)
         if: steps.build-type.outputs.is_prerelease == 'true'
