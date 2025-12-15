@@ -3,7 +3,7 @@ version = "1.0-SNAPSHOT"
 
 buildscript {
     ext.kotlin_version = "2.1.20"
-    ext.mozillaComponentsVersion = '145.0.2'
+    ext.mozillaComponentsVersion = '145.0'
 
     repositories {
         google()
@@ -21,7 +21,7 @@ rootProject.allprojects {
         mavenCentral()
         
         //Don't touch the following, it is replaced with sed at fdroid build:
-        maven { name "Mozilla"; url "https://maven.mozilla.org/maven2" }
+        maven { name "Mozilla"; url "https://gitlab.com/api/v4/projects/71401321/packages/maven" }
 
         // maven {
         //     name "Mozilla Nightly"
