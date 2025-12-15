@@ -36,47 +36,42 @@ class ContainerSelectionScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final containersAsync = ref.watch(watchContainersWithCountProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Select Container')),
-      body: HookConsumer(
-        builder: (context, ref, child) {
-          final containersAsync = ref.watch(watchContainersWithCountProvider);
-
-          return Skeletonizer(
-            enabled: containersAsync.isLoading,
-            child: containersAsync.when(
-              skipLoadingOnReload: true,
-              data: (containers) => FadingScroll(
-                fadingSize: 25,
-                builder: (context, controller) {
-                  return ListView.builder(
-                    controller: controller,
-                    itemCount: containers.length,
-                    itemBuilder: (context, index) {
-                      final container = containers[index];
-                      return ContainerListTile(
-                        container,
-                        isSelected: false,
-                        onTap: () {
-                          context.pop<String?>(container.id);
-                        },
-                      );
+      body: Skeletonizer(
+        enabled: containersAsync.isLoading,
+        child: containersAsync.when(
+          skipLoadingOnReload: true,
+          data: (containers) => FadingScroll(
+            fadingSize: 25,
+            builder: (context, controller) {
+              return ListView.builder(
+                controller: controller,
+                itemCount: containers.length,
+                itemBuilder: (context, index) {
+                  final container = containers[index];
+                  return ContainerListTile(
+                    container,
+                    isSelected: false,
+                    onTap: () {
+                      context.pop<String?>(container.id);
                     },
                   );
                 },
-              ),
-              error: (error, stackTrace) => SizedBox.shrink(),
-              loading: () => ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) => ContainerListTile(
-                  ContainerData(id: 'null', color: Colors.transparent),
-                  isSelected: false,
-                  onTap: null,
-                ),
-              ),
+              );
+            },
+          ),
+          error: (error, stackTrace) => SizedBox.shrink(),
+          loading: () => ListView.builder(
+            itemCount: 3,
+            itemBuilder: (context, index) => ContainerListTile(
+              ContainerData(id: 'null', color: Colors.transparent),
+              isSelected: false,
+              onTap: null,
             ),
-          );
-        },
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {

@@ -37,170 +37,161 @@ class FeedArticleListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tags = ref.watch(articleFilterProvider);
+    final articlesAsync = ref.watch(
+      // ignore: provider_parameters
+      filteredArticleListProvider(feedId),
+    );
+
+    final feedTitle = ref.watch(
+      feedDataProvider(
+        feedId,
+      ).select((value) => value.value?.title.whenNotEmpty),
+    );
+
+    final focusNode = useFocusNode();
+    final searchTextController = useTextEditingController();
+
+    final hasText = useListenableSelector(
+      searchTextController,
+      () => searchTextController.text.isNotEmpty,
+    );
+
+    useListenableCallback(searchTextController, () {
+      ref
+          .read(filteredArticleListProvider(feedId).notifier)
+          .search(searchTextController.text);
+    });
+
+    final bottomHeight = useMemoized(() {
+      var height = 56.0 + 4.0;
+
+      if (tags.isNotEmpty) {
+        height += 48;
+      }
+
+      return height;
+    }, [tags.isNotEmpty]);
+
     return Scaffold(
       body: NestedScrollView(
         floatHeaderSlivers: true,
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
-            HookConsumer(
-              builder: (context, ref, child) {
-                final tags = ref.watch(articleFilterProvider);
-                final feedTitle = ref.watch(
-                  feedDataProvider(
-                    feedId,
-                  ).select((value) => value.value?.title.whenNotEmpty),
-                );
-
-                final focusNode = useFocusNode();
-                final searchTextController = useTextEditingController();
-
-                final hasText = useListenableSelector(
-                  searchTextController,
-                  () => searchTextController.text.isNotEmpty,
-                );
-
-                useListenableCallback(searchTextController, () {
-                  ref
-                      .read(filteredArticleListProvider(feedId).notifier)
-                      .search(searchTextController.text);
-                });
-
-                final bottomHeight = useMemoized(() {
-                  var height = 56.0 + 4.0;
-
-                  if (tags.isNotEmpty) {
-                    height += 48;
-                  }
-
-                  return height;
-                }, [tags.isNotEmpty]);
-
-                return SliverAppBar(
-                  floating: true,
-                  title: Text(feedTitle ?? 'Articles'),
-                  bottom: PreferredSize(
-                    preferredSize: Size(double.infinity, bottomHeight),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        children: [
-                          TextField(
-                            focusNode: focusNode,
-                            controller: searchTextController,
-                            decoration: InputDecoration(
-                              label: const Text('Search'),
-                              suffixIcon: hasText
-                                  ? IconButton(
-                                      onPressed: () {
-                                        searchTextController.clear();
-                                        focusNode.requestFocus();
-                                      },
-                                      icon: const Icon(Icons.clear),
-                                    )
-                                  : SpeechToTextButton(
-                                      onTextReceived: (data) {
-                                        searchTextController.text = data
-                                            .toString();
-                                      },
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          if (tags.isNotEmpty)
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: FadingScroll(
-                                fadingSize: 15,
-                                builder: (context, controller) {
-                                  return ListView(
-                                    controller: controller,
-                                    shrinkWrap: true,
-                                    scrollDirection: Axis.horizontal,
-                                    children: tags
-                                        .map(
-                                          (tag) => Padding(
-                                            padding: const EdgeInsets.only(
-                                              right: 8.0,
-                                            ),
-                                            child: FilterChip(
-                                              label: Text(tag),
-                                              showCheckmark: false,
-                                              selected: true,
-                                              onSelected: (value) {},
-                                              onDeleted: () {
-                                                ref
-                                                    .read(
-                                                      articleFilterProvider
-                                                          .notifier,
-                                                    )
-                                                    .removeTag(tag);
-                                              },
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  );
-                                },
-                              ),
-                            ),
-                        ],
+            SliverAppBar(
+              floating: true,
+              title: Text(feedTitle ?? 'Articles'),
+              bottom: PreferredSize(
+                preferredSize: Size(double.infinity, bottomHeight),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        focusNode: focusNode,
+                        controller: searchTextController,
+                        decoration: InputDecoration(
+                          label: const Text('Search'),
+                          suffixIcon: hasText
+                              ? IconButton(
+                                  onPressed: () {
+                                    searchTextController.clear();
+                                    focusNode.requestFocus();
+                                  },
+                                  icon: const Icon(Icons.clear),
+                                )
+                              : SpeechToTextButton(
+                                  onTextReceived: (data) {
+                                    searchTextController.text = data.toString();
+                                  },
+                                ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      if (tags.isNotEmpty)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: FadingScroll(
+                            fadingSize: 15,
+                            builder: (context, controller) {
+                              return ListView(
+                                controller: controller,
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                children: tags
+                                    .map(
+                                      (tag) => Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                        ),
+                                        child: FilterChip(
+                                          label: Text(tag),
+                                          showCheckmark: false,
+                                          selected: true,
+                                          onSelected: (value) {},
+                                          onDeleted: () {
+                                            ref
+                                                .read(
+                                                  articleFilterProvider
+                                                      .notifier,
+                                                )
+                                                .removeTag(tag);
+                                          },
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   ),
-                );
-              },
+                ),
+              ),
             ),
           ];
         },
-        body: Consumer(
-          builder: (context, ref, child) {
-            final articlesAsync = ref.watch(
-              // ignore: provider_parameters
-              filteredArticleListProvider(feedId),
-            );
-
-            return articlesAsync.when(
-              skipLoadingOnReload: true,
-              data: (articles) {
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    if (feedId != null) {
-                      await ref
-                          .read(fetchArticlesControllerProvider.notifier)
-                          .fetchFeedArticles(feedId!);
-                    } else {
-                      await ref
-                          .read(fetchArticlesControllerProvider.notifier)
-                          .fetchAllArticles();
-                    }
-                  },
-                  child: MediaQuery.removePadding(
-                    removeTop: true,
-                    context: context,
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: articles.length,
-                      itemBuilder: (context, i) {
-                        final article = articles[i];
-                        return FeedArticleCard(
-                          key: ValueKey(article.id),
-                          article: article,
-                        );
-                      },
-                    ),
-                  ),
-                );
+        body: articlesAsync.when(
+          skipLoadingOnReload: true,
+          data: (articles) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                if (feedId != null) {
+                  await ref
+                      .read(fetchArticlesControllerProvider.notifier)
+                      .fetchFeedArticles(feedId!);
+                } else {
+                  await ref
+                      .read(fetchArticlesControllerProvider.notifier)
+                      .fetchAllArticles();
+                }
               },
-              error: (error, stackTrace) => Center(
-                child: FailureWidget(
-                  title: 'Failed to load Articles',
-                  exception: error,
+              child: MediaQuery.removePadding(
+                removeTop: true,
+                context: context,
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: articles.length,
+                  itemBuilder: (context, i) {
+                    final article = articles[i];
+                    return FeedArticleCard(
+                      key: ValueKey(article.id),
+                      article: article,
+                    );
+                  },
                 ),
               ),
-              loading: () => const SizedBox.shrink(),
             );
           },
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Failed to load Articles',
+              exception: error,
+            ),
+          ),
+          loading: () => const SizedBox.shrink(),
         ),
       ),
     );

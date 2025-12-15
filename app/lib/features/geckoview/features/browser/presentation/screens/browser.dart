@@ -52,6 +52,112 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/wid
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+class _TabBar extends HookConsumerWidget {
+  final ValueNotifier<bool> showAppBar;
+  final ValueNotifier<PersistentBottomSheetController?> sheetController;
+
+  const _TabBar({required this.showAppBar, required this.sheetController});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabId = ref.watch(selectedTabProvider);
+    final displayedSheet = ref.watch(bottomSheetControllerProvider);
+
+    final tabInFullScreen = ref.watch(
+      selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),
+    );
+
+    final autoHideTabBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.autoHideTabBar,
+      ),
+    );
+
+    if (!autoHideTabBar) {
+      return Visibility(
+        visible: !tabInFullScreen,
+        child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+      );
+    }
+
+    final appBarVisible = useValueListenable(showAppBar);
+    final diffAcc = useRef(0.0);
+
+    void resetHiddenState() {
+      showAppBar.value = true;
+      diffAcc.value = 0.0;
+    }
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        resetHiddenState();
+      });
+
+      return null;
+    }, [tabId]);
+
+    useOnAppLifecycleStateChange((previous, current) {
+      if (current == AppLifecycleState.resumed) {
+        resetHiddenState();
+      }
+    });
+
+    ref.listen(tabStateProvider(tabId).select((value) => value?.isLoading), (
+      previous,
+      next,
+    ) {
+      if (next == true) {
+        resetHiddenState();
+      }
+    });
+
+    ref.listen(tabStateProvider(tabId).select((value) => value?.historyState), (
+      previous,
+      next,
+    ) {
+      if (next != null && previous != null) {
+        if (previous != next) {
+          resetHiddenState();
+        }
+      }
+    });
+
+    ref.listen(tabScrollYProvider(tabId, const Duration(milliseconds: 50)), (
+      previous,
+      next,
+    ) {
+      if (previous?.value != null && next.value != null) {
+        final diff = previous!.value! - next.value!;
+        if (diff < 0) {
+          if (diffAcc.value > 0) {
+            diffAcc.value = 0.0;
+          }
+
+          diffAcc.value += diff;
+          if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
+            showAppBar.value = false;
+          }
+        } else if (diff > 0) {
+          if (diffAcc.value < 0) {
+            diffAcc.value = 0.0;
+          }
+
+          diffAcc.value += diff;
+          if (diffAcc.value.abs() > (kToolbarHeight / 2)) {
+            resetHiddenState();
+          }
+        }
+      }
+    });
+
+    return Visibility(
+      visible:
+          sheetController.value != null || (!tabInFullScreen && appBarVisible),
+      child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+    );
+  }
+}
+
 class BrowserScreen extends HookConsumerWidget {
   const BrowserScreen({super.key});
 
@@ -114,107 +220,9 @@ class BrowserScreen extends HookConsumerWidget {
             //This causes issues with a non dismissable barrier pushed, we ahve our own barrier and this does seem to have issues when dismissing, so disable it completely
             return null;
           },
-          bottomNavigationBar: HookConsumer(
-            builder: (context, ref, child) {
-              final tabId = ref.watch(selectedTabProvider);
-              final displayedSheet = ref.watch(bottomSheetControllerProvider);
-
-              final tabInFullScreen = ref.watch(
-                selectedTabStateProvider.select(
-                  (value) => value?.isFullScreen ?? false,
-                ),
-              );
-
-              final autoHideTabBar = ref.watch(
-                generalSettingsWithDefaultsProvider.select(
-                  (value) => value.autoHideTabBar,
-                ),
-              );
-
-              if (!autoHideTabBar) {
-                return Visibility(
-                  visible: !tabInFullScreen,
-                  child: BrowserBottomAppBar(displayedSheet: displayedSheet),
-                );
-              }
-
-              final appBarVisible = useValueListenable(showAppBar);
-              final diffAcc = useRef(0.0);
-
-              void resetHiddenState() {
-                showAppBar.value = true;
-                diffAcc.value = 0.0;
-              }
-
-              useEffect(() {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  resetHiddenState();
-                });
-
-                return null;
-              }, [tabId]);
-
-              useOnAppLifecycleStateChange((previous, current) {
-                if (current == AppLifecycleState.resumed) {
-                  resetHiddenState();
-                }
-              });
-
-              ref.listen(
-                tabStateProvider(tabId).select((value) => value?.isLoading),
-                (previous, next) {
-                  if (next == true) {
-                    resetHiddenState();
-                  }
-                },
-              );
-
-              ref.listen(
-                tabStateProvider(tabId).select((value) => value?.historyState),
-                (previous, next) {
-                  if (next != null && previous != null) {
-                    if (previous != next) {
-                      resetHiddenState();
-                    }
-                  }
-                },
-              );
-
-              ref.listen(
-                tabScrollYProvider(tabId, const Duration(milliseconds: 50)),
-                (previous, next) {
-                  if (previous?.value != null && next.value != null) {
-                    final diff = previous!.value! - next.value!;
-                    if (diff < 0) {
-                      if (diffAcc.value > 0) {
-                        diffAcc.value = 0.0;
-                      }
-
-                      diffAcc.value += diff;
-                      if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
-                        showAppBar.value = false;
-                      }
-                    } else if (diff > 0) {
-                      if (diffAcc.value < 0) {
-                        diffAcc.value = 0.0;
-                      }
-
-                      diffAcc.value += diff;
-                      if (diffAcc.value.abs() > (kToolbarHeight / 2)) {
-                        resetHiddenState();
-                      }
-                    }
-                  }
-                },
-              );
-
-              return Visibility(
-                visible:
-                    sheetController.value != null ||
-                    (!tabInFullScreen && appBarVisible),
-                child: BrowserBottomAppBar(displayedSheet: displayedSheet),
-              );
-            },
+          bottomNavigationBar: _TabBar(
+            showAppBar: showAppBar,
+            sheetController: sheetController,
           ),
           body: _Browser(
             overlayController: overlayController,
