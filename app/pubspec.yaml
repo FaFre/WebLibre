@@ -13,8 +13,8 @@ dependencies:
   collection: ^1.19.1
   copy_with_extension: ^10.0.1
   country_flags: ^4.1.0
-  drift: ^2.29.0
-  drift_dev: ^2.29.0
+  drift: ^2.30.0
+  drift_dev: ^2.30.0
   dynamic_color: ^1.8.1
   exceptions: ^0.6.1
   fading_scroll: ^0.9.1
@@ -31,8 +31,8 @@ dependencies:
   flutter_reorderable_grid_view: ^5.5.2
   flutter_slidable: ^4.0.3
   flutter_svg: ^2.2.3
-  go_router: ^17.0.0
-  google_fonts: ^6.3.2
+  go_router: ^17.0.1
+  google_fonts: ^6.3.3
   graphview: ^1.5.1
   home_widget: ^0.8.1
   hooks_riverpod: ^3.0.3
@@ -65,15 +65,15 @@ dependencies:
   share_plus: ^12.0.1
   simple_intent_receiver:
     path: ../packages/simple_intent_receiver
-  skeletonizer: ^2.1.0+1
+  skeletonizer: ^2.1.2
   sliver_tools: ^0.2.12
-  smooth_page_indicator: ^1.2.1
+  smooth_page_indicator: ^2.0.1
   socks5_proxy: ^2.1.1
   speech_to_text_google_dialog: 
     git:
       url: https://github.com/FaFre/speech_to_text_google_dialog.git
   sqlite3: ^2.9.4
-  sqlite3_flutter_libs: ^0.5.40
+  sqlite3_flutter_libs: ^0.5.41
   synchronized: ^3.4.0
   text_scroll: ^0.2.1
   timeago: ^3.7.1
@@ -94,7 +94,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter
-  go_router_builder: ^4.1.1
+  go_router_builder: ^4.1.3
   json_serializable: ^6.11.2
   lint: ^2.8.0
   riverpod_generator: ^3.0.3
