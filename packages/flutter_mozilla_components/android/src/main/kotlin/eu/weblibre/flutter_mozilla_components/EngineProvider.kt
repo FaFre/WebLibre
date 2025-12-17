@@ -23,6 +23,7 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.support.webextensions.BuiltInWebExtensionController
 import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
@@ -41,24 +42,30 @@ object EngineProvider {
             val builder = GeckoRuntimeSettings.Builder()
             val contentBlocking = ContentBlocking.Settings.Builder();
 
-            contentBlocking.bounceTrackingProtectionMode(when(components.contentBlocking.bounceTrackingProtectionMode) {
-                BounceTrackingProtectionMode.ENABLED -> EngineSession.BounceTrackingProtectionMode.ENABLED.mode
-                BounceTrackingProtectionMode.DISABLED -> EngineSession.BounceTrackingProtectionMode.DISABLED.mode
-                BounceTrackingProtectionMode.ENABLED_STANDBY -> EngineSession.BounceTrackingProtectionMode.ENABLED_STANDBY.mode
-                BounceTrackingProtectionMode.ENABLED_DRY_RUN -> EngineSession.BounceTrackingProtectionMode.ENABLED_DRY_RUN.mode
-            })
+            contentBlocking.bounceTrackingProtectionMode(
+                when (components.contentBlocking.bounceTrackingProtectionMode) {
+                    BounceTrackingProtectionMode.ENABLED -> EngineSession.BounceTrackingProtectionMode.ENABLED.mode
+                    BounceTrackingProtectionMode.DISABLED -> EngineSession.BounceTrackingProtectionMode.DISABLED.mode
+                    BounceTrackingProtectionMode.ENABLED_STANDBY -> EngineSession.BounceTrackingProtectionMode.ENABLED_STANDBY.mode
+                    BounceTrackingProtectionMode.ENABLED_DRY_RUN -> EngineSession.BounceTrackingProtectionMode.ENABLED_DRY_RUN.mode
+                }
+            )
 
-            contentBlocking.queryParameterStrippingEnabled(when(components.contentBlocking.queryParameterStripping) {
-                QueryParameterStripping.ENABLED -> true
-                QueryParameterStripping.DISABLED -> false
-                QueryParameterStripping.PRIVATE_ONLY -> false
-            })
+            contentBlocking.queryParameterStrippingEnabled(
+                when (components.contentBlocking.queryParameterStripping) {
+                    QueryParameterStripping.ENABLED -> true
+                    QueryParameterStripping.DISABLED -> false
+                    QueryParameterStripping.PRIVATE_ONLY -> false
+                }
+            )
 
-            contentBlocking.queryParameterStrippingPrivateBrowsingEnabled(when(components.contentBlocking.queryParameterStripping) {
-                QueryParameterStripping.ENABLED -> true
-                QueryParameterStripping.DISABLED -> false
-                QueryParameterStripping.PRIVATE_ONLY -> true
-            })
+            contentBlocking.queryParameterStrippingPrivateBrowsingEnabled(
+                when (components.contentBlocking.queryParameterStripping) {
+                    QueryParameterStripping.ENABLED -> true
+                    QueryParameterStripping.DISABLED -> false
+                    QueryParameterStripping.PRIVATE_ONLY -> true
+                }
+            )
 
             contentBlocking.queryParameterStrippingAllowList(components.contentBlocking.queryParameterStrippingAllowList)
             contentBlocking.queryParameterStrippingStripList(components.contentBlocking.queryParameterStrippingStripList)
@@ -82,7 +89,12 @@ object EngineProvider {
         return runtime!!
     }
 
-    fun createEngine(context: Context, defaultSettings: DefaultSettings, extensionEvents: BrowserExtensionEvents, stateEvents: GeckoStateEvents): Engine {
+    fun createEngine(
+        context: Context,
+        defaultSettings: DefaultSettings,
+        extensionEvents: BrowserExtensionEvents,
+        stateEvents: GeckoStateEvents
+    ): Engine {
         Logger.debug("Creating Engine")
         val runtime = getOrCreateRuntime(context)
 
@@ -93,6 +105,19 @@ object EngineProvider {
             ContainerProxyFeature.install(it, stateEvents)
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)
+
+            //Install extensions early
+            BuiltInWebExtensionController(
+                "readability-extract@weblibre.eu",
+                "resource://android/assets/extensions/readability_extract/",
+                "mozacReaderExtract",
+            ).install(it)
+
+            BuiltInWebExtensionController(
+                "readerview@mozac.org",
+                "resource://android/assets/extensions/readerview/",
+                "mozacReaderview",
+            ).install(it)
         }
     }
 
