@@ -66,28 +66,30 @@ class _MainWidget extends HookConsumerWidget {
 
       await ref.read(appInitializationServiceProvider.notifier).initialize();
 
-      await BackgroundFetch.configure(
-        BackgroundFetchConfig(
-          minimumFetchInterval: 15,
-          enableHeadless: true,
-          stopOnTerminate: false,
-          requiredNetworkType: NetworkType.ANY,
-          startOnBoot: true,
-        ),
-        (String taskId) async {
-          try {
-            await ref
-                .read(fetchArticlesControllerProvider.notifier)
-                .fetchAllArticles();
+      if (!kDebugMode) {
+        await BackgroundFetch.configure(
+          BackgroundFetchConfig(
+            minimumFetchInterval: 15,
+            enableHeadless: true,
+            stopOnTerminate: false,
+            requiredNetworkType: NetworkType.ANY,
+            startOnBoot: true,
+          ),
+          (String taskId) async {
+            try {
+              await ref
+                  .read(fetchArticlesControllerProvider.notifier)
+                  .fetchAllArticles();
 
-            logger.i('Fetched articles in foreground');
-          } catch (e, s) {
-            logger.e('Failed fetching articles', error: e, stackTrace: s);
-          } finally {
-            await BackgroundFetch.finish(taskId);
-          }
-        },
-      );
+              logger.i('Fetched articles in foreground');
+            } catch (e, s) {
+              logger.e('Failed fetching articles', error: e, stackTrace: s);
+            } finally {
+              await BackgroundFetch.finish(taskId);
+            }
+          },
+        );
+      }
     });
 
     return DynamicColorBuilder(
@@ -141,7 +143,9 @@ void main() async {
 
   await filesystem.init();
 
-  await BackgroundFetch.registerHeadlessTask(backgroundFetch);
+  if (!kDebugMode) {
+    await BackgroundFetch.registerHeadlessTask(backgroundFetch);
+  }
 
   if (kDebugMode) {
     final serviceProtocolInfo = await Service.getInfo();
