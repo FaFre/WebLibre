@@ -316,6 +316,17 @@ class TabMenu extends HookConsumerWidget {
         SubmenuButton(
           menuChildren: [
             MenuItemButton(
+              leadingIcon: const Icon(MdiIcons.contentCopy),
+              child: const Text('Copy Address'),
+              onPressed: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+                await Clipboard.setData(
+                  ClipboardData(text: tabState.url.toString()),
+                );
+              },
+            ),
+            MenuItemButton(
               leadingIcon: const Icon(Icons.open_in_browser),
               child: const Text('Launch External'),
               onPressed: () async {
@@ -376,17 +387,6 @@ class TabMenu extends HookConsumerWidget {
           ],
           leadingIcon: const Icon(Icons.share),
           child: const Text('Share'),
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.contentCopy),
-          child: const Text('Copy Address'),
-          onPressed: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-            await Clipboard.setData(
-              ClipboardData(text: tabState.url.toString()),
-            );
-          },
         ),
         MenuItemButton(
           onPressed: () async {
