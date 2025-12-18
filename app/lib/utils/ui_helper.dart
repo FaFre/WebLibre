@@ -139,7 +139,13 @@ Future<void> launchUrlFeedback(
   LaunchMode mode = LaunchMode.externalApplication,
 }) async {
   if (await canLaunchUrl(url)) {
-    if (!await launchUrl(url, mode: mode)) {
+    try {
+      if (!await launchUrl(url, mode: mode)) {
+        if (context.mounted) {
+          showErrorMessage(context, 'Could not launch URL ($url)');
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
         showErrorMessage(context, 'Could not launch URL ($url)');
       }
