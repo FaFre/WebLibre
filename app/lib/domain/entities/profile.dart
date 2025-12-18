@@ -34,10 +34,12 @@ class Profile with FastEquatable {
 
   late final uuidValue = UuidValue.fromString(id);
 
+  static String getNewProfileId() => uuid.v7();
+
   Profile({required this.id, required this.name});
 
   factory Profile.create({required String name}) {
-    return Profile(id: uuid.v7(), name: name);
+    return Profile(id: getNewProfileId(), name: name);
   }
 
   @override

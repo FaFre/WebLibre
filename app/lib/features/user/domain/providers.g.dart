@@ -160,3 +160,41 @@ final class SelectedProfileProvider
 }
 
 String _$selectedProfileHash() => r'c703cad8f30abb4f5f42db0119756ee6791ac477';
+
+@ProviderFor(backupList)
+const backupListProvider = BackupListProvider._();
+
+final class BackupListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<File>>,
+          List<File>,
+          FutureOr<List<File>>
+        >
+    with $FutureModifier<List<File>>, $FutureProvider<List<File>> {
+  const BackupListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<File>> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<File>> create(Ref ref) {
+    return backupList(ref);
+  }
+}
+
+String _$backupListHash() => r'6fdfbb5293df11aa37ed74f4fcf9bd78591d770f';

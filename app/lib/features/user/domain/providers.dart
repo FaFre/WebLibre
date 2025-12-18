@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:io';
+
 import 'package:exceptions/exceptions.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
@@ -29,6 +31,7 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/features/user/domain/services/fingerprinting.dart';
+import 'package:weblibre/features/user/domain/services/user_backup.dart';
 
 part 'providers.g.dart';
 
@@ -72,4 +75,12 @@ Future<Result<FingerprintOverrides>> fingerprintOverrideSettings(
 Future<Profile> selectedProfile(Ref ref) async {
   final profiles = await ref.watch(profileRepositoryProvider.future);
   return profiles.firstWhere((p) => p.uuidValue == filesystem.selectedProfile);
+}
+
+@Riverpod()
+Future<List<File>> backupList(Ref ref) {
+  return ref
+      .watch(userBackupServiceProvider.notifier)
+      .getBackupListStream()
+      .toList();
 }

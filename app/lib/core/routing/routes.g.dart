@@ -458,6 +458,21 @@ RouteBase get $browserRoute => GoRouteData.$route(
           factory: $EditProfileRoute._fromState,
         ),
         GoRouteData.$route(
+          path: 'backup_list',
+          name: 'ProfileBackupListRoute',
+          factory: $ProfileBackupListRoute._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'restore',
+          name: 'RestoreProfileRoute',
+          factory: $RestoreProfileRoute._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'backup',
+          name: 'BackupProfileRoute',
+          factory: $BackupProfileRoute._fromState,
+        ),
+        GoRouteData.$route(
           path: 'create',
           name: 'CreateProfileRoute',
           factory: $CreateProfileRoute._fromState,
@@ -863,6 +878,81 @@ mixin $EditProfileRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/browser/profiles/edit',
+    queryParams: {'profile': _self.profile},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ProfileBackupListRoute on GoRouteData {
+  static ProfileBackupListRoute _fromState(GoRouterState state) =>
+      ProfileBackupListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/browser/profiles/backup_list');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $RestoreProfileRoute on GoRouteData {
+  static RestoreProfileRoute _fromState(GoRouterState state) =>
+      RestoreProfileRoute(
+        backupFilePath: state.uri.queryParameters['backup-file-path']!,
+      );
+
+  RestoreProfileRoute get _self => this as RestoreProfileRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/profiles/restore',
+    queryParams: {'backup-file-path': _self.backupFilePath},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BackupProfileRoute on GoRouteData {
+  static BackupProfileRoute _fromState(GoRouterState state) =>
+      BackupProfileRoute(profile: state.uri.queryParameters['profile']!);
+
+  BackupProfileRoute get _self => this as BackupProfileRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/browser/profiles/backup',
     queryParams: {'profile': _self.profile},
   );
 

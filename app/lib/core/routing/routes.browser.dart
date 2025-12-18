@@ -73,6 +73,18 @@ part of 'routes.dart';
       path: 'profiles',
       routes: [
         TypedGoRoute<EditProfileRoute>(name: 'ProfileEditScreen', path: 'edit'),
+        TypedGoRoute<ProfileBackupListRoute>(
+          name: 'ProfileBackupListRoute',
+          path: 'backup_list',
+        ),
+        TypedGoRoute<RestoreProfileRoute>(
+          name: 'RestoreProfileRoute',
+          path: 'restore',
+        ),
+        TypedGoRoute<BackupProfileRoute>(
+          name: 'BackupProfileRoute',
+          path: 'backup',
+        ),
         TypedGoRoute<CreateProfileRoute>(
           name: 'CreateProfileRoute',
           path: 'create',
@@ -300,6 +312,37 @@ class EditProfileRoute extends GoRouteData with $EditProfileRoute {
     return ProfileEditScreen(
       profile: Profile.fromJson(jsonDecode(profile) as Map<String, dynamic>),
     );
+  }
+}
+
+class BackupProfileRoute extends GoRouteData with $BackupProfileRoute {
+  final String profile;
+
+  const BackupProfileRoute({required this.profile});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProfileBackupScreen(
+      profile: Profile.fromJson(jsonDecode(profile) as Map<String, dynamic>),
+    );
+  }
+}
+
+class RestoreProfileRoute extends GoRouteData with $RestoreProfileRoute {
+  final String backupFilePath;
+
+  const RestoreProfileRoute({required this.backupFilePath});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProfileRestoreScreen(backupFile: File(backupFilePath));
+  }
+}
+
+class ProfileBackupListRoute extends GoRouteData with $ProfileBackupListRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ProfileBackupListScreen();
   }
 }
 

@@ -20,6 +20,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:sqlite3/sqlite3.dart';
@@ -62,6 +64,21 @@ class _Filesystem {
 
   Future<void> setStartupProfile(UuidValue profile) {
     return fs.writeStartupProfile(profilesDir, profile, flush: true);
+  }
+
+  Future<void> clearMozillaProfileCache(String profileId) {
+    return fs.clearMozillaProfileCache(profileId);
+  }
+
+  Future<String?> checkForDuplicateMozillaProfile(UuidValue profile) async {
+    final duplicates = await fs
+        .getProfilesWithDuplicateMozillaProfiles(profilesDir)
+        .then((dirs) => dirs.map((dir) => dir.path).toList());
+    final profileDir = fs.getProfileDir(profilesDir, profile).path;
+
+    return duplicates
+        .firstWhereOrNull((dir) => p.isWithin(profileDir, dir))
+        .mapNotNull((dir) => p.basename(dir));
   }
 
   Future<void> _linkMozillaDir(Directory filesDir) async {

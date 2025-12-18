@@ -1,0 +1,154 @@
+import 'dart:io';
+
+import 'package:convert/convert.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:secure_archive/secure_archive.dart';
+import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/domain/repositories/profile.dart';
+
+part 'user_backup.g.dart';
+
+@Riverpod(keepAlive: true)
+class UserBackupService extends _$UserBackupService {
+  static final dateFormatter = FixedDateTimeFormatter('YYYY-MM-DD_hhmmss');
+
+  Future<Directory> getBackupDirectory() async {
+    return Directory(
+      p.join(
+        await getExternalStorageDirectory().then(
+          (dir) => Directory(
+            dir!.path.replaceFirst('/data/', '/media/'),
+          ).parent.path,
+        ),
+        'Backup',
+      ),
+    );
+  }
+
+  Stream<File> getBackupListStream() async* {
+    final backupDirectory = await getBackupDirectory();
+
+    await for (final entity in backupDirectory.list(recursive: true)) {
+      if (entity is File) {
+        yield entity;
+      }
+    }
+  }
+
+  Future<bool> createUserBackup(
+    Profile profile, {
+    required String password,
+    required bool integrityCheck,
+  }) async {
+    final timestamp = dateFormatter.encode(DateTime.now());
+
+    final outputFile = File(
+      p.join(
+        await getBackupDirectory().then((dir) => dir.path),
+        'backup_${profile.name}_$timestamp.weblibre',
+      ),
+    );
+
+    await outputFile.parent.create(recursive: true);
+
+    final backup = SecureArchivePack(
+      outputFile: outputFile,
+      sourceDirectory: filesystem.getProfileDir(profile.uuidValue),
+      argon2Params: Argon2Params.memoryConstrained(),
+    );
+
+    await backup.pack(password, integrityCheck: integrityCheck);
+
+    return true;
+  }
+
+  Future<bool> restoreAndCreateNew(
+    File backupFile, {
+    required String profileName,
+    required String password,
+  }) async {
+    final outputDirectory = Directory(
+      p.join(filesystem.profilesDir.path, p.basename(backupFile.path)),
+    );
+
+    try {
+      final backup = SecureArchiveUnpack(
+        inputFile: backupFile,
+        outputDirectory: outputDirectory,
+        argon2Params: Argon2Params.memoryConstrained(),
+      );
+      await backup.unpack(password).then((_) async {
+        final newProfile = Profile.create(name: profileName);
+        final newPath = filesystem.getProfileDir(newProfile.uuidValue);
+
+        await outputDirectory.rename(newPath.path);
+        await filesystem.updateProfileMetadata(newProfile);
+      });
+
+      ref.invalidate(profileRepositoryProvider);
+      return true;
+    } finally {
+      try {
+        if (await outputDirectory.exists()) {
+          await outputDirectory.delete(recursive: true);
+        }
+      } catch (_) {
+        // Ignore cleanup errors
+      }
+    }
+  }
+
+  Future<bool> restoreAndCreateOrOverride(
+    File backupFile, {
+    required String password,
+    required FutureOr<bool?> Function() confirmOverrideCallback,
+  }) async {
+    final outputDirectory = Directory(
+      p.join(filesystem.profilesDir.path, p.basename(backupFile.path)),
+    );
+
+    try {
+      final backup = SecureArchiveUnpack(
+        inputFile: backupFile,
+        outputDirectory: outputDirectory,
+        argon2Params: Argon2Params.memoryConstrained(),
+      );
+      await backup.unpack(password).then((_) async {
+        final existingProfile = await filesystem.readProfileMetadata(
+          outputDirectory,
+        );
+        if (existingProfile != null) {
+          if (existingProfile.uuidValue == filesystem.selectedProfile) {
+            throw Exception(
+              'Unable to override active User, please switch to another User and try again',
+            );
+          }
+
+          final profileDir = filesystem.getProfileDir(
+            existingProfile.uuidValue,
+          );
+
+          if (await profileDir.exists()) {
+            final result = await confirmOverrideCallback();
+
+            if (result == true) {
+              await profileDir.delete(recursive: true);
+              await outputDirectory.rename(profileDir.path);
+            }
+          }
+        }
+      });
+
+      ref.invalidate(profileRepositoryProvider);
+      return true;
+    } finally {
+      await outputDirectory.delete(recursive: true);
+    }
+  }
+
+  @override
+  void build() {}
+}

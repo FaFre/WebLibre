@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -64,8 +65,11 @@ import 'package:weblibre/features/settings/presentation/screens/web_engine_harde
 import 'package:weblibre/features/settings/presentation/screens/web_engine_settings.dart';
 import 'package:weblibre/features/tor/presentation/screens/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/select_profile.dart';
+import 'package:weblibre/features/user/domain/presentation/screens/profile_backup.dart';
+import 'package:weblibre/features/user/domain/presentation/screens/profile_backup_list.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_edit.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_list.dart';
+import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article_list.dart';

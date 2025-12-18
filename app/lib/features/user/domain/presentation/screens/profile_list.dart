@@ -20,6 +20,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -34,7 +35,17 @@ class ProfileListScreen extends HookConsumerWidget {
     final usersAsync = ref.watch(profileRepositoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Users')),
+      appBar: AppBar(
+        title: const Text('Users'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await ProfileBackupListRoute().push(context);
+            },
+            icon: const Icon(MdiIcons.backupRestore),
+          ),
+        ],
+      ),
       body: usersAsync.when(
         skipLoadingOnReload: true,
         data: (profiles) => ListView.builder(
