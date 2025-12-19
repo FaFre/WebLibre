@@ -100,13 +100,6 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
   </a>
 </p>
 
-> **⚠️ F-Droid Updates Delayed**  
-> Due to the complexity of compiling the browser from scratch and the ongoing issue of the F-Droid server not supporting up-to-date AGP >= 8.12 (https://gitlab.com/fdroid/admin/-/issues/593), it is very difficult to provide up-to-date F-Droid builds.
->
-> A lot of effort has already been put into working on getting the F-Droid build up to date, and the progress can be tracked here: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/26485
->
-> For up-to-date releases, please consider using the GitHub Releases (ideally with Obtainium) or Google Play for now.
-
 ---
 
 ## Feedback & Contributions
