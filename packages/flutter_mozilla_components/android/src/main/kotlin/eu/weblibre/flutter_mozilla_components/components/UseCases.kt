@@ -42,7 +42,7 @@ class UseCases(
     /**
      * Use cases related to the downloads feature.
      */
-    val downloadsUseCases: DownloadsUseCases by lazy { DownloadsUseCases(store) }
+    val downloadsUseCases: DownloadsUseCases by lazy { DownloadsUseCases(store, context) }
 
     /**
      * Use cases related to Custom Tabs.

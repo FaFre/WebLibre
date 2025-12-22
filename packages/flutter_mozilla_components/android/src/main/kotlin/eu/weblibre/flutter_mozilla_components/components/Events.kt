@@ -76,7 +76,7 @@ class Events(
                         System.currentTimeMillis(),
                         tab.id,
                         SecurityInfoState(
-                            tab.content.securityInfo.secure,
+                            tab.content.securityInfo.isSecure,
                             tab.content.securityInfo.host,
                             tab.content.securityInfo.issuer,
                         )
