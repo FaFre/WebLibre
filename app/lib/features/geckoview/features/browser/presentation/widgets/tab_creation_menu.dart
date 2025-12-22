@@ -26,13 +26,11 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 class TabCreationMenu extends HookConsumerWidget {
   final Widget child;
   final MenuController controller;
-  final String? selectedTabId;
 
   const TabCreationMenu({
     super.key,
     required this.child,
     required this.controller,
-    required this.selectedTabId,
   });
 
   @override

@@ -26,6 +26,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_reorderable_grid_view/widgets/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
@@ -36,8 +37,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tree_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -50,6 +50,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -67,7 +68,7 @@ int calculateCrossAxisItemCount({
   return crossAxisCount;
 }
 
-double calculateItemHeight({
+Size calculateItemSize({
   required double screenWidth,
   required double childAspectRatio,
   required double horizontalPadding,
@@ -81,9 +82,8 @@ double calculateItemHeight({
       screenWidth - totalHorizontalPadding - totalCrossAxisSpacing;
   final itemWidth = availableWidth / crossAxisCount;
   final itemHeight = itemWidth / childAspectRatio;
-  final totalItemHeight = itemHeight + mainAxisSpacing;
 
-  return totalItemHeight;
+  return Size(itemWidth, itemHeight + mainAxisSpacing);
 }
 
 class _TabDraggable extends HookConsumerWidget {
@@ -165,16 +165,19 @@ class _TabDraggable extends HookConsumerWidget {
 class _TabViewHeader extends HookConsumerWidget {
   static const headerSize = 124.0;
 
-  final bool treeViewEnabled;
+  final TabsViewMode tabsViewMode;
   final VoidCallback onClose;
 
-  const _TabViewHeader({required this.onClose, required this.treeViewEnabled});
+  const _TabViewHeader({required this.onClose, required this.tabsViewMode});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchMode = useState(false);
     final searchTextFocus = useFocusNode();
     final searchTextController = useTextEditingController();
+
+    final viewModeMenuController = useMenuController();
+    final tabsActionMenuController = useMenuController();
 
     final hasSearchText = useListenableSelector(
       searchTextController,
@@ -218,8 +221,8 @@ class _TabViewHeader extends HookConsumerWidget {
                           padding: EdgeInsets.zero,
                           onPressed: () {
                             ref
-                                .read(treeViewControllerProvider.notifier)
-                                .hide();
+                                .read(tabsViewModeControllerProvider.notifier)
+                                .set(TabsViewMode.grid);
 
                             searchMode.value = true;
                             searchTextFocus.requestFocus();
@@ -229,17 +232,40 @@ class _TabViewHeader extends HookConsumerWidget {
                           height: 32,
                           child: VerticalDivider(indent: 4, endIndent: 4),
                         ),
-                        IconButton(
-                          icon: const Icon(MdiIcons.familyTree),
-                          selectedIcon: const Icon(MdiIcons.table),
-                          isSelected: treeViewEnabled,
-                          iconSize: 18,
-                          padding: EdgeInsets.zero,
-                          onPressed: () {
-                            ref
-                                .read(treeViewControllerProvider.notifier)
-                                .toggle();
-                          },
+                        MenuAnchor(
+                          controller: viewModeMenuController,
+                          menuChildren: TabsViewMode.values
+                              .map(
+                                (mode) => MenuItemButton(
+                                  leadingIcon: Icon(mode.icon),
+                                  child: Text(mode.label),
+                                  onPressed: () {
+                                    ref
+                                        .read(
+                                          tabsViewModeControllerProvider
+                                              .notifier,
+                                        )
+                                        .set(mode);
+                                  },
+                                ),
+                              )
+                              .toList(),
+                          child: IconButton(
+                            onPressed: () {
+                              if (viewModeMenuController.isOpen) {
+                                viewModeMenuController.close();
+                              } else {
+                                viewModeMenuController.open();
+                              }
+                            },
+                            icon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(tabsViewMode.icon, size: 18),
+                                const Icon(Icons.arrow_drop_down, size: 18),
+                              ],
+                            ),
+                          ),
                         ),
                         if (enableAiFeatures)
                           Consumer(
@@ -264,26 +290,122 @@ class _TabViewHeader extends HookConsumerWidget {
                               );
                             },
                           ),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final tabsReorderabe = ref.watch(
+                              tabsReorderableControllerProvider,
+                            );
+
+                            return IconButton.filledTonal(
+                              icon: const Icon(MdiIcons.orderNumericAscending),
+                              isSelected: tabsReorderabe,
+                              iconSize: 18,
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                ref
+                                    .read(
+                                      tabsReorderableControllerProvider
+                                          .notifier,
+                                    )
+                                    .toggle();
+                              },
+                            );
+                          },
+                        ),
                       ],
                     ),
-                    TextButton.icon(
-                      onPressed: () async {
-                        final container = ref.read(selectedContainerProvider);
+                    MenuAnchor(
+                      controller: tabsActionMenuController,
+                      menuChildren: [
+                        MenuItemButton(
+                          leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
+                          child: const Text('Bookmark all'),
+                          onPressed: () async {
+                            final containerId = ref.read(
+                              selectedContainerProvider,
+                            );
 
-                        final count = await ref
-                            .read(tabDataRepositoryProvider.notifier)
-                            .closeAllTabsByContainer(container);
+                            final tabData = await ref
+                                .read(tabDataRepositoryProvider.notifier)
+                                .getContainerTabsData(containerId);
 
-                        if (context.mounted) {
-                          ui_helper.showTabUndoClose(
-                            context,
-                            ref.read(tabRepositoryProvider.notifier).undoClose,
-                            count: count,
-                          );
-                        }
-                      },
-                      icon: const Icon(MdiIcons.closeBoxMultiple),
-                      label: const Text('Close All'),
+                            for (final tab in tabData) {
+                              if (context.mounted) {
+                                await BookmarkEntryAddRoute(
+                                  bookmarkInfo: jsonEncode(
+                                    BookmarkInfo(
+                                      title: tab.title,
+                                      url: tab.url.toString(),
+                                    ).encode(),
+                                  ),
+                                ).push(context);
+                              }
+                            }
+                          },
+                        ),
+                        MenuItemButton(
+                          leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
+                          child: const Text('Close All'),
+                          onPressed: () async {
+                            final result = await showDialog<bool?>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  icon: const Icon(Icons.warning),
+                                  title: const Text('Close All Tabs'),
+                                  content: const Text(
+                                    'Are you sure you want to close all displayed tabs?',
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, false);
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, true);
+                                      },
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (result == true) {
+                              final container = ref.read(
+                                selectedContainerProvider,
+                              );
+
+                              final count = await ref
+                                  .read(tabDataRepositoryProvider.notifier)
+                                  .closeAllTabsByContainer(container);
+
+                              if (context.mounted) {
+                                ui_helper.showTabUndoClose(
+                                  context,
+                                  ref
+                                      .read(tabRepositoryProvider.notifier)
+                                      .undoClose,
+                                  count: count,
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                      child: IconButton(
+                        onPressed: () {
+                          if (tabsActionMenuController.isOpen) {
+                            tabsActionMenuController.close();
+                          } else {
+                            tabsActionMenuController.open();
+                          }
+                        },
+                        icon: const Icon(MdiIcons.dotsVertical),
+                      ),
                     ),
                   ],
                 )
@@ -318,7 +440,7 @@ class _TabViewHeader extends HookConsumerWidget {
                     ),
                   ),
                 ),
-              if (!treeViewEnabled)
+              if (tabsViewMode == TabsViewMode.grid)
                 Consumer(
                   builder: (context, ref, child) {
                     final selectedContainer = ref.watch(
@@ -372,9 +494,14 @@ class _TabViewHeader extends HookConsumerWidget {
 
 class _TabView extends HookConsumerWidget {
   final ScrollController scrollController;
+  final bool tabsReorderable;
   final VoidCallback onClose;
 
-  const _TabView({required this.scrollController, required this.onClose});
+  const _TabView({
+    required this.scrollController,
+    required this.tabsReorderable,
+    required this.onClose,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -415,8 +542,8 @@ class _TabView extends HookConsumerWidget {
       return math.max(math.min(calculatedCount, itemCount), 2);
     }, [screenWidth, itemCount]);
 
-    final itemHeight = useMemoized(
-      () => calculateItemHeight(
+    final itemSize = useMemoized(
+      () => calculateItemSize(
         screenWidth: screenWidth,
         childAspectRatio: 0.75,
         horizontalPadding: 4.0,
@@ -438,7 +565,7 @@ class _TabView extends HookConsumerWidget {
             );
 
             if (index > -1) {
-              final offset = (index ~/ 2) * itemHeight;
+              final offset = (index ~/ 2) * itemSize.height;
 
               if (offset != scrollController.offset) {
                 lastScroll.value = activeTab;
@@ -465,103 +592,176 @@ class _TabView extends HookConsumerWidget {
         fadingSize: 5,
         controller: scrollController,
         builder: (context, controller) {
-          return ReorderableBuilder.builder(
-            //Rebuild when cross axis count changes
-            key: ValueKey(crossAxisCount),
-            scrollController: controller,
-            itemCount: itemCount,
-            onDragStarted: (index) {
-              ref.read(willAcceptDropProvider.notifier).clear();
-            },
-            onReorderPositions: (positions) async {
-              assert(positions.length == 1, 'Not ready for multiple reorders');
-
-              final oldIndex = positions.first.oldIndex;
-              final newIndex = positions.first.newIndex;
-
-              final containerRepository = ref.read(
-                containerRepositoryProvider.notifier,
-              );
-
-              //Suggestions are at the end and not reorderable, so skip
-              if (oldIndex >= filteredTabEntities.value.length) {
-                return;
-              }
-
-              final tabId = filteredTabEntities.value[oldIndex].tabId;
-              final containerId = await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .getContainerTabId(tabId);
-
-              final String key;
-              if (newIndex <= 0) {
-                key = await containerRepository.getLeadingOrderKey(containerId);
-              } else if (newIndex >= filteredTabEntities.value.length - 1) {
-                key = await containerRepository.getTrailingOrderKey(
-                  containerId,
-                );
-              } else {
-                if (newIndex < oldIndex) {
-                  key = (await containerRepository.getOrderKeyAfterTab(
-                    filteredTabEntities.value[newIndex - 1].tabId,
-                    containerId,
-                  ))!;
-                } else {
-                  key = await containerRepository.getOrderKeyBeforeTab(
-                    filteredTabEntities.value[newIndex + 1].tabId,
-                    containerId,
-                  );
-                }
-              }
-
-              await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .assignOrderKey(tabId, key);
-            },
-            childBuilder: (itemBuilder) {
-              return GridView.builder(
-                controller: controller,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  //Sync values for itemHeight calculation _calculateItemHeight
-                  childAspectRatio: 0.75,
-                  mainAxisSpacing: 8.0,
-                  crossAxisSpacing: 8.0,
+          return !tabsReorderable
+              ? _TabGrid(
+                  key: ValueKey(crossAxisCount),
                   crossAxisCount: crossAxisCount,
-                ),
-                itemCount: itemCount,
-                itemBuilder: (context, index) {
-                  final Widget tab;
-                  if (index < filteredTabEntities.value.length) {
-                    final entity = filteredTabEntities.value[index];
-                    tab = CustomDraggable(
-                      key: Key(entity.tabId),
-                      data: TabDragData(entity.tabId),
-                      child: _TabDraggable(entity: entity, onClose: onClose),
-                    );
-                  } else {
-                    final suggestedIndex =
-                        index - filteredTabEntities.value.length;
-                    final entity = suggestedTabEntities.value[suggestedIndex];
-
-                    tab = CustomDraggable(
-                      key: Key('suggested_${entity.tabId}'),
-                      child: _TabDraggable(
-                        entity: entity,
-                        onClose: onClose,
-                        suggestedContainerId: ref.watch(
-                          selectedContainerProvider,
+                  itemCount: itemCount,
+                  scrollController: controller,
+                  itemBuilder: (widget, _) {
+                    if (widget is CustomDraggable) {
+                      return LongPressDraggable(
+                        feedback: Material(
+                          color: Colors
+                              .transparent, // removes white corners when having shadow
+                          child: Transform.scale(
+                            scale: 1.05,
+                            child: SizedBox(
+                              height: itemSize.height,
+                              width: itemSize.width,
+                              child: widget.child,
+                            ),
+                          ),
                         ),
-                      ),
-                    );
-                  }
+                        data: widget.data,
+                        child: widget.child,
+                      );
+                    }
 
-                  return itemBuilder(tab, index);
-                },
-              );
-            },
-          );
+                    return widget;
+                  },
+                  suggestedContainerId: containerId,
+                  filteredTabEntities: filteredTabEntities,
+                  suggestedTabEntities: suggestedTabEntities,
+                  onClose: onClose,
+                )
+              : ReorderableBuilder.builder(
+                  //Rebuild when cross axis count changes
+                  key: ValueKey(crossAxisCount),
+                  scrollController: controller,
+                  itemCount: itemCount,
+                  onDragStarted: (index) {
+                    ref.read(willAcceptDropProvider.notifier).clear();
+                  },
+                  onReorderPositions: (positions) async {
+                    assert(
+                      positions.length == 1,
+                      'Not ready for multiple reorders',
+                    );
+
+                    final oldIndex = positions.first.oldIndex;
+                    final newIndex = positions.first.newIndex;
+
+                    final containerRepository = ref.read(
+                      containerRepositoryProvider.notifier,
+                    );
+
+                    //Suggestions are at the end and not reorderable, so skip
+                    if (oldIndex >= filteredTabEntities.value.length) {
+                      return;
+                    }
+
+                    final tabId = filteredTabEntities.value[oldIndex].tabId;
+                    final containerId = await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .getContainerTabId(tabId);
+
+                    final String key;
+                    if (newIndex <= 0) {
+                      key = await containerRepository.getLeadingOrderKey(
+                        containerId,
+                      );
+                    } else if (newIndex >=
+                        filteredTabEntities.value.length - 1) {
+                      key = await containerRepository.getTrailingOrderKey(
+                        containerId,
+                      );
+                    } else {
+                      if (newIndex < oldIndex) {
+                        key = (await containerRepository.getOrderKeyAfterTab(
+                          filteredTabEntities.value[newIndex - 1].tabId,
+                          containerId,
+                        ))!;
+                      } else {
+                        key = await containerRepository.getOrderKeyBeforeTab(
+                          filteredTabEntities.value[newIndex + 1].tabId,
+                          containerId,
+                        );
+                      }
+                    }
+
+                    await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .assignOrderKey(tabId, key);
+                  },
+                  childBuilder: (itemBuilder) {
+                    return _TabGrid(
+                      crossAxisCount: crossAxisCount,
+                      itemCount: itemCount,
+                      scrollController: controller,
+                      itemBuilder: itemBuilder,
+                      suggestedContainerId: containerId,
+                      filteredTabEntities: filteredTabEntities,
+                      suggestedTabEntities: suggestedTabEntities,
+                      onClose: onClose,
+                    );
+                  },
+                );
         },
       ),
+    );
+  }
+}
+
+class _TabGrid extends StatelessWidget {
+  const _TabGrid({
+    super.key,
+    required this.crossAxisCount,
+    required this.scrollController,
+    required this.itemCount,
+    required this.itemBuilder,
+    required this.suggestedContainerId,
+    required this.filteredTabEntities,
+    required this.suggestedTabEntities,
+    required this.onClose,
+  });
+
+  final int crossAxisCount;
+  final int itemCount;
+  final ScrollController? scrollController;
+  final String? suggestedContainerId;
+  final EquatableValue<List<TabEntity>> filteredTabEntities;
+  final EquatableValue<List<TabEntity>> suggestedTabEntities;
+  final Widget Function(Widget, int)? itemBuilder;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      controller: scrollController,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        //Sync values for itemHeight calculation _calculateItemHeight
+        childAspectRatio: 0.75,
+        mainAxisSpacing: 8.0,
+        crossAxisSpacing: 8.0,
+        crossAxisCount: crossAxisCount,
+      ),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        final Widget tab;
+        if (index < filteredTabEntities.value.length) {
+          final entity = filteredTabEntities.value[index];
+          tab = CustomDraggable(
+            key: Key(entity.tabId),
+            data: TabDragData(entity.tabId),
+            child: _TabDraggable(entity: entity, onClose: onClose),
+          );
+        } else {
+          final suggestedIndex = index - filteredTabEntities.value.length;
+          final entity = suggestedTabEntities.value[suggestedIndex];
+
+          tab = CustomDraggable(
+            key: Key('suggested_${entity.tabId}'),
+            child: _TabDraggable(
+              entity: entity,
+              onClose: onClose,
+              suggestedContainerId: suggestedContainerId,
+            ),
+          );
+        }
+
+        return (itemBuilder != null) ? itemBuilder!(tab, index) : tab;
+      },
     );
   }
 }
@@ -569,13 +769,15 @@ class _TabView extends HookConsumerWidget {
 class ViewTabsWidget extends HookConsumerWidget {
   final ScrollController scrollController;
   final DraggableScrollableController? draggableScrollableController;
-  final VoidCallback onClose;
   final bool showNewTabFab;
+  final bool tabsReorderable;
+  final VoidCallback onClose;
 
   const ViewTabsWidget({
     required this.onClose,
     required this.scrollController,
     this.draggableScrollableController,
+    required this.tabsReorderable,
     required this.showNewTabFab,
     super.key,
   });
@@ -596,14 +798,21 @@ class ViewTabsWidget extends HookConsumerWidget {
                           controller: draggableScrollableController,
                           child: _TabViewHeader(
                             onClose: onClose,
-                            treeViewEnabled: false,
+                            tabsViewMode: TabsViewMode.grid,
                           ),
                         ),
                   ) ??
-                  _TabViewHeader(onClose: onClose, treeViewEnabled: false),
+                  _TabViewHeader(
+                    onClose: onClose,
+                    tabsViewMode: TabsViewMode.grid,
+                  ),
             ),
           ],
-          body: _TabView(scrollController: scrollController, onClose: onClose),
+          body: _TabView(
+            scrollController: scrollController,
+            tabsReorderable: tabsReorderable,
+            onClose: onClose,
+          ),
         ),
         if (showNewTabFab)
           Padding(
@@ -650,7 +859,7 @@ class ViewTabTreesWidget extends HookConsumerWidget {
       children: [
         Column(
           children: [
-            _TabViewHeader(onClose: onClose, treeViewEnabled: true),
+            _TabViewHeader(onClose: onClose, tabsViewMode: TabsViewMode.tree),
             Expanded(
               child: HookConsumer(
                 builder: (context, ref, child) {
@@ -684,8 +893,8 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                     );
                   }, [screenWidth, filteredTabEntities.value.length]);
 
-                  final itemHeight = useMemoized(
-                    () => calculateItemHeight(
+                  final itemSize = useMemoized(
+                    () => calculateItemSize(
                       screenWidth: screenWidth,
                       childAspectRatio: 0.75,
                       horizontalPadding: 4.0,
@@ -702,7 +911,7 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                     );
 
                     if (index > -1) {
-                      final offset = (index ~/ 2) * itemHeight;
+                      final offset = (index ~/ 2) * itemSize.height;
 
                       if (offset != scrollController.offset) {
                         unawaited(

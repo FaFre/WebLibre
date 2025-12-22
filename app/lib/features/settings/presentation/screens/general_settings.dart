@@ -363,6 +363,38 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                 },
               ),
               SwitchListTile.adaptive(
+                title: const Text('Show Contextual Tab Bar'),
+                subtitle: const Text(
+                  'Show additional bottom toolbar for navigation and actions',
+                ),
+                secondary: const Icon(MdiIcons.dockBottom),
+                value: generalSettings.tabBarShowContextualBar,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) => currentSettings.copyWith
+                            .tabBarShowContextualBar(value),
+                      );
+                },
+              ),
+              SwitchListTile.adaptive(
+                title: const Text('Show Quick Tab Switcher Bar'),
+                subtitle: const Text(
+                  'Show additional toolbar to quickly switch to recently used tabs',
+                ),
+                secondary: const Icon(MdiIcons.dockBottom),
+                value: generalSettings.tabBarShowQuickTabSwitcherBar,
+                onChanged: (value) async {
+                  await ref
+                      .read(saveGeneralSettingsControllerProvider.notifier)
+                      .save(
+                        (currentSettings) => currentSettings.copyWith
+                            .tabBarShowQuickTabSwitcherBar(value),
+                      );
+                },
+              ),
+              SwitchListTile.adaptive(
                 title: const Text('Create Child Tabs'),
                 subtitle: const Text(
                   'Display a button to create a child tab under the current tab (tree view only)',

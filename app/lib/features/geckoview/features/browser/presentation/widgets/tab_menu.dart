@@ -18,23 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
@@ -315,75 +311,11 @@ class TabMenu extends HookConsumerWidget {
         ),
         SubmenuButton(
           menuChildren: [
-            MenuItemButton(
-              leadingIcon: const Icon(MdiIcons.contentCopy),
-              child: const Text('Copy Address'),
-              onPressed: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-                await Clipboard.setData(
-                  ClipboardData(text: tabState.url.toString()),
-                );
-              },
-            ),
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.open_in_browser),
-              child: const Text('Launch External'),
-              onPressed: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-                await ui_helper.launchUrlFeedback(context, tabState.url);
-              },
-            ),
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.mobile_screen_share),
-              child: const Text('Share Screenshot'),
-              onPressed: () async {
-                final screenshot = await ref
-                    .read(selectedTabSessionProvider)
-                    .requestScreenshot();
-
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-                if (screenshot != null) {
-                  ui.decodeImageFromList(screenshot, (result) async {
-                    final png = await result.toByteData(
-                      format: ui.ImageByteFormat.png,
-                    );
-
-                    if (png != null) {
-                      final file = XFile.fromData(
-                        png.buffer.asUint8List(),
-                        mimeType: 'image/png',
-                      );
-
-                      await SharePlus.instance.share(
-                        ShareParams(files: [file], subject: tabState.title),
-                      );
-                    }
-                  });
-                }
-              },
-            ),
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.share),
-              onPressed: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-                await SharePlus.instance.share(ShareParams(uri: tabState.url));
-              },
-              child: const Text('Share Link'),
-            ),
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.qr_code),
-              onPressed: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-                await showQrCode(context, tabState.url.toString());
-                controller.close();
-              },
-              child: const Text('Show QR Code'),
-            ),
+            CopyAddressMenuItemButton(selectedTabId: selectedTabId),
+            LaunchExternalMenuItemButton(selectedTabId: selectedTabId),
+            ShareScreenshotMenuItemButton(selectedTabId: selectedTabId),
+            ShareMenuItemButton(selectedTabId: selectedTabId),
+            ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
           ],
           leadingIcon: const Icon(Icons.share),
           child: const Text('Share'),

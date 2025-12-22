@@ -221,6 +221,45 @@ final class WatchContainerTabIdsFamily extends $Family
   String toString() => r'watchContainerTabIdsProvider';
 }
 
+@ProviderFor(watchgetTabsFifo)
+const watchgetTabsFifoProvider = WatchgetTabsFifoProvider._();
+
+final class WatchgetTabsFifoProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<TabData>>,
+          List<TabData>,
+          Stream<List<TabData>>
+        >
+    with $FutureModifier<List<TabData>>, $StreamProvider<List<TabData>> {
+  const WatchgetTabsFifoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchgetTabsFifoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchgetTabsFifoHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<TabData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<TabData>> create(Ref ref) {
+    return watchgetTabsFifo(ref);
+  }
+}
+
+String _$watchgetTabsFifoHash() => r'b0f58ca1688003ba46a55de1ca29d8253fc3de3a';
+
 @ProviderFor(containerTabCount)
 const containerTabCountProvider = ContainerTabCountFamily._();
 

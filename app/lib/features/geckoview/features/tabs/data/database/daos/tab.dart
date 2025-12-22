@@ -51,6 +51,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return query.map((row) => row.read(db.tab.id)!);
   }
 
+  Selectable<TabData> getTabsFifo({int limit = 25}) {
+    return select(db.tab)
+      ..limit(limit)
+      ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]);
+  }
+
   SingleOrNullSelectable<String?> getTabContainerId(String tabId) {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.containerId])

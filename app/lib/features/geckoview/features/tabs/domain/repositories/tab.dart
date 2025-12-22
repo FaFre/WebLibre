@@ -20,6 +20,7 @@
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -87,11 +88,7 @@ class TabDataRepository extends _$TabDataRepository {
   }
 
   Future<int> closeAllTabsByHost(String? containerId, String host) async {
-    final tabs = await ref
-        .read(tabDatabaseProvider)
-        .containerDao
-        .getContainerTabsData(containerId)
-        .get();
+    final tabs = await getContainerTabsData(containerId);
 
     final filtered = tabs
         .where((tab) => tab.url?.host == host)
@@ -103,6 +100,14 @@ class TabDataRepository extends _$TabDataRepository {
     }
 
     return filtered.length;
+  }
+
+  Future<List<TabData>> getContainerTabsData(String? containerId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getContainerTabsData(containerId)
+        .get();
   }
 
   Future<String?> getContainerTabId(String tabId) {

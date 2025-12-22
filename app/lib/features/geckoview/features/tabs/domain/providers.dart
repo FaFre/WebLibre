@@ -74,6 +74,13 @@ Stream<List<String>> watchContainerTabIds(
   }
 }
 
+@Riverpod(keepAlive: true)
+Stream<List<TabData>> watchgetTabsFifo(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+
+  return db.tabDao.getTabsFifo().watch();
+}
+
 @Riverpod()
 Future<int> containerTabCount(Ref ref, ContainerFilter containerFilter) {
   return ref.watch(

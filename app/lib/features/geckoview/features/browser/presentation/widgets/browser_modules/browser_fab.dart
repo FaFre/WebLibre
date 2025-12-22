@@ -22,12 +22,15 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_bar_dismissable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/domain/providers/readerable.dart';
 
-class ReaderAppearanceButton extends HookConsumerWidget {
+class BrowserFab extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final buttonVisible = ref.watch(
+    final tabBarDismissed = ref.watch(tabBarDismissableControllerProvider);
+
+    final appearanceButtonVisible = ref.watch(
       appearanceButtonVisibilityProvider.select(
         (value) => value.value ?? false,
       ),
@@ -40,7 +43,15 @@ class ReaderAppearanceButton extends HookConsumerWidget {
     );
 
     return Visibility(
-      visible: readerabilityState.active && buttonVisible,
+      visible: readerabilityState.active && appearanceButtonVisible,
+      replacement: tabBarDismissed
+          ? FloatingActionButton(
+              child: const Icon(MdiIcons.dockBottom),
+              onPressed: () {
+                ref.read(tabBarDismissableControllerProvider.notifier).show();
+              },
+            )
+          : const SizedBox.shrink(),
       child: FloatingActionButton(
         onPressed: () async {
           await ref.read(readerableServiceProvider).onAppearanceButtonTap();

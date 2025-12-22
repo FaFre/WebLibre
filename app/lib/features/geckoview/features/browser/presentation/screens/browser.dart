@@ -40,23 +40,31 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tree_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_bar_dismissable.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/view_tabs.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_appearance_button.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class _TabBar extends HookConsumerWidget {
+  final bool showContextualToolbar;
+  final bool showQuickTabSwitcherBar;
   final ValueNotifier<bool> showAppBar;
   final ValueNotifier<PersistentBottomSheetController?> sheetController;
 
-  const _TabBar({required this.showAppBar, required this.sheetController});
+  const _TabBar({
+    required this.showContextualToolbar,
+    required this.showQuickTabSwitcherBar,
+    required this.showAppBar,
+    required this.sheetController,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,7 +84,11 @@ class _TabBar extends HookConsumerWidget {
     if (!autoHideTabBar) {
       return Visibility(
         visible: !tabInFullScreen,
-        child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+        child: BrowserBottomAppBar(
+          displayedSheet: displayedSheet,
+          showContextualToolbar: showContextualToolbar,
+          showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+        ),
       );
     }
 
@@ -84,7 +96,10 @@ class _TabBar extends HookConsumerWidget {
     final diffAcc = useRef(0.0);
 
     void resetHiddenState() {
-      showAppBar.value = true;
+      if (!ref.read(tabBarDismissableControllerProvider)) {
+        showAppBar.value = true;
+      }
+
       diffAcc.value = 0.0;
     }
 
@@ -153,7 +168,12 @@ class _TabBar extends HookConsumerWidget {
     return Visibility(
       visible:
           sheetController.value != null || (!tabInFullScreen && appBarVisible),
-      child: BrowserBottomAppBar(displayedSheet: displayedSheet),
+      maintainState: true,
+      child: BrowserBottomAppBar(
+        displayedSheet: displayedSheet,
+        showContextualToolbar: showContextualToolbar,
+        showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      ),
     );
   }
 }
@@ -171,7 +191,23 @@ class BrowserScreen extends HookConsumerWidget {
 
     final overlayController = useOverlayPortalController();
 
+    final showContextualAppBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.tabBarShowContextualBar,
+      ),
+    );
+
+    final showQuickTabSwitcherBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.tabBarShowQuickTabSwitcherBar,
+      ),
+    );
+
     final showAppBar = useValueNotifier(true);
+
+    ref.listen(tabBarDismissableControllerProvider, (previous, next) {
+      showAppBar.value = !next;
+    });
 
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
@@ -220,17 +256,25 @@ class BrowserScreen extends HookConsumerWidget {
             //This causes issues with a non dismissable barrier pushed, we ahve our own barrier and this does seem to have issues when dismissing, so disable it completely
             return null;
           },
-          bottomNavigationBar: _TabBar(
-            showAppBar: showAppBar,
-            sheetController: sheetController,
+          body: Column(
+            children: [
+              _TabBar(
+                showAppBar: showAppBar,
+                sheetController: sheetController,
+                showContextualToolbar: showContextualAppBar,
+                showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+              ),
+              Expanded(
+                child: _Browser(
+                  overlayController: overlayController,
+                  sheetController: sheetController,
+                  showAppBar: showAppBar,
+                  tabInFullScreen: tabInFullScreen,
+                ),
+              ),
+            ],
           ),
-          body: _Browser(
-            overlayController: overlayController,
-            sheetController: sheetController,
-            showAppBar: showAppBar,
-            tabInFullScreen: tabInFullScreen,
-          ),
-          floatingActionButton: ReaderAppearanceButton(),
+          floatingActionButton: BrowserFab(),
         ),
       ),
     );
@@ -408,7 +452,9 @@ class _Browser extends HookConsumerWidget {
                 }
 
                 //Make sure app bar is visible
-                showAppBar.value = true;
+                if (!ref.read(tabBarDismissableControllerProvider)) {
+                  showAppBar.value = true;
+                }
 
                 if (tabState?.isLoading == true) {
                   lastBackButtonPress.value = null;
@@ -634,11 +680,15 @@ class _ViewTabsSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final draggableScrollableController = useDraggableScrollableController();
+    final tabsViewMode = ref.watch(tabsViewModeControllerProvider);
+    final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
-    final treeModeEnabled = ref.watch(treeViewControllerProvider);
+    final draggableScrollableController = useDraggableScrollableController(
+      keys: [tabsReorderable],
+    );
 
     return DraggableScrollableSheet(
+      key: ValueKey(tabsReorderable),
       controller: draggableScrollableController,
       expand: false,
       minChildSize: 0.1,
@@ -649,26 +699,28 @@ class _ViewTabsSheet extends HookConsumerWidget {
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
           ),
-          child: treeModeEnabled
-              ? ViewTabTreesWidget(
-                  scrollController: scrollController,
-                  showNewTabFab: true,
-                  onClose: () {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
-                  },
-                )
-              : ViewTabsWidget(
-                  scrollController: scrollController,
-                  showNewTabFab: true,
-                  draggableScrollableController: draggableScrollableController,
-                  onClose: () {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
-                  },
-                ),
+          child: switch (tabsViewMode) {
+            TabsViewMode.grid => ViewTabsWidget(
+              scrollController: scrollController,
+              showNewTabFab: true,
+              tabsReorderable: tabsReorderable,
+              draggableScrollableController: draggableScrollableController,
+              onClose: () {
+                ref
+                    .read(bottomSheetControllerProvider.notifier)
+                    .requestDismiss();
+              },
+            ),
+            TabsViewMode.tree => ViewTabTreesWidget(
+              scrollController: scrollController,
+              showNewTabFab: true,
+              onClose: () {
+                ref
+                    .read(bottomSheetControllerProvider.notifier)
+                    .requestDismiss();
+              },
+            ),
+          },
         );
       },
     );

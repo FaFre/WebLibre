@@ -108,6 +108,12 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'tabBarShowContextualBar': settings['tabBarShowContextualBar']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'tabBarShowQuickTabSwitcherBar': settings['tabBarShowQuickTabSwitcherBar']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
     });
   }
 

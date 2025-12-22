@@ -382,6 +382,55 @@ final class AvailableTabStatesFamily extends $Family
   String toString() => r'availableTabStatesProvider';
 }
 
+@ProviderFor(fifoTabStates)
+const fifoTabStatesProvider = FifoTabStatesProvider._();
+
+final class FifoTabStatesProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<FifoTab>>,
+          EquatableValue<List<FifoTab>>,
+          EquatableValue<List<FifoTab>>
+        >
+    with $Provider<EquatableValue<List<FifoTab>>> {
+  const FifoTabStatesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'fifoTabStatesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$fifoTabStatesHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<FifoTab>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<FifoTab>> create(Ref ref) {
+    return fifoTabStates(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<FifoTab>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<FifoTab>>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$fifoTabStatesHash() => r'0320c28b328d814ed358ec6a10ec770a1ed634ad';
+
 @ProviderFor(suggestedTabEntities)
 const suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
 

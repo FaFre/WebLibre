@@ -45,6 +45,12 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarReaderView(bool tabBarReaderView);
 
+  GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar);
+
+  GeneralSettings tabBarShowQuickTabSwitcherBar(
+    bool tabBarShowQuickTabSwitcherBar,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -69,6 +75,8 @@ abstract class _$GeneralSettingsCWProxy {
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
     bool tabBarReaderView,
+    bool tabBarShowContextualBar,
+    bool tabBarShowQuickTabSwitcherBar,
   });
 }
 
@@ -146,6 +154,15 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabBarReaderView: tabBarReaderView);
 
   @override
+  GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar) =>
+      call(tabBarShowContextualBar: tabBarShowContextualBar);
+
+  @override
+  GeneralSettings tabBarShowQuickTabSwitcherBar(
+    bool tabBarShowQuickTabSwitcherBar,
+  ) => call(tabBarShowQuickTabSwitcherBar: tabBarShowQuickTabSwitcherBar);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -170,6 +187,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
     Object? tabBarReaderView = const $CopyWithPlaceholder(),
+    Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
+    Object? tabBarShowQuickTabSwitcherBar = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -264,6 +283,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarReaderView
           // ignore: cast_nullable_to_non_nullable
           : tabBarReaderView as bool,
+      tabBarShowContextualBar:
+          tabBarShowContextualBar == const $CopyWithPlaceholder() ||
+              tabBarShowContextualBar == null
+          ? _value.tabBarShowContextualBar
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarShowContextualBar as bool,
+      tabBarShowQuickTabSwitcherBar:
+          tabBarShowQuickTabSwitcherBar == const $CopyWithPlaceholder() ||
+              tabBarShowQuickTabSwitcherBar == null
+          ? _value.tabBarShowQuickTabSwitcherBar
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarShowQuickTabSwitcherBar as bool,
     );
   }
 }
@@ -279,46 +310,48 @@ extension $GeneralSettingsCopyWith on GeneralSettings {
 // JsonSerializableGenerator
 // **************************************************************************
 
-GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
-    GeneralSettings.withDefaults(
-      themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
-      enableReadability: json['enableReadability'] as bool?,
-      enforceReadability: json['enforceReadability'] as bool?,
-      deleteBrowsingDataOnQuit:
-          (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
-              ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
-              .toSet(),
-      defaultSearchProvider: const BangKeyConverter().fromJson(
-        json['defaultSearchProvider'] as String?,
-      ),
-      defaultSearchSuggestionsProvider: $enumDecodeNullable(
-        _$SearchSuggestionProvidersEnumMap,
-        json['defaultSearchSuggestionsProvider'],
-      ),
-      createChildTabsOption: json['createChildTabsOption'] as bool?,
-      showExtensionShortcut: json['showExtensionShortcut'] as bool?,
-      enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
-      defaultCreateTabType: $enumDecodeNullable(
-        _$TabTypeEnumMap,
-        json['defaultCreateTabType'],
-      ),
-      tabIntentOpenSetting: $enumDecodeNullable(
-        _$TabIntentOpenSettingEnumMap,
-        json['tabIntentOpenSetting'],
-      ),
-      autoHideTabBar: json['autoHideTabBar'] as bool?,
-      tabBarSwipeAction: $enumDecodeNullable(
-        _$TabBarSwipeActionEnumMap,
-        json['tabBarSwipeAction'],
-      ),
-      historyAutoCleanInterval: json['historyAutoCleanInterval'] == null
-          ? null
-          : Duration(
-              microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
-            ),
-      tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
-      tabBarReaderView: json['tabBarReaderView'] as bool?,
-    );
+GeneralSettings _$GeneralSettingsFromJson(
+  Map<String, dynamic> json,
+) => GeneralSettings.withDefaults(
+  themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
+  enableReadability: json['enableReadability'] as bool?,
+  enforceReadability: json['enforceReadability'] as bool?,
+  deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
+      ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
+      .toSet(),
+  defaultSearchProvider: const BangKeyConverter().fromJson(
+    json['defaultSearchProvider'] as String?,
+  ),
+  defaultSearchSuggestionsProvider: $enumDecodeNullable(
+    _$SearchSuggestionProvidersEnumMap,
+    json['defaultSearchSuggestionsProvider'],
+  ),
+  createChildTabsOption: json['createChildTabsOption'] as bool?,
+  showExtensionShortcut: json['showExtensionShortcut'] as bool?,
+  enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
+  defaultCreateTabType: $enumDecodeNullable(
+    _$TabTypeEnumMap,
+    json['defaultCreateTabType'],
+  ),
+  tabIntentOpenSetting: $enumDecodeNullable(
+    _$TabIntentOpenSettingEnumMap,
+    json['tabIntentOpenSetting'],
+  ),
+  autoHideTabBar: json['autoHideTabBar'] as bool?,
+  tabBarSwipeAction: $enumDecodeNullable(
+    _$TabBarSwipeActionEnumMap,
+    json['tabBarSwipeAction'],
+  ),
+  historyAutoCleanInterval: json['historyAutoCleanInterval'] == null
+      ? null
+      : Duration(
+          microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
+        ),
+  tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
+  tabBarReaderView: json['tabBarReaderView'] as bool?,
+  tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
+  tabBarShowQuickTabSwitcherBar: json['tabBarShowQuickTabSwitcherBar'] as bool?,
+);
 
 Map<String, dynamic> _$GeneralSettingsToJson(
   GeneralSettings instance,
@@ -346,6 +379,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
   'tabBarReaderView': instance.tabBarReaderView,
+  'tabBarShowContextualBar': instance.tabBarShowContextualBar,
+  'tabBarShowQuickTabSwitcherBar': instance.tabBarShowQuickTabSwitcherBar,
 };
 
 const _$ThemeModeEnumMap = {

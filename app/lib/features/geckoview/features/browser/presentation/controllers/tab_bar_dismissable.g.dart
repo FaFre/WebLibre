@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'tab_suggestions.dart';
+part of 'tab_bar_dismissable.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,29 @@ part of 'tab_suggestions.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(TabSuggestionsController)
-const tabSuggestionsControllerProvider = TabSuggestionsControllerProvider._();
+@ProviderFor(TabBarDismissableController)
+const tabBarDismissableControllerProvider =
+    TabBarDismissableControllerProvider._();
 
-final class TabSuggestionsControllerProvider
-    extends $NotifierProvider<TabSuggestionsController, bool> {
-  const TabSuggestionsControllerProvider._()
+final class TabBarDismissableControllerProvider
+    extends $NotifierProvider<TabBarDismissableController, bool> {
+  const TabBarDismissableControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'tabSuggestionsControllerProvider',
-        isAutoDispose: false,
+        name: r'tabBarDismissableControllerProvider',
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$tabSuggestionsControllerHash();
+  String debugGetCreateSourceHash() => _$tabBarDismissableControllerHash();
 
   @$internal
   @override
-  TabSuggestionsController create() => TabSuggestionsController();
+  TabBarDismissableController create() => TabBarDismissableController();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(bool value) {
@@ -41,10 +42,10 @@ final class TabSuggestionsControllerProvider
   }
 }
 
-String _$tabSuggestionsControllerHash() =>
-    r'5ce7f385b8aba14d432912cf0acb06aad04433fc';
+String _$tabBarDismissableControllerHash() =>
+    r'2bb0055f5525a21982ba3d7cb6443bcad823b64f';
 
-abstract class _$TabSuggestionsController extends $Notifier<bool> {
+abstract class _$TabBarDismissableController extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override

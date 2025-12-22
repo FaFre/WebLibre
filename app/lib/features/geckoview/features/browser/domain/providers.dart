@@ -31,12 +31,15 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
+
+typedef FifoTab = (TabState, ContainerData?);
 
 @Riverpod(keepAlive: true)
 class SelectedBangTrigger extends _$SelectedBangTrigger {
@@ -109,6 +112,33 @@ EquatableValue<Map<String, TabState>> availableTabStates(
     for (final tabId in availableTabs.value)
       if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
   });
+}
+
+@Riverpod(keepAlive: true)
+EquatableValue<List<FifoTab>> fifoTabStates(Ref ref) {
+  final containerData = ref
+      .watch(watchContainersWithCountProvider.select((value) => value.value))
+      .mapNotNull(
+        (value) => Map.fromEntries(value.map((c) => MapEntry(c.id, c))),
+      );
+
+  final sortedTabs = ref.watch(
+    watchgetTabsFifoProvider.select((value) => value.value),
+  );
+
+  final tabStates = ref.watch(tabStatesProvider);
+
+  return EquatableValue([
+    if (sortedTabs != null)
+      for (final tab in sortedTabs)
+        if (tabStates.containsKey(tab.id))
+          (
+            tabStates[tab.id]!,
+            tab.containerId.mapNotNull(
+              (containerId) => containerData?[containerId],
+            ),
+          ),
+  ]);
 }
 
 @Riverpod()

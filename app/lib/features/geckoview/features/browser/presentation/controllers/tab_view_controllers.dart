@@ -17,12 +17,56 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'tree_view.g.dart';
+part 'tab_view_controllers.g.dart';
 
 @Riverpod(keepAlive: true)
-class TreeViewController extends _$TreeViewController {
+class TabSuggestionsController extends _$TabSuggestionsController {
+  void toggle() {
+    state = !state;
+  }
+
+  void hide() {
+    if (state) {
+      state = false;
+    }
+  }
+
+  @override
+  bool build() {
+    return false;
+  }
+}
+
+enum TabsViewMode {
+  grid(MdiIcons.table, 'Grid'),
+  tree(MdiIcons.familyTree, 'Tree');
+
+  final IconData icon;
+  final String label;
+
+  const TabsViewMode(this.icon, this.label);
+}
+
+@Riverpod(keepAlive: true)
+class TabsViewModeController extends _$TabsViewModeController {
+  void set(TabsViewMode mode) {
+    if (mode != state) {
+      state = mode;
+    }
+  }
+
+  @override
+  TabsViewMode build() {
+    return TabsViewMode.grid;
+  }
+}
+
+@Riverpod()
+class TabsReorderableController extends _$TabsReorderableController {
   void toggle() {
     state = !state;
   }
