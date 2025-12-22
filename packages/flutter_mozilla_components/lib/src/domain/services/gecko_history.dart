@@ -25,6 +25,18 @@ class GeckoHistoryService {
     );
   }
 
+  Future<List<VisitInfo>> getVisitsPaginated(
+    int offset,
+    int count,
+    Set<VisitType> types,
+  ) {
+    return _api.getVisitsPaginated(
+      offset,
+      count,
+      VisitType.values.toSet().difference(types).toList(),
+    );
+  }
+
   Future<void> deleteVisit(VisitInfo info) {
     switch (info.visitType) {
       case VisitType.link:

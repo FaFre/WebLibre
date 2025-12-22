@@ -4911,23 +4911,6 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onScrollChange(timestampArg: Long, tabIdArg: String, scrollYArg: Long, callback: (Result<Unit>) -> Unit)
-{
-    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onScrollChange$separatedMessageChannelSuffix"
-    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, tabIdArg, scrollYArg)) {
-      if (it is List<*>) {
-        if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
-        } else {
-          callback(Result.success(Unit))
-        }
-      } else {
-        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      } 
-    }
-  }
   fun onPreferenceChange(timestampArg: Long, valueArg: GeckoPref, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
@@ -5492,6 +5475,7 @@ interface GeckoDeleteBrowsingDataController {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoHistoryApi {
   fun getDetailedVisits(startMillis: Long, endMillis: Long, excludeTypes: List<VisitType>, callback: (Result<List<VisitInfo>>) -> Unit)
+  fun getVisitsPaginated(offset: Long, count: Long, excludeTypes: List<VisitType>, callback: (Result<List<VisitInfo>>) -> Unit)
   fun deleteVisit(url: String, timestamp: Long, callback: (Result<Unit>) -> Unit)
   fun deleteDownload(id: String, callback: (Result<Unit>) -> Unit)
   fun deleteVisitsBetween(startMillis: Long, endMillis: Long, callback: (Result<Unit>) -> Unit)
@@ -5514,6 +5498,28 @@ interface GeckoHistoryApi {
             val endMillisArg = args[1] as Long
             val excludeTypesArg = args[2] as List<VisitType>
             api.getDetailedVisits(startMillisArg, endMillisArg, excludeTypesArg) { result: Result<List<VisitInfo>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.getVisitsPaginated$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val offsetArg = args[0] as Long
+            val countArg = args[1] as Long
+            val excludeTypesArg = args[2] as List<VisitType>
+            api.getVisitsPaginated(offsetArg, countArg, excludeTypesArg) { result: Result<List<VisitInfo>> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

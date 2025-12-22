@@ -1226,7 +1226,7 @@ abstract class GeckoStateEvents {
   void onFindResults(int timestamp, String id, List<FindResultState> results);
   void onLongPress(int timestamp, String id, HitResult hitResult);
 
-  void onScrollChange(int timestamp, String tabId, int scrollY);
+  // void onScrollChange(int timestamp, String tabId, int scrollY);
   void onPreferenceChange(int timestamp, GeckoPref value);
 
   void onContainerSiteAssignment(
@@ -1337,6 +1337,13 @@ abstract class GeckoHistoryApi {
   List<VisitInfo> getDetailedVisits(
     int startMillis,
     int endMillis,
+    List<VisitType> excludeTypes,
+  );
+
+  @async
+  List<VisitInfo> getVisitsPaginated(
+    int offset,
+    int count,
     List<VisitType> excludeTypes,
   );
 

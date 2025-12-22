@@ -26,8 +26,9 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
         endMillis: Long,
     ): List<VisitInfo> =
         values
-            .filter { isDisplayableItem(it.status) &&
-                    it.createdTime >= startMillis && it.createdTime <= endMillis
+            .filter {
+                isDisplayableItem(it.status) &&
+                        it.createdTime >= startMillis && it.createdTime <= endMillis
             }
             .distinctBy { Pair(it.fileName, it.status) }
             .sortedByDescending { it.createdTime } // sort from newest to oldest
@@ -92,11 +93,75 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
                 }
 
                 if (!excludeTypes.contains(VisitType.DOWNLOAD)) {
-                   visits = visits + components.core.store.state.downloads.toVisitInfoList(startMillis, endMillis)
+                    visits = visits + components.core.store.state.downloads.toVisitInfoList(
+                        startMillis,
+                        endMillis
+                    )
                 }
 
-                callback(Result.success(visits
-                ))
+                callback(
+                    Result.success(
+                        visits
+                    )
+                )
+            }
+        }
+    }
+
+    override fun getVisitsPaginated(
+        offset: Long,
+        count: Long,
+        excludeTypes: List<VisitType>,
+        callback: (Result<List<VisitInfo>>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                var visits = components.core.historyStorage.getVisitsPaginated(
+                    offset,
+                    count,
+                    excludeTypes.map {
+                        when (it) {
+                            VisitType.LINK -> mozilla.components.concept.storage.VisitType.LINK
+                            VisitType.TYPED -> mozilla.components.concept.storage.VisitType.TYPED
+                            VisitType.BOOKMARK -> mozilla.components.concept.storage.VisitType.BOOKMARK
+                            VisitType.EMBED -> mozilla.components.concept.storage.VisitType.EMBED
+                            VisitType.REDIRECT_PERMANENT -> mozilla.components.concept.storage.VisitType.REDIRECT_PERMANENT
+                            VisitType.REDIRECT_TEMPORARY -> mozilla.components.concept.storage.VisitType.REDIRECT_TEMPORARY
+                            VisitType.DOWNLOAD -> mozilla.components.concept.storage.VisitType.DOWNLOAD
+                            VisitType.FRAMED_LINK -> mozilla.components.concept.storage.VisitType.FRAMED_LINK
+                            VisitType.RELOAD -> mozilla.components.concept.storage.VisitType.RELOAD
+                        }
+                    }).map {
+                    VisitInfo(
+                        url = it.url,
+                        title = it.title,
+                        visitTime = it.visitTime,
+                        visitType = when (it.visitType) {
+                            mozilla.components.concept.storage.VisitType.LINK -> VisitType.LINK
+                            mozilla.components.concept.storage.VisitType.TYPED -> VisitType.TYPED
+                            mozilla.components.concept.storage.VisitType.BOOKMARK -> VisitType.BOOKMARK
+                            mozilla.components.concept.storage.VisitType.EMBED -> VisitType.EMBED
+                            mozilla.components.concept.storage.VisitType.REDIRECT_PERMANENT -> VisitType.REDIRECT_PERMANENT
+                            mozilla.components.concept.storage.VisitType.REDIRECT_TEMPORARY -> VisitType.REDIRECT_TEMPORARY
+                            mozilla.components.concept.storage.VisitType.DOWNLOAD -> VisitType.DOWNLOAD
+                            mozilla.components.concept.storage.VisitType.FRAMED_LINK -> VisitType.FRAMED_LINK
+                            mozilla.components.concept.storage.VisitType.RELOAD -> VisitType.RELOAD
+                        },
+                        previewImageUrl = it.previewImageUrl,
+                        isRemote = it.isRemote
+                    )
+                }
+
+                if (!excludeTypes.contains(VisitType.DOWNLOAD)) {
+                    callback(Result.failure(Throwable("Downloads not supported yet")))
+//                    visits = visits + components.core.store.state.downloads.toVisitInfoList(startMillis, endMillis)
+                }
+
+                callback(
+                    Result.success(
+                        visits
+                    )
+                )
             }
         }
     }

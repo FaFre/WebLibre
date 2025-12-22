@@ -38,7 +38,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _thumbnailSubject = PublishSubject<ThumbnailEvent>();
   final _findResultsSubject = PublishSubject<FindResultsEvent>();
   final _longPressSubject = PublishSubject<LongPressEvent>();
-  final _scrollEventSubject = PublishSubject<ScrollEvent>();
+  // final _scrollEventSubject = PublishSubject<ScrollEvent>();
   final _prefUpdateSubject = PublishSubject<GeckoPref>();
   final _siteAssignementSubject = PublishSubject<ContainerSiteAssignment>();
 
@@ -60,7 +60,7 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<ThumbnailEvent> get thumbnailEvents => _thumbnailSubject.stream;
   Stream<FindResultsEvent> get findResultsEvent => _findResultsSubject.stream;
   Stream<LongPressEvent> get longPressEvent => _longPressSubject.stream;
-  Stream<ScrollEvent> get scrollEvent => _scrollEventSubject.stream;
+  // Stream<ScrollEvent> get scrollEvent => _scrollEventSubject.stream;
   Stream<GeckoPref> get prefUpdateEvent => _prefUpdateSubject.stream;
   Stream<ContainerSiteAssignment> get siteAssignementEvent =>
       _siteAssignementSubject.stream;
@@ -174,13 +174,13 @@ class GeckoEventService extends GeckoStateEvents {
     _tabAddedSubject.addWhenMoreRecent(timestamp, null, tabId);
   }
 
-  @override
-  void onScrollChange(int timestamp, String tabId, int scrollY) {
-    _scrollEventSubject.addWhenMoreRecent(timestamp, tabId, (
-      tabId: tabId,
-      scrollY: scrollY,
-    ));
-  }
+  // @override
+  // void onScrollChange(int timestamp, String tabId, int scrollY) {
+  //   _scrollEventSubject.addWhenMoreRecent(timestamp, tabId, (
+  //     tabId: tabId,
+  //     scrollY: scrollY,
+  //   ));
+  // }
 
   @override
   void onPreferenceChange(int timestamp, GeckoPref value) {
@@ -224,7 +224,7 @@ class GeckoEventService extends GeckoStateEvents {
     await _thumbnailSubject.close();
     await _findResultsSubject.close();
     await _longPressSubject.close();
-    await _scrollEventSubject.close();
+    // await _scrollEventSubject.close();
     await _tabAddedSubject.close();
     await _prefUpdateSubject.close();
     await _siteAssignementSubject.close();
