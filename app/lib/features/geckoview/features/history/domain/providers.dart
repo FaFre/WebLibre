@@ -24,6 +24,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
 part 'providers.g.dart';
@@ -67,14 +68,7 @@ class HistoryFilter extends _$HistoryFilter {
 Future<List<VisitInfo>> browsingHistory(Ref ref) {
   final options = ref.watch(historyFilterProvider);
 
-  final service = GeckoHistoryService();
-  return service
-      .getDetailedVisits(
-        options.dateRange?.start ?? DateTime(0),
-        options.dateRange?.end ?? DateTime(9999),
-        options.visitTypes,
-      )
-      .then(
-        (visits) => visits..sort((a, b) => b.visitTime.compareTo(a.visitTime)),
-      );
+  return ref
+      .read(historyRepositoryProvider.notifier)
+      .getDetailedVisits(options);
 }

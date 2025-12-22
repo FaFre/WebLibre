@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_file.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -106,8 +107,9 @@ class Section extends MultiSliver {
                        builder: (context, ref, _) {
                          return IconButton(
                            onPressed: () async {
-                             final service = GeckoHistoryService();
-                             await service.deleteVisit(item);
+                             await ref
+                                 .read(historyRepositoryProvider.notifier)
+                                 .deleteVisit(item);
 
                              final downloadedFile = item.title.mapNotNull(
                                (title) => File(title),
@@ -240,8 +242,9 @@ class HistoryScreen extends HookConsumerWidget {
                 DeleteDecision? deleteDecision;
 
                 for (final item in selectedItems.value) {
-                  final service = GeckoHistoryService();
-                  await service.deleteVisit(item);
+                  await ref
+                      .read(historyRepositoryProvider.notifier)
+                      .deleteVisit(item);
 
                   final downloadedFile = item.title.mapNotNull(
                     (title) => File(title),

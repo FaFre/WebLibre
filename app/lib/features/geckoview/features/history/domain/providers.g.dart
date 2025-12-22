@@ -99,4 +99,4 @@ final class BrowsingHistoryProvider
   }
 }
 
-String _$browsingHistoryHash() => r'6447fd4d8209c3befb07f2d82fa41a24bd3accb1';
+String _$browsingHistoryHash() => r'3b6ee5853387481d7544bc9733741a5519f84f40';
