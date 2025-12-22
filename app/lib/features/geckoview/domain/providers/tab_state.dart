@@ -300,13 +300,13 @@ AsyncValue<String?> selectedTabContainerId(Ref ref) {
   return const AsyncData(null);
 }
 
-@Riverpod()
-Stream<int> tabScrollY(Ref ref, String? tabId, Duration sampleTime) {
-  final eventService = ref.watch(eventServiceProvider);
+// @Riverpod()
+// Stream<int> tabScrollY(Ref ref, String? tabId, Duration sampleTime) {
+//   final eventService = ref.watch(eventServiceProvider);
 
-  return eventService.scrollEvent
-      .where((event) => event.tabId == tabId)
-      .sampleTime(sampleTime)
-      .map((event) => event.scrollY)
-      .asBroadcastStream();
-}
+//   return eventService.scrollEvent
+//       .where((event) => event.tabId == tabId)
+//       .sampleTime(sampleTime)
+//       .map((event) => event.scrollY)
+//       .asBroadcastStream();
+// }

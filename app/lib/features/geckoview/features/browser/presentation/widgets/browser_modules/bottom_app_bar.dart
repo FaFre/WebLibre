@@ -44,35 +44,114 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
-class BrowserBottomAppBar extends HookConsumerWidget {
+class BrowserTopAppBar extends HookConsumerWidget {
+  final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
 
-  const BrowserBottomAppBar({
+  late final BrowserTabBar _tabBar;
+  late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
+
+  BrowserTopAppBar({
+    required this.showMainToolbar,
+    required this.showContextualToolbar,
+    required this.showQuickTabSwitcherBar,
+  }) {
+    _tabBar = BrowserTabBar(
+      showMainToolbar: showMainToolbar,
+      displayedSheet: null,
+      showContextualToolbar: false,
+      showQuickTabSwitcherBar: false,
+      showMainToolbarNavigationButton: !showContextualToolbar,
+      showMainToolbarTabsCount: !showContextualToolbar,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SafeArea(
+      child: SizedBox(height: preferredSize.height, child: _tabBar),
+    );
+  }
+
+  Size get preferredSize => _size;
+}
+
+class BrowserBottomAppBar extends HookConsumerWidget {
+  final bool showMainToolbar;
+  final bool showContextualToolbar;
+  final bool showQuickTabSwitcherBar;
+  final Sheet? displayedSheet;
+
+  late final BrowserTabBar _tabBar;
+  late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
+
+  BrowserBottomAppBar({
+    required this.showMainToolbar,
     required this.displayedSheet,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
-  });
+  }) {
+    _tabBar = BrowserTabBar(
+      displayedSheet: displayedSheet,
+      showMainToolbar: showMainToolbar,
+      showContextualToolbar: showContextualToolbar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      showMainToolbarNavigationButton: !showContextualToolbar,
+      showMainToolbarTabsCount: !showContextualToolbar,
+    );
+  }
 
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return BottomAppBar(
+      height: _size.height,
+      padding: EdgeInsets.zero,
+      child: _tabBar,
+    );
+  }
+
+  Size get preferredSize => _size;
+}
+
+class BrowserTabBar extends HookConsumerWidget {
+  final bool showMainToolbar;
+  final bool showContextualToolbar;
+  final bool showQuickTabSwitcherBar;
   final Sheet? displayedSheet;
+
+  final bool showMainToolbarTabsCount;
+  final bool showMainToolbarNavigationButton;
+
+  const BrowserTabBar({
+    required this.showMainToolbar,
+    required this.displayedSheet,
+    required this.showContextualToolbar,
+    required this.showQuickTabSwitcherBar,
+    required this.showMainToolbarTabsCount,
+    required this.showMainToolbarNavigationButton,
+  });
 
   static const contextualToolabarHeight = 54.0;
   static const quickTabSwitcherHeight = 48.0;
 
   bool get displayAppBar =>
-      !showContextualToolbar || displayedSheet is! ViewTabsSheet;
+      showMainToolbar &&
+      (!showContextualToolbar || displayedSheet is! ViewTabsSheet);
 
   bool get displayQuickTabSwitcher =>
       showQuickTabSwitcherBar && displayedSheet is! ViewTabsSheet;
@@ -113,67 +192,68 @@ class BrowserBottomAppBar extends HookConsumerWidget {
 
     final dragStartPosition = useRef(Offset.zero);
 
-    return BottomAppBar(
-      height: getToolbarHeight(),
-      padding: EdgeInsets.zero,
-      child: GestureDetector(
-        onTap: () {
-          if (displayedSheet case EditUrlSheet()) {
-            ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-            return;
-          }
+    final toolbarHeight = useMemoized(() => getToolbarHeight());
 
-          final tabState = ref.read(selectedTabStateProvider);
+    return GestureDetector(
+      onTap: () {
+        if (displayedSheet case EditUrlSheet()) {
+          ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+          return;
+        }
 
-          if (tabState != null) {
-            ref
-                .read(bottomSheetControllerProvider.notifier)
-                .show(EditUrlSheet(tabState: tabState));
-          }
-        },
-        onHorizontalDragStart: (details) {
-          dragStartPosition.value = details.globalPosition;
-        },
-        onHorizontalDragEnd: (details) async {
-          final distance = dragStartPosition.value - details.globalPosition;
+        final tabState = ref.read(selectedTabStateProvider);
 
-          if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
-            final selectedTab = ref.read(selectedTabProvider);
-            final setting = await ref
-                .read(generalSettingsRepositoryProvider.notifier)
-                .fetchSettings();
+        if (tabState != null) {
+          ref
+              .read(bottomSheetControllerProvider.notifier)
+              .show(EditUrlSheet(tabState: tabState));
+        }
+      },
+      onHorizontalDragStart: (details) {
+        dragStartPosition.value = details.globalPosition;
+      },
+      onHorizontalDragEnd: (details) async {
+        final distance = dragStartPosition.value - details.globalPosition;
 
-            if (selectedTab != null) {
-              switch (setting.tabBarSwipeAction) {
-                case TabBarSwipeAction.switchLastOpened:
+        if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
+          final selectedTab = ref.read(selectedTabProvider);
+          final setting = await ref
+              .read(generalSettingsRepositoryProvider.notifier)
+              .fetchSettings();
+
+          if (selectedTab != null) {
+            switch (setting.tabBarSwipeAction) {
+              case TabBarSwipeAction.switchLastOpened:
+                await ref
+                    .read(tabRepositoryProvider.notifier)
+                    .selectPreviouslyOpenedTab(selectedTab);
+              case TabBarSwipeAction.navigateOrderedTabs:
+                if (distance.dx < 0) {
                   await ref
                       .read(tabRepositoryProvider.notifier)
-                      .selectPreviouslyOpenedTab(selectedTab);
-                case TabBarSwipeAction.navigateOrderedTabs:
-                  if (distance.dx < 0) {
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .selectPreviousTab(selectedTab);
-                  } else {
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .selectNextTab(selectedTab);
-                  }
-              }
+                      .selectPreviousTab(selectedTab);
+                } else {
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .selectNextTab(selectedTab);
+                }
             }
-          } else if (distance.dy < 20 && distance.dx.abs() < 15) {
-            ref.read(tabBarDismissableControllerProvider.notifier).dismiss();
           }
-        },
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (showQuickTabSwitcherBar)
-              Visibility(
-                visible: displayQuickTabSwitcher,
-                maintainState: true,
-                child: QuickTabSwitcher(),
-              ),
+        } else if (distance.dy < (toolbarHeight / 3) &&
+            distance.dx.abs() < 15) {
+          ref.read(tabBarDismissableControllerProvider.notifier).dismiss();
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showQuickTabSwitcherBar)
+            Visibility(
+              visible: displayQuickTabSwitcher,
+              maintainState: true,
+              child: QuickTabSwitcher(),
+            ),
+          if (showMainToolbar)
             Visibility(
               visible: displayAppBar,
               maintainState: true,
@@ -269,28 +349,39 @@ class BrowserBottomAppBar extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                  if (!showContextualToolbar)
+                  if (showMainToolbarTabsCount)
                     TabsCountButton(
                       selectedTabId: selectedTabId,
                       displayedSheet: displayedSheet,
                       showLongPressMenu: true,
                     ),
-                  if (!showContextualToolbar)
-                    NavigationMenuButton(selectedTabId: selectedTabId),
+                  if (showMainToolbarNavigationButton)
+                    NavigationMenuButton(
+                      selectedTabId: selectedTabId,
+                      showNavigationButtons: true,
+                    ),
                 ],
               ),
             ),
-            if (showContextualToolbar)
-              ContextualToolbar(
-                selectedTabId: selectedTabId,
-                displayedSheet: displayedSheet,
-              ),
-          ],
-        ),
+          if (showContextualToolbar)
+            ContextualToolbar(
+              selectedTabId: selectedTabId,
+              displayedSheet: displayedSheet,
+            ),
+        ],
       ),
     );
   }
 }
+
+typedef _QuickTabItem = ({
+  Color? color,
+  String id,
+  bool isPrivate,
+  bool isHistory,
+  String title,
+  Uri url,
+});
 
 class ContextualToolbar extends HookConsumerWidget {
   const ContextualToolbar({
@@ -333,7 +424,10 @@ class ContextualToolbar extends HookConsumerWidget {
           displayedSheet: displayedSheet,
           showLongPressMenu: false,
         ),
-        NavigationMenuButton(selectedTabId: selectedTabId),
+        NavigationMenuButton(
+          selectedTabId: selectedTabId,
+          showNavigationButtons: false,
+        ),
       ],
     );
   }
@@ -342,7 +436,16 @@ class ContextualToolbar extends HookConsumerWidget {
 class QuickTabSwitcher extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabStates = ref.watch(fifoTabStatesProvider).value;
+    final tabStates = ref.watch(fifoTabStatesProvider);
+    final historyAsync = useCachedFuture(() {
+      if (tabStates.value.length <= 1) {
+        return ref
+            .read(historyRepositoryProvider.notifier)
+            .getVisitsPaginated(count: 25);
+      }
+
+      return Future.value(<VisitInfo>[]);
+    }, [tabStates.value.length <= 1]);
 
     final chipScrollController = useScrollController();
 
@@ -351,19 +454,19 @@ class QuickTabSwitcher extends HookConsumerWidget {
       child: SizedBox(
         height: 48,
         width: double.maxFinite,
-        child: SelectableChips<FifoTab, FifoTab, String>(
+        child: SelectableChips<_QuickTabItem, _QuickTabItem, String>(
           enableDelete: false,
           scrollController: chipScrollController,
-          itemId: (item) => item.$1.id,
+          itemId: (item) => item.id,
           itemLabel: (item) {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 64),
-                  child: Text(item.$1.titleOrAuthority),
+                  child: Text(item.title),
                 ),
-                if (item.$1.isPrivate)
+                if (item.isPrivate)
                   const Padding(
                     padding: EdgeInsets.only(left: 8.0),
                     child: Icon(
@@ -372,23 +475,57 @@ class QuickTabSwitcher extends HookConsumerWidget {
                       size: 20,
                     ),
                   ),
+                if (item.isHistory)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Icon(MdiIcons.history, size: 20),
+                  ),
               ],
             );
           },
-          itemAvatar: (item) => UrlIcon([item.$1.url], iconSize: 16),
-          itemBackgroundColor: (item) => item.$2?.color.withValues(alpha: 0.5),
+          itemAvatar: (item) => UrlIcon([item.url], iconSize: 16),
+          itemBackgroundColor: (item) => item.color?.withValues(alpha: 0.5),
           onSelected: (item) async {
             final animation = chipScrollController.animateTo(
               0,
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutBack,
             );
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .selectTab(item.$1.id);
+            if (item.isHistory) {
+              await ref
+                  .read(tabRepositoryProvider.notifier)
+                  .addTab(url: item.url, private: false);
+            } else {
+              await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
+            }
             await animation;
           },
-          availableItems: tabStates.skip(1),
+          availableItems: tabStates.value
+              .map(
+                (state) => (
+                  id: state.$1.id,
+                  title: state.$1.titleOrAuthority,
+                  isPrivate: state.$1.isPrivate,
+                  isHistory: false,
+                  url: state.$1.url,
+                  color: state.$2?.color,
+                ),
+              )
+              .skip(1)
+              .followedBy(
+                (historyAsync.data ?? []).map((state) {
+                  final url = Uri.parse(state.url);
+
+                  return (
+                    id: state.url,
+                    title: state.title ?? url.authority,
+                    isPrivate: false,
+                    isHistory: true,
+                    url: url,
+                    color: null,
+                  );
+                }),
+              ),
         ),
       ),
     );
@@ -430,18 +567,18 @@ class ShareMenuButton extends HookConsumerWidget {
 }
 
 class NavigationMenuButton extends HookConsumerWidget {
-  const NavigationMenuButton({super.key, required this.selectedTabId});
-
   final String? selectedTabId;
+  final bool showNavigationButtons;
+
+  const NavigationMenuButton({
+    super.key,
+    required this.selectedTabId,
+    required this.showNavigationButtons,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final addonService = ref.watch(addonServiceProvider);
-    final showContextualAppBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.tabBarShowContextualBar,
-      ),
-    );
 
     final hamburgerMenuController = useMenuController();
 
@@ -674,7 +811,7 @@ class NavigationMenuButton extends HookConsumerWidget {
             child: const Text('Reload'),
           ),
         if (selectedTabId != null) const Divider(),
-        if (selectedTabId != null && !showContextualAppBar)
+        if (selectedTabId != null && showNavigationButtons)
           Consumer(
             builder: (context, ref, child) {
               final history = ref.watch(

@@ -48,6 +48,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
   final DraggableScrollableController draggableScrollableController;
   final VoidCallback onClose;
   final double initialHeight;
+  final double bottomAppBarHeight;
 
   const ViewTabSheetWidget({
     required this.initialTabState,
@@ -55,6 +56,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     required this.draggableScrollableController,
     required this.onClose,
     required this.initialHeight,
+    required this.bottomAppBarHeight,
   });
 
   @override
@@ -79,7 +81,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
           final totalHeight =
               headerBox.size.height +
               textBox.size.height +
-              kToolbarHeight +
+              bottomAppBarHeight +
               MediaQuery.of(context).viewInsets.bottom;
 
           final relative = (totalHeight / MediaQuery.of(context).size.height)

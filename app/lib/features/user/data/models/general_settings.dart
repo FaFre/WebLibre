@@ -38,6 +38,8 @@ enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
 enum TabIntentOpenSetting { regular, private, ask }
 
+enum TabBarPosition { top, bottom }
+
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
   history('Browsing history'),
@@ -74,6 +76,7 @@ class GeneralSettings with FastEquatable {
   final bool tabBarReaderView;
   final bool tabBarShowContextualBar;
   final bool tabBarShowQuickTabSwitcherBar;
+  final TabBarPosition tabBarPosition;
 
   GeneralSettings({
     required this.themeMode,
@@ -94,6 +97,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarReaderView,
     required this.tabBarShowContextualBar,
     required this.tabBarShowQuickTabSwitcherBar,
+    required this.tabBarPosition,
   });
 
   GeneralSettings.withDefaults({
@@ -115,6 +119,7 @@ class GeneralSettings with FastEquatable {
     bool? tabBarReaderView,
     bool? tabBarShowContextualBar,
     bool? tabBarShowQuickTabSwitcherBar,
+    TabBarPosition? tabBarPosition,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -134,7 +139,8 @@ class GeneralSettings with FastEquatable {
        tabViewBottomSheet = tabViewBottomSheet ?? false,
        tabBarReaderView = tabBarReaderView ?? false,
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
-       tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true;
+       tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true,
+       tabBarPosition = tabBarPosition ?? TabBarPosition.bottom;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -161,5 +167,6 @@ class GeneralSettings with FastEquatable {
     tabBarReaderView,
     tabBarShowContextualBar,
     tabBarShowQuickTabSwitcherBar,
+    tabBarPosition,
   ];
 }

@@ -51,6 +51,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabBarShowQuickTabSwitcherBar,
   );
 
+  GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -77,6 +79,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabBarReaderView,
     bool tabBarShowContextualBar,
     bool tabBarShowQuickTabSwitcherBar,
+    TabBarPosition tabBarPosition,
   });
 }
 
@@ -163,6 +166,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(tabBarShowQuickTabSwitcherBar: tabBarShowQuickTabSwitcherBar);
 
   @override
+  GeneralSettings tabBarPosition(TabBarPosition tabBarPosition) =>
+      call(tabBarPosition: tabBarPosition);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -189,6 +196,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarReaderView = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarShowQuickTabSwitcherBar = const $CopyWithPlaceholder(),
+    Object? tabBarPosition = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -295,6 +303,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarShowQuickTabSwitcherBar
           // ignore: cast_nullable_to_non_nullable
           : tabBarShowQuickTabSwitcherBar as bool,
+      tabBarPosition:
+          tabBarPosition == const $CopyWithPlaceholder() ||
+              tabBarPosition == null
+          ? _value.tabBarPosition
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarPosition as TabBarPosition,
     );
   }
 }
@@ -351,6 +365,10 @@ GeneralSettings _$GeneralSettingsFromJson(
   tabBarReaderView: json['tabBarReaderView'] as bool?,
   tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
   tabBarShowQuickTabSwitcherBar: json['tabBarShowQuickTabSwitcherBar'] as bool?,
+  tabBarPosition: $enumDecodeNullable(
+    _$TabBarPositionEnumMap,
+    json['tabBarPosition'],
+  ),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -381,6 +399,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarReaderView': instance.tabBarReaderView,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
   'tabBarShowQuickTabSwitcherBar': instance.tabBarShowQuickTabSwitcherBar,
+  'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
 };
 
 const _$ThemeModeEnumMap = {
@@ -421,4 +440,9 @@ const _$TabIntentOpenSettingEnumMap = {
 const _$TabBarSwipeActionEnumMap = {
   TabBarSwipeAction.switchLastOpened: 'switchLastOpened',
   TabBarSwipeAction.navigateOrderedTabs: 'navigateOrderedTabs',
+};
+
+const _$TabBarPositionEnumMap = {
+  TabBarPosition.top: 'top',
+  TabBarPosition.bottom: 'bottom',
 };

@@ -44,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers/li
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -59,11 +60,13 @@ class BrowserView extends StatefulHookConsumerWidget {
   final Duration screenshotPeriod;
   final Duration suggestionTimeout;
   final Future<void> Function()? postInitializationStep;
+  final StreamSink<Offset>? pointerMoveEventSink;
 
   const BrowserView({
     this.screenshotPeriod = const Duration(seconds: 10),
     this.suggestionTimeout = const Duration(seconds: 30),
     this.postInitializationStep,
+    this.pointerMoveEventSink,
   });
 
   @override
@@ -106,9 +109,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
             if (settings.historyAutoCleanInterval > Duration.zero) {
               await GeckoHistoryService().deleteVisitsBetween(
-                DateTime(0),
-                DateTime.now().subtract(settings.historyAutoCleanInterval),
-              );
+                    DateTime(0),
+                    DateTime.now().subtract(settings.historyAutoCleanInterval),
+                  );
             }
           });
     });
@@ -216,74 +219,87 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       },
     );
 
-    return Stack(
-      children: [
-        GeckoView(
-          preInitializationStep: () async {
-            await ref
-                .read(eventServiceProvider)
-                .viewReadyStateEvents
-                .firstWhere((state) => state == true)
-                .timeout(
-                  const Duration(seconds: 3),
-                  onTimeout: () {
-                    logger.e(
-                      'Browser fragement not reported ready, trying to intitialize anyways',
-                    );
-                    return true;
-                  },
-                );
-          },
-          postInitializationStep: () async {
-            await widget.postInitializationStep?.call();
-
-            if (!initializationCompleter.isCompleted) {
-              const quickActions = QuickActions();
-
-              //Debounce: https://github.com/flutter/flutter/issues/131121
-              DateTime? lastAction;
-              await quickActions.initialize((type) async {
-                if (lastAction == null ||
-                    DateTime.now().difference(lastAction!) >
-                        const Duration(seconds: 5)) {
-                  if (type == 'new_tab') {
-                    lastAction = DateTime.now();
-
-                    final router = await ref.read(routerProvider.future);
-                    const route = SearchRoute(tabType: TabType.regular);
-
-                    await router.push(route.location);
-                  } else if (type == 'new_private_tab') {
-                    lastAction = DateTime.now();
-
-                    final router = await ref.read(routerProvider.future);
-                    const route = SearchRoute(tabType: TabType.private);
-
-                    await router.push(route.location);
-                  } else {
-                    throw UnimplementedError();
-                  }
-                }
-              });
-
-              await quickActions.setShortcutItems([
-                //TODO: add icons
-                const ShortcutItem(type: 'new_tab', localizedTitle: 'New Tab'),
-                const ShortcutItem(
-                  type: 'new_private_tab',
-                  localizedTitle: 'New Private Tab',
-                ),
-              ]);
-
-              initializationCompleter.complete();
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerMove: (widget.pointerMoveEventSink != null)
+          ? (event) {
+              if (event.down) {
+                widget.pointerMoveEventSink!.add(event.localDelta);
+              }
             }
-          },
-        ),
-        if (!hasTab)
-          Positioned.fill(
-            child: SizedBox.expand(child: Container(color: Colors.grey[800])),
+          : null,
+      child: Stack(
+        children: [
+          GeckoView(
+            preInitializationStep: () async {
+              await ref
+                  .read(eventServiceProvider)
+                  .viewReadyStateEvents
+                  .firstWhere((state) => state == true)
+                  .timeout(
+                    const Duration(seconds: 3),
+                    onTimeout: () {
+                      logger.e(
+                        'Browser fragement not reported ready, trying to intitialize anyways',
+                      );
+                      return true;
+                    },
+                  );
+            },
+            postInitializationStep: () async {
+              await widget.postInitializationStep?.call();
+
+              if (!initializationCompleter.isCompleted) {
+                const quickActions = QuickActions();
+
+                //Debounce: https://github.com/flutter/flutter/issues/131121
+                DateTime? lastAction;
+                await quickActions.initialize((type) async {
+                  if (lastAction == null ||
+                      DateTime.now().difference(lastAction!) >
+                          const Duration(seconds: 5)) {
+                    if (type == 'new_tab') {
+                      lastAction = DateTime.now();
+
+                      final router = await ref.read(routerProvider.future);
+                      const route = SearchRoute(tabType: TabType.regular);
+
+                      await router.push(route.location);
+                    } else if (type == 'new_private_tab') {
+                      lastAction = DateTime.now();
+
+                      final router = await ref.read(routerProvider.future);
+                      const route = SearchRoute(tabType: TabType.private);
+
+                      await router.push(route.location);
+                    } else {
+                      throw UnimplementedError();
+                    }
+                  }
+                });
+
+                await quickActions.setShortcutItems([
+                  //TODO: add icons
+                  const ShortcutItem(
+                    type: 'new_tab',
+                    localizedTitle: 'New Tab',
+                  ),
+                  const ShortcutItem(
+                    type: 'new_private_tab',
+                    localizedTitle: 'New Private Tab',
+                  ),
+                ]);
+
+                initializationCompleter.complete();
+              }
+            },
           ),
-      ],
+          if (!hasTab)
+            Positioned.fill(
+              child: SizedBox.expand(child: Container(color: Colors.grey[800])),
+            ),
+        ],
+      ),
     );
   }
 

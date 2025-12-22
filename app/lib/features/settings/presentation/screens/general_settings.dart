@@ -362,6 +362,55 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                       );
                 },
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('Tab Bar Position'),
+                      leading: Icon(MdiIcons.dockWindow),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    RadioGroup(
+                      groupValue: generalSettings.tabBarPosition,
+                      onChanged: (value) async {
+                        if (value != null) {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .tabBarPosition(value),
+                              );
+                        }
+                      },
+                      child: const Column(
+                        children: [
+                          RadioListTile.adaptive(
+                            value: TabBarPosition.top,
+                            title: Text('Top'),
+                            subtitle: Text(
+                              'Persistent tab bar without auto-hide',
+                            ),
+                          ),
+                          RadioListTile.adaptive(
+                            value: TabBarPosition.bottom,
+                            title: Text('Bottom'),
+                            subtitle: Text('Tab bar with auto-hide support'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               SwitchListTile.adaptive(
                 title: const Text('Show Contextual Tab Bar'),
                 subtitle: const Text(

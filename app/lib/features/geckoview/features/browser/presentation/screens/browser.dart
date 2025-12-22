@@ -50,20 +50,27 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class _TabBar extends HookConsumerWidget {
+  final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
-  final ValueNotifier<bool> showAppBar;
+  final ValueNotifier<bool> displayAppBar;
   final ValueNotifier<PersistentBottomSheetController?> sheetController;
+  final Stream<Offset>? pointerMoveEvents;
+  final TabBarPosition tabBarPosition;
 
   const _TabBar({
+    required this.showMainToolbar,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
-    required this.showAppBar,
+    required this.displayAppBar,
     required this.sheetController,
+    required this.tabBarPosition,
+    required this.pointerMoveEvents,
   });
 
   @override
@@ -75,29 +82,43 @@ class _TabBar extends HookConsumerWidget {
       selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),
     );
 
-    final autoHideTabBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.autoHideTabBar,
+    final autoHideTabBar = switch (tabBarPosition) {
+      TabBarPosition.top => false,
+      TabBarPosition.bottom => ref.watch(
+        generalSettingsWithDefaultsProvider.select(
+          (value) => value.autoHideTabBar,
+        ),
       ),
-    );
+    };
+
+    final appBarVisible = tabBarPosition == TabBarPosition.top
+        ? !ref.watch(tabBarDismissableControllerProvider)
+        : useValueListenable(displayAppBar);
 
     if (!autoHideTabBar) {
       return Visibility(
-        visible: !tabInFullScreen,
-        child: BrowserBottomAppBar(
-          displayedSheet: displayedSheet,
-          showContextualToolbar: showContextualToolbar,
-          showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-        ),
+        visible: !tabInFullScreen && appBarVisible,
+        child: switch (tabBarPosition) {
+          TabBarPosition.top => BrowserTopAppBar(
+            showMainToolbar: showMainToolbar,
+            showContextualToolbar: showContextualToolbar,
+            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+          ),
+          TabBarPosition.bottom => BrowserBottomAppBar(
+            displayedSheet: displayedSheet,
+            showMainToolbar: showMainToolbar,
+            showContextualToolbar: showContextualToolbar,
+            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+          ),
+        },
       );
     }
 
-    final appBarVisible = useValueListenable(showAppBar);
     final diffAcc = useRef(0.0);
 
     void resetHiddenState() {
       if (!ref.read(tabBarDismissableControllerProvider)) {
-        showAppBar.value = true;
+        displayAppBar.value = true;
       }
 
       diffAcc.value = 0.0;
@@ -137,12 +158,10 @@ class _TabBar extends HookConsumerWidget {
       }
     });
 
-    ref.listen(tabScrollYProvider(tabId, const Duration(milliseconds: 50)), (
-      previous,
-      next,
-    ) {
-      if (previous?.value != null && next.value != null) {
-        final diff = previous!.value! - next.value!;
+    useOnStreamChange(
+      pointerMoveEvents,
+      onData: (event) {
+        final diff = event.dy;
         if (diff < 0) {
           if (diffAcc.value > 0) {
             diffAcc.value = 0.0;
@@ -150,7 +169,7 @@ class _TabBar extends HookConsumerWidget {
 
           diffAcc.value += diff;
           if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
-            showAppBar.value = false;
+            displayAppBar.value = false;
           }
         } else if (diff > 0) {
           if (diffAcc.value < 0) {
@@ -162,18 +181,26 @@ class _TabBar extends HookConsumerWidget {
             resetHiddenState();
           }
         }
-      }
-    });
+      },
+    );
 
     return Visibility(
       visible:
           sheetController.value != null || (!tabInFullScreen && appBarVisible),
       maintainState: true,
-      child: BrowserBottomAppBar(
-        displayedSheet: displayedSheet,
-        showContextualToolbar: showContextualToolbar,
-        showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-      ),
+      child: switch (tabBarPosition) {
+        TabBarPosition.top => BrowserTopAppBar(
+          showMainToolbar: showMainToolbar,
+          showContextualToolbar: showContextualToolbar,
+          showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+        ),
+        TabBarPosition.bottom => BrowserBottomAppBar(
+          showMainToolbar: showMainToolbar,
+          displayedSheet: displayedSheet,
+          showContextualToolbar: showContextualToolbar,
+          showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+        ),
+      },
     );
   }
 }
@@ -191,7 +218,13 @@ class BrowserScreen extends HookConsumerWidget {
 
     final overlayController = useOverlayPortalController();
 
-    final showContextualAppBar = ref.watch(
+    final tabBarPosition = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.tabBarPosition,
+      ),
+    );
+
+    final showContextualToolbar = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (value) => value.tabBarShowContextualBar,
       ),
@@ -203,10 +236,14 @@ class BrowserScreen extends HookConsumerWidget {
       ),
     );
 
-    final showAppBar = useValueNotifier(true);
+    final displayAppBar = useValueNotifier(true);
+    final removeTopAppBar = useState(false);
 
     ref.listen(tabBarDismissableControllerProvider, (previous, next) {
-      showAppBar.value = !next;
+      displayAppBar.value = !next;
+      if (tabBarPosition == TabBarPosition.bottom) {
+        removeTopAppBar.value = next;
+      }
     });
 
     ref.listen(overlayControllerProvider, (previous, next) {
@@ -244,6 +281,8 @@ class BrowserScreen extends HookConsumerWidget {
 
     final sheetController = useState<PersistentBottomSheetController?>(null);
 
+    final pointerMoveEventsController = useStreamController<Offset>();
+
     return PopScope(
       //We need this for BackButtonListener to work downstream
       //No direct pop result will be handled here
@@ -256,23 +295,50 @@ class BrowserScreen extends HookConsumerWidget {
             //This causes issues with a non dismissable barrier pushed, we ahve our own barrier and this does seem to have issues when dismissing, so disable it completely
             return null;
           },
-          body: Column(
-            children: [
-              _TabBar(
-                showAppBar: showAppBar,
-                sheetController: sheetController,
-                showContextualToolbar: showContextualAppBar,
-                showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-              ),
-              Expanded(
-                child: _Browser(
-                  overlayController: overlayController,
-                  sheetController: sheetController,
-                  showAppBar: showAppBar,
-                  tabInFullScreen: tabInFullScreen,
-                ),
-              ),
-            ],
+          appBar: (tabBarPosition == TabBarPosition.top)
+              ? PreferredSize(
+                  preferredSize: BrowserTopAppBar(
+                    showMainToolbar: true,
+                    showContextualToolbar: showContextualToolbar,
+                    showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+                  ).preferredSize,
+                  child: _TabBar(
+                    tabBarPosition: TabBarPosition.top,
+                    showMainToolbar: true,
+                    displayAppBar: displayAppBar,
+                    sheetController: sheetController,
+                    showContextualToolbar: showContextualToolbar,
+                    showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+                    pointerMoveEvents: null,
+                  ),
+                )
+              : removeTopAppBar.value
+              ? const PreferredSize(
+                  preferredSize: Size.zero,
+                  child: SizedBox.shrink(),
+                )
+              : null,
+          bottomNavigationBar: _TabBar(
+            tabBarPosition: TabBarPosition.bottom,
+            displayAppBar: displayAppBar,
+            sheetController: sheetController,
+            showMainToolbar: tabBarPosition == TabBarPosition.bottom,
+            showContextualToolbar: showContextualToolbar,
+            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+            pointerMoveEvents: pointerMoveEventsController.stream,
+          ),
+          body: _Browser(
+            overlayController: overlayController,
+            sheetController: sheetController,
+            displayAppBar: displayAppBar,
+            tabInFullScreen: tabInFullScreen,
+            pointerMoveEventSink: pointerMoveEventsController.sink,
+            bottomAppBarSize: BrowserBottomAppBar(
+              showMainToolbar: false,
+              showContextualToolbar: showContextualToolbar,
+              showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+              displayedSheet: null,
+            ).preferredSize,
           ),
           floatingActionButton: BrowserFab(),
         ),
@@ -286,15 +352,19 @@ class _Browser extends HookConsumerWidget {
 
   final OverlayPortalController overlayController;
   final ValueNotifier<PersistentBottomSheetController?> sheetController;
-  final ValueNotifier<bool> showAppBar;
+  final ValueNotifier<bool> displayAppBar;
+  final StreamSink<Offset> pointerMoveEventSink;
+  final Size bottomAppBarSize;
 
   final bool tabInFullScreen;
 
   const _Browser({
     required this.overlayController,
     required this.sheetController,
-    required this.showAppBar,
+    required this.displayAppBar,
     required this.tabInFullScreen,
+    required this.pointerMoveEventSink,
+    required this.bottomAppBarSize,
   });
 
   @override
@@ -363,6 +433,7 @@ class _Browser extends HookConsumerWidget {
                     child: _ViewUrlSheet(
                       initialTabState: parameter.tabState,
                       maxChildSize: relativeSafeArea,
+                      bottomAppBarSize: bottomAppBarSize,
                     ),
                   ),
               };
@@ -453,7 +524,7 @@ class _Browser extends HookConsumerWidget {
 
                 //Make sure app bar is visible
                 if (!ref.read(tabBarDismissableControllerProvider)) {
-                  showAppBar.value = true;
+                  displayAppBar.value = true;
                 }
 
                 if (tabState?.isLoading == true) {
@@ -530,6 +601,7 @@ class _Browser extends HookConsumerWidget {
               child: _BrowserView(
                 sheetDisplayed: sheetController.value != null,
                 isFullscreen: tabInFullScreen,
+                pointerMoveEventSink: pointerMoveEventSink,
               ),
             ),
           ),
@@ -542,10 +614,12 @@ class _Browser extends HookConsumerWidget {
 class _BrowserView extends StatelessWidget {
   final bool sheetDisplayed;
   final bool isFullscreen;
+  final StreamSink<Offset>? pointerMoveEventSink;
 
   const _BrowserView({
     required this.sheetDisplayed,
     required this.isFullscreen,
+    this.pointerMoveEventSink,
   });
 
   @override
@@ -559,7 +633,7 @@ class _BrowserView extends StatelessWidget {
           left: !isFullscreen,
           child: Stack(
             children: [
-              const BrowserView(),
+              BrowserView(pointerMoveEventSink: pointerMoveEventSink),
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -627,8 +701,13 @@ class _BrowserView extends StatelessWidget {
 class _ViewUrlSheet extends HookConsumerWidget {
   final double maxChildSize;
   final TabState initialTabState;
+  final Size bottomAppBarSize;
 
-  const _ViewUrlSheet({required this.initialTabState, this.maxChildSize = 1.0});
+  const _ViewUrlSheet({
+    required this.initialTabState,
+    required this.bottomAppBarSize,
+    this.maxChildSize = 1.0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -666,6 +745,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
               }
             },
             initialHeight: initialHeight,
+            bottomAppBarHeight: bottomAppBarSize.height,
           ),
         );
       },
