@@ -55,18 +55,21 @@ class _GestureWrapper extends StatelessWidget {
 }
 
 class SelectableChips<T extends S, S, K> extends StatelessWidget {
-  final List<T> availableItems;
+  final Iterable<T> availableItems;
   final List<Widget> prefixListItems;
   final S? selectedItem;
   final int maxCount;
-  final bool deleteIcon;
+  final bool enableDelete;
   final bool sortSelectedFirst;
+
+  final ScrollController? scrollController;
 
   final K Function(S item) itemId;
   final Widget Function(T item) itemLabel;
   final Widget? Function(T item)? itemAvatar;
   final String? Function(T item)? itemTooltip;
   final int? Function(T item)? itemBadgeCount;
+  final Color? Function(T item)? itemBackgroundColor;
 
   final Widget Function(Widget child, S item)? itemWrap;
 
@@ -81,15 +84,17 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.itemBadgeCount,
     this.itemWrap,
     this.itemTooltip,
+    this.itemBackgroundColor,
     this.prefixListItems = const [],
     required this.availableItems,
     this.selectedItem,
     this.maxCount = 25,
-    this.deleteIcon = true,
+    this.enableDelete = true,
     this.onSelected,
     this.onDeleted,
     this.onLongPress,
     this.sortSelectedFirst = true,
+    this.scrollController,
     super.key,
   });
 
@@ -110,6 +115,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     }
 
     return FadingScroll(
+      controller: scrollController,
       fadingSize: 15,
       builder: (context, controller) {
         return ListView.builder(
@@ -148,7 +154,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                         onDeleted?.call(item);
                       }
                     },
-                    onDeleted: deleteIcon
+                    onDeleted: enableDelete
                         ? () {
                             onDeleted?.call(item);
                           }
@@ -156,6 +162,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                     label: itemLabel.call(item),
                     avatar: itemAvatar?.call(item),
                     tooltip: itemTooltip?.call(item),
+                    backgroundColor: itemBackgroundColor?.call(item),
                   ),
                 ),
               ),

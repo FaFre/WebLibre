@@ -26,7 +26,7 @@ import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -91,16 +91,10 @@ class ContainerChips extends HookConsumerWidget {
             children: [
               Expanded(
                 child: SelectableChips(
-                  deleteIcon: false,
+                  enableDelete: false,
                   itemId: (container) => container.id,
-                  itemAvatar: (container) => Container(
-                    width: 20.0,
-                    height: 20.0,
-                    decoration: BoxDecoration(
-                      color: container.color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                  itemBackgroundColor: (container) =>
+                      container.color.withValues(alpha: 0.5),
                   itemLabel: (container) =>
                       ContainerTitle(container: container),
                   itemBadgeCount: (container) => container.tabCount,

@@ -84,7 +84,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                   SizedBox(
                     height: 48,
                     child: SelectableChips(
-                      deleteIcon: false,
+                      enableDelete: false,
                       sortSelectedFirst: false,
                       itemId: (container) => container,
                       itemAvatar: (container) =>
