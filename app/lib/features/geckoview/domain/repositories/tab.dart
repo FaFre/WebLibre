@@ -28,7 +28,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_delete_cache.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -349,8 +348,6 @@ class TabRepository extends _$TabRepository {
       await _selectNextTab(tabId);
     }
 
-    ref.read(tabDeleteCacheProvider.notifier).delete(tabId);
-
     return _tabsService.removeTab(tabId: tabId);
   }
 
@@ -358,10 +355,6 @@ class TabRepository extends _$TabRepository {
     final selectedTab = ref.read(selectedTabProvider);
     if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
       await _selectNextTab(selectedTab!);
-    }
-
-    for (final tabId in tabIds) {
-      ref.read(tabDeleteCacheProvider.notifier).delete(tabId);
     }
 
     return _tabsService.removeTabs(ids: tabIds);

@@ -17,13 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_delete_cache.dart';
 
 part 'tab_list.g.dart';
 
@@ -51,10 +49,7 @@ class TabList extends _$TabList {
     );
 
     final tabListSub = eventService.tabListEvents.listen((tabs) {
-      final deletedTabs = ref.read(tabDeleteCacheProvider);
-      final equatableTabs = EquatableValue(
-        tabs.whereNot(deletedTabs.contains).toList(),
-      );
+      final equatableTabs = EquatableValue(tabs);
 
       if (equatableTabs != state) {
         state = equatableTabs;
