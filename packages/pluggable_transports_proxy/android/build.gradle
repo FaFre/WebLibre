@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.11.1")
+        classpath("com.android.tools.build:gradle:8.13.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -66,5 +66,5 @@ android {
 }
 
 dependencies {
-    implementation 'com.netzarchitekten:IPtProxy:4.2.2'
+    implementation 'com.netzarchitekten:IPtProxy:4.3.0'
 }
