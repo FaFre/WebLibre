@@ -42,6 +42,8 @@ class TabState extends WebPageInfo {
   @override
   String get title => super.title!;
 
+  String get titleOrAuthority => (title.isNotEmpty) ? title : url.authority;
+
   final EquatableImage? icon;
 
   @override

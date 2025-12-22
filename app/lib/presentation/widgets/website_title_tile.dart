@@ -55,7 +55,7 @@ class WebsiteTitleTile extends HookConsumerWidget {
             ),
             contentPadding: EdgeInsets.zero,
             title: Text(
-              info.title.whenNotEmpty ?? 'Untitled',
+              info.title.whenNotEmpty ?? info.url.authority,
               maxLines: 6,
               overflow: TextOverflow.ellipsis,
             ),
@@ -77,7 +77,7 @@ class WebsiteTitleTile extends HookConsumerWidget {
             width: 24,
           ),
           contentPadding: EdgeInsets.zero,
-          title: Text(initialTabState.title.whenNotEmpty ?? 'Untitled'),
+          title: Text(initialTabState.titleOrAuthority),
           subtitle: UriBreadcrumb(uri: initialTabState.url),
         ),
       ),

@@ -151,7 +151,7 @@ class TabMenu extends HookConsumerWidget {
             await BookmarkEntryAddRoute(
               bookmarkInfo: jsonEncode(
                 BookmarkInfo(
-                  title: tabState.title,
+                  title: tabState.titleOrAuthority,
                   url: tabState.url.toString(),
                 ).encode(),
               ),

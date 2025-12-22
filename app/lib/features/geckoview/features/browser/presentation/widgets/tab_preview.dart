@@ -152,7 +152,7 @@ class TabPreview extends HookConsumerWidget {
                     padding: const EdgeInsets.only(left: 6.0, top: 2.0),
                     child: Text(
                       overflow: TextOverflow.ellipsis,
-                      tabState.title,
+                      tabState.titleOrAuthority,
                       maxLines: 2,
                       style: tabState.isPrivate
                           ? const TextStyle(color: Colors.white)
@@ -167,15 +167,13 @@ class TabPreview extends HookConsumerWidget {
                       return child!;
                     },
                     menuChildren: [
-                      ?onDeleteAll.mapNotNull(
-                        (value) => MenuItemButton(
-                          onPressed: () {
-                            value(tabState.url.host);
-                          },
+                      MenuItemButton(
+                        onPressed: () {
+                          onDeleteAll?.call(tabState.url.host);
+                        },
 
-                          leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                          child: Text('Close all from ${tabState.url.host}'),
-                        ),
+                        leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
+                        child: Text('Close all from ${tabState.url.host}'),
                       ),
                     ],
                     child: IconButton(
@@ -184,13 +182,15 @@ class TabPreview extends HookConsumerWidget {
                         vertical: -4.0,
                       ),
                       onPressed: onDelete,
-                      onLongPress: () {
-                        if (extendedDeleteMenuController.isOpen) {
-                          extendedDeleteMenuController.close();
-                        } else {
-                          extendedDeleteMenuController.open();
-                        }
-                      },
+                      onLongPress: onDeleteAll != null
+                          ? () {
+                              if (extendedDeleteMenuController.isOpen) {
+                                extendedDeleteMenuController.close();
+                              } else {
+                                extendedDeleteMenuController.open();
+                              }
+                            }
+                          : null,
                       icon: const Icon(Icons.close),
                     ),
                   ),
