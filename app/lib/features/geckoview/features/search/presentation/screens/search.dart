@@ -190,6 +190,7 @@ class SearchScreen extends HookConsumerWidget {
                     textEditingController: searchTextController,
                     focusNode: searchFocusNode,
                     autofocus: true,
+                    label: const Text('Address / Search'),
                     onSubmitted: (value) async {
                       if (value.isNotEmpty) {
                         var newUrl = uri_parser.tryParseUrl(
