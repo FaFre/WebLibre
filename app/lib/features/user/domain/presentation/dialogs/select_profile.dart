@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
@@ -33,7 +34,7 @@ class SelectProfileDialog extends HookConsumerWidget {
     final usersAsync = ref.watch(profileRepositoryProvider);
 
     return AlertDialog(
-      title: const Text('Manage Users'),
+      title: const Text('Users'),
       scrollable: true,
       content: usersAsync.when(
         skipLoadingOnReload: true,
@@ -44,7 +45,7 @@ class SelectProfileDialog extends HookConsumerWidget {
             return ListTile(
               key: ValueKey(profile.id),
               enabled: !isSelected,
-              leading: const Icon(Icons.person),
+              trailing: !isSelected ? const Icon(MdiIcons.accountSwitch) : null,
               title: Text(profile.name),
               subtitle: isSelected ? const Text('Active') : null,
               onTap: () async {
@@ -129,10 +130,49 @@ class SelectProfileDialog extends HookConsumerWidget {
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
         TextButton.icon(
-          icon: const Icon(Icons.edit),
-          label: const Text('Edit'),
+          icon: const Icon(MdiIcons.power),
+          iconAlignment: IconAlignment.start,
+          label: const Text('Quit Browser'),
+          onPressed: () async {
+            final result = await showDialog<bool?>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  icon: const Icon(Icons.warning),
+                  title: const Text('Quit Browser'),
+                  content: const Text(
+                    'This will properly shutdown the browser and clear private tabs',
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, false);
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, true);
+                      },
+                      child: const Text('Quit'),
+                    ),
+                  ],
+                );
+              },
+            );
+
+            if (result == true) {
+              await exitApp(ref.container);
+            }
+          },
+        ),
+        TextButton.icon(
+          icon: const Icon(MdiIcons.accountGroup),
+          iconAlignment: IconAlignment.end,
+          label: const Text('Manage'),
           onPressed: () async {
             await ProfileListRoute().push(context);
           },
