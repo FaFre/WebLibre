@@ -154,33 +154,34 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
-            android:theme="@style/Theme.AppCompat.Light"
+            android:theme="@style/AppTheme"
             android:name="eu.weblibre.flutter_mozilla_components.addons.AddonDetailsActivity"
             android:exported="false"
             android:label="@string/mozac_feature_addons_addons" />
 
-        <activity android:name="eu.weblibre.flutter_mozilla_components.addons.InstalledAddonDetailsActivity"
+        <activity
+            android:name="eu.weblibre.flutter_mozilla_components.addons.InstalledAddonDetailsActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:parentActivityName="eu.weblibre.flutter_mozilla_components.addons.AddonsActivity"
             android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light" />
+            android:theme="@style/AppTheme" />
 
         <activity
             android:name="eu.weblibre.flutter_mozilla_components.addons.PermissionsDetailsActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light" />
+            android:theme="@style/AppTheme" />
 
         <activity
             android:name="eu.weblibre.flutter_mozilla_components.addons.AddonSettingsActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light" />
+            android:theme="@style/AppTheme" />
 
         <activity
             android:name="eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
             android:label="@string/mozac_feature_addons_addons"
-            android:theme="@style/Theme.AppCompat.Light"/>
+            android:theme="@style/AppTheme"/>
 
         <receiver
             android:name=".SearchBarWidgetReceiver"

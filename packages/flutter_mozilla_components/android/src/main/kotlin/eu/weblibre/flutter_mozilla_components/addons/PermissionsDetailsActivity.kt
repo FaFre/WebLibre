@@ -5,17 +5,21 @@
 package eu.weblibre.flutter_mozilla_components.addons
 
 import android.content.Intent
-import android.net.Uri
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.ui.translateName
+import mozilla.components.support.ktx.android.view.setupPersistentInsets
 import mozilla.components.support.utils.ext.getParcelableExtraCompat
 import eu.weblibre.flutter_mozilla_components.R
 
@@ -25,10 +29,15 @@ private const val LEARN_MORE_URL =
 /**
  * An activity to show the permissions of an add-on.
  */
-class PermissionsDetailsActivity : AppCompatActivity(), View.OnClickListener {
+class PermissionsDetailsActivity :
+    AppCompatActivity(),
+    View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(SystemBarStyle.dark(Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_on_permissions)
+        window.setupPersistentInsets()
+
         val addon = requireNotNull(
             intent.getParcelableExtraCompat("add_on", Addon::class.java),
         )
@@ -56,9 +65,11 @@ class PermissionsDetailsActivity : AppCompatActivity(), View.OnClickListener {
      */
     class PermissionsAdapter(
         private val permissions: List<String>,
-    ) :
-        RecyclerView.Adapter<PermissionViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionViewHolder {
+    ) : RecyclerView.Adapter<PermissionViewHolder>() {
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int,
+        ): PermissionViewHolder {
             val context = parent.context
             val inflater = LayoutInflater.from(context)
             val view = inflater.inflate(R.layout.add_ons_permission_item, parent, false)
@@ -71,7 +82,10 @@ class PermissionsDetailsActivity : AppCompatActivity(), View.OnClickListener {
 
         override fun getItemCount() = permissions.size
 
-        override fun onBindViewHolder(holder: PermissionViewHolder, position: Int) {
+        override fun onBindViewHolder(
+            holder: PermissionViewHolder,
+            position: Int,
+        ) {
             val permission = permissions[position]
             holder.textView.text = permission
         }
@@ -86,8 +100,7 @@ class PermissionsDetailsActivity : AppCompatActivity(), View.OnClickListener {
     ) : RecyclerView.ViewHolder(view)
 
     override fun onClick(v: View?) {
-        val intent =
-            Intent(Intent.ACTION_VIEW).setData(Uri.parse(LEARN_MORE_URL))
+        val intent = Intent(Intent.ACTION_VIEW).setData(LEARN_MORE_URL.toUri())
         startActivity(intent)
     }
 }

@@ -26,7 +26,11 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="AddonsActivityTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
+
+    <style name="AddonsActivityTheme" parent="AppTheme">
         <item name="mozac_primary_text_color">@color/photonDarkGrey90</item>
     </style>
 </resources>

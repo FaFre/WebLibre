@@ -4,11 +4,11 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".addons.PermissionsDetailsActivity">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -21,13 +21,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/add_ons_permissions"
-        android:background="?attr/selectableItemBackground"
+        app:drawableEndCompat="@drawable/mozac_ic_link_24"
         android:padding="16dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:background="?attr/selectableItemBackground"
         android:text="@string/mozac_feature_addons_learn_more"
-        android:textColor="@android:color/black"
-        app:drawableEndCompat="@drawable/mozac_ic_link_24"
-        app:drawableTint="@android:color/black" />
+        app:drawableTint="@color/icons" />
 
 </RelativeLayout>

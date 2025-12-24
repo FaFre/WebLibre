@@ -107,15 +107,15 @@
             android:layout_below="@+id/last_updated_divider"
             android:text="@string/mozac_feature_addons_home_page" />
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/home_page_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/last_updated_divider"
             android:layout_alignParentEnd="true"
             android:contentDescription="@string/mozac_feature_addons_home_page"
-            app:srcCompat="@drawable/mozac_ic_link_24"
-            app:tint="@android:color/black" />
+            android:src="@drawable/mozac_ic_link_24"
+            app:tint="@color/icons" />
 
         <View
             android:id="@+id/home_page_divider"
