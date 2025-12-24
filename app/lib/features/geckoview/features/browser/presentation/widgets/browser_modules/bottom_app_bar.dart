@@ -56,7 +56,6 @@ import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class BrowserTopAppBar extends HookConsumerWidget {
   final bool showMainToolbar;
@@ -400,7 +399,8 @@ class ContextualToolbar extends HookConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        if (tabState?.historyState.canGoBack == true)
+        if (tabState?.historyState.canGoBack == true ||
+            tabState?.isLoading == true)
           NavigateBackButton(
             selectedTabId: selectedTabId,
             isLoading: tabState?.isLoading ?? false,
@@ -829,37 +829,19 @@ class NavigationMenuButton extends HookConsumerWidget {
               return Row(
                 children: [
                   Expanded(
-                    child: (history?.canGoBack == true || isLoading)
-                        ? NavigateBackButton(
-                            selectedTabId: selectedTabId,
-                            isLoading: isLoading,
-                            menuControllerToClose: hamburgerMenuController,
-                          )
-                        : IconButton(
-                            onPressed: () async {
-                              await ref
-                                  .read(tabRepositoryProvider.notifier)
-                                  .closeTab(selectedTabId!);
-
-                              hamburgerMenuController.close();
-
-                              if (context.mounted) {
-                                ui_helper.showTabUndoClose(
-                                  context,
-                                  ref
-                                      .read(tabRepositoryProvider.notifier)
-                                      .undoClose,
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.close),
-                          ),
+                    child: NavigateBackButton(
+                      selectedTabId: selectedTabId,
+                      isLoading: isLoading,
+                      menuControllerToClose: hamburgerMenuController,
+                      canGoBack: history?.canGoBack == true,
+                    ),
                   ),
                   const SizedBox(height: 48, child: VerticalDivider()),
                   Expanded(
                     child: NavigateForwardButton(
                       selectedTabId: selectedTabId,
                       menuControllerToClose: hamburgerMenuController,
+                      canGoForward: history?.canGoForward == true,
                     ),
                   ),
                 ],
@@ -876,22 +858,26 @@ class NavigateForwardButton extends HookConsumerWidget {
     super.key,
     required this.selectedTabId,
     this.menuControllerToClose,
+    this.canGoForward = true,
   });
 
   final String? selectedTabId;
   final MenuController? menuControllerToClose;
+  final bool canGoForward;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
-      onPressed: () async {
-        final controller = ref.read(
-          tabSessionProvider(tabId: selectedTabId).notifier,
-        );
+      onPressed: canGoForward
+          ? () async {
+              final controller = ref.read(
+                tabSessionProvider(tabId: selectedTabId).notifier,
+              );
 
-        await controller.goForward();
-        menuControllerToClose?.close();
-      },
+              await controller.goForward();
+              menuControllerToClose?.close();
+            }
+          : null,
       icon: const Icon(Icons.arrow_forward),
     );
   }
@@ -903,39 +889,43 @@ class NavigateBackButton extends HookConsumerWidget {
     required this.selectedTabId,
     required this.isLoading,
     this.menuControllerToClose,
+    this.canGoBack = true,
   });
 
   final String? selectedTabId;
   final bool isLoading;
   final MenuController? menuControllerToClose;
+  final bool canGoBack;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
-      onPressed: () async {
-        final controller = ref.read(
-          tabSessionProvider(tabId: selectedTabId).notifier,
-        );
+      onPressed: (canGoBack || isLoading)
+          ? () async {
+              final controller = ref.read(
+                tabSessionProvider(tabId: selectedTabId).notifier,
+              );
 
-        final isReaderActive = ref.read(
-          selectedTabStateProvider.select(
-            (state) => state?.readerableState.active ?? false,
-          ),
-        );
+              final isReaderActive = ref.read(
+                selectedTabStateProvider.select(
+                  (state) => state?.readerableState.active ?? false,
+                ),
+              );
 
-        if (isLoading) {
-          await controller.stopLoading();
-        } else if (isReaderActive) {
-          await ref
-              .read(readerableScreenControllerProvider.notifier)
-              .toggleReaderView(false);
-        } else {
-          await controller.goBack();
-        }
+              if (isLoading) {
+                await controller.stopLoading();
+              } else if (isReaderActive) {
+                await ref
+                    .read(readerableScreenControllerProvider.notifier)
+                    .toggleReaderView(false);
+              } else {
+                await controller.goBack();
+              }
 
-        menuControllerToClose?.close();
-      },
-      icon: const Icon(Icons.arrow_back),
+              menuControllerToClose?.close();
+            }
+          : null,
+      icon: isLoading ? const Icon(Icons.close) : const Icon(Icons.arrow_back),
     );
   }
 }
