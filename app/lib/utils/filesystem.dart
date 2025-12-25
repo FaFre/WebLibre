@@ -49,11 +49,13 @@ final profileMozillaDirectoryTransformer =
       handleData: (entity, sink) {
         final mozillaDir = Directory(p.join(entity.path, 'mozilla'));
 
-        for (final entity in mozillaDir.listSync()) {
-          if (entity is Directory) {
-            final profile = p.basename(entity.path);
-            if (profile.endsWith('.default')) {
-              sink.add(entity);
+        if (mozillaDir.existsSync()) {
+          for (final entity in mozillaDir.listSync()) {
+            if (entity is Directory) {
+              final profile = p.basename(entity.path);
+              if (profile.endsWith('.default')) {
+                sink.add(entity);
+              }
             }
           }
         }
