@@ -19,7 +19,9 @@
  */
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -319,6 +321,43 @@ class TabMenu extends HookConsumerWidget {
           ],
           leadingIcon: const Icon(Icons.share),
           child: const Text('Share'),
+        ),
+        SubmenuButton(
+          menuChildren: [
+            ShareMarkdownActionMenuItemButton(
+              selectedTabId: selectedTabId,
+              title: const Text('Copy as Markdown'),
+              // ignore: deprecated_member_use
+              icon: const Icon(MdiIcons.languageMarkdownOutline),
+              shareMarkdownAction: (content, fileName) async {
+                await Clipboard.setData(ClipboardData(text: content));
+
+                if (context.mounted) {
+                  ui_helper.showInfoMessage(
+                    context,
+                    'Markdown copied to clipboard',
+                  );
+                }
+              },
+            ),
+            ShareMarkdownActionMenuItemButton(
+              selectedTabId: selectedTabId,
+              title: const Text('Export as Markdown'),
+              // ignore: deprecated_member_use
+              icon: const Icon(MdiIcons.languageMarkdown),
+              shareMarkdownAction: (content, fileName) async {
+                await FilePicker.platform.saveFile(
+                  fileName: fileName,
+                  type: FileType.custom,
+                  allowedExtensions: ['md'],
+                  bytes: utf8.encode(content),
+                );
+              },
+            ),
+            SaveToPdfMenuItemButton(selectedTabId: selectedTabId),
+          ],
+          leadingIcon: const Icon(MdiIcons.fileExport),
+          child: const Text('Export'),
         ),
         MenuItemButton(
           onPressed: () async {

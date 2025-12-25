@@ -21,6 +21,7 @@ import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.FlowPreview
@@ -191,6 +192,7 @@ class Core(
                 SessionPrioritizationMiddleware(),
                 RecordingDevicesMiddleware(context, components.notificationsDelegate),
                 PromptMiddleware(),
+                SaveToPDFMiddleware(),
                 FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
                 LastMediaAccessMiddleware(),
             ) + EngineMiddleware.create(

@@ -68,6 +68,10 @@ class TabSession extends _$TabSession {
     return _sessionService.requestDesktopSite(enable: enable);
   }
 
+  Future<void> saveToPdf() {
+    return _sessionService.saveToPdf();
+  }
+
   @override
   void build({required String? tabId}) {
     _sessionService = (tabId != null)

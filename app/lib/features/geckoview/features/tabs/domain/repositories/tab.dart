@@ -102,6 +102,14 @@ class TabDataRepository extends _$TabDataRepository {
     return filtered.length;
   }
 
+  Future<TabData?> getTabDataById(String tabId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getTabDataById(tabId)
+        .getSingleOrNull();
+  }
+
   Future<List<TabData>> getContainerTabsData(String? containerId) {
     return ref
         .read(tabDatabaseProvider)
