@@ -248,6 +248,7 @@ class _TabListView extends HookConsumerWidget {
               : ReorderableListView.builder(
                   scrollController: controller,
                   itemCount: itemCount,
+                  itemExtent: _itemHeight,
                   onReorderStart: (index) {
                     ref.read(willAcceptDropProvider.notifier).clear();
                   },
