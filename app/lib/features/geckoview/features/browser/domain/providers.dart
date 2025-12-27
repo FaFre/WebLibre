@@ -83,7 +83,7 @@ class SelectedBangData extends _$SelectedBangData {
 }
 
 @Riverpod()
-EquatableValue<List<String>> availableTabIds(
+EquatableValue<List<DefaultTabEntity>> availableTabIds(
   Ref ref,
   ContainerFilter containerFilter,
 ) {
@@ -94,10 +94,37 @@ EquatableValue<List<String>> availableTabIds(
   );
   final tabList = ref.watch(tabListProvider);
 
-  return EquatableValue(
-    containerTabs?.where((tabId) => tabList.value.contains(tabId)).toList() ??
-        [],
-  );
+  final availableTabs =
+      containerTabs?.where((tabId) => tabList.value.contains(tabId)).toList() ??
+      [];
+
+  switch (containerFilter) {
+    case ContainerFilterById():
+      return EquatableValue(
+        availableTabs
+            .map(
+              (t) => DefaultTabEntity(
+                tabId: t,
+                containerId: containerFilter.containerId,
+              ),
+            )
+            .toList(),
+      );
+    case ContainerFilterDisabled():
+      return ref.watch(
+        watchTabsContainerIdProvider(EquatableValue(availableTabs)).select(
+          (value) => EquatableValue(
+            value.value?.entries
+                    .map(
+                      (e) =>
+                          DefaultTabEntity(tabId: e.key, containerId: e.value),
+                    )
+                    .toList() ??
+                [],
+          ),
+        ),
+      );
+  }
 }
 
 @Riverpod()
@@ -109,8 +136,9 @@ EquatableValue<Map<String, TabState>> availableTabStates(
   final tabStates = ref.watch(tabStatesProvider);
 
   return EquatableValue({
-    for (final tabId in availableTabs.value)
-      if (tabStates.containsKey(tabId)) tabId: tabStates[tabId]!,
+    for (final tabEntity in availableTabs.value)
+      if (tabStates.containsKey(tabEntity.tabId))
+        tabEntity.tabId: tabStates[tabEntity.tabId]!,
   });
 }
 
@@ -171,7 +199,12 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
                   .whereNot(
                     (tabId) => excludedTabIds.value?.contains(tabId) ?? false,
                   )
-                  .map((tabId) => DefaultTabEntity(tabId: tabId))
+                  .map(
+                    (tabId) => DefaultTabEntity(
+                      tabId: tabId,
+                      containerId: containerId,
+                    ),
+                  )
                   .toList(),
             ) ??
             const [],
@@ -198,6 +231,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
                   .map(
                     (tab) => SearchResultTabEntity(
                       tabId: tab.id,
+                      containerId: tab.containerId,
                       searchQuery: result.query,
                     ),
                   )
@@ -208,13 +242,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       )
       .value;
 
-  final availableTabs = ref.watch(
-    availableTabIdsProvider(containerFilter).select(
-      (value) => EquatableValue(
-        value.value.map((tab) => DefaultTabEntity(tabId: tab)).toList(),
-      ),
-    ),
-  );
+  final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
 
   if (tabSearchResults == null) {
     if (groupTrees) {

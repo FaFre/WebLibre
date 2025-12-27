@@ -671,6 +671,88 @@ final class WatchContainerTabIdFamily extends $Family
   String toString() => r'watchContainerTabIdProvider';
 }
 
+@ProviderFor(watchTabsContainerId)
+const watchTabsContainerIdProvider = WatchTabsContainerIdFamily._();
+
+final class WatchTabsContainerIdProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, String?>>,
+          Map<String, String?>,
+          Stream<Map<String, String?>>
+        >
+    with
+        $FutureModifier<Map<String, String?>>,
+        $StreamProvider<Map<String, String?>> {
+  const WatchTabsContainerIdProvider._({
+    required WatchTabsContainerIdFamily super.from,
+    required EquatableValue<List<String>> super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchTabsContainerIdProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchTabsContainerIdHash();
+
+  @override
+  String toString() {
+    return r'watchTabsContainerIdProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, String?>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, String?>> create(Ref ref) {
+    final argument = this.argument as EquatableValue<List<String>>;
+    return watchTabsContainerId(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchTabsContainerIdProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchTabsContainerIdHash() =>
+    r'ffdebb10f7118cdff93695c821ef5fbb0d434de1';
+
+final class WatchTabsContainerIdFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          Stream<Map<String, String?>>,
+          EquatableValue<List<String>>
+        > {
+  const WatchTabsContainerIdFamily._()
+    : super(
+        retry: null,
+        name: r'watchTabsContainerIdProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WatchTabsContainerIdProvider call(EquatableValue<List<String>> tabIds) =>
+      WatchTabsContainerIdProvider._(argument: tabIds, from: this);
+
+  @override
+  String toString() => r'watchTabsContainerIdProvider';
+}
+
 @ProviderFor(watchAllAssignedSites)
 const watchAllAssignedSitesProvider = WatchAllAssignedSitesProvider._();
 

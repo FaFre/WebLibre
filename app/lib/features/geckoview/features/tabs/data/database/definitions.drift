@@ -140,6 +140,7 @@ queryTabsBasic WITH TabQueryResult:
   )
   SELECT 
     t.id,
+    t.container_id,
     t.title,
     CAST(t.url AS TEXT) AS url,
     t.url AS clean_url,
@@ -166,6 +167,7 @@ queryTabsFullContent WITH TabQueryResult:
   )
   SELECT 
       t.id,
+      t.container_id,
       highlight(tab_fts, 0, :beforeMatch, :afterMatch) AS title,
       highlight(tab_fts, 1, :beforeMatch, :afterMatch) AS url,
       snippet(tab_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS extracted_content,

@@ -26,23 +26,29 @@ sealed class TabEntity with FastEquatable {
 class DefaultTabEntity extends TabEntity {
   @override
   final String tabId;
+  final String? containerId;
 
-  DefaultTabEntity({required this.tabId});
+  DefaultTabEntity({required this.tabId, required this.containerId});
 
   @override
-  List<Object?> get hashParameters => [tabId];
+  List<Object?> get hashParameters => [tabId, containerId];
 }
 
 class SearchResultTabEntity extends TabEntity {
   @override
   final String tabId;
+  final String? containerId;
 
   final String searchQuery;
 
-  SearchResultTabEntity({required this.tabId, required this.searchQuery});
+  SearchResultTabEntity({
+    required this.tabId,
+    required this.searchQuery,
+    required this.containerId,
+  });
 
   @override
-  List<Object?> get hashParameters => [tabId, searchQuery];
+  List<Object?> get hashParameters => [tabId, searchQuery, containerId];
 }
 
 class TabTreeEntity extends TabEntity {

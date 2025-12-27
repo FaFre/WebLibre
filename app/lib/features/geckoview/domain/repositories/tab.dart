@@ -188,7 +188,7 @@ class TabRepository extends _$TabRepository {
   Future<bool> selectTab(String tabId) async {
     final containerId = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .getContainerTabId(tabId);
+        .getTabContainerId(tabId);
 
     if (!ref.mounted) return false;
 
@@ -234,7 +234,7 @@ class TabRepository extends _$TabRepository {
 
     final currentContainerId = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .getContainerTabId(tabId);
+        .getTabContainerId(tabId);
 
     if (!ref.mounted) return;
 
@@ -419,7 +419,7 @@ class TabRepository extends _$TabRepository {
             } else {
               final tabContainerId = await ref
                   .read(tabDataRepositoryProvider.notifier)
-                  .getContainerTabId(tabState.id);
+                  .getTabContainerId(tabState.id);
 
               if (targetContainerId != tabContainerId) {
                 if (originUri == null) {

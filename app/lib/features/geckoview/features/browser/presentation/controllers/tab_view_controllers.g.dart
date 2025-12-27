@@ -42,7 +42,7 @@ final class TabSuggestionsControllerProvider
 }
 
 String _$tabSuggestionsControllerHash() =>
-    r'5ce7f385b8aba14d432912cf0acb06aad04433fc';
+    r'c60912e474177f2a0f15167743db439d157cd852';
 
 abstract class _$TabSuggestionsController extends $Notifier<bool> {
   bool build();
@@ -96,7 +96,7 @@ final class TabsViewModeControllerProvider
 }
 
 String _$tabsViewModeControllerHash() =>
-    r'9c574458f6d5a4c6a8b5aabf96ad7f5dcd043dd0';
+    r'e013b174218fcad81981f7d939cf161c3b002adc';
 
 abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
   TabsViewMode build();

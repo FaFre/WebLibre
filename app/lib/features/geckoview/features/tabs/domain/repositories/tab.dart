@@ -34,7 +34,7 @@ class TabDataRepository extends _$TabDataRepository {
     ContainerData targetContainer, {
     bool closeOldTab = true,
   }) async {
-    final currentContainerId = await getContainerTabId(tabId);
+    final currentContainerId = await getTabContainerId(tabId);
 
     final currentContainerData = await currentContainerId.mapNotNull(
       (containerId) => ref
@@ -118,12 +118,21 @@ class TabDataRepository extends _$TabDataRepository {
         .get();
   }
 
-  Future<String?> getContainerTabId(String tabId) {
+  Future<String?> getTabContainerId(String tabId) {
     return ref
         .read(tabDatabaseProvider)
         .tabDao
         .getTabContainerId(tabId)
         .getSingleOrNull();
+  }
+
+  Future<Map<String, String?>> getTabsContainerId(Iterable<String> tabIds) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getTabsContainerId(tabIds)
+        .get()
+        .then(Map.fromEntries);
   }
 
   Future<Map<String, String?>> getTabDescendants(String tabId) async {

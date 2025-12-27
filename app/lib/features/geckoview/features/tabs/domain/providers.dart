@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -127,6 +128,19 @@ Stream<String?> watchContainerTabId(Ref ref, String tabId) {
       .tabDao
       .getTabContainerId(tabId)
       .watchSingleOrNull();
+}
+
+@Riverpod()
+Stream<Map<String, String?>> watchTabsContainerId(
+  Ref ref,
+  EquatableValue<List<String>> tabIds,
+) {
+  return ref
+      .read(tabDatabaseProvider)
+      .tabDao
+      .getTabsContainerId(tabIds.value)
+      .watch()
+      .map(Map.fromEntries);
 }
 
 @Riverpod()

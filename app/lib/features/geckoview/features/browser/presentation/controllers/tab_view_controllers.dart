@@ -17,9 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 part 'tab_view_controllers.g.dart';
 
@@ -37,11 +42,19 @@ class TabSuggestionsController extends _$TabSuggestionsController {
 
   @override
   bool build() {
-    return false;
+    persist(
+      ref.watch(riverpodDatabaseStorageProvider),
+      key: 'TabSuggestions',
+      encode: (state) => jsonEncode([state]),
+      decode: (encoded) => (jsonDecode(encoded) as List<dynamic>).first as bool,
+    );
+
+    return stateOrNull ?? false;
   }
 }
 
 enum TabsViewMode {
+  list(MdiIcons.folderTable, 'List'),
   grid(MdiIcons.table, 'Grid'),
   tree(MdiIcons.familyTree, 'Tree');
 
@@ -61,7 +74,17 @@ class TabsViewModeController extends _$TabsViewModeController {
 
   @override
   TabsViewMode build() {
-    return TabsViewMode.grid;
+    persist(
+      ref.watch(riverpodDatabaseStorageProvider),
+      key: 'TabsViewMode',
+      encode: (state) => jsonEncode([state.name]),
+      decode: (encoded) {
+        final name = (jsonDecode(encoded) as List<dynamic>).first as String;
+        return TabsViewMode.values.firstWhere((e) => e.name == name);
+      },
+    );
+
+    return stateOrNull ?? TabsViewMode.list;
   }
 }
 

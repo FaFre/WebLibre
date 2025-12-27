@@ -255,7 +255,7 @@ Future<bool> isTabTunneled(Ref ref, String? tabId) async {
         case TorRegularTabProxyMode.container:
           final containerId = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .getContainerTabId(tabState.id);
+              .getTabContainerId(tabState.id);
 
           final containerData = await containerId.mapNotNull(
             (containerId) => ref

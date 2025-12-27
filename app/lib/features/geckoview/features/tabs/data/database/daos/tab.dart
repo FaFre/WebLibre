@@ -65,6 +65,18 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return query.map((row) => row.read(db.tab.containerId));
   }
 
+  Selectable<MapEntry<String, String?>> getTabsContainerId(
+    Iterable<String> tabIds,
+  ) {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id, db.tab.containerId])
+      ..where(db.tab.id.isIn(tabIds));
+
+    return query.map(
+      (row) => MapEntry(row.read(db.tab.id)!, row.read(db.tab.containerId)),
+    );
+  }
+
   Future<String> _generateOrderKey({
     required Value<String?> parentId,
     required Value<String?> containerId,

@@ -46,7 +46,9 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/view_tabs.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
@@ -780,7 +782,18 @@ class _ViewTabsSheet extends HookConsumerWidget {
             topRight: Radius.circular(28),
           ),
           child: switch (tabsViewMode) {
-            TabsViewMode.grid => ViewTabsWidget(
+            TabsViewMode.list => ViewTabListWidget(
+              scrollController: scrollController,
+              showNewTabFab: true,
+              tabsReorderable: tabsReorderable,
+              draggableScrollableController: draggableScrollableController,
+              onClose: () {
+                ref
+                    .read(bottomSheetControllerProvider.notifier)
+                    .requestDismiss();
+              },
+            ),
+            TabsViewMode.grid => ViewTabGridWidget(
               scrollController: scrollController,
               showNewTabFab: true,
               tabsReorderable: tabsReorderable,

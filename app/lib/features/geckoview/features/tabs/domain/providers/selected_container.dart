@@ -125,7 +125,7 @@ class SelectedContainer extends _$SelectedContainer {
         if (next != null) {
           final tabContainerId = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .getContainerTabId(next);
+              .getTabContainerId(next);
 
           if (ref.mounted && tabContainerId != stateOrNull) {
             if (tabContainerId != null) {
