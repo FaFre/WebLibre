@@ -81,11 +81,11 @@ class Bang extends Table with TableInfo<Bang, BangData> {
         requiredDuringInsert: false,
         $customConstraints: '',
       );
-  late final GeneratedColumn<bool> searxngApi = GeneratedColumn<bool>(
+  late final GeneratedColumn<int> searxngApi = GeneratedColumn<int>(
     'searxng_api',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     $customConstraints: 'NOT NULL DEFAULT FALSE',
     defaultValue: const CustomExpression('FALSE'),
@@ -151,7 +151,7 @@ class Bang extends Table with TableInfo<Bang, BangData> {
         data['${effectivePrefix}additional_triggers'],
       ),
       searxngApi: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
+        DriftSqlType.int,
         data['${effectivePrefix}searxng_api'],
       )!,
     );
@@ -180,7 +180,7 @@ class BangData extends DataClass implements Insertable<BangData> {
   final String? subCategory;
   final String? format;
   final String? additionalTriggers;
-  final bool searxngApi;
+  final int searxngApi;
   const BangData({
     required this.trigger,
     required this.group,
@@ -213,7 +213,7 @@ class BangData extends DataClass implements Insertable<BangData> {
     if (!nullToAbsent || additionalTriggers != null) {
       map['additional_triggers'] = Variable<String>(additionalTriggers);
     }
-    map['searxng_api'] = Variable<bool>(searxngApi);
+    map['searxng_api'] = Variable<int>(searxngApi);
     return map;
   }
 
@@ -234,7 +234,7 @@ class BangData extends DataClass implements Insertable<BangData> {
       additionalTriggers: serializer.fromJson<String?>(
         json['additionalTriggers'],
       ),
-      searxngApi: serializer.fromJson<bool>(json['searxngApi']),
+      searxngApi: serializer.fromJson<int>(json['searxngApi']),
     );
   }
   @override
@@ -250,7 +250,7 @@ class BangData extends DataClass implements Insertable<BangData> {
       'subCategory': serializer.toJson<String?>(subCategory),
       'format': serializer.toJson<String?>(format),
       'additionalTriggers': serializer.toJson<String?>(additionalTriggers),
-      'searxngApi': serializer.toJson<bool>(searxngApi),
+      'searxngApi': serializer.toJson<int>(searxngApi),
     };
   }
 
@@ -264,7 +264,7 @@ class BangData extends DataClass implements Insertable<BangData> {
     Value<String?> subCategory = const Value.absent(),
     Value<String?> format = const Value.absent(),
     Value<String?> additionalTriggers = const Value.absent(),
-    bool? searxngApi,
+    int? searxngApi,
   }) => BangData(
     trigger: trigger ?? this.trigger,
     group: group ?? this.group,
@@ -360,7 +360,7 @@ class BangCompanion extends UpdateCompanion<BangData> {
   final Value<String?> subCategory;
   final Value<String?> format;
   final Value<String?> additionalTriggers;
-  final Value<bool> searxngApi;
+  final Value<int> searxngApi;
   final Value<int> rowid;
   const BangCompanion({
     this.trigger = const Value.absent(),
@@ -402,7 +402,7 @@ class BangCompanion extends UpdateCompanion<BangData> {
     Expression<String>? subCategory,
     Expression<String>? format,
     Expression<String>? additionalTriggers,
-    Expression<bool>? searxngApi,
+    Expression<int>? searxngApi,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -430,7 +430,7 @@ class BangCompanion extends UpdateCompanion<BangData> {
     Value<String?>? subCategory,
     Value<String?>? format,
     Value<String?>? additionalTriggers,
-    Value<bool>? searxngApi,
+    Value<int>? searxngApi,
     Value<int>? rowid,
   }) {
     return BangCompanion(
@@ -479,7 +479,7 @@ class BangCompanion extends UpdateCompanion<BangData> {
       map['additional_triggers'] = Variable<String>(additionalTriggers.value);
     }
     if (searxngApi.present) {
-      map['searxng_api'] = Variable<bool>(searxngApi.value);
+      map['searxng_api'] = Variable<int>(searxngApi.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -749,11 +749,11 @@ class BangSync extends Table with TableInfo<BangSync, BangSyncData> {
     requiredDuringInsert: false,
     $customConstraints: 'PRIMARY KEY NOT NULL',
   );
-  late final GeneratedColumn<DateTime> lastSync = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<int> lastSync = GeneratedColumn<int>(
     'last_sync',
     aliasedName,
     false,
-    type: DriftSqlType.dateTime,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
@@ -775,7 +775,7 @@ class BangSync extends Table with TableInfo<BangSync, BangSyncData> {
         data['${effectivePrefix}group'],
       )!,
       lastSync: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
+        DriftSqlType.int,
         data['${effectivePrefix}last_sync'],
       )!,
     );
@@ -792,13 +792,13 @@ class BangSync extends Table with TableInfo<BangSync, BangSyncData> {
 
 class BangSyncData extends DataClass implements Insertable<BangSyncData> {
   final int group;
-  final DateTime lastSync;
+  final int lastSync;
   const BangSyncData({required this.group, required this.lastSync});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['group'] = Variable<int>(group);
-    map['last_sync'] = Variable<DateTime>(lastSync);
+    map['last_sync'] = Variable<int>(lastSync);
     return map;
   }
 
@@ -809,7 +809,7 @@ class BangSyncData extends DataClass implements Insertable<BangSyncData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BangSyncData(
       group: serializer.fromJson<int>(json['group']),
-      lastSync: serializer.fromJson<DateTime>(json['lastSync']),
+      lastSync: serializer.fromJson<int>(json['lastSync']),
     );
   }
   @override
@@ -817,11 +817,11 @@ class BangSyncData extends DataClass implements Insertable<BangSyncData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'group': serializer.toJson<int>(group),
-      'lastSync': serializer.toJson<DateTime>(lastSync),
+      'lastSync': serializer.toJson<int>(lastSync),
     };
   }
 
-  BangSyncData copyWith({int? group, DateTime? lastSync}) => BangSyncData(
+  BangSyncData copyWith({int? group, int? lastSync}) => BangSyncData(
     group: group ?? this.group,
     lastSync: lastSync ?? this.lastSync,
   );
@@ -853,18 +853,18 @@ class BangSyncData extends DataClass implements Insertable<BangSyncData> {
 
 class BangSyncCompanion extends UpdateCompanion<BangSyncData> {
   final Value<int> group;
-  final Value<DateTime> lastSync;
+  final Value<int> lastSync;
   const BangSyncCompanion({
     this.group = const Value.absent(),
     this.lastSync = const Value.absent(),
   });
   BangSyncCompanion.insert({
     this.group = const Value.absent(),
-    required DateTime lastSync,
+    required int lastSync,
   }) : lastSync = Value(lastSync);
   static Insertable<BangSyncData> custom({
     Expression<int>? group,
-    Expression<DateTime>? lastSync,
+    Expression<int>? lastSync,
   }) {
     return RawValuesInsertable({
       if (group != null) 'group': group,
@@ -872,7 +872,7 @@ class BangSyncCompanion extends UpdateCompanion<BangSyncData> {
     });
   }
 
-  BangSyncCompanion copyWith({Value<int>? group, Value<DateTime>? lastSync}) {
+  BangSyncCompanion copyWith({Value<int>? group, Value<int>? lastSync}) {
     return BangSyncCompanion(
       group: group ?? this.group,
       lastSync: lastSync ?? this.lastSync,
@@ -886,7 +886,7 @@ class BangSyncCompanion extends UpdateCompanion<BangSyncData> {
       map['group'] = Variable<int>(group.value);
     }
     if (lastSync.present) {
-      map['last_sync'] = Variable<DateTime>(lastSync.value);
+      map['last_sync'] = Variable<int>(lastSync.value);
     }
     return map;
   }
@@ -931,11 +931,11 @@ class BangFrequency extends Table
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  late final GeneratedColumn<DateTime> lastUsed = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<int> lastUsed = GeneratedColumn<int>(
     'last_used',
     aliasedName,
     false,
-    type: DriftSqlType.dateTime,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
@@ -965,7 +965,7 @@ class BangFrequency extends Table
         data['${effectivePrefix}frequency'],
       )!,
       lastUsed: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
+        DriftSqlType.int,
         data['${effectivePrefix}last_used'],
       )!,
     );
@@ -990,7 +990,7 @@ class BangFrequencyData extends DataClass
   final String trigger;
   final int group;
   final int frequency;
-  final DateTime lastUsed;
+  final int lastUsed;
   const BangFrequencyData({
     required this.trigger,
     required this.group,
@@ -1003,7 +1003,7 @@ class BangFrequencyData extends DataClass
     map['trigger'] = Variable<String>(trigger);
     map['group'] = Variable<int>(group);
     map['frequency'] = Variable<int>(frequency);
-    map['last_used'] = Variable<DateTime>(lastUsed);
+    map['last_used'] = Variable<int>(lastUsed);
     return map;
   }
 
@@ -1016,7 +1016,7 @@ class BangFrequencyData extends DataClass
       trigger: serializer.fromJson<String>(json['trigger']),
       group: serializer.fromJson<int>(json['group']),
       frequency: serializer.fromJson<int>(json['frequency']),
-      lastUsed: serializer.fromJson<DateTime>(json['lastUsed']),
+      lastUsed: serializer.fromJson<int>(json['lastUsed']),
     );
   }
   @override
@@ -1026,7 +1026,7 @@ class BangFrequencyData extends DataClass
       'trigger': serializer.toJson<String>(trigger),
       'group': serializer.toJson<int>(group),
       'frequency': serializer.toJson<int>(frequency),
-      'lastUsed': serializer.toJson<DateTime>(lastUsed),
+      'lastUsed': serializer.toJson<int>(lastUsed),
     };
   }
 
@@ -1034,7 +1034,7 @@ class BangFrequencyData extends DataClass
     String? trigger,
     int? group,
     int? frequency,
-    DateTime? lastUsed,
+    int? lastUsed,
   }) => BangFrequencyData(
     trigger: trigger ?? this.trigger,
     group: group ?? this.group,
@@ -1077,7 +1077,7 @@ class BangFrequencyCompanion extends UpdateCompanion<BangFrequencyData> {
   final Value<String> trigger;
   final Value<int> group;
   final Value<int> frequency;
-  final Value<DateTime> lastUsed;
+  final Value<int> lastUsed;
   final Value<int> rowid;
   const BangFrequencyCompanion({
     this.trigger = const Value.absent(),
@@ -1090,7 +1090,7 @@ class BangFrequencyCompanion extends UpdateCompanion<BangFrequencyData> {
     required String trigger,
     required int group,
     required int frequency,
-    required DateTime lastUsed,
+    required int lastUsed,
     this.rowid = const Value.absent(),
   }) : trigger = Value(trigger),
        group = Value(group),
@@ -1100,7 +1100,7 @@ class BangFrequencyCompanion extends UpdateCompanion<BangFrequencyData> {
     Expression<String>? trigger,
     Expression<int>? group,
     Expression<int>? frequency,
-    Expression<DateTime>? lastUsed,
+    Expression<int>? lastUsed,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1116,7 +1116,7 @@ class BangFrequencyCompanion extends UpdateCompanion<BangFrequencyData> {
     Value<String>? trigger,
     Value<int>? group,
     Value<int>? frequency,
-    Value<DateTime>? lastUsed,
+    Value<int>? lastUsed,
     Value<int>? rowid,
   }) {
     return BangFrequencyCompanion(
@@ -1141,7 +1141,7 @@ class BangFrequencyCompanion extends UpdateCompanion<BangFrequencyData> {
       map['frequency'] = Variable<int>(frequency.value);
     }
     if (lastUsed.present) {
-      map['last_used'] = Variable<DateTime>(lastUsed.value);
+      map['last_used'] = Variable<int>(lastUsed.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1191,11 +1191,11 @@ class BangHistory extends Table with TableInfo<BangHistory, BangHistoryData> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  late final GeneratedColumn<DateTime> searchDate = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<int> searchDate = GeneratedColumn<int>(
     'search_date',
     aliasedName,
     false,
-    type: DriftSqlType.dateTime,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
@@ -1230,7 +1230,7 @@ class BangHistory extends Table with TableInfo<BangHistory, BangHistoryData> {
         data['${effectivePrefix}group'],
       )!,
       searchDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
+        DriftSqlType.int,
         data['${effectivePrefix}search_date'],
       )!,
     );
@@ -1253,7 +1253,7 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
   final String searchQuery;
   final String trigger;
   final int group;
-  final DateTime searchDate;
+  final int searchDate;
   const BangHistoryData({
     required this.searchQuery,
     required this.trigger,
@@ -1266,7 +1266,7 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
     map['search_query'] = Variable<String>(searchQuery);
     map['trigger'] = Variable<String>(trigger);
     map['group'] = Variable<int>(group);
-    map['search_date'] = Variable<DateTime>(searchDate);
+    map['search_date'] = Variable<int>(searchDate);
     return map;
   }
 
@@ -1279,7 +1279,7 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
       searchQuery: serializer.fromJson<String>(json['searchQuery']),
       trigger: serializer.fromJson<String>(json['trigger']),
       group: serializer.fromJson<int>(json['group']),
-      searchDate: serializer.fromJson<DateTime>(json['searchDate']),
+      searchDate: serializer.fromJson<int>(json['searchDate']),
     );
   }
   @override
@@ -1289,7 +1289,7 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
       'searchQuery': serializer.toJson<String>(searchQuery),
       'trigger': serializer.toJson<String>(trigger),
       'group': serializer.toJson<int>(group),
-      'searchDate': serializer.toJson<DateTime>(searchDate),
+      'searchDate': serializer.toJson<int>(searchDate),
     };
   }
 
@@ -1297,7 +1297,7 @@ class BangHistoryData extends DataClass implements Insertable<BangHistoryData> {
     String? searchQuery,
     String? trigger,
     int? group,
-    DateTime? searchDate,
+    int? searchDate,
   }) => BangHistoryData(
     searchQuery: searchQuery ?? this.searchQuery,
     trigger: trigger ?? this.trigger,
@@ -1344,7 +1344,7 @@ class BangHistoryCompanion extends UpdateCompanion<BangHistoryData> {
   final Value<String> searchQuery;
   final Value<String> trigger;
   final Value<int> group;
-  final Value<DateTime> searchDate;
+  final Value<int> searchDate;
   final Value<int> rowid;
   const BangHistoryCompanion({
     this.searchQuery = const Value.absent(),
@@ -1357,7 +1357,7 @@ class BangHistoryCompanion extends UpdateCompanion<BangHistoryData> {
     required String searchQuery,
     required String trigger,
     required int group,
-    required DateTime searchDate,
+    required int searchDate,
     this.rowid = const Value.absent(),
   }) : searchQuery = Value(searchQuery),
        trigger = Value(trigger),
@@ -1367,7 +1367,7 @@ class BangHistoryCompanion extends UpdateCompanion<BangHistoryData> {
     Expression<String>? searchQuery,
     Expression<String>? trigger,
     Expression<int>? group,
-    Expression<DateTime>? searchDate,
+    Expression<int>? searchDate,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1383,7 +1383,7 @@ class BangHistoryCompanion extends UpdateCompanion<BangHistoryData> {
     Value<String>? searchQuery,
     Value<String>? trigger,
     Value<int>? group,
-    Value<DateTime>? searchDate,
+    Value<int>? searchDate,
     Value<int>? rowid,
   }) {
     return BangHistoryCompanion(
@@ -1408,7 +1408,7 @@ class BangHistoryCompanion extends UpdateCompanion<BangHistoryData> {
       map['group'] = Variable<int>(group.value);
     }
     if (searchDate.present) {
-      map['search_date'] = Variable<DateTime>(searchDate.value);
+      map['search_date'] = Variable<int>(searchDate.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1440,17 +1440,17 @@ class BangFts extends Table
   late final GeneratedColumn<String> trigger = GeneratedColumn<String>(
     'trigger',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     $customConstraints: '',
   );
   late final GeneratedColumn<String> websiteName = GeneratedColumn<String>(
     'website_name',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     $customConstraints: '',
   );
   @override
@@ -1469,11 +1469,11 @@ class BangFts extends Table
       trigger: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}trigger'],
-      )!,
+      ),
       websiteName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}website_name'],
-      )!,
+      ),
     );
   }
 
@@ -1483,19 +1483,25 @@ class BangFts extends Table
   }
 
   @override
+  bool get dontWriteConstraints => true;
+  @override
   String get moduleAndArgs =>
       'fts5(trigger, website_name, content=bang, prefix=\'2 3\')';
 }
 
 class BangFtsData extends DataClass implements Insertable<BangFtsData> {
-  final String trigger;
-  final String websiteName;
-  const BangFtsData({required this.trigger, required this.websiteName});
+  final String? trigger;
+  final String? websiteName;
+  const BangFtsData({this.trigger, this.websiteName});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['trigger'] = Variable<String>(trigger);
-    map['website_name'] = Variable<String>(websiteName);
+    if (!nullToAbsent || trigger != null) {
+      map['trigger'] = Variable<String>(trigger);
+    }
+    if (!nullToAbsent || websiteName != null) {
+      map['website_name'] = Variable<String>(websiteName);
+    }
     return map;
   }
 
@@ -1505,22 +1511,25 @@ class BangFtsData extends DataClass implements Insertable<BangFtsData> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BangFtsData(
-      trigger: serializer.fromJson<String>(json['trigger']),
-      websiteName: serializer.fromJson<String>(json['websiteName']),
+      trigger: serializer.fromJson<String?>(json['trigger']),
+      websiteName: serializer.fromJson<String?>(json['websiteName']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'trigger': serializer.toJson<String>(trigger),
-      'websiteName': serializer.toJson<String>(websiteName),
+      'trigger': serializer.toJson<String?>(trigger),
+      'websiteName': serializer.toJson<String?>(websiteName),
     };
   }
 
-  BangFtsData copyWith({String? trigger, String? websiteName}) => BangFtsData(
-    trigger: trigger ?? this.trigger,
-    websiteName: websiteName ?? this.websiteName,
+  BangFtsData copyWith({
+    Value<String?> trigger = const Value.absent(),
+    Value<String?> websiteName = const Value.absent(),
+  }) => BangFtsData(
+    trigger: trigger.present ? trigger.value : this.trigger,
+    websiteName: websiteName.present ? websiteName.value : this.websiteName,
   );
   BangFtsData copyWithCompanion(BangFtsCompanion data) {
     return BangFtsData(
@@ -1551,8 +1560,8 @@ class BangFtsData extends DataClass implements Insertable<BangFtsData> {
 }
 
 class BangFtsCompanion extends UpdateCompanion<BangFtsData> {
-  final Value<String> trigger;
-  final Value<String> websiteName;
+  final Value<String?> trigger;
+  final Value<String?> websiteName;
   final Value<int> rowid;
   const BangFtsCompanion({
     this.trigger = const Value.absent(),
@@ -1560,11 +1569,10 @@ class BangFtsCompanion extends UpdateCompanion<BangFtsData> {
     this.rowid = const Value.absent(),
   });
   BangFtsCompanion.insert({
-    required String trigger,
-    required String websiteName,
+    this.trigger = const Value.absent(),
+    this.websiteName = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : trigger = Value(trigger),
-       websiteName = Value(websiteName);
+  });
   static Insertable<BangFtsData> custom({
     Expression<String>? trigger,
     Expression<String>? websiteName,
@@ -1578,8 +1586,8 @@ class BangFtsCompanion extends UpdateCompanion<BangFtsData> {
   }
 
   BangFtsCompanion copyWith({
-    Value<String>? trigger,
-    Value<String>? websiteName,
+    Value<String?>? trigger,
+    Value<String?>? websiteName,
     Value<int>? rowid,
   }) {
     return BangFtsCompanion(
@@ -1627,9 +1635,9 @@ class BangTriggersFts extends Table
       GeneratedColumn<String>(
         'additional_trigger',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.string,
-        requiredDuringInsert: true,
+        requiredDuringInsert: false,
         $customConstraints: '',
       );
   @override
@@ -1648,7 +1656,7 @@ class BangTriggersFts extends Table
       additionalTrigger: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}additional_trigger'],
-      )!,
+      ),
     );
   }
 
@@ -1658,18 +1666,22 @@ class BangTriggersFts extends Table
   }
 
   @override
+  bool get dontWriteConstraints => true;
+  @override
   String get moduleAndArgs =>
       'fts5(additional_trigger, content=bang_triggers, prefix=\'2 3\')';
 }
 
 class BangTriggersFtsData extends DataClass
     implements Insertable<BangTriggersFtsData> {
-  final String additionalTrigger;
-  const BangTriggersFtsData({required this.additionalTrigger});
+  final String? additionalTrigger;
+  const BangTriggersFtsData({this.additionalTrigger});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['additional_trigger'] = Variable<String>(additionalTrigger);
+    if (!nullToAbsent || additionalTrigger != null) {
+      map['additional_trigger'] = Variable<String>(additionalTrigger);
+    }
     return map;
   }
 
@@ -1679,21 +1691,26 @@ class BangTriggersFtsData extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BangTriggersFtsData(
-      additionalTrigger: serializer.fromJson<String>(json['additionalTrigger']),
+      additionalTrigger: serializer.fromJson<String?>(
+        json['additionalTrigger'],
+      ),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'additionalTrigger': serializer.toJson<String>(additionalTrigger),
+      'additionalTrigger': serializer.toJson<String?>(additionalTrigger),
     };
   }
 
-  BangTriggersFtsData copyWith({String? additionalTrigger}) =>
-      BangTriggersFtsData(
-        additionalTrigger: additionalTrigger ?? this.additionalTrigger,
-      );
+  BangTriggersFtsData copyWith({
+    Value<String?> additionalTrigger = const Value.absent(),
+  }) => BangTriggersFtsData(
+    additionalTrigger: additionalTrigger.present
+        ? additionalTrigger.value
+        : this.additionalTrigger,
+  );
   BangTriggersFtsData copyWithCompanion(BangTriggersFtsCompanion data) {
     return BangTriggersFtsData(
       additionalTrigger: data.additionalTrigger.present
@@ -1720,16 +1737,16 @@ class BangTriggersFtsData extends DataClass
 }
 
 class BangTriggersFtsCompanion extends UpdateCompanion<BangTriggersFtsData> {
-  final Value<String> additionalTrigger;
+  final Value<String?> additionalTrigger;
   final Value<int> rowid;
   const BangTriggersFtsCompanion({
     this.additionalTrigger = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   BangTriggersFtsCompanion.insert({
-    required String additionalTrigger,
+    this.additionalTrigger = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : additionalTrigger = Value(additionalTrigger);
+  });
   static Insertable<BangTriggersFtsData> custom({
     Expression<String>? additionalTrigger,
     Expression<int>? rowid,
@@ -1741,7 +1758,7 @@ class BangTriggersFtsCompanion extends UpdateCompanion<BangTriggersFtsData> {
   }
 
   BangTriggersFtsCompanion copyWith({
-    Value<String>? additionalTrigger,
+    Value<String?>? additionalTrigger,
     Value<int>? rowid,
   }) {
     return BangTriggersFtsCompanion(
@@ -1782,9 +1799,9 @@ class BangDataViewData extends DataClass {
   final String? subCategory;
   final String? format;
   final String? additionalTriggers;
-  final bool searxngApi;
+  final int searxngApi;
   final int? frequency;
-  final DateTime? lastUsed;
+  final int? lastUsed;
   const BangDataViewData({
     required this.trigger,
     required this.group,
@@ -1816,9 +1833,9 @@ class BangDataViewData extends DataClass {
       additionalTriggers: serializer.fromJson<String?>(
         json['additionalTriggers'],
       ),
-      searxngApi: serializer.fromJson<bool>(json['searxngApi']),
+      searxngApi: serializer.fromJson<int>(json['searxngApi']),
       frequency: serializer.fromJson<int?>(json['frequency']),
-      lastUsed: serializer.fromJson<DateTime?>(json['lastUsed']),
+      lastUsed: serializer.fromJson<int?>(json['lastUsed']),
     );
   }
   @override
@@ -1834,9 +1851,9 @@ class BangDataViewData extends DataClass {
       'subCategory': serializer.toJson<String?>(subCategory),
       'format': serializer.toJson<String?>(format),
       'additionalTriggers': serializer.toJson<String?>(additionalTriggers),
-      'searxngApi': serializer.toJson<bool>(searxngApi),
+      'searxngApi': serializer.toJson<int>(searxngApi),
       'frequency': serializer.toJson<int?>(frequency),
-      'lastUsed': serializer.toJson<DateTime?>(lastUsed),
+      'lastUsed': serializer.toJson<int?>(lastUsed),
     };
   }
 
@@ -1850,9 +1867,9 @@ class BangDataViewData extends DataClass {
     Value<String?> subCategory = const Value.absent(),
     Value<String?> format = const Value.absent(),
     Value<String?> additionalTriggers = const Value.absent(),
-    bool? searxngApi,
+    int? searxngApi,
     Value<int?> frequency = const Value.absent(),
-    Value<DateTime?> lastUsed = const Value.absent(),
+    Value<int?> lastUsed = const Value.absent(),
   }) => BangDataViewData(
     trigger: trigger ?? this.trigger,
     group: group ?? this.group,
@@ -1949,7 +1966,7 @@ class BangDataView extends ViewInfo<BangDataView, BangDataViewData>
   @override
   Map<SqlDialect, String> get createViewStatements => {
     SqlDialect.sqlite:
-        'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group";',
+        'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"',
   };
   @override
   BangDataView get asDslTable => this;
@@ -1994,7 +2011,7 @@ class BangDataView extends ViewInfo<BangDataView, BangDataViewData>
         data['${effectivePrefix}additional_triggers'],
       ),
       searxngApi: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
+        DriftSqlType.int,
         data['${effectivePrefix}searxng_api'],
       )!,
       frequency: attachedDatabase.typeMapping.read(
@@ -2002,7 +2019,7 @@ class BangDataView extends ViewInfo<BangDataView, BangDataViewData>
         data['${effectivePrefix}frequency'],
       ),
       lastUsed: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
+        DriftSqlType.int,
         data['${effectivePrefix}last_used'],
       ),
     );
@@ -2063,14 +2080,11 @@ class BangDataView extends ViewInfo<BangDataView, BangDataViewData>
         true,
         type: DriftSqlType.string,
       );
-  late final GeneratedColumn<bool> searxngApi = GeneratedColumn<bool>(
+  late final GeneratedColumn<int> searxngApi = GeneratedColumn<int>(
     'searxng_api',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("searxng_api" IN (0, 1))',
-    ),
+    type: DriftSqlType.int,
   );
   late final GeneratedColumn<int> frequency = GeneratedColumn<int>(
     'frequency',
@@ -2078,11 +2092,11 @@ class BangDataView extends ViewInfo<BangDataView, BangDataViewData>
     true,
     type: DriftSqlType.int,
   );
-  late final GeneratedColumn<DateTime> lastUsed = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<int> lastUsed = GeneratedColumn<int>(
     'last_used',
     aliasedName,
     true,
-    type: DriftSqlType.dateTime,
+    type: DriftSqlType.int,
   );
   @override
   BangDataView createAlias(String alias) {
@@ -2092,7 +2106,7 @@ class BangDataView extends ViewInfo<BangDataView, BangDataViewData>
   @override
   Query? get query => null;
   @override
-  Set<String> get readTables => const {};
+  Set<String> get readTables => const {'bang', 'bang_frequency'};
 }
 
 class DatabaseAtV4 extends GeneratedDatabase {
@@ -2171,56 +2185,80 @@ class DatabaseAtV4 extends GeneratedDatabase {
         'bang',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [],
+      result: [TableUpdate('bang_triggers', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('bang_triggers', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [
+        TableUpdate('bang_triggers', kind: UpdateKind.delete),
+        TableUpdate('bang_triggers', kind: UpdateKind.insert),
+      ],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'bang',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [],
+      result: [TableUpdate('bang_frequency', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'bang',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [],
+      result: [TableUpdate('bang_history', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('bang_fts', kind: UpdateKind.insert)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'bang',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [],
+      result: [TableUpdate('bang_fts', kind: UpdateKind.insert)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'bang',
-        limitUpdateKind: UpdateKind.delete,
+        limitUpdateKind: UpdateKind.update,
       ),
-      result: [],
+      result: [TableUpdate('bang_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'bang_triggers',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('bang_triggers_fts', kind: UpdateKind.insert)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'bang_triggers',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [],
+      result: [TableUpdate('bang_triggers_fts', kind: UpdateKind.insert)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'bang_triggers',
-        limitUpdateKind: UpdateKind.delete,
+        limitUpdateKind: UpdateKind.update,
       ),
-      result: [],
-    ),
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'bang_triggers',
-        limitUpdateKind: UpdateKind.delete,
-      ),
-      result: [],
+      result: [TableUpdate('bang_triggers_fts', kind: UpdateKind.insert)],
     ),
   ]);
   @override

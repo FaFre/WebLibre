@@ -1,23 +1,3 @@
-/*
- * Copyright (c) 2024-2025 Fabian Freund.
- *
- * This file is part of WebLibre
- * (see https://weblibre.eu).
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 // dart format width=80
 import 'package:drift/internal/versioned_schema.dart' as i0;
 import 'package:drift/drift.dart' as i1;
@@ -121,8 +101,8 @@ class Shape1 extends i0.VersionedTable {
       columnsByName['origin']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<i2.Uint8List> get iconData =>
       columnsByName['icon_data']! as i1.GeneratedColumn<i2.Uint8List>;
-  i1.GeneratedColumn<DateTime> get fetchDate =>
-      columnsByName['fetch_date']! as i1.GeneratedColumn<DateTime>;
+  i1.GeneratedColumn<int> get fetchDate =>
+      columnsByName['fetch_date']! as i1.GeneratedColumn<int>;
 }
 
 i1.GeneratedColumn<String> _column_3(String aliasedName) =>
@@ -141,12 +121,12 @@ i1.GeneratedColumn<i2.Uint8List> _column_4(String aliasedName) =>
       type: i1.DriftSqlType.blob,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<DateTime> _column_5(String aliasedName) =>
-    i1.GeneratedColumn<DateTime>(
+i1.GeneratedColumn<int> _column_5(String aliasedName) =>
+    i1.GeneratedColumn<int>(
       'fetch_date',
       aliasedName,
       false,
-      type: i1.DriftSqlType.dateTime,
+      type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
 
@@ -154,8 +134,8 @@ class Shape2 extends i0.VersionedTable {
   Shape2({required super.source, required super.alias}) : super.aliased();
   i1.GeneratedColumn<int> get revision =>
       columnsByName['revision']! as i1.GeneratedColumn<int>;
-  i1.GeneratedColumn<DateTime> get completionDate =>
-      columnsByName['completion_date']! as i1.GeneratedColumn<DateTime>;
+  i1.GeneratedColumn<int> get completionDate =>
+      columnsByName['completion_date']! as i1.GeneratedColumn<int>;
 }
 
 i1.GeneratedColumn<int> _column_6(String aliasedName) =>
@@ -166,12 +146,12 @@ i1.GeneratedColumn<int> _column_6(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<DateTime> _column_7(String aliasedName) =>
-    i1.GeneratedColumn<DateTime>(
+i1.GeneratedColumn<int> _column_7(String aliasedName) =>
+    i1.GeneratedColumn<int>(
       'completion_date',
       aliasedName,
       false,
-      type: i1.DriftSqlType.dateTime,
+      type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
 
@@ -181,8 +161,8 @@ class Shape3 extends i0.VersionedTable {
       columnsByName['key']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get json =>
       columnsByName['json']! as i1.GeneratedColumn<String>;
-  i1.GeneratedColumn<DateTime> get expireAt =>
-      columnsByName['expireAt']! as i1.GeneratedColumn<DateTime>;
+  i1.GeneratedColumn<int> get expireAt =>
+      columnsByName['expireAt']! as i1.GeneratedColumn<int>;
   i1.GeneratedColumn<String> get destroyKey =>
       columnsByName['destroyKey']! as i1.GeneratedColumn<String>;
 }
@@ -195,12 +175,12 @@ i1.GeneratedColumn<String> _column_8(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: 'NOT NULL',
     );
-i1.GeneratedColumn<DateTime> _column_9(String aliasedName) =>
-    i1.GeneratedColumn<DateTime>(
+i1.GeneratedColumn<int> _column_9(String aliasedName) =>
+    i1.GeneratedColumn<int>(
       'expireAt',
       aliasedName,
       true,
-      type: i1.DriftSqlType.dateTime,
+      type: i1.DriftSqlType.int,
       $customConstraints: '',
     );
 i1.GeneratedColumn<String> _column_10(String aliasedName) =>

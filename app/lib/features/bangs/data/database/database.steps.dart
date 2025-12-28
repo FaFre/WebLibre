@@ -1,23 +1,3 @@
-/*
- * Copyright (c) 2024-2025 Fabian Freund.
- *
- * This file is part of WebLibre
- * (see https://weblibre.eu).
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 // dart format width=80
 import 'package:drift/internal/versioned_schema.dart' as i0;
 import 'package:drift/drift.dart' as i1;
@@ -750,7 +730,7 @@ final class Schema4 extends i0.VersionedSchema {
     bangTriggersAfterDeleteFts,
     bangTriggersAfterUpdateFts,
   ];
-  late final Shape6 bang = Shape6(
+  late final Shape10 bang = Shape10(
     source: i0.VersionedTable(
       entityName: 'bang',
       withoutRowId: false,
@@ -766,7 +746,7 @@ final class Schema4 extends i0.VersionedSchema {
         _column_6,
         _column_7,
         _column_26,
-        _column_27,
+        _column_32,
       ],
       attachedDatabase: database,
     ),
@@ -798,18 +778,18 @@ final class Schema4 extends i0.VersionedSchema {
     'CREATE TRIGGER bang_triggers_after_update AFTER UPDATE ON bang BEGIN DELETE FROM bang_triggers WHERE "trigger" = old."trigger" AND "group" = old."group";INSERT INTO bang_triggers ("trigger", "group", additional_trigger) SELECT new."trigger", new."group", json_each.value FROM json_each(new.additional_triggers)WHERE new.additional_triggers IS NOT NULL;END',
     'bang_triggers_after_update',
   );
-  late final Shape1 bangSync = Shape1(
+  late final Shape11 bangSync = Shape11(
     source: i0.VersionedTable(
       entityName: 'bang_sync',
       withoutRowId: false,
       isStrict: false,
       tableConstraints: [],
-      columns: [_column_8, _column_9],
+      columns: [_column_8, _column_33],
       attachedDatabase: database,
     ),
     alias: null,
   );
-  late final Shape2 bangFrequency = Shape2(
+  late final Shape12 bangFrequency = Shape12(
     source: i0.VersionedTable(
       entityName: 'bang_frequency',
       withoutRowId: false,
@@ -818,12 +798,12 @@ final class Schema4 extends i0.VersionedSchema {
         'PRIMARY KEY("trigger", "group")',
         'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
       ],
-      columns: [_column_0, _column_1, _column_10, _column_11],
+      columns: [_column_0, _column_1, _column_10, _column_34],
       attachedDatabase: database,
     ),
     alias: null,
   );
-  late final Shape3 bangHistory = Shape3(
+  late final Shape13 bangHistory = Shape13(
     source: i0.VersionedTable(
       entityName: 'bang_history',
       withoutRowId: false,
@@ -831,7 +811,7 @@ final class Schema4 extends i0.VersionedSchema {
       tableConstraints: [
         'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
       ],
-      columns: [_column_12, _column_0, _column_1, _column_13],
+      columns: [_column_12, _column_0, _column_1, _column_35],
       attachedDatabase: database,
     ),
     alias: null,
@@ -841,7 +821,7 @@ final class Schema4 extends i0.VersionedSchema {
       entityName: 'bang_fts',
       moduleAndArgs:
           'fts5(trigger, website_name, content=bang, prefix=\'2 3\')',
-      columns: [_column_14, _column_15],
+      columns: [_column_36, _column_37],
       attachedDatabase: database,
     ),
     alias: null,
@@ -851,12 +831,12 @@ final class Schema4 extends i0.VersionedSchema {
       entityName: 'bang_triggers_fts',
       moduleAndArgs:
           'fts5(additional_trigger, content=bang_triggers, prefix=\'2 3\')',
-      columns: [_column_29],
+      columns: [_column_38],
       attachedDatabase: database,
     ),
     alias: null,
   );
-  late final Shape9 bangDataView = Shape9(
+  late final Shape14 bangDataView = Shape14(
     source: i0.VersionedView(
       entityName: 'bang_data_view',
       createViewStmt:
@@ -871,9 +851,9 @@ final class Schema4 extends i0.VersionedSchema {
         _column_22,
         _column_23,
         _column_30,
-        _column_31,
+        _column_39,
         _column_24,
-        _column_25,
+        _column_40,
       ],
       attachedDatabase: database,
     ),
@@ -905,6 +885,165 @@ final class Schema4 extends i0.VersionedSchema {
   );
 }
 
+class Shape10 extends i0.VersionedTable {
+  Shape10({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get trigger =>
+      columnsByName['trigger']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get group =>
+      columnsByName['group']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get websiteName =>
+      columnsByName['website_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get domain =>
+      columnsByName['domain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlTemplate =>
+      columnsByName['url_template']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get category =>
+      columnsByName['category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get subCategory =>
+      columnsByName['sub_category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get format =>
+      columnsByName['format']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get additionalTriggers =>
+      columnsByName['additional_triggers']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get searxngApi =>
+      columnsByName['searxng_api']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_32(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'searxng_api',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL DEFAULT FALSE',
+      defaultValue: const i1.CustomExpression('FALSE'),
+    );
+
+class Shape11 extends i0.VersionedTable {
+  Shape11({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get group =>
+      columnsByName['group']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastSync =>
+      columnsByName['last_sync']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_33(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'last_sync',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+
+class Shape12 extends i0.VersionedTable {
+  Shape12({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get trigger =>
+      columnsByName['trigger']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get group =>
+      columnsByName['group']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get frequency =>
+      columnsByName['frequency']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastUsed =>
+      columnsByName['last_used']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_34(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'last_used',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+
+class Shape13 extends i0.VersionedTable {
+  Shape13({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get searchQuery =>
+      columnsByName['search_query']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get trigger =>
+      columnsByName['trigger']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get group =>
+      columnsByName['group']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get searchDate =>
+      columnsByName['search_date']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_35(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'search_date',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_36(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'trigger',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
+i1.GeneratedColumn<String> _column_37(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'website_name',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
+i1.GeneratedColumn<String> _column_38(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'additional_trigger',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
+
+class Shape14 extends i0.VersionedView {
+  Shape14({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get trigger =>
+      columnsByName['trigger']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get group =>
+      columnsByName['group']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get websiteName =>
+      columnsByName['website_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get domain =>
+      columnsByName['domain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlTemplate =>
+      columnsByName['url_template']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get category =>
+      columnsByName['category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get subCategory =>
+      columnsByName['sub_category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get format =>
+      columnsByName['format']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get additionalTriggers =>
+      columnsByName['additional_triggers']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get searxngApi =>
+      columnsByName['searxng_api']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get frequency =>
+      columnsByName['frequency']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastUsed =>
+      columnsByName['last_used']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_39(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'searxng_api',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+    );
+i1.GeneratedColumn<int> _column_40(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'last_used',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,

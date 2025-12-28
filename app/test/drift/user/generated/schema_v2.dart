@@ -248,11 +248,11 @@ class IconCache extends Table with TableInfo<IconCache, IconCacheData> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       );
-  late final GeneratedColumn<DateTime> fetchDate = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<int> fetchDate = GeneratedColumn<int>(
     'fetch_date',
     aliasedName,
     false,
-    type: DriftSqlType.dateTime,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
@@ -278,7 +278,7 @@ class IconCache extends Table with TableInfo<IconCache, IconCacheData> {
         data['${effectivePrefix}icon_data'],
       )!,
       fetchDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
+        DriftSqlType.int,
         data['${effectivePrefix}fetch_date'],
       )!,
     );
@@ -296,7 +296,7 @@ class IconCache extends Table with TableInfo<IconCache, IconCacheData> {
 class IconCacheData extends DataClass implements Insertable<IconCacheData> {
   final String origin;
   final i2.Uint8List iconData;
-  final DateTime fetchDate;
+  final int fetchDate;
   const IconCacheData({
     required this.origin,
     required this.iconData,
@@ -307,7 +307,7 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
     final map = <String, Expression>{};
     map['origin'] = Variable<String>(origin);
     map['icon_data'] = Variable<i2.Uint8List>(iconData);
-    map['fetch_date'] = Variable<DateTime>(fetchDate);
+    map['fetch_date'] = Variable<int>(fetchDate);
     return map;
   }
 
@@ -319,7 +319,7 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
     return IconCacheData(
       origin: serializer.fromJson<String>(json['origin']),
       iconData: serializer.fromJson<i2.Uint8List>(json['iconData']),
-      fetchDate: serializer.fromJson<DateTime>(json['fetchDate']),
+      fetchDate: serializer.fromJson<int>(json['fetchDate']),
     );
   }
   @override
@@ -328,14 +328,14 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
     return <String, dynamic>{
       'origin': serializer.toJson<String>(origin),
       'iconData': serializer.toJson<i2.Uint8List>(iconData),
-      'fetchDate': serializer.toJson<DateTime>(fetchDate),
+      'fetchDate': serializer.toJson<int>(fetchDate),
     };
   }
 
   IconCacheData copyWith({
     String? origin,
     i2.Uint8List? iconData,
-    DateTime? fetchDate,
+    int? fetchDate,
   }) => IconCacheData(
     origin: origin ?? this.origin,
     iconData: iconData ?? this.iconData,
@@ -374,7 +374,7 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
 class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
   final Value<String> origin;
   final Value<i2.Uint8List> iconData;
-  final Value<DateTime> fetchDate;
+  final Value<int> fetchDate;
   final Value<int> rowid;
   const IconCacheCompanion({
     this.origin = const Value.absent(),
@@ -385,7 +385,7 @@ class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
   IconCacheCompanion.insert({
     required String origin,
     required i2.Uint8List iconData,
-    required DateTime fetchDate,
+    required int fetchDate,
     this.rowid = const Value.absent(),
   }) : origin = Value(origin),
        iconData = Value(iconData),
@@ -393,7 +393,7 @@ class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
   static Insertable<IconCacheData> custom({
     Expression<String>? origin,
     Expression<i2.Uint8List>? iconData,
-    Expression<DateTime>? fetchDate,
+    Expression<int>? fetchDate,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -407,7 +407,7 @@ class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
   IconCacheCompanion copyWith({
     Value<String>? origin,
     Value<i2.Uint8List>? iconData,
-    Value<DateTime>? fetchDate,
+    Value<int>? fetchDate,
     Value<int>? rowid,
   }) {
     return IconCacheCompanion(
@@ -428,7 +428,7 @@ class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
       map['icon_data'] = Variable<i2.Uint8List>(iconData.value);
     }
     if (fetchDate.present) {
-      map['fetch_date'] = Variable<DateTime>(fetchDate.value);
+      map['fetch_date'] = Variable<int>(fetchDate.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -461,15 +461,14 @@ class Onboarding extends Table with TableInfo<Onboarding, OnboardingData> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  late final GeneratedColumn<DateTime> completionDate =
-      GeneratedColumn<DateTime>(
-        'completion_date',
-        aliasedName,
-        false,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: true,
-        $customConstraints: 'NOT NULL',
-      );
+  late final GeneratedColumn<int> completionDate = GeneratedColumn<int>(
+    'completion_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [revision, completionDate];
   @override
@@ -488,7 +487,7 @@ class Onboarding extends Table with TableInfo<Onboarding, OnboardingData> {
         data['${effectivePrefix}revision'],
       )!,
       completionDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
+        DriftSqlType.int,
         data['${effectivePrefix}completion_date'],
       )!,
     );
@@ -505,13 +504,13 @@ class Onboarding extends Table with TableInfo<Onboarding, OnboardingData> {
 
 class OnboardingData extends DataClass implements Insertable<OnboardingData> {
   final int revision;
-  final DateTime completionDate;
+  final int completionDate;
   const OnboardingData({required this.revision, required this.completionDate});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['revision'] = Variable<int>(revision);
-    map['completion_date'] = Variable<DateTime>(completionDate);
+    map['completion_date'] = Variable<int>(completionDate);
     return map;
   }
 
@@ -522,7 +521,7 @@ class OnboardingData extends DataClass implements Insertable<OnboardingData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return OnboardingData(
       revision: serializer.fromJson<int>(json['revision']),
-      completionDate: serializer.fromJson<DateTime>(json['completionDate']),
+      completionDate: serializer.fromJson<int>(json['completionDate']),
     );
   }
   @override
@@ -530,11 +529,11 @@ class OnboardingData extends DataClass implements Insertable<OnboardingData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'revision': serializer.toJson<int>(revision),
-      'completionDate': serializer.toJson<DateTime>(completionDate),
+      'completionDate': serializer.toJson<int>(completionDate),
     };
   }
 
-  OnboardingData copyWith({int? revision, DateTime? completionDate}) =>
+  OnboardingData copyWith({int? revision, int? completionDate}) =>
       OnboardingData(
         revision: revision ?? this.revision,
         completionDate: completionDate ?? this.completionDate,
@@ -569,7 +568,7 @@ class OnboardingData extends DataClass implements Insertable<OnboardingData> {
 
 class OnboardingCompanion extends UpdateCompanion<OnboardingData> {
   final Value<int> revision;
-  final Value<DateTime> completionDate;
+  final Value<int> completionDate;
   final Value<int> rowid;
   const OnboardingCompanion({
     this.revision = const Value.absent(),
@@ -578,13 +577,13 @@ class OnboardingCompanion extends UpdateCompanion<OnboardingData> {
   });
   OnboardingCompanion.insert({
     required int revision,
-    required DateTime completionDate,
+    required int completionDate,
     this.rowid = const Value.absent(),
   }) : revision = Value(revision),
        completionDate = Value(completionDate);
   static Insertable<OnboardingData> custom({
     Expression<int>? revision,
-    Expression<DateTime>? completionDate,
+    Expression<int>? completionDate,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -596,7 +595,7 @@ class OnboardingCompanion extends UpdateCompanion<OnboardingData> {
 
   OnboardingCompanion copyWith({
     Value<int>? revision,
-    Value<DateTime>? completionDate,
+    Value<int>? completionDate,
     Value<int>? rowid,
   }) {
     return OnboardingCompanion(
@@ -613,7 +612,7 @@ class OnboardingCompanion extends UpdateCompanion<OnboardingData> {
       map['revision'] = Variable<int>(revision.value);
     }
     if (completionDate.present) {
-      map['completion_date'] = Variable<DateTime>(completionDate.value);
+      map['completion_date'] = Variable<int>(completionDate.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -653,11 +652,11 @@ class Riverpod extends Table with TableInfo<Riverpod, RiverpodData> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  late final GeneratedColumn<DateTime> expireAt = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<int> expireAt = GeneratedColumn<int>(
     'expireAt',
     aliasedName,
     true,
-    type: DriftSqlType.dateTime,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     $customConstraints: '',
   );
@@ -691,7 +690,7 @@ class Riverpod extends Table with TableInfo<Riverpod, RiverpodData> {
         data['${effectivePrefix}json'],
       )!,
       expireAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
+        DriftSqlType.int,
         data['${effectivePrefix}expireAt'],
       ),
       destroyKey: attachedDatabase.typeMapping.read(
@@ -715,7 +714,7 @@ class Riverpod extends Table with TableInfo<Riverpod, RiverpodData> {
 class RiverpodData extends DataClass implements Insertable<RiverpodData> {
   final String key;
   final String json;
-  final DateTime? expireAt;
+  final int? expireAt;
   final String? destroyKey;
   const RiverpodData({
     required this.key,
@@ -729,7 +728,7 @@ class RiverpodData extends DataClass implements Insertable<RiverpodData> {
     map['key'] = Variable<String>(key);
     map['json'] = Variable<String>(json);
     if (!nullToAbsent || expireAt != null) {
-      map['expireAt'] = Variable<DateTime>(expireAt);
+      map['expireAt'] = Variable<int>(expireAt);
     }
     if (!nullToAbsent || destroyKey != null) {
       map['destroyKey'] = Variable<String>(destroyKey);
@@ -745,7 +744,7 @@ class RiverpodData extends DataClass implements Insertable<RiverpodData> {
     return RiverpodData(
       key: serializer.fromJson<String>(json['key']),
       json: serializer.fromJson<String>(json['json']),
-      expireAt: serializer.fromJson<DateTime?>(json['expireAt']),
+      expireAt: serializer.fromJson<int?>(json['expireAt']),
       destroyKey: serializer.fromJson<String?>(json['destroyKey']),
     );
   }
@@ -755,7 +754,7 @@ class RiverpodData extends DataClass implements Insertable<RiverpodData> {
     return <String, dynamic>{
       'key': serializer.toJson<String>(key),
       'json': serializer.toJson<String>(json),
-      'expireAt': serializer.toJson<DateTime?>(expireAt),
+      'expireAt': serializer.toJson<int?>(expireAt),
       'destroyKey': serializer.toJson<String?>(destroyKey),
     };
   }
@@ -763,7 +762,7 @@ class RiverpodData extends DataClass implements Insertable<RiverpodData> {
   RiverpodData copyWith({
     String? key,
     String? json,
-    Value<DateTime?> expireAt = const Value.absent(),
+    Value<int?> expireAt = const Value.absent(),
     Value<String?> destroyKey = const Value.absent(),
   }) => RiverpodData(
     key: key ?? this.key,
@@ -808,7 +807,7 @@ class RiverpodData extends DataClass implements Insertable<RiverpodData> {
 class RiverpodCompanion extends UpdateCompanion<RiverpodData> {
   final Value<String> key;
   final Value<String> json;
-  final Value<DateTime?> expireAt;
+  final Value<int?> expireAt;
   final Value<String?> destroyKey;
   const RiverpodCompanion({
     this.key = const Value.absent(),
@@ -826,7 +825,7 @@ class RiverpodCompanion extends UpdateCompanion<RiverpodData> {
   static Insertable<RiverpodData> custom({
     Expression<String>? key,
     Expression<String>? json,
-    Expression<DateTime>? expireAt,
+    Expression<int>? expireAt,
     Expression<String>? destroyKey,
   }) {
     return RawValuesInsertable({
@@ -840,7 +839,7 @@ class RiverpodCompanion extends UpdateCompanion<RiverpodData> {
   RiverpodCompanion copyWith({
     Value<String>? key,
     Value<String>? json,
-    Value<DateTime?>? expireAt,
+    Value<int?>? expireAt,
     Value<String?>? destroyKey,
   }) {
     return RiverpodCompanion(
@@ -861,7 +860,7 @@ class RiverpodCompanion extends UpdateCompanion<RiverpodData> {
       map['json'] = Variable<String>(json.value);
     }
     if (expireAt.present) {
-      map['expireAt'] = Variable<DateTime>(expireAt.value);
+      map['expireAt'] = Variable<int>(expireAt.value);
     }
     if (destroyKey.present) {
       map['destroyKey'] = Variable<String>(destroyKey.value);
