@@ -94,7 +94,7 @@ class ContainerChips extends HookConsumerWidget {
                   enableDelete: false,
                   itemId: (container) => container.id,
                   itemBackgroundColor: (container) =>
-                      container.color.withValues(alpha: 0.5),
+                      container.color.withValues(alpha: 0.33),
                   itemLabel: (container) =>
                       ContainerTitle(container: container),
                   itemBadgeCount: (container) => container.tabCount,

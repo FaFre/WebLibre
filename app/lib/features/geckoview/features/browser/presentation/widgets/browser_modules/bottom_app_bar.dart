@@ -484,7 +484,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
             );
           },
           itemAvatar: (item) => UrlIcon([item.url], iconSize: 16),
-          itemBackgroundColor: (item) => item.color?.withValues(alpha: 0.5),
+          itemBackgroundColor: (item) => item.color?.withValues(alpha: 0.33),
           onSelected: (item) async {
             final animation = chipScrollController.animateTo(
               0,
