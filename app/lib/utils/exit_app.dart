@@ -22,9 +22,14 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 
 Future<void> exitApp(ProviderContainer container) async {
   logger.i('Preparing exit');
+
+  await container
+      .read(tabDataRepositoryProvider.notifier)
+      .closeAllTabs(includeRegular: false);
 
   await SystemNavigator.pop();
   logger.i('SystemNavigator popped');

@@ -19,6 +19,7 @@ CREATE TABLE tab(
   order_key TEXT NOT NULL,
   url TEXT MAPPED BY `const UriConverterNullable()`,
   title TEXT,
+  is_private BOOL,
   is_probably_readerable BOOL,
   extracted_content_markdown TEXT,
   extracted_content_plain TEXT,
@@ -141,6 +142,7 @@ queryTabsBasic WITH TabQueryResult:
   SELECT 
     t.id,
     t.container_id,
+    t.is_private,
     t.title,
     CAST(t.url AS TEXT) AS url,
     t.url AS clean_url,
@@ -168,6 +170,7 @@ queryTabsFullContent WITH TabQueryResult:
   SELECT 
       t.id,
       t.container_id,
+      t.is_private,
       highlight(tab_fts, 0, :beforeMatch, :afterMatch) AS title,
       highlight(tab_fts, 1, :beforeMatch, :afterMatch) AS url,
       snippet(tab_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS extracted_content,

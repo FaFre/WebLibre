@@ -22,6 +22,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 class TabQueryResult with FastEquatable {
   final String id;
   final String? containerId;
+  final bool? isPrivate;
 
   final String? title;
   final Uri? cleanUrl;
@@ -35,6 +36,7 @@ class TabQueryResult with FastEquatable {
   TabQueryResult({
     required this.id,
     required this.containerId,
+    required this.isPrivate,
     required this.title,
     required this.url,
     required this.cleanUrl,
@@ -47,6 +49,7 @@ class TabQueryResult with FastEquatable {
   List<Object?> get hashParameters => [
     id,
     containerId,
+    isPrivate,
     title,
     cleanUrl,
     url,

@@ -72,7 +72,31 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
-  Selectable<String> getContainerTabIds(String? containerId) {
+  Selectable<String> getAllTabIds({
+    bool includeRegular = true,
+    bool includePrivate = true,
+  }) {
+    final query = selectOnly(db.tab)..addColumns([db.tab.id]);
+
+    if (!includeRegular) {
+      query.where(
+        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(false),
+      );
+    }
+    if (!includePrivate) {
+      query.where(
+        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(true),
+      );
+    }
+
+    return query.map((row) => row.read(db.tab.id)!);
+  }
+
+  Selectable<String> getContainerTabIds(
+    String? containerId, {
+    bool includeRegular = true,
+    bool includePrivate = true,
+  }) {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.id])
       ..where(
@@ -81,6 +105,17 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
             : db.tab.containerId.isNull(),
       )
       ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
+
+    if (!includeRegular) {
+      query.where(
+        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(false),
+      );
+    }
+    if (!includePrivate) {
+      query.where(
+        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(true),
+      );
+    }
 
     return query.map((row) => row.read(db.tab.id)!);
   }

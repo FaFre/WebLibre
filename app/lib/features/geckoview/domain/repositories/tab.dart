@@ -92,6 +92,7 @@ class TabRepository extends _$TabRepository {
       },
       parentId: Value(parentId),
       containerId: Value(assingedContainer.value?.id),
+      isPrivate: Value(private),
     );
 
     if (launchedFromIntent) {
@@ -102,7 +103,7 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<String> duplicateTab({
-    required String? selectTabId,
+    required String selectTabId,
     String? containerId,
     bool selectTab = true,
   }) async {
@@ -124,6 +125,9 @@ class TabRepository extends _$TabRepository {
       },
       parentId: const Value.absent(),
       containerId: Value(containerData?.id),
+      isPrivate: Value(
+        await tabDao.getTabIsPrivate(selectTabId).getSingleOrNull(),
+      ),
     );
   }
 
@@ -378,6 +382,7 @@ class TabRepository extends _$TabRepository {
         tabId,
         parentId: const Value.absent(),
         containerId: Value(containerId),
+        isPrivate: const Value.absent(),
       );
     });
 

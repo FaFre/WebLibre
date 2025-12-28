@@ -326,6 +326,7 @@ typedef $TabCreateCompanionBuilder =
       required String orderKey,
       i0.Value<Uri?> url,
       i0.Value<String?> title,
+      i0.Value<bool?> isPrivate,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -342,6 +343,7 @@ typedef $TabUpdateCompanionBuilder =
       i0.Value<String> orderKey,
       i0.Value<Uri?> url,
       i0.Value<String?> title,
+      i0.Value<bool?> isPrivate,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -415,6 +417,11 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
 
   i0.ColumnFilters<String> get title => $composableBuilder(
     column: $table.title,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<bool> get isPrivate => $composableBuilder(
+    column: $table.isPrivate,
     builder: (column) => i0.ColumnFilters(column),
   );
 
@@ -509,6 +516,11 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<bool> get isPrivate => $composableBuilder(
+    column: $table.isPrivate,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<bool> get isProbablyReaderable => $composableBuilder(
     column: $table.isProbablyReaderable,
     builder: (column) => i0.ColumnOrderings(column),
@@ -589,6 +601,9 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
 
   i0.GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
+
+  i0.GeneratedColumn<bool> get isPrivate =>
+      $composableBuilder(column: $table.isPrivate, builder: (column) => column);
 
   i0.GeneratedColumn<bool> get isProbablyReaderable => $composableBuilder(
     column: $table.isProbablyReaderable,
@@ -680,6 +695,7 @@ class $TabTableManager
                 i0.Value<String> orderKey = const i0.Value.absent(),
                 i0.Value<Uri?> url = const i0.Value.absent(),
                 i0.Value<String?> title = const i0.Value.absent(),
+                i0.Value<bool?> isPrivate = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -696,6 +712,7 @@ class $TabTableManager
                 orderKey: orderKey,
                 url: url,
                 title: title,
+                isPrivate: isPrivate,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -712,6 +729,7 @@ class $TabTableManager
                 required String orderKey,
                 i0.Value<Uri?> url = const i0.Value.absent(),
                 i0.Value<String?> title = const i0.Value.absent(),
+                i0.Value<bool?> isPrivate = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -728,6 +746,7 @@ class $TabTableManager
                 orderKey: orderKey,
                 url: url,
                 title: title,
+                isPrivate: isPrivate,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -1219,6 +1238,14 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
+  late final i0.GeneratedColumn<bool> isPrivate = i0.GeneratedColumn<bool>(
+    'is_private',
+    aliasedName,
+    true,
+    type: i0.DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final i0.GeneratedColumn<bool> isProbablyReaderable =
       i0.GeneratedColumn<bool>(
         'is_probably_readerable',
@@ -1281,6 +1308,7 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     orderKey,
     url,
     title,
+    isPrivate,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -1324,6 +1352,10 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
       title: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
         data['${effectivePrefix}title'],
+      ),
+      isPrivate: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}is_private'],
       ),
       isProbablyReaderable: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.bool,
@@ -1370,6 +1402,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   final String orderKey;
   final Uri? url;
   final String? title;
+  final bool? isPrivate;
   final bool? isProbablyReaderable;
   final String? extractedContentMarkdown;
   final String? extractedContentPlain;
@@ -1383,6 +1416,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     required this.orderKey,
     this.url,
     this.title,
+    this.isPrivate,
     this.isProbablyReaderable,
     this.extractedContentMarkdown,
     this.extractedContentPlain,
@@ -1406,6 +1440,9 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     }
     if (!nullToAbsent || title != null) {
       map['title'] = i0.Variable<String>(title);
+    }
+    if (!nullToAbsent || isPrivate != null) {
+      map['is_private'] = i0.Variable<bool>(isPrivate);
     }
     if (!nullToAbsent || isProbablyReaderable != null) {
       map['is_probably_readerable'] = i0.Variable<bool>(isProbablyReaderable);
@@ -1442,6 +1479,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       orderKey: serializer.fromJson<String>(json['order_key']),
       url: serializer.fromJson<Uri?>(json['url']),
       title: serializer.fromJson<String?>(json['title']),
+      isPrivate: serializer.fromJson<bool?>(json['is_private']),
       isProbablyReaderable: serializer.fromJson<bool?>(
         json['is_probably_readerable'],
       ),
@@ -1470,6 +1508,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       'order_key': serializer.toJson<String>(orderKey),
       'url': serializer.toJson<Uri?>(url),
       'title': serializer.toJson<String?>(title),
+      'is_private': serializer.toJson<bool?>(isPrivate),
       'is_probably_readerable': serializer.toJson<bool?>(isProbablyReaderable),
       'extracted_content_markdown': serializer.toJson<String?>(
         extractedContentMarkdown,
@@ -1490,6 +1529,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     String? orderKey,
     i0.Value<Uri?> url = const i0.Value.absent(),
     i0.Value<String?> title = const i0.Value.absent(),
+    i0.Value<bool?> isPrivate = const i0.Value.absent(),
     i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
     i0.Value<String?> extractedContentMarkdown = const i0.Value.absent(),
     i0.Value<String?> extractedContentPlain = const i0.Value.absent(),
@@ -1503,6 +1543,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     orderKey: orderKey ?? this.orderKey,
     url: url.present ? url.value : this.url,
     title: title.present ? title.value : this.title,
+    isPrivate: isPrivate.present ? isPrivate.value : this.isPrivate,
     isProbablyReaderable: isProbablyReaderable.present
         ? isProbablyReaderable.value
         : this.isProbablyReaderable,
@@ -1530,6 +1571,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
       url: data.url.present ? data.url.value : this.url,
       title: data.title.present ? data.title.value : this.title,
+      isPrivate: data.isPrivate.present ? data.isPrivate.value : this.isPrivate,
       isProbablyReaderable: data.isProbablyReaderable.present
           ? data.isProbablyReaderable.value
           : this.isProbablyReaderable,
@@ -1558,6 +1600,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
+          ..write('isPrivate: $isPrivate, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -1576,6 +1619,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     orderKey,
     url,
     title,
+    isPrivate,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -1593,6 +1637,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           other.orderKey == this.orderKey &&
           other.url == this.url &&
           other.title == this.title &&
+          other.isPrivate == this.isPrivate &&
           other.isProbablyReaderable == this.isProbablyReaderable &&
           other.extractedContentMarkdown == this.extractedContentMarkdown &&
           other.extractedContentPlain == this.extractedContentPlain &&
@@ -1608,6 +1653,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   final i0.Value<String> orderKey;
   final i0.Value<Uri?> url;
   final i0.Value<String?> title;
+  final i0.Value<bool?> isPrivate;
   final i0.Value<bool?> isProbablyReaderable;
   final i0.Value<String?> extractedContentMarkdown;
   final i0.Value<String?> extractedContentPlain;
@@ -1622,6 +1668,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     this.orderKey = const i0.Value.absent(),
     this.url = const i0.Value.absent(),
     this.title = const i0.Value.absent(),
+    this.isPrivate = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -1637,6 +1684,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     required String orderKey,
     this.url = const i0.Value.absent(),
     this.title = const i0.Value.absent(),
+    this.isPrivate = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -1654,6 +1702,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Expression<String>? orderKey,
     i0.Expression<String>? url,
     i0.Expression<String>? title,
+    i0.Expression<bool>? isPrivate,
     i0.Expression<bool>? isProbablyReaderable,
     i0.Expression<String>? extractedContentMarkdown,
     i0.Expression<String>? extractedContentPlain,
@@ -1669,6 +1718,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       if (orderKey != null) 'order_key': orderKey,
       if (url != null) 'url': url,
       if (title != null) 'title': title,
+      if (isPrivate != null) 'is_private': isPrivate,
       if (isProbablyReaderable != null)
         'is_probably_readerable': isProbablyReaderable,
       if (extractedContentMarkdown != null)
@@ -1690,6 +1740,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Value<String>? orderKey,
     i0.Value<Uri?>? url,
     i0.Value<String?>? title,
+    i0.Value<bool?>? isPrivate,
     i0.Value<bool?>? isProbablyReaderable,
     i0.Value<String?>? extractedContentMarkdown,
     i0.Value<String?>? extractedContentPlain,
@@ -1705,6 +1756,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       orderKey: orderKey ?? this.orderKey,
       url: url ?? this.url,
       title: title ?? this.title,
+      isPrivate: isPrivate ?? this.isPrivate,
       isProbablyReaderable: isProbablyReaderable ?? this.isProbablyReaderable,
       extractedContentMarkdown:
           extractedContentMarkdown ?? this.extractedContentMarkdown,
@@ -1737,6 +1789,9 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     }
     if (title.present) {
       map['title'] = i0.Variable<String>(title.value);
+    }
+    if (isPrivate.present) {
+      map['is_private'] = i0.Variable<bool>(isPrivate.value);
     }
     if (isProbablyReaderable.present) {
       map['is_probably_readerable'] = i0.Variable<bool>(
@@ -1779,6 +1834,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
+          ..write('isPrivate: $isPrivate, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -2161,13 +2217,14 @@ class DefinitionsDrift extends i7.ModularAccessor {
 
   i0.Selectable<i8.TabQueryResult> queryTabsBasic({required String query}) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC',
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.is_private, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC',
       variables: [i0.Variable<String>(query)],
       readsFrom: {tab, tabFts},
     ).map(
       (i0.QueryRow row) => i8.TabQueryResult(
         id: row.read<String>('id'),
         containerId: row.readNullable<String>('container_id'),
+        isPrivate: row.readNullable<bool>('is_private'),
         title: row.readNullable<String>('title'),
         url: row.readNullable<String>('url'),
         cleanUrl: i3.Tab.$converterurl.fromSql(
@@ -2186,7 +2243,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
     required String query,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, t.container_id, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content, t.url AS clean_url,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC',
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, t.container_id, t.is_private, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content, t.url AS clean_url,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC',
       variables: [
         i0.Variable<String>(beforeMatch),
         i0.Variable<String>(afterMatch),
@@ -2199,6 +2256,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
       (i0.QueryRow row) => i8.TabQueryResult(
         id: row.read<String>('id'),
         containerId: row.readNullable<String>('container_id'),
+        isPrivate: row.readNullable<bool>('is_private'),
         title: row.readNullable<String>('title'),
         url: row.readNullable<String>('url'),
         cleanUrl: i3.Tab.$converterurl.fromSql(

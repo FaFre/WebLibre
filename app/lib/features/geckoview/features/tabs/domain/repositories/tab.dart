@@ -73,11 +73,39 @@ class TabDataRepository extends _$TabDataRepository {
         .assignOrderKey(tabId, orderKey: orderKey);
   }
 
-  Future<int> closeAllTabsByContainer(String? containerId) async {
+  Future<int> closeAllTabs({
+    bool includeRegular = true,
+    bool includePrivate = true,
+  }) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
         .containerDao
-        .getContainerTabIds(containerId)
+        .getAllTabIds(
+          includeRegular: includeRegular,
+          includePrivate: includePrivate,
+        )
+        .get();
+
+    if (tabIds.isNotEmpty) {
+      await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
+    }
+
+    return tabIds.length;
+  }
+
+  Future<int> closeContainerTabs(
+    String? containerId, {
+    bool includeRegular = true,
+    bool includePrivate = true,
+  }) async {
+    final tabIds = await ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getContainerTabIds(
+          containerId,
+          includeRegular: includeRegular,
+          includePrivate: includePrivate,
+        )
         .get();
 
     if (tabIds.isNotEmpty) {

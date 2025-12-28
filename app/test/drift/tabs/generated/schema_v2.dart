@@ -1,0 +1,1234 @@
+// dart format width=80
+// GENERATED CODE, DO NOT EDIT BY HAND.
+// ignore_for_file: type=lint
+import 'package:drift/drift.dart';
+
+class Container extends Table with TableInfo<Container, ContainerData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Container(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+    'color',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
+    'metadata',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, color, metadata];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'container';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContainerData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color'],
+      )!,
+      metadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata'],
+      ),
+    );
+  }
+
+  @override
+  Container createAlias(String alias) {
+    return Container(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class ContainerData extends DataClass implements Insertable<ContainerData> {
+  final String id;
+  final String? name;
+  final int color;
+  final String? metadata;
+  const ContainerData({
+    required this.id,
+    this.name,
+    required this.color,
+    this.metadata,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    map['color'] = Variable<int>(color);
+    if (!nullToAbsent || metadata != null) {
+      map['metadata'] = Variable<String>(metadata);
+    }
+    return map;
+  }
+
+  factory ContainerData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContainerData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String?>(json['name']),
+      color: serializer.fromJson<int>(json['color']),
+      metadata: serializer.fromJson<String?>(json['metadata']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String?>(name),
+      'color': serializer.toJson<int>(color),
+      'metadata': serializer.toJson<String?>(metadata),
+    };
+  }
+
+  ContainerData copyWith({
+    String? id,
+    Value<String?> name = const Value.absent(),
+    int? color,
+    Value<String?> metadata = const Value.absent(),
+  }) => ContainerData(
+    id: id ?? this.id,
+    name: name.present ? name.value : this.name,
+    color: color ?? this.color,
+    metadata: metadata.present ? metadata.value : this.metadata,
+  );
+  ContainerData copyWithCompanion(ContainerCompanion data) {
+    return ContainerData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+      metadata: data.metadata.present ? data.metadata.value : this.metadata,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContainerData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('metadata: $metadata')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, color, metadata);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContainerData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.color == this.color &&
+          other.metadata == this.metadata);
+}
+
+class ContainerCompanion extends UpdateCompanion<ContainerData> {
+  final Value<String> id;
+  final Value<String?> name;
+  final Value<int> color;
+  final Value<String?> metadata;
+  final Value<int> rowid;
+  const ContainerCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+    this.metadata = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContainerCompanion.insert({
+    required String id,
+    this.name = const Value.absent(),
+    required int color,
+    this.metadata = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       color = Value(color);
+  static Insertable<ContainerData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<int>? color,
+    Expression<String>? metadata,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+      if (metadata != null) 'metadata': metadata,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContainerCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? name,
+    Value<int>? color,
+    Value<String?>? metadata,
+    Value<int>? rowid,
+  }) {
+    return ContainerCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      metadata: metadata ?? this.metadata,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
+    if (metadata.present) {
+      map['metadata'] = Variable<String>(metadata.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContainerCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('metadata: $metadata, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Tab extends Table with TableInfo<Tab, TabData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Tab(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
+    'parent_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'REFERENCES tab(id)ON DELETE SET NULL',
+  );
+  late final GeneratedColumn<String> containerId = GeneratedColumn<String>(
+    'container_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'REFERENCES container(id)ON DELETE CASCADE',
+  );
+  late final GeneratedColumn<String> orderKey = GeneratedColumn<String>(
+    'order_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<int> isProbablyReaderable = GeneratedColumn<int>(
+    'is_probably_readerable',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<String> extractedContentMarkdown =
+      GeneratedColumn<String>(
+        'extracted_content_markdown',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  late final GeneratedColumn<String> extractedContentPlain =
+      GeneratedColumn<String>(
+        'extracted_content_plain',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  late final GeneratedColumn<String> fullContentMarkdown =
+      GeneratedColumn<String>(
+        'full_content_markdown',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  late final GeneratedColumn<String> fullContentPlain = GeneratedColumn<String>(
+    'full_content_plain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    parentId,
+    containerId,
+    orderKey,
+    url,
+    title,
+    isProbablyReaderable,
+    extractedContentMarkdown,
+    extractedContentPlain,
+    fullContentMarkdown,
+    fullContentPlain,
+    timestamp,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tab';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TabData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TabData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      parentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_id'],
+      ),
+      containerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}container_id'],
+      ),
+      orderKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_key'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      isProbablyReaderable: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}is_probably_readerable'],
+      ),
+      extractedContentMarkdown: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}extracted_content_markdown'],
+      ),
+      extractedContentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}extracted_content_plain'],
+      ),
+      fullContentMarkdown: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_content_markdown'],
+      ),
+      fullContentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_content_plain'],
+      ),
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
+    );
+  }
+
+  @override
+  Tab createAlias(String alias) {
+    return Tab(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class TabData extends DataClass implements Insertable<TabData> {
+  final String id;
+  final String? parentId;
+  final String? containerId;
+  final String orderKey;
+  final String? url;
+  final String? title;
+  final int? isProbablyReaderable;
+  final String? extractedContentMarkdown;
+  final String? extractedContentPlain;
+  final String? fullContentMarkdown;
+  final String? fullContentPlain;
+  final int timestamp;
+  const TabData({
+    required this.id,
+    this.parentId,
+    this.containerId,
+    required this.orderKey,
+    this.url,
+    this.title,
+    this.isProbablyReaderable,
+    this.extractedContentMarkdown,
+    this.extractedContentPlain,
+    this.fullContentMarkdown,
+    this.fullContentPlain,
+    required this.timestamp,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
+    if (!nullToAbsent || containerId != null) {
+      map['container_id'] = Variable<String>(containerId);
+    }
+    map['order_key'] = Variable<String>(orderKey);
+    if (!nullToAbsent || url != null) {
+      map['url'] = Variable<String>(url);
+    }
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || isProbablyReaderable != null) {
+      map['is_probably_readerable'] = Variable<int>(isProbablyReaderable);
+    }
+    if (!nullToAbsent || extractedContentMarkdown != null) {
+      map['extracted_content_markdown'] = Variable<String>(
+        extractedContentMarkdown,
+      );
+    }
+    if (!nullToAbsent || extractedContentPlain != null) {
+      map['extracted_content_plain'] = Variable<String>(extractedContentPlain);
+    }
+    if (!nullToAbsent || fullContentMarkdown != null) {
+      map['full_content_markdown'] = Variable<String>(fullContentMarkdown);
+    }
+    if (!nullToAbsent || fullContentPlain != null) {
+      map['full_content_plain'] = Variable<String>(fullContentPlain);
+    }
+    map['timestamp'] = Variable<int>(timestamp);
+    return map;
+  }
+
+  factory TabData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TabData(
+      id: serializer.fromJson<String>(json['id']),
+      parentId: serializer.fromJson<String?>(json['parentId']),
+      containerId: serializer.fromJson<String?>(json['containerId']),
+      orderKey: serializer.fromJson<String>(json['orderKey']),
+      url: serializer.fromJson<String?>(json['url']),
+      title: serializer.fromJson<String?>(json['title']),
+      isProbablyReaderable: serializer.fromJson<int?>(
+        json['isProbablyReaderable'],
+      ),
+      extractedContentMarkdown: serializer.fromJson<String?>(
+        json['extractedContentMarkdown'],
+      ),
+      extractedContentPlain: serializer.fromJson<String?>(
+        json['extractedContentPlain'],
+      ),
+      fullContentMarkdown: serializer.fromJson<String?>(
+        json['fullContentMarkdown'],
+      ),
+      fullContentPlain: serializer.fromJson<String?>(json['fullContentPlain']),
+      timestamp: serializer.fromJson<int>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'parentId': serializer.toJson<String?>(parentId),
+      'containerId': serializer.toJson<String?>(containerId),
+      'orderKey': serializer.toJson<String>(orderKey),
+      'url': serializer.toJson<String?>(url),
+      'title': serializer.toJson<String?>(title),
+      'isProbablyReaderable': serializer.toJson<int?>(isProbablyReaderable),
+      'extractedContentMarkdown': serializer.toJson<String?>(
+        extractedContentMarkdown,
+      ),
+      'extractedContentPlain': serializer.toJson<String?>(
+        extractedContentPlain,
+      ),
+      'fullContentMarkdown': serializer.toJson<String?>(fullContentMarkdown),
+      'fullContentPlain': serializer.toJson<String?>(fullContentPlain),
+      'timestamp': serializer.toJson<int>(timestamp),
+    };
+  }
+
+  TabData copyWith({
+    String? id,
+    Value<String?> parentId = const Value.absent(),
+    Value<String?> containerId = const Value.absent(),
+    String? orderKey,
+    Value<String?> url = const Value.absent(),
+    Value<String?> title = const Value.absent(),
+    Value<int?> isProbablyReaderable = const Value.absent(),
+    Value<String?> extractedContentMarkdown = const Value.absent(),
+    Value<String?> extractedContentPlain = const Value.absent(),
+    Value<String?> fullContentMarkdown = const Value.absent(),
+    Value<String?> fullContentPlain = const Value.absent(),
+    int? timestamp,
+  }) => TabData(
+    id: id ?? this.id,
+    parentId: parentId.present ? parentId.value : this.parentId,
+    containerId: containerId.present ? containerId.value : this.containerId,
+    orderKey: orderKey ?? this.orderKey,
+    url: url.present ? url.value : this.url,
+    title: title.present ? title.value : this.title,
+    isProbablyReaderable: isProbablyReaderable.present
+        ? isProbablyReaderable.value
+        : this.isProbablyReaderable,
+    extractedContentMarkdown: extractedContentMarkdown.present
+        ? extractedContentMarkdown.value
+        : this.extractedContentMarkdown,
+    extractedContentPlain: extractedContentPlain.present
+        ? extractedContentPlain.value
+        : this.extractedContentPlain,
+    fullContentMarkdown: fullContentMarkdown.present
+        ? fullContentMarkdown.value
+        : this.fullContentMarkdown,
+    fullContentPlain: fullContentPlain.present
+        ? fullContentPlain.value
+        : this.fullContentPlain,
+    timestamp: timestamp ?? this.timestamp,
+  );
+  TabData copyWithCompanion(TabCompanion data) {
+    return TabData(
+      id: data.id.present ? data.id.value : this.id,
+      parentId: data.parentId.present ? data.parentId.value : this.parentId,
+      containerId: data.containerId.present
+          ? data.containerId.value
+          : this.containerId,
+      orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
+      url: data.url.present ? data.url.value : this.url,
+      title: data.title.present ? data.title.value : this.title,
+      isProbablyReaderable: data.isProbablyReaderable.present
+          ? data.isProbablyReaderable.value
+          : this.isProbablyReaderable,
+      extractedContentMarkdown: data.extractedContentMarkdown.present
+          ? data.extractedContentMarkdown.value
+          : this.extractedContentMarkdown,
+      extractedContentPlain: data.extractedContentPlain.present
+          ? data.extractedContentPlain.value
+          : this.extractedContentPlain,
+      fullContentMarkdown: data.fullContentMarkdown.present
+          ? data.fullContentMarkdown.value
+          : this.fullContentMarkdown,
+      fullContentPlain: data.fullContentPlain.present
+          ? data.fullContentPlain.value
+          : this.fullContentPlain,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TabData(')
+          ..write('id: $id, ')
+          ..write('parentId: $parentId, ')
+          ..write('containerId: $containerId, ')
+          ..write('orderKey: $orderKey, ')
+          ..write('url: $url, ')
+          ..write('title: $title, ')
+          ..write('isProbablyReaderable: $isProbablyReaderable, ')
+          ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
+          ..write('extractedContentPlain: $extractedContentPlain, ')
+          ..write('fullContentMarkdown: $fullContentMarkdown, ')
+          ..write('fullContentPlain: $fullContentPlain, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    parentId,
+    containerId,
+    orderKey,
+    url,
+    title,
+    isProbablyReaderable,
+    extractedContentMarkdown,
+    extractedContentPlain,
+    fullContentMarkdown,
+    fullContentPlain,
+    timestamp,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TabData &&
+          other.id == this.id &&
+          other.parentId == this.parentId &&
+          other.containerId == this.containerId &&
+          other.orderKey == this.orderKey &&
+          other.url == this.url &&
+          other.title == this.title &&
+          other.isProbablyReaderable == this.isProbablyReaderable &&
+          other.extractedContentMarkdown == this.extractedContentMarkdown &&
+          other.extractedContentPlain == this.extractedContentPlain &&
+          other.fullContentMarkdown == this.fullContentMarkdown &&
+          other.fullContentPlain == this.fullContentPlain &&
+          other.timestamp == this.timestamp);
+}
+
+class TabCompanion extends UpdateCompanion<TabData> {
+  final Value<String> id;
+  final Value<String?> parentId;
+  final Value<String?> containerId;
+  final Value<String> orderKey;
+  final Value<String?> url;
+  final Value<String?> title;
+  final Value<int?> isProbablyReaderable;
+  final Value<String?> extractedContentMarkdown;
+  final Value<String?> extractedContentPlain;
+  final Value<String?> fullContentMarkdown;
+  final Value<String?> fullContentPlain;
+  final Value<int> timestamp;
+  final Value<int> rowid;
+  const TabCompanion({
+    this.id = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.containerId = const Value.absent(),
+    this.orderKey = const Value.absent(),
+    this.url = const Value.absent(),
+    this.title = const Value.absent(),
+    this.isProbablyReaderable = const Value.absent(),
+    this.extractedContentMarkdown = const Value.absent(),
+    this.extractedContentPlain = const Value.absent(),
+    this.fullContentMarkdown = const Value.absent(),
+    this.fullContentPlain = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TabCompanion.insert({
+    required String id,
+    this.parentId = const Value.absent(),
+    this.containerId = const Value.absent(),
+    required String orderKey,
+    this.url = const Value.absent(),
+    this.title = const Value.absent(),
+    this.isProbablyReaderable = const Value.absent(),
+    this.extractedContentMarkdown = const Value.absent(),
+    this.extractedContentPlain = const Value.absent(),
+    this.fullContentMarkdown = const Value.absent(),
+    this.fullContentPlain = const Value.absent(),
+    required int timestamp,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       orderKey = Value(orderKey),
+       timestamp = Value(timestamp);
+  static Insertable<TabData> custom({
+    Expression<String>? id,
+    Expression<String>? parentId,
+    Expression<String>? containerId,
+    Expression<String>? orderKey,
+    Expression<String>? url,
+    Expression<String>? title,
+    Expression<int>? isProbablyReaderable,
+    Expression<String>? extractedContentMarkdown,
+    Expression<String>? extractedContentPlain,
+    Expression<String>? fullContentMarkdown,
+    Expression<String>? fullContentPlain,
+    Expression<int>? timestamp,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (parentId != null) 'parent_id': parentId,
+      if (containerId != null) 'container_id': containerId,
+      if (orderKey != null) 'order_key': orderKey,
+      if (url != null) 'url': url,
+      if (title != null) 'title': title,
+      if (isProbablyReaderable != null)
+        'is_probably_readerable': isProbablyReaderable,
+      if (extractedContentMarkdown != null)
+        'extracted_content_markdown': extractedContentMarkdown,
+      if (extractedContentPlain != null)
+        'extracted_content_plain': extractedContentPlain,
+      if (fullContentMarkdown != null)
+        'full_content_markdown': fullContentMarkdown,
+      if (fullContentPlain != null) 'full_content_plain': fullContentPlain,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TabCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? parentId,
+    Value<String?>? containerId,
+    Value<String>? orderKey,
+    Value<String?>? url,
+    Value<String?>? title,
+    Value<int?>? isProbablyReaderable,
+    Value<String?>? extractedContentMarkdown,
+    Value<String?>? extractedContentPlain,
+    Value<String?>? fullContentMarkdown,
+    Value<String?>? fullContentPlain,
+    Value<int>? timestamp,
+    Value<int>? rowid,
+  }) {
+    return TabCompanion(
+      id: id ?? this.id,
+      parentId: parentId ?? this.parentId,
+      containerId: containerId ?? this.containerId,
+      orderKey: orderKey ?? this.orderKey,
+      url: url ?? this.url,
+      title: title ?? this.title,
+      isProbablyReaderable: isProbablyReaderable ?? this.isProbablyReaderable,
+      extractedContentMarkdown:
+          extractedContentMarkdown ?? this.extractedContentMarkdown,
+      extractedContentPlain:
+          extractedContentPlain ?? this.extractedContentPlain,
+      fullContentMarkdown: fullContentMarkdown ?? this.fullContentMarkdown,
+      fullContentPlain: fullContentPlain ?? this.fullContentPlain,
+      timestamp: timestamp ?? this.timestamp,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (containerId.present) {
+      map['container_id'] = Variable<String>(containerId.value);
+    }
+    if (orderKey.present) {
+      map['order_key'] = Variable<String>(orderKey.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (isProbablyReaderable.present) {
+      map['is_probably_readerable'] = Variable<int>(isProbablyReaderable.value);
+    }
+    if (extractedContentMarkdown.present) {
+      map['extracted_content_markdown'] = Variable<String>(
+        extractedContentMarkdown.value,
+      );
+    }
+    if (extractedContentPlain.present) {
+      map['extracted_content_plain'] = Variable<String>(
+        extractedContentPlain.value,
+      );
+    }
+    if (fullContentMarkdown.present) {
+      map['full_content_markdown'] = Variable<String>(
+        fullContentMarkdown.value,
+      );
+    }
+    if (fullContentPlain.present) {
+      map['full_content_plain'] = Variable<String>(fullContentPlain.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<int>(timestamp.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TabCompanion(')
+          ..write('id: $id, ')
+          ..write('parentId: $parentId, ')
+          ..write('containerId: $containerId, ')
+          ..write('orderKey: $orderKey, ')
+          ..write('url: $url, ')
+          ..write('title: $title, ')
+          ..write('isProbablyReaderable: $isProbablyReaderable, ')
+          ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
+          ..write('extractedContentPlain: $extractedContentPlain, ')
+          ..write('fullContentMarkdown: $fullContentMarkdown, ')
+          ..write('fullContentPlain: $fullContentPlain, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class TabFts extends Table
+    with TableInfo<TabFts, TabFtsData>, VirtualTableInfo<TabFts, TabFtsData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  TabFts(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumn<String> extractedContentPlain =
+      GeneratedColumn<String>(
+        'extracted_content_plain',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  late final GeneratedColumn<String> fullContentPlain = GeneratedColumn<String>(
+    'full_content_plain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    title,
+    url,
+    extractedContentPlain,
+    fullContentPlain,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tab_fts';
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  TabFtsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TabFtsData(
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      ),
+      extractedContentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}extracted_content_plain'],
+      ),
+      fullContentPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_content_plain'],
+      ),
+    );
+  }
+
+  @override
+  TabFts createAlias(String alias) {
+    return TabFts(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+  @override
+  String get moduleAndArgs =>
+      'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")';
+}
+
+class TabFtsData extends DataClass implements Insertable<TabFtsData> {
+  final String? title;
+  final String? url;
+  final String? extractedContentPlain;
+  final String? fullContentPlain;
+  const TabFtsData({
+    this.title,
+    this.url,
+    this.extractedContentPlain,
+    this.fullContentPlain,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || url != null) {
+      map['url'] = Variable<String>(url);
+    }
+    if (!nullToAbsent || extractedContentPlain != null) {
+      map['extracted_content_plain'] = Variable<String>(extractedContentPlain);
+    }
+    if (!nullToAbsent || fullContentPlain != null) {
+      map['full_content_plain'] = Variable<String>(fullContentPlain);
+    }
+    return map;
+  }
+
+  factory TabFtsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TabFtsData(
+      title: serializer.fromJson<String?>(json['title']),
+      url: serializer.fromJson<String?>(json['url']),
+      extractedContentPlain: serializer.fromJson<String?>(
+        json['extractedContentPlain'],
+      ),
+      fullContentPlain: serializer.fromJson<String?>(json['fullContentPlain']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'title': serializer.toJson<String?>(title),
+      'url': serializer.toJson<String?>(url),
+      'extractedContentPlain': serializer.toJson<String?>(
+        extractedContentPlain,
+      ),
+      'fullContentPlain': serializer.toJson<String?>(fullContentPlain),
+    };
+  }
+
+  TabFtsData copyWith({
+    Value<String?> title = const Value.absent(),
+    Value<String?> url = const Value.absent(),
+    Value<String?> extractedContentPlain = const Value.absent(),
+    Value<String?> fullContentPlain = const Value.absent(),
+  }) => TabFtsData(
+    title: title.present ? title.value : this.title,
+    url: url.present ? url.value : this.url,
+    extractedContentPlain: extractedContentPlain.present
+        ? extractedContentPlain.value
+        : this.extractedContentPlain,
+    fullContentPlain: fullContentPlain.present
+        ? fullContentPlain.value
+        : this.fullContentPlain,
+  );
+  TabFtsData copyWithCompanion(TabFtsCompanion data) {
+    return TabFtsData(
+      title: data.title.present ? data.title.value : this.title,
+      url: data.url.present ? data.url.value : this.url,
+      extractedContentPlain: data.extractedContentPlain.present
+          ? data.extractedContentPlain.value
+          : this.extractedContentPlain,
+      fullContentPlain: data.fullContentPlain.present
+          ? data.fullContentPlain.value
+          : this.fullContentPlain,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TabFtsData(')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('extractedContentPlain: $extractedContentPlain, ')
+          ..write('fullContentPlain: $fullContentPlain')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(title, url, extractedContentPlain, fullContentPlain);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TabFtsData &&
+          other.title == this.title &&
+          other.url == this.url &&
+          other.extractedContentPlain == this.extractedContentPlain &&
+          other.fullContentPlain == this.fullContentPlain);
+}
+
+class TabFtsCompanion extends UpdateCompanion<TabFtsData> {
+  final Value<String?> title;
+  final Value<String?> url;
+  final Value<String?> extractedContentPlain;
+  final Value<String?> fullContentPlain;
+  final Value<int> rowid;
+  const TabFtsCompanion({
+    this.title = const Value.absent(),
+    this.url = const Value.absent(),
+    this.extractedContentPlain = const Value.absent(),
+    this.fullContentPlain = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TabFtsCompanion.insert({
+    this.title = const Value.absent(),
+    this.url = const Value.absent(),
+    this.extractedContentPlain = const Value.absent(),
+    this.fullContentPlain = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  static Insertable<TabFtsData> custom({
+    Expression<String>? title,
+    Expression<String>? url,
+    Expression<String>? extractedContentPlain,
+    Expression<String>? fullContentPlain,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (title != null) 'title': title,
+      if (url != null) 'url': url,
+      if (extractedContentPlain != null)
+        'extracted_content_plain': extractedContentPlain,
+      if (fullContentPlain != null) 'full_content_plain': fullContentPlain,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TabFtsCompanion copyWith({
+    Value<String?>? title,
+    Value<String?>? url,
+    Value<String?>? extractedContentPlain,
+    Value<String?>? fullContentPlain,
+    Value<int>? rowid,
+  }) {
+    return TabFtsCompanion(
+      title: title ?? this.title,
+      url: url ?? this.url,
+      extractedContentPlain:
+          extractedContentPlain ?? this.extractedContentPlain,
+      fullContentPlain: fullContentPlain ?? this.fullContentPlain,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (extractedContentPlain.present) {
+      map['extracted_content_plain'] = Variable<String>(
+        extractedContentPlain.value,
+      );
+    }
+    if (fullContentPlain.present) {
+      map['full_content_plain'] = Variable<String>(fullContentPlain.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TabFtsCompanion(')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('extractedContentPlain: $extractedContentPlain, ')
+          ..write('fullContentPlain: $fullContentPlain, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class DatabaseAtV2 extends GeneratedDatabase {
+  DatabaseAtV2(QueryExecutor e) : super(e);
+  late final Container container = Container(this);
+  late final Tab tab = Tab(this);
+  late final TabFts tabFts = TabFts(this);
+  late final Trigger tabMaintainParentChainOnDelete = Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = OLD.parent_id WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  late final Trigger tabAfterInsert = Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  late final Trigger tabAfterDelete = Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  late final Trigger tabAfterUpdate = Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+  @override
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    container,
+    tab,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+  ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'container',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('tab', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('tab', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.insert,
+      ),
+      result: [TableUpdate('tab_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('tab_fts', kind: UpdateKind.insert)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tab',
+        limitUpdateKind: UpdateKind.update,
+      ),
+      result: [TableUpdate('tab_fts', kind: UpdateKind.insert)],
+    ),
+  ]);
+  @override
+  int get schemaVersion => 2;
+}

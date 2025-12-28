@@ -219,8 +219,8 @@ class TabViewHeader extends HookConsumerWidget {
                           },
                         ),
                         MenuItemButton(
-                          leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                          child: const Text('Close All'),
+                          leadingIcon: const Icon(MdiIcons.closeCircle),
+                          child: const Text('Close All Tabs'),
                           onPressed: () async {
                             final result = await showDialog<bool?>(
                               context: context,
@@ -256,7 +256,62 @@ class TabViewHeader extends HookConsumerWidget {
 
                               final count = await ref
                                   .read(tabDataRepositoryProvider.notifier)
-                                  .closeAllTabsByContainer(container);
+                                  .closeContainerTabs(container);
+
+                              if (context.mounted) {
+                                ui_helper.showTabUndoClose(
+                                  context,
+                                  ref
+                                      .read(tabRepositoryProvider.notifier)
+                                      .undoClose,
+                                  count: count,
+                                );
+                              }
+                            }
+                          },
+                        ),
+                        MenuItemButton(
+                          leadingIcon: const Icon(MdiIcons.incognitoCircleOff),
+                          child: const Text('Close Private Tabs'),
+                          onPressed: () async {
+                            final result = await showDialog<bool?>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  icon: const Icon(Icons.warning),
+                                  title: const Text('Close All Private Tabs'),
+                                  content: const Text(
+                                    'Are you sure you want to close all displayed private tabs?',
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, false);
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context, true);
+                                      },
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (result == true) {
+                              final container = ref.read(
+                                selectedContainerProvider,
+                              );
+
+                              final count = await ref
+                                  .read(tabDataRepositoryProvider.notifier)
+                                  .closeContainerTabs(
+                                    container,
+                                    includeRegular: false,
+                                  );
 
                               if (context.mounted) {
                                 ui_helper.showTabUndoClose(

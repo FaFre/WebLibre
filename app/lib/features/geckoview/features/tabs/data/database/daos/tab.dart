@@ -43,6 +43,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   SingleOrNullSelectable<TabData> getTabDataById(String id) =>
       db.tab.select()..where((t) => t.id.equals(id));
 
+  SingleOrNullSelectable<bool?> getTabIsPrivate(String tabId) {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.isPrivate])
+      ..where(db.tab.id.equals(tabId));
+
+    return query.map((row) => row.read(db.tab.isPrivate));
+  }
+
   Selectable<String> getAllTabIds() {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.id])
@@ -97,6 +105,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
   Future<String> upsertContainerTabTransactional(
     Future<String> Function() createTab, {
+    required Value<bool?> isPrivate,
     required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
@@ -113,6 +122,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           parentId: parentId,
           timestamp: DateTime.now(),
           containerId: containerId,
+          isPrivate: isPrivate,
           orderKey: currentOrderKey,
         ),
         onConflict: DoUpdate(
@@ -131,6 +141,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   //Upsert an tab only if there is no container assigned yet
   Future<String> upsertUnassignedTab(
     String tabId, {
+    required Value<bool?> isPrivate,
     required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
@@ -147,6 +158,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           timestamp: DateTime.now(),
           containerId: containerId,
           orderKey: currentOrderKey,
+          isPrivate: isPrivate,
         ),
         mode: InsertMode.insertOrIgnore,
       );
