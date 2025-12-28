@@ -217,6 +217,10 @@ class GridTabPreview extends HookConsumerWidget {
                     ),
                   ),
                 ),
+              )
+            else
+              Expanded(
+                child: Center(child: TabIcon(tabState: tabState, iconSize: 48)),
               ),
           ],
         ),
