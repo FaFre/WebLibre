@@ -289,7 +289,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
 }
 
 @Riverpod()
-EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
+EquatableValue<List<TabPreview>> filteredTabPreviews(
   Ref ref,
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
@@ -307,21 +307,7 @@ EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
   );
 
   if (tabSearchResults == null) {
-    return EquatableValue(
-      availableTabStates.value.values
-          .map(
-            (state) => TabPreview(
-              id: state.id,
-              title: state.title,
-              icon: state.icon,
-              url: state.url,
-              highlightedUrl: null,
-              content: null,
-              sourceSearchQuery: null,
-            ),
-          )
-          .toList(),
-    );
+    return EquatableValue([]);
   }
 
   return EquatableValue(
@@ -330,6 +316,7 @@ EquatableValue<List<TabPreview>> seamlessFilteredTabPreviews(
         .map((tab) {
           return TabPreview(
             id: tab.id,
+            containerId: tab.containerId,
             title: tab.title ?? availableTabStates.value[tab.id]!.title,
             icon: null,
             url: tab.cleanUrl ?? availableTabStates.value[tab.id]!.url,

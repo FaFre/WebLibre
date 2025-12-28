@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class HistorySuggestions extends HookConsumerWidget {
   final bool isPrivate;
@@ -82,6 +83,7 @@ class HistorySuggestions extends HookConsumerWidget {
                 itemCount: historySuggestions.length,
                 itemBuilder: (context, index) {
                   final suggestion = historySuggestions[index];
+                  final uri = suggestion.description.mapNotNull(Uri.tryParse);
 
                   return HookBuilder(
                     key: ValueKey(suggestion.id),
@@ -107,30 +109,27 @@ class HistorySuggestions extends HookConsumerWidget {
                         title: suggestion.title.mapNotNull(
                           (title) => Text(title),
                         ),
-                        subtitle: suggestion.description.mapNotNull(
-                          (description) => Text(
-                            description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                        subtitle:
+                            uri.mapNotNull((uri) => UriBreadcrumb(uri: uri)) ??
+                            suggestion.description.mapNotNull(
+                              (description) => Text(
+                                description,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                         onTap: () async {
-                          if (suggestion.description != null) {
-                            if (Uri.tryParse(suggestion.description!)
-                                case final Uri url) {
-                              await ref
-                                  .read(tabRepositoryProvider.notifier)
-                                  .addTab(url: url, private: isPrivate);
+                          if (uri != null) {
+                            await ref
+                                .read(tabRepositoryProvider.notifier)
+                                .addTab(url: uri, private: isPrivate);
 
-                              if (context.mounted) {
-                                ref
-                                    .read(
-                                      bottomSheetControllerProvider.notifier,
-                                    )
-                                    .requestDismiss();
+                            if (context.mounted) {
+                              ref
+                                  .read(bottomSheetControllerProvider.notifier)
+                                  .requestDismiss();
 
-                                const BrowserRoute().go(context);
-                              }
+                              const BrowserRoute().go(context);
                             }
                           }
                         },

@@ -32,13 +32,13 @@ class FixedSearchTermSuggestions extends HookConsumerWidget {
   final TextEditingController searchTextController;
   final Future<void> Function(String query) submitSearch;
   final BangData? activeBang;
-  final int count;
+  final int limit;
 
   const FixedSearchTermSuggestions({
     required this.searchTextController,
     required this.submitSearch,
     required this.activeBang,
-    this.count = 3,
+    required this.limit,
     super.key,
   });
 
@@ -76,27 +76,28 @@ class FixedSearchTermSuggestions extends HookConsumerWidget {
                   .whereNot(
                     (suggestion) => suggestion == searchTextController.text,
                   )
-                  .take(count),
+                  .take(limit),
           ]
         : <String>[];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: prioritizedSuggestions
-          .map(
-            (suggestion) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.search),
-              title: Text(suggestion),
-              onLongPress: () {
-                searchTextController.text = suggestion;
-              },
-              onTap: () async {
-                await submitSearch(suggestion);
-              },
-            ),
-          )
-          .toList(),
+    return Wrap(
+      spacing: 8.0,
+      children: prioritizedSuggestions.map((query) {
+        return InkWell(
+          onLongPress: () {
+            searchTextController.text = query;
+          },
+          child: InputChip(
+            // avatar: const Icon(Icons.search),
+            label: Text(query),
+            onSelected: (value) async {
+              if (value) {
+                await submitSearch(query);
+              }
+            },
+          ),
+        );
+      }).toList(),
     );
   }
 }

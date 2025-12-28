@@ -61,35 +61,45 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           .addQuery(searchTextController.text);
     });
 
-    final Widget listSliver;
+    final MultiSliver listSliver;
 
     if (!searchTextIsNotEmpty && (searchHistory.value.isNotEmpty)) {
       final entries = searchHistory.value!;
 
-      listSliver = SliverList.builder(
-        itemCount: entries.length,
-        itemBuilder: (context, index) {
-          final query = entries[index].searchQuery;
+      listSliver = MultiSliver(
+        children: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Wrap(
+                spacing: 8.0,
+                children: entries.map((entry) {
+                  final query = entry.searchQuery;
 
-          return ListTile(
-            leading: const Icon(Icons.history),
-            title: Text(query),
-            onLongPress: () {
-              searchTextController.text = query;
-            },
-            onTap: () async {
-              await submitSearch(query);
-            },
-            trailing: IconButton(
-              onPressed: () async {
-                await ref
-                    .read(bangDataRepositoryProvider.notifier)
-                    .removeSearchEntry(query);
-              },
-              icon: const Icon(Icons.close),
+                  return InkWell(
+                    onLongPress: () {
+                      searchTextController.text = query;
+                    },
+                    child: InputChip(
+                      avatar: const Icon(Icons.history),
+                      label: Text(query),
+                      onSelected: (value) async {
+                        if (value) {
+                          await submitSearch(query);
+                        }
+                      },
+                      onDeleted: () async {
+                        await ref
+                            .read(bangDataRepositoryProvider.notifier)
+                            .removeSearchEntry(query);
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
-          );
-        },
+          ),
+        ],
       );
     } else {
       final prioritizedSuggestions = [
@@ -100,22 +110,33 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           ),
       ];
 
-      listSliver = SliverList.builder(
-        itemCount: prioritizedSuggestions.length,
-        itemBuilder: (context, index) {
-          final suggestion = prioritizedSuggestions[index];
-
-          return ListTile(
-            leading: const Icon(Icons.search),
-            title: Text(suggestion),
-            onLongPress: () {
-              searchTextController.text = suggestion;
-            },
-            onTap: () async {
-              await submitSearch(suggestion);
-            },
-          );
-        },
+      listSliver = MultiSliver(
+        children: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Wrap(
+                spacing: 8.0,
+                children: prioritizedSuggestions.map((query) {
+                  return InkWell(
+                    onLongPress: () {
+                      searchTextController.text = query;
+                    },
+                    child: InputChip(
+                      // avatar: const Icon(Icons.search),
+                      label: Text(query),
+                      onSelected: (value) async {
+                        if (value) {
+                          await submitSearch(query);
+                        }
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
@@ -167,17 +188,20 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           ),
         ),
         SliverToBoxAdapter(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 150),
-            child: FadingScroll(
-              fadingSize: 25,
-              builder: (context, controller) {
-                return CustomScrollView(
-                  shrinkWrap: true,
-                  controller: controller,
-                  slivers: [listSliver],
-                );
-              },
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 150),
+              child: FadingScroll(
+                fadingSize: 25,
+                builder: (context, controller) {
+                  return CustomScrollView(
+                    shrinkWrap: true,
+                    controller: controller,
+                    slivers: [listSliver],
+                  );
+                },
+              ),
             ),
           ),
         ),

@@ -22,6 +22,7 @@ import 'package:weblibre/domain/entities/equatable_image.dart';
 
 class TabPreview with FastEquatable {
   final String id;
+  final String? containerId;
 
   final String title;
   final EquatableImage? icon;
@@ -35,6 +36,7 @@ class TabPreview with FastEquatable {
 
   TabPreview({
     required this.id,
+    required this.containerId,
     required this.title,
     required this.icon,
     required this.url,
@@ -46,6 +48,7 @@ class TabPreview with FastEquatable {
   @override
   List<Object?> get hashParameters => [
     id,
+    containerId,
     title,
     icon,
     url,

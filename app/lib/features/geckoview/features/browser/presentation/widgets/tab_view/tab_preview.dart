@@ -266,7 +266,7 @@ class ListTabPreview extends HookConsumerWidget {
       decoration: BoxDecoration(
         color: tabState.isPrivate ? const Color(0xFF25003E) : null,
         border: isActive ? Border.all(color: colorScheme.primary) : null,
-        // borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
       ),
       child: Row(
         children: [

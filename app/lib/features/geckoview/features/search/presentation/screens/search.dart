@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -125,142 +126,152 @@ class SearchScreen extends HookConsumerWidget {
     }
 
     return Scaffold(
-      body: Form(
-        key: formKey,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              pinned: true,
-              automaticallyImplyLeading: false,
-              title: Align(
-                child: Focus(
-                  canRequestFocus: false,
-                  child: SegmentedButton(
-                    showSelectedIcon: false,
-                    segments: [
-                      const ButtonSegment(
-                        value: TabType.regular,
-                        label: Text('Regular'),
-                        icon: Icon(MdiIcons.tab),
-                      ),
-                      const ButtonSegment(
-                        value: TabType.private,
-                        label: Text('Private'),
-                        icon: Icon(MdiIcons.tabUnselected),
-                      ),
-                      if (createChildTabsOption)
-                        const ButtonSegment(
-                          value: TabType.child,
-                          label: Text('Child'),
-                          icon: Icon(MdiIcons.fileTree),
+      body: SafeArea(
+        child: Form(
+          key: formKey,
+          child: FadingScroll(
+            builder: (context, controller) {
+              return CustomScrollView(
+                controller: controller,
+                slivers: [
+                  SliverAppBar(
+                    floating: true,
+                    pinned: true,
+                    automaticallyImplyLeading: false,
+                    title: Align(
+                      child: Focus(
+                        canRequestFocus: false,
+                        child: SegmentedButton(
+                          showSelectedIcon: false,
+                          segments: [
+                            const ButtonSegment(
+                              value: TabType.regular,
+                              label: Text('Regular'),
+                              icon: Icon(MdiIcons.tab),
+                            ),
+                            const ButtonSegment(
+                              value: TabType.private,
+                              label: Text('Private'),
+                              icon: Icon(MdiIcons.tabUnselected),
+                            ),
+                            if (createChildTabsOption)
+                              const ButtonSegment(
+                                value: TabType.child,
+                                label: Text('Child'),
+                                icon: Icon(MdiIcons.fileTree),
+                              ),
+                          ],
+                          selected: {selectedTabType.value},
+                          onSelectionChanged: (value) {
+                            selectedTabType.value = value.first;
+                            // Restore focus to search field after segment change
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              searchFocusNode.requestFocus();
+                            });
+                          },
+                          style: switch (selectedTabType.value) {
+                            TabType.regular => null,
+                            TabType.private => SegmentedButton.styleFrom(
+                              selectedBackgroundColor: const Color(0x648000D7),
+                            ),
+                            TabType.child =>
+                              (currentTabTabType == TabType.private)
+                                  ? SegmentedButton.styleFrom(
+                                      selectedBackgroundColor: const Color(
+                                        0x648000D7,
+                                      ),
+                                    )
+                                  : null,
+                          },
                         ),
-                    ],
-                    selected: {selectedTabType.value},
-                    onSelectionChanged: (value) {
-                      selectedTabType.value = value.first;
-                      // Restore focus to search field after segment change
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        searchFocusNode.requestFocus();
-                      });
-                    },
-                    style: switch (selectedTabType.value) {
-                      TabType.regular => null,
-                      TabType.private => SegmentedButton.styleFrom(
-                        selectedBackgroundColor: const Color(0x648000D7),
                       ),
-                      TabType.child =>
-                        (currentTabTabType == TabType.private)
-                            ? SegmentedButton.styleFrom(
-                                selectedBackgroundColor: const Color(
-                                  0x648000D7,
-                                ),
-                              )
-                            : null,
-                    },
-                  ),
-                ),
-              ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: SearchField(
-                    showBangIcon: showBangIcon.value,
-                    textEditingController: searchTextController,
-                    focusNode: searchFocusNode,
-                    autofocus: true,
-                    label: const Text('Address / Search'),
-                    onSubmitted: (value) async {
-                      if (value.isNotEmpty) {
-                        var newUrl = uri_parser.tryParseUrl(
-                          value,
-                          eagerParsing: true,
-                        );
-
-                        if (newUrl == null) {
-                          final bang =
-                              ref.read(selectedBangDataProvider()) ??
-                              await ref.read(
-                                defaultSearchBangDataProvider.future,
+                    ),
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(kToolbarHeight),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: SearchField(
+                          showBangIcon: showBangIcon.value,
+                          textEditingController: searchTextController,
+                          focusNode: searchFocusNode,
+                          autofocus: true,
+                          label: const Text('Address / Search'),
+                          onSubmitted: (value) async {
+                            if (value.isNotEmpty) {
+                              var newUrl = uri_parser.tryParseUrl(
+                                value,
+                                eagerParsing: true,
                               );
 
-                          if (bang != null) {
-                            newUrl = bang.getTemplateUrl(value);
+                              if (newUrl == null) {
+                                final bang =
+                                    ref.read(selectedBangDataProvider()) ??
+                                    await ref.read(
+                                      defaultSearchBangDataProvider.future,
+                                    );
 
-                            if (!privateTabMode) {
-                              await ref
-                                  .read(bangSearchProvider.notifier)
-                                  .triggerBangSearch(bang, value);
+                                if (bang != null) {
+                                  newUrl = bang.getTemplateUrl(value);
+
+                                  if (!privateTabMode) {
+                                    await ref
+                                        .read(bangSearchProvider.notifier)
+                                        .triggerBangSearch(bang, value);
+                                  }
+                                }
+                              }
+
+                              if (newUrl != null) {
+                                await ref
+                                    .read(tabRepositoryProvider.notifier)
+                                    .addTab(
+                                      url: newUrl,
+                                      private: privateTabMode,
+                                      parentId:
+                                          (selectedTabType.value ==
+                                              TabType.child)
+                                          ? ref.read(selectedTabProvider)
+                                          : null,
+                                      launchedFromIntent: launchedFromIntent,
+                                    );
+
+                                if (context.mounted) {
+                                  ref
+                                      .read(
+                                        bottomSheetControllerProvider.notifier,
+                                      )
+                                      .requestDismiss();
+
+                                  const BrowserRoute().go(context);
+                                }
+                              }
                             }
-                          }
-                        }
-
-                        if (newUrl != null) {
-                          await ref
-                              .read(tabRepositoryProvider.notifier)
-                              .addTab(
-                                url: newUrl,
-                                private: privateTabMode,
-                                parentId:
-                                    (selectedTabType.value == TabType.child)
-                                    ? ref.read(selectedTabProvider)
-                                    : null,
-                                launchedFromIntent: launchedFromIntent,
-                              );
-
-                          if (context.mounted) {
-                            ref
-                                .read(bottomSheetControllerProvider.notifier)
-                                .requestDismiss();
-
-                            const BrowserRoute().go(context);
-                          }
-                        }
-                      }
-                    },
-                    activeBang: activeBang,
-                    showSuggestions: true,
+                          },
+                          activeBang: activeBang,
+                          showSuggestions: true,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: ClipboardFillLink(controller: searchTextController),
-            ),
-            const SliverToBoxAdapter(child: Divider()),
-            FullSearchTermSuggestions(
-              searchTextController: searchTextController,
-              activeBang: activeBang,
-              submitSearch: submitSearch,
-            ),
-            TabSearch(searchTextListenable: sampledSearchText),
-            FeedSearch(searchTextNotifier: sampledSearchText),
-            HistorySuggestions(
-              isPrivate: privateTabMode,
-              searchTextListenable: sampledSearchText,
-            ),
-          ],
+                  SliverToBoxAdapter(
+                    child: ClipboardFillLink(controller: searchTextController),
+                  ),
+                  const SliverToBoxAdapter(child: Divider()),
+                  FullSearchTermSuggestions(
+                    searchTextController: searchTextController,
+                    activeBang: activeBang,
+                    submitSearch: submitSearch,
+                  ),
+                  TabSearch(searchTextListenable: sampledSearchText),
+                  FeedSearch(searchTextNotifier: sampledSearchText),
+                  HistorySuggestions(
+                    isPrivate: privateTabMode,
+                    searchTextListenable: sampledSearchText,
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

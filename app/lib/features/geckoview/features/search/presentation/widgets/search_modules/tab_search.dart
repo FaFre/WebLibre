@@ -17,6 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -33,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
@@ -53,15 +58,53 @@ class TabSearch extends HookConsumerWidget {
       ref.read(selectedContainerDataProvider.select((value) => value.value)),
     );
 
-    final tabs = ref
-        .watch(
-          seamlessFilteredTabPreviewsProvider(
-            TabSearchPartition.search,
-            // ignore: provider_parameters
-            ContainerFilterById(containerId: selectedContainer.value?.id),
-          ),
-        )
-        .value;
+    final tabSearchResults = ref.watch(
+      filteredTabPreviewsProvider(
+        TabSearchPartition.search,
+        // ignore: provider_parameters
+        ContainerFilterDisabled(),
+      ),
+    );
+
+    final containerIdsWithResults = useMemoized(
+      () => EquatableValue(
+        tabSearchResults.value
+            .map((result) => result.containerId)
+            .fold(
+              <String?, int>{},
+              (map, id) =>
+                  map..update(id, (value) => ++value, ifAbsent: () => 1),
+            ),
+      ),
+      [tabSearchResults],
+    );
+
+    final filteredTabs = useMemoized(
+      () => tabSearchResults.value
+          .where((result) => result.containerId == selectedContainer.value?.id)
+          .toList(),
+      [tabSearchResults, selectedContainer.value?.id],
+    );
+
+    unawaited(
+      useValueChanged(containerIdsWithResults, (_, _) async {
+        if (containerIdsWithResults.value.isNotEmpty &&
+            !containerIdsWithResults.value.containsKey(
+              selectedContainer.value?.id,
+            )) {
+          selectedContainer.value = await ref
+              .read(containerRepositoryProvider.notifier)
+              .getAllContainersWithCount()
+              .then((containers) {
+                return containers.firstWhereOrNull(
+                  (container) =>
+                      !container.metadata.authSettings.authenticationRequired &&
+                      containerIdsWithResults.value.containsKey(container.id),
+                );
+              });
+        }
+      }),
+    );
 
     useListenableCallback(searchTextListenable, () async {
       if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.search))) {
@@ -79,6 +122,10 @@ class TabSearch extends HookConsumerWidget {
       }
     });
 
+    if (tabSearchResults.value.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
     return MultiSliver(
       children: [
         const SliverToBoxAdapter(child: Divider()),
@@ -92,6 +139,9 @@ class TabSearch extends HookConsumerWidget {
                 ContainerChips(
                   displayMenu: false,
                   selectedContainer: selectedContainer.value,
+                  showUnassignedChip: containerIdsWithResults.value.containsKey(
+                    null,
+                  ),
                   onSelected: (container) async {
                     if (container != null) {
                       if (await ref
@@ -106,7 +156,10 @@ class TabSearch extends HookConsumerWidget {
                   onDeleted: (container) {
                     selectedContainer.value = null;
                   },
-                  containerFilter: (container) => (container.tabCount ?? 0) > 0,
+                  containerFilter: (container) =>
+                      containerIdsWithResults.value.containsKey(container.id),
+                  containerBadgeCount: (container) =>
+                      containerIdsWithResults.value[container?.id] ?? 0,
                   searchTextListenable: searchTextListenable,
                 ),
               ],
@@ -114,10 +167,11 @@ class TabSearch extends HookConsumerWidget {
           ),
         ),
         SliverList.builder(
-          itemCount: tabs.length,
+          itemCount: filteredTabs.length,
           itemBuilder: (context, index) {
-            final result = tabs[index];
+            final result = filteredTabs[index];
 
+            final titleHasMatch = result.title.contains(_matchPrefix);
             final urlHasMatch =
                 result.highlightedUrl?.contains(_matchPrefix) ?? false;
             final bodyHasMatch =
@@ -142,11 +196,13 @@ class TabSearch extends HookConsumerWidget {
                   ),
                 ),
               ),
-              subtitle: (bodyHasMatch || urlHasMatch)
+              subtitle: (bodyHasMatch || (urlHasMatch && !titleHasMatch))
                   ? MarkdownBody(
-                      data: bodyHasMatch
-                          ? result.content!
-                          : result.highlightedUrl!,
+                      data:
+                          (bodyHasMatch
+                                  ? result.content!
+                                  : result.highlightedUrl!)
+                              .replaceAll(RegExp(r'\s+'), ' '),
                       styleSheet: MarkdownStyleSheet(
                         p: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,

@@ -45,7 +45,6 @@ class SiteSearch extends HookConsumerWidget {
   final List<BangData> availableBangs;
   final TextEditingController? controller;
   final bool searchInNewTab;
-  final Widget? label;
 
   const SiteSearch({
     required this.domain,
@@ -53,7 +52,6 @@ class SiteSearch extends HookConsumerWidget {
     super.key,
     this.controller,
     this.searchInNewTab = false,
-    this.label,
   });
 
   @override
@@ -119,6 +117,7 @@ class SiteSearch extends HookConsumerWidget {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
           visible: availableBangs.isNotEmpty,
@@ -169,7 +168,9 @@ class SiteSearch extends HookConsumerWidget {
           maxLines: null,
           activeBang: selectedBang,
           showSuggestions: true,
-          label: label,
+          label: (selectedBang != null)
+              ? const Text('Search')
+              : const Text('Address / Search'),
           onTap: () {
             if (!searchFocusNode.hasFocus) {
               // Select all text when the field is tapped
@@ -188,6 +189,7 @@ class SiteSearch extends HookConsumerWidget {
           searchTextController: searchTextController,
           activeBang: selectedBang,
           submitSearch: submitSearch,
+          limit: 25,
         ),
       ],
     );

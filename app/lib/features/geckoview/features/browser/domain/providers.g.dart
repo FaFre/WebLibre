@@ -640,11 +640,10 @@ final class SeamlessFilteredTabEntitiesFamily extends $Family
   String toString() => r'seamlessFilteredTabEntitiesProvider';
 }
 
-@ProviderFor(seamlessFilteredTabPreviews)
-const seamlessFilteredTabPreviewsProvider =
-    SeamlessFilteredTabPreviewsFamily._();
+@ProviderFor(filteredTabPreviews)
+const filteredTabPreviewsProvider = FilteredTabPreviewsFamily._();
 
-final class SeamlessFilteredTabPreviewsProvider
+final class FilteredTabPreviewsProvider
     extends
         $FunctionalProvider<
           EquatableValue<List<TabPreview>>,
@@ -652,23 +651,23 @@ final class SeamlessFilteredTabPreviewsProvider
           EquatableValue<List<TabPreview>>
         >
     with $Provider<EquatableValue<List<TabPreview>>> {
-  const SeamlessFilteredTabPreviewsProvider._({
-    required SeamlessFilteredTabPreviewsFamily super.from,
+  const FilteredTabPreviewsProvider._({
+    required FilteredTabPreviewsFamily super.from,
     required (TabSearchPartition, ContainerFilter) super.argument,
   }) : super(
          retry: null,
-         name: r'seamlessFilteredTabPreviewsProvider',
+         name: r'filteredTabPreviewsProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$seamlessFilteredTabPreviewsHash();
+  String debugGetCreateSourceHash() => _$filteredTabPreviewsHash();
 
   @override
   String toString() {
-    return r'seamlessFilteredTabPreviewsProvider'
+    return r'filteredTabPreviewsProvider'
         ''
         '$argument';
   }
@@ -682,7 +681,7 @@ final class SeamlessFilteredTabPreviewsProvider
   @override
   EquatableValue<List<TabPreview>> create(Ref ref) {
     final argument = this.argument as (TabSearchPartition, ContainerFilter);
-    return seamlessFilteredTabPreviews(ref, argument.$1, argument.$2);
+    return filteredTabPreviews(ref, argument.$1, argument.$2);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -697,8 +696,7 @@ final class SeamlessFilteredTabPreviewsProvider
 
   @override
   bool operator ==(Object other) {
-    return other is SeamlessFilteredTabPreviewsProvider &&
-        other.argument == argument;
+    return other is FilteredTabPreviewsProvider && other.argument == argument;
   }
 
   @override
@@ -707,32 +705,32 @@ final class SeamlessFilteredTabPreviewsProvider
   }
 }
 
-String _$seamlessFilteredTabPreviewsHash() =>
-    r'ee1d441ca5f5822e201de8fc0b264ea7b8db0776';
+String _$filteredTabPreviewsHash() =>
+    r'f2958369b4270f4c8165526c0ffad22f41ec0491';
 
-final class SeamlessFilteredTabPreviewsFamily extends $Family
+final class FilteredTabPreviewsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabPreview>>,
           (TabSearchPartition, ContainerFilter)
         > {
-  const SeamlessFilteredTabPreviewsFamily._()
+  const FilteredTabPreviewsFamily._()
     : super(
         retry: null,
-        name: r'seamlessFilteredTabPreviewsProvider',
+        name: r'filteredTabPreviewsProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  SeamlessFilteredTabPreviewsProvider call(
+  FilteredTabPreviewsProvider call(
     TabSearchPartition searchPartition,
     ContainerFilter containerFilter,
-  ) => SeamlessFilteredTabPreviewsProvider._(
+  ) => FilteredTabPreviewsProvider._(
     argument: (searchPartition, containerFilter),
     from: this,
   );
 
   @override
-  String toString() => r'seamlessFilteredTabPreviewsProvider';
+  String toString() => r'filteredTabPreviewsProvider';
 }

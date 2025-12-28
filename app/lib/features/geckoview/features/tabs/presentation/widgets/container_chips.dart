@@ -38,10 +38,12 @@ import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 class ContainerChips extends HookConsumerWidget {
   final bool displayMenu;
+  final bool showUnassignedChip;
   final bool showGroupSuggestions;
 
   final ContainerData? selectedContainer;
   final bool Function(ContainerDataWithCount)? containerFilter;
+  final int Function(ContainerDataWithCount?)? containerBadgeCount;
   final void Function(ContainerDataWithCount?)? onSelected;
   final void Function(ContainerDataWithCount)? onDeleted;
   final void Function(ContainerDataWithCount)? onLongPress;
@@ -54,8 +56,10 @@ class ContainerChips extends HookConsumerWidget {
     required this.onDeleted,
     this.onLongPress,
     this.containerFilter,
+    this.containerBadgeCount,
     this.searchTextListenable,
     this.displayMenu = true,
+    this.showUnassignedChip = true,
     this.showGroupSuggestions = false,
   });
 
@@ -97,7 +101,9 @@ class ContainerChips extends HookConsumerWidget {
                       container.color.withValues(alpha: 0.33),
                   itemLabel: (container) =>
                       ContainerTitle(container: container),
-                  itemBadgeCount: (container) => container.tabCount,
+                  itemBadgeCount: (container) =>
+                      containerBadgeCount?.call(container) ??
+                      container.tabCount,
                   itemWrap: (child, container) {
                     return TabDragContainerTarget(
                       container: container,
@@ -105,36 +111,39 @@ class ContainerChips extends HookConsumerWidget {
                     );
                   },
                   prefixListItems: [
-                    TabDragContainerTarget(
-                      container: null,
-                      child: Consumer(
-                        builder: (context, ref, child) {
-                          final tabCount = ref.watch(
-                            containerTabCountProvider(
-                              // ignore: provider_parameters
-                              ContainerFilterById(containerId: null),
-                            ).select((value) => value.value ?? 0),
-                          );
+                    if (showUnassignedChip)
+                      TabDragContainerTarget(
+                        container: null,
+                        child: Consumer(
+                          builder: (context, ref, child) {
+                            final int tabCount =
+                                containerBadgeCount?.call(null) ??
+                                ref.watch(
+                                  containerTabCountProvider(
+                                    // ignore: provider_parameters
+                                    ContainerFilterById(containerId: null),
+                                  ).select((value) => value.value ?? 0),
+                                );
 
-                          return FilterChip(
-                            avatar: const Icon(MdiIcons.folderHidden),
-                            labelPadding: (tabCount > 0)
-                                ? null
-                                : const EdgeInsets.only(right: 2.0),
-                            label: (tabCount > 0)
-                                ? Text(tabCount.toString())
-                                : const SizedBox.shrink(),
-                            selected: selectedContainer == null,
-                            showCheckmark: false,
-                            onSelected: (value) {
-                              if (value) {
-                                onSelected?.call(null);
-                              }
-                            },
-                          );
-                        },
+                            return FilterChip(
+                              avatar: const Icon(MdiIcons.folderHidden),
+                              labelPadding: (tabCount > 0)
+                                  ? null
+                                  : const EdgeInsets.only(right: 2.0),
+                              label: (tabCount > 0)
+                                  ? Text(tabCount.toString())
+                                  : const SizedBox.shrink(),
+                              selected: selectedContainer == null,
+                              showCheckmark: false,
+                              onSelected: (value) {
+                                if (value) {
+                                  onSelected?.call(null);
+                                }
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
                     if (showGroupSuggestions)
                       Consumer(
                         builder: (context, ref, child) {
