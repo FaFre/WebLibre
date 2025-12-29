@@ -107,7 +107,11 @@ class HistorySuggestions extends HookConsumerWidget {
                               const Icon(MdiIcons.web, size: 24),
                         ),
                         title: suggestion.title.mapNotNull(
-                          (title) => Text(title),
+                          (title) => Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         subtitle:
                             uri.mapNotNull((uri) => UriBreadcrumb(uri: uri)) ??

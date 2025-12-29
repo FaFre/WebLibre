@@ -19,7 +19,6 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -35,6 +34,7 @@ import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/text_highlight.dart';
 
 class FeedSearch extends HookConsumerWidget {
   static const _matchPrefix = '***';
@@ -116,39 +116,47 @@ class FeedSearch extends HookConsumerWidget {
                     ], iconSize: 24.0),
                   ),
                   title: (titleHighlight.isNotEmpty)
-                      ? MarkdownBody(
-                          data: titleHighlight!,
-                          styleSheet: MarkdownStyleSheet(
-                            p: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
-                                ),
+                      ? Text.rich(
+                          buildHighlightedText(
+                            titleHighlight!,
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            _matchPrefix,
+                            _matchSuffix,
                           ),
                         )
                       : Text(
                           article.displayTitle,
                           style: theme.textTheme.titleMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (searchSnippet.isNotEmpty)
-                        MarkdownBody(
-                          data: searchSnippet!,
-                          styleSheet: MarkdownStyleSheet(
-                            p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        Text.rich(
+                          buildHighlightedText(
+                            searchSnippet!,
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurfaceVariant,
                             ),
-                            a: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurfaceVariant,
-                              decoration: TextDecoration.none,
+                              fontWeight: FontWeight.bold,
                             ),
+                            _matchPrefix,
+                            _matchSuffix,
+                            normalizeWhitespaces: true,
                           ),
                         )
                       else

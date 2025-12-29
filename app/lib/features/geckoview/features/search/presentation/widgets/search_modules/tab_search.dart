@@ -24,7 +24,6 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -43,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/text_highlight.dart';
 
 class TabSearch extends HookConsumerWidget {
   static const _matchPrefix = '***';
@@ -171,11 +171,15 @@ class TabSearch extends HookConsumerWidget {
           itemBuilder: (context, index) {
             final result = filteredTabs[index];
 
+            final content =
+                (result.extractedContent?.contains(_matchPrefix) == true)
+                ? result.extractedContent
+                : result.fullContent;
+
             final titleHasMatch = result.title.contains(_matchPrefix);
             final urlHasMatch =
                 result.highlightedUrl?.contains(_matchPrefix) ?? false;
-            final bodyHasMatch =
-                result.content?.contains(_matchPrefix) ?? false;
+            final bodyHasMatch = content?.contains(_matchPrefix) ?? false;
 
             return ListTile(
               leading: RepaintBoundary(
@@ -187,30 +191,35 @@ class TabSearch extends HookConsumerWidget {
                     UrlIcon([result.url], iconSize: 24),
               ),
               title: result.title.mapNotNull(
-                (title) => MarkdownBody(
-                  data: title,
-                  styleSheet: MarkdownStyleSheet(
-                    p: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                (title) => Text.rich(
+                  buildHighlightedText(
+                    title,
+                    Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
+                    Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    _matchPrefix,
+                    _matchSuffix,
                   ),
                 ),
               ),
               subtitle: (bodyHasMatch || (urlHasMatch && !titleHasMatch))
-                  ? MarkdownBody(
-                      data:
-                          (bodyHasMatch
-                                  ? result.content!
-                                  : result.highlightedUrl!)
-                              .replaceAll(RegExp(r'\s+'), ' '),
-                      styleSheet: MarkdownStyleSheet(
-                        p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  ? Text.rich(
+                      buildHighlightedText(
+                        (bodyHasMatch ? content! : result.highlightedUrl!),
+                        Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                        a: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          decoration: TextDecoration.none,
+                          fontWeight: FontWeight.bold,
                         ),
+                        _matchPrefix,
+                        _matchSuffix,
+                        normalizeWhitespaces: true,
                       ),
                     )
                   : UriBreadcrumb(uri: result.url),

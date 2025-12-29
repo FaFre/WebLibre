@@ -321,7 +321,8 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
             icon: null,
             url: tab.cleanUrl ?? availableTabStates.value[tab.id]!.url,
             highlightedUrl: tab.url,
-            content: tab.extractedContent ?? tab.fullContent,
+            extractedContent: tab.extractedContent,
+            fullContent: tab.fullContent,
             sourceSearchQuery: tabSearchResults.query,
           );
         })

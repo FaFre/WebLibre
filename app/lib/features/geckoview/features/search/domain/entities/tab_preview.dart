@@ -30,7 +30,8 @@ class TabPreview with FastEquatable {
   final Uri url;
   final String? highlightedUrl;
 
-  final String? content;
+  final String? extractedContent;
+  final String? fullContent;
 
   final String? sourceSearchQuery;
 
@@ -41,7 +42,8 @@ class TabPreview with FastEquatable {
     required this.icon,
     required this.url,
     required this.highlightedUrl,
-    required this.content,
+    required this.extractedContent,
+    required this.fullContent,
     required this.sourceSearchQuery,
   });
 
@@ -53,7 +55,8 @@ class TabPreview with FastEquatable {
     icon,
     url,
     highlightedUrl,
-    content,
+    extractedContent,
+    fullContent,
     sourceSearchQuery,
   ];
 }

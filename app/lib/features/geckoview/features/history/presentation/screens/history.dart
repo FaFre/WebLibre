@@ -98,7 +98,7 @@ class Section extends MultiSliver {
                            VisitType.download => p.basename(title),
                            _ => title,
                          },
-                         maxLines: 3,
+                         maxLines: 2,
                          overflow: TextOverflow.ellipsis,
                        ),
                      ),

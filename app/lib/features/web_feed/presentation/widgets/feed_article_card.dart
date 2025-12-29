@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -34,8 +33,12 @@ import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/text_highlight.dart';
 
 class FeedArticleCard extends HookConsumerWidget {
+  static const _matchPrefix = '***';
+  static const _matchSuffix = '***';
+
   final FeedArticle article;
 
   const FeedArticleCard({super.key, required this.article});
@@ -86,15 +89,18 @@ class FeedArticleCard extends HookConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (titleHighlight.isNotEmpty)
-                          MarkdownBody(
-                            data: titleHighlight!,
-                            styleSheet: MarkdownStyleSheet(
-                              p: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurface,
-                                  ),
+                          Text.rich(
+                            buildHighlightedText(
+                              titleHighlight!,
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              _matchPrefix,
+                              _matchSuffix,
                             ),
                           ),
                         if (titleHighlight.isEmpty)
@@ -103,22 +109,23 @@ class FeedArticleCard extends HookConsumerWidget {
                             style: theme.textTheme.titleMedium,
                           ),
                         if (searchSnippet.isNotEmpty)
-                          MarkdownBody(
-                            data: searchSnippet!,
-                            styleSheet: MarkdownStyleSheet(
-                              p: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                              a: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                    decoration: TextDecoration.none,
-                                  ),
+                          Text.rich(
+                            buildHighlightedText(
+                              searchSnippet!,
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              _matchPrefix,
+                              _matchSuffix,
+                              normalizeWhitespaces: true,
                             ),
                           ),
                         if (searchSnippet.isEmpty &&
