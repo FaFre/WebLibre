@@ -30,8 +30,12 @@ part 'tab_view_controllers.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabSuggestionsController extends _$TabSuggestionsController {
-  void toggle() {
-    state = !state;
+  void enable() {
+    state = true;
+  }
+
+  void disable() {
+    state = false;
   }
 
   void hide() {

@@ -1113,6 +1113,67 @@ abstract class GeckoPrefApi {
   void unregisterPrefForObservation(String name);
 }
 
+/// Type of ML model operation
+enum MlProgressType {
+  downloading,
+  loadingFromCache,
+  runningInference,
+}
+
+/// Status of the ML operation
+enum MlProgressStatus {
+  initiate,
+  sizeEstimate,
+  inProgress,
+  done,
+}
+
+/// Progress information for ML model operations
+class MlProgressData {
+  /// The type of ML model being loaded
+  final String modelType;
+
+  /// Percentage of completion (0-100)
+  final double progress;
+
+  /// Type of operation (download, cache load, or inference)
+  final MlProgressType type;
+
+  /// Current status of the operation
+  final MlProgressStatus status;
+
+  /// Total bytes loaded so far
+  final int totalLoaded;
+
+  /// Bytes loaded in current update
+  final int currentLoaded;
+
+  /// Total size estimate
+  final int total;
+
+  /// Units of measurement (e.g., "bytes")
+  final String units;
+
+  /// Whether the operation completed successfully
+  final bool ok;
+
+  /// Unique identifier for this operation
+  final String? id;
+
+  const MlProgressData({
+    required this.modelType,
+    required this.progress,
+    required this.type,
+    required this.status,
+    required this.totalLoaded,
+    required this.currentLoaded,
+    required this.total,
+    required this.units,
+    required this.ok,
+    this.id,
+  });
+}
+
 @HostApi()
 abstract class GeckoMlApi {
   @async
@@ -1233,6 +1294,8 @@ abstract class GeckoStateEvents {
     int timestamp,
     ContainerSiteAssignment details,
   );
+
+  void onMlProgress(int timestamp, MlProgressData progress);
 }
 
 @FlutterApi()

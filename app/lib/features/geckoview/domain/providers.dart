@@ -205,3 +205,43 @@ class EngineReadyState extends _$EngineReadyState {
     return currentState;
   }
 }
+
+/// Stream of ML model progress events
+@Riverpod(keepAlive: true)
+Stream<MlProgressData> mlProgressEvents(Ref ref) {
+  final service = ref.watch(eventServiceProvider);
+  return service.mlProgressEvents;
+}
+
+/// Tracks active ML model downloads
+@Riverpod()
+class MlDownloadState extends _$MlDownloadState {
+  @override
+  MlProgressData? build() {
+    ref.listen(
+      mlProgressEventsProvider,
+      (previous, next) {
+        next.whenData((progress) {
+          if (progress.type == MlProgressType.downloading) {
+            if (progress.status == MlProgressStatus.done) {
+              // Keep showing for 2 seconds after completion
+              Future.delayed(const Duration(seconds: 2), () {
+                if (state != null && state!.id == progress.id) {
+                  state = null;
+                }
+              });
+            } else {
+              state = progress;
+            }
+          }
+        });
+      },
+    );
+
+    return null;
+  }
+
+  void clear() {
+    state = null;
+  }
+}

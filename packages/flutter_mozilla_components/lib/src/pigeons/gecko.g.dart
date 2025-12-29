@@ -217,6 +217,21 @@ enum LogLevel {
   error,
 }
 
+/// Type of ML model operation
+enum MlProgressType {
+  downloading,
+  loadingFromCache,
+  runningInference,
+}
+
+/// Status of the ML operation
+enum MlProgressStatus {
+  initiate,
+  sizeEstimate,
+  inProgress,
+  done,
+}
+
 enum GeckoFetchMethod {
   get,
   head,
@@ -2881,6 +2896,103 @@ class GeckoPref {
 ;
 }
 
+/// Progress information for ML model operations
+class MlProgressData {
+  MlProgressData({
+    required this.modelType,
+    required this.progress,
+    required this.type,
+    required this.status,
+    required this.totalLoaded,
+    required this.currentLoaded,
+    required this.total,
+    required this.units,
+    required this.ok,
+    this.id,
+  });
+
+  /// The type of ML model being loaded
+  String modelType;
+
+  /// Percentage of completion (0-100)
+  double progress;
+
+  /// Type of operation (download, cache load, or inference)
+  MlProgressType type;
+
+  /// Current status of the operation
+  MlProgressStatus status;
+
+  /// Total bytes loaded so far
+  int totalLoaded;
+
+  /// Bytes loaded in current update
+  int currentLoaded;
+
+  /// Total size estimate
+  int total;
+
+  /// Units of measurement (e.g., "bytes")
+  String units;
+
+  /// Whether the operation completed successfully
+  bool ok;
+
+  /// Unique identifier for this operation
+  String? id;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      modelType,
+      progress,
+      type,
+      status,
+      totalLoaded,
+      currentLoaded,
+      total,
+      units,
+      ok,
+      id,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static MlProgressData decode(Object result) {
+    result as List<Object?>;
+    return MlProgressData(
+      modelType: result[0]! as String,
+      progress: result[1]! as double,
+      type: result[2]! as MlProgressType,
+      status: result[3]! as MlProgressStatus,
+      totalLoaded: result[4]! as int,
+      currentLoaded: result[5]! as int,
+      total: result[6]! as int,
+      units: result[7]! as String,
+      ok: result[8]! as bool,
+      id: result[9] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! MlProgressData || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 class ContainerSiteAssignment {
   ContainerSiteAssignment({
     required this.requestId,
@@ -3348,167 +3460,176 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is LogLevel) {
       buffer.putUint8(147);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchMethod) {
+    }    else if (value is MlProgressType) {
       buffer.putUint8(148);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchRedircet) {
+    }    else if (value is MlProgressStatus) {
       buffer.putUint8(149);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchCookiePolicy) {
+    }    else if (value is GeckoFetchMethod) {
       buffer.putUint8(150);
       writeValue(buffer, value.index);
-    }    else if (value is BookmarkNodeType) {
+    }    else if (value is GeckoFetchRedircet) {
       buffer.putUint8(151);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    }    else if (value is GeckoFetchCookiePolicy) {
       buffer.putUint8(152);
-      writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+      writeValue(buffer, value.index);
+    }    else if (value is BookmarkNodeType) {
       buffer.putUint8(153);
-      writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+      writeValue(buffer, value.index);
+    }    else if (value is TranslationOptions) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+    }    else if (value is ReaderState) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(156);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(157);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(158);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(159);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(160);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(161);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableBrowserState) {
+    }    else if (value is TabState) {
       buffer.putUint8(162);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(163);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is RecoverableBrowserState) {
       buffer.putUint8(164);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(165);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(166);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is Resource) {
       buffer.putUint8(167);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is IconResult) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    }    else if (value is VisitInfo) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is Cookie) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is VisitInfo) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is ReaderableState) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    }    else if (value is ContentBlocking) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    }    else if (value is DohSettings) {
+    }    else if (value is TabContent) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is ContentBlocking) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is DohSettings) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    }    else if (value is AutocompleteResult) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    }    else if (value is UnknownHitResult) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    }    else if (value is ImageHitResult) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    }    else if (value is VideoHitResult) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    }    else if (value is AudioHitResult) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    }    else if (value is ImageSrcHitResult) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    }    else if (value is PhoneHitResult) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    }    else if (value is EmailHitResult) {
       buffer.putUint8(192);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    }    else if (value is GeoHitResult) {
       buffer.putUint8(193);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonCollection) {
+    }    else if (value is DownloadState) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPref) {
+    }    else if (value is ShareInternetResourceState) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    }    else if (value is ContainerSiteAssignment) {
+    }    else if (value is AddonCollection) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoHeader) {
+    }    else if (value is GeckoPref) {
       buffer.putUint8(197);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchRequest) {
+    }    else if (value is MlProgressData) {
       buffer.putUint8(198);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchResponse) {
+    }    else if (value is ContainerSiteAssignment) {
       buffer.putUint8(199);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkNode) {
+    }    else if (value is GeckoHeader) {
       buffer.putUint8(200);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkInfo) {
+    }    else if (value is GeckoFetchRequest) {
       buffer.putUint8(201);
+      writeValue(buffer, value.encode());
+    }    else if (value is GeckoFetchResponse) {
+      buffer.putUint8(202);
+      writeValue(buffer, value.encode());
+    }    else if (value is BookmarkNode) {
+      buffer.putUint8(203);
+      writeValue(buffer, value.encode());
+    }    else if (value is BookmarkInfo) {
+      buffer.putUint8(204);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -3577,115 +3698,123 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : LogLevel.values[value];
       case 148: 
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchMethod.values[value];
+        return value == null ? null : MlProgressType.values[value];
       case 149: 
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchRedircet.values[value];
+        return value == null ? null : MlProgressStatus.values[value];
       case 150: 
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchCookiePolicy.values[value];
+        return value == null ? null : GeckoFetchMethod.values[value];
       case 151: 
         final value = readValue(buffer) as int?;
-        return value == null ? null : BookmarkNodeType.values[value];
+        return value == null ? null : GeckoFetchRedircet.values[value];
       case 152: 
-        return TranslationOptions.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : GeckoFetchCookiePolicy.values[value];
       case 153: 
-        return ReaderState.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : BookmarkNodeType.values[value];
       case 154: 
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 155: 
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 156: 
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 157: 
-        return ExternalPackage.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 158: 
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 159: 
-        return SourceValue.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 160: 
-        return TabState.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 161: 
-        return RecoverableTab.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 162: 
-        return RecoverableBrowserState.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 163: 
-        return IconRequest.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 164: 
-        return ResourceSize.decode(readValue(buffer)!);
+        return RecoverableBrowserState.decode(readValue(buffer)!);
       case 165: 
-        return Resource.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 166: 
-        return IconResult.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 167: 
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 168: 
-        return Cookie.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 169: 
-        return VisitInfo.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 170: 
-        return HistoryItem.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 171: 
-        return HistoryState.decode(readValue(buffer)!);
+        return VisitInfo.decode(readValue(buffer)!);
       case 172: 
-        return ReaderableState.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 173: 
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 174: 
-        return TabContentState.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 175: 
-        return FindResultState.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 176: 
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 177: 
-        return WebExtensionData.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 178: 
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 179: 
-        return TabContent.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 180: 
-        return ContentBlocking.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 181: 
-        return DohSettings.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 182: 
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 183: 
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 184: 
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 185: 
-        return ImageHitResult.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 186: 
-        return VideoHitResult.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 187: 
-        return AudioHitResult.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 188: 
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 189: 
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 190: 
-        return EmailHitResult.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 191: 
-        return GeoHitResult.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 192: 
-        return DownloadState.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 193: 
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 194: 
-        return AddonCollection.decode(readValue(buffer)!);
+        return DownloadState.decode(readValue(buffer)!);
       case 195: 
-        return GeckoPref.decode(readValue(buffer)!);
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       case 196: 
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return AddonCollection.decode(readValue(buffer)!);
       case 197: 
-        return GeckoHeader.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       case 198: 
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return MlProgressData.decode(readValue(buffer)!);
       case 199: 
-        return GeckoFetchResponse.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 200: 
-        return BookmarkNode.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 201: 
+        return GeckoFetchRequest.decode(readValue(buffer)!);
+      case 202: 
+        return GeckoFetchResponse.decode(readValue(buffer)!);
+      case 203: 
+        return BookmarkNode.decode(readValue(buffer)!);
+      case 204: 
         return BookmarkInfo.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -5356,6 +5485,8 @@ abstract class GeckoStateEvents {
 
   void onContainerSiteAssignment(int timestamp, ContainerSiteAssignment details);
 
+  void onMlProgress(int timestamp, MlProgressData progress);
+
   static void setUp(GeckoStateEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
@@ -5815,6 +5946,34 @@ abstract class GeckoStateEvents {
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment was null, expected non-null ContainerSiteAssignment.');
           try {
             api.onContainerSiteAssignment(arg_timestamp!, arg_details!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_timestamp = (args[0] as int?);
+          assert(arg_timestamp != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress was null, expected non-null int.');
+          final MlProgressData? arg_progress = (args[1] as MlProgressData?);
+          assert(arg_progress != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress was null, expected non-null MlProgressData.');
+          try {
+            api.onMlProgress(arg_timestamp!, arg_progress!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

@@ -6,6 +6,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -142,20 +143,75 @@ class TabViewHeader extends HookConsumerWidget {
                               final tabSuggestionsEnabled = ref.watch(
                                 tabSuggestionsControllerProvider,
                               );
+                              final downloadProgress = ref.watch(
+                                mlDownloadStateProvider,
+                              );
 
-                              return IconButton.filledTonal(
-                                icon: const Icon(MdiIcons.imageAutoAdjust),
-                                isSelected: tabSuggestionsEnabled,
-                                iconSize: 18,
-                                padding: EdgeInsets.zero,
-                                onPressed: () {
-                                  ref
-                                      .read(
-                                        tabSuggestionsControllerProvider
-                                            .notifier,
+                              return Badge(
+                                isLabelVisible: downloadProgress != null,
+                                offset: const Offset(-2, 2),
+                                label: downloadProgress != null
+                                    ? Text(
+                                        '${downloadProgress.progress.toInt()}%',
+                                        style: const TextStyle(fontSize: 10),
                                       )
-                                      .toggle();
-                                },
+                                    : null,
+                                child: IconButton.filledTonal(
+                                  icon: const Icon(MdiIcons.imageAutoAdjust),
+                                  isSelected: tabSuggestionsEnabled,
+                                  iconSize: 18,
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () async {
+                                    if (!tabSuggestionsEnabled) {
+                                      final result = await showDialog<bool?>(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            icon: const Icon(MdiIcons.download),
+                                            title: const Text(
+                                              'Enable AI Tab Suggestions',
+                                            ),
+                                            content: const Text(
+                                              'Enabling this feature may require downloading AI models. '
+                                              'The download size and progress cannot be determined in advance.\n\n'
+                                              'Do you want to continue?',
+                                            ),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context, false);
+                                                },
+                                                child: const Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context, true);
+                                                },
+                                                child: const Text('Enable'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+
+                                      if (result == true) {
+                                        ref
+                                            .read(
+                                              tabSuggestionsControllerProvider
+                                                  .notifier,
+                                            )
+                                            .enable();
+                                      }
+                                    } else {
+                                      ref
+                                          .read(
+                                            tabSuggestionsControllerProvider
+                                                .notifier,
+                                          )
+                                          .disable();
+                                    }
+                                  },
+                                ),
                               );
                             },
                           ),

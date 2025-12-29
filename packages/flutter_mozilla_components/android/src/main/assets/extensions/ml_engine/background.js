@@ -23,6 +23,13 @@ function sendErrorForRequest(id) {
     }
 }
 
+browser.experiments.ml.onProgress.addListener((progressData) => {
+    port.postMessage({
+        type: "mlProgress",
+        progress: progressData
+    });
+});
+
 port.onMessage.addListener(async (message) => {
     let requestId = message["id"]
     switch (message["action"]) {

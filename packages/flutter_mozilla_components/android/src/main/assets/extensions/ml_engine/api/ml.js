@@ -92,11 +92,55 @@ function isEngineClosed(engine) {
     return !engine || engine?.engineStatus === "closed";
 }
 
+/**
+ * Create a progress callback that emits progress via the event
+ * @param {string} modelType The type of model being loaded
+ * @param {function} progressEmitter Function to emit progress events
+ * @return {function} Progress callback function
+ */
+function createProgressCallback(modelType, progressEmitter) {
+    return (progressData) => {
+        if (progressEmitter) {
+            progressEmitter.async({
+                modelType: modelType,
+                progress: progressData.progress || 0,
+                type: progressData.type,
+                statusText: progressData.statusText,
+                totalLoaded: progressData.totalLoaded || 0,
+                currentLoaded: progressData.currentLoaded || 0,
+                total: progressData.total || 0,
+                units: progressData.units || "bytes",
+                ok: progressData.ok || false,
+                id: progressData.id,
+            });
+        }
+    };
+}
+
 this.ml = class extends ExtensionAPI {
+    constructor(extension) {
+        super(extension);
+        this.embeddingEngine = null;
+        this.topicEngine = null;
+        this.progressEmitter = null;
+    }
+
     getAPI(context) {
+        const self = this;
+
         return {
             experiments: {
                 ml: {
+                    onProgress: new ExtensionCommon.EventManager({
+                        context,
+                        name: "ml.onProgress",
+                        register: (fire) => {
+                            self.progressEmitter = fire;
+                            return () => {
+                                self.progressEmitter = null;
+                            };
+                        },
+                    }).api(),
                     async generateEmbeddings(textToEmbedList) {
                         const inputData = {
                             inputArgs: textToEmbedList,
@@ -106,8 +150,11 @@ this.ml = class extends ExtensionAPI {
                             },
                         };
 
-                        if (isEngineClosed(this.embeddingEngine)) {
-                            this.embeddingEngine = await createEngine(SMART_TAB_GROUPING_CONFIG.embedding);
+                        if (isEngineClosed(self.embeddingEngine)) {
+                            self.embeddingEngine = await createEngine(
+                                SMART_TAB_GROUPING_CONFIG.embedding,
+                                createProgressCallback("Embedding Model", self.progressEmitter)
+                            );
                         }
 
                         const request = {
@@ -115,12 +162,12 @@ this.ml = class extends ExtensionAPI {
                             options: inputData.runOptions,
                         };
 
-                        const generated = await this.embeddingEngine.run(request);
+                        const generated = await self.embeddingEngine.run(request);
 
                         return JSON.stringify(generated);
                     },
                     async predictTopic(keywords, documents) {
-                        if (isEngineClosed(this.topicEngine)) {
+                        if (isEngineClosed(self.topicEngine)) {
                             const {
                                 featureId,
                                 engineId,
@@ -143,7 +190,10 @@ this.ml = class extends ExtensionAPI {
                                 backend,
                             };
 
-                            this.topicEngine = await createEngine(initData);
+                            self.topicEngine = await createEngine(
+                                initData,
+                                createProgressCallback("Topic Generation Model", self.progressEmitter)
+                            );
                         }
 
                         const inputArgs = createModelInput(
@@ -161,7 +211,7 @@ this.ml = class extends ExtensionAPI {
                             options: requestInfo.runOptions,
                         };
 
-                        const res = await this.topicEngine.run(request);
+                        const res = await self.topicEngine.run(request);
 
                         const generated = cutAtDuplicateWords((res[0]["generated_text"] || "").trim());
 

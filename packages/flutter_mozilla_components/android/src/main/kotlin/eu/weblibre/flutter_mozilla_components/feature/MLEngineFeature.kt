@@ -31,6 +31,9 @@ object MLEngineFeature {
     private val requestHandlers = HashMap<Int, ResultConsumer<JSONObject>>()
     private val mutex = Mutex()
 
+    // Progress callback for ML operations
+    var progressCallback: ((JSONObject) -> Unit)? = null
+
     @VisibleForTesting
     // This is an internal var to make it mutable for unit testing purposes only
     internal var extensionController = BuiltInWebExtensionController(
@@ -63,9 +66,17 @@ object MLEngineFeature {
         override fun onPortMessage(message: Any, port: Port) {
             runBlocking {
                 withContext(Dispatchers.Default) {
-                    mutex.withLock {
-                        val messageJSON = message as JSONObject;
+                    val messageJSON = message as JSONObject;
 
+                    // Check if this is a progress message
+                    if (messageJSON.has("type") && messageJSON.getString("type") == "mlProgress") {
+                        val progressData = messageJSON.getJSONObject("progress")
+                        progressCallback?.invoke(progressData)
+                        return@withContext
+                    }
+
+                    // Handle regular request/response messages
+                    mutex.withLock {
                         val requestId = messageJSON.getInt("id")
                         val status = messageJSON.getString("status")
                         if (status == "success") {

@@ -43,6 +43,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _siteAssignementSubject = PublishSubject<ContainerSiteAssignment>();
 
   final _tabAddedSubject = PublishSubject<String>();
+  final _mlProgressSubject = PublishSubject<MlProgressData>();
 
   // Event streams
   ValueStream<bool> get viewReadyStateEvents => _viewStateSubject.stream;
@@ -66,6 +67,7 @@ class GeckoEventService extends GeckoStateEvents {
       _siteAssignementSubject.stream;
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
+  Stream<MlProgressData> get mlProgressEvents => _mlProgressSubject.stream;
 
   @override
   void onViewReadyStateChange(int timestamp, bool state) {
@@ -199,6 +201,11 @@ class GeckoEventService extends GeckoStateEvents {
     );
   }
 
+  @override
+  void onMlProgress(int timestamp, MlProgressData progress) {
+    _mlProgressSubject.addWhenMoreRecent(timestamp, null, progress);
+  }
+
   GeckoEventService.setUp({
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
@@ -228,5 +235,6 @@ class GeckoEventService extends GeckoStateEvents {
     await _tabAddedSubject.close();
     await _prefUpdateSubject.close();
     await _siteAssignementSubject.close();
+    await _mlProgressSubject.close();
   }
 }

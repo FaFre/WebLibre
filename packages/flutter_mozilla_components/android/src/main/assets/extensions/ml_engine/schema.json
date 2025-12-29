@@ -31,6 +31,20 @@
     {
         "namespace": "experiments.ml",
         "description": "Machine Learning utilities",
+        "events": [
+            {
+                "name": "onProgress",
+                "type": "function",
+                "description": "Fired when ML model loading or processing makes progress",
+                "parameters": [
+                    {
+                        "name": "progressData",
+                        "type": "object",
+                        "description": "Progress information including modelType, progress percentage, type, and status"
+                    }
+                ]
+            }
+        ],
         "functions": [
             {
                 "name": "generateEmbeddings",

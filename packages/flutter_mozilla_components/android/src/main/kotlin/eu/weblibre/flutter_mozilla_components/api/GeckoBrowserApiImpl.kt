@@ -238,7 +238,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoTabsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTabsApiImpl())
         GeckoIconsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoIconsApiImpl())
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
-        GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl())
+        GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl(_flutterPluginBinding.binaryMessenger, _flutterEvents))
         GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
         GeckoContainerProxyApi.setUp(
             _flutterPluginBinding.binaryMessenger,

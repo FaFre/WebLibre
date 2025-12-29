@@ -298,3 +298,106 @@ abstract class _$EngineReadyState extends $Notifier<bool> {
     element.handleValue(ref, created);
   }
 }
+
+/// Stream of ML model progress events
+
+@ProviderFor(mlProgressEvents)
+const mlProgressEventsProvider = MlProgressEventsProvider._();
+
+/// Stream of ML model progress events
+
+final class MlProgressEventsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MlProgressData>,
+          MlProgressData,
+          Stream<MlProgressData>
+        >
+    with $FutureModifier<MlProgressData>, $StreamProvider<MlProgressData> {
+  /// Stream of ML model progress events
+  const MlProgressEventsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mlProgressEventsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mlProgressEventsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<MlProgressData> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<MlProgressData> create(Ref ref) {
+    return mlProgressEvents(ref);
+  }
+}
+
+String _$mlProgressEventsHash() => r'41c1e6aece7f9ee2bebe5d189c6bec753c2fefc8';
+
+/// Tracks active ML model downloads
+
+@ProviderFor(MlDownloadState)
+const mlDownloadStateProvider = MlDownloadStateProvider._();
+
+/// Tracks active ML model downloads
+final class MlDownloadStateProvider
+    extends $NotifierProvider<MlDownloadState, MlProgressData?> {
+  /// Tracks active ML model downloads
+  const MlDownloadStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mlDownloadStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mlDownloadStateHash();
+
+  @$internal
+  @override
+  MlDownloadState create() => MlDownloadState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MlProgressData? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MlProgressData?>(value),
+    );
+  }
+}
+
+String _$mlDownloadStateHash() => r'10be3767d448ea8fca8bf35578c343f3b9ddbb4e';
+
+/// Tracks active ML model downloads
+
+abstract class _$MlDownloadState extends $Notifier<MlProgressData?> {
+  MlProgressData? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<MlProgressData?, MlProgressData?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<MlProgressData?, MlProgressData?>,
+              MlProgressData?,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

@@ -42,7 +42,7 @@ final class TabSuggestionsControllerProvider
 }
 
 String _$tabSuggestionsControllerHash() =>
-    r'c60912e474177f2a0f15167743db439d157cd852';
+    r'27a22674f9e4efb01e70120338202e95acef4791';
 
 abstract class _$TabSuggestionsController extends $Notifier<bool> {
   bool build();
