@@ -24,8 +24,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
@@ -101,6 +103,18 @@ class ProfileEditScreen extends HookConsumerWidget {
                     },
                   ),
                 ),
+                const SizedBox(height: 16),
+                if (filesystem.selectedProfile != profile!.uuidValue)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      label: const Text('Switch to this Profile'),
+                      icon: const Icon(MdiIcons.accountSwitch),
+                      onPressed: () async {
+                        await handleSwitchProfile(context, ref, profile!);
+                      },
+                    ),
+                  ),
               ],
               const SizedBox(height: 16),
               SizedBox(

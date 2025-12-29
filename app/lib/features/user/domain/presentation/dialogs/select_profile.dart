@@ -18,12 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/utils/exit_app.dart';
@@ -49,75 +48,7 @@ class SelectProfileDialog extends HookConsumerWidget {
               title: Text(profile.name),
               subtitle: isSelected ? const Text('Active') : null,
               onTap: () async {
-                final duplicateMozillaProfile = await filesystem
-                    .checkForDuplicateMozillaProfile(profile.uuidValue);
-
-                if (context.mounted) {
-                  final result = await showDialog<(bool, bool)>(
-                    context: context,
-                    builder: (context) => HookBuilder(
-                      builder: (context) {
-                        final clearCache = useState(false);
-
-                        return AlertDialog(
-                          icon: const Icon(Icons.warning),
-                          title: const Text('Switch User'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "Switching to User '${profile.name}' will require a restart of the Browser.",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              if (duplicateMozillaProfile != null)
-                                SwitchListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  value: clearCache.value,
-                                  title: const Text('Clear Shared Cache'),
-                                  subtitle: const Text(
-                                    'This User has been created based on an exisiting Mozilla Profile Identifier. Clearing cache will affect all linked accounts.',
-                                  ),
-                                  onChanged: (value) {
-                                    clearCache.value = value;
-                                  },
-                                ),
-                            ],
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                context.pop((false, false));
-                              },
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                context.pop((true, clearCache.value));
-                              },
-                              child: const Text('Switch Profile'),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  );
-
-                  if (result?.$1 == true) {
-                    if (duplicateMozillaProfile != null && result?.$2 == true) {
-                      await filesystem.clearMozillaProfileCache(
-                        duplicateMozillaProfile,
-                      );
-                    }
-
-                    await ref
-                        .read(profileRepositoryProvider.notifier)
-                        .switchProfile(profile.id);
-                    await exitApp(ref.container);
-                  }
-                }
+                await handleSwitchProfile(context, ref, profile);
               },
             );
           }).toList(),

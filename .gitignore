@@ -11,3 +11,4 @@
 .dart_tool/
 build/
 pubspec.lock
+CLAUDE.md
