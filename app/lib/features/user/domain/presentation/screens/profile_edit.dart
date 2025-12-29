@@ -115,60 +115,60 @@ class ProfileEditScreen extends HookConsumerWidget {
                       },
                     ),
                   ),
-              ],
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.error,
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                      iconColor: Theme.of(context).colorScheme.error,
                     ),
-                    foregroundColor: Theme.of(context).colorScheme.error,
-                    iconColor: Theme.of(context).colorScheme.error,
-                  ),
-                  label: const Text('Delete'),
-                  icon: const Icon(Icons.delete),
-                  onPressed: () async {
-                    final result = await showDialog<bool?>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          icon: const Icon(Icons.warning),
-                          title: const Text('Delete User'),
-                          content: const Text(
-                            'Are you sure you want to delete this User including all data?',
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, false);
-                              },
-                              child: const Text('Cancel'),
+                    label: const Text('Delete'),
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async {
+                      final result = await showDialog<bool?>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            icon: const Icon(Icons.warning),
+                            title: const Text('Delete User'),
+                            content: const Text(
+                              'Are you sure you want to delete this User including all data?',
                             ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, true);
-                              },
-                              child: const Text('Delete'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, false);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, true);
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
 
-                    if (result == true) {
-                      await ref
-                          .read(profileRepositoryProvider.notifier)
-                          .deleteProfile(profile!.uuidValue.uuid);
+                      if (result == true) {
+                        await ref
+                            .read(profileRepositoryProvider.notifier)
+                            .deleteProfile(profile!.uuidValue.uuid);
 
-                      if (context.mounted) {
-                        context.pop();
+                        if (context.mounted) {
+                          context.pop();
+                        }
                       }
-                    }
-                  },
+                    },
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
