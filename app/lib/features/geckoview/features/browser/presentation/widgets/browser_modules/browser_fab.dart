@@ -26,6 +26,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/readerview/domain/providers/readerable.dart';
 
 class BrowserFab extends HookConsumerWidget {
+  const BrowserFab({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabBarDismissed = ref.watch(tabBarDismissableControllerProvider);
@@ -42,22 +44,38 @@ class BrowserFab extends HookConsumerWidget {
       ),
     );
 
-    return Visibility(
-      visible: readerabilityState.active && appearanceButtonVisible,
-      replacement: tabBarDismissed
-          ? FloatingActionButton(
-              child: const Icon(MdiIcons.dockBottom),
-              onPressed: () {
-                ref.read(tabBarDismissableControllerProvider.notifier).show();
-              },
-            )
-          : const SizedBox.shrink(),
-      child: FloatingActionButton(
+    final Widget child;
+    if (readerabilityState.active && appearanceButtonVisible) {
+      child = FloatingActionButton(
+        key: const ValueKey('appearance_fab'),
+        heroTag: 'appearance_fab',
         onPressed: () async {
           await ref.read(readerableServiceProvider).onAppearanceButtonTap();
         },
         child: const Icon(MdiIcons.formatFont),
-      ),
+      );
+    } else if (tabBarDismissed) {
+      child = FloatingActionButton(
+        key: const ValueKey('dock_fab'),
+        heroTag: 'dock_fab',
+        onPressed: () {
+          ref.read(tabBarDismissableControllerProvider.notifier).show();
+        },
+        child: const Icon(MdiIcons.dockBottom),
+      );
+    } else {
+      child = const SizedBox.shrink(key: ValueKey('no_fab'));
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: child,
+        );
+      },
+      child: child,
     );
   }
 }

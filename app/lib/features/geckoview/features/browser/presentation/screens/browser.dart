@@ -342,7 +342,7 @@ class BrowserScreen extends HookConsumerWidget {
               displayedSheet: null,
             ).preferredSize,
           ),
-          floatingActionButton: BrowserFab(),
+          floatingActionButton: const BrowserFab(),
         ),
       ),
     );
