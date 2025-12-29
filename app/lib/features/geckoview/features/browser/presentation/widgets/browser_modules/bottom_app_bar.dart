@@ -331,22 +331,24 @@ class BrowserTabBar extends HookConsumerWidget {
                     TabMenu(
                       controller: trippleDotMenuController,
                       selectedTabId: selectedTabId,
-                      child: InkWell(
-                        onTap: () {
-                          if (trippleDotMenuController.isOpen) {
-                            trippleDotMenuController.close();
-                          } else {
-                            trippleDotMenuController.open();
-                          }
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                            vertical: 15.0,
+                      builder: (context, controller, child) {
+                        return InkWell(
+                          onTap: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 15.0,
+                            ),
+                            child: Icon(MdiIcons.dotsVertical),
                           ),
-                          child: Icon(MdiIcons.dotsVertical),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   if (showMainToolbarTabsCount)
                     TabsCountButton(
@@ -499,6 +501,27 @@ class QuickTabSwitcher extends HookConsumerWidget {
               await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
             }
             await animation;
+          },
+          itemWrap: (child, item) {
+            return TabMenu(
+              selectedTabId: item.id,
+              enableFindInPage: false,
+              enableFetchFeeds: false,
+              enableDesktopMode: false,
+              enableReaderMode: false,
+              builder: (context, controller, _) {
+                return InkWell(
+                  onLongPress: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: child,
+                );
+              },
+            );
           },
           availableItems: tabStates.value
               .map(

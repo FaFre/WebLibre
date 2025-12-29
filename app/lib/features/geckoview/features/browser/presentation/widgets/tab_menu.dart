@@ -40,206 +40,220 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class TabMenu extends HookConsumerWidget {
-  final Widget child;
-  final MenuController controller;
+  final MenuAnchorChildBuilder builder;
+  final MenuController? controller;
   final String selectedTabId;
+  final bool enableFindInPage;
+  final bool enableReaderMode;
+  final bool enableDesktopMode;
+  final bool enableFetchFeeds;
+  final bool enableAddBookmark;
+  final bool enableCloneTab;
+  final bool enableContainer;
+  final bool enableShare;
+  final bool enableExport;
+  final bool enableCloseTab;
 
   const TabMenu({
     super.key,
-    required this.child,
-    required this.controller,
+    required this.builder,
     required this.selectedTabId,
+    this.controller,
+    this.enableFindInPage = true,
+    this.enableReaderMode = true,
+    this.enableDesktopMode = true,
+    this.enableFetchFeeds = true,
+    this.enableAddBookmark = true,
+    this.enableCloneTab = true,
+    this.enableContainer = true,
+    this.enableShare = true,
+    this.enableExport = true,
+    this.enableCloseTab = true,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showFeeds = useState(false);
 
+    final controller = this.controller ?? useMenuController();
+
     return MenuAnchor(
       controller: controller,
       onClose: () {
         showFeeds.value = false;
       },
-      builder: (context, controller, child) {
-        return child!;
-      },
+      builder: builder,
       menuChildren: [
-        MenuItemButton(
-          onPressed: () {
-            ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+        if (enableFindInPage)
+          MenuItemButton(
+            onPressed: () {
+              ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
 
-            ref
-                .read(findInPageControllerProvider(selectedTabId).notifier)
-                .show();
-          },
-          leadingIcon: const Icon(Icons.search),
-          child: const Text('Find in page'),
-        ),
-        ReaderButton(
-          buttonBuilder: (isLoading, readerActive, icon) => MenuItemButton(
-            onPressed: isLoading
-                ? null
-                : () async {
+              ref
+                  .read(findInPageControllerProvider(selectedTabId).notifier)
+                  .show();
+            },
+            leadingIcon: const Icon(Icons.search),
+            child: const Text('Find in page'),
+          ),
+        if (enableReaderMode)
+          ReaderButton(
+            buttonBuilder: (isLoading, readerActive, icon) => MenuItemButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      await ref
+                          .read(readerableScreenControllerProvider.notifier)
+                          .toggleReaderView(!readerActive);
+                    },
+              leadingIcon: icon,
+              trailingIcon: Checkbox(
+                value: readerActive,
+                onChanged: (value) async {
+                  if (value != null && !isLoading) {
                     await ref
                         .read(readerableScreenControllerProvider.notifier)
                         .toggleReaderView(!readerActive);
-                  },
-            leadingIcon: icon,
-            trailingIcon: Checkbox(
-              value: readerActive,
-              onChanged: (value) async {
-                if (value != null && !isLoading) {
-                  await ref
-                      .read(readerableScreenControllerProvider.notifier)
-                      .toggleReaderView(!readerActive);
-                  controller.close();
-                }
-              },
-            ),
-            child: const Text('Reader Mode'),
-          ),
-        ),
-        Consumer(
-          builder: (context, childRef, child) {
-            final enabled = childRef.watch(desktopModeProvider(selectedTabId));
-
-            return MenuItemButton(
-              onPressed: () {
-                ref.read(desktopModeProvider(selectedTabId).notifier).toggle();
-              },
-              leadingIcon: const Icon(MdiIcons.monitor),
-              trailingIcon: Checkbox(
-                value: enabled,
-                onChanged: (value) {
-                  if (value != null) {
-                    ref
-                        .read(desktopModeProvider(selectedTabId).notifier)
-                        .enabled(value);
                     controller.close();
                   }
                 },
               ),
-              child: const Text('Desktop Mode'),
-            );
-          },
-        ),
-        const Divider(),
-        Visibility(
-          visible: showFeeds.value,
-          replacement: MenuItemButton(
-            closeOnActivate: false,
-            leadingIcon: const Icon(Icons.rss_feed),
-            child: const Text('Fetch Feeds'),
-            onPressed: () {
-              showFeeds.value = true;
+              child: const Text('Reader Mode'),
+            ),
+          ),
+        if (enableDesktopMode)
+          Consumer(
+            builder: (context, childRef, child) {
+              final enabled = childRef.watch(
+                desktopModeProvider(selectedTabId),
+              );
+
+              return MenuItemButton(
+                onPressed: () {
+                  ref
+                      .read(desktopModeProvider(selectedTabId).notifier)
+                      .toggle();
+                },
+                leadingIcon: const Icon(MdiIcons.monitor),
+                trailingIcon: Checkbox(
+                  value: enabled,
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref
+                          .read(desktopModeProvider(selectedTabId).notifier)
+                          .enabled(value);
+                      controller.close();
+                    }
+                  },
+                ),
+                child: const Text('Desktop Mode'),
+              );
             },
           ),
-          child: WebsiteFeedMenuButton(selectedTabId),
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.bookmarkPlus),
-          child: const Text('Add Bookmark'),
-          onPressed: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId))!;
+        if (enableFindInPage || enableReaderMode || enableDesktopMode)
+          const Divider(),
+        if (enableFetchFeeds)
+          Visibility(
+            visible: showFeeds.value,
+            replacement: MenuItemButton(
+              closeOnActivate: false,
+              leadingIcon: const Icon(Icons.rss_feed),
+              child: const Text('Fetch Feeds'),
+              onPressed: () {
+                showFeeds.value = true;
+              },
+            ),
+            child: WebsiteFeedMenuButton(selectedTabId),
+          ),
+        if (enableAddBookmark)
+          MenuItemButton(
+            leadingIcon: const Icon(MdiIcons.bookmarkPlus),
+            child: const Text('Add Bookmark'),
+            onPressed: () async {
+              final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-            await BookmarkEntryAddRoute(
-              bookmarkInfo: jsonEncode(
-                BookmarkInfo(
-                  title: tabState.titleOrAuthority,
-                  url: tabState.url.toString(),
-                ).encode(),
-              ),
-            ).push(context);
-          },
-        ),
-        SubmenuButton(
-          menuChildren: [
-            MenuItemButton(
-              leadingIcon: const Icon(MdiIcons.tabPlus),
-              child: const Text('Regular'),
-              onPressed: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+              await BookmarkEntryAddRoute(
+                bookmarkInfo: jsonEncode(
+                  BookmarkInfo(
+                    title: tabState.titleOrAuthority,
+                    url: tabState.url.toString(),
+                  ).encode(),
+                ),
+              ).push(context);
+            },
+          ),
+        if (enableCloneTab)
+          SubmenuButton(
+            menuChildren: [
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.tabPlus),
+                child: const Text('Regular'),
+                onPressed: () async {
+                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                final tabId = await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .addTab(
-                      url: tabState.url,
-                      private: false,
-                      selectTab: false,
+                  final tabId = await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(
+                        url: tabState.url,
+                        private: false,
+                        selectTab: false,
+                      );
+
+                  if (context.mounted) {
+                    //save reference before pop `ref` gets disposed
+                    final repo = ref.read(tabRepositoryProvider.notifier);
+
+                    ui_helper.showTabSwitchMessage(
+                      context,
+                      onSwitch: () async {
+                        await repo.selectTab(tabId);
+                      },
                     );
-
-                if (context.mounted) {
-                  //save reference before pop `ref` gets disposed
-                  final repo = ref.read(tabRepositoryProvider.notifier);
-
-                  ui_helper.showTabSwitchMessage(
-                    context,
-                    onSwitch: () async {
-                      await repo.selectTab(tabId);
-                    },
-                  );
-                }
-              },
-            ),
-            MenuItemButton(
-              leadingIcon: const Icon(MdiIcons.tabUnselected),
-              child: const Text('Private'),
-              onPressed: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-                final tabId = await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .addTab(url: tabState.url, private: true, selectTab: false);
-
-                if (context.mounted) {
-                  //save reference before pop `ref` gets disposed
-                  final repo = ref.read(tabRepositoryProvider.notifier);
-
-                  ui_helper.showTabSwitchMessage(
-                    context,
-                    onSwitch: () async {
-                      await repo.selectTab(tabId);
-                    },
-                  );
-                }
-              },
-            ),
-          ],
-          leadingIcon: const Icon(MdiIcons.tabPlus),
-          child: const Text('Clone Tab'),
-        ),
-        SubmenuButton(
-          menuChildren: [
-            MenuItemButton(
-              leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
-              child: const Text('Assign Container'),
-              onPressed: () async {
-                final targetContainerId = await const ContainerSelectionRoute()
-                    .push<String?>(context);
-
-                if (targetContainerId != null) {
-                  final containerData = await ref
-                      .read(containerRepositoryProvider.notifier)
-                      .getContainerData(targetContainerId);
-
-                  if (containerData != null) {
-                    final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-                    await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .assignContainer(tabState.id, containerData);
                   }
-                }
-              },
-            ),
-            Consumer(
-              child: MenuItemButton(
-                leadingIcon: const Icon(MdiIcons.webPlus),
-                child: const Text('URL relation'),
+                },
+              ),
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.tabUnselected),
+                child: const Text('Private'),
+                onPressed: () async {
+                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+                  final tabId = await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(
+                        url: tabState.url,
+                        private: true,
+                        selectTab: false,
+                      );
+
+                  if (context.mounted) {
+                    //save reference before pop `ref` gets disposed
+                    final repo = ref.read(tabRepositoryProvider.notifier);
+
+                    ui_helper.showTabSwitchMessage(
+                      context,
+                      onSwitch: () async {
+                        await repo.selectTab(tabId);
+                      },
+                    );
+                  }
+                },
+              ),
+            ],
+            leadingIcon: const Icon(MdiIcons.tabPlus),
+            child: const Text('Clone Tab'),
+          ),
+        if (enableContainer)
+          SubmenuButton(
+            menuChildren: [
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
+                child: const Text('Assign Container'),
                 onPressed: () async {
                   final targetContainerId =
                       await const ContainerSelectionRoute().push<String?>(
@@ -254,129 +268,165 @@ class TabMenu extends HookConsumerWidget {
                     if (containerData != null) {
                       final tabState = ref.read(
                         tabStateProvider(selectedTabId),
-                      );
-                      final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+                      )!;
 
-                      if (origin != null) {
-                        await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .replaceContainer(
-                              containerData.copyWith.metadata(
-                                containerData.metadata.copyWith.assignedSites([
-                                  ...?containerData.metadata.assignedSites,
-                                  origin,
-                                ]),
-                              ),
-                            );
-                      }
+                      await ref
+                          .read(tabDataRepositoryProvider.notifier)
+                          .assignContainer(tabState.id, containerData);
                     }
                   }
                 },
               ),
-              builder: (context, ref, child) {
-                final isSiteAssigned = ref.watch(
-                  watchIsCurrentSiteAssignedToContainerProvider,
-                );
+              Consumer(
+                child: MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.webPlus),
+                  child: const Text('URL relation'),
+                  onPressed: () async {
+                    final targetContainerId =
+                        await const ContainerSelectionRoute().push<String?>(
+                          context,
+                        );
 
-                return Visibility(
-                  visible:
-                      isSiteAssigned.hasValue && !isSiteAssigned.requireValue,
-                  child: child!,
-                );
-              },
-            ),
-            Consumer(
-              child: MenuItemButton(
-                leadingIcon: const Icon(MdiIcons.folderCancelOutline),
-                child: const Text('Unassign Container'),
-                onPressed: () async {
-                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                    if (targetContainerId != null) {
+                      final containerData = await ref
+                          .read(containerRepositoryProvider.notifier)
+                          .getContainerData(targetContainerId);
 
-                  await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .unassignContainer(tabState.id);
+                      if (containerData != null) {
+                        final tabState = ref.read(
+                          tabStateProvider(selectedTabId),
+                        );
+                        final origin = tabState?.url.origin.mapNotNull(
+                          Uri.parse,
+                        );
+
+                        if (origin != null) {
+                          await ref
+                              .read(containerRepositoryProvider.notifier)
+                              .replaceContainer(
+                                containerData.copyWith.metadata(
+                                  containerData.metadata.copyWith.assignedSites(
+                                    [
+                                      ...?containerData.metadata.assignedSites,
+                                      origin,
+                                    ],
+                                  ),
+                                ),
+                              );
+                        }
+                      }
+                    }
+                  },
+                ),
+                builder: (context, ref, child) {
+                  final isSiteAssigned = ref.watch(
+                    watchIsCurrentSiteAssignedToContainerProvider,
+                  );
+
+                  return Visibility(
+                    visible:
+                        isSiteAssigned.hasValue && !isSiteAssigned.requireValue,
+                    child: child!,
+                  );
                 },
               ),
-              builder: (context, ref, child) {
-                final containerId = ref.watch(
-                  watchContainerTabIdProvider(
-                    selectedTabId,
-                  ).select((value) => value.value),
-                );
+              Consumer(
+                child: MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.folderCancelOutline),
+                  child: const Text('Unassign Container'),
+                  onPressed: () async {
+                    final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                return Visibility(visible: containerId != null, child: child!);
-              },
-            ),
-          ],
-          leadingIcon: const Icon(MdiIcons.folder),
-          child: const Text('Container'),
-        ),
-        SubmenuButton(
-          menuChildren: [
-            CopyAddressMenuItemButton(selectedTabId: selectedTabId),
-            LaunchExternalMenuItemButton(selectedTabId: selectedTabId),
-            ShareScreenshotMenuItemButton(selectedTabId: selectedTabId),
-            ShareMenuItemButton(selectedTabId: selectedTabId),
-            ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
-          ],
-          leadingIcon: const Icon(Icons.share),
-          child: const Text('Share'),
-        ),
-        SubmenuButton(
-          menuChildren: [
-            ShareMarkdownActionMenuItemButton(
-              selectedTabId: selectedTabId,
-              title: const Text('Copy as Markdown'),
-              // ignore: deprecated_member_use
-              icon: const Icon(MdiIcons.languageMarkdownOutline),
-              shareMarkdownAction: (content, fileName) async {
-                await Clipboard.setData(ClipboardData(text: content));
-
-                if (context.mounted) {
-                  ui_helper.showInfoMessage(
-                    context,
-                    'Markdown copied to clipboard',
+                    await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .unassignContainer(tabState.id);
+                  },
+                ),
+                builder: (context, ref, child) {
+                  final containerId = ref.watch(
+                    watchContainerTabIdProvider(
+                      selectedTabId,
+                    ).select((value) => value.value),
                   );
-                }
-              },
-            ),
-            ShareMarkdownActionMenuItemButton(
-              selectedTabId: selectedTabId,
-              title: const Text('Export as Markdown'),
-              // ignore: deprecated_member_use
-              icon: const Icon(MdiIcons.languageMarkdown),
-              shareMarkdownAction: (content, fileName) async {
-                await FilePicker.platform.saveFile(
-                  fileName: fileName,
-                  type: FileType.custom,
-                  allowedExtensions: ['md'],
-                  bytes: utf8.encode(content),
-                );
-              },
-            ),
-            SaveToPdfMenuItemButton(selectedTabId: selectedTabId),
-          ],
-          leadingIcon: const Icon(MdiIcons.fileExport),
-          child: const Text('Export'),
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .closeTab(selectedTabId);
 
-            if (context.mounted) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-              );
-            }
-          },
-          leadingIcon: const Icon(Icons.close),
-          child: const Text('Close Tab'),
-        ),
+                  return Visibility(
+                    visible: containerId != null,
+                    child: child!,
+                  );
+                },
+              ),
+            ],
+            leadingIcon: const Icon(MdiIcons.folder),
+            child: const Text('Container'),
+          ),
+        if (enableShare)
+          SubmenuButton(
+            menuChildren: [
+              CopyAddressMenuItemButton(selectedTabId: selectedTabId),
+              LaunchExternalMenuItemButton(selectedTabId: selectedTabId),
+              ShareScreenshotMenuItemButton(selectedTabId: selectedTabId),
+              ShareMenuItemButton(selectedTabId: selectedTabId),
+              ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
+            ],
+            leadingIcon: const Icon(Icons.share),
+            child: const Text('Share'),
+          ),
+        if (enableExport)
+          SubmenuButton(
+            menuChildren: [
+              ShareMarkdownActionMenuItemButton(
+                selectedTabId: selectedTabId,
+                title: const Text('Copy as Markdown'),
+                // ignore: deprecated_member_use
+                icon: const Icon(MdiIcons.languageMarkdownOutline),
+                shareMarkdownAction: (content, fileName) async {
+                  await Clipboard.setData(ClipboardData(text: content));
+
+                  if (context.mounted) {
+                    ui_helper.showInfoMessage(
+                      context,
+                      'Markdown copied to clipboard',
+                    );
+                  }
+                },
+              ),
+              ShareMarkdownActionMenuItemButton(
+                selectedTabId: selectedTabId,
+                title: const Text('Export as Markdown'),
+                // ignore: deprecated_member_use
+                icon: const Icon(MdiIcons.languageMarkdown),
+                shareMarkdownAction: (content, fileName) async {
+                  await FilePicker.platform.saveFile(
+                    fileName: fileName,
+                    type: FileType.custom,
+                    allowedExtensions: ['md'],
+                    bytes: utf8.encode(content),
+                  );
+                },
+              ),
+              SaveToPdfMenuItemButton(selectedTabId: selectedTabId),
+            ],
+            leadingIcon: const Icon(MdiIcons.fileExport),
+            child: const Text('Export'),
+          ),
+        if (enableCloseTab)
+          MenuItemButton(
+            onPressed: () async {
+              await ref
+                  .read(tabRepositoryProvider.notifier)
+                  .closeTab(selectedTabId);
+
+              if (context.mounted) {
+                ui_helper.showTabUndoClose(
+                  context,
+                  ref.read(tabRepositoryProvider.notifier).undoClose,
+                );
+              }
+            },
+            leadingIcon: const Icon(Icons.close),
+            child: const Text('Close Tab'),
+          ),
       ],
-      child: child,
     );
   }
 }
