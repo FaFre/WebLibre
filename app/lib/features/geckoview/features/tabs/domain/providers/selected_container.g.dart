@@ -106,9 +106,8 @@ String _$selectedContainerDataHash() =>
 const selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();
 
 final class SelectedContainerTabCountProvider
-    extends
-        $FunctionalProvider<AsyncValue<int>, AsyncValue<int>, AsyncValue<int>>
-    with $Provider<AsyncValue<int>> {
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
   const SelectedContainerTabCountProvider._()
     : super(
         from: null,
@@ -125,22 +124,14 @@ final class SelectedContainerTabCountProvider
 
   @$internal
   @override
-  $ProviderElement<AsyncValue<int>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
-  AsyncValue<int> create(Ref ref) {
+  FutureOr<int> create(Ref ref) {
     return selectedContainerTabCount(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<int> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<int>>(value),
-    );
   }
 }
 
 String _$selectedContainerTabCountHash() =>
-    r'0fd457793f7870050f81c54d2fbcc81aca60f394';
+    r'36efadeaa356e34cfdb6c07dbba73eed6d2ad6ca';

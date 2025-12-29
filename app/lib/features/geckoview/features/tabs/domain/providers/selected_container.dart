@@ -164,14 +164,18 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
 }
 
 @Riverpod()
-AsyncValue<int> selectedContainerTabCount(Ref ref) {
+Future<int> selectedContainerTabCount(Ref ref) async {
   final selectedContainer = ref.watch(selectedContainerProvider);
-  final tabCount = ref.watch(
-    containerTabCountProvider(
+
+  if (selectedContainer == null) {
+    return 0;
+  }
+
+  // Use selectAsync to avoid UnmountedRefException when container changes
+  return ref.watch(
+    watchContainerTabIdsProvider(
       // ignore: provider_parameters
       ContainerFilterById(containerId: selectedContainer),
-    ),
+    ).selectAsync((tabs) => tabs.length),
   );
-
-  return tabCount;
 }
