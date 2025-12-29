@@ -134,4 +134,4 @@ final class SelectedContainerTabCountProvider
 }
 
 String _$selectedContainerTabCountHash() =>
-    r'36efadeaa356e34cfdb6c07dbba73eed6d2ad6ca';
+    r'b763f949210ac9106d4a9240c0e65bdfae2d18ec';

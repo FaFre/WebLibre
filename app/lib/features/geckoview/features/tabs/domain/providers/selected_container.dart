@@ -167,11 +167,6 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
 Future<int> selectedContainerTabCount(Ref ref) async {
   final selectedContainer = ref.watch(selectedContainerProvider);
 
-  if (selectedContainer == null) {
-    return 0;
-  }
-
-  // Use selectAsync to avoid UnmountedRefException when container changes
   return ref.watch(
     watchContainerTabIdsProvider(
       // ignore: provider_parameters
