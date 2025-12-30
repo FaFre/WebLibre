@@ -226,7 +226,7 @@ class MlDownloadState extends _$MlDownloadState {
             if (progress.status == MlProgressStatus.done) {
               // Keep showing for 2 seconds after completion
               Future.delayed(const Duration(seconds: 2), () {
-                if (state != null && state!.id == progress.id) {
+                if (ref.mounted && state != null && state!.id == progress.id) {
                   state = null;
                 }
               });
