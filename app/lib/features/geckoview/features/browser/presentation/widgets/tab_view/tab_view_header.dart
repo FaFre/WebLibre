@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -8,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -379,6 +381,182 @@ class TabViewHeader extends HookConsumerWidget {
                                 );
                               }
                             }
+                          },
+                        ),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final selectedContainer = ref.watch(
+                              selectedContainerDataProvider.select(
+                                (value) => value.value,
+                              ),
+                            );
+
+                            // Only show if container has cookie isolation
+                            if (selectedContainer
+                                    ?.metadata
+                                    .contextualIdentity ==
+                                null) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Divider(),
+                                MenuItemButton(
+                                  closeOnActivate: false,
+                                  leadingIcon: const Icon(
+                                    Icons.cleaning_services,
+                                  ),
+                                  child: const Text('Clear Container Data'),
+                                  onPressed: () async {
+                                    final containerId = selectedContainer!.id;
+                                    final tabs = await ref
+                                        .read(
+                                          tabDataRepositoryProvider.notifier,
+                                        )
+                                        .getContainerTabsData(containerId);
+
+                                    if (!context.mounted) return;
+
+                                    final result = await showDialog<bool?>(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          icon: const Icon(
+                                            Icons.cleaning_services,
+                                          ),
+                                          title: const Text(
+                                            'Clear Container Data?',
+                                          ),
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'This will clear all data for this container:',
+                                              ),
+                                              const SizedBox(height: 8),
+                                              const Text('• Cookies'),
+                                              const Text('• Site data'),
+                                              const Text('• Cache'),
+                                              const Text('• Permissions'),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                '${tabs.length} tab(s) will be closed and reopened fresh.',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.tertiary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context, false);
+                                              },
+                                              child: const Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context, true);
+                                              },
+                                              child: const Text('Clear Data'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+
+                                    if (result == true) {
+                                      try {
+                                        await ref
+                                            .read(
+                                              tabDataRepositoryProvider
+                                                  .notifier,
+                                            )
+                                            .closeContainerTabs(containerId);
+
+                                        await ref
+                                            .read(
+                                              browserDataServiceProvider
+                                                  .notifier,
+                                            )
+                                            .clearDataForContext(
+                                              selectedContainer
+                                                  .metadata
+                                                  .contextualIdentity!,
+                                            );
+
+                                        await ref
+                                            .read(
+                                              tabRepositoryProvider.notifier,
+                                            )
+                                            .addMultipleTabs(
+                                              tabs: tabs
+                                                  .map(
+                                                    (tab) => AddTabParams(
+                                                      url: tab.url.toString(),
+                                                      startLoading: true,
+                                                      parentId: tab.parentId,
+                                                      private:
+                                                          tab.isPrivate ??
+                                                          false,
+                                                      flags: LoadUrlFlags.NONE
+                                                          .toValue(),
+                                                      source: Internal.newTab
+                                                          .toValue(),
+                                                      contextId: selectedContainer
+                                                          .metadata
+                                                          .contextualIdentity,
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                              container: Value(
+                                                selectedContainer,
+                                              ),
+                                            );
+
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Container data cleared successfully',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Error clearing data: $e',
+                                              ),
+                                              backgroundColor: Theme.of(
+                                                context,
+                                              ).colorScheme.error,
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    }
+
+                                    if (context.mounted) {
+                                      MenuController.maybeOf(context)?.close();
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
                           },
                         ),
                       ],

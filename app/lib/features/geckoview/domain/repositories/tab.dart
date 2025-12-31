@@ -75,7 +75,7 @@ class TabRepository extends _$TabRepository {
           await ref.read(selectedContainerProvider.notifier).fetchData(),
         );
 
-    final newTabId = await tabDao.upsertContainerTabTransactional(
+    final newTabId = await tabDao.upsertTabTransactional(
       () {
         return _tabsService.addTab(
           url: url,
@@ -93,6 +93,7 @@ class TabRepository extends _$TabRepository {
       parentId: Value(parentId),
       containerId: Value(assingedContainer.value?.id),
       isPrivate: Value(private),
+      url: Value(url),
     );
 
     if (launchedFromIntent) {
@@ -102,10 +103,42 @@ class TabRepository extends _$TabRepository {
     return newTabId;
   }
 
+  Future<List<String>> addMultipleTabs({
+    required List<AddTabParams> tabs,
+    String? selectTabId,
+    Value<ContainerData?>? container,
+  }) async {
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+    final db = ref.read(tabDatabaseProvider);
+
+    return await db.transaction(() async {
+      final createdTabIds = await _tabsService.addMultipleTabs(
+        tabs: tabs,
+        selectTabId: selectTabId,
+      );
+
+      // Upsert all tabs in the database
+      for (var i = 0; i < createdTabIds.length; i++) {
+        final tabId = createdTabIds[i];
+        final tab = tabs[i];
+
+        await tabDao.insertTab(
+          tabId,
+          parentId: Value(tab.parentId),
+          containerId: Value(container?.value?.id),
+          isPrivate: Value(tab.private),
+          url: Value(Uri.tryParse(tab.url)),
+        );
+      }
+
+      return createdTabIds;
+    });
+  }
+
   Future<String> duplicateTab({
     required String selectTabId,
-    String? containerId,
-    bool selectTab = true,
+    required String? containerId,
+    bool selectTab = false,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
@@ -115,7 +148,7 @@ class TabRepository extends _$TabRepository {
           .getContainerData(containerId),
     );
 
-    return await tabDao.upsertContainerTabTransactional(
+    return await tabDao.upsertTabTransactional(
       () {
         return _tabsService.duplicateTab(
           selectTabId: selectTabId,
@@ -376,14 +409,16 @@ class TabRepository extends _$TabRepository {
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen((tabId) async {
-      // ignore: only_use_keep_alive_inside_keep_alive
-      final containerId = ref.read(selectedContainerProvider);
-      await db.tabDao.upsertUnassignedTab(
-        tabId,
-        parentId: const Value.absent(),
-        containerId: Value(containerId),
-        isPrivate: const Value.absent(),
-      );
+      if (await db.tabDao.getTabDataById(tabId).getSingleOrNull() == null) {
+        // ignore: only_use_keep_alive_inside_keep_alive
+        final containerId = ref.read(selectedContainerProvider);
+        await db.tabDao.insertTab(
+          tabId,
+          parentId: const Value.absent(),
+          containerId: Value(containerId),
+          isPrivate: const Value.absent(),
+        );
+      }
     });
 
     final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen((
@@ -407,7 +442,7 @@ class TabRepository extends _$TabRepository {
 
           if (containerData != null) {
             final tabIsEmpty =
-                tabState.url == TabState.$default(tabState.id).url &&
+                tabState.url == TabState.defaultUrl &&
                 tabState.historyState.items.isEmpty;
 
             if (event.blocked || tabIsEmpty) {

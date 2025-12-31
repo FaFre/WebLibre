@@ -17,8 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:drift/drift.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -49,21 +51,53 @@ class TabDataRepository extends _$TabDataRepository {
           .tabDao
           .assignContainer(tabId, containerId: targetContainer.id);
     } else {
-      await ref
-          .read(tabRepositoryProvider.notifier)
-          .duplicateTab(selectTabId: tabId, containerId: targetContainer.id);
+      final tabState = ref.read(tabStateProvider(tabId));
+      if (tabState != null) {
+        if (closeOldTab) {
+          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+        }
 
-      if (closeOldTab) {
-        await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .addTab(
+              url: tabState.url,
+              private: tabState.isPrivate,
+              container: Value(targetContainer),
+              parentId: tabState.parentId,
+            );
       }
     }
   }
 
-  Future<void> unassignContainer(String tabId) {
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .assignContainer(tabId, containerId: null);
+  Future<void> unassignContainer(String tabId) async {
+    final currentContainerId = await getTabContainerId(tabId);
+
+    final currentContainerData = await currentContainerId.mapNotNull(
+      (containerId) => ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainerData(containerId),
+    );
+
+    if (currentContainerData?.metadata.contextualIdentity == null) {
+      return ref
+          .read(tabDatabaseProvider)
+          .tabDao
+          .assignContainer(tabId, containerId: null);
+    } else {
+      final tabState = ref.read(tabStateProvider(tabId));
+      if (tabState != null) {
+        await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .addTab(
+              url: tabState.url,
+              private: tabState.isPrivate,
+              container: const Value(null),
+              parentId: tabState.parentId,
+            );
+      }
+    }
   }
 
   Future<void> assignOrderKey(String tabId, String orderKey) {

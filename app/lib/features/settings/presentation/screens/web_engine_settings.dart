@@ -121,7 +121,7 @@ class WebEngineSettingsScreen extends HookConsumerWidget {
                   vertical: 8.0,
                   horizontal: 16.0,
                 ),
-                leading: const Icon(MdiIcons.delete),
+                leading: const Icon(Icons.cleaning_services),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () async {
                   await showDialog(

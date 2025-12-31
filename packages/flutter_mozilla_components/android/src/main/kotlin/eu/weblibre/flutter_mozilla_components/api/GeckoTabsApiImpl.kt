@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import eu.weblibre.flutter_mozilla_components.pigeons.AddTabParams
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryMetadataKey as PigeonHistoryMetadataKey
 import eu.weblibre.flutter_mozilla_components.pigeons.LoadUrlFlagsValue
@@ -33,6 +34,7 @@ import kotlinx.coroutines.withContext
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.session.storage.RecoverableBrowserState
+import mozilla.components.browser.state.action.EngineAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.state.BrowserState
@@ -515,6 +517,60 @@ class GeckoTabsApiImpl : GeckoTabsApi {
             }
         } catch (e: Exception) {
             logger.error("$TAG: Failed to migrate private tab", e)
+            throw e
+        }
+    }
+
+    override fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?): List<String> {
+        try {
+            val tabSessionStates = tabs.map { params ->
+                createTab(
+                    url = params.url,
+                    private = params.private,
+                    source = restoreSource(params.source),
+                    contextId = params.contextId,
+                    parent = params.parentId?.let { components.core.store.state.findTab(it) },
+                    historyMetadata = params.historyMetadata?.let { metadata ->
+                        HistoryMetadataKey(
+                            url = metadata.url,
+                            searchTerm = metadata.searchTerm,
+                            referrerUrl = metadata.referrerUrl
+                        )
+                    },
+                    desktopMode = components.core.store.state.desktopMode
+                )
+            }
+
+            components.core.store.dispatch(
+                TabListAction.AddMultipleTabsAction(
+                    tabs = tabSessionStates
+                )
+            )
+
+            // Load URLs for tabs that need loading
+            tabs.zip(tabSessionStates).forEach { (params, tabState) ->
+                if (params.startLoading) {
+                    components.core.store.dispatch(
+                        EngineAction.LoadUrlAction(
+                            tabId = tabState.id,
+                            url = params.url,
+                            flags = EngineSession.LoadUrlFlags.select(params.flags.value.toInt()),
+                            additionalHeaders = params.additionalHeaders,
+                            includeParent = true
+                        )
+                    )
+                }
+            }
+
+            selectTabId?.let {
+                components.useCases.tabsUseCases.selectTab(tabId = it)
+            }
+
+            val createdTabIds = tabSessionStates.map { it.id }
+            logger.debug("$TAG: Added ${tabs.size} tabs: ${createdTabIds.joinToString()}")
+            return createdTabIds
+        } catch (e: Exception) {
+            logger.error("$TAG: Failed to add multiple tabs", e)
             throw e
         }
     }

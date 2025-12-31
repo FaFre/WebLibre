@@ -110,4 +110,17 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
             }
         }
     }
+
+    override fun clearDataForSessionContext(
+        contextId: String,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                components.core.runtime.storageController.clearDataForSessionContext(contextId)
+
+                callback(Result.success(Unit))
+            }
+        }
+    }
 }

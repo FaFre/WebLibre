@@ -24,6 +24,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
@@ -95,10 +96,8 @@ class GridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabState = ref.watch(tabStateProvider(tabId));
-    if (tabState == null) {
-      return const SizedBox.shrink();
-    }
+    final tabState =
+        ref.watch(tabStateProvider(tabId)) ?? TabState.$default(tabId);
 
     final extendedDeleteMenuController = useMenuController();
 
@@ -255,10 +254,8 @@ class ListTabPreview extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final tabState = ref.watch(tabStateProvider(tabId));
-    if (tabState == null) {
-      return const SizedBox.shrink();
-    }
+    final tabState =
+        ref.watch(tabStateProvider(tabId)) ?? TabState.$default(tabId);
 
     final extendedDeleteMenuController = useMenuController();
 
@@ -388,14 +385,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasTabState = ref.watch(
-      tabStateProvider(tabId).select((value) => value != null),
-    );
-
-    if (!hasTabState) {
-      return const SizedBox.shrink();
-    }
-
     final dragStartPosition = useRef(Offset.zero);
     final draggedDistance = useState(0.0);
 
@@ -512,14 +501,6 @@ class SingleListTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasTabState = ref.watch(
-      tabStateProvider(tabId).select((value) => value != null),
-    );
-
-    if (!hasTabState) {
-      return const SizedBox.shrink();
-    }
-
     final dragStartPosition = useRef(Offset.zero);
     final draggedDistance = useState(0.0);
 

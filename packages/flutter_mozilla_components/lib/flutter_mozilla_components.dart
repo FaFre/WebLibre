@@ -33,6 +33,7 @@ export 'src/domain/services/gecko_tab_content.dart';
 export 'src/geckoview_widget.dart';
 export 'src/pigeons/gecko.g.dart'
     show
+        AddTabParams,
         AddonCollection,
         AudioHitResult,
         BookmarkInfo,

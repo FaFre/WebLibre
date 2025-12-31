@@ -46,9 +46,9 @@ part 'tab_state.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabStates extends _$TabStates {
-  void _onTabContentStateChange(TabContentState contentState) {
-    final current =
-        state[contentState.id] ?? TabState.$default(contentState.id);
+  Future<void> _onTabContentStateChange(TabContentState contentState) async {
+    final current = await patchedState(contentState.id);
+
     final url = Uri.parse(contentState.url);
 
     // Determine title based on priority: new non-empty title > existing title if URL authority unchanged > new title
@@ -79,6 +79,27 @@ class TabStates extends _$TabStates {
           .read(geckoInferenceRepositoryProvider.notifier)
           .markInitialLoadComplete();
     }
+  }
+
+  Future<TabState> patchedState(String id) async {
+    var current = stateOrNull?[id];
+
+    if (current == null || current.url == TabState.defaultUrl) {
+      current ??= TabState.$default(id);
+
+      final tabData = await ref
+          .read(tabDataRepositoryProvider.notifier)
+          .getTabDataById(id);
+
+      if (tabData?.url != null) {
+        current = current.copyWith(
+          title: tabData!.title ?? current.title,
+          url: tabData.url ?? current.url,
+        );
+      }
+    }
+
+    return current;
   }
 
   Future<void> _onIconChange(IconChangeEvent event) async {
@@ -174,8 +195,8 @@ class TabStates extends _$TabStates {
     final eventService = ref.watch(eventServiceProvider);
 
     final subscriptions = [
-      eventService.tabContentEvents.listen((event) {
-        _onTabContentStateChange(event);
+      eventService.tabContentEvents.listen((event) async {
+        await _onTabContentStateChange(event);
       }),
       eventService.iconChangeEvents.listen((event) async {
         await _onIconChange(event);

@@ -54,6 +54,31 @@ class ReaderState {
   });
 }
 
+/// Parameters for adding a new tab.
+class AddTabParams {
+  final String url;
+  final bool startLoading;
+  final String? parentId;
+  final LoadUrlFlagsValue flags;
+  final String? contextId;
+  final SourceValue source;
+  final bool private;
+  final HistoryMetadataKey? historyMetadata;
+  final Map<String, String>? additionalHeaders;
+
+  const AddTabParams({
+    required this.url,
+    required this.startLoading,
+    this.parentId,
+    required this.flags,
+    this.contextId,
+    required this.source,
+    required this.private,
+    this.historyMetadata,
+    this.additionalHeaders,
+  });
+}
+
 /// Details about the last playing media in this tab.
 class LastMediaAccessState {
   /// [TabContentState.url] when media started playing.
@@ -1008,6 +1033,11 @@ abstract class GeckoTabsApi {
     required Map<String, String>? additionalHeaders,
   });
 
+  List<String> addMultipleTabs({
+    required List<AddTabParams> tabs,
+    required String? selectTabId,
+  });
+
   void removeAllTabs({required bool recoverable});
 
   void removeTabs({required List<String> ids});
@@ -1114,19 +1144,10 @@ abstract class GeckoPrefApi {
 }
 
 /// Type of ML model operation
-enum MlProgressType {
-  downloading,
-  loadingFromCache,
-  runningInference,
-}
+enum MlProgressType { downloading, loadingFromCache, runningInference }
 
 /// Status of the ML operation
-enum MlProgressStatus {
-  initiate,
-  sizeEstimate,
-  inProgress,
-  done,
-}
+enum MlProgressStatus { initiate, sizeEstimate, inProgress, done }
 
 /// Progress information for ML model operations
 class MlProgressData {
@@ -1392,6 +1413,9 @@ abstract class GeckoDeleteBrowsingDataController {
   void deleteSitePermissions();
   @async
   void deleteDownloads();
+
+  @async
+  void clearDataForSessionContext(String contextId);
 }
 
 @HostApi()

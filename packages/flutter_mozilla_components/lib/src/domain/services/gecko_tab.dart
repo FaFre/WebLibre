@@ -180,4 +180,14 @@ class GeckoTabService {
       alternativeUrl: alternativeUrl?.toString(),
     );
   }
+
+  Future<List<String>> addMultipleTabs({
+    required List<AddTabParams> tabs,
+    String? selectTabId,
+  }) {
+    return _api.addMultipleTabs(
+      tabs: tabs,
+      selectTabId: selectTabId,
+    );
+  }
 }

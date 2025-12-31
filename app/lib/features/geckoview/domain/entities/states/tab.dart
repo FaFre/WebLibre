@@ -32,6 +32,8 @@ part 'tab.g.dart';
 
 @CopyWith()
 class TabState extends WebPageInfo {
+  static final defaultUrl = Uri.parse('about:blank');
+
   @CopyWithField(immutable: true)
   final String id;
 
@@ -92,7 +94,7 @@ class TabState extends WebPageInfo {
     id: tabId,
     parentId: null,
     contextId: null,
-    url: Uri.parse('about:blank'),
+    url: defaultUrl,
     title: "",
     icon: null,
     thumbnail: null,

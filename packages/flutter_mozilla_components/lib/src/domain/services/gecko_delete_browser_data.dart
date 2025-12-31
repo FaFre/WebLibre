@@ -37,4 +37,8 @@ class GeckoDeleteBrowserDataService {
   Future<void> deleteDownloads() {
     return _api.deleteDownloads();
   }
+
+  Future<void> clearDataForContext(String contextId) {
+    return _api.clearDataForSessionContext(contextId);
+  }
 }

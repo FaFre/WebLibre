@@ -59,6 +59,10 @@ class BrowserDataService extends _$BrowserDataService {
     }
   }
 
+  Future<void> clearDataForContext(String contextId) {
+    return _service.clearDataForContext(contextId);
+  }
+
   @override
   void build() {}
 }

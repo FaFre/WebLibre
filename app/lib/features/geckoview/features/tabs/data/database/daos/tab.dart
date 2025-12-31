@@ -103,12 +103,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     }
   }
 
-  Future<String> upsertContainerTabTransactional(
+  Future<String> upsertTabTransactional(
     Future<String> Function() createTab, {
     required Value<bool?> isPrivate,
     required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
+    Value<Uri?> url = const Value.absent(),
+    Value<String?> title = const Value.absent(),
   }) {
     return db.transaction(() async {
       final tabId = await createTab();
@@ -122,6 +124,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           parentId: parentId,
           timestamp: DateTime.now(),
           containerId: containerId,
+          url: url,
+          title: title,
           isPrivate: isPrivate,
           orderKey: currentOrderKey,
         ),
@@ -130,6 +134,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             parentId: parentId,
             containerId: containerId,
             orderKey: Value.absentIfNull(orderKey.value),
+            url: url,
+            title: title,
           ),
         ),
       );
@@ -139,12 +145,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   }
 
   //Upsert an tab only if there is no container assigned yet
-  Future<String> upsertUnassignedTab(
+  Future<String> insertTab(
     String tabId, {
     required Value<bool?> isPrivate,
     required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
+    Value<Uri?> url = const Value.absent(),
+    Value<String?> title = const Value.absent(),
   }) {
     return db.transaction(() async {
       final currentOrderKey =
@@ -159,6 +167,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           containerId: containerId,
           orderKey: currentOrderKey,
           isPrivate: isPrivate,
+          url: url,
+          title: title,
         ),
         mode: InsertMode.insertOrIgnore,
       );
@@ -218,7 +228,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             db.tab,
             TabCompanion(
               parentId: (previousState?.parentId != state.parentId)
-                  ? Value(state.parentId)
+                  ? Value(
+                      next.containsKey(state.parentId) ? state.parentId : null,
+                    )
                   : const Value.absent(),
               url: (previousState?.url != state.url)
                   ? Value(state.url)

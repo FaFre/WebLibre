@@ -196,13 +196,20 @@ class TabMenu extends HookConsumerWidget {
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                  final tabId = await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: tabState.url,
-                        private: false,
-                        selectTab: false,
-                      );
+                  final tabId = (tabState.isPrivate)
+                      ? await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .addTab(
+                              url: tabState.url,
+                              private: false,
+                              selectTab: false,
+                            )
+                      : await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .duplicateTab(
+                              selectTabId: selectedTabId,
+                              containerId: tabState.contextId,
+                            );
 
                   if (context.mounted) {
                     //save reference before pop `ref` gets disposed
@@ -223,13 +230,20 @@ class TabMenu extends HookConsumerWidget {
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                  final tabId = await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: tabState.url,
-                        private: true,
-                        selectTab: false,
-                      );
+                  final tabId = (!tabState.isPrivate)
+                      ? await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .addTab(
+                              url: tabState.url,
+                              private: true,
+                              selectTab: false,
+                            )
+                      : await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .duplicateTab(
+                              selectTabId: selectedTabId,
+                              containerId: tabState.contextId,
+                            );
 
                   if (context.mounted) {
                     //save reference before pop `ref` gets disposed
