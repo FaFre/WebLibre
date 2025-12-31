@@ -139,6 +139,77 @@ final class TabStateFamily extends $Family
   String toString() => r'tabStateProvider';
 }
 
+@ProviderFor(tabStateWithFallback)
+const tabStateWithFallbackProvider = TabStateWithFallbackFamily._();
+
+final class TabStateWithFallbackProvider
+    extends
+        $FunctionalProvider<AsyncValue<TabState>, TabState, FutureOr<TabState>>
+    with $FutureModifier<TabState>, $FutureProvider<TabState> {
+  const TabStateWithFallbackProvider._({
+    required TabStateWithFallbackFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'tabStateWithFallbackProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabStateWithFallbackHash();
+
+  @override
+  String toString() {
+    return r'tabStateWithFallbackProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<TabState> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<TabState> create(Ref ref) {
+    final argument = this.argument as String;
+    return tabStateWithFallback(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TabStateWithFallbackProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$tabStateWithFallbackHash() =>
+    r'061011ac79738dbe4e662a76fccbc8592cba21cf';
+
+final class TabStateWithFallbackFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<TabState>, String> {
+  const TabStateWithFallbackFamily._()
+    : super(
+        retry: null,
+        name: r'tabStateWithFallbackProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  TabStateWithFallbackProvider call(String tabId) =>
+      TabStateWithFallbackProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'tabStateWithFallbackProvider';
+}
+
 @ProviderFor(isTabTunneled)
 const isTabTunneledProvider = IsTabTunneledFamily._();
 
@@ -188,7 +259,7 @@ final class IsTabTunneledProvider
   }
 }
 
-String _$isTabTunneledHash() => r'2e1a911c26345951cf259ca4547d236a71607667';
+String _$isTabTunneledHash() => r'84035f8df248cd0586016c12c1820dd902717c1d';
 
 final class IsTabTunneledFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String?> {

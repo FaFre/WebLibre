@@ -264,6 +264,17 @@ TabState? tabState(Ref ref, String? tabId) {
 }
 
 @Riverpod()
+Future<TabState> tabStateWithFallback(Ref ref, String tabId) async {
+  final state = ref.watch(tabStateProvider(tabId));
+
+  if (state != null) {
+    return state;
+  }
+
+  return await ref.read(tabStatesProvider.notifier).patchedState(tabId);
+}
+
+@Riverpod()
 Future<bool> isTabTunneled(Ref ref, String? tabId) async {
   final tabState = ref.watch(tabStateProvider(tabId));
   final torSettings = ref.watch(torSettingsWithDefaultsProvider);

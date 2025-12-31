@@ -96,8 +96,10 @@ class GridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabState =
-        ref.watch(tabStateProvider(tabId)) ?? TabState.$default(tabId);
+    final tabState = ref.watch(
+          tabStateWithFallbackProvider(tabId).select((asyncValue) => asyncValue.value),
+        ) ??
+        TabState.$default(tabId);
 
     final extendedDeleteMenuController = useMenuController();
 
@@ -254,8 +256,10 @@ class ListTabPreview extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final tabState =
-        ref.watch(tabStateProvider(tabId)) ?? TabState.$default(tabId);
+    final tabState = ref.watch(
+          tabStateWithFallbackProvider(tabId).select((asyncValue) => asyncValue.value),
+        ) ??
+        TabState.$default(tabId);
 
     final extendedDeleteMenuController = useMenuController();
 
