@@ -278,11 +278,15 @@ Future<bool> isTabTunneled(Ref ref, String? tabId) async {
               .read(tabDataRepositoryProvider.notifier)
               .getTabContainerId(tabState.id);
 
+          if (!ref.mounted) return false;
+
           final containerData = await containerId.mapNotNull(
             (containerId) => ref
                 .read(containerRepositoryProvider.notifier)
                 .getContainerData(containerId),
           );
+
+          if (!ref.mounted) return false;
 
           return containerData?.metadata.useProxy ?? false;
         case TorRegularTabProxyMode.all:
