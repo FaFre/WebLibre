@@ -25,12 +25,13 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/con
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.steps.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
 @DriftDatabase(include: {'definitions.drift'}, daos: [ContainerDao, TabDao])
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 3;
+  final int schemaVersion = 4;
 
   @override
   final int ftsTokenLimit = 10;
@@ -82,6 +83,17 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
     from2To3: (m, schema) async {
       final tabAtV3 = schema.tab;
       await m.addColumn(tabAtV3, tabAtV3.isPrivate);
+    },
+    from3To4: (m, schema) async {
+      await m.alterTable(
+        TableMigration(
+          schema.tab,
+          columnTransformer: {
+            schema.tab.source: Constant(TabSource.manual.index),
+          },
+          newColumns: [schema.tab.source],
+        ),
+      );
     },
   );
 }

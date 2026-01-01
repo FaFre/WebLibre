@@ -80,6 +80,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
                   url: defaultSearchBang.getTemplateUrl(text),
                   parentId: currentTab?.id,
                   private: isPrivate,
+                  selectTab: true,
                 );
           } else {
             logger.e('No default search bang found');

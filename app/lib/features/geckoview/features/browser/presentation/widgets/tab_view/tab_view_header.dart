@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -297,7 +298,7 @@ class TabViewHeader extends HookConsumerWidget {
                                   ref
                                       .read(tabRepositoryProvider.notifier)
                                       .undoClose,
-                                  count: count,
+                                  count: count.length,
                                 );
                               }
                             }
@@ -329,7 +330,7 @@ class TabViewHeader extends HookConsumerWidget {
                                   ref
                                       .read(tabRepositoryProvider.notifier)
                                       .undoClose,
-                                  count: count,
+                                  count: count.length,
                                 );
                               }
                             }
@@ -379,7 +380,7 @@ class TabViewHeader extends HookConsumerWidget {
 
                                     if (result == true) {
                                       try {
-                                        await ref
+                                        final closedTabIds = await ref
                                             .read(
                                               tabDataRepositoryProvider
                                                   .notifier,
@@ -402,25 +403,35 @@ class TabViewHeader extends HookConsumerWidget {
                                               tabRepositoryProvider.notifier,
                                             )
                                             .addMultipleTabs(
-                                              tabs: tabs
-                                                  .map(
-                                                    (tab) => AddTabParams(
-                                                      url: tab.url.toString(),
-                                                      startLoading: true,
-                                                      parentId: tab.parentId,
-                                                      private:
-                                                          tab.isPrivate ??
-                                                          false,
-                                                      flags: LoadUrlFlags.NONE
-                                                          .toValue(),
-                                                      source: Internal.newTab
-                                                          .toValue(),
-                                                      contextId: selectedContainer
-                                                          .metadata
-                                                          .contextualIdentity,
-                                                    ),
-                                                  )
-                                                  .toList(),
+                                              tabs: tabs.map((tab) {
+                                                var parentId = tab.parentId;
+                                                while (parentId != null &&
+                                                    closedTabIds.contains(
+                                                      parentId,
+                                                    )) {
+                                                  parentId = tabs
+                                                      .firstWhereOrNull(
+                                                        (old) =>
+                                                            old.id == parentId,
+                                                      )
+                                                      ?.parentId;
+                                                }
+
+                                                return AddTabParams(
+                                                  url: tab.url.toString(),
+                                                  startLoading: true,
+                                                  parentId: parentId,
+                                                  private:
+                                                      tab.isPrivate ?? false,
+                                                  flags: LoadUrlFlags.NONE
+                                                      .toValue(),
+                                                  source: Internal.newTab
+                                                      .toValue(),
+                                                  contextId: selectedContainer
+                                                      .metadata
+                                                      .contextualIdentity,
+                                                );
+                                              }).toList(),
                                               container: Value(
                                                 selectedContainer,
                                               ),

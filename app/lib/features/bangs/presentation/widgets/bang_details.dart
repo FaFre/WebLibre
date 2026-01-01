@@ -96,7 +96,11 @@ class BangDetails extends HookConsumerWidget {
 
                       await ref
                           .read(tabRepositoryProvider.notifier)
-                          .addTab(url: url, private: isPrivate);
+                          .addTab(
+                            url: url,
+                            private: isPrivate,
+                            selectTab: true,
+                          );
 
                       if (context.mounted) {
                         const BrowserRoute().go(context);

@@ -103,7 +103,7 @@ class SiteSearch extends HookConsumerWidget {
           if (searchInNewTab) {
             await ref
                 .read(tabRepositoryProvider.notifier)
-                .addTab(url: searchUri, private: isPrivate);
+                .addTab(url: searchUri, private: isPrivate, selectTab: true);
           } else {
             await ref
                 .read(tabSessionProvider(tabId: null).notifier)

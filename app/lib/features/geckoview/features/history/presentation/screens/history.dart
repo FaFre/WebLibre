@@ -473,6 +473,7 @@ class HistoryScreen extends HookConsumerWidget {
                                       .addTab(
                                         url: Uri.parse(item.url),
                                         private: false,
+                                        selectTab: true,
                                       );
 
                                   if (context.mounted) {

@@ -9,12 +9,14 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/definiti
 import 'package:weblibre/data/database/converters/color.dart' as i4;
 import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart'
     as i5;
-import 'package:weblibre/data/database/converters/uri.dart' as i6;
-import 'package:drift/internal/modular.dart' as i7;
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart'
+    as i6;
+import 'package:weblibre/data/database/converters/uri.dart' as i7;
+import 'package:drift/internal/modular.dart' as i8;
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart'
-    as i8;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart'
     as i9;
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart'
+    as i10;
 
 typedef $ContainerCreateCompanionBuilder =
     i3.ContainerCompanion Function({
@@ -45,10 +47,10 @@ final class $ContainerReferences
   static i0.MultiTypedResultKey<i3.Tab, List<i3.TabData>> _tabRefsTable(
     i0.GeneratedDatabase db,
   ) => i0.MultiTypedResultKey.fromTable(
-    i7.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
+    i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
     aliasName: i0.$_aliasNameGenerator(
-      i7.ReadDatabaseContainer(db).resultSet<i3.Container>('container').id,
-      i7.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
+      i8.ReadDatabaseContainer(db).resultSet<i3.Container>('container').id,
+      i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
     ),
   );
 
@@ -56,7 +58,7 @@ final class $ContainerReferences
     final manager = i3
         .$TabTableManager(
           $_db,
-          i7.ReadDatabaseContainer($_db).resultSet<i3.Tab>('tab'),
+          i8.ReadDatabaseContainer($_db).resultSet<i3.Tab>('tab'),
         )
         .filter((f) => f.containerId.id.sqlEquals($_itemColumn<String>('id')!));
 
@@ -108,7 +110,7 @@ class $ContainerFilterComposer
     final i3.$TabFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: i7.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+      referencedTable: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
       getReferencedColumn: (t) => t.containerId,
       builder:
           (
@@ -117,7 +119,7 @@ class $ContainerFilterComposer
             $removeJoinBuilderFromRootComposer,
           }) => i3.$TabFilterComposer(
             $db: $db,
-            $table: i7.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $table: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -186,7 +188,7 @@ class $ContainerAnnotationComposer
     final i3.$TabAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: i7.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+      referencedTable: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
       getReferencedColumn: (t) => t.containerId,
       builder:
           (
@@ -195,7 +197,7 @@ class $ContainerAnnotationComposer
             $removeJoinBuilderFromRootComposer,
           }) => i3.$TabAnnotationComposer(
             $db: $db,
-            $table: i7.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $table: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -273,7 +275,7 @@ class $ContainerTableManager
               db: db,
               explicitlyWatchedTables: [
                 if (tabRefs)
-                  i7.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
+                  i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -321,6 +323,7 @@ typedef $ContainerProcessedTableManager =
 typedef $TabCreateCompanionBuilder =
     i3.TabCompanion Function({
       required String id,
+      required i6.TabSource source,
       i0.Value<String?> parentId,
       i0.Value<String?> containerId,
       required String orderKey,
@@ -338,6 +341,7 @@ typedef $TabCreateCompanionBuilder =
 typedef $TabUpdateCompanionBuilder =
     i3.TabCompanion Function({
       i0.Value<String> id,
+      i0.Value<i6.TabSource> source,
       i0.Value<String?> parentId,
       i0.Value<String?> containerId,
       i0.Value<String> orderKey,
@@ -358,12 +362,12 @@ final class $TabReferences
   $TabReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static i3.Container _containerIdTable(i0.GeneratedDatabase db) =>
-      i7.ReadDatabaseContainer(db)
+      i8.ReadDatabaseContainer(db)
           .resultSet<i3.Container>('container')
           .createAlias(
             i0.$_aliasNameGenerator(
-              i7.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
-              i7.ReadDatabaseContainer(
+              i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
+              i8.ReadDatabaseContainer(
                 db,
               ).resultSet<i3.Container>('container').id,
             ),
@@ -375,7 +379,7 @@ final class $TabReferences
     final manager = i3
         .$ContainerTableManager(
           $_db,
-          i7.ReadDatabaseContainer($_db).resultSet<i3.Container>('container'),
+          i8.ReadDatabaseContainer($_db).resultSet<i3.Container>('container'),
         )
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_containerIdTable($_db));
@@ -397,6 +401,12 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
   i0.ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
     builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnWithTypeConverterFilters<i6.TabSource, i6.TabSource, int>
+  get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
   );
 
   i0.ColumnFilters<String> get parentId => $composableBuilder(
@@ -459,7 +469,7 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     final i3.$ContainerFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.containerId,
-      referencedTable: i7.ReadDatabaseContainer(
+      referencedTable: i8.ReadDatabaseContainer(
         $db,
       ).resultSet<i3.Container>('container'),
       getReferencedColumn: (t) => t.id,
@@ -470,7 +480,7 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
             $removeJoinBuilderFromRootComposer,
           }) => i3.$ContainerFilterComposer(
             $db: $db,
-            $table: i7.ReadDatabaseContainer(
+            $table: i8.ReadDatabaseContainer(
               $db,
             ).resultSet<i3.Container>('container'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -493,6 +503,11 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
   });
   i0.ColumnOrderings<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<int> get source => $composableBuilder(
+    column: $table.source,
     builder: (column) => i0.ColumnOrderings(column),
   );
 
@@ -555,7 +570,7 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     final i3.$ContainerOrderingComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.containerId,
-      referencedTable: i7.ReadDatabaseContainer(
+      referencedTable: i8.ReadDatabaseContainer(
         $db,
       ).resultSet<i3.Container>('container'),
       getReferencedColumn: (t) => t.id,
@@ -566,7 +581,7 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
             $removeJoinBuilderFromRootComposer,
           }) => i3.$ContainerOrderingComposer(
             $db: $db,
-            $table: i7.ReadDatabaseContainer(
+            $table: i8.ReadDatabaseContainer(
               $db,
             ).resultSet<i3.Container>('container'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -589,6 +604,9 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
   });
   i0.GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  i0.GeneratedColumnWithTypeConverter<i6.TabSource, int> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
 
   i0.GeneratedColumn<String> get parentId =>
       $composableBuilder(column: $table.parentId, builder: (column) => column);
@@ -637,7 +655,7 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     final i3.$ContainerAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.containerId,
-      referencedTable: i7.ReadDatabaseContainer(
+      referencedTable: i8.ReadDatabaseContainer(
         $db,
       ).resultSet<i3.Container>('container'),
       getReferencedColumn: (t) => t.id,
@@ -648,7 +666,7 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
             $removeJoinBuilderFromRootComposer,
           }) => i3.$ContainerAnnotationComposer(
             $db: $db,
-            $table: i7.ReadDatabaseContainer(
+            $table: i8.ReadDatabaseContainer(
               $db,
             ).resultSet<i3.Container>('container'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -690,6 +708,7 @@ class $TabTableManager
           updateCompanionCallback:
               ({
                 i0.Value<String> id = const i0.Value.absent(),
+                i0.Value<i6.TabSource> source = const i0.Value.absent(),
                 i0.Value<String?> parentId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 i0.Value<String> orderKey = const i0.Value.absent(),
@@ -707,6 +726,7 @@ class $TabTableManager
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.TabCompanion(
                 id: id,
+                source: source,
                 parentId: parentId,
                 containerId: containerId,
                 orderKey: orderKey,
@@ -724,6 +744,7 @@ class $TabTableManager
           createCompanionCallback:
               ({
                 required String id,
+                required i6.TabSource source,
                 i0.Value<String?> parentId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 required String orderKey,
@@ -741,6 +762,7 @@ class $TabTableManager
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.TabCompanion.insert(
                 id: id,
+                source: source,
                 parentId: parentId,
                 containerId: containerId,
                 orderKey: orderKey,
@@ -1196,6 +1218,15 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     requiredDuringInsert: true,
     $customConstraints: 'PRIMARY KEY NOT NULL',
   );
+  late final i0.GeneratedColumnWithTypeConverter<i6.TabSource, int> source =
+      i0.GeneratedColumn<int>(
+        'source',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<i6.TabSource>(i3.Tab.$convertersource);
   late final i0.GeneratedColumn<String> parentId = i0.GeneratedColumn<String>(
     'parent_id',
     aliasedName,
@@ -1303,6 +1334,7 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
   @override
   List<i0.GeneratedColumn> get $columns => [
     id,
+    source,
     parentId,
     containerId,
     orderKey,
@@ -1331,6 +1363,12 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
         i0.DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      source: i3.Tab.$convertersource.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.int,
+          data['${effectivePrefix}source'],
+        )!,
+      ),
       parentId: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
         data['${effectivePrefix}parent_id'],
@@ -1389,14 +1427,17 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     return Tab(attachedDatabase, alias);
   }
 
+  static i0.JsonTypeConverter2<i6.TabSource, int, int> $convertersource =
+      const i0.EnumIndexConverter<i6.TabSource>(i6.TabSource.values);
   static i0.TypeConverter<Uri?, String?> $converterurl =
-      const i6.UriConverterNullable();
+      const i7.UriConverterNullable();
   @override
   bool get dontWriteConstraints => true;
 }
 
 class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   final String id;
+  final i6.TabSource source;
   final String? parentId;
   final String? containerId;
   final String orderKey;
@@ -1411,6 +1452,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   final DateTime timestamp;
   const TabData({
     required this.id,
+    required this.source,
     this.parentId,
     this.containerId,
     required this.orderKey,
@@ -1428,6 +1470,9 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
     final map = <String, i0.Expression>{};
     map['id'] = i0.Variable<String>(id);
+    {
+      map['source'] = i0.Variable<int>(i3.Tab.$convertersource.toSql(source));
+    }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = i0.Variable<String>(parentId);
     }
@@ -1474,6 +1519,9 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return TabData(
       id: serializer.fromJson<String>(json['id']),
+      source: i3.Tab.$convertersource.fromJson(
+        serializer.fromJson<int>(json['source']),
+      ),
       parentId: serializer.fromJson<String?>(json['parent_id']),
       containerId: serializer.fromJson<String?>(json['container_id']),
       orderKey: serializer.fromJson<String>(json['order_key']),
@@ -1503,6 +1551,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'source': serializer.toJson<int>(i3.Tab.$convertersource.toJson(source)),
       'parent_id': serializer.toJson<String?>(parentId),
       'container_id': serializer.toJson<String?>(containerId),
       'order_key': serializer.toJson<String>(orderKey),
@@ -1524,6 +1573,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
 
   i3.TabData copyWith({
     String? id,
+    i6.TabSource? source,
     i0.Value<String?> parentId = const i0.Value.absent(),
     i0.Value<String?> containerId = const i0.Value.absent(),
     String? orderKey,
@@ -1538,6 +1588,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     DateTime? timestamp,
   }) => i3.TabData(
     id: id ?? this.id,
+    source: source ?? this.source,
     parentId: parentId.present ? parentId.value : this.parentId,
     containerId: containerId.present ? containerId.value : this.containerId,
     orderKey: orderKey ?? this.orderKey,
@@ -1564,6 +1615,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   TabData copyWithCompanion(i3.TabCompanion data) {
     return TabData(
       id: data.id.present ? data.id.value : this.id,
+      source: data.source.present ? data.source.value : this.source,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       containerId: data.containerId.present
           ? data.containerId.value
@@ -1595,6 +1647,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   String toString() {
     return (StringBuffer('TabData(')
           ..write('id: $id, ')
+          ..write('source: $source, ')
           ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
@@ -1614,6 +1667,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   @override
   int get hashCode => Object.hash(
     id,
+    source,
     parentId,
     containerId,
     orderKey,
@@ -1632,6 +1686,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       identical(this, other) ||
       (other is i3.TabData &&
           other.id == this.id &&
+          other.source == this.source &&
           other.parentId == this.parentId &&
           other.containerId == this.containerId &&
           other.orderKey == this.orderKey &&
@@ -1648,6 +1703,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
 
 class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   final i0.Value<String> id;
+  final i0.Value<i6.TabSource> source;
   final i0.Value<String?> parentId;
   final i0.Value<String?> containerId;
   final i0.Value<String> orderKey;
@@ -1663,6 +1719,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   final i0.Value<int> rowid;
   const TabCompanion({
     this.id = const i0.Value.absent(),
+    this.source = const i0.Value.absent(),
     this.parentId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     this.orderKey = const i0.Value.absent(),
@@ -1679,6 +1736,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   });
   TabCompanion.insert({
     required String id,
+    required i6.TabSource source,
     this.parentId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     required String orderKey,
@@ -1693,10 +1751,12 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     required DateTime timestamp,
     this.rowid = const i0.Value.absent(),
   }) : id = i0.Value(id),
+       source = i0.Value(source),
        orderKey = i0.Value(orderKey),
        timestamp = i0.Value(timestamp);
   static i0.Insertable<i3.TabData> custom({
     i0.Expression<String>? id,
+    i0.Expression<int>? source,
     i0.Expression<String>? parentId,
     i0.Expression<String>? containerId,
     i0.Expression<String>? orderKey,
@@ -1713,6 +1773,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   }) {
     return i0.RawValuesInsertable({
       if (id != null) 'id': id,
+      if (source != null) 'source': source,
       if (parentId != null) 'parent_id': parentId,
       if (containerId != null) 'container_id': containerId,
       if (orderKey != null) 'order_key': orderKey,
@@ -1735,6 +1796,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
 
   i3.TabCompanion copyWith({
     i0.Value<String>? id,
+    i0.Value<i6.TabSource>? source,
     i0.Value<String?>? parentId,
     i0.Value<String?>? containerId,
     i0.Value<String>? orderKey,
@@ -1751,6 +1813,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   }) {
     return i3.TabCompanion(
       id: id ?? this.id,
+      source: source ?? this.source,
       parentId: parentId ?? this.parentId,
       containerId: containerId ?? this.containerId,
       orderKey: orderKey ?? this.orderKey,
@@ -1774,6 +1837,11 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     final map = <String, i0.Expression>{};
     if (id.present) {
       map['id'] = i0.Variable<String>(id.value);
+    }
+    if (source.present) {
+      map['source'] = i0.Variable<int>(
+        i3.Tab.$convertersource.toSql(source.value),
+      );
     }
     if (parentId.present) {
       map['parent_id'] = i0.Variable<String>(parentId.value);
@@ -1829,6 +1897,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   String toString() {
     return (StringBuffer('TabCompanion(')
           ..write('id: $id, ')
+          ..write('source: $source, ')
           ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
@@ -2142,7 +2211,7 @@ i0.Trigger get tabAfterUpdate => i0.Trigger(
   'tab_after_update',
 );
 
-class DefinitionsDrift extends i7.ModularAccessor {
+class DefinitionsDrift extends i8.ModularAccessor {
   DefinitionsDrift(i0.GeneratedDatabase db) : super(db);
   Future<int> optimizeFtsIndex() {
     return customInsert(
@@ -2215,13 +2284,13 @@ class DefinitionsDrift extends i7.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
-  i0.Selectable<i8.TabQueryResult> queryTabsBasic({required String query}) {
+  i0.Selectable<i9.TabQueryResult> queryTabsBasic({required String query}) {
     return customSelect(
       'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.is_private, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC',
       variables: [i0.Variable<String>(query)],
       readsFrom: {tab, tabFts},
     ).map(
-      (i0.QueryRow row) => i8.TabQueryResult(
+      (i0.QueryRow row) => i9.TabQueryResult(
         id: row.read<String>('id'),
         containerId: row.readNullable<String>('container_id'),
         isPrivate: row.readNullable<bool>('is_private'),
@@ -2235,7 +2304,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
     );
   }
 
-  i0.Selectable<i8.TabQueryResult> queryTabsFullContent({
+  i0.Selectable<i9.TabQueryResult> queryTabsFullContent({
     required String beforeMatch,
     required String afterMatch,
     required String ellipsis,
@@ -2253,7 +2322,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
       ],
       readsFrom: {tab, tabFts},
     ).map(
-      (i0.QueryRow row) => i8.TabQueryResult(
+      (i0.QueryRow row) => i9.TabQueryResult(
         id: row.read<String>('id'),
         containerId: row.readNullable<String>('container_id'),
         isPrivate: row.readNullable<bool>('is_private'),
@@ -2369,13 +2438,13 @@ class DefinitionsDrift extends i7.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
-  i0.Selectable<i9.SiteAssignment> allAssignedSites() {
+  i0.Selectable<i10.SiteAssignment> allAssignedSites() {
     return customSelect(
       'SELECT container.id, COALESCE(container.metadata ->> \'\$.contextualIdentity\', \'general\') AS contextualIdentity, value AS assigned_site FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE value IS NOT NULL',
       variables: [],
       readsFrom: {container},
     ).map(
-      (i0.QueryRow row) => i9.SiteAssignment(
+      (i0.QueryRow row) => i10.SiteAssignment(
         id: row.read<String>('id'),
         contextualIdentity: row.read<String>('contextualIdentity'),
         assignedSite: row.readNullable<String>('assigned_site'),
@@ -2391,14 +2460,14 @@ class DefinitionsDrift extends i7.ModularAccessor {
     ).map((i0.QueryRow row) => row.readNullable<String>('contextual_identity'));
   }
 
-  i3.TabFts get tabFts => i7.ReadDatabaseContainer(
+  i3.TabFts get tabFts => i8.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.TabFts>('tab_fts');
-  i3.Container get container => i7.ReadDatabaseContainer(
+  i3.Container get container => i8.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.Container>('container');
   i3.Tab get tab =>
-      i7.ReadDatabaseContainer(attachedDatabase).resultSet<i3.Tab>('tab');
+      i8.ReadDatabaseContainer(attachedDatabase).resultSet<i3.Tab>('tab');
 }
 
 class TabTreesResult {

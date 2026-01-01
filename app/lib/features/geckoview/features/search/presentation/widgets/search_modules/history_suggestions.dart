@@ -126,7 +126,11 @@ class HistorySuggestions extends HookConsumerWidget {
                           if (uri != null) {
                             await ref
                                 .read(tabRepositoryProvider.notifier)
-                                .addTab(url: uri, private: isPrivate);
+                                .addTab(
+                                  url: uri,
+                                  private: isPrivate,
+                                  selectTab: true,
+                                );
 
                             if (context.mounted) {
                               ref

@@ -123,13 +123,15 @@ class SelectedContainer extends _$SelectedContainer {
       selectedTabProvider,
       (previous, next) async {
         if (next != null) {
-          final tabContainerId = await ref
+          final tabData = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .getTabContainerId(next);
+              .getTabDataById(next);
 
-          if (ref.mounted && tabContainerId != stateOrNull) {
-            if (tabContainerId != null) {
-              await setContainerId(tabContainerId);
+          if (ref.mounted &&
+              tabData != null &&
+              tabData.containerId != stateOrNull) {
+            if (tabData.containerId != null) {
+              await setContainerId(tabData.containerId!);
             } else {
               clearContainer();
             }

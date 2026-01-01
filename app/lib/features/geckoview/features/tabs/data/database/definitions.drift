@@ -4,6 +4,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 
 CREATE TABLE container (
   id TEXT PRIMARY KEY NOT NULL,
@@ -14,6 +15,7 @@ CREATE TABLE container (
 
 CREATE TABLE tab( 
   id TEXT PRIMARY KEY NOT NULL,
+  source ENUM(TabSource) NOT NULL,
   parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
   container_id TEXT REFERENCES container (id) ON DELETE CASCADE,
   order_key TEXT NOT NULL,

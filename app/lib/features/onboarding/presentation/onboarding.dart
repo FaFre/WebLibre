@@ -149,6 +149,7 @@ class OnboardingScreen extends HookConsumerWidget {
                               url: ref.read(docsUriProvider),
                               private: false,
                               container: const Value(null),
+                              selectTab: true,
                             );
 
                         ref.invalidate(routerProvider);

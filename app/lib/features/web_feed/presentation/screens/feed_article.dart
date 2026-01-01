@@ -207,6 +207,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                   url: articleLink.uri,
                                   private: isPrivate,
                                   container: const Value(null),
+                                  selectTab: true,
                                 );
 
                             if (context.mounted) {
@@ -251,7 +252,11 @@ class FeedArticleScreen extends HookConsumerWidget {
 
                             await ref
                                 .read(tabRepositoryProvider.notifier)
-                                .addTab(url: url, private: isPrivate);
+                                .addTab(
+                                  url: url,
+                                  private: isPrivate,
+                                  selectTab: true,
+                                );
 
                             if (context.mounted) {
                               showTabOpenedMessage(

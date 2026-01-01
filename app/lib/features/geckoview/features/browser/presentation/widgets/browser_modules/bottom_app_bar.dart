@@ -501,7 +501,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
             if (item.isHistory) {
               await ref
                   .read(tabRepositoryProvider.notifier)
-                  .addTab(url: item.url, private: false);
+                  .addTab(url: item.url, private: false, selectTab: true);
             } else {
               await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
             }
@@ -755,6 +755,7 @@ class NavigationMenuButton extends HookConsumerWidget {
                           url: Uri.parse('https://addons.mozilla.org'),
                           private: isPrivate,
                           container: const Value(null),
+                          selectTab: true,
                         );
                   },
                   leadingIcon: const Icon(MdiIcons.puzzlePlus),

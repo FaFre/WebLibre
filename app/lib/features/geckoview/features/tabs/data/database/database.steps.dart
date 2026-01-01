@@ -265,8 +265,127 @@ class Shape2 extends i0.VersionedVirtualTable {
       columnsByName['full_content_plain']! as i1.GeneratedColumn<String>;
 }
 
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    container,
+    tab,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+  ];
+  late final Shape0 container = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 tab = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_16,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 tabFts = Shape2(
+    source: i0.VersionedVirtualTable(
+      entityName: 'tab_fts',
+      moduleAndArgs:
+          'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")',
+      columns: [_column_8, _column_7, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger tabMaintainParentChainOnDelete = i1.Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = OLD.parent_id WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  final i1.Trigger tabAfterInsert = i1.Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  final i1.Trigger tabAfterDelete = i1.Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  final i1.Trigger tabAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+}
+
+class Shape3 extends i0.VersionedTable {
+  Shape3({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get source =>
+      columnsByName['source']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get parentId =>
+      columnsByName['parent_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get containerId =>
+      columnsByName['container_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get orderKey =>
+      columnsByName['order_key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get url =>
+      columnsByName['url']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get title =>
+      columnsByName['title']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get isPrivate =>
+      columnsByName['is_private']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get isProbablyReaderable =>
+      columnsByName['is_probably_readerable']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get extractedContentMarkdown =>
+      columnsByName['extracted_content_markdown']!
+          as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get extractedContentPlain =>
+      columnsByName['extracted_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentMarkdown =>
+      columnsByName['full_content_markdown']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentPlain =>
+      columnsByName['full_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get timestamp =>
+      columnsByName['timestamp']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_16(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'source',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -275,6 +394,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from2To3(migrator, schema);
         return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -283,6 +407,7 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from2To3: from2To3),
+  step: migrationSteps(from2To3: from2To3, from3To4: from3To4),
 );

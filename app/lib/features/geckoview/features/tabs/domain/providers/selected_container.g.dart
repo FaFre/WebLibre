@@ -41,7 +41,7 @@ final class SelectedContainerProvider
   }
 }
 
-String _$selectedContainerHash() => r'35a8fc409e563758156a197bb8b114387d31b389';
+String _$selectedContainerHash() => r'e1d20f0c2e7764e82937ba486de52c92184c0e4a';
 
 abstract class _$SelectedContainer extends $Notifier<String?> {
   String? build();

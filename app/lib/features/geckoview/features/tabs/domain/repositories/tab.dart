@@ -64,6 +64,7 @@ class TabDataRepository extends _$TabDataRepository {
               private: tabState.isPrivate,
               container: Value(targetContainer),
               parentId: tabState.parentId,
+              selectTab: false,
             );
       }
     }
@@ -95,6 +96,7 @@ class TabDataRepository extends _$TabDataRepository {
               private: tabState.isPrivate,
               container: const Value(null),
               parentId: tabState.parentId,
+              selectTab: false,
             );
       }
     }
@@ -127,7 +129,7 @@ class TabDataRepository extends _$TabDataRepository {
     return tabIds.length;
   }
 
-  Future<int> closeContainerTabs(
+  Future<List<String>> closeContainerTabs(
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
@@ -146,7 +148,7 @@ class TabDataRepository extends _$TabDataRepository {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
     }
 
-    return tabIds.length;
+    return tabIds;
   }
 
   Future<int> closeAllTabsByHost(String? containerId, String host) async {

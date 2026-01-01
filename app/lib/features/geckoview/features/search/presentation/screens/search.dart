@@ -116,6 +116,7 @@ class SearchScreen extends HookConsumerWidget {
                   ? ref.read(selectedTabProvider)
                   : null,
               launchedFromIntent: launchedFromIntent,
+              selectTab: true,
             );
 
         if (context.mounted) {
@@ -173,12 +174,14 @@ class SearchScreen extends HookConsumerWidget {
                           style: switch (selectedTabType.value) {
                             TabType.regular => null,
                             TabType.private => SegmentedButton.styleFrom(
-                              selectedBackgroundColor: AppColors.privateSelectionOverlay,
+                              selectedBackgroundColor:
+                                  AppColors.privateSelectionOverlay,
                             ),
                             TabType.child =>
                               (currentTabTabType == TabType.private)
                                   ? SegmentedButton.styleFrom(
-                                      selectedBackgroundColor: AppColors.privateSelectionOverlay,
+                                      selectedBackgroundColor:
+                                          AppColors.privateSelectionOverlay,
                                     )
                                   : null,
                           },
@@ -232,6 +235,7 @@ class SearchScreen extends HookConsumerWidget {
                                           ? ref.read(selectedTabProvider)
                                           : null,
                                       launchedFromIntent: launchedFromIntent,
+                                      selectTab: true,
                                     );
 
                                 if (context.mounted) {

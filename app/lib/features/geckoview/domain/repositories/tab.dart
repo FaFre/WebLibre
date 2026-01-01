@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -55,7 +56,7 @@ class TabRepository extends _$TabRepository {
 
   Future<String> addTab({
     Uri? url,
-    bool selectTab = true,
+    required bool selectTab,
     bool startLoading = true,
     String? parentId,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
@@ -125,6 +126,7 @@ class TabRepository extends _$TabRepository {
         await tabDao.insertTab(
           tabId,
           parentId: Value(tab.parentId),
+          source: TabSource.manual,
           containerId: Value(container?.value?.id),
           isPrivate: Value(tab.private),
           url: Value(Uri.tryParse(tab.url)),
@@ -409,16 +411,14 @@ class TabRepository extends _$TabRepository {
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen((tabId) async {
-      if (await db.tabDao.getTabDataById(tabId).getSingleOrNull() == null) {
-        // ignore: only_use_keep_alive_inside_keep_alive
-        final containerId = ref.read(selectedContainerProvider);
-        await db.tabDao.insertTab(
-          tabId,
-          parentId: const Value.absent(),
-          containerId: Value(containerId),
-          isPrivate: const Value.absent(),
-        );
-      }
+      final containerId = ref.read(selectedContainerProvider);
+      await db.tabDao.insertTab(
+        tabId,
+        parentId: const Value.absent(),
+        source: TabSource.addedEvent,
+        containerId: Value(containerId),
+        isPrivate: const Value.absent(),
+      );
     });
 
     final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen((
@@ -451,6 +451,7 @@ class TabRepository extends _$TabRepository {
                 private: tabState.isPrivate,
                 container: Value(containerData),
                 parentId: tabState.id,
+                selectTab: true,
               );
 
               if (tabIsEmpty) {

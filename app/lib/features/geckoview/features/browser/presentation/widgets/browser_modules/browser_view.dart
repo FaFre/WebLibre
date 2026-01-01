@@ -188,6 +188,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             settings.tabIntentOpenSetting ==
                             TabIntentOpenSetting.private,
                         launchedFromIntent: true,
+                        selectTab: true,
                       );
                 case SharedText():
                   final bang =
@@ -202,6 +203,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             settings.tabIntentOpenSetting ==
                             TabIntentOpenSetting.private,
                         launchedFromIntent: true,
+                        selectTab: true,
                       );
               }
             case TabIntentOpenSetting.ask:

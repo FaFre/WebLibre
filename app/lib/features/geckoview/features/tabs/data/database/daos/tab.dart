@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 
 @DriftAccessor()
@@ -122,6 +123,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         TabCompanion.insert(
           id: tabId,
           parentId: parentId,
+          source: TabSource.manual,
           timestamp: DateTime.now(),
           containerId: containerId,
           url: url,
@@ -131,11 +133,13 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         ),
         onConflict: DoUpdate(
           (old) => TabCompanion(
+            source: const Value(TabSource.manual),
             parentId: parentId,
             containerId: containerId,
-            orderKey: Value.absentIfNull(orderKey.value),
             url: url,
             title: title,
+            isPrivate: isPrivate,
+            orderKey: Value.absentIfNull(orderKey.value),
           ),
         ),
       );
@@ -147,6 +151,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   //Upsert an tab only if there is no container assigned yet
   Future<String> insertTab(
     String tabId, {
+    required TabSource source,
     required Value<bool?> isPrivate,
     required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
@@ -163,6 +168,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         TabCompanion.insert(
           id: tabId,
           parentId: parentId,
+          source: source,
           timestamp: DateTime.now(),
           containerId: containerId,
           orderKey: currentOrderKey,
@@ -170,7 +176,18 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           url: url,
           title: title,
         ),
-        mode: InsertMode.insertOrIgnore,
+        onConflict: DoUpdate(
+          (old) => TabCompanion(
+            source: Value(source),
+            parentId: parentId,
+            containerId: containerId,
+            url: url,
+            title: title,
+            isPrivate: isPrivate,
+            orderKey: Value.absentIfNull(orderKey.value),
+          ),
+          where: (old) => old.source.isSmallerThanValue(source.index),
+        ),
       );
 
       return tabId;
@@ -273,6 +290,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
               _undoHistory[id] ??
               TabCompanion.insert(
                 id: id,
+                source: TabSource.syncEvent,
                 orderKey: currentOrderKey,
                 timestamp: DateTime.now(),
               );
@@ -281,7 +299,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
           return insertable;
         }),
-        mode: InsertMode.insertOrIgnore,
+        onConflict: DoNothing(),
       );
     });
   }

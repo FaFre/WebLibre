@@ -50,6 +50,7 @@ class OpenSharedContent extends HookConsumerWidget {
               private: isPrivate,
               container: Value(selectedContainer.value),
               launchedFromIntent: true,
+              selectTab: true,
             );
 
         if (context.mounted) {
