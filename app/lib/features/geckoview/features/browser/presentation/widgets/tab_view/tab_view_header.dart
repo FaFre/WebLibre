@@ -79,6 +79,7 @@ class TabViewHeader extends HookConsumerWidget {
                           icon: const Icon(MdiIcons.tabSearch),
                           iconSize: 18,
                           padding: EdgeInsets.zero,
+                          tooltip: 'Search inside tabs',
                           onPressed: () {
                             switch (ref.read(tabsViewModeControllerProvider)) {
                               case TabsViewMode.tree:
@@ -119,6 +120,7 @@ class TabViewHeader extends HookConsumerWidget {
                               )
                               .toList(),
                           child: IconButton(
+                            tooltip: 'Change view mode',
                             onPressed: () {
                               if (viewModeMenuController.isOpen) {
                                 viewModeMenuController.close();
@@ -163,6 +165,11 @@ class TabViewHeader extends HookConsumerWidget {
                                   isSelected: tabSuggestionsEnabled,
                                   iconSize: 18,
                                   padding: EdgeInsets.zero,
+                                  tooltip: downloadProgress != null
+                                      ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
+                                      : tabSuggestionsEnabled
+                                          ? 'Disable AI tab suggestions'
+                                          : 'Enable AI tab suggestions',
                                   onPressed: () async {
                                     if (!tabSuggestionsEnabled) {
                                       final result = await showDialog<bool?>(
@@ -234,13 +241,26 @@ class TabViewHeader extends HookConsumerWidget {
                                 isSelected: tabsReorderabe,
                                 iconSize: 18,
                                 padding: EdgeInsets.zero,
+                                tooltip: tabsReorderabe
+                                    ? 'Disable reordering mode'
+                                    : 'Enable reordering mode',
                                 onPressed: () {
+                                  final wasEnabled = tabsReorderabe;
+
                                   ref
                                       .read(
                                         tabsReorderableControllerProvider
                                             .notifier,
                                       )
                                       .toggle();
+
+                                  // Show info when enabling reordering
+                                  if (!wasEnabled && context.mounted) {
+                                    ui_helper.showInfoMessage(
+                                      context,
+                                      'Drag and drop tabs to reorder them',
+                                    );
+                                  }
                                 },
                               );
                             },
@@ -561,6 +581,7 @@ class TabViewHeader extends HookConsumerWidget {
                         ),
                       ],
                       child: IconButton(
+                        tooltip: 'Tab actions',
                         onPressed: () {
                           if (tabsActionMenuController.isOpen) {
                             tabsActionMenuController.close();
