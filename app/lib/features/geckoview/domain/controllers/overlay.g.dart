@@ -10,11 +10,11 @@ part of 'overlay.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(OverlayController)
-const overlayControllerProvider = OverlayControllerProvider._();
+final overlayControllerProvider = OverlayControllerProvider._();
 
 final class OverlayControllerProvider
     extends $NotifierProvider<OverlayController, WidgetBuilder?> {
-  const OverlayControllerProvider._()
+  OverlayControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$OverlayController extends $Notifier<WidgetBuilder?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<WidgetBuilder?, WidgetBuilder?>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$OverlayController extends $Notifier<WidgetBuilder?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

@@ -10,11 +10,11 @@ part of 'locale_resolver.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(LocaleResolverRepository)
-const localeResolverRepositoryProvider = LocaleResolverRepositoryFamily._();
+final localeResolverRepositoryProvider = LocaleResolverRepositoryFamily._();
 
 final class LocaleResolverRepositoryProvider
     extends $NotifierProvider<LocaleResolverRepository, void> {
-  const LocaleResolverRepositoryProvider._({
+  LocaleResolverRepositoryProvider._({
     required LocaleResolverRepositoryFamily super.from,
     required intl.Locale super.argument,
   }) : super(
@@ -71,7 +71,7 @@ final class LocaleResolverRepositoryFamily extends $Family
           void,
           intl.Locale
         > {
-  const LocaleResolverRepositoryFamily._()
+  LocaleResolverRepositoryFamily._()
     : super(
         retry: null,
         name: r'localeResolverRepositoryProvider',
@@ -95,7 +95,6 @@ abstract class _$LocaleResolverRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build(_$args);
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -105,12 +104,12 @@ abstract class _$LocaleResolverRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, () => build(_$args));
   }
 }
 
 @ProviderFor(resolveLocale)
-const resolveLocaleProvider = ResolveLocaleFamily._();
+final resolveLocaleProvider = ResolveLocaleFamily._();
 
 final class ResolveLocaleProvider
     extends
@@ -120,7 +119,7 @@ final class ResolveLocaleProvider
           FutureOr<LocalizedResult>
         >
     with $FutureModifier<LocalizedResult>, $FutureProvider<LocalizedResult> {
-  const ResolveLocaleProvider._({
+  ResolveLocaleProvider._({
     required ResolveLocaleFamily super.from,
     required intl.Locale super.argument,
   }) : super(
@@ -168,7 +167,7 @@ String _$resolveLocaleHash() => r'94d7a9b307a81de372b8b40b06f046acc76e01c8';
 
 final class ResolveLocaleFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<LocalizedResult>, intl.Locale> {
-  const ResolveLocaleFamily._()
+  ResolveLocaleFamily._()
     : super(
         retry: null,
         name: r'resolveLocaleProvider',

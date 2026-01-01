@@ -10,11 +10,11 @@ part of 'search.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BangSearch)
-const bangSearchProvider = BangSearchProvider._();
+final bangSearchProvider = BangSearchProvider._();
 
 final class BangSearchProvider
     extends $StreamNotifierProvider<BangSearch, List<BangData>> {
-  const BangSearchProvider._()
+  BangSearchProvider._()
     : super(
         from: null,
         argument: null,
@@ -40,7 +40,6 @@ abstract class _$BangSearch extends $StreamNotifier<List<BangData>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<List<BangData>>, List<BangData>>;
     final element =
         ref.element
@@ -50,16 +49,16 @@ abstract class _$BangSearch extends $StreamNotifier<List<BangData>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(SeamlessBang)
-const seamlessBangProvider = SeamlessBangProvider._();
+final seamlessBangProvider = SeamlessBangProvider._();
 
 final class SeamlessBangProvider
     extends $NotifierProvider<SeamlessBang, AsyncValue<List<BangData>>> {
-  const SeamlessBangProvider._()
+  SeamlessBangProvider._()
     : super(
         from: null,
         argument: null,
@@ -93,7 +92,6 @@ abstract class _$SeamlessBang extends $Notifier<AsyncValue<List<BangData>>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref
             as $Ref<AsyncValue<List<BangData>>, AsyncValue<List<BangData>>>;
@@ -108,6 +106,6 @@ abstract class _$SeamlessBang extends $Notifier<AsyncValue<List<BangData>>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

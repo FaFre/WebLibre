@@ -10,7 +10,7 @@ part of 'tab_search.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TabSearchRepository)
-const tabSearchRepositoryProvider = TabSearchRepositoryFamily._();
+final tabSearchRepositoryProvider = TabSearchRepositoryFamily._();
 
 final class TabSearchRepositoryProvider
     extends
@@ -18,7 +18,7 @@ final class TabSearchRepositoryProvider
           TabSearchRepository,
           ({String query, List<TabQueryResult> results})?
         > {
-  const TabSearchRepositoryProvider._({
+  TabSearchRepositoryProvider._({
     required TabSearchRepositoryFamily super.from,
     required TabSearchPartition super.argument,
   }) : super(
@@ -66,7 +66,7 @@ final class TabSearchRepositoryFamily extends $Family
           FutureOr<({String query, List<TabQueryResult> results})?>,
           TabSearchPartition
         > {
-  const TabSearchRepositoryFamily._()
+  TabSearchRepositoryFamily._()
     : super(
         retry: null,
         name: r'tabSearchRepositoryProvider',
@@ -93,7 +93,6 @@ abstract class _$TabSearchRepository
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref
             as $Ref<
@@ -111,6 +110,6 @@ abstract class _$TabSearchRepository
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

@@ -10,11 +10,11 @@ part of 'kagi.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(KagiAutosuggestService)
-const kagiAutosuggestServiceProvider = KagiAutosuggestServiceProvider._();
+final kagiAutosuggestServiceProvider = KagiAutosuggestServiceProvider._();
 
 final class KagiAutosuggestServiceProvider
     extends $NotifierProvider<KagiAutosuggestService, void> {
-  const KagiAutosuggestServiceProvider._()
+  KagiAutosuggestServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$KagiAutosuggestService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$KagiAutosuggestService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

@@ -10,10 +10,10 @@ part of 'format.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(Format)
-const formatProvider = FormatProvider._();
+final formatProvider = FormatProvider._();
 
 final class FormatProvider extends $AsyncNotifierProvider<Format, void> {
-  const FormatProvider._()
+  FormatProvider._()
     : super(
         from: null,
         argument: null,
@@ -39,7 +39,6 @@ abstract class _$Format extends $AsyncNotifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -49,6 +48,6 @@ abstract class _$Format extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

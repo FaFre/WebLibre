@@ -10,12 +10,12 @@ part of 'tab_bar_dismissable.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TabBarDismissableController)
-const tabBarDismissableControllerProvider =
+final tabBarDismissableControllerProvider =
     TabBarDismissableControllerProvider._();
 
 final class TabBarDismissableControllerProvider
     extends $NotifierProvider<TabBarDismissableController, bool> {
-  const TabBarDismissableControllerProvider._()
+  TabBarDismissableControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -50,7 +50,6 @@ abstract class _$TabBarDismissableController extends $Notifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -60,6 +59,6 @@ abstract class _$TabBarDismissableController extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

@@ -10,7 +10,7 @@ part of 'fingerprinting.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(fingerprintTargets)
-const fingerprintTargetsProvider = FingerprintTargetsProvider._();
+final fingerprintTargetsProvider = FingerprintTargetsProvider._();
 
 final class FingerprintTargetsProvider
     extends
@@ -20,7 +20,7 @@ final class FingerprintTargetsProvider
           FutureOr<List<RFPTarget>>
         >
     with $FutureModifier<List<RFPTarget>>, $FutureProvider<List<RFPTarget>> {
-  const FingerprintTargetsProvider._()
+  FingerprintTargetsProvider._()
     : super(
         from: null,
         argument: null,

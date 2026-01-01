@@ -10,11 +10,11 @@ part of 'find_in_page.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(FindInPageController)
-const findInPageControllerProvider = FindInPageControllerFamily._();
+final findInPageControllerProvider = FindInPageControllerFamily._();
 
 final class FindInPageControllerProvider
     extends $NotifierProvider<FindInPageController, FindInPageState> {
-  const FindInPageControllerProvider._({
+  FindInPageControllerProvider._({
     required FindInPageControllerFamily super.from,
     required String super.argument,
   }) : super(
@@ -70,7 +70,7 @@ final class FindInPageControllerFamily extends $Family
           FindInPageState,
           String
         > {
-  const FindInPageControllerFamily._()
+  FindInPageControllerFamily._()
     : super(
         retry: null,
         name: r'findInPageControllerProvider',
@@ -94,7 +94,6 @@ abstract class _$FindInPageController extends $Notifier<FindInPageState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref = this.ref as $Ref<FindInPageState, FindInPageState>;
     final element =
         ref.element
@@ -104,6 +103,6 @@ abstract class _$FindInPageController extends $Notifier<FindInPageState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

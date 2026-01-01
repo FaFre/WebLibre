@@ -10,12 +10,12 @@ part of 'defaults.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(lightSeedColorFallback)
-const lightSeedColorFallbackProvider = LightSeedColorFallbackProvider._();
+final lightSeedColorFallbackProvider = LightSeedColorFallbackProvider._();
 
 final class LightSeedColorFallbackProvider
     extends $FunctionalProvider<Color, Color, Color>
     with $Provider<Color> {
-  const LightSeedColorFallbackProvider._()
+  LightSeedColorFallbackProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,12 +52,12 @@ String _$lightSeedColorFallbackHash() =>
     r'd5fb3ead5795c1cadd6c3a5f91ef84c3cbdaa3c1';
 
 @ProviderFor(darkSeedColorFallback)
-const darkSeedColorFallbackProvider = DarkSeedColorFallbackProvider._();
+final darkSeedColorFallbackProvider = DarkSeedColorFallbackProvider._();
 
 final class DarkSeedColorFallbackProvider
     extends $FunctionalProvider<Color, Color, Color>
     with $Provider<Color> {
-  const DarkSeedColorFallbackProvider._()
+  DarkSeedColorFallbackProvider._()
     : super(
         from: null,
         argument: null,
@@ -94,11 +94,11 @@ String _$darkSeedColorFallbackHash() =>
     r'a383dbf6edf4fee54a8215bc52a98f26354e4645';
 
 @ProviderFor(docsUri)
-const docsUriProvider = DocsUriProvider._();
+final docsUriProvider = DocsUriProvider._();
 
 final class DocsUriProvider extends $FunctionalProvider<Uri, Uri, Uri>
     with $Provider<Uri> {
-  const DocsUriProvider._()
+  DocsUriProvider._()
     : super(
         from: null,
         argument: null,

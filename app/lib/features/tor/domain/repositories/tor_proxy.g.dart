@@ -10,11 +10,11 @@ part of 'tor_proxy.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TorProxyRepository)
-const torProxyRepositoryProvider = TorProxyRepositoryProvider._();
+final torProxyRepositoryProvider = TorProxyRepositoryProvider._();
 
 final class TorProxyRepositoryProvider
     extends $NotifierProvider<TorProxyRepository, void> {
-  const TorProxyRepositoryProvider._()
+  TorProxyRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$TorProxyRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$TorProxyRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

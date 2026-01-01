@@ -10,12 +10,12 @@ part of 'duckduckgo.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(DuckDuckGoAutosuggestService)
-const duckDuckGoAutosuggestServiceProvider =
+final duckDuckGoAutosuggestServiceProvider =
     DuckDuckGoAutosuggestServiceProvider._();
 
 final class DuckDuckGoAutosuggestServiceProvider
     extends $NotifierProvider<DuckDuckGoAutosuggestService, void> {
-  const DuckDuckGoAutosuggestServiceProvider._()
+  DuckDuckGoAutosuggestServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -50,7 +50,6 @@ abstract class _$DuckDuckGoAutosuggestService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -60,6 +59,6 @@ abstract class _$DuckDuckGoAutosuggestService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

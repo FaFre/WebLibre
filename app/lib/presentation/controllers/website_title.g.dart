@@ -10,11 +10,11 @@ part of 'website_title.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(CompletePageInfo)
-const completePageInfoProvider = CompletePageInfoFamily._();
+final completePageInfoProvider = CompletePageInfoFamily._();
 
 final class CompletePageInfoProvider
     extends $NotifierProvider<CompletePageInfo, AsyncValue<WebPageInfo>> {
-  const CompletePageInfoProvider._({
+  CompletePageInfoProvider._({
     required CompletePageInfoFamily super.from,
     required TabState super.argument,
   }) : super(
@@ -69,7 +69,7 @@ final class CompletePageInfoFamily extends $Family
           AsyncValue<WebPageInfo>,
           TabState
         > {
-  const CompletePageInfoFamily._()
+  CompletePageInfoFamily._()
     : super(
         retry: null,
         name: r'completePageInfoProvider',
@@ -93,7 +93,6 @@ abstract class _$CompletePageInfo extends $Notifier<AsyncValue<WebPageInfo>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref as $Ref<AsyncValue<WebPageInfo>, AsyncValue<WebPageInfo>>;
     final element =
@@ -104,12 +103,12 @@ abstract class _$CompletePageInfo extends $Notifier<AsyncValue<WebPageInfo>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }
 
 @ProviderFor(pageInfo)
-const pageInfoProvider = PageInfoFamily._();
+final pageInfoProvider = PageInfoFamily._();
 
 final class PageInfoProvider
     extends
@@ -119,7 +118,7 @@ final class PageInfoProvider
           FutureOr<WebPageInfo>
         >
     with $FutureModifier<WebPageInfo>, $FutureProvider<WebPageInfo> {
-  const PageInfoProvider._({
+  PageInfoProvider._({
     required PageInfoFamily super.from,
     required (Uri, {bool isImageRequest}) super.argument,
   }) : super(
@@ -171,7 +170,7 @@ final class PageInfoFamily extends $Family
           FutureOr<WebPageInfo>,
           (Uri, {bool isImageRequest})
         > {
-  const PageInfoFamily._()
+  PageInfoFamily._()
     : super(
         retry: null,
         name: r'pageInfoProvider',
@@ -191,7 +190,7 @@ final class PageInfoFamily extends $Family
 }
 
 @ProviderFor(websiteFeedProvider)
-const websiteFeedProviderProvider = WebsiteFeedProviderFamily._();
+final websiteFeedProviderProvider = WebsiteFeedProviderFamily._();
 
 final class WebsiteFeedProviderProvider
     extends
@@ -201,7 +200,7 @@ final class WebsiteFeedProviderProvider
           AsyncValue<EquatableValue<Set<Uri>?>>
         >
     with $Provider<AsyncValue<EquatableValue<Set<Uri>?>>> {
-  const WebsiteFeedProviderProvider._({
+  WebsiteFeedProviderProvider._({
     required WebsiteFeedProviderFamily super.from,
     required String super.argument,
   }) : super(
@@ -263,7 +262,7 @@ final class WebsiteFeedProviderFamily extends $Family
           AsyncValue<EquatableValue<Set<Uri>?>>,
           String
         > {
-  const WebsiteFeedProviderFamily._()
+  WebsiteFeedProviderFamily._()
     : super(
         retry: null,
         name: r'websiteFeedProviderProvider',

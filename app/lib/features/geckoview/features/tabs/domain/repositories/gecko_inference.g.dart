@@ -10,11 +10,11 @@ part of 'gecko_inference.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(GeckoInferenceRepository)
-const geckoInferenceRepositoryProvider = GeckoInferenceRepositoryProvider._();
+final geckoInferenceRepositoryProvider = GeckoInferenceRepositoryProvider._();
 
 final class GeckoInferenceRepositoryProvider
     extends $NotifierProvider<GeckoInferenceRepository, void> {
-  const GeckoInferenceRepositoryProvider._()
+  GeckoInferenceRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$GeckoInferenceRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,17 +58,17 @@ abstract class _$GeckoInferenceRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(containerTopic)
-const containerTopicProvider = ContainerTopicFamily._();
+final containerTopicProvider = ContainerTopicFamily._();
 
 final class ContainerTopicProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
     with $FutureModifier<String?>, $FutureProvider<String?> {
-  const ContainerTopicProvider._({
+  ContainerTopicProvider._({
     required ContainerTopicFamily super.from,
     required String super.argument,
   }) : super(
@@ -116,7 +115,7 @@ String _$containerTopicHash() => r'2d04d50890c4ab0ddb70f3c1a2f45fd9ca56412d';
 
 final class ContainerTopicFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<String?>, String> {
-  const ContainerTopicFamily._()
+  ContainerTopicFamily._()
     : super(
         retry: null,
         name: r'containerTopicProvider',
@@ -133,7 +132,7 @@ final class ContainerTopicFamily extends $Family
 }
 
 @ProviderFor(tabsTopic)
-const tabsTopicProvider = TabsTopicFamily._();
+final tabsTopicProvider = TabsTopicFamily._();
 
 final class TabsTopicProvider
     extends
@@ -143,7 +142,7 @@ final class TabsTopicProvider
           AsyncValue<String?>
         >
     with $Provider<AsyncValue<String?>> {
-  const TabsTopicProvider._({
+  TabsTopicProvider._({
     required TabsTopicFamily super.from,
     required EquatableValue<Set<String>> super.argument,
   }) : super(
@@ -203,7 +202,7 @@ final class TabsTopicFamily extends $Family
           AsyncValue<String?>,
           EquatableValue<Set<String>>
         > {
-  const TabsTopicFamily._()
+  TabsTopicFamily._()
     : super(
         retry: null,
         name: r'tabsTopicProvider',
@@ -220,12 +219,12 @@ final class TabsTopicFamily extends $Family
 }
 
 @ProviderFor(topicSuggestion)
-const topicSuggestionProvider = TopicSuggestionFamily._();
+final topicSuggestionProvider = TopicSuggestionFamily._();
 
 final class TopicSuggestionProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
     with $FutureModifier<String?>, $FutureProvider<String?> {
-  const TopicSuggestionProvider._({
+  TopicSuggestionProvider._({
     required TopicSuggestionFamily super.from,
     required EquatableValue<Set<String>> super.argument,
   }) : super(
@@ -276,7 +275,7 @@ final class TopicSuggestionFamily extends $Family
           FutureOr<String?>,
           EquatableValue<Set<String>>
         > {
-  const TopicSuggestionFamily._()
+  TopicSuggestionFamily._()
     : super(
         retry: null,
         name: r'topicSuggestionProvider',
@@ -293,7 +292,7 @@ final class TopicSuggestionFamily extends $Family
 }
 
 @ProviderFor(suggestClusters)
-const suggestClustersProvider = SuggestClustersProvider._();
+final suggestClustersProvider = SuggestClustersProvider._();
 
 final class SuggestClustersProvider
     extends
@@ -305,7 +304,7 @@ final class SuggestClustersProvider
     with
         $FutureModifier<List<SuggestedContainer>?>,
         $FutureProvider<List<SuggestedContainer>?> {
-  const SuggestClustersProvider._()
+  SuggestClustersProvider._()
     : super(
         from: null,
         argument: null,
@@ -334,7 +333,7 @@ final class SuggestClustersProvider
 String _$suggestClustersHash() => r'3fa169a2696954589078c7567b6245c708303232';
 
 @ProviderFor(containerTabSuggestions)
-const containerTabSuggestionsProvider = ContainerTabSuggestionsFamily._();
+final containerTabSuggestionsProvider = ContainerTabSuggestionsFamily._();
 
 final class ContainerTabSuggestionsProvider
     extends
@@ -344,7 +343,7 @@ final class ContainerTabSuggestionsProvider
           FutureOr<List<String>?>
         >
     with $FutureModifier<List<String>?>, $FutureProvider<List<String>?> {
-  const ContainerTabSuggestionsProvider._({
+  ContainerTabSuggestionsProvider._({
     required ContainerTabSuggestionsFamily super.from,
     required String? super.argument,
   }) : super(
@@ -394,7 +393,7 @@ String _$containerTabSuggestionsHash() =>
 
 final class ContainerTabSuggestionsFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<String>?>, String?> {
-  const ContainerTabSuggestionsFamily._()
+  ContainerTabSuggestionsFamily._()
     : super(
         retry: null,
         name: r'containerTabSuggestionsProvider',

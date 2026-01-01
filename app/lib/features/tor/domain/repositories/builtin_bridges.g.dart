@@ -10,11 +10,11 @@ part of 'builtin_bridges.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BuiltinBridgesRepository)
-const builtinBridgesRepositoryProvider = BuiltinBridgesRepositoryFamily._();
+final builtinBridgesRepositoryProvider = BuiltinBridgesRepositoryFamily._();
 
 final class BuiltinBridgesRepositoryProvider
     extends $NotifierProvider<BuiltinBridgesRepository, void> {
-  const BuiltinBridgesRepositoryProvider._({
+  BuiltinBridgesRepositoryProvider._({
     required BuiltinBridgesRepositoryFamily super.from,
     required MoatService super.argument,
   }) : super(
@@ -71,7 +71,7 @@ final class BuiltinBridgesRepositoryFamily extends $Family
           void,
           MoatService
         > {
-  const BuiltinBridgesRepositoryFamily._()
+  BuiltinBridgesRepositoryFamily._()
     : super(
         retry: null,
         name: r'builtinBridgesRepositoryProvider',
@@ -95,7 +95,6 @@ abstract class _$BuiltinBridgesRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build(_$args);
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -105,6 +104,6 @@ abstract class _$BuiltinBridgesRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

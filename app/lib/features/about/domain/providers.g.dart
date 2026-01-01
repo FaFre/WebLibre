@@ -10,7 +10,7 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(packageInfo)
-const packageInfoProvider = PackageInfoProvider._();
+final packageInfoProvider = PackageInfoProvider._();
 
 final class PackageInfoProvider
     extends
@@ -20,7 +20,7 @@ final class PackageInfoProvider
           FutureOr<PackageInfo>
         >
     with $FutureModifier<PackageInfo>, $FutureProvider<PackageInfo> {
-  const PackageInfoProvider._()
+  PackageInfoProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,12 +49,12 @@ final class PackageInfoProvider
 String _$packageInfoHash() => r'44d37547139567a5f03c1942c1d62ff1abb07248';
 
 @ProviderFor(geckoVersion)
-const geckoVersionProvider = GeckoVersionProvider._();
+final geckoVersionProvider = GeckoVersionProvider._();
 
 final class GeckoVersionProvider
     extends $FunctionalProvider<AsyncValue<String>, String, FutureOr<String>>
     with $FutureModifier<String>, $FutureProvider<String> {
-  const GeckoVersionProvider._()
+  GeckoVersionProvider._()
     : super(
         from: null,
         argument: null,

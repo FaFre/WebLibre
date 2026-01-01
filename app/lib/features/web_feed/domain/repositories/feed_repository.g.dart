@@ -10,11 +10,11 @@ part of 'feed_repository.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(FeedRepository)
-const feedRepositoryProvider = FeedRepositoryProvider._();
+final feedRepositoryProvider = FeedRepositoryProvider._();
 
 final class FeedRepositoryProvider
     extends $NotifierProvider<FeedRepository, void> {
-  const FeedRepositoryProvider._()
+  FeedRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$FeedRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$FeedRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

@@ -10,11 +10,11 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SelectedBangTrigger)
-const selectedBangTriggerProvider = SelectedBangTriggerFamily._();
+final selectedBangTriggerProvider = SelectedBangTriggerFamily._();
 
 final class SelectedBangTriggerProvider
     extends $NotifierProvider<SelectedBangTrigger, BangKey?> {
-  const SelectedBangTriggerProvider._({
+  SelectedBangTriggerProvider._({
     required SelectedBangTriggerFamily super.from,
     required String? super.argument,
   }) : super(
@@ -70,7 +70,7 @@ final class SelectedBangTriggerFamily extends $Family
           BangKey?,
           String?
         > {
-  const SelectedBangTriggerFamily._()
+  SelectedBangTriggerFamily._()
     : super(
         retry: null,
         name: r'selectedBangTriggerProvider',
@@ -94,7 +94,6 @@ abstract class _$SelectedBangTrigger extends $Notifier<BangKey?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(domain: _$args);
     final ref = this.ref as $Ref<BangKey?, BangKey?>;
     final element =
         ref.element
@@ -104,16 +103,16 @@ abstract class _$SelectedBangTrigger extends $Notifier<BangKey?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(domain: _$args));
   }
 }
 
 @ProviderFor(SelectedBangData)
-const selectedBangDataProvider = SelectedBangDataFamily._();
+final selectedBangDataProvider = SelectedBangDataFamily._();
 
 final class SelectedBangDataProvider
     extends $NotifierProvider<SelectedBangData, BangData?> {
-  const SelectedBangDataProvider._({
+  SelectedBangDataProvider._({
     required SelectedBangDataFamily super.from,
     required String? super.argument,
   }) : super(
@@ -168,7 +167,7 @@ final class SelectedBangDataFamily extends $Family
           BangData?,
           String?
         > {
-  const SelectedBangDataFamily._()
+  SelectedBangDataFamily._()
     : super(
         retry: null,
         name: r'selectedBangDataProvider',
@@ -192,7 +191,6 @@ abstract class _$SelectedBangData extends $Notifier<BangData?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(domain: _$args);
     final ref = this.ref as $Ref<BangData?, BangData?>;
     final element =
         ref.element
@@ -202,12 +200,12 @@ abstract class _$SelectedBangData extends $Notifier<BangData?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(domain: _$args));
   }
 }
 
 @ProviderFor(availableTabIds)
-const availableTabIdsProvider = AvailableTabIdsFamily._();
+final availableTabIdsProvider = AvailableTabIdsFamily._();
 
 final class AvailableTabIdsProvider
     extends
@@ -217,7 +215,7 @@ final class AvailableTabIdsProvider
           EquatableValue<List<DefaultTabEntity>>
         >
     with $Provider<EquatableValue<List<DefaultTabEntity>>> {
-  const AvailableTabIdsProvider._({
+  AvailableTabIdsProvider._({
     required AvailableTabIdsFamily super.from,
     required ContainerFilter super.argument,
   }) : super(
@@ -278,7 +276,7 @@ final class AvailableTabIdsFamily extends $Family
           EquatableValue<List<DefaultTabEntity>>,
           ContainerFilter
         > {
-  const AvailableTabIdsFamily._()
+  AvailableTabIdsFamily._()
     : super(
         retry: null,
         name: r'availableTabIdsProvider',
@@ -295,7 +293,7 @@ final class AvailableTabIdsFamily extends $Family
 }
 
 @ProviderFor(availableTabStates)
-const availableTabStatesProvider = AvailableTabStatesFamily._();
+final availableTabStatesProvider = AvailableTabStatesFamily._();
 
 final class AvailableTabStatesProvider
     extends
@@ -305,7 +303,7 @@ final class AvailableTabStatesProvider
           EquatableValue<Map<String, TabState>>
         >
     with $Provider<EquatableValue<Map<String, TabState>>> {
-  const AvailableTabStatesProvider._({
+  AvailableTabStatesProvider._({
     required AvailableTabStatesFamily super.from,
     required ContainerFilter super.argument,
   }) : super(
@@ -367,7 +365,7 @@ final class AvailableTabStatesFamily extends $Family
           EquatableValue<Map<String, TabState>>,
           ContainerFilter
         > {
-  const AvailableTabStatesFamily._()
+  AvailableTabStatesFamily._()
     : super(
         retry: null,
         name: r'availableTabStatesProvider',
@@ -384,7 +382,7 @@ final class AvailableTabStatesFamily extends $Family
 }
 
 @ProviderFor(fifoTabStates)
-const fifoTabStatesProvider = FifoTabStatesProvider._();
+final fifoTabStatesProvider = FifoTabStatesProvider._();
 
 final class FifoTabStatesProvider
     extends
@@ -394,7 +392,7 @@ final class FifoTabStatesProvider
           EquatableValue<List<FifoTab>>
         >
     with $Provider<EquatableValue<List<FifoTab>>> {
-  const FifoTabStatesProvider._()
+  FifoTabStatesProvider._()
     : super(
         from: null,
         argument: null,
@@ -433,7 +431,7 @@ final class FifoTabStatesProvider
 String _$fifoTabStatesHash() => r'0320c28b328d814ed358ec6a10ec770a1ed634ad';
 
 @ProviderFor(suggestedTabEntities)
-const suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
+final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
 
 final class SuggestedTabEntitiesProvider
     extends
@@ -443,7 +441,7 @@ final class SuggestedTabEntitiesProvider
           EquatableValue<List<TabEntity>>
         >
     with $Provider<EquatableValue<List<TabEntity>>> {
-  const SuggestedTabEntitiesProvider._({
+  SuggestedTabEntitiesProvider._({
     required SuggestedTabEntitiesFamily super.from,
     required String? super.argument,
   }) : super(
@@ -502,7 +500,7 @@ String _$suggestedTabEntitiesHash() =>
 
 final class SuggestedTabEntitiesFamily extends $Family
     with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {
-  const SuggestedTabEntitiesFamily._()
+  SuggestedTabEntitiesFamily._()
     : super(
         retry: null,
         name: r'suggestedTabEntitiesProvider',
@@ -519,7 +517,7 @@ final class SuggestedTabEntitiesFamily extends $Family
 }
 
 @ProviderFor(seamlessFilteredTabEntities)
-const seamlessFilteredTabEntitiesProvider =
+final seamlessFilteredTabEntitiesProvider =
     SeamlessFilteredTabEntitiesFamily._();
 
 final class SeamlessFilteredTabEntitiesProvider
@@ -530,7 +528,7 @@ final class SeamlessFilteredTabEntitiesProvider
           EquatableValue<List<TabEntity>>
         >
     with $Provider<EquatableValue<List<TabEntity>>> {
-  const SeamlessFilteredTabEntitiesProvider._({
+  SeamlessFilteredTabEntitiesProvider._({
     required SeamlessFilteredTabEntitiesFamily super.from,
     required ({
       TabSearchPartition searchPartition,
@@ -614,7 +612,7 @@ final class SeamlessFilteredTabEntitiesFamily extends $Family
             bool groupTrees,
           })
         > {
-  const SeamlessFilteredTabEntitiesFamily._()
+  SeamlessFilteredTabEntitiesFamily._()
     : super(
         retry: null,
         name: r'seamlessFilteredTabEntitiesProvider',
@@ -641,7 +639,7 @@ final class SeamlessFilteredTabEntitiesFamily extends $Family
 }
 
 @ProviderFor(filteredTabPreviews)
-const filteredTabPreviewsProvider = FilteredTabPreviewsFamily._();
+final filteredTabPreviewsProvider = FilteredTabPreviewsFamily._();
 
 final class FilteredTabPreviewsProvider
     extends
@@ -651,7 +649,7 @@ final class FilteredTabPreviewsProvider
           EquatableValue<List<TabPreview>>
         >
     with $Provider<EquatableValue<List<TabPreview>>> {
-  const FilteredTabPreviewsProvider._({
+  FilteredTabPreviewsProvider._({
     required FilteredTabPreviewsFamily super.from,
     required (TabSearchPartition, ContainerFilter) super.argument,
   }) : super(
@@ -714,7 +712,7 @@ final class FilteredTabPreviewsFamily extends $Family
           EquatableValue<List<TabPreview>>,
           (TabSearchPartition, ContainerFilter)
         > {
-  const FilteredTabPreviewsFamily._()
+  FilteredTabPreviewsFamily._()
     : super(
         retry: null,
         name: r'filteredTabPreviewsProvider',

@@ -10,11 +10,11 @@ part of 'proxy_settings_replication.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ProxySettingsReplication)
-const proxySettingsReplicationProvider = ProxySettingsReplicationProvider._();
+final proxySettingsReplicationProvider = ProxySettingsReplicationProvider._();
 
 final class ProxySettingsReplicationProvider
     extends $NotifierProvider<ProxySettingsReplication, void> {
-  const ProxySettingsReplicationProvider._()
+  ProxySettingsReplicationProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$ProxySettingsReplication extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$ProxySettingsReplication extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

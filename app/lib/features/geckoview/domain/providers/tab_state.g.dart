@@ -10,11 +10,11 @@ part of 'tab_state.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TabStates)
-const tabStatesProvider = TabStatesProvider._();
+final tabStatesProvider = TabStatesProvider._();
 
 final class TabStatesProvider
     extends $NotifierProvider<TabStates, Map<String, TabState>> {
-  const TabStatesProvider._()
+  TabStatesProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<Map<String, TabState>, Map<String, TabState>>;
     final element =
         ref.element
@@ -58,17 +57,17 @@ abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(tabState)
-const tabStateProvider = TabStateFamily._();
+final tabStateProvider = TabStateFamily._();
 
 final class TabStateProvider
     extends $FunctionalProvider<TabState?, TabState?, TabState?>
     with $Provider<TabState?> {
-  const TabStateProvider._({
+  TabStateProvider._({
     required TabStateFamily super.from,
     required String? super.argument,
   }) : super(
@@ -123,7 +122,7 @@ String _$tabStateHash() => r'f57b2353acc99ca73670d504b45ea5ff19df38c7';
 
 final class TabStateFamily extends $Family
     with $FunctionalFamilyOverride<TabState?, String?> {
-  const TabStateFamily._()
+  TabStateFamily._()
     : super(
         retry: null,
         name: r'tabStateProvider',
@@ -140,13 +139,13 @@ final class TabStateFamily extends $Family
 }
 
 @ProviderFor(tabStateWithFallback)
-const tabStateWithFallbackProvider = TabStateWithFallbackFamily._();
+final tabStateWithFallbackProvider = TabStateWithFallbackFamily._();
 
 final class TabStateWithFallbackProvider
     extends
         $FunctionalProvider<AsyncValue<TabState>, TabState, FutureOr<TabState>>
     with $FutureModifier<TabState>, $FutureProvider<TabState> {
-  const TabStateWithFallbackProvider._({
+  TabStateWithFallbackProvider._({
     required TabStateWithFallbackFamily super.from,
     required String super.argument,
   }) : super(
@@ -194,7 +193,7 @@ String _$tabStateWithFallbackHash() =>
 
 final class TabStateWithFallbackFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<TabState>, String> {
-  const TabStateWithFallbackFamily._()
+  TabStateWithFallbackFamily._()
     : super(
         retry: null,
         name: r'tabStateWithFallbackProvider',
@@ -211,12 +210,12 @@ final class TabStateWithFallbackFamily extends $Family
 }
 
 @ProviderFor(isTabTunneled)
-const isTabTunneledProvider = IsTabTunneledFamily._();
+final isTabTunneledProvider = IsTabTunneledFamily._();
 
 final class IsTabTunneledProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
-  const IsTabTunneledProvider._({
+  IsTabTunneledProvider._({
     required IsTabTunneledFamily super.from,
     required String? super.argument,
   }) : super(
@@ -263,7 +262,7 @@ String _$isTabTunneledHash() => r'84035f8df248cd0586016c12c1820dd902717c1d';
 
 final class IsTabTunneledFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
-  const IsTabTunneledFamily._()
+  IsTabTunneledFamily._()
     : super(
         retry: null,
         name: r'isTabTunneledProvider',
@@ -280,12 +279,12 @@ final class IsTabTunneledFamily extends $Family
 }
 
 @ProviderFor(selectedTabState)
-const selectedTabStateProvider = SelectedTabStateProvider._();
+final selectedTabStateProvider = SelectedTabStateProvider._();
 
 final class SelectedTabStateProvider
     extends $FunctionalProvider<TabState?, TabState?, TabState?>
     with $Provider<TabState?> {
-  const SelectedTabStateProvider._()
+  SelectedTabStateProvider._()
     : super(
         from: null,
         argument: null,
@@ -321,12 +320,12 @@ final class SelectedTabStateProvider
 String _$selectedTabStateHash() => r'dbd36af7af286bd9d079f30e8e11bbda23bf7728';
 
 @ProviderFor(selectedTabType)
-const selectedTabTypeProvider = SelectedTabTypeProvider._();
+final selectedTabTypeProvider = SelectedTabTypeProvider._();
 
 final class SelectedTabTypeProvider
     extends $FunctionalProvider<TabType?, TabType?, TabType?>
     with $Provider<TabType?> {
-  const SelectedTabTypeProvider._()
+  SelectedTabTypeProvider._()
     : super(
         from: null,
         argument: null,
@@ -362,7 +361,7 @@ final class SelectedTabTypeProvider
 String _$selectedTabTypeHash() => r'53093fc6db8becde7500163661e087fb0a2eb955';
 
 @ProviderFor(selectedTabContainerId)
-const selectedTabContainerIdProvider = SelectedTabContainerIdProvider._();
+final selectedTabContainerIdProvider = SelectedTabContainerIdProvider._();
 
 final class SelectedTabContainerIdProvider
     extends
@@ -372,7 +371,7 @@ final class SelectedTabContainerIdProvider
           AsyncValue<String?>
         >
     with $Provider<AsyncValue<String?>> {
-  const SelectedTabContainerIdProvider._()
+  SelectedTabContainerIdProvider._()
     : super(
         from: null,
         argument: null,

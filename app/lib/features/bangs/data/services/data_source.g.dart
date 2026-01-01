@@ -10,11 +10,11 @@ part of 'data_source.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BangDataSourceService)
-const bangDataSourceServiceProvider = BangDataSourceServiceProvider._();
+final bangDataSourceServiceProvider = BangDataSourceServiceProvider._();
 
 final class BangDataSourceServiceProvider
     extends $NotifierProvider<BangDataSourceService, void> {
-  const BangDataSourceServiceProvider._()
+  BangDataSourceServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$BangDataSourceService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$BangDataSourceService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

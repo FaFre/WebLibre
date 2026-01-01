@@ -10,11 +10,11 @@ part of 'qwant.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(QwantAutosuggestService)
-const qwantAutosuggestServiceProvider = QwantAutosuggestServiceProvider._();
+final qwantAutosuggestServiceProvider = QwantAutosuggestServiceProvider._();
 
 final class QwantAutosuggestServiceProvider
     extends $NotifierProvider<QwantAutosuggestService, void> {
-  const QwantAutosuggestServiceProvider._()
+  QwantAutosuggestServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$QwantAutosuggestService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$QwantAutosuggestService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

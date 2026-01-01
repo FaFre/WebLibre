@@ -10,11 +10,11 @@ part of 'preference_observer.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(PreferenceChangeListener)
-const preferenceChangeListenerProvider = PreferenceChangeListenerProvider._();
+final preferenceChangeListenerProvider = PreferenceChangeListenerProvider._();
 
 final class PreferenceChangeListenerProvider
     extends $StreamNotifierProvider<PreferenceChangeListener, GeckoPref> {
-  const PreferenceChangeListenerProvider._()
+  PreferenceChangeListenerProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,7 +41,6 @@ abstract class _$PreferenceChangeListener extends $StreamNotifier<GeckoPref> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<GeckoPref>, GeckoPref>;
     final element =
         ref.element
@@ -51,16 +50,16 @@ abstract class _$PreferenceChangeListener extends $StreamNotifier<GeckoPref> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(PreferenceFixator)
-const preferenceFixatorProvider = PreferenceFixatorProvider._();
+final preferenceFixatorProvider = PreferenceFixatorProvider._();
 
 final class PreferenceFixatorProvider
     extends $NotifierProvider<PreferenceFixator, Map<String, Object>> {
-  const PreferenceFixatorProvider._()
+  PreferenceFixatorProvider._()
     : super(
         from: null,
         argument: null,
@@ -94,7 +93,6 @@ abstract class _$PreferenceFixator extends $Notifier<Map<String, Object>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<Map<String, Object>, Map<String, Object>>;
     final element =
         ref.element
@@ -104,6 +102,6 @@ abstract class _$PreferenceFixator extends $Notifier<Map<String, Object>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

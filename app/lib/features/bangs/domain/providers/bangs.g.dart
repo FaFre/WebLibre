@@ -10,13 +10,13 @@ part of 'bangs.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(defaultSearchBangData)
-const defaultSearchBangDataProvider = DefaultSearchBangDataProvider._();
+final defaultSearchBangDataProvider = DefaultSearchBangDataProvider._();
 
 final class DefaultSearchBangDataProvider
     extends
         $FunctionalProvider<AsyncValue<BangData?>, BangData?, Stream<BangData?>>
     with $FutureModifier<BangData?>, $StreamProvider<BangData?> {
-  const DefaultSearchBangDataProvider._()
+  DefaultSearchBangDataProvider._()
     : super(
         from: null,
         argument: null,
@@ -45,13 +45,13 @@ String _$defaultSearchBangDataHash() =>
     r'5f43b8989219cf3cb2f5ca65df351b6cb100427f';
 
 @ProviderFor(bangData)
-const bangDataProvider = BangDataFamily._();
+final bangDataProvider = BangDataFamily._();
 
 final class BangDataProvider
     extends
         $FunctionalProvider<AsyncValue<BangData?>, BangData?, Stream<BangData?>>
     with $FutureModifier<BangData?>, $StreamProvider<BangData?> {
-  const BangDataProvider._({
+  BangDataProvider._({
     required BangDataFamily super.from,
     required BangKey super.argument,
   }) : super(
@@ -98,7 +98,7 @@ String _$bangDataHash() => r'bd9f5ec8b29aab74620a9b5a4246cb7e3b2fd377';
 
 final class BangDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<BangData?>, BangKey> {
-  const BangDataFamily._()
+  BangDataFamily._()
     : super(
         retry: null,
         name: r'bangDataProvider',
@@ -115,7 +115,7 @@ final class BangDataFamily extends $Family
 }
 
 @ProviderFor(bangCategories)
-const bangCategoriesProvider = BangCategoriesProvider._();
+final bangCategoriesProvider = BangCategoriesProvider._();
 
 final class BangCategoriesProvider
     extends
@@ -127,7 +127,7 @@ final class BangCategoriesProvider
     with
         $FutureModifier<Map<String, List<String>>>,
         $StreamProvider<Map<String, List<String>>> {
-  const BangCategoriesProvider._()
+  BangCategoriesProvider._()
     : super(
         from: null,
         argument: null,
@@ -156,7 +156,7 @@ final class BangCategoriesProvider
 String _$bangCategoriesHash() => r'947fcfd2dffcc7f585c6ed7379d319f4fe72293a';
 
 @ProviderFor(bangList)
-const bangListProvider = BangListFamily._();
+final bangListProvider = BangListFamily._();
 
 final class BangListProvider
     extends
@@ -166,7 +166,7 @@ final class BangListProvider
           Stream<List<BangData>>
         >
     with $FutureModifier<List<BangData>>, $StreamProvider<List<BangData>> {
-  const BangListProvider._({
+  BangListProvider._({
     required BangListFamily super.from,
     required ({
       List<String>? triggers,
@@ -246,7 +246,7 @@ final class BangListFamily extends $Family
             bool? orderMostFrequentFirst,
           })
         > {
-  const BangListFamily._()
+  BangListFamily._()
     : super(
         retry: null,
         name: r'bangListProvider',
@@ -277,7 +277,7 @@ final class BangListFamily extends $Family
 }
 
 @ProviderFor(frequentBangList)
-const frequentBangListProvider = FrequentBangListProvider._();
+final frequentBangListProvider = FrequentBangListProvider._();
 
 final class FrequentBangListProvider
     extends
@@ -287,7 +287,7 @@ final class FrequentBangListProvider
           Stream<List<BangData>>
         >
     with $FutureModifier<List<BangData>>, $StreamProvider<List<BangData>> {
-  const FrequentBangListProvider._()
+  FrequentBangListProvider._()
     : super(
         from: null,
         argument: null,
@@ -316,7 +316,7 @@ final class FrequentBangListProvider
 String _$frequentBangListHash() => r'2c1ecb7e9416772fc1c32d01d767e1eb4f865975';
 
 @ProviderFor(searchHistory)
-const searchHistoryProvider = SearchHistoryProvider._();
+final searchHistoryProvider = SearchHistoryProvider._();
 
 final class SearchHistoryProvider
     extends
@@ -328,7 +328,7 @@ final class SearchHistoryProvider
     with
         $FutureModifier<List<SearchHistoryEntry>>,
         $StreamProvider<List<SearchHistoryEntry>> {
-  const SearchHistoryProvider._()
+  SearchHistoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -357,13 +357,13 @@ final class SearchHistoryProvider
 String _$searchHistoryHash() => r'7b97798729643de8e44fd8024cdc02f35124b08b';
 
 @ProviderFor(lastSyncOfGroup)
-const lastSyncOfGroupProvider = LastSyncOfGroupFamily._();
+final lastSyncOfGroupProvider = LastSyncOfGroupFamily._();
 
 final class LastSyncOfGroupProvider
     extends
         $FunctionalProvider<AsyncValue<DateTime?>, DateTime?, Stream<DateTime?>>
     with $FutureModifier<DateTime?>, $StreamProvider<DateTime?> {
-  const LastSyncOfGroupProvider._({
+  LastSyncOfGroupProvider._({
     required LastSyncOfGroupFamily super.from,
     required BangGroup super.argument,
   }) : super(
@@ -410,7 +410,7 @@ String _$lastSyncOfGroupHash() => r'23d07f3132ba9bb35a31f74e3a69698d31d4c569';
 
 final class LastSyncOfGroupFamily extends $Family
     with $FunctionalFamilyOverride<Stream<DateTime?>, BangGroup> {
-  const LastSyncOfGroupFamily._()
+  LastSyncOfGroupFamily._()
     : super(
         retry: null,
         name: r'lastSyncOfGroupProvider',
@@ -427,12 +427,12 @@ final class LastSyncOfGroupFamily extends $Family
 }
 
 @ProviderFor(bangCountOfGroup)
-const bangCountOfGroupProvider = BangCountOfGroupFamily._();
+final bangCountOfGroupProvider = BangCountOfGroupFamily._();
 
 final class BangCountOfGroupProvider
     extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
     with $FutureModifier<int>, $StreamProvider<int> {
-  const BangCountOfGroupProvider._({
+  BangCountOfGroupProvider._({
     required BangCountOfGroupFamily super.from,
     required BangGroup super.argument,
   }) : super(
@@ -479,7 +479,7 @@ String _$bangCountOfGroupHash() => r'211ffcd7f49b637a7953f913dc5eafda344423f3';
 
 final class BangCountOfGroupFamily extends $Family
     with $FunctionalFamilyOverride<Stream<int>, BangGroup> {
-  const BangCountOfGroupFamily._()
+  BangCountOfGroupFamily._()
     : super(
         retry: null,
         name: r'bangCountOfGroupProvider',

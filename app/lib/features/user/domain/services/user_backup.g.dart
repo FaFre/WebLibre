@@ -10,11 +10,11 @@ part of 'user_backup.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(UserBackupService)
-const userBackupServiceProvider = UserBackupServiceProvider._();
+final userBackupServiceProvider = UserBackupServiceProvider._();
 
 final class UserBackupServiceProvider
     extends $NotifierProvider<UserBackupService, void> {
-  const UserBackupServiceProvider._()
+  UserBackupServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$UserBackupService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$UserBackupService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

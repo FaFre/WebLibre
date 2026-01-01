@@ -10,11 +10,11 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ArticleSearch)
-const articleSearchProvider = ArticleSearchFamily._();
+final articleSearchProvider = ArticleSearchFamily._();
 
 final class ArticleSearchProvider
     extends $StreamNotifierProvider<ArticleSearch, List<FeedArticle>> {
-  const ArticleSearchProvider._({
+  ArticleSearchProvider._({
     required ArticleSearchFamily super.from,
     required Uri? super.argument,
   }) : super(
@@ -61,7 +61,7 @@ final class ArticleSearchFamily extends $Family
           Stream<List<FeedArticle>>,
           Uri?
         > {
-  const ArticleSearchFamily._()
+  ArticleSearchFamily._()
     : super(
         retry: null,
         name: r'articleSearchProvider',
@@ -85,7 +85,6 @@ abstract class _$ArticleSearch extends $StreamNotifier<List<FeedArticle>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref as $Ref<AsyncValue<List<FeedArticle>>, List<FeedArticle>>;
     final element =
@@ -96,12 +95,12 @@ abstract class _$ArticleSearch extends $StreamNotifier<List<FeedArticle>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }
 
 @ProviderFor(feedList)
-const feedListProvider = FeedListProvider._();
+final feedListProvider = FeedListProvider._();
 
 final class FeedListProvider
     extends
@@ -111,7 +110,7 @@ final class FeedListProvider
           Stream<List<FeedData>>
         >
     with $FutureModifier<List<FeedData>>, $StreamProvider<List<FeedData>> {
-  const FeedListProvider._()
+  FeedListProvider._()
     : super(
         from: null,
         argument: null,
@@ -140,13 +139,13 @@ final class FeedListProvider
 String _$feedListHash() => r'0076186437354768c39fb1d7c8bcfcf7b94c7dd1';
 
 @ProviderFor(feedData)
-const feedDataProvider = FeedDataFamily._();
+final feedDataProvider = FeedDataFamily._();
 
 final class FeedDataProvider
     extends
         $FunctionalProvider<AsyncValue<FeedData?>, FeedData?, Stream<FeedData?>>
     with $FutureModifier<FeedData?>, $StreamProvider<FeedData?> {
-  const FeedDataProvider._({
+  FeedDataProvider._({
     required FeedDataFamily super.from,
     required Uri? super.argument,
   }) : super(
@@ -193,7 +192,7 @@ String _$feedDataHash() => r'0599a2e3d159ef3abb6c3d2c871f87da2f5e646b';
 
 final class FeedDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<FeedData?>, Uri?> {
-  const FeedDataFamily._()
+  FeedDataFamily._()
     : super(
         retry: null,
         name: r'feedDataProvider',
@@ -210,7 +209,7 @@ final class FeedDataFamily extends $Family
 }
 
 @ProviderFor(feedArticleList)
-const feedArticleListProvider = FeedArticleListFamily._();
+final feedArticleListProvider = FeedArticleListFamily._();
 
 final class FeedArticleListProvider
     extends
@@ -222,7 +221,7 @@ final class FeedArticleListProvider
     with
         $FutureModifier<List<FeedArticle>>,
         $StreamProvider<List<FeedArticle>> {
-  const FeedArticleListProvider._({
+  FeedArticleListProvider._({
     required FeedArticleListFamily super.from,
     required Uri? super.argument,
   }) : super(
@@ -270,7 +269,7 @@ String _$feedArticleListHash() => r'45d585cc9f59ad48a0d1d6fbcf802b1c7de7f6bc';
 
 final class FeedArticleListFamily extends $Family
     with $FunctionalFamilyOverride<Stream<List<FeedArticle>>, Uri?> {
-  const FeedArticleListFamily._()
+  FeedArticleListFamily._()
     : super(
         retry: null,
         name: r'feedArticleListProvider',
@@ -287,12 +286,12 @@ final class FeedArticleListFamily extends $Family
 }
 
 @ProviderFor(FilteredArticleList)
-const filteredArticleListProvider = FilteredArticleListFamily._();
+final filteredArticleListProvider = FilteredArticleListFamily._();
 
 final class FilteredArticleListProvider
     extends
         $NotifierProvider<FilteredArticleList, AsyncValue<List<FeedArticle>>> {
-  const FilteredArticleListProvider._({
+  FilteredArticleListProvider._({
     required FilteredArticleListFamily super.from,
     required Uri? super.argument,
   }) : super(
@@ -350,7 +349,7 @@ final class FilteredArticleListFamily extends $Family
           AsyncValue<List<FeedArticle>>,
           Uri?
         > {
-  const FilteredArticleListFamily._()
+  FilteredArticleListFamily._()
     : super(
         retry: null,
         name: r'filteredArticleListProvider',
@@ -375,7 +374,6 @@ abstract class _$FilteredArticleList
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref
             as $Ref<
@@ -393,12 +391,12 @@ abstract class _$FilteredArticleList
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }
 
 @ProviderFor(feedArticle)
-const feedArticleProvider = FeedArticleFamily._();
+final feedArticleProvider = FeedArticleFamily._();
 
 final class FeedArticleProvider
     extends
@@ -408,7 +406,7 @@ final class FeedArticleProvider
           Stream<FeedArticle?>
         >
     with $FutureModifier<FeedArticle?>, $StreamProvider<FeedArticle?> {
-  const FeedArticleProvider._({
+  FeedArticleProvider._({
     required FeedArticleFamily super.from,
     required (String, {bool updateReadDate}) super.argument,
   }) : super(
@@ -464,7 +462,7 @@ final class FeedArticleFamily extends $Family
           Stream<FeedArticle?>,
           (String, {bool updateReadDate})
         > {
-  const FeedArticleFamily._()
+  FeedArticleFamily._()
     : super(
         retry: null,
         name: r'feedArticleProvider',
@@ -484,7 +482,7 @@ final class FeedArticleFamily extends $Family
 }
 
 @ProviderFor(unreadArticleCount)
-const unreadArticleCountProvider = UnreadArticleCountProvider._();
+final unreadArticleCountProvider = UnreadArticleCountProvider._();
 
 final class UnreadArticleCountProvider
     extends
@@ -494,7 +492,7 @@ final class UnreadArticleCountProvider
           Raw<Stream<Map<String, int>>>
         >
     with $Provider<Raw<Stream<Map<String, int>>>> {
-  const UnreadArticleCountProvider._()
+  UnreadArticleCountProvider._()
     : super(
         from: null,
         argument: null,
@@ -534,12 +532,12 @@ String _$unreadArticleCountHash() =>
     r'709518ad229636df0f1095f47e3a6d116b3aa7e6';
 
 @ProviderFor(unreadFeedArticleCount)
-const unreadFeedArticleCountProvider = UnreadFeedArticleCountFamily._();
+final unreadFeedArticleCountProvider = UnreadFeedArticleCountFamily._();
 
 final class UnreadFeedArticleCountProvider
     extends $FunctionalProvider<AsyncValue<int?>, int?, Stream<int?>>
     with $FutureModifier<int?>, $StreamProvider<int?> {
-  const UnreadFeedArticleCountProvider._({
+  UnreadFeedArticleCountProvider._({
     required UnreadFeedArticleCountFamily super.from,
     required Uri super.argument,
   }) : super(
@@ -588,7 +586,7 @@ String _$unreadFeedArticleCountHash() =>
 
 final class UnreadFeedArticleCountFamily extends $Family
     with $FunctionalFamilyOverride<Stream<int?>, Uri> {
-  const UnreadFeedArticleCountFamily._()
+  UnreadFeedArticleCountFamily._()
     : super(
         retry: null,
         name: r'unreadFeedArticleCountProvider',
@@ -605,7 +603,7 @@ final class UnreadFeedArticleCountFamily extends $Family
 }
 
 @ProviderFor(fetchWebFeed)
-const fetchWebFeedProvider = FetchWebFeedFamily._();
+final fetchWebFeedProvider = FetchWebFeedFamily._();
 
 final class FetchWebFeedProvider
     extends
@@ -615,7 +613,7 @@ final class FetchWebFeedProvider
           FutureOr<FeedParseResult>
         >
     with $FutureModifier<FeedParseResult>, $FutureProvider<FeedParseResult> {
-  const FetchWebFeedProvider._({
+  FetchWebFeedProvider._({
     required FetchWebFeedFamily super.from,
     required Uri super.argument,
   }) : super(
@@ -663,7 +661,7 @@ String _$fetchWebFeedHash() => r'73bdf87ad7dbd039c7dc181d80acdf99d96fe1c6';
 
 final class FetchWebFeedFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<FeedParseResult>, Uri> {
-  const FetchWebFeedFamily._()
+  FetchWebFeedFamily._()
     : super(
         retry: null,
         name: r'fetchWebFeedProvider',

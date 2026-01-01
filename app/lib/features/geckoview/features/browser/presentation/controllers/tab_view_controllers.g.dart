@@ -10,11 +10,11 @@ part of 'tab_view_controllers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TabSuggestionsController)
-const tabSuggestionsControllerProvider = TabSuggestionsControllerProvider._();
+final tabSuggestionsControllerProvider = TabSuggestionsControllerProvider._();
 
 final class TabSuggestionsControllerProvider
     extends $NotifierProvider<TabSuggestionsController, bool> {
-  const TabSuggestionsControllerProvider._()
+  TabSuggestionsControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$TabSuggestionsController extends $Notifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -59,16 +58,16 @@ abstract class _$TabSuggestionsController extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(TabsViewModeController)
-const tabsViewModeControllerProvider = TabsViewModeControllerProvider._();
+final tabsViewModeControllerProvider = TabsViewModeControllerProvider._();
 
 final class TabsViewModeControllerProvider
     extends $NotifierProvider<TabsViewModeController, TabsViewMode> {
-  const TabsViewModeControllerProvider._()
+  TabsViewModeControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -103,7 +102,6 @@ abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<TabsViewMode, TabsViewMode>;
     final element =
         ref.element
@@ -113,16 +111,16 @@ abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(TabsReorderableController)
-const tabsReorderableControllerProvider = TabsReorderableControllerProvider._();
+final tabsReorderableControllerProvider = TabsReorderableControllerProvider._();
 
 final class TabsReorderableControllerProvider
     extends $NotifierProvider<TabsReorderableController, bool> {
-  const TabsReorderableControllerProvider._()
+  TabsReorderableControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -157,7 +155,6 @@ abstract class _$TabsReorderableController extends $Notifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -167,6 +164,6 @@ abstract class _$TabsReorderableController extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

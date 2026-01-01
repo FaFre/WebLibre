@@ -10,11 +10,11 @@ part of 'generic_website.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(GenericWebsiteService)
-const genericWebsiteServiceProvider = GenericWebsiteServiceProvider._();
+final genericWebsiteServiceProvider = GenericWebsiteServiceProvider._();
 
 final class GenericWebsiteServiceProvider
     extends $NotifierProvider<GenericWebsiteService, void> {
-  const GenericWebsiteServiceProvider._()
+  GenericWebsiteServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$GenericWebsiteService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$GenericWebsiteService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

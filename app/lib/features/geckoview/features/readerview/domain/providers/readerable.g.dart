@@ -10,7 +10,7 @@ part of 'readerable.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(readerableService)
-const readerableServiceProvider = ReaderableServiceProvider._();
+final readerableServiceProvider = ReaderableServiceProvider._();
 
 final class ReaderableServiceProvider
     extends
@@ -20,7 +20,7 @@ final class ReaderableServiceProvider
           GeckoReaderableService
         >
     with $Provider<GeckoReaderableService> {
-  const ReaderableServiceProvider._()
+  ReaderableServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -57,13 +57,13 @@ final class ReaderableServiceProvider
 String _$readerableServiceHash() => r'0c432ede496d85ed6a7d028af346b129d97f7502';
 
 @ProviderFor(appearanceButtonVisibility)
-const appearanceButtonVisibilityProvider =
+final appearanceButtonVisibilityProvider =
     AppearanceButtonVisibilityProvider._();
 
 final class AppearanceButtonVisibilityProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
     with $FutureModifier<bool>, $StreamProvider<bool> {
-  const AppearanceButtonVisibilityProvider._()
+  AppearanceButtonVisibilityProvider._()
     : super(
         from: null,
         argument: null,

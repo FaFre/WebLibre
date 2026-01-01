@@ -10,11 +10,11 @@ part of 'engine_suggestions.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(EngineSuggestions)
-const engineSuggestionsProvider = EngineSuggestionsProvider._();
+final engineSuggestionsProvider = EngineSuggestionsProvider._();
 
 final class EngineSuggestionsProvider
     extends $StreamNotifierProvider<EngineSuggestions, List<GeckoSuggestion>> {
-  const EngineSuggestionsProvider._()
+  EngineSuggestionsProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,7 +41,6 @@ abstract class _$EngineSuggestions
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref
             as $Ref<AsyncValue<List<GeckoSuggestion>>, List<GeckoSuggestion>>;
@@ -56,12 +55,12 @@ abstract class _$EngineSuggestions
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(engineHistorySuggestions)
-const engineHistorySuggestionsProvider = EngineHistorySuggestionsProvider._();
+final engineHistorySuggestionsProvider = EngineHistorySuggestionsProvider._();
 
 final class EngineHistorySuggestionsProvider
     extends
@@ -71,7 +70,7 @@ final class EngineHistorySuggestionsProvider
           AsyncValue<List<GeckoSuggestion>>
         >
     with $Provider<AsyncValue<List<GeckoSuggestion>>> {
-  const EngineHistorySuggestionsProvider._()
+  EngineHistorySuggestionsProvider._()
     : super(
         from: null,
         argument: null,

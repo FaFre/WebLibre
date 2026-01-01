@@ -10,11 +10,11 @@ part of 'article_filter.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ArticleFilter)
-const articleFilterProvider = ArticleFilterProvider._();
+final articleFilterProvider = ArticleFilterProvider._();
 
 final class ArticleFilterProvider
     extends $NotifierProvider<ArticleFilter, Set<String>> {
-  const ArticleFilterProvider._()
+  ArticleFilterProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$ArticleFilter extends $Notifier<Set<String>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<Set<String>, Set<String>>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$ArticleFilter extends $Notifier<Set<String>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

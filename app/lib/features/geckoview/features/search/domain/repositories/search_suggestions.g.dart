@@ -10,7 +10,7 @@ part of 'search_suggestions.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SearchSuggestionsRepository)
-const searchSuggestionsRepositoryProvider =
+final searchSuggestionsRepositoryProvider =
     SearchSuggestionsRepositoryFamily._();
 
 final class SearchSuggestionsRepositoryProvider
@@ -19,7 +19,7 @@ final class SearchSuggestionsRepositoryProvider
           SearchSuggestionsRepository,
           Raw<Stream<List<String>>>
         > {
-  const SearchSuggestionsRepositoryProvider._({
+  SearchSuggestionsRepositoryProvider._({
     required SearchSuggestionsRepositoryFamily super.from,
     required ISearchSuggestionProvider super.argument,
   }) : super(
@@ -76,7 +76,7 @@ final class SearchSuggestionsRepositoryFamily extends $Family
           Raw<Stream<List<String>>>,
           ISearchSuggestionProvider
         > {
-  const SearchSuggestionsRepositoryFamily._()
+  SearchSuggestionsRepositoryFamily._()
     : super(
         retry: null,
         name: r'searchSuggestionsRepositoryProvider',
@@ -107,7 +107,6 @@ abstract class _$SearchSuggestionsRepository
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref as $Ref<Raw<Stream<List<String>>>, Raw<Stream<List<String>>>>;
     final element =
@@ -118,6 +117,6 @@ abstract class _$SearchSuggestionsRepository
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

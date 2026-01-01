@@ -10,12 +10,12 @@ part of 'local_authentication.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(LocalAuthenticationService)
-const localAuthenticationServiceProvider =
+final localAuthenticationServiceProvider =
     LocalAuthenticationServiceProvider._();
 
 final class LocalAuthenticationServiceProvider
     extends $AsyncNotifierProvider<LocalAuthenticationService, bool> {
-  const LocalAuthenticationServiceProvider._()
+  LocalAuthenticationServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -42,7 +42,6 @@ abstract class _$LocalAuthenticationService extends $AsyncNotifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<bool>, bool>;
     final element =
         ref.element
@@ -52,6 +51,6 @@ abstract class _$LocalAuthenticationService extends $AsyncNotifier<bool> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

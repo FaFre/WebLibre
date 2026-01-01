@@ -10,11 +10,11 @@ part of 'selected_container.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SelectedContainer)
-const selectedContainerProvider = SelectedContainerProvider._();
+final selectedContainerProvider = SelectedContainerProvider._();
 
 final class SelectedContainerProvider
     extends $NotifierProvider<SelectedContainer, String?> {
-  const SelectedContainerProvider._()
+  SelectedContainerProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$SelectedContainer extends $Notifier<String?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<String?, String?>;
     final element =
         ref.element
@@ -58,12 +57,12 @@ abstract class _$SelectedContainer extends $Notifier<String?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(selectedContainerData)
-const selectedContainerDataProvider = SelectedContainerDataProvider._();
+final selectedContainerDataProvider = SelectedContainerDataProvider._();
 
 final class SelectedContainerDataProvider
     extends
@@ -73,7 +72,7 @@ final class SelectedContainerDataProvider
           Stream<ContainerData?>
         >
     with $FutureModifier<ContainerData?>, $StreamProvider<ContainerData?> {
-  const SelectedContainerDataProvider._()
+  SelectedContainerDataProvider._()
     : super(
         from: null,
         argument: null,
@@ -103,12 +102,12 @@ String _$selectedContainerDataHash() =>
     r'1ec86a82e1fc4823a867285f05036c903633a165';
 
 @ProviderFor(selectedContainerTabCount)
-const selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();
+final selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();
 
 final class SelectedContainerTabCountProvider
     extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
     with $FutureModifier<int>, $FutureProvider<int> {
-  const SelectedContainerTabCountProvider._()
+  SelectedContainerTabCountProvider._()
     : super(
         from: null,
         argument: null,

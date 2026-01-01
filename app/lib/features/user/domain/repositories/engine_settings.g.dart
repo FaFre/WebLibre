@@ -10,11 +10,11 @@ part of 'engine_settings.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(EngineSettingsRepository)
-const engineSettingsRepositoryProvider = EngineSettingsRepositoryProvider._();
+final engineSettingsRepositoryProvider = EngineSettingsRepositoryProvider._();
 
 final class EngineSettingsRepositoryProvider
     extends $StreamNotifierProvider<EngineSettingsRepository, EngineSettings> {
-  const EngineSettingsRepositoryProvider._()
+  EngineSettingsRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -42,7 +42,6 @@ abstract class _$EngineSettingsRepository
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<EngineSettings>, EngineSettings>;
     final element =
         ref.element
@@ -52,18 +51,18 @@ abstract class _$EngineSettingsRepository
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(engineSettingsWithDefaults)
-const engineSettingsWithDefaultsProvider =
+final engineSettingsWithDefaultsProvider =
     EngineSettingsWithDefaultsProvider._();
 
 final class EngineSettingsWithDefaultsProvider
     extends $FunctionalProvider<EngineSettings, EngineSettings, EngineSettings>
     with $Provider<EngineSettings> {
-  const EngineSettingsWithDefaultsProvider._()
+  EngineSettingsWithDefaultsProvider._()
     : super(
         from: null,
         argument: null,

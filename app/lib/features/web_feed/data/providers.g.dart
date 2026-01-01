@@ -10,12 +10,12 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(feedDatabase)
-const feedDatabaseProvider = FeedDatabaseProvider._();
+final feedDatabaseProvider = FeedDatabaseProvider._();
 
 final class FeedDatabaseProvider
     extends $FunctionalProvider<FeedDatabase, FeedDatabase, FeedDatabase>
     with $Provider<FeedDatabase> {
-  const FeedDatabaseProvider._()
+  FeedDatabaseProvider._()
     : super(
         from: null,
         argument: null,

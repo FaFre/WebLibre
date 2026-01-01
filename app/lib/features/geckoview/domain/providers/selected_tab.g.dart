@@ -10,11 +10,11 @@ part of 'selected_tab.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SelectedTab)
-const selectedTabProvider = SelectedTabProvider._();
+final selectedTabProvider = SelectedTabProvider._();
 
 final class SelectedTabProvider
     extends $NotifierProvider<SelectedTab, String?> {
-  const SelectedTabProvider._()
+  SelectedTabProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$SelectedTab extends $Notifier<String?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<String?, String?>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$SelectedTab extends $Notifier<String?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

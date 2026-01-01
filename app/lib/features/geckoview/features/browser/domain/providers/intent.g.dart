@@ -10,11 +10,11 @@ part of 'intent.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(EngineBoundIntentStream)
-const engineBoundIntentStreamProvider = EngineBoundIntentStreamProvider._();
+final engineBoundIntentStreamProvider = EngineBoundIntentStreamProvider._();
 
 final class EngineBoundIntentStreamProvider
     extends $StreamNotifierProvider<EngineBoundIntentStream, SharedContent> {
-  const EngineBoundIntentStreamProvider._()
+  EngineBoundIntentStreamProvider._()
     : super(
         from: null,
         argument: null,
@@ -42,7 +42,6 @@ abstract class _$EngineBoundIntentStream
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<SharedContent>, SharedContent>;
     final element =
         ref.element
@@ -52,6 +51,6 @@ abstract class _$EngineBoundIntentStream
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

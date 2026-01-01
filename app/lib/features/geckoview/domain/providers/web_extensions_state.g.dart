@@ -10,12 +10,12 @@ part of 'web_extensions_state.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(WebExtensionsState)
-const webExtensionsStateProvider = WebExtensionsStateFamily._();
+final webExtensionsStateProvider = WebExtensionsStateFamily._();
 
 final class WebExtensionsStateProvider
     extends
         $NotifierProvider<WebExtensionsState, Map<String, WebExtensionState>> {
-  const WebExtensionsStateProvider._({
+  WebExtensionsStateProvider._({
     required WebExtensionsStateFamily super.from,
     required WebExtensionActionType super.argument,
   }) : super(
@@ -73,7 +73,7 @@ final class WebExtensionsStateFamily extends $Family
           Map<String, WebExtensionState>,
           WebExtensionActionType
         > {
-  const WebExtensionsStateFamily._()
+  WebExtensionsStateFamily._()
     : super(
         retry: null,
         name: r'webExtensionsStateProvider',
@@ -98,7 +98,6 @@ abstract class _$WebExtensionsState
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref
             as $Ref<
@@ -116,6 +115,6 @@ abstract class _$WebExtensionsState
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

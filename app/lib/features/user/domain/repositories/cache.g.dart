@@ -10,11 +10,11 @@ part of 'cache.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(CacheRepository)
-const cacheRepositoryProvider = CacheRepositoryProvider._();
+final cacheRepositoryProvider = CacheRepositoryProvider._();
 
 final class CacheRepositoryProvider
     extends $NotifierProvider<CacheRepository, void> {
-  const CacheRepositoryProvider._()
+  CacheRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$CacheRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$CacheRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

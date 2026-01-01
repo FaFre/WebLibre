@@ -10,11 +10,11 @@ part of 'bottom_sheet.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BottomSheetController)
-const bottomSheetControllerProvider = BottomSheetControllerProvider._();
+final bottomSheetControllerProvider = BottomSheetControllerProvider._();
 
 final class BottomSheetControllerProvider
     extends $NotifierProvider<BottomSheetController, Sheet?> {
-  const BottomSheetControllerProvider._()
+  BottomSheetControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$BottomSheetController extends $Notifier<Sheet?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<Sheet?, Sheet?>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$BottomSheetController extends $Notifier<Sheet?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

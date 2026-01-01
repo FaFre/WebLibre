@@ -10,12 +10,12 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(userDatabase)
-const userDatabaseProvider = UserDatabaseProvider._();
+final userDatabaseProvider = UserDatabaseProvider._();
 
 final class UserDatabaseProvider
     extends $FunctionalProvider<UserDatabase, UserDatabase, UserDatabase>
     with $Provider<UserDatabase> {
-  const UserDatabaseProvider._()
+  UserDatabaseProvider._()
     : super(
         from: null,
         argument: null,
@@ -51,7 +51,7 @@ final class UserDatabaseProvider
 String _$userDatabaseHash() => r'8cc40197f9dbb85ccd8263984218753d3690954b';
 
 @ProviderFor(riverpodDatabaseStorage)
-const riverpodDatabaseStorageProvider = RiverpodDatabaseStorageProvider._();
+final riverpodDatabaseStorageProvider = RiverpodDatabaseStorageProvider._();
 
 final class RiverpodDatabaseStorageProvider
     extends
@@ -61,7 +61,7 @@ final class RiverpodDatabaseStorageProvider
           Storage<String, String>
         >
     with $Provider<Storage<String, String>> {
-  const RiverpodDatabaseStorageProvider._()
+  RiverpodDatabaseStorageProvider._()
     : super(
         from: null,
         argument: null,

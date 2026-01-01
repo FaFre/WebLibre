@@ -10,12 +10,12 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(tabDatabase)
-const tabDatabaseProvider = TabDatabaseProvider._();
+final tabDatabaseProvider = TabDatabaseProvider._();
 
 final class TabDatabaseProvider
     extends $FunctionalProvider<TabDatabase, TabDatabase, TabDatabase>
     with $Provider<TabDatabase> {
-  const TabDatabaseProvider._()
+  TabDatabaseProvider._()
     : super(
         from: null,
         argument: null,

@@ -10,7 +10,7 @@ part of 'browser_extension.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(browserExtensionService)
-const browserExtensionServiceProvider = BrowserExtensionServiceProvider._();
+final browserExtensionServiceProvider = BrowserExtensionServiceProvider._();
 
 final class BrowserExtensionServiceProvider
     extends
@@ -20,7 +20,7 @@ final class BrowserExtensionServiceProvider
           GeckoBrowserExtensionService
         >
     with $Provider<GeckoBrowserExtensionService> {
-  const BrowserExtensionServiceProvider._()
+  BrowserExtensionServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,12 +58,12 @@ String _$browserExtensionServiceHash() =>
     r'c3f67763e0abb10039b407fced6e175e5ec7c6c3';
 
 @ProviderFor(feedRequested)
-const feedRequestedProvider = FeedRequestedProvider._();
+final feedRequestedProvider = FeedRequestedProvider._();
 
 final class FeedRequestedProvider
     extends $FunctionalProvider<AsyncValue<String>, String, Stream<String>>
     with $FutureModifier<String>, $StreamProvider<String> {
-  const FeedRequestedProvider._()
+  FeedRequestedProvider._()
     : super(
         from: null,
         argument: null,

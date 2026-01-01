@@ -10,7 +10,7 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(selectionActionService)
-const selectionActionServiceProvider = SelectionActionServiceProvider._();
+final selectionActionServiceProvider = SelectionActionServiceProvider._();
 
 final class SelectionActionServiceProvider
     extends
@@ -20,7 +20,7 @@ final class SelectionActionServiceProvider
           GeckoSelectionActionService
         >
     with $Provider<GeckoSelectionActionService> {
-  const SelectionActionServiceProvider._()
+  SelectionActionServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,7 +58,7 @@ String _$selectionActionServiceHash() =>
     r'424c2c444524ee4bf2302405cac3358c148a7b16';
 
 @ProviderFor(eventService)
-const eventServiceProvider = EventServiceProvider._();
+final eventServiceProvider = EventServiceProvider._();
 
 final class EventServiceProvider
     extends
@@ -68,7 +68,7 @@ final class EventServiceProvider
           GeckoEventService
         >
     with $Provider<GeckoEventService> {
-  const EventServiceProvider._()
+  EventServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -105,7 +105,7 @@ final class EventServiceProvider
 String _$eventServiceHash() => r'3a297348fadda05dc60433d7ce8f662b2ff62c26';
 
 @ProviderFor(addonService)
-const addonServiceProvider = AddonServiceProvider._();
+final addonServiceProvider = AddonServiceProvider._();
 
 final class AddonServiceProvider
     extends
@@ -115,7 +115,7 @@ final class AddonServiceProvider
           GeckoAddonService
         >
     with $Provider<GeckoAddonService> {
-  const AddonServiceProvider._()
+  AddonServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -152,7 +152,7 @@ final class AddonServiceProvider
 String _$addonServiceHash() => r'30fedb35c68943159246df79b5f1b62a25767fa0';
 
 @ProviderFor(tabContentService)
-const tabContentServiceProvider = TabContentServiceProvider._();
+final tabContentServiceProvider = TabContentServiceProvider._();
 
 final class TabContentServiceProvider
     extends
@@ -162,7 +162,7 @@ final class TabContentServiceProvider
           GeckoTabContentService
         >
     with $Provider<GeckoTabContentService> {
-  const TabContentServiceProvider._()
+  TabContentServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -199,7 +199,7 @@ final class TabContentServiceProvider
 String _$tabContentServiceHash() => r'12d8322c37ded4ad3344af327d884bbf7f089594';
 
 @ProviderFor(engineSuggestionsService)
-const engineSuggestionsServiceProvider = EngineSuggestionsServiceProvider._();
+final engineSuggestionsServiceProvider = EngineSuggestionsServiceProvider._();
 
 final class EngineSuggestionsServiceProvider
     extends
@@ -209,7 +209,7 @@ final class EngineSuggestionsServiceProvider
           GeckoSuggestionsService
         >
     with $Provider<GeckoSuggestionsService> {
-  const EngineSuggestionsServiceProvider._()
+  EngineSuggestionsServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -247,11 +247,11 @@ String _$engineSuggestionsServiceHash() =>
     r'1ec1192f0c5c86cecc7ad448ee2b039f7a48e32b';
 
 @ProviderFor(EngineReadyState)
-const engineReadyStateProvider = EngineReadyStateProvider._();
+final engineReadyStateProvider = EngineReadyStateProvider._();
 
 final class EngineReadyStateProvider
     extends $NotifierProvider<EngineReadyState, bool> {
-  const EngineReadyStateProvider._()
+  EngineReadyStateProvider._()
     : super(
         from: null,
         argument: null,
@@ -285,7 +285,6 @@ abstract class _$EngineReadyState extends $Notifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -295,14 +294,14 @@ abstract class _$EngineReadyState extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 /// Stream of ML model progress events
 
 @ProviderFor(mlProgressEvents)
-const mlProgressEventsProvider = MlProgressEventsProvider._();
+final mlProgressEventsProvider = MlProgressEventsProvider._();
 
 /// Stream of ML model progress events
 
@@ -315,7 +314,7 @@ final class MlProgressEventsProvider
         >
     with $FutureModifier<MlProgressData>, $StreamProvider<MlProgressData> {
   /// Stream of ML model progress events
-  const MlProgressEventsProvider._()
+  MlProgressEventsProvider._()
     : super(
         from: null,
         argument: null,
@@ -346,13 +345,13 @@ String _$mlProgressEventsHash() => r'41c1e6aece7f9ee2bebe5d189c6bec753c2fefc8';
 /// Tracks active ML model downloads
 
 @ProviderFor(MlDownloadState)
-const mlDownloadStateProvider = MlDownloadStateProvider._();
+final mlDownloadStateProvider = MlDownloadStateProvider._();
 
 /// Tracks active ML model downloads
 final class MlDownloadStateProvider
     extends $NotifierProvider<MlDownloadState, MlProgressData?> {
   /// Tracks active ML model downloads
-  const MlDownloadStateProvider._()
+  MlDownloadStateProvider._()
     : super(
         from: null,
         argument: null,
@@ -388,7 +387,6 @@ abstract class _$MlDownloadState extends $Notifier<MlProgressData?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<MlProgressData?, MlProgressData?>;
     final element =
         ref.element
@@ -398,6 +396,6 @@ abstract class _$MlDownloadState extends $Notifier<MlProgressData?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

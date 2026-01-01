@@ -10,11 +10,11 @@ part of 'browser_data.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BrowserDataService)
-const browserDataServiceProvider = BrowserDataServiceProvider._();
+final browserDataServiceProvider = BrowserDataServiceProvider._();
 
 final class BrowserDataServiceProvider
     extends $NotifierProvider<BrowserDataService, void> {
-  const BrowserDataServiceProvider._()
+  BrowserDataServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$BrowserDataService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$BrowserDataService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

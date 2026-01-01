@@ -10,11 +10,11 @@ part of 'global_drop.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(WillAcceptDrop)
-const willAcceptDropProvider = WillAcceptDropProvider._();
+final willAcceptDropProvider = WillAcceptDropProvider._();
 
 final class WillAcceptDropProvider
     extends $NotifierProvider<WillAcceptDrop, DropTargetData?> {
-  const WillAcceptDropProvider._()
+  WillAcceptDropProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$WillAcceptDrop extends $Notifier<DropTargetData?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<DropTargetData?, DropTargetData?>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$WillAcceptDrop extends $Notifier<DropTargetData?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

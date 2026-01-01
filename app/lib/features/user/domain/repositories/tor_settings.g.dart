@@ -10,11 +10,11 @@ part of 'tor_settings.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TorSettingsRepository)
-const torSettingsRepositoryProvider = TorSettingsRepositoryProvider._();
+final torSettingsRepositoryProvider = TorSettingsRepositoryProvider._();
 
 final class TorSettingsRepositoryProvider
     extends $StreamNotifierProvider<TorSettingsRepository, TorSettings> {
-  const TorSettingsRepositoryProvider._()
+  TorSettingsRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,7 +41,6 @@ abstract class _$TorSettingsRepository extends $StreamNotifier<TorSettings> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<TorSettings>, TorSettings>;
     final element =
         ref.element
@@ -51,17 +50,17 @@ abstract class _$TorSettingsRepository extends $StreamNotifier<TorSettings> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(torSettingsWithDefaults)
-const torSettingsWithDefaultsProvider = TorSettingsWithDefaultsProvider._();
+final torSettingsWithDefaultsProvider = TorSettingsWithDefaultsProvider._();
 
 final class TorSettingsWithDefaultsProvider
     extends $FunctionalProvider<TorSettings, TorSettings, TorSettings>
     with $Provider<TorSettings> {
-  const TorSettingsWithDefaultsProvider._()
+  TorSettingsWithDefaultsProvider._()
     : super(
         from: null,
         argument: null,

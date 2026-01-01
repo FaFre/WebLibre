@@ -10,12 +10,12 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(bangDatabase)
-const bangDatabaseProvider = BangDatabaseProvider._();
+final bangDatabaseProvider = BangDatabaseProvider._();
 
 final class BangDatabaseProvider
     extends $FunctionalProvider<BangDatabase, BangDatabase, BangDatabase>
     with $Provider<BangDatabase> {
-  const BangDatabaseProvider._()
+  BangDatabaseProvider._()
     : super(
         from: null,
         argument: null,

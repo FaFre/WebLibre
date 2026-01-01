@@ -10,12 +10,12 @@ part of 'general_settings.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(GeneralSettingsRepository)
-const generalSettingsRepositoryProvider = GeneralSettingsRepositoryProvider._();
+final generalSettingsRepositoryProvider = GeneralSettingsRepositoryProvider._();
 
 final class GeneralSettingsRepositoryProvider
     extends
         $StreamNotifierProvider<GeneralSettingsRepository, GeneralSettings> {
-  const GeneralSettingsRepositoryProvider._()
+  GeneralSettingsRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -43,7 +43,6 @@ abstract class _$GeneralSettingsRepository
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<GeneralSettings>, GeneralSettings>;
     final element =
         ref.element
@@ -53,19 +52,19 @@ abstract class _$GeneralSettingsRepository
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(generalSettingsWithDefaults)
-const generalSettingsWithDefaultsProvider =
+final generalSettingsWithDefaultsProvider =
     GeneralSettingsWithDefaultsProvider._();
 
 final class GeneralSettingsWithDefaultsProvider
     extends
         $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
     with $Provider<GeneralSettings> {
-  const GeneralSettingsWithDefaultsProvider._()
+  GeneralSettingsWithDefaultsProvider._()
     : super(
         from: null,
         argument: null,

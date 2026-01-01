@@ -10,11 +10,11 @@ part of 'browser_addon.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BrowserAddonService)
-const browserAddonServiceProvider = BrowserAddonServiceProvider._();
+final browserAddonServiceProvider = BrowserAddonServiceProvider._();
 
 final class BrowserAddonServiceProvider
     extends $NotifierProvider<BrowserAddonService, void> {
-  const BrowserAddonServiceProvider._()
+  BrowserAddonServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$BrowserAddonService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$BrowserAddonService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

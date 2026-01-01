@@ -10,12 +10,12 @@ part of 'readerable.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ReaderableScreenController)
-const readerableScreenControllerProvider =
+final readerableScreenControllerProvider =
     ReaderableScreenControllerProvider._();
 
 final class ReaderableScreenControllerProvider
     extends $AsyncNotifierProvider<ReaderableScreenController, void> {
-  const ReaderableScreenControllerProvider._()
+  ReaderableScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -42,7 +42,6 @@ abstract class _$ReaderableScreenController extends $AsyncNotifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -52,6 +51,6 @@ abstract class _$ReaderableScreenController extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

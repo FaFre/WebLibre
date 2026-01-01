@@ -11,12 +11,12 @@ part of 'providers.dart';
 
 @ProviderFor(HistoryFilter)
 @JsonPersist()
-const historyFilterProvider = HistoryFilterProvider._();
+final historyFilterProvider = HistoryFilterProvider._();
 
 @JsonPersist()
 final class HistoryFilterProvider
     extends $NotifierProvider<HistoryFilter, HistoryFilterOptions> {
-  const HistoryFilterProvider._()
+  HistoryFilterProvider._()
     : super(
         from: null,
         argument: null,
@@ -51,7 +51,6 @@ abstract class _$HistoryFilterBase extends $Notifier<HistoryFilterOptions> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<HistoryFilterOptions, HistoryFilterOptions>;
     final element =
         ref.element
@@ -61,12 +60,12 @@ abstract class _$HistoryFilterBase extends $Notifier<HistoryFilterOptions> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(browsingHistory)
-const browsingHistoryProvider = BrowsingHistoryProvider._();
+final browsingHistoryProvider = BrowsingHistoryProvider._();
 
 final class BrowsingHistoryProvider
     extends
@@ -76,7 +75,7 @@ final class BrowsingHistoryProvider
           FutureOr<List<VisitInfo>>
         >
     with $FutureModifier<List<VisitInfo>>, $FutureProvider<List<VisitInfo>> {
-  const BrowsingHistoryProvider._()
+  BrowsingHistoryProvider._()
     : super(
         from: null,
         argument: null,

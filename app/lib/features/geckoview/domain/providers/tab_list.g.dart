@@ -10,11 +10,11 @@ part of 'tab_list.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TabList)
-const tabListProvider = TabListProvider._();
+final tabListProvider = TabListProvider._();
 
 final class TabListProvider
     extends $NotifierProvider<TabList, EquatableValue<List<String>>> {
-  const TabListProvider._()
+  TabListProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$TabList extends $Notifier<EquatableValue<List<String>>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref
             as $Ref<EquatableValue<List<String>>, EquatableValue<List<String>>>;
@@ -63,6 +62,6 @@ abstract class _$TabList extends $Notifier<EquatableValue<List<String>>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

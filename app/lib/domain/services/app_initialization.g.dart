@@ -10,7 +10,7 @@ part of 'app_initialization.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(AppInitializationService)
-const appInitializationServiceProvider = AppInitializationServiceProvider._();
+final appInitializationServiceProvider = AppInitializationServiceProvider._();
 
 final class AppInitializationServiceProvider
     extends
@@ -18,7 +18,7 @@ final class AppInitializationServiceProvider
           AppInitializationService,
           Result<({List<ErrorMessage> errors, bool initialized, String? stage})>
         > {
-  const AppInitializationServiceProvider._()
+  AppInitializationServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -66,7 +66,6 @@ abstract class _$AppInitializationService
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref
             as $Ref<
@@ -94,6 +93,6 @@ abstract class _$AppInitializationService
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

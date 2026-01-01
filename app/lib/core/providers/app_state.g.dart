@@ -10,11 +10,11 @@ part of 'app_state.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(AppStateKey)
-const appStateKeyProvider = AppStateKeyProvider._();
+final appStateKeyProvider = AppStateKeyProvider._();
 
 final class AppStateKeyProvider
     extends $NotifierProvider<AppStateKey, GlobalKey<State<StatefulWidget>>> {
-  const AppStateKeyProvider._()
+  AppStateKeyProvider._()
     : super(
         from: null,
         argument: null,
@@ -51,7 +51,6 @@ abstract class _$AppStateKey
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref
             as $Ref<
@@ -69,6 +68,6 @@ abstract class _$AppStateKey
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

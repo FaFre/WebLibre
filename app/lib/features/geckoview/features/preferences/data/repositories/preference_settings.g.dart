@@ -10,7 +10,7 @@ part of 'preference_settings.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(_preferenceSettingContent)
-const _preferenceSettingContentProvider = _PreferenceSettingContentProvider._();
+final _preferenceSettingContentProvider = _PreferenceSettingContentProvider._();
 
 final class _PreferenceSettingContentProvider
     extends
@@ -22,7 +22,7 @@ final class _PreferenceSettingContentProvider
     with
         $FutureModifier<Map<String, dynamic>>,
         $FutureProvider<Map<String, dynamic>> {
-  const _PreferenceSettingContentProvider._()
+  _PreferenceSettingContentProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,7 +52,7 @@ String _$_preferenceSettingContentHash() =>
     r'a8a61fdf8800cb7adb365c100409ddce09c574b1';
 
 @ProviderFor(_preferenceSettingGroups)
-const _preferenceSettingGroupsProvider = _PreferenceSettingGroupsFamily._();
+final _preferenceSettingGroupsProvider = _PreferenceSettingGroupsFamily._();
 
 final class _PreferenceSettingGroupsProvider
     extends
@@ -64,7 +64,7 @@ final class _PreferenceSettingGroupsProvider
     with
         $FutureModifier<Map<String, PreferenceSettingGroup>>,
         $FutureProvider<Map<String, PreferenceSettingGroup>> {
-  const _PreferenceSettingGroupsProvider._({
+  _PreferenceSettingGroupsProvider._({
     required _PreferenceSettingGroupsFamily super.from,
     required PreferencePartition super.argument,
   }) : super(
@@ -118,7 +118,7 @@ final class _PreferenceSettingGroupsFamily extends $Family
           FutureOr<Map<String, PreferenceSettingGroup>>,
           PreferencePartition
         > {
-  const _PreferenceSettingGroupsFamily._()
+  _PreferenceSettingGroupsFamily._()
     : super(
         retry: null,
         name: r'_preferenceSettingGroupsProvider',
@@ -135,7 +135,7 @@ final class _PreferenceSettingGroupsFamily extends $Family
 }
 
 @ProviderFor(_preferenceSettingGroup)
-const _preferenceSettingGroupProvider = _PreferenceSettingGroupFamily._();
+final _preferenceSettingGroupProvider = _PreferenceSettingGroupFamily._();
 
 final class _PreferenceSettingGroupProvider
     extends
@@ -147,7 +147,7 @@ final class _PreferenceSettingGroupProvider
     with
         $FutureModifier<PreferenceSettingGroup>,
         $FutureProvider<PreferenceSettingGroup> {
-  const _PreferenceSettingGroupProvider._({
+  _PreferenceSettingGroupProvider._({
     required _PreferenceSettingGroupFamily super.from,
     required (PreferencePartition, String) super.argument,
   }) : super(
@@ -201,7 +201,7 @@ final class _PreferenceSettingGroupFamily extends $Family
           FutureOr<PreferenceSettingGroup>,
           (PreferencePartition, String)
         > {
-  const _PreferenceSettingGroupFamily._()
+  _PreferenceSettingGroupFamily._()
     : super(
         retry: null,
         name: r'_preferenceSettingGroupProvider',
@@ -223,7 +223,7 @@ final class _PreferenceSettingGroupFamily extends $Family
 }
 
 @ProviderFor(_PreferenceRepository)
-const _preferenceRepositoryProvider = _PreferenceRepositoryProvider._();
+final _preferenceRepositoryProvider = _PreferenceRepositoryProvider._();
 
 final class _PreferenceRepositoryProvider
     extends
@@ -231,7 +231,7 @@ final class _PreferenceRepositoryProvider
           _PreferenceRepository,
           Raw<Stream<Map<String, GeckoPref>>>
         > {
-  const _PreferenceRepositoryProvider._()
+  _PreferenceRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -269,7 +269,6 @@ abstract class _$PreferenceRepository
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref
             as $Ref<
@@ -287,12 +286,12 @@ abstract class _$PreferenceRepository
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(UnifiedPreferenceSettingsRepository)
-const unifiedPreferenceSettingsRepositoryProvider =
+final unifiedPreferenceSettingsRepositoryProvider =
     UnifiedPreferenceSettingsRepositoryFamily._();
 
 final class UnifiedPreferenceSettingsRepositoryProvider
@@ -301,7 +300,7 @@ final class UnifiedPreferenceSettingsRepositoryProvider
           UnifiedPreferenceSettingsRepository,
           Map<String, PreferenceSettingGroup>
         > {
-  const UnifiedPreferenceSettingsRepositoryProvider._({
+  UnifiedPreferenceSettingsRepositoryProvider._({
     required UnifiedPreferenceSettingsRepositoryFamily super.from,
     required PreferencePartition super.argument,
   }) : super(
@@ -352,7 +351,7 @@ final class UnifiedPreferenceSettingsRepositoryFamily extends $Family
           Stream<Map<String, PreferenceSettingGroup>>,
           PreferencePartition
         > {
-  const UnifiedPreferenceSettingsRepositoryFamily._()
+  UnifiedPreferenceSettingsRepositoryFamily._()
     : super(
         retry: null,
         name: r'unifiedPreferenceSettingsRepositoryProvider',
@@ -383,7 +382,6 @@ abstract class _$UnifiedPreferenceSettingsRepository
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref
             as $Ref<
@@ -401,12 +399,12 @@ abstract class _$UnifiedPreferenceSettingsRepository
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }
 
 @ProviderFor(PreferenceSettingsGroupRepository)
-const preferenceSettingsGroupRepositoryProvider =
+final preferenceSettingsGroupRepositoryProvider =
     PreferenceSettingsGroupRepositoryFamily._();
 
 final class PreferenceSettingsGroupRepositoryProvider
@@ -415,7 +413,7 @@ final class PreferenceSettingsGroupRepositoryProvider
           PreferenceSettingsGroupRepository,
           PreferenceSettingGroup
         > {
-  const PreferenceSettingsGroupRepositoryProvider._({
+  PreferenceSettingsGroupRepositoryProvider._({
     required PreferenceSettingsGroupRepositoryFamily super.from,
     required (PreferencePartition, String) super.argument,
   }) : super(
@@ -466,7 +464,7 @@ final class PreferenceSettingsGroupRepositoryFamily extends $Family
           Stream<PreferenceSettingGroup>,
           (PreferencePartition, String)
         > {
-  const PreferenceSettingsGroupRepositoryFamily._()
+  PreferenceSettingsGroupRepositoryFamily._()
     : super(
         retry: null,
         name: r'preferenceSettingsGroupRepositoryProvider',
@@ -500,7 +498,6 @@ abstract class _$PreferenceSettingsGroupRepository
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args.$1, _$args.$2);
     final ref =
         this.ref
             as $Ref<AsyncValue<PreferenceSettingGroup>, PreferenceSettingGroup>;
@@ -515,6 +512,6 @@ abstract class _$PreferenceSettingsGroupRepository
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args.$1, _$args.$2));
   }
 }

@@ -10,10 +10,10 @@ part of 'desktop_mode.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(DesktopMode)
-const desktopModeProvider = DesktopModeFamily._();
+final desktopModeProvider = DesktopModeFamily._();
 
 final class DesktopModeProvider extends $NotifierProvider<DesktopMode, bool> {
-  const DesktopModeProvider._({
+  DesktopModeProvider._({
     required DesktopModeFamily super.from,
     required String super.argument,
   }) : super(
@@ -61,7 +61,7 @@ String _$desktopModeHash() => r'18550009e95a23ff82d30206ce81daa859c57c26';
 
 final class DesktopModeFamily extends $Family
     with $ClassFamilyOverride<DesktopMode, bool, bool, bool, String> {
-  const DesktopModeFamily._()
+  DesktopModeFamily._()
     : super(
         retry: null,
         name: r'desktopModeProvider',
@@ -85,7 +85,6 @@ abstract class _$DesktopMode extends $Notifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -95,6 +94,6 @@ abstract class _$DesktopMode extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

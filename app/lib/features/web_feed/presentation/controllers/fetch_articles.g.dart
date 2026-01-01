@@ -10,11 +10,11 @@ part of 'fetch_articles.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(FetchArticlesController)
-const fetchArticlesControllerProvider = FetchArticlesControllerProvider._();
+final fetchArticlesControllerProvider = FetchArticlesControllerProvider._();
 
 final class FetchArticlesControllerProvider
     extends $NotifierProvider<FetchArticlesController, AsyncValue<void>> {
-  const FetchArticlesControllerProvider._()
+  FetchArticlesControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$FetchArticlesController extends $Notifier<AsyncValue<void>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$FetchArticlesController extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

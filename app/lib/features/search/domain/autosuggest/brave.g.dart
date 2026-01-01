@@ -10,11 +10,11 @@ part of 'brave.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BraveAutosuggestService)
-const braveAutosuggestServiceProvider = BraveAutosuggestServiceProvider._();
+final braveAutosuggestServiceProvider = BraveAutosuggestServiceProvider._();
 
 final class BraveAutosuggestServiceProvider
     extends $NotifierProvider<BraveAutosuggestService, void> {
-  const BraveAutosuggestServiceProvider._()
+  BraveAutosuggestServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$BraveAutosuggestService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$BraveAutosuggestService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

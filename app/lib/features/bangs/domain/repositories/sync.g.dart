@@ -10,11 +10,11 @@ part of 'sync.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BangSyncRepository)
-const bangSyncRepositoryProvider = BangSyncRepositoryProvider._();
+final bangSyncRepositoryProvider = BangSyncRepositoryProvider._();
 
 final class BangSyncRepositoryProvider
     extends $NotifierProvider<BangSyncRepository, void> {
-  const BangSyncRepositoryProvider._()
+  BangSyncRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$BangSyncRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$BangSyncRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

@@ -10,7 +10,7 @@ part of 'providers.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(watchContainersWithCount)
-const watchContainersWithCountProvider = WatchContainersWithCountProvider._();
+final watchContainersWithCountProvider = WatchContainersWithCountProvider._();
 
 final class WatchContainersWithCountProvider
     extends
@@ -22,7 +22,7 @@ final class WatchContainersWithCountProvider
     with
         $FutureModifier<List<ContainerDataWithCount>>,
         $StreamProvider<List<ContainerDataWithCount>> {
-  const WatchContainersWithCountProvider._()
+  WatchContainersWithCountProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,7 +52,7 @@ String _$watchContainersWithCountHash() =>
     r'50d8e9b39cb589b0b5f50d79cbe20b8d10d7a504';
 
 @ProviderFor(matchSortedContainersWithCount)
-const matchSortedContainersWithCountProvider =
+final matchSortedContainersWithCountProvider =
     MatchSortedContainersWithCountFamily._();
 
 final class MatchSortedContainersWithCountProvider
@@ -63,7 +63,7 @@ final class MatchSortedContainersWithCountProvider
           AsyncValue<List<ContainerDataWithCount>>
         >
     with $Provider<AsyncValue<List<ContainerDataWithCount>>> {
-  const MatchSortedContainersWithCountProvider._({
+  MatchSortedContainersWithCountProvider._({
     required MatchSortedContainersWithCountFamily super.from,
     required String? super.argument,
   }) : super(
@@ -126,7 +126,7 @@ final class MatchSortedContainersWithCountFamily extends $Family
           AsyncValue<List<ContainerDataWithCount>>,
           String?
         > {
-  const MatchSortedContainersWithCountFamily._()
+  MatchSortedContainersWithCountFamily._()
     : super(
         retry: null,
         name: r'matchSortedContainersWithCountProvider',
@@ -146,7 +146,7 @@ final class MatchSortedContainersWithCountFamily extends $Family
 }
 
 @ProviderFor(watchContainerTabIds)
-const watchContainerTabIdsProvider = WatchContainerTabIdsFamily._();
+final watchContainerTabIdsProvider = WatchContainerTabIdsFamily._();
 
 final class WatchContainerTabIdsProvider
     extends
@@ -156,7 +156,7 @@ final class WatchContainerTabIdsProvider
           Stream<List<String>>
         >
     with $FutureModifier<List<String>>, $StreamProvider<List<String>> {
-  const WatchContainerTabIdsProvider._({
+  WatchContainerTabIdsProvider._({
     required WatchContainerTabIdsFamily super.from,
     required ContainerFilter super.argument,
   }) : super(
@@ -205,7 +205,7 @@ String _$watchContainerTabIdsHash() =>
 
 final class WatchContainerTabIdsFamily extends $Family
     with $FunctionalFamilyOverride<Stream<List<String>>, ContainerFilter> {
-  const WatchContainerTabIdsFamily._()
+  WatchContainerTabIdsFamily._()
     : super(
         retry: null,
         name: r'watchContainerTabIdsProvider',
@@ -222,7 +222,7 @@ final class WatchContainerTabIdsFamily extends $Family
 }
 
 @ProviderFor(watchgetTabsFifo)
-const watchgetTabsFifoProvider = WatchgetTabsFifoProvider._();
+final watchgetTabsFifoProvider = WatchgetTabsFifoProvider._();
 
 final class WatchgetTabsFifoProvider
     extends
@@ -232,7 +232,7 @@ final class WatchgetTabsFifoProvider
           Stream<List<TabData>>
         >
     with $FutureModifier<List<TabData>>, $StreamProvider<List<TabData>> {
-  const WatchgetTabsFifoProvider._()
+  WatchgetTabsFifoProvider._()
     : super(
         from: null,
         argument: null,
@@ -261,12 +261,12 @@ final class WatchgetTabsFifoProvider
 String _$watchgetTabsFifoHash() => r'b0f58ca1688003ba46a55de1ca29d8253fc3de3a';
 
 @ProviderFor(containerTabCount)
-const containerTabCountProvider = ContainerTabCountFamily._();
+final containerTabCountProvider = ContainerTabCountFamily._();
 
 final class ContainerTabCountProvider
     extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
     with $FutureModifier<int>, $FutureProvider<int> {
-  const ContainerTabCountProvider._({
+  ContainerTabCountProvider._({
     required ContainerTabCountFamily super.from,
     required ContainerFilter super.argument,
   }) : super(
@@ -313,7 +313,7 @@ String _$containerTabCountHash() => r'df4008a9c589936c8a0699b082ab23087ae9b85f';
 
 final class ContainerTabCountFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<int>, ContainerFilter> {
-  const ContainerTabCountFamily._()
+  ContainerTabCountFamily._()
     : super(
         retry: null,
         name: r'containerTabCountProvider',
@@ -330,7 +330,7 @@ final class ContainerTabCountFamily extends $Family
 }
 
 @ProviderFor(watchTabTrees)
-const watchTabTreesProvider = WatchTabTreesProvider._();
+final watchTabTreesProvider = WatchTabTreesProvider._();
 
 final class WatchTabTreesProvider
     extends
@@ -342,7 +342,7 @@ final class WatchTabTreesProvider
     with
         $FutureModifier<List<TabTreesResult>>,
         $StreamProvider<List<TabTreesResult>> {
-  const WatchTabTreesProvider._()
+  WatchTabTreesProvider._()
     : super(
         from: null,
         argument: null,
@@ -371,7 +371,7 @@ final class WatchTabTreesProvider
 String _$watchTabTreesHash() => r'a2be591acb6818ea8675a12d90e6c4684a0448a8';
 
 @ProviderFor(watchTabDescendants)
-const watchTabDescendantsProvider = WatchTabDescendantsFamily._();
+final watchTabDescendantsProvider = WatchTabDescendantsFamily._();
 
 final class WatchTabDescendantsProvider
     extends
@@ -383,7 +383,7 @@ final class WatchTabDescendantsProvider
     with
         $FutureModifier<Map<String, String?>>,
         $StreamProvider<Map<String, String?>> {
-  const WatchTabDescendantsProvider._({
+  WatchTabDescendantsProvider._({
     required WatchTabDescendantsFamily super.from,
     required String super.argument,
   }) : super(
@@ -432,7 +432,7 @@ String _$watchTabDescendantsHash() =>
 
 final class WatchTabDescendantsFamily extends $Family
     with $FunctionalFamilyOverride<Stream<Map<String, String?>>, String> {
-  const WatchTabDescendantsFamily._()
+  WatchTabDescendantsFamily._()
     : super(
         retry: null,
         name: r'watchTabDescendantsProvider',
@@ -449,7 +449,7 @@ final class WatchTabDescendantsFamily extends $Family
 }
 
 @ProviderFor(watchContainerTabsData)
-const watchContainerTabsDataProvider = WatchContainerTabsDataFamily._();
+final watchContainerTabsDataProvider = WatchContainerTabsDataFamily._();
 
 final class WatchContainerTabsDataProvider
     extends
@@ -459,7 +459,7 @@ final class WatchContainerTabsDataProvider
           Stream<List<TabData>>
         >
     with $FutureModifier<List<TabData>>, $StreamProvider<List<TabData>> {
-  const WatchContainerTabsDataProvider._({
+  WatchContainerTabsDataProvider._({
     required WatchContainerTabsDataFamily super.from,
     required String? super.argument,
   }) : super(
@@ -509,7 +509,7 @@ String _$watchContainerTabsDataHash() =>
 
 final class WatchContainerTabsDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<List<TabData>>, String?> {
-  const WatchContainerTabsDataFamily._()
+  WatchContainerTabsDataFamily._()
     : super(
         retry: null,
         name: r'watchContainerTabsDataProvider',
@@ -526,7 +526,7 @@ final class WatchContainerTabsDataFamily extends $Family
 }
 
 @ProviderFor(watchContainerData)
-const watchContainerDataProvider = WatchContainerDataFamily._();
+final watchContainerDataProvider = WatchContainerDataFamily._();
 
 final class WatchContainerDataProvider
     extends
@@ -536,7 +536,7 @@ final class WatchContainerDataProvider
           Stream<ContainerData?>
         >
     with $FutureModifier<ContainerData?>, $StreamProvider<ContainerData?> {
-  const WatchContainerDataProvider._({
+  WatchContainerDataProvider._({
     required WatchContainerDataFamily super.from,
     required String super.argument,
   }) : super(
@@ -585,7 +585,7 @@ String _$watchContainerDataHash() =>
 
 final class WatchContainerDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<ContainerData?>, String> {
-  const WatchContainerDataFamily._()
+  WatchContainerDataFamily._()
     : super(
         retry: null,
         name: r'watchContainerDataProvider',
@@ -602,12 +602,12 @@ final class WatchContainerDataFamily extends $Family
 }
 
 @ProviderFor(watchContainerTabId)
-const watchContainerTabIdProvider = WatchContainerTabIdFamily._();
+final watchContainerTabIdProvider = WatchContainerTabIdFamily._();
 
 final class WatchContainerTabIdProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, Stream<String?>>
     with $FutureModifier<String?>, $StreamProvider<String?> {
-  const WatchContainerTabIdProvider._({
+  WatchContainerTabIdProvider._({
     required WatchContainerTabIdFamily super.from,
     required String super.argument,
   }) : super(
@@ -655,7 +655,7 @@ String _$watchContainerTabIdHash() =>
 
 final class WatchContainerTabIdFamily extends $Family
     with $FunctionalFamilyOverride<Stream<String?>, String> {
-  const WatchContainerTabIdFamily._()
+  WatchContainerTabIdFamily._()
     : super(
         retry: null,
         name: r'watchContainerTabIdProvider',
@@ -672,7 +672,7 @@ final class WatchContainerTabIdFamily extends $Family
 }
 
 @ProviderFor(watchTabsContainerId)
-const watchTabsContainerIdProvider = WatchTabsContainerIdFamily._();
+final watchTabsContainerIdProvider = WatchTabsContainerIdFamily._();
 
 final class WatchTabsContainerIdProvider
     extends
@@ -684,7 +684,7 @@ final class WatchTabsContainerIdProvider
     with
         $FutureModifier<Map<String, String?>>,
         $StreamProvider<Map<String, String?>> {
-  const WatchTabsContainerIdProvider._({
+  WatchTabsContainerIdProvider._({
     required WatchTabsContainerIdFamily super.from,
     required EquatableValue<List<String>> super.argument,
   }) : super(
@@ -737,7 +737,7 @@ final class WatchTabsContainerIdFamily extends $Family
           Stream<Map<String, String?>>,
           EquatableValue<List<String>>
         > {
-  const WatchTabsContainerIdFamily._()
+  WatchTabsContainerIdFamily._()
     : super(
         retry: null,
         name: r'watchTabsContainerIdProvider',
@@ -754,7 +754,7 @@ final class WatchTabsContainerIdFamily extends $Family
 }
 
 @ProviderFor(watchAllAssignedSites)
-const watchAllAssignedSitesProvider = WatchAllAssignedSitesProvider._();
+final watchAllAssignedSitesProvider = WatchAllAssignedSitesProvider._();
 
 final class WatchAllAssignedSitesProvider
     extends
@@ -766,7 +766,7 @@ final class WatchAllAssignedSitesProvider
     with
         $FutureModifier<List<SiteAssignment>>,
         $StreamProvider<List<SiteAssignment>> {
-  const WatchAllAssignedSitesProvider._()
+  WatchAllAssignedSitesProvider._()
     : super(
         from: null,
         argument: null,
@@ -796,13 +796,13 @@ String _$watchAllAssignedSitesHash() =>
     r'd755451be0ad7e03db36ba39c64f6f0b5c1d9ba3';
 
 @ProviderFor(watchIsCurrentSiteAssignedToContainer)
-const watchIsCurrentSiteAssignedToContainerProvider =
+final watchIsCurrentSiteAssignedToContainerProvider =
     WatchIsCurrentSiteAssignedToContainerProvider._();
 
 final class WatchIsCurrentSiteAssignedToContainerProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
     with $FutureModifier<bool>, $StreamProvider<bool> {
-  const WatchIsCurrentSiteAssignedToContainerProvider._()
+  WatchIsCurrentSiteAssignedToContainerProvider._()
     : super(
         from: null,
         argument: null,

@@ -10,12 +10,12 @@ part of 'save_settings.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SaveGeneralSettingsController)
-const saveGeneralSettingsControllerProvider =
+final saveGeneralSettingsControllerProvider =
     SaveGeneralSettingsControllerProvider._();
 
 final class SaveGeneralSettingsControllerProvider
     extends $AsyncNotifierProvider<SaveGeneralSettingsController, void> {
-  const SaveGeneralSettingsControllerProvider._()
+  SaveGeneralSettingsControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -42,7 +42,6 @@ abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -52,17 +51,17 @@ abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(SaveEngineSettingsController)
-const saveEngineSettingsControllerProvider =
+final saveEngineSettingsControllerProvider =
     SaveEngineSettingsControllerProvider._();
 
 final class SaveEngineSettingsControllerProvider
     extends $AsyncNotifierProvider<SaveEngineSettingsController, void> {
-  const SaveEngineSettingsControllerProvider._()
+  SaveEngineSettingsControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -89,7 +88,6 @@ abstract class _$SaveEngineSettingsController extends $AsyncNotifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -99,16 +97,16 @@ abstract class _$SaveEngineSettingsController extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(SaveTorSettingsController)
-const saveTorSettingsControllerProvider = SaveTorSettingsControllerProvider._();
+final saveTorSettingsControllerProvider = SaveTorSettingsControllerProvider._();
 
 final class SaveTorSettingsControllerProvider
     extends $AsyncNotifierProvider<SaveTorSettingsController, void> {
-  const SaveTorSettingsControllerProvider._()
+  SaveTorSettingsControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -135,7 +133,6 @@ abstract class _$SaveTorSettingsController extends $AsyncNotifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -145,6 +142,6 @@ abstract class _$SaveTorSettingsController extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

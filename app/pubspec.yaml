@@ -13,7 +13,7 @@ dependencies:
   collection: ^1.19.1
   convert: ^3.1.2
   copy_with_extension: ^10.0.1
-  country_flags: ^4.1.0
+  country_flags: ^4.1.1
   cryptography_flutter: ^2.3.4
   drift: ^2.30.0
   drift_dev: ^2.30.0
@@ -39,7 +39,7 @@ dependencies:
   google_fonts: ^6.3.3
   graphview: ^1.5.1
   home_widget: ^0.8.1
-  hooks_riverpod: ^3.0.3
+  hooks_riverpod: ^3.1.0
   html: ^0.15.6
   http: ^1.6.0
   intl: ^0.20.2
@@ -62,8 +62,8 @@ dependencies:
     path: ../packages/pluggable_transports_proxy
   pretty_qr_code: ^3.5.0
   quick_actions: ^1.1.0
-  riverpod: ^3.0.3
-  riverpod_annotation: ^3.0.3
+  riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
   rss_dart: ^1.0.14
   rxdart: ^0.28.0
   secure_archive:
@@ -105,8 +105,8 @@ dev_dependencies:
   go_router_builder: ^4.1.3
   json_serializable: ^6.11.2
   lint: ^2.8.0
-  riverpod_generator: ^3.0.3
-  riverpod_lint: ^3.0.3
+  riverpod_generator: ^4.0.0+1
+  riverpod_lint: ^3.1.0
 
 flutter:
   uses-material-design: true

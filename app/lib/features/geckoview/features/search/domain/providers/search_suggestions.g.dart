@@ -10,7 +10,7 @@ part of 'search_suggestions.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(defaultSearchSuggestions)
-const defaultSearchSuggestionsProvider = DefaultSearchSuggestionsProvider._();
+final defaultSearchSuggestionsProvider = DefaultSearchSuggestionsProvider._();
 
 final class DefaultSearchSuggestionsProvider
     extends
@@ -20,7 +20,7 @@ final class DefaultSearchSuggestionsProvider
           ISearchSuggestionProvider
         >
     with $Provider<ISearchSuggestionProvider> {
-  const DefaultSearchSuggestionsProvider._()
+  DefaultSearchSuggestionsProvider._()
     : super(
         from: null,
         argument: null,
@@ -58,11 +58,11 @@ String _$defaultSearchSuggestionsHash() =>
     r'6d7a387c7daeb790a4c9a5cdc105d2a2bdbacd2b';
 
 @ProviderFor(SearchSuggestions)
-const searchSuggestionsProvider = SearchSuggestionsFamily._();
+final searchSuggestionsProvider = SearchSuggestionsFamily._();
 
 final class SearchSuggestionsProvider
     extends $StreamNotifierProvider<SearchSuggestions, List<String>> {
-  const SearchSuggestionsProvider._({
+  SearchSuggestionsProvider._({
     required SearchSuggestionsFamily super.from,
     required ISearchSuggestionProvider? super.argument,
   }) : super(
@@ -109,7 +109,7 @@ final class SearchSuggestionsFamily extends $Family
           Stream<List<String>>,
           ISearchSuggestionProvider?
         > {
-  const SearchSuggestionsFamily._()
+  SearchSuggestionsFamily._()
     : super(
         retry: null,
         name: r'searchSuggestionsProvider',
@@ -134,7 +134,6 @@ abstract class _$SearchSuggestions extends $StreamNotifier<List<String>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(suggestionsProvider: _$args);
     final ref = this.ref as $Ref<AsyncValue<List<String>>, List<String>>;
     final element =
         ref.element
@@ -144,6 +143,6 @@ abstract class _$SearchSuggestions extends $StreamNotifier<List<String>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(suggestionsProvider: _$args));
   }
 }

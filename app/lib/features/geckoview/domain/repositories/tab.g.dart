@@ -10,11 +10,11 @@ part of 'tab.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TabRepository)
-const tabRepositoryProvider = TabRepositoryProvider._();
+final tabRepositoryProvider = TabRepositoryProvider._();
 
 final class TabRepositoryProvider
     extends $NotifierProvider<TabRepository, void> {
-  const TabRepositoryProvider._()
+  TabRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$TabRepository extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$TabRepository extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

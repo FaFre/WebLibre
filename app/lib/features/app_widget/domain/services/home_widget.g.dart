@@ -10,12 +10,12 @@ part of 'home_widget.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(widgetPinnable)
-const widgetPinnableProvider = WidgetPinnableProvider._();
+final widgetPinnableProvider = WidgetPinnableProvider._();
 
 final class WidgetPinnableProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
-  const WidgetPinnableProvider._()
+  WidgetPinnableProvider._()
     : super(
         from: null,
         argument: null,
@@ -43,7 +43,7 @@ final class WidgetPinnableProvider
 String _$widgetPinnableHash() => r'3181e5e3e69e7e796e6429ca7507bbbc239f6c21';
 
 @ProviderFor(appWidgetLaunchStream)
-const appWidgetLaunchStreamProvider = AppWidgetLaunchStreamProvider._();
+final appWidgetLaunchStreamProvider = AppWidgetLaunchStreamProvider._();
 
 final class AppWidgetLaunchStreamProvider
     extends
@@ -53,7 +53,7 @@ final class AppWidgetLaunchStreamProvider
           Raw<Stream<ReceivedIntentParameter>>
         >
     with $Provider<Raw<Stream<ReceivedIntentParameter>>> {
-  const AppWidgetLaunchStreamProvider._()
+  AppWidgetLaunchStreamProvider._()
     : super(
         from: null,
         argument: null,

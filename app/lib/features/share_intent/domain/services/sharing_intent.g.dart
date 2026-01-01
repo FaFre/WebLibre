@@ -10,7 +10,7 @@ part of 'sharing_intent.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(sharingIntentStream)
-const sharingIntentStreamProvider = SharingIntentStreamProvider._();
+final sharingIntentStreamProvider = SharingIntentStreamProvider._();
 
 final class SharingIntentStreamProvider
     extends
@@ -20,7 +20,7 @@ final class SharingIntentStreamProvider
           Raw<Stream<ReceivedIntentParameter>>
         >
     with $Provider<Raw<Stream<ReceivedIntentParameter>>> {
-  const SharingIntentStreamProvider._()
+  SharingIntentStreamProvider._()
     : super(
         from: null,
         argument: null,

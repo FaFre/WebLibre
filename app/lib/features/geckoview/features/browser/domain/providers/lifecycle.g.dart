@@ -10,11 +10,11 @@ part of 'lifecycle.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BrowserViewLifecycle)
-const browserViewLifecycleProvider = BrowserViewLifecycleProvider._();
+final browserViewLifecycleProvider = BrowserViewLifecycleProvider._();
 
 final class BrowserViewLifecycleProvider
     extends $NotifierProvider<BrowserViewLifecycle, AppLifecycleState?> {
-  const BrowserViewLifecycleProvider._()
+  BrowserViewLifecycleProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$BrowserViewLifecycle extends $Notifier<AppLifecycleState?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AppLifecycleState?, AppLifecycleState?>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$BrowserViewLifecycle extends $Notifier<AppLifecycleState?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

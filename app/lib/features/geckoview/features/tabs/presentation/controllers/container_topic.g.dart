@@ -10,11 +10,11 @@ part of 'container_topic.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ContainerTopicController)
-const containerTopicControllerProvider = ContainerTopicControllerProvider._();
+final containerTopicControllerProvider = ContainerTopicControllerProvider._();
 
 final class ContainerTopicControllerProvider
     extends $NotifierProvider<ContainerTopicController, AsyncValue<void>> {
-  const ContainerTopicControllerProvider._()
+  ContainerTopicControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$ContainerTopicController extends $Notifier<AsyncValue<void>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$ContainerTopicController extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

@@ -10,11 +10,11 @@ part of 'bookmarks.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BookmarksSearch)
-const bookmarksSearchProvider = BookmarksSearchProvider._();
+final bookmarksSearchProvider = BookmarksSearchProvider._();
 
 final class BookmarksSearchProvider
     extends $StreamNotifierProvider<BookmarksSearch, Set<String>> {
-  const BookmarksSearchProvider._()
+  BookmarksSearchProvider._()
     : super(
         from: null,
         argument: null,
@@ -40,7 +40,6 @@ abstract class _$BookmarksSearch extends $StreamNotifier<Set<String>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<Set<String>>, Set<String>>;
     final element =
         ref.element
@@ -50,17 +49,17 @@ abstract class _$BookmarksSearch extends $StreamNotifier<Set<String>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(bookmarks)
-const bookmarksProvider = BookmarksFamily._();
+final bookmarksProvider = BookmarksFamily._();
 
 final class BookmarksProvider<T extends BookmarkItem>
     extends $FunctionalProvider<AsyncValue<T?>, AsyncValue<T?>, AsyncValue<T?>>
     with $Provider<AsyncValue<T?>> {
-  const BookmarksProvider._({
+  BookmarksProvider._({
     required BookmarksFamily super.from,
     required String super.argument,
   }) : super(
@@ -120,7 +119,7 @@ final class BookmarksProvider<T extends BookmarkItem>
 String _$bookmarksHash() => r'dfa19aea04f352b8a6cefe35a0b283c9fddb214f';
 
 final class BookmarksFamily extends $Family {
-  const BookmarksFamily._()
+  BookmarksFamily._()
     : super(
         retry: null,
         name: r'bookmarksProvider',
@@ -155,11 +154,11 @@ final class BookmarksFamily extends $Family {
 }
 
 @ProviderFor(SeamlessBookmarks)
-const seamlessBookmarksProvider = SeamlessBookmarksFamily._();
+final seamlessBookmarksProvider = SeamlessBookmarksFamily._();
 
 final class SeamlessBookmarksProvider
     extends $NotifierProvider<SeamlessBookmarks, AsyncValue<BookmarkItem?>> {
-  const SeamlessBookmarksProvider._({
+  SeamlessBookmarksProvider._({
     required SeamlessBookmarksFamily super.from,
     required String super.argument,
   }) : super(
@@ -214,7 +213,7 @@ final class SeamlessBookmarksFamily extends $Family
           AsyncValue<BookmarkItem?>,
           String
         > {
-  const SeamlessBookmarksFamily._()
+  SeamlessBookmarksFamily._()
     : super(
         retry: null,
         name: r'seamlessBookmarksProvider',
@@ -239,7 +238,6 @@ abstract class _$SeamlessBookmarks
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref as $Ref<AsyncValue<BookmarkItem?>, AsyncValue<BookmarkItem?>>;
     final element =
@@ -250,6 +248,6 @@ abstract class _$SeamlessBookmarks
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

@@ -10,11 +10,11 @@ part of 'bookmarks.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BookmarksRepository)
-const bookmarksRepositoryProvider = BookmarksRepositoryProvider._();
+final bookmarksRepositoryProvider = BookmarksRepositoryProvider._();
 
 final class BookmarksRepositoryProvider
     extends $AsyncNotifierProvider<BookmarksRepository, BookmarkItem?> {
-  const BookmarksRepositoryProvider._()
+  BookmarksRepositoryProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,7 +41,6 @@ abstract class _$BookmarksRepository extends $AsyncNotifier<BookmarkItem?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<BookmarkItem?>, BookmarkItem?>;
     final element =
         ref.element
@@ -51,6 +50,6 @@ abstract class _$BookmarksRepository extends $AsyncNotifier<BookmarkItem?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

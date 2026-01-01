@@ -10,11 +10,11 @@ part of 'add_dialog_blocking.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(AddFeedDialogBlocking)
-const addFeedDialogBlockingProvider = AddFeedDialogBlockingProvider._();
+final addFeedDialogBlockingProvider = AddFeedDialogBlockingProvider._();
 
 final class AddFeedDialogBlockingProvider
     extends $NotifierProvider<AddFeedDialogBlocking, void> {
-  const AddFeedDialogBlockingProvider._()
+  AddFeedDialogBlockingProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,7 +49,6 @@ abstract class _$AddFeedDialogBlocking extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -59,6 +58,6 @@ abstract class _$AddFeedDialogBlocking extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, build);
   }
 }

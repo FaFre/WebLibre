@@ -10,10 +10,10 @@ part of 'tab_session.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(TabSession)
-const tabSessionProvider = TabSessionFamily._();
+final tabSessionProvider = TabSessionFamily._();
 
 final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
-  const TabSessionProvider._({
+  TabSessionProvider._({
     required TabSessionFamily super.from,
     required String? super.argument,
   }) : super(
@@ -61,7 +61,7 @@ String _$tabSessionHash() => r'4b7206863e205dfeee6201ba6072e742c43ab6f3';
 
 final class TabSessionFamily extends $Family
     with $ClassFamilyOverride<TabSession, void, void, void, String?> {
-  const TabSessionFamily._()
+  TabSessionFamily._()
     : super(
         retry: null,
         name: r'tabSessionProvider',
@@ -85,7 +85,6 @@ abstract class _$TabSession extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
-    build(tabId: _$args);
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -95,18 +94,18 @@ abstract class _$TabSession extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, null);
+    element.handleCreate(ref, () => build(tabId: _$args));
   }
 }
 
 @ProviderFor(selectedTabSessionNotifier)
-const selectedTabSessionProvider = SelectedTabSessionNotifierProvider._();
+final selectedTabSessionProvider = SelectedTabSessionNotifierProvider._();
 
 final class SelectedTabSessionNotifierProvider
     extends
         $FunctionalProvider<Raw<TabSession>, Raw<TabSession>, Raw<TabSession>>
     with $Provider<Raw<TabSession>> {
-  const SelectedTabSessionNotifierProvider._()
+  SelectedTabSessionNotifierProvider._()
     : super(
         from: null,
         argument: null,
