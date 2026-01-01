@@ -301,6 +301,14 @@ class ListTabPreview extends HookConsumerWidget {
               ),
               subtitle: Row(
                 children: [
+                  if (tabState.isPrivate) ...[
+                    const Icon(
+                      MdiIcons.dominoMask,
+                      color: Color(0xFF8000D7),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                   Expanded(
                     child: UriBreadcrumb(
                       uri: tabState.url,
@@ -309,25 +317,6 @@ class ListTabPreview extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  if (tabState.isPrivate) ...[
-                    const SizedBox(width: 6.0),
-                    const SizedBox(
-                      height: 16,
-                      width: 24,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Positioned(
-                            top: -4,
-                            child: Icon(
-                              MdiIcons.dominoMask,
-                              color: Color(0xFF8000D7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

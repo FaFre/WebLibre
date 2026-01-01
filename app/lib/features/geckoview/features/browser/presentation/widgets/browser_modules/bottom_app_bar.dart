@@ -47,6 +47,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -179,8 +180,9 @@ class BrowserTabBar extends HookConsumerWidget {
     final trippleDotMenuController = useMenuController();
 
     final selectedTabId = ref.watch(selectedTabProvider);
-    final isPrivateTab = ref.watch(
-      selectedTabStateProvider.select((state) => state?.isPrivate ?? false),
+
+    final containerColor = ref.watch(
+      selectedContainerDataProvider.select((data) => data.value?.color),
     );
 
     final showExtensionShortcut = ref.watch(
@@ -260,8 +262,8 @@ class BrowserTabBar extends HookConsumerWidget {
                 automaticallyImplyLeading: false,
                 titleSpacing: 8.0,
                 backgroundColor:
-                    (isPrivateTab && displayedSheet is! ViewTabsSheet)
-                    ? const Color(0x648000D7)
+                    (containerColor != null && displayedSheet is! ViewTabsSheet)
+                    ? containerColor.withValues(alpha: 0.33)
                     : null,
                 title:
                     (selectedTabId != null && displayedSheet is! ViewTabsSheet)

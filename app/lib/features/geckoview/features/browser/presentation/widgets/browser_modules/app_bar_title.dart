@@ -106,6 +106,14 @@ class AppBarTitle extends HookConsumerWidget {
                   ],
                   icon,
                   const SizedBox(width: 4),
+                  if (tabState.isPrivate) ...[
+                    const Icon(
+                      MdiIcons.dominoMask,
+                      color: Color(0xFF8000D7),
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                   Expanded(
                     child: UriBreadcrumb(
                       uri: tabState.url,
