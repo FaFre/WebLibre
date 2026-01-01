@@ -2383,6 +2383,14 @@ class DefinitionsDrift extends i7.ModularAccessor {
     );
   }
 
+  i0.Selectable<String?> containersToClearOnExit() {
+    return customSelect(
+      'SELECT container.metadata ->> \'\$.contextualIdentity\' AS contextual_identity FROM container WHERE json_extract(container.metadata, \'\$.clearDataOnExit\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',
+      variables: [],
+      readsFrom: {container},
+    ).map((i0.QueryRow row) => row.readNullable<String>('contextual_identity'));
+  }
+
   i3.TabFts get tabFts => i7.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.TabFts>('tab_fts');

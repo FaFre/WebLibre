@@ -170,6 +170,15 @@ class ContainerRepository extends _$ContainerRepository {
         .getSingle();
   }
 
+  Future<List<String>> getContainersToClearOnExit() async {
+    final contextIds = await ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .containersToClearOnExit()
+        .get();
+    return contextIds.whereType<String>().toList();
+  }
+
   @override
   void build() {}
 }

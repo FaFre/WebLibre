@@ -42,7 +42,7 @@ final class ContainerRepositoryProvider
 }
 
 String _$containerRepositoryHash() =>
-    r'2a377774f9f18604bb90cb1a8eb7cda5f944c601';
+    r'3154277f7a6029d6f5b9fcc62ba057e117248e0c';
 
 abstract class _$ContainerRepository extends $Notifier<void> {
   void build();

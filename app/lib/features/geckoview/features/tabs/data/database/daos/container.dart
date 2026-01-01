@@ -193,4 +193,8 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   Selectable<SiteAssignment> allAssignedSites() {
     return db.definitionsDrift.allAssignedSites();
   }
+
+  Selectable<String?> containersToClearOnExit() {
+    return db.definitionsDrift.containersToClearOnExit();
+  }
 }

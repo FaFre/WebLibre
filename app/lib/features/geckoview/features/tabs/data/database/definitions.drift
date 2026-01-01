@@ -310,10 +310,17 @@ siteAssignedContainerId:
   );
 
 allAssignedSites WITH SiteAssignment:
-  SELECT 
+  SELECT
   	container.id,
-  	COALESCE(container.metadata ->> '$.contextualIdentity', 'general') AS contextualIdentity, 
+  	COALESCE(container.metadata ->> '$.contextualIdentity', 'general') AS contextualIdentity,
   	value AS assigned_site
   FROM container
   CROSS JOIN json_each(container.metadata, '$.assignedSites')
   WHERE value IS NOT NULL;
+
+containersToClearOnExit:
+  SELECT container.metadata ->> '$.contextualIdentity' AS contextual_identity
+  FROM container
+  WHERE
+    json_extract(container.metadata, '$.clearDataOnExit') = 1
+    AND container.metadata ->> '$.contextualIdentity' IS NOT NULL;

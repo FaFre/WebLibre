@@ -73,6 +73,9 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool useProxy;
 
+  @JsonKey(defaultValue: false)
+  final bool clearDataOnExit;
+
   final List<Uri>? assignedSites;
 
   ContainerMetadata({
@@ -80,6 +83,7 @@ class ContainerMetadata with FastEquatable {
     required this.contextualIdentity,
     required this.authSettings,
     required this.useProxy,
+    required this.clearDataOnExit,
     required this.assignedSites,
   });
 
@@ -88,12 +92,14 @@ class ContainerMetadata with FastEquatable {
     String? contextualIdentity,
     ContainerAuthSettings? authSettings,
     bool? useProxy,
+    bool? clearDataOnExit,
     List<Uri>? assignedSites,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
          authSettings: authSettings ?? ContainerAuthSettings.withDefaults(),
          useProxy: useProxy ?? false,
+         clearDataOnExit: clearDataOnExit ?? false,
          assignedSites: assignedSites,
        );
 
@@ -108,6 +114,7 @@ class ContainerMetadata with FastEquatable {
     contextualIdentity,
     authSettings,
     useProxy,
+    clearDataOnExit,
     assignedSites,
   ];
 }

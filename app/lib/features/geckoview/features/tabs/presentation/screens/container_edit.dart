@@ -77,6 +77,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
     final authSettings = useState(initialContainer.metadata.authSettings);
     final useProxy = useState(initialContainer.metadata.useProxy);
+    final clearDataOnExit = useState(initialContainer.metadata.clearDataOnExit);
     final assignedSites = useState(initialContainer.metadata.assignedSites);
 
     final textController = useTextEditingController(
@@ -105,6 +106,8 @@ class ContainerEditScreen extends HookConsumerWidget {
                   contextualIdentity: contextualIdentity.value,
                   authSettings: authSettings.value,
                   useProxy: useProxy.value && contextualIdentity.value != null,
+                  clearDataOnExit:
+                      clearDataOnExit.value && contextualIdentity.value != null,
                   assignedSites: assignedSites.value,
                 ),
               );
@@ -261,6 +264,20 @@ class ContainerEditScreen extends HookConsumerWidget {
                                 }
                               : null,
                       },
+                    ),
+                    SwitchListTile.adaptive(
+                      value: clearDataOnExit.value,
+                      title: const Text('Clear Data on Exit'),
+                      subtitle: const Text(
+                        'Clear cookies and site data when app closes',
+                      ),
+                      secondary: const Icon(MdiIcons.databaseRemove),
+                      contentPadding: EdgeInsets.zero,
+                      onChanged: (contextualIdentity.value != null)
+                          ? (value) {
+                              clearDataOnExit.value = value;
+                            }
+                          : null,
                     ),
                     SwitchListTile.adaptive(
                       value: authSettings.value.authenticationRequired,

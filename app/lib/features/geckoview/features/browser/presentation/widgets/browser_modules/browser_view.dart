@@ -46,6 +46,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/eng
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
@@ -116,6 +117,17 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                   );
             }
           });
+
+      // Clear data for containers with clearDataOnExit enabled
+      final containersToClear = await ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainersToClearOnExit();
+
+      if (containersToClear.isNotEmpty) {
+        await ref
+            .read(browserDataServiceProvider.notifier)
+            .clearContainerDataOnEngineStart(containersToClear);
+      }
     });
 
     final hasTab = ref.watch(

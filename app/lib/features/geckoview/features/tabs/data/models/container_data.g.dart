@@ -98,6 +98,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata useProxy(bool useProxy);
 
+  ContainerMetadata clearDataOnExit(bool clearDataOnExit);
+
   ContainerMetadata assignedSites(List<Uri>? assignedSites);
 
   /// Creates a new instance with the provided field values.
@@ -112,6 +114,7 @@ abstract class _$ContainerMetadataCWProxy {
     String? contextualIdentity,
     ContainerAuthSettings authSettings,
     bool useProxy,
+    bool clearDataOnExit,
     List<Uri>? assignedSites,
   });
 }
@@ -138,6 +141,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata useProxy(bool useProxy) => call(useProxy: useProxy);
 
   @override
+  ContainerMetadata clearDataOnExit(bool clearDataOnExit) =>
+      call(clearDataOnExit: clearDataOnExit);
+
+  @override
   ContainerMetadata assignedSites(List<Uri>? assignedSites) =>
       call(assignedSites: assignedSites);
 
@@ -154,6 +161,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? contextualIdentity = const $CopyWithPlaceholder(),
     Object? authSettings = const $CopyWithPlaceholder(),
     Object? useProxy = const $CopyWithPlaceholder(),
+    Object? clearDataOnExit = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
@@ -174,6 +182,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.useProxy
           // ignore: cast_nullable_to_non_nullable
           : useProxy as bool,
+      clearDataOnExit:
+          clearDataOnExit == const $CopyWithPlaceholder() ||
+              clearDataOnExit == null
+          ? _value.clearDataOnExit
+          // ignore: cast_nullable_to_non_nullable
+          : clearDataOnExit as bool,
       assignedSites: assignedSites == const $CopyWithPlaceholder()
           ? _value.assignedSites
           // ignore: cast_nullable_to_non_nullable
@@ -311,6 +325,7 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
               json['authSettings'] as Map<String, dynamic>,
             ),
       useProxy: json['useProxy'] as bool? ?? false,
+      clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
       assignedSites: (json['assignedSites'] as List<dynamic>?)
           ?.map((e) => Uri.parse(e as String))
           .toList(),
@@ -326,6 +341,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'contextualIdentity': instance.contextualIdentity,
   'authSettings': instance.authSettings.toJson(),
   'useProxy': instance.useProxy,
+  'clearDataOnExit': instance.clearDataOnExit,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
 };
 
