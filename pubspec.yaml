@@ -62,3 +62,6 @@ melos:
         done
       packageFilters:
         dirExists: 'pigeons'
+    format:
+      description: Format all Dart files in the workspace
+      exec: dart format .
