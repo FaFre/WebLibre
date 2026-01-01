@@ -28,6 +28,7 @@ import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
+import 'package:weblibre/features/bangs/presentation/dialogs/delete_bang_dialog.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -308,32 +309,7 @@ class EditBangScreen extends HookConsumerWidget {
                       label: const Text('Delete'),
                       icon: const Icon(Icons.delete),
                       onPressed: () async {
-                        final result = await showDialog<bool?>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              icon: const Icon(Icons.warning),
-                              title: const Text('Delete Bang'),
-                              content: const Text(
-                                'Are you sure you want to delete this Bang?',
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, false);
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, true);
-                                  },
-                                  child: const Text('Delete'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
+                        final result = await showDeleteBangDialog(context);
 
                         if (result == true) {
                           await ref

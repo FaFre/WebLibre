@@ -8,6 +8,7 @@ import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -144,39 +145,11 @@ class ShareMarkdownActionMenuItemButton extends HookConsumerWidget {
     BuildContext context,
     TabData tabData,
   ) async {
-    await showDialog(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: title,
-        children: [
-          ListTile(
-            title: const Text('Extracted Content'),
-            subtitle: const Text(
-              'Reader-optimized content without navigation and ads',
-            ),
-            onTap: () async {
-              Navigator.of(context).pop();
-              await shareMarkdownAction(
-                tabData.extractedContentMarkdown!,
-                tabData.title ?? tabData.url?.authority,
-              );
-            },
-          ),
-          ListTile(
-            title: const Text('Full Content'),
-            subtitle: const Text(
-              'Complete page including all elements and structure',
-            ),
-            onTap: () async {
-              Navigator.of(context).pop();
-              await shareMarkdownAction(
-                tabData.fullContentMarkdown!,
-                tabData.title ?? tabData.url?.authority,
-              );
-            },
-          ),
-        ],
-      ),
+    await showContentSelectionDialog(
+      context,
+      title: title,
+      tabData: tabData,
+      shareMarkdownAction: shareMarkdownAction,
     );
   }
 }

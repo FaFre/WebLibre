@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/override_profile_dialog.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -129,32 +130,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                 password: passwordTextController.text,
                                 confirmOverrideCallback: () {
                                   if (context.mounted) {
-                                    return showDialog<bool?>(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          icon: const Icon(Icons.warning),
-                                          title: const Text('Override User'),
-                                          content: const Text(
-                                            'Are you sure you want to override the exisiting User?',
-                                          ),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context, false);
-                                              },
-                                              child: const Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context, true);
-                                              },
-                                              child: const Text('Override'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
+                                    return showOverrideProfileDialog(context);
                                   } else {
                                     throw Exception('Override failed');
                                   }

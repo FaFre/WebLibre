@@ -29,6 +29,7 @@ import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart'
 import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/repositories/feed_repository.dart';
+import 'package:weblibre/features/web_feed/presentation/dialogs/delete_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/tag_field.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -302,32 +303,7 @@ class _FeedEditContent extends HookConsumerWidget {
                     label: const Text('Delete'),
                     icon: const Icon(Icons.delete),
                     onPressed: () async {
-                      final result = await showDialog<bool?>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            icon: const Icon(Icons.warning),
-                            title: const Text('Delete Feed'),
-                            content: const Text(
-                              'Are you sure you want to delete this feed and delete all related articles?',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                                child: const Text('Delete'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      final result = await showDeleteFeedDialog(context);
 
                       if (result == true) {
                         await ref

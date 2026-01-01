@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_bookmark_dialog.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
@@ -264,32 +265,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                       label: const Text('Delete'),
                       icon: const Icon(MdiIcons.bookmarkRemove),
                       onPressed: () async {
-                        final result = await showDialog<bool?>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              icon: const Icon(Icons.warning),
-                              title: const Text('Delete Bookmark'),
-                              content: const Text(
-                                'Are you sure you want to delete this Bookmark?',
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, false);
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context, true);
-                                  },
-                                  child: const Text('Delete'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
+                        final result = await showDeleteBookmarkDialog(context);
 
                         if (result == true) {
                           await ref

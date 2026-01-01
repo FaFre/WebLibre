@@ -5,6 +5,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/password_confirmation_dialog.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -120,43 +121,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                   onPressed: () async {
                     if (formKey.currentState?.validate() ?? false) {
                       if (!skipPasswordConfirmation.value) {
-                        final confirmation = await showDialog<String>(
-                          context: context,
-                          builder: (context) {
-                            final controller = TextEditingController();
-
-                            return AlertDialog(
-                              title: const Text('Password Confirmation'),
-                              content: TextField(
-                                controller: controller,
-                                enableSuggestions: false,
-                                autocorrect: false,
-                                enableIMEPersonalizedLearning: false,
-                                keyboardType: TextInputType.visiblePassword,
-                                obscureText: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Password',
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(controller.text);
-                                  },
-                                  child: const Text('Confirm'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
+                        final confirmation = await showPasswordConfirmationDialog(context);
 
                         if (confirmation != passwordTextController.text) {
                           if (context.mounted) {

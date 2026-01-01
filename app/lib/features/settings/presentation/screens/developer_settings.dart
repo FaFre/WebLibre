@@ -25,13 +25,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
@@ -93,30 +93,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                         );
 
                     if (context.mounted) {
-                      final restart = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          icon: const Icon(Icons.warning),
-                          title: const Text('User Agent Changed'),
-                          content: const Text(
-                            'The Browser needs to get restarted for the new user agent to take effect',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                context.pop(false);
-                              },
-                              child: const Text('Later'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                context.pop(true);
-                              },
-                              child: const Text('Restart Now'),
-                            ),
-                          ],
-                        ),
-                      );
+                      final restart = await showUserAgentRestartDialog(context);
 
                       if (restart == true) {
                         await exitApp(ref.container);

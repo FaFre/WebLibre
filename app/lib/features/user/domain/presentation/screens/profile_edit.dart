@@ -27,6 +27,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/delete_profile_dialog.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/utils/form_validators.dart';
@@ -129,32 +130,7 @@ class ProfileEditScreen extends HookConsumerWidget {
                     label: const Text('Delete'),
                     icon: const Icon(Icons.delete),
                     onPressed: () async {
-                      final result = await showDialog<bool?>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            icon: const Icon(Icons.warning),
-                            title: const Text('Delete User'),
-                            content: const Text(
-                              'Are you sure you want to delete this User including all data?',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                                child: const Text('Delete'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      final result = await showDeleteProfileDialog(context);
 
                       if (result == true) {
                         await ref

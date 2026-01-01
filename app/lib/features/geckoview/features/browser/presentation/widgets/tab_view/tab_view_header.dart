@@ -11,6 +11,10 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/clear_container_data_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_private_tabs_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
@@ -172,36 +176,7 @@ class TabViewHeader extends HookConsumerWidget {
                                           : 'Enable AI tab suggestions',
                                   onPressed: () async {
                                     if (!tabSuggestionsEnabled) {
-                                      final result = await showDialog<bool?>(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            icon: const Icon(MdiIcons.download),
-                                            title: const Text(
-                                              'Enable AI Tab Suggestions',
-                                            ),
-                                            content: const Text(
-                                              'Enabling this feature may require downloading AI models. '
-                                              'The download size and progress cannot be determined in advance.\n\n'
-                                              'Do you want to continue?',
-                                            ),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context, false);
-                                                },
-                                                child: const Text('Cancel'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context, true);
-                                                },
-                                                child: const Text('Enable'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
+                                      final result = await showEnableAiTabSuggestionsDialog(context);
 
                                       if (result == true) {
                                         ref
@@ -300,32 +275,7 @@ class TabViewHeader extends HookConsumerWidget {
                           leadingIcon: const Icon(MdiIcons.closeCircle),
                           child: const Text('Close All Tabs'),
                           onPressed: () async {
-                            final result = await showDialog<bool?>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  icon: const Icon(Icons.warning),
-                                  title: const Text('Close All Tabs'),
-                                  content: const Text(
-                                    'Are you sure you want to close all displayed tabs?',
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, false);
-                                      },
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, true);
-                                      },
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            final result = await showCloseAllTabsDialog(context);
 
                             if (result == true) {
                               final container = ref.read(
@@ -352,32 +302,7 @@ class TabViewHeader extends HookConsumerWidget {
                           leadingIcon: const Icon(MdiIcons.incognitoCircleOff),
                           child: const Text('Close Private Tabs'),
                           onPressed: () async {
-                            final result = await showDialog<bool?>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  icon: const Icon(Icons.warning),
-                                  title: const Text('Close All Private Tabs'),
-                                  content: const Text(
-                                    'Are you sure you want to close all displayed private tabs?',
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, false);
-                                      },
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, true);
-                                      },
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            final result = await showCloseAllPrivateTabsDialog(context);
 
                             if (result == true) {
                               final container = ref.read(
@@ -439,57 +364,9 @@ class TabViewHeader extends HookConsumerWidget {
 
                                     if (!context.mounted) return;
 
-                                    final result = await showDialog<bool?>(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          icon: const Icon(
-                                            MdiIcons.databaseRemove,
-                                          ),
-                                          title: const Text(
-                                            'Clear Container Data?',
-                                          ),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Text(
-                                                'This will clear all data for this container:',
-                                              ),
-                                              const SizedBox(height: 8),
-                                              const Text('• Cookies'),
-                                              const Text('• Site data'),
-                                              const Text('• Cache'),
-                                              const Text('• Permissions'),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                '${tabs.length} tab(s) will be closed and reopened fresh.',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.tertiary,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context, false);
-                                              },
-                                              child: const Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context, true);
-                                              },
-                                              child: const Text('Clear Data'),
-                                            ),
-                                          ],
-                                        );
-                                      },
+                                    final result = await showClearContainerDataDialog(
+                                      context,
+                                      tabs.length,
                                     );
 
                                     if (result == true) {

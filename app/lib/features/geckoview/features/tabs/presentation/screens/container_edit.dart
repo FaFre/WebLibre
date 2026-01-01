@@ -28,6 +28,7 @@ import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
@@ -358,32 +359,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                     label: const Text('Delete'),
                     icon: const Icon(Icons.delete),
                     onPressed: () async {
-                      final result = await showDialog<bool?>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            icon: const Icon(Icons.warning),
-                            title: const Text('Delete Container'),
-                            content: const Text(
-                              'Are you sure you want to delete this container and close all attached tabs?',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                                child: const Text('Delete'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      final result = await showDeleteContainerDialog(context);
 
                       if (result == true) {
                         await ref

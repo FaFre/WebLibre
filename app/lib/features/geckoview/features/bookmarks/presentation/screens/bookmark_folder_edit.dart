@@ -24,6 +24,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
 class BookmarkFolderEditScreen extends HookConsumerWidget {
@@ -104,32 +105,7 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
                     label: const Text('Delete'),
                     icon: const Icon(Icons.delete),
                     onPressed: () async {
-                      final result = await showDialog<bool?>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            icon: const Icon(Icons.warning),
-                            title: const Text('Delete Folder'),
-                            content: const Text(
-                              'Are you sure you want to delete this Folder including all bookmarks?',
-                            ),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                                child: const Text('Delete'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      final result = await showDeleteFolderDialog(context);
 
                       if (result == true) {
                         await ref
