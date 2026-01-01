@@ -121,7 +121,8 @@ class ProfileBackupScreen extends HookConsumerWidget {
                   onPressed: () async {
                     if (formKey.currentState?.validate() ?? false) {
                       if (!skipPasswordConfirmation.value) {
-                        final confirmation = await showPasswordConfirmationDialog(context);
+                        final confirmation =
+                            await showPasswordConfirmationDialog(context);
 
                         if (confirmation != passwordTextController.text) {
                           if (context.mounted) {

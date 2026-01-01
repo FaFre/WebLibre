@@ -96,8 +96,11 @@ class GridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabState = ref.watch(
-          tabStateWithFallbackProvider(tabId).select((asyncValue) => asyncValue.value),
+    final tabState =
+        ref.watch(
+          tabStateWithFallbackProvider(
+            tabId,
+          ).select((asyncValue) => asyncValue.value),
         ) ??
         TabState.$default(tabId);
 
@@ -256,8 +259,11 @@ class ListTabPreview extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final tabState = ref.watch(
-          tabStateWithFallbackProvider(tabId).select((asyncValue) => asyncValue.value),
+    final tabState =
+        ref.watch(
+          tabStateWithFallbackProvider(
+            tabId,
+          ).select((asyncValue) => asyncValue.value),
         ) ??
         TabState.$default(tabId);
 

@@ -185,9 +185,6 @@ class GeckoTabService {
     required List<AddTabParams> tabs,
     String? selectTabId,
   }) {
-    return _api.addMultipleTabs(
-      tabs: tabs,
-      selectTabId: selectTabId,
-    );
+    return _api.addMultipleTabs(tabs: tabs, selectTabId: selectTabId);
   }
 }

@@ -20,27 +20,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 
-Future<bool?> showClearContainerDataDialog(
-  BuildContext context,
-  int tabCount,
-) {
+Future<bool?> showClearContainerDataDialog(BuildContext context, int tabCount) {
   return showDialog<bool?>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        icon: const Icon(
-          MdiIcons.databaseRemove,
-        ),
-        title: const Text(
-          'Clear Container Data?',
-        ),
+        icon: const Icon(MdiIcons.databaseRemove),
+        title: const Text('Clear Container Data?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'This will clear all data for this container:',
-            ),
+            const Text('This will clear all data for this container:'),
             const SizedBox(height: 8),
             const Text('• Cookies'),
             const Text('• Site data'),
@@ -51,9 +42,7 @@ Future<bool?> showClearContainerDataDialog(
               '$tabCount tab(s) will be closed and reopened fresh.',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(
-                  context,
-                ).colorScheme.tertiary,
+                color: Theme.of(context).colorScheme.tertiary,
               ),
             ),
           ],

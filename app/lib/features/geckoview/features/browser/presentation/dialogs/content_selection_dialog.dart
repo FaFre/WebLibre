@@ -28,7 +28,7 @@ Future<void> showContentSelectionDialog(
   required Widget title,
   required TabData tabData,
   required Future<void> Function(String content, String? fileName)
-      shareMarkdownAction,
+  shareMarkdownAction,
 }) async {
   await showDialog(
     context: context,

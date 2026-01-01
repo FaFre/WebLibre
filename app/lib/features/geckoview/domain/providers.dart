@@ -218,25 +218,22 @@ Stream<MlProgressData> mlProgressEvents(Ref ref) {
 class MlDownloadState extends _$MlDownloadState {
   @override
   MlProgressData? build() {
-    ref.listen(
-      mlProgressEventsProvider,
-      (previous, next) {
-        next.whenData((progress) {
-          if (progress.type == MlProgressType.downloading) {
-            if (progress.status == MlProgressStatus.done) {
-              // Keep showing for 2 seconds after completion
-              Future.delayed(const Duration(seconds: 2), () {
-                if (ref.mounted && state != null && state!.id == progress.id) {
-                  state = null;
-                }
-              });
-            } else {
-              state = progress;
-            }
+    ref.listen(mlProgressEventsProvider, (previous, next) {
+      next.whenData((progress) {
+        if (progress.type == MlProgressType.downloading) {
+          if (progress.status == MlProgressStatus.done) {
+            // Keep showing for 2 seconds after completion
+            Future.delayed(const Duration(seconds: 2), () {
+              if (ref.mounted && state != null && state!.id == progress.id) {
+                state = null;
+              }
+            });
+          } else {
+            state = progress;
           }
-        });
-      },
-    );
+        }
+      });
+    });
 
     return null;
   }

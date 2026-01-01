@@ -172,11 +172,14 @@ class TabViewHeader extends HookConsumerWidget {
                                   tooltip: downloadProgress != null
                                       ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
                                       : tabSuggestionsEnabled
-                                          ? 'Disable AI tab suggestions'
-                                          : 'Enable AI tab suggestions',
+                                      ? 'Disable AI tab suggestions'
+                                      : 'Enable AI tab suggestions',
                                   onPressed: () async {
                                     if (!tabSuggestionsEnabled) {
-                                      final result = await showEnableAiTabSuggestionsDialog(context);
+                                      final result =
+                                          await showEnableAiTabSuggestionsDialog(
+                                            context,
+                                          );
 
                                       if (result == true) {
                                         ref
@@ -275,7 +278,9 @@ class TabViewHeader extends HookConsumerWidget {
                           leadingIcon: const Icon(MdiIcons.closeCircle),
                           child: const Text('Close All Tabs'),
                           onPressed: () async {
-                            final result = await showCloseAllTabsDialog(context);
+                            final result = await showCloseAllTabsDialog(
+                              context,
+                            );
 
                             if (result == true) {
                               final container = ref.read(
@@ -302,7 +307,9 @@ class TabViewHeader extends HookConsumerWidget {
                           leadingIcon: const Icon(MdiIcons.incognitoCircleOff),
                           child: const Text('Close Private Tabs'),
                           onPressed: () async {
-                            final result = await showCloseAllPrivateTabsDialog(context);
+                            final result = await showCloseAllPrivateTabsDialog(
+                              context,
+                            );
 
                             if (result == true) {
                               final container = ref.read(
@@ -364,10 +371,11 @@ class TabViewHeader extends HookConsumerWidget {
 
                                     if (!context.mounted) return;
 
-                                    final result = await showClearContainerDataDialog(
-                                      context,
-                                      tabs.length,
-                                    );
+                                    final result =
+                                        await showClearContainerDataDialog(
+                                          context,
+                                          tabs.length,
+                                        );
 
                                     if (result == true) {
                                       try {

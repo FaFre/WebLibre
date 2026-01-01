@@ -26,9 +26,7 @@ Future<bool?> showDeleteBookmarkDialog(BuildContext context) {
       return AlertDialog(
         icon: const Icon(Icons.warning),
         title: const Text('Delete Bookmark'),
-        content: const Text(
-          'Are you sure you want to delete this Bookmark?',
-        ),
+        content: const Text('Are you sure you want to delete this Bookmark?'),
         actions: <Widget>[
           TextButton(
             onPressed: () {

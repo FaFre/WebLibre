@@ -63,9 +63,7 @@ class BrowserDataService extends _$BrowserDataService {
     return _service.clearDataForContext(contextId);
   }
 
-  Future<void> clearContainerDataOnEngineStart(
-    List<String> contextIds,
-  ) async {
+  Future<void> clearContainerDataOnEngineStart(List<String> contextIds) async {
     if (!_onStartDeleted && contextIds.isNotEmpty) {
       for (final contextId in contextIds) {
         await clearDataForContext(contextId);

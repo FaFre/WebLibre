@@ -26,9 +26,7 @@ Future<bool?> showEnableAiTabSuggestionsDialog(BuildContext context) {
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(MdiIcons.download),
-        title: const Text(
-          'Enable AI Tab Suggestions',
-        ),
+        title: const Text('Enable AI Tab Suggestions'),
         content: const Text(
           'Enabling this feature may require downloading AI models. '
           'The download size and progress cannot be determined in advance.\n\n'
