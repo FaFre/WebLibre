@@ -23,6 +23,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:text_scroll/text_scroll.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -109,7 +110,7 @@ class AppBarTitle extends HookConsumerWidget {
                   if (tabState.isPrivate) ...[
                     const Icon(
                       MdiIcons.dominoMask,
-                      color: Color(0xFF8000D7),
+                      color: AppColors.privateTabPurple,
                       size: 14,
                     ),
                     const SizedBox(width: 4),

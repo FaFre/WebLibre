@@ -19,14 +19,15 @@
  */
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 
 part 'defaults.g.dart';
 
 @Riverpod(keepAlive: true)
-Color lightSeedColorFallback(Ref ref) => const Color(0xFF167C80);
+Color lightSeedColorFallback(Ref ref) => AppColors.seedColor;
 
 @Riverpod(keepAlive: true)
-Color darkSeedColorFallback(Ref ref) => const Color(0xFF167C80);
+Color darkSeedColorFallback(Ref ref) => AppColors.seedColor;
 
 @Riverpod(keepAlive: true)
 Uri docsUri(Ref ref) => Uri.parse('https://docs.weblibre.eu/');

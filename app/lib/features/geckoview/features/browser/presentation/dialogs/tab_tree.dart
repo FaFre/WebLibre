@@ -27,6 +27,7 @@ import 'package:graphview/GraphView.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -82,7 +83,7 @@ class TabTreeDialog extends HookConsumerWidget {
     return Dialog.fullscreen(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: const Color(0x44000000),
+          backgroundColor: AppColors.dialogOverlay,
           elevation: 0,
           leading: const CloseButton(),
         ),

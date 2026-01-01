@@ -23,6 +23,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -144,7 +145,7 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                         style: switch (generalSettings.defaultCreateTabType) {
                           TabType.regular => null,
                           TabType.private => SegmentedButton.styleFrom(
-                            selectedBackgroundColor: const Color(0x648000D7),
+                            selectedBackgroundColor: AppColors.privateSelectionOverlay,
                           ),
                           TabType.child => null,
                         },
@@ -205,7 +206,7 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                           TabIntentOpenSetting.regular => null,
                           TabIntentOpenSetting.private =>
                             SegmentedButton.styleFrom(
-                              selectedBackgroundColor: const Color(0x648000D7),
+                              selectedBackgroundColor: AppColors.privateSelectionOverlay,
                             ),
                           TabIntentOpenSetting.ask => null,
                         },

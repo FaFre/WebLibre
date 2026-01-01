@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
@@ -35,7 +36,7 @@ class TorNotification extends HookConsumerWidget {
 
     return SafeArea(
       child: ColoredBox(
-        color: const Color(0xFF7D4698),
+        color: AppColors.torPurple,
         child: SizedBox(
           height: 56,
           width: MediaQuery.of(context).size.width,
@@ -47,7 +48,7 @@ class TorNotification extends HookConsumerWidget {
                   duration: const Duration(milliseconds: 500),
                   primaryEnd: Alignment.bottomLeft,
                   secondaryEnd: Alignment.topRight,
-                  primaryColors: const [Color(0xFF68B030), Color(0xFF68B030)],
+                  primaryColors: const [AppColors.torActiveGreen, AppColors.torActiveGreen],
                   secondaryColors: const [Colors.white, Colors.white],
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12),

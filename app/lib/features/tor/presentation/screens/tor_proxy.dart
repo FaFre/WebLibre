@@ -21,6 +21,7 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
@@ -60,7 +61,7 @@ class TorProxyScreen extends HookConsumerWidget {
               Set<WidgetState> states,
             ) {
               if (states.isEmpty) {
-                return const Color(0xFF333A41);
+                return AppColors.torBackgroundGrey;
               }
               return null; // Use the default color.
             }),
@@ -86,7 +87,7 @@ class TorProxyScreen extends HookConsumerWidget {
         ),
         child: SafeArea(
           child: ColoredBox(
-            color: const Color(0xFF7D4698),
+            color: AppColors.torPurple,
             child: Column(
               children: [
                 const SizedBox(height: 16),
@@ -100,7 +101,7 @@ class TorProxyScreen extends HookConsumerWidget {
                   ),
                   child: SwitchListTile.adaptive(
                     inactiveThumbColor: Colors.white,
-                    activeThumbColor: const Color(0xFF68B030),
+                    activeThumbColor: AppColors.torActiveGreen,
                     thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
                       Set<WidgetState> states,
                     ) {
@@ -189,7 +190,7 @@ class TorProxyScreen extends HookConsumerWidget {
 
                               SwitchListTile.adaptive(
                                 inactiveThumbColor: Colors.white,
-                                activeThumbColor: const Color(0xFF68B030),
+                                activeThumbColor: AppColors.torActiveGreen,
                                 thumbIcon:
                                     WidgetStateProperty.resolveWith<Icon?>((
                                       Set<WidgetState> states,
@@ -234,7 +235,7 @@ class TorProxyScreen extends HookConsumerWidget {
                               ),
                               SwitchListTile.adaptive(
                                 inactiveThumbColor: Colors.white,
-                                activeThumbColor: const Color(0xFF68B030),
+                                activeThumbColor: AppColors.torActiveGreen,
                                 thumbIcon:
                                     WidgetStateProperty.resolveWith<Icon?>((
                                       Set<WidgetState> states,
@@ -284,7 +285,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                   TorConnectionConfig.auto) ...[
                                 SwitchListTile.adaptive(
                                   inactiveThumbColor: Colors.white,
-                                  activeThumbColor: const Color(0xFF68B030),
+                                  activeThumbColor: AppColors.torActiveGreen,
                                   value: torSettings.requireBridge,
                                   contentPadding: const EdgeInsets.only(
                                     left: 56,
@@ -418,8 +419,8 @@ class TorProxyScreen extends HookConsumerWidget {
                           children: [
                             SizedBox(height: 8),
                             LinearProgressIndicator(
-                              backgroundColor: Color(0xFF333A41),
-                              color: Color(0xFF68B030),
+                              backgroundColor: AppColors.torBackgroundGrey,
+                              color: AppColors.torActiveGreen,
                             ),
                             SizedBox(height: 8),
                             Text(
@@ -436,14 +437,14 @@ class TorProxyScreen extends HookConsumerWidget {
                             children: [
                               const Icon(
                                 MdiIcons.shieldLockOutline,
-                                color: Color(0xFF68B030),
+                                color: AppColors.torActiveGreen,
                                 size: 32,
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 'Connected to the Tor Network',
                                 style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(color: const Color(0xFF68B030)),
+                                    ?.copyWith(color: AppColors.torActiveGreen),
                               ),
                             ],
                           ),

@@ -25,6 +25,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
@@ -475,7 +476,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
                     padding: EdgeInsets.only(left: 8.0),
                     child: Icon(
                       MdiIcons.dominoMask,
-                      color: Color(0xFF8000D7),
+                      color: AppColors.privateTabPurple,
                       size: 20,
                     ),
                   ),
@@ -777,7 +778,7 @@ class NavigationMenuButton extends HookConsumerWidget {
 
               return Badge(
                 isLabelVisible: torConnected,
-                backgroundColor: const Color(0xFF68B030),
+                backgroundColor: AppColors.torActiveGreen,
                 child: child,
               );
             },

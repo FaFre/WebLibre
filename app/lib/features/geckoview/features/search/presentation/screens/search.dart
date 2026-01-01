@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
@@ -172,14 +173,12 @@ class SearchScreen extends HookConsumerWidget {
                           style: switch (selectedTabType.value) {
                             TabType.regular => null,
                             TabType.private => SegmentedButton.styleFrom(
-                              selectedBackgroundColor: const Color(0x648000D7),
+                              selectedBackgroundColor: AppColors.privateSelectionOverlay,
                             ),
                             TabType.child =>
                               (currentTabTabType == TabType.private)
                                   ? SegmentedButton.styleFrom(
-                                      selectedBackgroundColor: const Color(
-                                        0x648000D7,
-                                      ),
+                                      selectedBackgroundColor: AppColors.privateSelectionOverlay,
                                     )
                                   : null,
                           },

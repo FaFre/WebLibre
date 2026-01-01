@@ -24,6 +24,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -61,7 +62,7 @@ class GridTabItemContainer extends StatelessWidget {
       ),
       child: Material(
         color: isPrivate
-            ? const Color(0xFF25003E)
+            ? AppColors.privateTabBackground
             : colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(14.0)),
         child: child,
@@ -193,7 +194,7 @@ class GridTabPreview extends HookConsumerWidget {
                           top: -4,
                           child: Icon(
                             MdiIcons.dominoMask,
-                            color: Color(0xFF8000D7),
+                            color: AppColors.privateTabPurple,
                           ),
                         ),
                       ],
@@ -271,7 +272,7 @@ class ListTabPreview extends HookConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: tabState.isPrivate ? const Color(0xFF25003E) : null,
+        color: tabState.isPrivate ? AppColors.privateTabBackground : null,
         border: isActive ? Border.all(color: colorScheme.primary) : null,
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
       ),
@@ -304,7 +305,7 @@ class ListTabPreview extends HookConsumerWidget {
                   if (tabState.isPrivate) ...[
                     const Icon(
                       MdiIcons.dominoMask,
-                      color: Color(0xFF8000D7),
+                      color: AppColors.privateTabPurple,
                       size: 14,
                     ),
                     const SizedBox(width: 4),

@@ -118,7 +118,7 @@ List<Map<Color, String>> shadingTypes(List<Color> colors) {
         ].map((int shade) => {colorType[shade]!: shade.toString()}).toList(),
       );
     } else {
-      result.add({const Color(0x00000000): ''});
+      result.add({Colors.transparent: ''});
     }
   }
 

@@ -49,7 +49,7 @@ final class LightSeedColorFallbackProvider
 }
 
 String _$lightSeedColorFallbackHash() =>
-    r'af151d3293d372f5df451aa8c3a75136377b6ce1';
+    r'd5fb3ead5795c1cadd6c3a5f91ef84c3cbdaa3c1';
 
 @ProviderFor(darkSeedColorFallback)
 const darkSeedColorFallbackProvider = DarkSeedColorFallbackProvider._();
@@ -91,7 +91,7 @@ final class DarkSeedColorFallbackProvider
 }
 
 String _$darkSeedColorFallbackHash() =>
-    r'9418cf71e3d80c8a2142e0d3a8820989b29bff86';
+    r'a383dbf6edf4fee54a8215bc52a98f26354e4645';
 
 @ProviderFor(docsUri)
 const docsUriProvider = DocsUriProvider._();

@@ -132,7 +132,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                           setState(() => _currentColorType = colors);
                         },
                         child: Container(
-                          color: const Color(0x00000000),
+                          color: Colors.transparent,
                           padding: isPortrait
                               ? const EdgeInsets.fromLTRB(0, 7, 0, 7)
                               : const EdgeInsets.fromLTRB(7, 0, 7, 0),
@@ -217,7 +217,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                       widget.onColorChanged(color);
                     },
                     child: Container(
-                      color: const Color(0x00000000),
+                      color: Colors.transparent,
                       margin: isPortrait
                           ? const EdgeInsets.only(right: 10)
                           : const EdgeInsets.only(bottom: 10),
