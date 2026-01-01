@@ -216,6 +216,8 @@ Stream<MlProgressData> mlProgressEvents(Ref ref) {
 /// Tracks active ML model downloads
 @Riverpod()
 class MlDownloadState extends _$MlDownloadState {
+  Timer? _clearTimer;
+
   @override
   MlProgressData? build() {
     ref.listen(mlProgressEventsProvider, (previous, next) {
@@ -223,7 +225,8 @@ class MlDownloadState extends _$MlDownloadState {
         if (progress.type == MlProgressType.downloading) {
           if (progress.status == MlProgressStatus.done) {
             // Keep showing for 2 seconds after completion
-            Future.delayed(const Duration(seconds: 2), () {
+            _clearTimer?.cancel();
+            _clearTimer = Timer(const Duration(seconds: 2), () {
               if (ref.mounted && state != null && state!.id == progress.id) {
                 state = null;
               }
@@ -235,10 +238,17 @@ class MlDownloadState extends _$MlDownloadState {
       });
     });
 
+    ref.onDispose(() {
+      _clearTimer?.cancel();
+      _clearTimer = null;
+    });
+
     return null;
   }
 
   void clear() {
+    _clearTimer?.cancel();
+    _clearTimer = null;
     state = null;
   }
 }

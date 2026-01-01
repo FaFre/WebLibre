@@ -379,7 +379,7 @@ final class MlDownloadStateProvider
   }
 }
 
-String _$mlDownloadStateHash() => r'837e73d9c0f8ac5c25e075417b22ff16cfcdf818';
+String _$mlDownloadStateHash() => r'a6e2612770878a9fc5ca6800665698c6335a047e';
 
 /// Tracks active ML model downloads
 
