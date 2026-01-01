@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
 
 class _TabDraggable extends HookConsumerWidget {
   final TabEntity entity;
@@ -400,6 +401,9 @@ class ViewTabGridWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Track FAB visibility based on scroll direction
+    final isFabVisible = useScrollVisibility(scrollController);
+
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
@@ -431,24 +435,33 @@ class ViewTabGridWidget extends HookConsumerWidget {
           ),
         ),
         if (showNewTabFab)
-          Padding(
-            padding: const EdgeInsets.only(
-              top: TabViewHeader.headerSize + 4,
-              right: 4,
-            ),
-            child: FloatingActionButton.small(
-              onPressed: () async {
-                final settings = ref.read(generalSettingsWithDefaultsProvider);
+          AnimatedSlide(
+            duration: const Duration(milliseconds: 200),
+            offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
+            curve: Curves.easeInOut,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: isFabVisible.value ? 1.0 : 0.0,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: TabViewHeader.headerSize + 4,
+                  right: 4,
+                ),
+                child: FloatingActionButton.small(
+                  onPressed: () async {
+                    final settings = ref.read(generalSettingsWithDefaultsProvider);
 
-                await SearchRoute(
-                  tabType:
-                      ref.read(selectedTabTypeProvider) ??
-                      settings.defaultCreateTabType,
-                ).push(context);
+                    await SearchRoute(
+                      tabType:
+                          ref.read(selectedTabTypeProvider) ??
+                          settings.defaultCreateTabType,
+                    ).push(context);
 
-                onClose();
-              },
-              child: const Icon(Icons.add),
+                    onClose();
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              ),
             ),
           ),
       ],

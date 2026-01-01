@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
 
 class TabViewScreen extends HookConsumerWidget {
   const TabViewScreen();
@@ -37,6 +38,9 @@ class TabViewScreen extends HookConsumerWidget {
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
     final scrollController = useScrollController(keys: [tabsReorderable]);
+
+    // Track FAB visibility based on scroll direction
+    final isFabVisible = useScrollVisibility(scrollController);
 
     return Dialog.fullscreen(
       child: Scaffold(
@@ -69,21 +73,30 @@ class TabViewScreen extends HookConsumerWidget {
             ),
           },
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            final settings = ref.read(generalSettingsWithDefaultsProvider);
+        floatingActionButton: AnimatedSlide(
+          duration: const Duration(milliseconds: 200),
+          offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
+          curve: Curves.easeInOut,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: isFabVisible.value ? 1.0 : 0.0,
+            child: FloatingActionButton(
+              onPressed: () async {
+                final settings = ref.read(generalSettingsWithDefaultsProvider);
 
-            await SearchRoute(
-              tabType:
-                  ref.read(selectedTabTypeProvider) ??
-                  settings.defaultCreateTabType,
-            ).push(context);
+                await SearchRoute(
+                  tabType:
+                      ref.read(selectedTabTypeProvider) ??
+                      settings.defaultCreateTabType,
+                ).push(context);
 
-            if (context.mounted) {
-              const BrowserRoute().go(context);
-            }
-          },
-          child: const Icon(Icons.add),
+                if (context.mounted) {
+                  const BrowserRoute().go(context);
+                }
+              },
+              child: const Icon(Icons.add),
+            ),
+          ),
         ),
       ),
     );
