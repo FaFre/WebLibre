@@ -406,7 +406,7 @@ class TabViewHeader extends HookConsumerWidget {
                                 MenuItemButton(
                                   closeOnActivate: false,
                                   leadingIcon: const Icon(
-                                    Icons.cleaning_services,
+                                    MdiIcons.databaseRemove,
                                   ),
                                   child: const Text('Clear Container Data'),
                                   onPressed: () async {
@@ -424,7 +424,7 @@ class TabViewHeader extends HookConsumerWidget {
                                       builder: (BuildContext context) {
                                         return AlertDialog(
                                           icon: const Icon(
-                                            Icons.cleaning_services,
+                                            MdiIcons.databaseRemove,
                                           ),
                                           title: const Text(
                                             'Clear Container Data?',
