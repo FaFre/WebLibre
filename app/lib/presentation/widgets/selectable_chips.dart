@@ -70,6 +70,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final String? Function(T item)? itemTooltip;
   final int? Function(T item)? itemBadgeCount;
   final Color? Function(T item)? itemBackgroundColor;
+  final Color? selectedBorderColor;
 
   final Widget Function(Widget child, S item)? itemWrap;
 
@@ -85,6 +86,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.itemWrap,
     this.itemTooltip,
     this.itemBackgroundColor,
+    this.selectedBorderColor,
     this.prefixListItems = const [],
     required this.availableItems,
     this.selectedItem,
@@ -133,6 +135,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
             }
 
             final item = items[index - prefixListItems.length];
+            final isSelected = selectedItem != null &&
+                itemId(item) == itemId(selectedItem as S);
             final child = Padding(
               padding: const EdgeInsets.only(right: 8.0, top: 4.0),
               child: _BadgeWrapper(
@@ -143,9 +147,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                         () => callback(item),
                   ),
                   child: FilterChip(
-                    selected:
-                        selectedItem != null &&
-                        itemId(item) == itemId(selectedItem as S),
+                    selected: selectedBorderColor == null && isSelected,
                     showCheckmark: false,
                     onSelected: (value) {
                       if (value) {
@@ -163,6 +165,12 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                     avatar: itemAvatar?.call(item),
                     tooltip: itemTooltip?.call(item),
                     backgroundColor: itemBackgroundColor?.call(item),
+                    side: isSelected && selectedBorderColor != null
+                        ? BorderSide(
+                            color: selectedBorderColor!,
+                            width: 2.0,
+                          )
+                        : null,
                   ),
                 ),
               ),

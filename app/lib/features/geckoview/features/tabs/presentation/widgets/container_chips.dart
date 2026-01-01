@@ -99,6 +99,7 @@ class ContainerChips extends HookConsumerWidget {
                   itemId: (container) => container.id,
                   itemBackgroundColor: (container) =>
                       container.color.withValues(alpha: 0.33),
+                  selectedBorderColor: Theme.of(context).colorScheme.primary,
                   itemLabel: (container) =>
                       ContainerTitle(container: container),
                   itemBadgeCount: (container) =>
