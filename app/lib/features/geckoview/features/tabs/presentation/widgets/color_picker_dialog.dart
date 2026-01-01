@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/material_color_picker.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 
 class ColorPickerDialog extends HookWidget {
   final Color initialColor;
@@ -47,6 +48,7 @@ class ColorPickerDialog extends HookWidget {
         onColorChanged: (value) {
           selectedColor.value = value;
         },
+        displayAlpha: ContainerColors.defaultAlpha,
       ),
       actions: [
         TextButton(

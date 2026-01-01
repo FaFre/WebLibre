@@ -32,6 +32,7 @@ class MaterialPicker extends StatefulWidget {
     this.onPrimaryChanged,
     this.enableLabel = false,
     this.portraitOnly = false,
+    this.displayAlpha,
   });
 
   final Color pickerColor;
@@ -39,6 +40,7 @@ class MaterialPicker extends StatefulWidget {
   final ValueChanged<Color>? onPrimaryChanged;
   final bool enableLabel;
   final bool portraitOnly;
+  final double? displayAlpha;
 
   @override
   State<StatefulWidget> createState() => _MaterialPickerState();
@@ -124,6 +126,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                       const Padding(padding: EdgeInsets.only(left: 7)),
                     ...colorTypes.map((List<Color> colors) {
                       final Color colorType = colors[0];
+                      final Color displayColorType = widget.displayAlpha != null
+                          ? colorType.withValues(alpha: widget.displayAlpha)
+                          : colorType;
                       return GestureDetector(
                         onTap: () {
                           if (widget.onPrimaryChanged != null) {
@@ -142,7 +147,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                               width: 25,
                               height: 25,
                               decoration: BoxDecoration(
-                                color: colorType,
+                                color: displayColorType,
                                 shape: BoxShape.circle,
                                 boxShadow: _currentColorType == colors
                                     ? [
@@ -158,7 +163,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           )
                                         else
                                           BoxShadow(
-                                            color: colorType,
+                                            color: displayColorType,
                                             blurRadius: 10,
                                           ),
                                       ]
@@ -211,6 +216,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                   Map<Color, String> colors,
                 ) {
                   final Color color = colors.keys.first;
+                  final Color displayColor = widget.displayAlpha != null
+                      ? color.withValues(alpha: widget.displayAlpha)
+                      : color;
                   return GestureDetector(
                     onTap: () {
                       setState(() => _currentShading = color);
@@ -233,7 +241,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                               : (_currentShading == color ? 50 : 30),
                           height: isPortrait ? 50 : 220,
                           decoration: BoxDecoration(
-                            color: color,
+                            color: displayColor,
                             boxShadow: _currentShading == color
                                 ? [
                                     if ((color == Colors.white) ||
@@ -247,7 +255,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                         blurRadius: 10,
                                       )
                                     else
-                                      BoxShadow(color: color, blurRadius: 10),
+                                      BoxShadow(color: displayColor, blurRadius: 10),
                                   ]
                                 : null,
                             border:
@@ -269,7 +277,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           Text(
                                             '  ${colors.values.first}',
                                             style: TextStyle(
-                                              color: useWhiteForeground(color)
+                                              color: useWhiteForeground(displayColor)
                                                   ? Colors.white
                                                   : Colors.black,
                                             ),
@@ -281,7 +289,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                                 '#${color.toString().replaceFirst('Color(0xff', '').replaceFirst(')', '').toUpperCase()}  ',
                                                 style: TextStyle(
                                                   color:
-                                                      useWhiteForeground(color)
+                                                      useWhiteForeground(displayColor)
                                                       ? Colors.white
                                                       : Colors.black,
                                                   fontWeight: FontWeight.bold,
@@ -306,7 +314,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           child: Text(
                                             colors.values.first,
                                             style: TextStyle(
-                                              color: useWhiteForeground(color)
+                                              color: useWhiteForeground(displayColor)
                                                   ? Colors.white
                                                   : Colors.black,
                                               fontWeight: FontWeight.bold,

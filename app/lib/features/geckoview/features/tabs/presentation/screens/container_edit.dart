@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/controlle
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
@@ -168,7 +169,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                             width: 24,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: selectedColor.value,
+                              color: ContainerColors.preview(selectedColor.value),
                             ),
                           ),
                         ),

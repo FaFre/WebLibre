@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/tab_drag_container_target.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
@@ -98,7 +99,7 @@ class ContainerChips extends HookConsumerWidget {
                   enableDelete: false,
                   itemId: (container) => container.id,
                   itemBackgroundColor: (container) =>
-                      container.color.withValues(alpha: 0.33),
+                      ContainerColors.forChip(container.color),
                   selectedBorderColor: Theme.of(context).colorScheme.primary,
                   itemLabel: (container) =>
                       ContainerTitle(container: container),

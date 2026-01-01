@@ -49,6 +49,7 @@ import 'package:weblibre/features/geckoview/features/history/domain/repositories
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -264,7 +265,7 @@ class BrowserTabBar extends HookConsumerWidget {
                 titleSpacing: 8.0,
                 backgroundColor:
                     (containerColor != null && displayedSheet is! ViewTabsSheet)
-                    ? containerColor.withValues(alpha: 0.33)
+                    ? ContainerColors.forAppBar(containerColor)
                     : null,
                 title:
                     (selectedTabId != null && displayedSheet is! ViewTabsSheet)
@@ -489,7 +490,8 @@ class QuickTabSwitcher extends HookConsumerWidget {
             );
           },
           itemAvatar: (item) => UrlIcon([item.url], iconSize: 16),
-          itemBackgroundColor: (item) => item.color?.withValues(alpha: 0.33),
+          itemBackgroundColor: (item) =>
+              item.color != null ? ContainerColors.forChip(item.color!) : null,
           onSelected: (item) async {
             final animation = chipScrollController.animateTo(
               0,
