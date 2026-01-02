@@ -42,9 +42,15 @@ CREATE VIRTUAL TABLE tab_fts
 
 -- Create trigger to handle parent deletion
 CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN
-  -- Update all children of the deleted row to point to its parent
-  UPDATE tab 
-  SET parent_id = OLD.parent_id 
+  -- Update all children of the deleted row to point to its parent (grandparent)
+  -- Only if the grandparent exists, otherwise set to NULL
+  UPDATE tab
+  SET parent_id = CASE
+    WHEN OLD.parent_id IS NOT NULL AND
+         EXISTS(SELECT 1 FROM tab WHERE id = OLD.parent_id)
+    THEN OLD.parent_id
+    ELSE NULL
+  END
   WHERE parent_id = OLD.id;
 END;
 

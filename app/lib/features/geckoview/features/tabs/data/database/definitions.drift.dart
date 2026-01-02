@@ -2195,7 +2195,7 @@ class TabFtsCompanion extends i0.UpdateCompanion<i3.TabFt> {
 }
 
 i0.Trigger get tabMaintainParentChainOnDelete => i0.Trigger(
-  'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = OLD.parent_id WHERE parent_id = OLD.id;END',
+  'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
   'tab_maintain_parent_chain_on_delete',
 );
 i0.Trigger get tabAfterInsert => i0.Trigger(

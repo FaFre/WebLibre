@@ -118,14 +118,35 @@ class TabRepository extends _$TabRepository {
         selectTabId: selectTabId,
       );
 
+      // Build sets for validation
+      final creatingTabIds = createdTabIds.toSet();
+      final parentIdsToValidate = tabs
+          .map((tab) => tab.parentId)
+          .whereType<String>()
+          .where((id) => !creatingTabIds.contains(id))
+          .toSet();
+
+      // Batch validate parent IDs that aren't in the current creation batch
+      final existingParentIds =
+          await tabDao.getExistingTabIds(parentIdsToValidate).get().then((ids) => ids.toSet());
+
       // Upsert all tabs in the database
       for (var i = 0; i < createdTabIds.length; i++) {
         final tabId = createdTabIds[i];
         final tab = tabs[i];
 
+        // Validate parent exists in either the batch being created or database
+        String? validatedParentId;
+        if (tab.parentId != null) {
+          if (creatingTabIds.contains(tab.parentId) ||
+              existingParentIds.contains(tab.parentId)) {
+            validatedParentId = tab.parentId;
+          }
+        }
+
         await tabDao.insertTab(
           tabId,
-          parentId: Value(tab.parentId),
+          parentId: Value(validatedParentId),
           source: TabSource.manual,
           containerId: Value(container?.value?.id),
           isPrivate: Value(tab.private),
@@ -539,7 +560,7 @@ class TabRepository extends _$TabRepository {
       },
     );
 
-    final tabStateDebouncer = Debouncer(const Duration(seconds: 3));
+    final tabStateDebouncer = Debouncer(const Duration(seconds: 1));
     Map<String, TabState>? debounceStartValue;
 
     ref.listen(

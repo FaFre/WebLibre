@@ -61,6 +61,15 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return query.map((row) => row.read(db.tab.id)!);
   }
 
+  /// Validates multiple tab IDs and returns only those that exist in the database.
+  Selectable<String> getExistingTabIds(Iterable<String> tabIds) {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(db.tab.id.isIn(tabIds));
+
+    return query.map((row) => row.read(db.tab.id)!);
+  }
+
   Selectable<TabData> getTabsFifo({int limit = 25}) {
     return select(db.tab)
       ..limit(limit)
@@ -242,33 +251,72 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Future<void> updateTabs(
     Map<String, TabState>? previous,
     Map<String, TabState> next,
-  ) async {
-    await batch((batch) {
+  ) {
+    return db.transaction(() async {
+      // Collect parent IDs that need database validation
+      final parentIdsToValidate = <String>{};
+      final validatedParentIds = <String, String?>{};
+
       for (final state in next.values) {
         final previousState = previous?[state.id];
 
-        if (previousState == null ||
-            previousState.url != state.url ||
-            previousState.title != state.title) {
-          batch.update(
-            db.tab,
-            TabCompanion(
-              parentId: (previousState?.parentId != state.parentId)
-                  ? Value(
-                      next.containsKey(state.parentId) ? state.parentId : null,
-                    )
-                  : const Value.absent(),
-              url: (previousState?.url != state.url)
-                  ? Value(state.url)
-                  : const Value.absent(),
-              title: (previousState?.title != state.title)
-                  ? Value(state.title)
-                  : const Value.absent(),
-            ),
-            where: (t) => t.id.equals(state.id),
-          );
+        if (previousState?.parentId != state.parentId && state.parentId != null) {
+          if (next.containsKey(state.parentId)) {
+            // Parent exists in current state
+            validatedParentIds[state.id] = state.parentId;
+          } else {
+            // Need to validate against database
+            parentIdsToValidate.add(state.parentId!);
+          }
         }
       }
+
+      // Batch validate parent IDs that aren't in the current state
+      final existingParentIds =
+          await getExistingTabIds(parentIdsToValidate).get().then((ids) => ids.toSet());
+
+      // Complete validation map
+      for (final state in next.values) {
+        final previousState = previous?[state.id];
+
+        if (previousState?.parentId != state.parentId) {
+          if (!validatedParentIds.containsKey(state.id)) {
+            // This parent ID needed database validation
+            if (state.parentId != null && existingParentIds.contains(state.parentId)) {
+              validatedParentIds[state.id] = state.parentId;
+            } else {
+              validatedParentIds[state.id] = null;
+            }
+          }
+        }
+      }
+
+      await batch((batch) {
+        for (final state in next.values) {
+          final previousState = previous?[state.id];
+
+          if (previousState == null ||
+              previousState.url != state.url ||
+              previousState.title != state.title ||
+              previousState.parentId != state.parentId) {
+            batch.update(
+              db.tab,
+              TabCompanion(
+                parentId: validatedParentIds.containsKey(state.id)
+                    ? Value(validatedParentIds[state.id])
+                    : const Value.absent(),
+                url: (previousState?.url != state.url)
+                    ? Value(state.url)
+                    : const Value.absent(),
+                title: (previousState?.title != state.title)
+                    ? Value(state.title)
+                    : const Value.absent(),
+              ),
+              where: (t) => t.id.equals(state.id),
+            );
+          }
+        }
+      });
     });
   }
 
