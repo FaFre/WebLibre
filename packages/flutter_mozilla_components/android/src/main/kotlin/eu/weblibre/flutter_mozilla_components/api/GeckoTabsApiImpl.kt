@@ -115,7 +115,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
     }
 
     private fun mapRestoreLocation(location: PigeonRestoreLocation): TabListAction.RestoreAction.RestoreLocation {
-        return when(location) {
+        return when (location) {
             RestoreLocation.BEGINNING -> TabListAction.RestoreAction.RestoreLocation.BEGINNING
             RestoreLocation.END -> TabListAction.RestoreAction.RestoreLocation.END
             RestoreLocation.AT_INDEX -> TabListAction.RestoreAction.RestoreLocation.AT_INDEX
@@ -156,7 +156,11 @@ class GeckoTabsApiImpl : GeckoTabsApi {
             bitmap?.let {
                 val bytes = it.toWebPBytes()
                 withContext(Dispatchers.Main) {
-                    components.flutterEvents.onThumbnailChange(System.currentTimeMillis(), tab.id, bytes) { }
+                    components.flutterEvents.onThumbnailChange(
+                        System.currentTimeMillis(),
+                        tab.id,
+                        bytes
+                    ) { }
                 }
             }
         } catch (e: Exception) {
@@ -180,11 +184,16 @@ class GeckoTabsApiImpl : GeckoTabsApi {
             val selectedTab = components.core.store.state.selectedTabId
 
             if (onSelectedTabChange) {
-                components.flutterEvents.onSelectedTabChange(System.currentTimeMillis(), selectedTab) { }
+                components.flutterEvents.onSelectedTabChange(
+                    System.currentTimeMillis(),
+                    selectedTab
+                ) { }
             }
 
             if (onTabListChange) {
-                components.flutterEvents.onTabListChange(System.currentTimeMillis(), tabs.map { it.id }) { }
+                components.flutterEvents.onTabListChange(
+                    System.currentTimeMillis(),
+                    tabs.map { it.id }) { }
             }
 
             tabs.forEach { tab ->
@@ -529,7 +538,8 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     private = params.private,
                     source = restoreSource(params.source),
                     contextId = params.contextId,
-                    parent = params.parentId?.let { components.core.store.state.findTab(it) },
+                    //ParentId currently not supported for multiple tabs
+                    //parent = params.parentId?.let { components.core.store.state.findTab(it) },
                     historyMetadata = params.historyMetadata?.let { metadata ->
                         HistoryMetadataKey(
                             url = metadata.url,
