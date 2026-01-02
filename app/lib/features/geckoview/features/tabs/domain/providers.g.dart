@@ -671,6 +671,82 @@ final class WatchContainerTabIdFamily extends $Family
   String toString() => r'watchContainerTabIdProvider';
 }
 
+@ProviderFor(watchTabContainerData)
+final watchTabContainerDataProvider = WatchTabContainerDataFamily._();
+
+final class WatchTabContainerDataProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ContainerData?>,
+          ContainerData?,
+          Stream<ContainerData?>
+        >
+    with $FutureModifier<ContainerData?>, $StreamProvider<ContainerData?> {
+  WatchTabContainerDataProvider._({
+    required WatchTabContainerDataFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchTabContainerDataProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchTabContainerDataHash();
+
+  @override
+  String toString() {
+    return r'watchTabContainerDataProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<ContainerData?> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<ContainerData?> create(Ref ref) {
+    final argument = this.argument as String?;
+    return watchTabContainerData(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchTabContainerDataProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchTabContainerDataHash() =>
+    r'7fe7d139555f6bbf3165ac67a3641bec9b1af966';
+
+final class WatchTabContainerDataFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<ContainerData?>, String?> {
+  WatchTabContainerDataFamily._()
+    : super(
+        retry: null,
+        name: r'watchTabContainerDataProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WatchTabContainerDataProvider call(String? tabId) =>
+      WatchTabContainerDataProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'watchTabContainerDataProvider';
+}
+
 @ProviderFor(watchTabsContainerId)
 final watchTabsContainerIdProvider = WatchTabsContainerIdFamily._();
 

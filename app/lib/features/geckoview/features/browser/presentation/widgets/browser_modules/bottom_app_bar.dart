@@ -48,7 +48,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -184,7 +184,9 @@ class BrowserTabBar extends HookConsumerWidget {
     final selectedTabId = ref.watch(selectedTabProvider);
 
     final containerColor = ref.watch(
-      selectedContainerDataProvider.select((data) => data.value?.color),
+      watchTabContainerDataProvider(
+        selectedTabId,
+      ).select((data) => data.value?.color),
     );
 
     final showExtensionShortcut = ref.watch(

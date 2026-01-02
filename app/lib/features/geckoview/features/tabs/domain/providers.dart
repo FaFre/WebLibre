@@ -131,6 +131,16 @@ Stream<String?> watchContainerTabId(Ref ref, String tabId) {
 }
 
 @Riverpod()
+Stream<ContainerData?> watchTabContainerData(Ref ref, String? tabId) {
+  if (tabId == null) {
+    return const Stream.empty();
+  }
+
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getTabContainerData(tabId).watchSingleOrNull();
+}
+
+@Riverpod()
 Stream<Map<String, String?>> watchTabsContainerId(
   Ref ref,
   EquatableValue<List<String>> tabIds,

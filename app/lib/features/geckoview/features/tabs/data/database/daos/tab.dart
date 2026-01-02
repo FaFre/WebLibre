@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 
 @DriftAccessor()
@@ -72,6 +73,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       ..where(db.tab.id.equals(tabId));
 
     return query.map((row) => row.read(db.tab.containerId));
+  }
+
+  SingleOrNullSelectable<ContainerData?> getTabContainerData(String tabId) {
+    final query = select(db.tab).join([
+      innerJoin(db.container, db.container.id.equalsExp(db.tab.containerId)),
+    ])..where(db.tab.id.equals(tabId));
+
+    return query.map((row) => row.readTableOrNull(db.container));
   }
 
   Selectable<MapEntry<String, String?>> getTabsContainerId(
