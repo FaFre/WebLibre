@@ -145,7 +145,8 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                         style: switch (generalSettings.defaultCreateTabType) {
                           TabType.regular => null,
                           TabType.private => SegmentedButton.styleFrom(
-                            selectedBackgroundColor: AppColors.privateSelectionOverlay,
+                            selectedBackgroundColor:
+                                AppColors.privateSelectionOverlay,
                           ),
                           TabType.child => null,
                         },
@@ -206,7 +207,8 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                           TabIntentOpenSetting.regular => null,
                           TabIntentOpenSetting.private =>
                             SegmentedButton.styleFrom(
-                              selectedBackgroundColor: AppColors.privateSelectionOverlay,
+                              selectedBackgroundColor:
+                                  AppColors.privateSelectionOverlay,
                             ),
                           TabIntentOpenSetting.ask => null,
                         },

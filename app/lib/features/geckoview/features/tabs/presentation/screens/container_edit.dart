@@ -169,7 +169,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                             width: 24,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: ContainerColors.preview(selectedColor.value),
+                              color: ContainerColors.preview(
+                                selectedColor.value,
+                              ),
                             ),
                           ),
                         ),

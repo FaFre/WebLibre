@@ -48,7 +48,10 @@ class TorNotification extends HookConsumerWidget {
                   duration: const Duration(milliseconds: 500),
                   primaryEnd: Alignment.bottomLeft,
                   secondaryEnd: Alignment.topRight,
-                  primaryColors: const [AppColors.torActiveGreen, AppColors.torActiveGreen],
+                  primaryColors: const [
+                    AppColors.torActiveGreen,
+                    AppColors.torActiveGreen,
+                  ],
                   secondaryColors: const [Colors.white, Colors.white],
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12),

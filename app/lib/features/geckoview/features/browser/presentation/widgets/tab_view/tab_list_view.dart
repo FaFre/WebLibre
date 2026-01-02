@@ -418,7 +418,9 @@ class ViewTabListWidget extends HookConsumerWidget {
                 ),
                 child: FloatingActionButton.small(
                   onPressed: () async {
-                    final settings = ref.read(generalSettingsWithDefaultsProvider);
+                    final settings = ref.read(
+                      generalSettingsWithDefaultsProvider,
+                    );
 
                     await SearchRoute(
                       tabType:

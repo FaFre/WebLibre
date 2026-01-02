@@ -255,7 +255,10 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                         blurRadius: 10,
                                       )
                                     else
-                                      BoxShadow(color: displayColor, blurRadius: 10),
+                                      BoxShadow(
+                                        color: displayColor,
+                                        blurRadius: 10,
+                                      ),
                                   ]
                                 : null,
                             border:
@@ -277,7 +280,10 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           Text(
                                             '  ${colors.values.first}',
                                             style: TextStyle(
-                                              color: useWhiteForeground(displayColor)
+                                              color:
+                                                  useWhiteForeground(
+                                                    displayColor,
+                                                  )
                                                   ? Colors.white
                                                   : Colors.black,
                                             ),
@@ -289,7 +295,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                                 '#${color.toString().replaceFirst('Color(0xff', '').replaceFirst(')', '').toUpperCase()}  ',
                                                 style: TextStyle(
                                                   color:
-                                                      useWhiteForeground(displayColor)
+                                                      useWhiteForeground(
+                                                        displayColor,
+                                                      )
                                                       ? Colors.white
                                                       : Colors.black,
                                                   fontWeight: FontWeight.bold,
@@ -314,7 +322,10 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                           child: Text(
                                             colors.values.first,
                                             style: TextStyle(
-                                              color: useWhiteForeground(displayColor)
+                                              color:
+                                                  useWhiteForeground(
+                                                    displayColor,
+                                                  )
                                                   ? Colors.white
                                                   : Colors.black,
                                               fontWeight: FontWeight.bold,

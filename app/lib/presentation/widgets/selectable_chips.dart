@@ -135,7 +135,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
             }
 
             final item = items[index - prefixListItems.length];
-            final isSelected = selectedItem != null &&
+            final isSelected =
+                selectedItem != null &&
                 itemId(item) == itemId(selectedItem as S);
             final child = Padding(
               padding: const EdgeInsets.only(right: 8.0, top: 4.0),
@@ -166,10 +167,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                     tooltip: itemTooltip?.call(item),
                     backgroundColor: itemBackgroundColor?.call(item),
                     side: isSelected && selectedBorderColor != null
-                        ? BorderSide(
-                            color: selectedBorderColor!,
-                            width: 2.0,
-                          )
+                        ? BorderSide(color: selectedBorderColor!, width: 2.0)
                         : null,
                   ),
                 ),

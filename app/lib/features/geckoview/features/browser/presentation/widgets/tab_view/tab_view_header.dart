@@ -379,7 +379,8 @@ class TabViewHeader extends HookConsumerWidget {
                                         );
 
                                     if (result?.confirmed == true) {
-                                      final shouldReopenTabs = result!.reopenTabs;
+                                      final shouldReopenTabs =
+                                          result!.reopenTabs;
 
                                       try {
                                         final closedTabIds = await ref
@@ -415,7 +416,8 @@ class TabViewHeader extends HookConsumerWidget {
                                                     parentId = tabs
                                                         .firstWhereOrNull(
                                                           (old) =>
-                                                              old.id == parentId,
+                                                              old.id ==
+                                                              parentId,
                                                         )
                                                         ?.parentId;
                                                   }

@@ -57,10 +57,7 @@ class ContainerColors {
   /// [baseColor] The stored container color (typically full opacity)
   /// [surface] The surface color to blend with (typically from theme)
   static Color forSurface(Color baseColor, Color surface) {
-    return Color.alphaBlend(
-      baseColor.withValues(alpha: defaultAlpha),
-      surface,
-    );
+    return Color.alphaBlend(baseColor.withValues(alpha: defaultAlpha), surface);
   }
 
   /// Returns the preview color showing how the color will appear in the UI.
