@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.sample
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.feature.addons.logger
@@ -67,7 +66,7 @@ class Events(
                     it.content
                 }
                 .ifAnyChanged { arrayOf(it.content.icon) }
-                .sample(50)
+                .debounce(15)
                 .collect { tab ->
                     val iconBytes = tab.content.icon?.toWebPBytes()
                     flutterEvents.onIconChange(
@@ -83,7 +82,7 @@ class Events(
                 .filterChanged {
                     it.content.securityInfo
                 }
-                .sample(50)
+                .debounce(15)
                 .collect { tab ->
                     flutterEvents.onSecurityInfoStateChange(
                         System.currentTimeMillis(),
@@ -108,7 +107,7 @@ class Events(
                         it.readerState.active,
                     )
                 }
-                .sample(50)
+                .debounce(25)
                 .collect { tab ->
                     flutterEvents.onReaderableStateChange(
                         System.currentTimeMillis(),
@@ -133,7 +132,7 @@ class Events(
                         it.content.canGoForward,
                     )
                 }
-                .sample(50)
+                .debounce(15)
                 .collect { tab ->
                     flutterEvents.onHistoryStateChange(
                         System.currentTimeMillis(),
@@ -168,7 +167,7 @@ class Events(
                         it.content.loading
                     )
                 }
-                .sample(50)
+                .debounce(15)
                 .collect { tab ->
                     flutterEvents.onTabContentStateChange(
                         System.currentTimeMillis(),
