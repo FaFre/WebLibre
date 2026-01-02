@@ -191,12 +191,18 @@ class EngineReadyState extends _$EngineReadyState {
                 return true;
               },
             )
-            .whenComplete(() => state = true),
+            .whenComplete(() {
+              if (ref.mounted) {
+                state = true;
+              }
+            }),
       );
     }
 
     final sub = eventService.engineReadyStateEvents.listen((value) {
-      state = value;
+      if (ref.mounted) {
+        state = value;
+      }
     });
 
     ref.onDispose(() async {
@@ -223,6 +229,8 @@ class MlDownloadState extends _$MlDownloadState {
   MlProgressData? build() {
     ref.listen(mlProgressEventsProvider, (previous, next) {
       next.whenData((progress) {
+        if (!ref.mounted) return;
+
         if (progress.type == MlProgressType.downloading) {
           if (progress.status == MlProgressStatus.done) {
             // Keep showing for 2 seconds after completion

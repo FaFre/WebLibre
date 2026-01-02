@@ -71,7 +71,9 @@ class SelectedBangData extends _$SelectedBangData {
     final subscription = repository.watchBang(selectedBangTrigger).listen((
       value,
     ) {
-      state = value;
+      if (ref.mounted) {
+        state = value;
+      }
     });
 
     ref.onDispose(() async {

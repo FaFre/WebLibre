@@ -156,7 +156,7 @@ final class SelectedBangDataProvider
   }
 }
 
-String _$selectedBangDataHash() => r'666858556efe59d2de38a04fda30e8ec227c6675';
+String _$selectedBangDataHash() => r'68bdd0d203cc47a0d26904ecb30651b58aa19486';
 
 final class SelectedBangDataFamily extends $Family
     with

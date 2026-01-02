@@ -278,7 +278,7 @@ final class EngineReadyStateProvider
   }
 }
 
-String _$engineReadyStateHash() => r'a892c48ffc29e3414de12e66d9bfec522e4f40a8';
+String _$engineReadyStateHash() => r'ab3fe385fbda4d7d8acaf8f5428b3b48b75f3f46';
 
 abstract class _$EngineReadyState extends $Notifier<bool> {
   bool build();
@@ -378,7 +378,7 @@ final class MlDownloadStateProvider
   }
 }
 
-String _$mlDownloadStateHash() => r'a6e2612770878a9fc5ca6800665698c6335a047e';
+String _$mlDownloadStateHash() => r'4b943f0a950bf63c9a1b628d4104fdd6fa0d8d07';
 
 /// Tracks active ML model downloads
 

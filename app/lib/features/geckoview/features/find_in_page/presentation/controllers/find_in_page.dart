@@ -72,6 +72,7 @@ class FindInPageController extends _$FindInPageController {
       fireImmediately: true,
       tabStateProvider(tabId),
       (previous, next) async {
+        if (!ref.mounted) return;
         //Ensure state is already initialized
         if (stateOrNull != null) {
           if (state.visible && state.lastSearchText.isNotEmpty) {

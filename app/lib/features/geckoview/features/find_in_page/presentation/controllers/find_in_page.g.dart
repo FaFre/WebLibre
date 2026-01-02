@@ -59,7 +59,7 @@ final class FindInPageControllerProvider
 }
 
 String _$findInPageControllerHash() =>
-    r'85e6b69edcd66a961d51326b01336a969d37fac1';
+    r'4aaa0c4b4a623e7274836e70e5f66e97a3ebf80a';
 
 final class FindInPageControllerFamily extends $Family
     with
