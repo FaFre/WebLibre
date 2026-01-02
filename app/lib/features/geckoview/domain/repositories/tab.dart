@@ -140,7 +140,7 @@ class TabRepository extends _$TabRepository {
   Future<String> duplicateTab({
     required String selectTabId,
     required String? containerId,
-    bool selectTab = false,
+    required bool selectTab,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 

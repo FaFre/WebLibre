@@ -209,6 +209,7 @@ class TabMenu extends HookConsumerWidget {
                             .duplicateTab(
                               selectTabId: selectedTabId,
                               containerId: tabState.contextId,
+                              selectTab: false,
                             );
 
                   if (context.mounted) {
@@ -243,6 +244,7 @@ class TabMenu extends HookConsumerWidget {
                             .duplicateTab(
                               selectTabId: selectedTabId,
                               containerId: tabState.contextId,
+                              selectTab: false,
                             );
 
                   if (context.mounted) {

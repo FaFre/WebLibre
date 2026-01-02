@@ -20,6 +20,7 @@
 import 'package:drift/drift.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
@@ -37,6 +38,7 @@ class TabDataRepository extends _$TabDataRepository {
     bool closeOldTab = true,
   }) async {
     final currentContainerId = await getTabContainerId(tabId);
+    final selectedTabId = ref.read(selectedTabProvider);
 
     final currentContainerData = await currentContainerId.mapNotNull(
       (containerId) => ref
@@ -64,7 +66,7 @@ class TabDataRepository extends _$TabDataRepository {
               private: tabState.isPrivate,
               container: Value(targetContainer),
               parentId: tabState.parentId,
-              selectTab: false,
+              selectTab: selectedTabId == tabState.id,
             );
       }
     }
@@ -72,6 +74,7 @@ class TabDataRepository extends _$TabDataRepository {
 
   Future<void> unassignContainer(String tabId) async {
     final currentContainerId = await getTabContainerId(tabId);
+    final selectedTabId = ref.read(selectedTabProvider);
 
     final currentContainerData = await currentContainerId.mapNotNull(
       (containerId) => ref
@@ -96,7 +99,7 @@ class TabDataRepository extends _$TabDataRepository {
               private: tabState.isPrivate,
               container: const Value(null),
               parentId: tabState.parentId,
-              selectTab: false,
+              selectTab: selectedTabId == tabState.id,
             );
       }
     }
