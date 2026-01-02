@@ -179,7 +179,7 @@ class _TabBar extends HookConsumerWidget {
           }
 
           diffAcc.value += diff;
-          if (diffAcc.value.abs() > (kToolbarHeight / 2)) {
+          if (diffAcc.value.abs() > kToolbarHeight) {
             resetHiddenState();
           }
         }
