@@ -378,7 +378,9 @@ class TabViewHeader extends HookConsumerWidget {
                                           tabs.length,
                                         );
 
-                                    if (result == true) {
+                                    if (result?.confirmed == true) {
+                                      final shouldReopenTabs = result!.reopenTabs;
+
                                       try {
                                         final closedTabIds = await ref
                                             .read(
@@ -398,52 +400,56 @@ class TabViewHeader extends HookConsumerWidget {
                                                   .contextualIdentity!,
                                             );
 
-                                        await ref
-                                            .read(
-                                              tabRepositoryProvider.notifier,
-                                            )
-                                            .addMultipleTabs(
-                                              tabs: tabs.map((tab) {
-                                                var parentId = tab.parentId;
-                                                while (parentId != null &&
-                                                    closedTabIds.contains(
-                                                      parentId,
-                                                    )) {
-                                                  parentId = tabs
-                                                      .firstWhereOrNull(
-                                                        (old) =>
-                                                            old.id == parentId,
-                                                      )
-                                                      ?.parentId;
-                                                }
+                                        if (shouldReopenTabs) {
+                                          await ref
+                                              .read(
+                                                tabRepositoryProvider.notifier,
+                                              )
+                                              .addMultipleTabs(
+                                                tabs: tabs.map((tab) {
+                                                  var parentId = tab.parentId;
+                                                  while (parentId != null &&
+                                                      closedTabIds.contains(
+                                                        parentId,
+                                                      )) {
+                                                    parentId = tabs
+                                                        .firstWhereOrNull(
+                                                          (old) =>
+                                                              old.id == parentId,
+                                                        )
+                                                        ?.parentId;
+                                                  }
 
-                                                return AddTabParams(
-                                                  url: tab.url.toString(),
-                                                  startLoading: true,
-                                                  parentId: parentId,
-                                                  private:
-                                                      tab.isPrivate ?? false,
-                                                  flags: LoadUrlFlags.NONE
-                                                      .toValue(),
-                                                  source: Internal.newTab
-                                                      .toValue(),
-                                                  contextId: selectedContainer
-                                                      .metadata
-                                                      .contextualIdentity,
-                                                );
-                                              }).toList(),
-                                              container: Value(
-                                                selectedContainer,
-                                              ),
-                                            );
+                                                  return AddTabParams(
+                                                    url: tab.url.toString(),
+                                                    startLoading: true,
+                                                    parentId: parentId,
+                                                    private:
+                                                        tab.isPrivate ?? false,
+                                                    flags: LoadUrlFlags.NONE
+                                                        .toValue(),
+                                                    source: Internal.newTab
+                                                        .toValue(),
+                                                    contextId: selectedContainer
+                                                        .metadata
+                                                        .contextualIdentity,
+                                                  );
+                                                }).toList(),
+                                                container: Value(
+                                                  selectedContainer,
+                                                ),
+                                              );
+                                        }
 
                                         if (context.mounted) {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
-                                                'Container data cleared successfully',
+                                                shouldReopenTabs
+                                                    ? 'Container data cleared successfully'
+                                                    : 'Container data cleared. ${tabs.length} tab(s) closed.',
                                               ),
                                             ),
                                           );
