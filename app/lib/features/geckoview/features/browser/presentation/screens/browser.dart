@@ -186,23 +186,28 @@ class _TabBar extends HookConsumerWidget {
       },
     );
 
-    return Visibility(
-      visible:
-          sheetController.value != null || (!tabInFullScreen && appBarVisible),
-      maintainState: true,
-      child: switch (tabBarPosition) {
-        TabBarPosition.top => BrowserTopAppBar(
-          showMainToolbar: showMainToolbar,
-          showContextualToolbar: showContextualToolbar,
-          showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-        ),
-        TabBarPosition.bottom => BrowserBottomAppBar(
-          showMainToolbar: showMainToolbar,
-          displayedSheet: displayedSheet,
-          showContextualToolbar: showContextualToolbar,
-          showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-        ),
-      },
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 125),
+      curve: Curves.easeInOut,
+      child: Visibility(
+        visible:
+            sheetController.value != null ||
+            (!tabInFullScreen && appBarVisible),
+        maintainState: true,
+        child: switch (tabBarPosition) {
+          TabBarPosition.top => BrowserTopAppBar(
+            showMainToolbar: showMainToolbar,
+            showContextualToolbar: showContextualToolbar,
+            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+          ),
+          TabBarPosition.bottom => BrowserBottomAppBar(
+            showMainToolbar: showMainToolbar,
+            displayedSheet: displayedSheet,
+            showContextualToolbar: showContextualToolbar,
+            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+          ),
+        },
+      ),
     );
   }
 }

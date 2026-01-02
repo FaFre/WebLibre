@@ -68,6 +68,7 @@ class BrowserFab extends HookConsumerWidget {
     }
 
     return AnimatedSwitcher(
+      key: child.key,
       duration: const Duration(milliseconds: 200),
       transitionBuilder: (child, animation) {
         return ScaleTransition(scale: animation, child: child);
