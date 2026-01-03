@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values, avoid_dynamic_calls
+
 /*
  * Copyright (c) 2024-2025 Fabian Freund.
  *
@@ -108,10 +110,7 @@ void main() {
 
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
 
-      await utils.importFromJSON(
-        jsonEncode(jsonData),
-        replace: true,
-      );
+      await utils.importFromJSON(jsonEncode(jsonData), replace: true);
 
       verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
     });
@@ -150,8 +149,9 @@ void main() {
         ],
       };
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark1___');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark1___');
 
       final count = await utils.importFromJSON(jsonEncode(jsonData));
 
@@ -184,8 +184,9 @@ void main() {
         ],
       };
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark1___');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark1___');
 
       final count = await utils.importFromJSON(jsonEncode(jsonData));
 
@@ -224,8 +225,9 @@ void main() {
         ],
       };
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'valid1______');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'valid1______');
 
       final count = await utils.importFromJSON(jsonEncode(jsonData));
 
@@ -267,10 +269,12 @@ void main() {
         ],
       };
 
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'folder1_____');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark1___');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'folder1_____');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark1___');
 
       final count = await utils.importFromJSON(jsonEncode(jsonData));
 
@@ -299,10 +303,7 @@ void main() {
                 'type': 'text/x-moz-place',
                 'uri': 'https://example.com/1',
               },
-              {
-                'guid': 'separator___',
-                'type': 'text/x-moz-place-separator',
-              },
+              {'guid': 'separator___', 'type': 'text/x-moz-place-separator'},
               {
                 'guid': 'bookmark2___',
                 'title': 'Second Bookmark',
@@ -314,8 +315,9 @@ void main() {
         ],
       };
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((invocation) async => 'generated_guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((invocation) async => 'generated_guid');
 
       final count = await utils.importFromJSON(jsonEncode(jsonData));
 
@@ -350,10 +352,12 @@ void main() {
         ],
       };
 
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'folder1_____');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'shortcut1___');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'folder1_____');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'shortcut1___');
 
       await utils.importFromJSON(jsonEncode(jsonData));
 
@@ -384,8 +388,9 @@ void main() {
         ],
       };
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'shortcut1___');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'shortcut1___');
 
       await utils.importFromJSON(jsonEncode(jsonData));
 
@@ -410,10 +415,12 @@ void main() {
 
       // Mock the service calls
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((invocation) async => 'generated_guid');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((invocation) async => 'generated_guid');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((invocation) async => 'generated_guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((invocation) async => 'generated_guid');
 
       final count = await utils.importFromJSON(jsonString, replace: true);
 
@@ -440,8 +447,9 @@ void main() {
         ],
       };
 
-      when(mockService.addItem(any, any, any, any))
-          .thenThrow(Exception('Database error'));
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenThrow(Exception('Database error'));
 
       // Should not throw, but should log and continue
       final count = await utils.importFromJSON(jsonEncode(jsonData));
@@ -475,8 +483,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final result = await utils.exportToJson(root: BookmarkRoot.menu);
 
@@ -529,8 +538,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final result = await utils.exportToJson(root: BookmarkRoot.menu);
 
@@ -565,8 +575,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final result = await utils.exportToJson(root: BookmarkRoot.menu);
 
@@ -600,8 +611,9 @@ void main() {
           children: [],
         );
 
-        when(mockService.getTree(testCase.$1.id, recursive: true))
-            .thenAnswer((_) async => mockNode);
+        when(
+          mockService.getTree(testCase.$1.id, recursive: true),
+        ).thenAnswer((_) async => mockNode);
 
         final result = await utils.exportToJson(root: testCase.$1);
 
@@ -654,8 +666,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final result = await utils.exportToJson(root: BookmarkRoot.menu);
 
@@ -667,9 +680,10 @@ void main() {
       expect(children[2]['index'], equals(2));
     });
 
-    test('should throw when tree cannot be fetched', () async {
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => null);
+    test('should throw when tree cannot be fetched', () {
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => null);
 
       expect(
         () => utils.exportToJson(root: BookmarkRoot.menu),
@@ -701,8 +715,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final result = await utils.exportToJson(root: BookmarkRoot.menu);
 
@@ -752,8 +767,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       // Export
       final exported = await utils.exportToJson(root: BookmarkRoot.menu);
@@ -761,12 +777,16 @@ void main() {
 
       // Re-import
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'folder1_____');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark1___');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'folder1_____');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark1___');
 
-      final jsonString = jsonEncode({'children': [exported]});
+      final jsonString = jsonEncode({
+        'children': [exported],
+      });
       final count = await utils.importFromJSON(jsonString, replace: true);
 
       expect(count, equals(1)); // One bookmark imported

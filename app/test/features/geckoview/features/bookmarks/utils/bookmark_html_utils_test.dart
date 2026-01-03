@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 /*
  * Copyright (c) 2024-2025 Fabian Freund.
  *
@@ -41,16 +43,19 @@ void main() {
   group('BookmarkHTMLUtils - Import', () {
     test('should handle corrupt HTML file with malformed URIs', () async {
       // Load the corrupt fixture
-      final fixtureFile =
-          File('test/utils/bookmarks/fixtures/bookmarks.corrupt.html');
+      final fixtureFile = File(
+        'test/utils/bookmarks/fixtures/bookmarks.corrupt.html',
+      );
       final htmlString = await fixtureFile.readAsString();
 
       // Mock the service calls
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'generated_guid');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'generated_guid');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'generated_guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'generated_guid');
 
       final count = await utils.importFromHTML(htmlString, replace: true);
 
@@ -60,15 +65,18 @@ void main() {
     });
 
     test('should import from valid HTML file', () async {
-      final fixtureFile =
-          File('test/utils/bookmarks/fixtures/bookmarks.preplaces.html');
+      final fixtureFile = File(
+        'test/utils/bookmarks/fixtures/bookmarks.preplaces.html',
+      );
       final htmlString = await fixtureFile.readAsString();
 
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'folder_guid');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark_guid');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'folder_guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark_guid');
 
       final count = await utils.importFromHTML(htmlString, replace: true);
 
@@ -105,8 +113,9 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       await utils.importFromHTML(simpleHtml);
 
@@ -123,8 +132,9 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       final count = await utils.importFromHTML(htmlWithSpecialChars);
 
@@ -146,8 +156,9 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       final count = await utils.importFromHTML(htmlWithDates);
 
@@ -171,10 +182,12 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'folder_guid');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark_guid');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'folder_guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark_guid');
 
       final count = await utils.importFromHTML(htmlWithFolders);
 
@@ -196,8 +209,9 @@ void main() {
       ''';
 
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       await utils.importFromHTML(htmlWithToolbar, replace: true);
 
@@ -222,8 +236,9 @@ void main() {
       ''';
 
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       await utils.importFromHTML(htmlWithUnfiled, replace: true);
 
@@ -245,8 +260,9 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       final count = await utils.importFromHTML(htmlWithSeparator);
 
@@ -265,8 +281,9 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       final count = await utils.importFromHTML(htmlWithoutUrl);
 
@@ -284,8 +301,9 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'guid');
 
       final count = await utils.importFromHTML(htmlWithInvalidUrl);
 
@@ -293,14 +311,17 @@ void main() {
     });
 
     test('should handle single frame HTML', () async {
-      final fixtureFile =
-          File('test/utils/bookmarks/fixtures/bookmarks_html_singleframe.html');
+      final fixtureFile = File(
+        'test/utils/bookmarks/fixtures/bookmarks_html_singleframe.html',
+      );
       final htmlString = await fixtureFile.readAsString();
 
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'folder_guid');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark_guid');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'folder_guid');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark_guid');
 
       final count = await utils.importFromHTML(htmlString);
 
@@ -333,8 +354,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -368,8 +390,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -402,8 +425,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -424,8 +448,9 @@ void main() {
         children: [],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.toolbar);
 
@@ -447,8 +472,9 @@ void main() {
         children: [],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.unfiled);
 
@@ -501,8 +527,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -543,8 +570,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -590,8 +618,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -601,9 +630,10 @@ void main() {
       expect(html, contains('</H3>'));
     });
 
-    test('should throw when tree cannot be fetched', () async {
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => null);
+    test('should throw when tree cannot be fetched', () {
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => null);
 
       expect(
         () => utils.exportToHTML(root: BookmarkRoot.menu),
@@ -624,8 +654,9 @@ void main() {
         children: [],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -659,8 +690,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
 
@@ -708,8 +740,9 @@ void main() {
         ],
       );
 
-      when(mockService.getTree(any, recursive: true))
-          .thenAnswer((_) async => mockNode);
+      when(
+        mockService.getTree(any, recursive: true),
+      ).thenAnswer((_) async => mockNode);
 
       // Export
       final html = await utils.exportToHTML(root: BookmarkRoot.menu);
@@ -717,10 +750,12 @@ void main() {
 
       // Re-import
       when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(mockService.addFolder(any, any, any))
-          .thenAnswer((_) async => 'folder1_____');
-      when(mockService.addItem(any, any, any, any))
-          .thenAnswer((_) async => 'bookmark1___');
+      when(
+        mockService.addFolder(any, any, any),
+      ).thenAnswer((_) async => 'folder1_____');
+      when(
+        mockService.addItem(any, any, any, any),
+      ).thenAnswer((_) async => 'bookmark1___');
 
       final count = await utils.importFromHTML(html, replace: true);
 

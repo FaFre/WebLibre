@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:weblibre/core/logger.dart';
 
 class BookmarkJSONUtils {
   final GeckoBookmarksService _service;
@@ -24,7 +25,7 @@ class BookmarkJSONUtils {
 
       return await _import(data, replace: replace);
     } catch (ex) {
-      print('Failed to import bookmarks: $ex');
+      logger.e('Failed to import bookmarks: $ex');
       rethrow;
     }
   }
@@ -130,10 +131,10 @@ class BookmarkJSONUtils {
               await _service.addItem(parentGuid, uri, title, i);
               count++;
             } else {
-              print('Skipping invalid URL: $url');
+              logger.w('Skipping invalid URL: $url');
             }
           } catch (e) {
-            print('Failed to import bookmark "$title": $e');
+            logger.e('Failed to import bookmark "$title": $e');
           }
         }
       } else if (type == BookmarkNodeType.folder) {
@@ -145,7 +146,7 @@ class BookmarkJSONUtils {
           // Recursively insert children
           count += await _insertTree(child, folderIdToGuidMap);
         } catch (e) {
-          print('Failed to import folder "$title": $e');
+          logger.e('Failed to import folder "$title": $e');
         }
       }
       // Note: Separators are not supported by the Android API
@@ -237,13 +238,13 @@ class BookmarkJSONUtils {
     // Skip invalid bookmarks
     if (node.type == BookmarkNodeType.item) {
       if (node.url == null || node.url!.isEmpty) {
-        print('Skipping bookmark with invalid URL: ${node.guid}');
+        logger.w('Skipping bookmark with invalid URL: ${node.guid}');
         return null;
       }
       try {
         Uri.parse(node.url!);
       } catch (e) {
-        print('Skipping bookmark with malformed URL: ${node.url}');
+        logger.w('Skipping bookmark with malformed URL: ${node.url}');
         return null;
       }
     }

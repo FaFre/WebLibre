@@ -48,7 +48,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
     final treeKey = useMemoized(() => GlobalKey<TreeViewState>());
 
     final folderList = ref.watch(
-      bookmarksProvider<BookmarkFolder>(BookmarkRoot.mobile.id),
+      bookmarksProvider<BookmarkFolder>(BookmarkRoot.root.id),
     );
 
     final nameTextController = useTextEditingController(
@@ -242,7 +242,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                         // ignore: unused_result
                         ref.refresh(
                           bookmarksProvider<BookmarkFolder>(
-                            BookmarkRoot.mobile.id,
+                            BookmarkRoot.root.id,
                           ),
                         );
                       },

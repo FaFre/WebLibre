@@ -18,8 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:animated_tree_view/animated_tree_view.dart';
+import 'package:convert/convert.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -29,11 +32,13 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class BookmarkListScreen extends HookConsumerWidget {
   final String entryGuid;
@@ -101,6 +106,38 @@ class BookmarkListScreen extends HookConsumerWidget {
                   });
                 },
               ),
+              SubmenuButton(
+                leadingIcon: const Icon(MdiIcons.import),
+                menuChildren: [
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.codeJson),
+                    child: const Text('JSON'),
+                    onPressed: () => _handleImport(context, ref, 'json'),
+                  ),
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.xml),
+                    child: const Text('HTML'),
+                    onPressed: () => _handleImport(context, ref, 'html'),
+                  ),
+                ],
+                child: const Text('Import'),
+              ),
+              SubmenuButton(
+                leadingIcon: const Icon(MdiIcons.export),
+                menuChildren: [
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.codeJson),
+                    child: const Text('JSON'),
+                    onPressed: () => _handleExport(context, ref, 'json'),
+                  ),
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.xml),
+                    child: const Text('HTML'),
+                    onPressed: () => _handleExport(context, ref, 'html'),
+                  ),
+                ],
+                child: const Text('Export'),
+              ),
             ],
             builder: (context, controller, child) => IconButton(
               onPressed: () {
@@ -148,6 +185,7 @@ class BookmarkListScreen extends HookConsumerWidget {
               return TreeView.simple(
                 key: treeKey,
                 tree: root,
+                showRootNode: entryGuid != BookmarkRoot.root.id,
                 onTreeReady: (controller) {
                   if (textFilterEnabled.value) {
                     controller.expandAllChildren(root, recursive: true);
@@ -298,5 +336,92 @@ class BookmarkListScreen extends HookConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleImport(
+    BuildContext context,
+    WidgetRef ref,
+    String format,
+  ) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: format == 'json' ? ['json'] : ['html', 'htm'],
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      if (file.path == null) {
+        if (context.mounted) {
+          showErrorMessage(context, 'Failed to read file');
+        }
+        return;
+      }
+
+      final content = await File(file.path!).readAsString();
+      final repository = ref.read(bookmarksRepositoryProvider.notifier);
+
+      final count = format == 'json'
+          ? await repository.importFromJSON(content)
+          : await repository.importFromHTML(content);
+
+      if (context.mounted) {
+        showInfoMessage(context, 'Imported $count bookmarks successfully');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showErrorMessage(context, 'Import failed: $e');
+      }
+    }
+  }
+
+  Future<void> _handleExport(
+    BuildContext context,
+    WidgetRef ref,
+    String format,
+  ) async {
+    try {
+      // Create the backup content first
+      final repository = ref.read(bookmarksRepositoryProvider.notifier);
+
+      String content;
+      if (format == 'json') {
+        final data = await repository.exportToJson(root: BookmarkRoot.root);
+        if (data == null) {
+          throw Exception('Failed to export bookmarks');
+        }
+        content = const JsonEncoder.withIndent('  ').convert(data);
+      } else {
+        content = await repository.exportToHTML(root: BookmarkRoot.root);
+      }
+
+      // Convert to bytes for the file picker
+      final bytes = utf8.encode(content);
+
+      // Now show the save dialog with the content ready
+      final dateFormatter = FixedDateTimeFormatter('YYYY-MM-DD_hhmmss');
+      final timestamp = dateFormatter.encode(DateTime.now());
+      final defaultFileName =
+          'bookmarks_$timestamp.${format == 'json' ? 'json' : 'html'}';
+
+      final outputPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Export Bookmarks',
+        fileName: defaultFileName,
+        type: FileType.custom,
+        allowedExtensions: format == 'json' ? ['json'] : ['html', 'htm'],
+        bytes: bytes,
+      );
+
+      if (outputPath == null) return;
+
+      if (context.mounted) {
+        showInfoMessage(context, 'Bookmarks exported successfully');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showErrorMessage(context, 'Export failed: $e');
+      }
+    }
   }
 }

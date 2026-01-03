@@ -1,6 +1,7 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
+import 'package:weblibre/core/logger.dart';
 
 const _containerNormal = 0;
 const _containerToolbar = 1;
@@ -426,7 +427,7 @@ class _BookmarkImporter {
               count++;
             }
           } catch (e) {
-            print('Failed to import bookmark "$title": $e');
+            logger.e('Failed to import bookmark "$title": $e');
           }
         }
       } else if (type == BookmarkNodeType.folder.index) {
@@ -436,7 +437,7 @@ class _BookmarkImporter {
           child['guid'] = newGuid;
           count += await _insertTree(child);
         } catch (e) {
-          print('Failed to import folder "$title": $e');
+          logger.e('Failed to import folder "$title": $e');
         }
       }
     }

@@ -21,12 +21,16 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
 
 part 'bookmarks.g.dart';
 
 @Riverpod(keepAlive: true)
 class BookmarksRepository extends _$BookmarksRepository {
   final _service = GeckoBookmarksService();
+  late final _jsonUtils = BookmarkJSONUtils(_service);
+  late final _htmlUtils = BookmarkHTMLUtils(_service);
 
   Future<void> addBookmark({
     required String parentGuid,
@@ -73,12 +77,31 @@ class BookmarksRepository extends _$BookmarksRepository {
     ref.invalidateSelf();
   }
 
+  Future<int> importFromJSON(String jsonString, {bool replace = false}) async {
+    final count = await _jsonUtils.importFromJSON(jsonString, replace: replace);
+    ref.invalidateSelf();
+    return count;
+  }
+
+  Future<int> importFromHTML(String htmlString, {bool replace = false}) async {
+    final count = await _htmlUtils.importFromHTML(htmlString, replace: replace);
+    ref.invalidateSelf();
+    return count;
+  }
+
+  Future<Map<String, dynamic>?> exportToJson({
+    required BookmarkRoot root,
+  }) async {
+    return await _jsonUtils.exportToJson(root: root);
+  }
+
+  Future<String> exportToHTML({required BookmarkRoot root}) async {
+    return await _htmlUtils.exportToHTML(root: root);
+  }
+
   @override
   Future<BookmarkItem?> build() async {
-    final node = await _service.getTree(
-      BookmarkRoot.mobile.id,
-      recursive: true,
-    );
+    final node = await _service.getTree(BookmarkRoot.root.id, recursive: true);
     return node.mapNotNull(BookmarkItem.parseRecursive);
   }
 }

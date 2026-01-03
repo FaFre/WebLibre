@@ -417,7 +417,7 @@ class ContextualToolbar extends HookConsumerWidget {
           IconButton(
             onPressed: () async {
               await BookmarkListRoute(
-                entryGuid: BookmarkRoot.mobile.id,
+                entryGuid: BookmarkRoot.root.id,
               ).push(context);
             },
             icon: const Icon(MdiIcons.bookmarkMultiple),
@@ -806,7 +806,7 @@ class NavigationMenuButton extends HookConsumerWidget {
         MenuItemButton(
           onPressed: () async {
             await BookmarkListRoute(
-              entryGuid: BookmarkRoot.mobile.id,
+              entryGuid: BookmarkRoot.root.id,
             ).push(context);
           },
           leadingIcon: const Icon(MdiIcons.bookmarkMultiple),
