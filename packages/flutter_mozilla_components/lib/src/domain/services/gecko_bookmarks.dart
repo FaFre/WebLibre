@@ -128,4 +128,23 @@ class GeckoBookmarksService {
   Future<bool> deleteNode(String guid) {
     return _api.deleteNode(guid);
   }
+
+  /// Removes ALL bookmarks from the specified root folder.
+  /// The root folder itself is preserved, only its children are removed.
+  Future<void> eraseEverything(BookmarkRoot root) async {
+    // Get all direct children of the root
+    final tree = await getTree(root.id);
+
+    // Delete each direct child (deleteNode cascades to all descendants)
+    if (tree?.children != null) {
+      for (final child in tree!.children!) {
+        // try {
+        await deleteNode(child.guid);
+        // } catch (e) {
+        //   // Log but continue with other children
+        //   logger.e('Failed to delete bookmark ${child.guid}: $e');
+        // }
+      }
+    }
+  }
 }

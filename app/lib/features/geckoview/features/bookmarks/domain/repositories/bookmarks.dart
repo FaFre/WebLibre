@@ -68,6 +68,11 @@ class BookmarksRepository extends _$BookmarksRepository {
     ref.invalidateSelf();
   }
 
+  Future<void> eraseEverything(BookmarkRoot root) async {
+    await _service.eraseEverything(root);
+    ref.invalidateSelf();
+  }
+
   @override
   Future<BookmarkItem?> build() async {
     final node = await _service.getTree(
