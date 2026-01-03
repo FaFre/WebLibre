@@ -40,7 +40,7 @@ class StartProxyController extends _$StartProxyController {
         final result = await showDialog<bool>(
           context: context,
           builder: (context) {
-            return TorDialog();
+            return const TorDialog();
           },
         );
 

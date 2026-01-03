@@ -284,7 +284,7 @@ class SelectProfileRoute extends GoRouteData with $SelectProfileRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(builder: (_) => SelectProfileDialog());
+    return DialogPage(builder: (_) => const SelectProfileDialog());
   }
 }
 

@@ -256,7 +256,7 @@ class BrowserTabBar extends HookConsumerWidget {
             Visibility(
               visible: displayQuickTabSwitcher,
               maintainState: true,
-              child: QuickTabSwitcher(),
+              child: const QuickTabSwitcher(),
             ),
           if (showMainToolbar)
             Visibility(
@@ -426,7 +426,7 @@ class ContextualToolbar extends HookConsumerWidget {
           NavigateForwardButton(selectedTabId: selectedTabId)
         else
           ShareMenuButton(selectedTabId: selectedTabId),
-        AddTabButton(),
+        const AddTabButton(),
         TabsCountButton(
           selectedTabId: selectedTabId,
           displayedSheet: displayedSheet,
@@ -442,6 +442,8 @@ class ContextualToolbar extends HookConsumerWidget {
 }
 
 class QuickTabSwitcher extends HookConsumerWidget {
+  const QuickTabSwitcher();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabStates = ref.watch(fifoTabStatesProvider);
@@ -962,6 +964,8 @@ class NavigateBackButton extends HookConsumerWidget {
 }
 
 class AddTabButton extends HookConsumerWidget {
+  const AddTabButton();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabMenuController = useMenuController();

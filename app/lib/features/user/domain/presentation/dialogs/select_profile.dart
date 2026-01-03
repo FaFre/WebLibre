@@ -28,6 +28,8 @@ import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
 class SelectProfileDialog extends HookConsumerWidget {
+  const SelectProfileDialog();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usersAsync = ref.watch(profileRepositoryProvider);

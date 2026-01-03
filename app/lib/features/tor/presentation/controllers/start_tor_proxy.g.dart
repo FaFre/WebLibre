@@ -42,7 +42,7 @@ final class StartProxyControllerProvider
 }
 
 String _$startProxyControllerHash() =>
-    r'a04e6cffc7483d48a0f2cbc320b0cc45c2e16674';
+    r'86a015a0c257ea18ad23aa28bdd43d289b6bfc64';
 
 abstract class _$StartProxyController extends $Notifier<void> {
   void build();

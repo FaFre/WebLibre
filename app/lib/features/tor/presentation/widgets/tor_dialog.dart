@@ -23,6 +23,8 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 class TorDialog extends StatelessWidget {
+  const TorDialog();
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
