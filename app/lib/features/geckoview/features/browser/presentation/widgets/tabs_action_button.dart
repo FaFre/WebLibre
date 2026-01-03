@@ -18,13 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 
 class TabsActionButton extends HookConsumerWidget {
   final bool isActive;
@@ -49,7 +50,11 @@ class TabsActionButton extends HookConsumerWidget {
         ? ref.watch(containerTabCountProvider(ContainerFilterDisabled()))
         : ref.watch(selectedContainerTabCountProvider);
 
-    final lastTabCount = useRef<int?>(null);
+    final containerColor = isActive
+        ? null
+        : ref.watch(
+            selectedContainerDataProvider.select((value) => value.value?.color),
+          );
 
     return InkWell(
       onTap: onTap,
@@ -66,14 +71,13 @@ class TabsActionButton extends HookConsumerWidget {
                   : DefaultTextStyle.of(context).style.color!,
             ),
             borderRadius: BorderRadius.circular(5.0),
+            color: containerColor.mapNotNull(ContainerColors.forAppBar),
           ),
           constraints: const BoxConstraints(minWidth: 25.0),
           child: Center(
             child: tabCount.when(
               skipLoadingOnReload: true,
               data: (count) {
-                lastTabCount.value = count;
-
                 return Text(
                   count.toString(),
                   style: TextStyle(
@@ -83,9 +87,9 @@ class TabsActionButton extends HookConsumerWidget {
                   ),
                 );
               },
-              loading: () => (lastTabCount.value != null)
+              loading: () => (tabCount.hasValue)
                   ? Text(
-                      lastTabCount.value.toString(),
+                      tabCount.value.toString(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
