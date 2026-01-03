@@ -193,6 +193,14 @@ class TabDataRepository extends _$TabDataRepository {
         .getSingleOrNull();
   }
 
+  Future<ContainerData?> getTabContainerData(String tabId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getTabContainerData(tabId)
+        .getSingleOrNull();
+  }
+
   Future<Map<String, String?>> getTabsContainerId(Iterable<String> tabIds) {
     return ref
         .read(tabDatabaseProvider)

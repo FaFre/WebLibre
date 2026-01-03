@@ -19,6 +19,7 @@
  */
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -195,6 +196,9 @@ class TabMenu extends HookConsumerWidget {
                 child: const Text('Regular'),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                  final containerData = await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .getTabContainerData(selectedTabId);
 
                   final tabId = (tabState.isPrivate)
                       ? await ref
@@ -202,13 +206,14 @@ class TabMenu extends HookConsumerWidget {
                             .addTab(
                               url: tabState.url,
                               private: false,
+                              container: Value(containerData),
                               selectTab: false,
                             )
                       : await ref
                             .read(tabRepositoryProvider.notifier)
                             .duplicateTab(
                               selectTabId: selectedTabId,
-                              containerId: tabState.contextId,
+                              containerData: containerData,
                               selectTab: false,
                             );
 
@@ -230,6 +235,9 @@ class TabMenu extends HookConsumerWidget {
                 child: const Text('Private'),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                  final containerData = await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .getTabContainerData(selectedTabId);
 
                   final tabId = (!tabState.isPrivate)
                       ? await ref
@@ -237,13 +245,14 @@ class TabMenu extends HookConsumerWidget {
                             .addTab(
                               url: tabState.url,
                               private: true,
+                              container: Value(containerData),
                               selectTab: false,
                             )
                       : await ref
                             .read(tabRepositoryProvider.notifier)
                             .duplicateTab(
                               selectTabId: selectedTabId,
-                              containerId: tabState.contextId,
+                              containerData: containerData,
                               selectTab: false,
                             );
 

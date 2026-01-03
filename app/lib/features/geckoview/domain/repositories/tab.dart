@@ -127,8 +127,10 @@ class TabRepository extends _$TabRepository {
           .toSet();
 
       // Batch validate parent IDs that aren't in the current creation batch
-      final existingParentIds =
-          await tabDao.getExistingTabIds(parentIdsToValidate).get().then((ids) => ids.toSet());
+      final existingParentIds = await tabDao
+          .getExistingTabIds(parentIdsToValidate)
+          .get()
+          .then((ids) => ids.toSet());
 
       // Upsert all tabs in the database
       for (var i = 0; i < createdTabIds.length; i++) {
@@ -160,16 +162,10 @@ class TabRepository extends _$TabRepository {
 
   Future<String> duplicateTab({
     required String selectTabId,
-    required String? containerId,
+    required ContainerData? containerData,
     required bool selectTab,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
-
-    final containerData = await containerId.mapNotNull(
-      (containerId) => ref
-          .read(containerRepositoryProvider.notifier)
-          .getContainerData(containerId),
-    );
 
     return await tabDao.upsertTabTransactional(
       () {
