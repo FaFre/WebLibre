@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -26,7 +25,6 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 
 part 'tab.g.dart';
 
@@ -37,14 +35,9 @@ class TabDataRepository extends _$TabDataRepository {
     ContainerData targetContainer, {
     bool closeOldTab = true,
   }) async {
-    final currentContainerId = await getTabContainerId(tabId);
     final selectedTabId = ref.read(selectedTabProvider);
 
-    final currentContainerData = await currentContainerId.mapNotNull(
-      (containerId) => ref
-          .read(containerRepositoryProvider.notifier)
-          .getContainerData(containerId),
-    );
+    final currentContainerData = await getTabContainerData(tabId);
 
     if (targetContainer.metadata.contextualIdentity ==
         currentContainerData?.metadata.contextualIdentity) {
@@ -73,14 +66,9 @@ class TabDataRepository extends _$TabDataRepository {
   }
 
   Future<void> unassignContainer(String tabId) async {
-    final currentContainerId = await getTabContainerId(tabId);
     final selectedTabId = ref.read(selectedTabProvider);
 
-    final currentContainerData = await currentContainerId.mapNotNull(
-      (containerId) => ref
-          .read(containerRepositoryProvider.notifier)
-          .getContainerData(containerId),
-    );
+    final currentContainerData = await getTabContainerData(tabId);
 
     if (currentContainerData?.metadata.contextualIdentity == null) {
       return ref

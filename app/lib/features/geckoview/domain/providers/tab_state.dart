@@ -35,7 +35,6 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
@@ -285,17 +284,9 @@ Future<bool> isTabTunneled(Ref ref, String? tabId) async {
     } else {
       switch (torSettings.proxyRegularTabsMode) {
         case TorRegularTabProxyMode.container:
-          final containerId = await ref
+          final containerData = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .getTabContainerId(tabState.id);
-
-          if (!ref.mounted) return false;
-
-          final containerData = await containerId.mapNotNull(
-            (containerId) => ref
-                .read(containerRepositoryProvider.notifier)
-                .getContainerData(containerId),
-          );
+              .getTabContainerData(tabState.id);
 
           if (!ref.mounted) return false;
 

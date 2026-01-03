@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
@@ -26,7 +25,6 @@ import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/extensions/ref_cache.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
@@ -85,15 +83,9 @@ Future<WebPageInfo> pageInfo(
 
   int? proxyPort;
   if (tabState?.id != null) {
-    final containerId = await ref
+    final containerData = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .getTabContainerId(tabState!.id);
-
-    final containerData = await containerId.mapNotNull(
-      (containerId) => ref
-          .read(containerRepositoryProvider.notifier)
-          .getContainerData(containerId),
-    );
+        .getTabContainerData(tabState!.id);
 
     final torSettings = ref.read(torSettingsWithDefaultsProvider);
 

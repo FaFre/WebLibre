@@ -242,24 +242,16 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<bool> selectTab(String tabId) async {
-    final containerId = await ref
+    final containerData = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .getTabContainerId(tabId);
-
-    if (!ref.mounted) return false;
-
-    final containerData = await containerId.mapNotNull(
-      (containerId) => ref
-          .read(containerRepositoryProvider.notifier)
-          .getContainerData(containerId),
-    );
+        .getTabContainerData(tabId);
 
     if (!ref.mounted) return false;
 
     if (containerData != null) {
       if (containerData.metadata.authSettings.authenticationRequired) {
         // ignore: only_use_keep_alive_inside_keep_alive
-        if (containerId != ref.read(selectedContainerProvider)) {
+        if (containerData.id != ref.read(selectedContainerProvider)) {
           logger.w(
             'Tried to open authenticated tab $tabId but container not selected',
           );
