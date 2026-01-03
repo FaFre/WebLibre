@@ -512,6 +512,10 @@ class QuickTabSwitcher extends HookConsumerWidget {
             await animation;
           },
           itemWrap: (child, item) {
+            if (item.isHistory) {
+              return child;
+            }
+
             return TabMenu(
               selectedTabId: item.id,
               enableFindInPage: false,
