@@ -27,7 +27,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangSearchScreen extends HookConsumerWidget {
@@ -45,7 +44,7 @@ class BangSearchScreen extends HookConsumerWidget {
       text: initialSearchText,
     );
 
-    useListenableCallback(textEditingController, () {
+    useOnListenableChange(textEditingController, () {
       unawaited(
         ref
             .read(bangSearchProvider.notifier)

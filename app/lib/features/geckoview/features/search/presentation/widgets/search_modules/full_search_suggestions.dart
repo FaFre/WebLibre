@@ -30,7 +30,6 @@ import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chips.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 
 class FullSearchTermSuggestions extends HookConsumerWidget {
   final TextEditingController searchTextController;
@@ -55,7 +54,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
 
     final searchHistory = ref.watch(searchHistoryProvider);
 
-    useListenableCallback(searchTextController, () {
+    useOnListenableChange(searchTextController, () {
       ref
           .read(searchSuggestionsProvider().notifier)
           .addQuery(searchTextController.text);

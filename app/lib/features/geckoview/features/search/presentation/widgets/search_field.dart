@@ -24,7 +24,6 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -73,7 +72,7 @@ class SearchField extends HookConsumerWidget {
     final lastText = useRef<String>(textEditingController.text);
 
     if (showSuggestions) {
-      useListenableCallback(textEditingController, () async {
+      useOnListenableChange(textEditingController, () async {
         if (textEditingController.text.isNotEmpty) {
           if (suggestion.value.isNotEmpty &&
               lastText.value.length > 1 &&

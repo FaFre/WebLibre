@@ -20,7 +20,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 
 final _tagSplitPatter = RegExp(r'[,\s]+');
 
@@ -39,7 +38,7 @@ class TagField extends HookWidget {
     final textController = useTextEditingController();
     final tags = useState(initialTags);
 
-    useListenableCallback(tags, () {
+    useOnListenableChange(tags, () {
       onTagsUpdate(tags.value);
     });
 

@@ -31,7 +31,6 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
@@ -49,7 +48,7 @@ class HistorySuggestions extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final historySuggestionsAsync = ref.watch(engineHistorySuggestionsProvider);
 
-    useListenableCallback(searchTextListenable, () async {
+    useOnListenableChange(searchTextListenable, () async {
       if (ref.exists(engineSuggestionsProvider)) {
         await ref
             .watch(engineSuggestionsProvider.notifier)

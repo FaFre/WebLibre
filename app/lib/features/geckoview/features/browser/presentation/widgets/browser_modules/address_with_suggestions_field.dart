@@ -25,7 +25,6 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -49,7 +48,7 @@ class AddressWithSuggestionsField extends HookConsumerWidget {
     final suggestion = useState<String?>(null);
     final lastText = useRef<String>(addressTextController.text);
 
-    useListenableCallback(addressTextController, () async {
+    useOnListenableChange(addressTextController, () async {
       if (addressTextController.text.isNotEmpty) {
         if (suggestion.value.isNotEmpty &&
             lastText.value.length > 1 &&

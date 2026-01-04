@@ -26,7 +26,6 @@ import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/providers/article_filter.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/feed_article_card.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 
@@ -57,7 +56,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
       () => searchTextController.text.isNotEmpty,
     );
 
-    useListenableCallback(searchTextController, () {
+    useOnListenableChange(searchTextController, () {
       ref
           .read(filteredArticleListProvider(feedId).notifier)
           .search(searchTextController.text);

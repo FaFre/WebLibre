@@ -19,6 +19,7 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -31,7 +32,6 @@ import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/extensions/atom.dart';
 import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/text_highlight.dart';
@@ -50,7 +50,7 @@ class FeedSearch extends HookConsumerWidget {
 
     final articlesAsync = ref.watch(articleSearchProvider(null));
 
-    useListenableCallback(searchTextNotifier, () async {
+    useOnListenableChange(searchTextNotifier, () async {
       await ref
           .read(articleSearchProvider(null).notifier)
           .search(

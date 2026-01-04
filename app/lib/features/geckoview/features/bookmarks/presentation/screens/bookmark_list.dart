@@ -34,7 +34,6 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/b
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_bookmarks_dialog.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -54,7 +53,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     final textFilterEnabled = useState(false);
     final textFilterController = useTextEditingController();
 
-    useListenableCallback(textFilterController, () {
+    useOnListenableChange(textFilterController, () {
       if (ref.exists(seamlessBookmarksProvider(entryGuid))) {
         ref
             .read(seamlessBookmarksProvider(entryGuid).notifier)

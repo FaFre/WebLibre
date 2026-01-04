@@ -22,7 +22,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -55,7 +54,7 @@ class TabViewHeader extends HookConsumerWidget {
       ),
     );
 
-    useListenableCallback(searchTextController, () async {
+    useOnListenableChange(searchTextController, () async {
       if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.preview))) {
         await ref
             .read(

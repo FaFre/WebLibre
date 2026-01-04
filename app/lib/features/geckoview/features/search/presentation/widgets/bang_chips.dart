@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -25,7 +26,6 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -74,7 +74,7 @@ class BangChips extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final availableBangs = ref.watch(seamlessBangProvider);
 
-    useListenableCallback(searchTextController, () {
+    useOnListenableChange(searchTextController, () {
       ref
           .read(seamlessBangProvider.notifier)
           .search(searchTextController!.text);
