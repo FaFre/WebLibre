@@ -33,6 +33,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_bookmarks_dialog.dart';
 import 'package:weblibre/presentation/hooks/listenable_callback.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -359,12 +360,18 @@ class BookmarkListScreen extends HookConsumerWidget {
         return;
       }
 
+      if (!context.mounted) return;
+
+      // Ask user if they want to erase existing bookmarks
+      final shouldReplace = await showImportBookmarksDialog(context);
+      if (shouldReplace == null) return; // User cancelled dialog
+
       final content = await File(file.path!).readAsString();
       final repository = ref.read(bookmarksRepositoryProvider.notifier);
 
       final count = format == 'json'
-          ? await repository.importFromJSON(content)
-          : await repository.importFromHTML(content);
+          ? await repository.importFromJSON(content, replace: shouldReplace)
+          : await repository.importFromHTML(content, replace: shouldReplace);
 
       if (context.mounted) {
         showInfoMessage(context, 'Imported $count bookmarks successfully');

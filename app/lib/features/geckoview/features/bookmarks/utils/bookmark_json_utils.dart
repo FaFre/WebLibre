@@ -64,7 +64,12 @@ class BookmarkJSONUtils {
 
     // If replacing, erase existing bookmarks first
     if (replace) {
-      await _service.eraseEverything(BookmarkRoot.root);
+      // Delete bookmarks from each root folder (except root itself to avoid errors)
+      for (final root in BookmarkRoot.values) {
+        if (root != BookmarkRoot.root) {
+          await _service.eraseEverything(root);
+        }
+      }
     }
 
     final folderIdToGuidMap = <String, String>{};

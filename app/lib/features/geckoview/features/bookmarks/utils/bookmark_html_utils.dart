@@ -387,7 +387,12 @@ class _BookmarkImporter {
 
   Future<int> _importBookmarks() async {
     if (_isImportDefaults) {
-      await _service.eraseEverything(BookmarkRoot.root);
+      // Delete bookmarks from each root folder (except root itself to avoid errors)
+      for (final root in BookmarkRoot.values) {
+        if (root != BookmarkRoot.root) {
+          await _service.eraseEverything(root);
+        }
+      }
     }
 
     final bookmarkTrees = _getBookmarkTrees();
