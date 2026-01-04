@@ -16,7 +16,7 @@
   </a>
 </p>
 
-WebLibre is an independent browser project built on the foundation of [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/). It offers a fully featured web browser compatible with Firefox mobile add-ons, designed with privacy and usability at its core.
+WebLibre is an independent privacy-focused browser for Android built on [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/). It offers a fully-featured web browser with extension support, enhanced by powerful privacy features, local AI assistance (opt-in), and advanced tab organization tools.
 
 <p align="center">
   <a href="https://liberapay.com/FaFre/donate">
@@ -24,15 +24,18 @@ WebLibre is an independent browser project built on the foundation of [Mozilla's
   </a>
 </p>
 
-> **⚠️ Alpha Release Notice**  
-> WebLibre is currently in the alpha phase. Expect frequent updates, potential bugs, and breaking changes. Please report issues on [GitHub](https://github.com/FaFre/WebLibre/issues).
-> Currently only F-Droid builds are free from Google dependencies.
+> **📱 Early Access**
+> WebLibre is under active development with frequent updates and new features. The browser is production-capable for early adopters who value privacy and are willing to help shape its future. Report issues or request features on [GitHub](https://github.com/FaFre/WebLibre/issues).
 
 ## Join the WebLibre Community
 
-We'd love to see you over on [Matrix](https://matrix.to/#/#weblibre:unredacted.org) to share ideas, get support, and help shape the future of this project.
+**Your voice matters.** Since WebLibre respects your privacy by design—no tracking, no telemetry—we depend on community feedback to improve. Here's how you can get involved:
 
-**Your voice matters.** Since WebLibre respects your privacy by design—no tracking, no telemetry—we depend on community feedback to improve. Whether you've discovered a bug, have a feature request, or want to share your experience, we'd love to hear from you!
+- **[Feedback Platform](https://feedback.weblibre.eu/)** - Vote on features, share ideas, and help prioritize development
+- **[Matrix Chat](https://matrix.to/#/#weblibre:unredacted.org)** - Get support, discuss ideas, and connect with other users
+- **[GitHub Issues](https://github.com/FaFre/WebLibre/issues)** - Report bugs and track development
+
+Whether you've discovered a bug, have a feature request, or want to share your experience, we'd love to hear from you!
 
 ## Privacy by Design
 
@@ -48,23 +51,33 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
 
 ## Features
 
+### Multi-User Profiles
+
+- **Complete Profile Isolation** - Separate browsing data, extensions, and settings per user
+- **Profile Backups** - Export and restore individual user profiles with all associated data
+- **Independent Configurations** - Each profile maintains its own containers, extensions, privacy settings, and preferences
+
 ### [Tab Management](https://docs.weblibre.eu/Tabs/Tab-Management)
 
-- [**Tab Containers:**](https://docs.weblibre.eu/Tabs/Containers/Container) Organize tabs into isolated containers for enhanced privacy and workflow management with optional features:
-    - [**Container Cookie Contexts:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Separate “cookie jars” for each container.
+- [**Tab Containers:**](https://docs.weblibre.eu/Tabs/Containers/Container) Organize tabs into isolated containers for enhanced privacy and workflow management:
+    - [**Container Cookie Contexts:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Separate "cookie jars" for each container
     - [**Tor Proxy:**](https://docs.weblibre.eu/Tabs/Containers/Features/Tor-Proxy) Route container traffic through the Tor network for anonymous browsing.
-    - [**Biometric Authentication:**](https://docs.weblibre.eu/Tabs/Containers/Features/Biometric-authentication) Restrict access to containers using fingerprint or face recognition.
-- [**Tree View Navigation:**](https://docs.weblibre.eu/Tabs/Tree-View-Navigation) Visualize and manage complex tab hierarchies for better browsing context.
-- [**Local AI Assistance:**](https://docs.weblibre.eu/Tabs/Containers/Features/On-Device-AI) Use on-device AI models to group tabs and manage containers effortlessly.
+    - [**Biometric Authentication:**](https://docs.weblibre.eu/Tabs/Containers/Features/Biometric-authentication) Restrict access to containers using fingerprint or face recognition
+    - **Site Assignments:** Automatically route specific domains to designated containers
+- [**Tree View Navigation:**](https://docs.weblibre.eu/Tabs/Tree-View-Navigation) Visualize and manage complex tab hierarchies with parent-child relationships
+- [**Local AI Assistance:**](https://docs.weblibre.eu/Tabs/Containers/Features/On-Device-AI) Use on-device AI models to intelligently group related tabs into new containers
+- **Flexible Tab Views:** Choose between list view, grid view, or tree view with tab hierarchy
 
 ### [Personal Local Search Engine](https://docs.weblibre.eu/Personal-Local-Search-Engine)
 
 - **Unified Search:** Instantly search across:
-    - **Open Tabs:** By title, address, and full page content (no size limits).
-    - **Web Feeds:** Aggregate and search your favorite news sites and blogs, with full content indexing.
-    - **Browsing History:** Quickly find previously visited sites by title or address.
-    - **Bangs:** Use custom shortcuts for direct on-site search.
-- **Local-First Search:** All indexing and search operations happen on your device—your data never leaves your control.
+    - **Open Tabs:** By title, address, and full page content (no size limits)
+    - **Bookmarks:** Search your saved bookmarks by title, URL, and folder
+    - **Web Feeds:** Aggregate and search your favorite news sites and blogs with full content indexing
+    - **Browsing History:** Quickly find previously visited sites by title or address
+    - **[Bangs](https://docs.weblibre.eu/Bangs):** Use thousands of built-in shortcuts for direct on-site search
+- **Custom Search Engines:** Create your own bang shortcuts for frequently used search engines and websites
+- **Local-First Search:** All indexing and search operations happen on your device—your data never leaves your control
 
 ### Privacy & Security
 
@@ -73,20 +86,34 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
 - **Tor Integration:** Route container or private tab traffic through the Tor network for greater anonymity.
 - **Ad and Content Blocking:** Optional content blocker (uBlock Origin) installation during onboarding.
 - **Web Engine Hardening:** Comprehensive and easy-to-use privacy and security presets for the Gecko Web-Engine.
+- **DNS over HTTPS (DoH):** Encrypted DNS with predefined or custom resolver options
+- **Container Data Isolation:** Clear container data for isolated containers
 
-### [Bangs](https://docs.weblibre.eu/Bangs)
+### Productivity & Content Management
 
-- **Direct On-Site Search:** Use thousands of powerful shortcuts (“bangs”) to search directly on popular websites—no third-party search engine required.
+- **Bookmark Management** - Import/export bookmarks (JSON/HTML format)
+- **Export Page Content** - Save web pages as PDF or Markdown
 
 ---
 
 ## Getting Started
 
-1. **Download & Install** WebLibre on your device.
-2. **Organize Tabs:** Use containers for work, personal, or research contexts.
-3. **Enable Tor Proxy:** Assign Tor to containers or private tabs for sensitive browsing.
-4. **Add Web Feeds:** Aggregate your favorite sites for unified, private search.
-5. **Try Bangs:** Search directly on your favorite websites with custom shortcuts.
+1. **Download & Install** WebLibre on your Android device
+2. **Set Up Your Profile:** Create your first user profile during onboarding
+3. **Organize with Containers:** Create containers for different contexts (work, personal, shopping)
+   - Assign specific websites to containers for automatic routing
+   - Enable Tor proxy for sensitive containers
+4. **Import Your Data:**
+   - Import bookmarks from Firefox, Chrome, or other browsers (HTML format)
+   - Organize bookmarks into folders
+5. **Configure Privacy:**
+   - Enable DNS over HTTPS
+   - Configure web engine hardening presets
+   - Set up content blocking (install uBlock Origin)
+6. **Customize Your Experience:**
+   - Add custom search engine bangs
+   - Configure tab management preferences
+   - Install extensions from custom addon collections
 
 <p align="center">
   <a href='https://github.com/FaFre/WebLibre/releases'>
@@ -104,5 +131,11 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
 
 ## Feedback & Contributions
 
-WebLibre is in active development, and your feedback is greatly welcomed!  
-Please share your ideas, report issues via [GitHub Issues](https://github.com/FaFre/WebLibre/issues).
+WebLibre is in active development, and your feedback shapes its future!
+
+- **Share Feedback:** [feedback.weblibre.eu](https://feedback.weblibre.eu/) - Request features, vote on ideas, and share your experience
+- **Report Issues:** [GitHub Issues](https://github.com/FaFre/WebLibre/issues) - Report bugs and technical problems
+- **Community Discussion:** [Matrix Chat](https://matrix.to/#/#weblibre:unredacted.org) - Get support and discuss ideas
+- **Documentation:** [docs.weblibre.eu](https://docs.weblibre.eu/) - Learn more about features and configuration
+
+Since WebLibre respects your privacy by design—**no tracking, no telemetry**—we rely entirely on community feedback to improve. Share your experience, request features, or report bugs!

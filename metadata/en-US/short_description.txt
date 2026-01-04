@@ -1,1 +1,1 @@
-Browse privately, search locally. Organize tabs, block tracking, and use Tor.
+Privacy-focused browser with local AI, advanced tab management, personal search, and Tor.

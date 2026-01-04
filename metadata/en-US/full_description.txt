@@ -1,29 +1,31 @@
-<b>WebLibre is a privacy-first browser that puts you in control.</b>
+<b>Privacy-Focused Browser with Local AI Assistance</b>
 
-Built on Mozilla’s Gecko engine, WebLibre combines powerful privacy features with advanced tab management and a personal local search engine—so your data stays on your device, not in the cloud.
+WebLibre is an independent privacy-focused browser for Android built on Mozilla's Gecko Engine and Mozilla Android Components. It offers a fully-featured web browser with extension support, enhanced by powerful privacy features, local AI assistance (opt-in), and advanced tab organization tools.
 
-- <b>Personal Local Search Engine</b>
-  Instantly search across open tabs, browsing history, and your favorite web feeds—all indexed privately on your device. No third-party search engine required.
+<b>Privacy by Design</b>
 
-- <b>Bangs: Direct Site Search</b>
-  Use thousands of “bangs” to search directly on popular websites, bypassing external search engines for faster, more private results.
+WebLibre shields you from third-party surveillance—whether by ISPs, tracking companies, or other entities seeking to monitor your browsing habits:
 
-- <b>Tab Containers for Privacy & Organization</b>
-  Separate your browsing into containers for work, shopping, or personal use. Each container has its own cookies, settings, and can be locked with biometric authentication.
+- <b>Web Engine Hardening</b>: Comprehensive privacy and security presets to resist tracking and fingerprinting
+- <b>Cookie Isolation</b>: Cookies separated by container or context, preventing cross-site tracking
+- <b>Content Blocking</b>: Blocks ads, trackers, and unwanted content by default
+- <b>Tor Proxying</b>: Route browsing traffic through the Tor network for enhanced anonymity
+- <b>Local Search Engine</b>: Your device handles search and retrieval, minimizing remote service contact
+- <b>No Tracking or Telemetry</b>: WebLibre does not track, monitor, or collect any browsing data
 
-- <b>Integrated Tor Proxy</b>
-  Route selected tabs or containers through the Tor network for enhanced anonymity and to bypass censorship—without leaving your browser.
+<b>Advanced Tab Management</b>
 
-- <b>Tree View Tab Navigation</b>
-  Visualize and manage complex browsing sessions with hierarchical tab organization. Never lose track of your research or workflow.
+- <b>Tab Containers</b>: Organize tabs into isolated containers with separate cookie contexts, Tor proxy support, biometric authentication, and automatic site assignments
+- <b>Tree View Navigation</b>: Visualize and manage complex tab hierarchies with parent-child relationships
+- <b>Local AI Assistance</b>: Use on-device AI models to intelligently group related tabs into new containers
+- <b>Flexible Views</b>: Choose between list view, grid view, or tree view with tab hierarchy
 
-- <b>No Tracking, No Cloud Storage</b>
-  WebLibre never tracks you. All your data—searches, history, and feeds—remains on your device for maximum privacy.
+<b>Personal Local Search Engine</b>
 
-Additional Highlights
+Instantly search across open tabs (with full page content), bookmarks, web feeds, browsing history, and bangs. All indexing and search operations happen on your device—your data never leaves your control.
 
-- <b>Biometric Authentication</b>: Lock sensitive tabs or containers with your fingerprint or face.
-- <b>Efficient Resource Use</b>: Lightweight tabs and persistent sessions for seamless multitasking.
-- <b>Open Source Foundations</b>: Built using trusted Mozilla components.
+<b>Multi-User Profiles</b>
 
-<b>Take back control of your browsing. Download WebLibre and experience privacy, speed, and organization—your way.</b>
+Complete profile isolation with separate browsing data, extensions, settings, and databases per user. Each profile maintains its own containers, add-ons, privacy settings, and preferences.
+
+<b>Download WebLibre and browse freely and privately with genuine control over your online experience.</b>
