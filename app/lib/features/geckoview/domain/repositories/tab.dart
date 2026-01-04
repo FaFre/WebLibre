@@ -455,11 +455,19 @@ class TabRepository extends _$TabRepository {
                 tabState.historyState.items.isEmpty;
 
             if (event.blocked || tabIsEmpty) {
+              // Check if contextual identity is changing
+              final currentContainerData = await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .getTabContainerData(tabState.id);
+
+              final contextChanging = containerData.metadata.contextualIdentity !=
+                  currentContainerData?.metadata.contextualIdentity;
+
               await addTab(
                 url: uri,
                 private: tabState.isPrivate,
                 container: Value(containerData),
-                parentId: tabState.id,
+                parentId: contextChanging ? null : tabState.id, // Break parent chain if context changes
                 selectTab: true,
               );
 

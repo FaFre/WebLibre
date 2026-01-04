@@ -58,7 +58,7 @@ class TabDataRepository extends _$TabDataRepository {
               url: tabState.url,
               private: tabState.isPrivate,
               container: Value(targetContainer),
-              parentId: tabState.parentId,
+              // parentId defaults to null - breaks parent chain when changing contextual identity
               selectTab: selectedTabId == tabState.id,
             );
       }
@@ -86,7 +86,7 @@ class TabDataRepository extends _$TabDataRepository {
               url: tabState.url,
               private: tabState.isPrivate,
               container: const Value(null),
-              parentId: tabState.parentId,
+              // parentId defaults to null - breaks parent chain when removing contextual identity
               selectTab: selectedTabId == tabState.id,
             );
       }
