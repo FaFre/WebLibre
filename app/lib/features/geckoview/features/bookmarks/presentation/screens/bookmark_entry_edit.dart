@@ -17,19 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_bookmark_dialog.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -45,11 +42,6 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
-    final treeKey = useMemoized(() => GlobalKey<TreeViewState>());
-
-    final folderList = ref.watch(
-      bookmarksProvider<BookmarkFolder>(BookmarkRoot.root.id),
-    );
 
     final nameTextController = useTextEditingController(
       text: initialInfo?.title ?? exisitingEntry?.title,
@@ -153,102 +145,9 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16),
-                Text('Folder', style: Theme.of(context).textTheme.labelMedium),
-                folderList.when(
-                  skipLoadingOnReload: true,
-                  data: (list) {
-                    TreeNode<BookmarkFolder> addChildren(
-                      TreeNode<BookmarkFolder>? parent,
-                      BookmarkFolder item,
-                    ) {
-                      final node = TreeNode(
-                        key: item.guid,
-                        data: item,
-                        parent: parent,
-                      );
-                      final targetNode = (parent?..add(node)) ?? node;
-
-                      if (item.children != null) {
-                        for (final child in item.children!) {
-                          addChildren(node, child as BookmarkFolder);
-                        }
-                      }
-
-                      return targetNode;
-                    }
-
-                    final root = (list != null)
-                        ? addChildren(null, list)
-                        : TreeNode<BookmarkFolder>.root();
-
-                    return TreeView.simple(
-                      key: treeKey,
-                      tree: root,
-                      shrinkWrap: true,
-                      onTreeReady: (controller) {
-                        controller.expandAllChildren(root, recursive: true);
-                      },
-                      expansionIndicatorBuilder: (context, tree) =>
-                          ChevronIndicator.upDown(
-                            tree: tree,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16.0,
-                              horizontal: 12.0,
-                            ),
-                          ),
-                      builder: (context, item) {
-                        final isSelected = item.data?.guid == parentGuid.value;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 42.0),
-                          child: switch (item.data) {
-                            final BookmarkFolder folder => ListTile(
-                              key: ValueKey(folder.guid),
-                              contentPadding: EdgeInsets.zero,
-                              selected: isSelected,
-                              leading: (item.isExpanded)
-                                  ? const Icon(MdiIcons.folderOpen)
-                                  : const Icon(MdiIcons.folder),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (isSelected) const Icon(Icons.check),
-                                  IconButton(
-                                    onPressed: () async {
-                                      await BookmarkFolderAddRoute(
-                                        parentGuid: folder.guid,
-                                      ).push(context);
-                                    },
-                                    icon: const Icon(MdiIcons.folderPlus),
-                                  ),
-                                ],
-                              ),
-                              title: Text(folder.title),
-                              onTap: () {
-                                parentGuid.value = folder.guid;
-                              },
-                            ),
-                            null => const SizedBox.shrink(),
-                          },
-                        );
-                      },
-                    );
-                  },
-                  error: (error, stackTrace) => Center(
-                    child: FailureWidget(
-                      title: 'Failed to load Bookmark Folders',
-                      exception: error,
-                      onRetry: () {
-                        // ignore: unused_result
-                        ref.refresh(
-                          bookmarksProvider<BookmarkFolder>(
-                            BookmarkRoot.root.id,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  loading: () => const SizedBox.shrink(),
+                FolderTreePicker(
+                  selectedFolderGuid: parentGuid,
+                  entryGuid: BookmarkRoot.root.id,
                 ),
                 const SizedBox(height: 16),
                 if (exisitingEntry != null)

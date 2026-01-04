@@ -62,8 +62,15 @@ class BookmarksRepository extends _$BookmarksRepository {
     ref.invalidateSelf();
   }
 
-  Future<void> editFolder({required String guid, required String title}) async {
-    await _service.updateNode(guid, BookmarkInfo(title: title));
+  Future<void> editFolder({
+    required String guid,
+    String? title,
+    String? parentGuid,
+  }) async {
+    await _service.updateNode(
+      guid,
+      BookmarkInfo(title: title, parentGuid: parentGuid),
+    );
     ref.invalidateSelf();
   }
 

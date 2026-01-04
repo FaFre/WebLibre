@@ -34,7 +34,7 @@ final class BookmarksRepositoryProvider
 }
 
 String _$bookmarksRepositoryHash() =>
-    r'932441e926afcb1d60dc34b8a8756b7ad8fe0a27';
+    r'c53414612bf1d1da824e1150ca4eca7bb7c3bec7';
 
 abstract class _$BookmarksRepository extends $AsyncNotifier<BookmarkItem?> {
   FutureOr<BookmarkItem?> build();

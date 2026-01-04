@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
 class BookmarkFolderEditScreen extends HookConsumerWidget {
@@ -37,6 +38,14 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameTextController = useTextEditingController(text: folder?.title);
+
+    final currentParentGuid = useState(
+      parentGuid ?? folder?.parentGuid ?? BookmarkRoot.mobile.id,
+    );
+
+    // Check if this is a bookmark root folder (these cannot be moved)
+    final isBookmarkRoot =
+        folder != null && bookmarkRootIds.contains(folder!.guid);
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +61,14 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
                       .read(bookmarksRepositoryProvider.notifier)
                       .editFolder(
                         guid: folder!.guid,
-                        title: nameTextController.text,
+                        title: (nameTextController.text != folder!.title)
+                            ? nameTextController.text
+                            : null,
+                        parentGuid:
+                            (!isBookmarkRoot &&
+                                currentParentGuid.value != folder!.parentGuid)
+                            ? currentParentGuid.value
+                            : null,
                       );
 
                   if (context.mounted) {
@@ -62,7 +78,7 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
                   await ref
                       .read(bookmarksRepositoryProvider.notifier)
                       .addFolder(
-                        parentGuid: parentGuid ?? BookmarkRoot.mobile.id,
+                        parentGuid: currentParentGuid.value,
                         title: nameTextController.text,
                       );
 
@@ -91,6 +107,14 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
                 validator: validateRequired,
               ),
               const SizedBox(height: 16),
+              if (!isBookmarkRoot) ...[
+                FolderTreePicker(
+                  selectedFolderGuid: currentParentGuid,
+                  excludeFolderGuid: folder?.guid,
+                  entryGuid: BookmarkRoot.root.id,
+                ),
+                const SizedBox(height: 16),
+              ],
               if (folder != null)
                 SizedBox(
                   width: double.infinity,
