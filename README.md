@@ -20,12 +20,15 @@ WebLibre is an independent privacy-focused browser for Android built on [Mozilla
 
 <p align="center">
   <a href="https://liberapay.com/FaFre/donate">
-    <img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg">
+    <img alt="Donate using Liberapay" src="https://docs.weblibre.eu/static/images/badges/liberapay.svg">
+  </a>
+  <a href="monero:89rpdkq1XJYJYUshjF23YZhJdNEpghrQTXnz7vxnrLVHGrrqXTZ6BdKbqgyQnNZCkxTDA4RfhDsUcF6eHAAqco4WDQR2cZF">
+    <img alt="Donate using Monero" src="https://docs.weblibre.eu/static/images/badges/monero.svg">
   </a>
 </p>
 
 > **📱 Early Access**
-> WebLibre is under active development with frequent updates and new features. The browser is production-capable for early adopters who value privacy and are willing to help shape its future. Report issues or request features on [GitHub](https://github.com/FaFre/WebLibre/issues).
+> WebLibre is under active development with frequent updates and new features. The browser is production-capable for early adopters who value privacy and are willing to help shape its future.
 
 ## Join the WebLibre Community
 
@@ -133,9 +136,9 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
 
 WebLibre is in active development, and your feedback shapes its future!
 
-- **Share Feedback:** [feedback.weblibre.eu](https://feedback.weblibre.eu/) - Request features, vote on ideas, and share your experience
+- **Share Feedback:** [Feedback Platform](https://feedback.weblibre.eu/) - Request features, vote on ideas, and share your experience
 - **Report Issues:** [GitHub Issues](https://github.com/FaFre/WebLibre/issues) - Report bugs and technical problems
 - **Community Discussion:** [Matrix Chat](https://matrix.to/#/#weblibre:unredacted.org) - Get support and discuss ideas
-- **Documentation:** [docs.weblibre.eu](https://docs.weblibre.eu/) - Learn more about features and configuration
+- **Documentation:** [Documentation](https://docs.weblibre.eu/) - Learn more about features and configuration
 
 Since WebLibre respects your privacy by design—**no tracking, no telemetry**—we rely entirely on community feedback to improve. Share your experience, request features, or report bugs!
