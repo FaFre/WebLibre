@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -35,7 +37,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/fixed_search_suggestions.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/listenable_callback.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
@@ -59,7 +61,52 @@ class SiteSearch extends HookConsumerWidget {
     final searchTextController = controller ?? useTextEditingController();
     final searchFocusNode = useFocusNode();
 
-    useListenableCallback(searchTextController, () {
+    useOnListenableChangeSelector(
+      searchFocusNode,
+      () => searchFocusNode.hasFocus,
+      () {
+        if (searchFocusNode.hasFocus) {
+          // Select all text when the field is focused
+          searchTextController.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: searchTextController.text.length,
+          );
+        }
+      },
+    );
+
+    //Request initial focus in a way our useOnListenableChangeSelector is triggered
+    useEffect(() {
+      //Wait for first frame then request focus
+      unawaited(
+        Future.delayed(const Duration(milliseconds: 1000 ~/ 60)).whenComplete(
+          () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              searchFocusNode.requestFocus();
+            });
+          },
+        ),
+      );
+
+      return null;
+    }, []);
+
+    useOnAppLifecycleStateChange((previous, current) {
+      switch (current) {
+        case AppLifecycleState.detached:
+        case AppLifecycleState.inactive:
+        case AppLifecycleState.hidden:
+        case AppLifecycleState.paused:
+          //Fixes issue with disappearing keyboard after resume (even we request focus)
+          searchFocusNode.unfocus();
+        case AppLifecycleState.resumed:
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            searchFocusNode.requestFocus();
+          });
+      }
+    });
+
+    useOnListenableChange(searchTextController, () {
       if (ref.exists(searchSuggestionsProvider())) {
         ref
             .read(searchSuggestionsProvider().notifier)
@@ -171,15 +218,6 @@ class SiteSearch extends HookConsumerWidget {
           label: (selectedBang != null)
               ? const Text('Search')
               : const Text('Address / Search'),
-          onTap: () {
-            if (!searchFocusNode.hasFocus) {
-              // Select all text when the field is tapped
-              searchTextController.selection = TextSelection(
-                baseOffset: 0,
-                extentOffset: searchTextController.text.length,
-              );
-            }
-          },
           unfocusOnTapOutside: false,
           onSubmitted: (value) async {
             await submitSearch(value);
