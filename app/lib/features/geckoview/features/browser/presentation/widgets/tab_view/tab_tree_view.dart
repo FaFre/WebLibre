@@ -15,6 +15,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -176,12 +177,14 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                 builder: (context, ref, child) {
                   final screenWidth = MediaQuery.of(context).size.width;
 
+                  final containerId = ref.watch(selectedContainerProvider);
+
                   final filteredTabEntities = ref.watch(
                     seamlessFilteredTabEntitiesProvider(
                       searchPartition: TabSearchPartition.preview,
                       // ignore: document_ignores using fast equatable
                       // ignore: provider_parameters
-                      containerFilter: ContainerFilterDisabled(),
+                      containerFilter: ContainerFilterById(containerId: containerId),
                       groupTrees: true,
                     ),
                   );

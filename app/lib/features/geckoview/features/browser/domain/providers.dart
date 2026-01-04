@@ -253,11 +253,20 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
           (value) => EquatableValue(
             value.value
                     ?.map(
-                      (tree) => TabTreeEntity(
-                        tabId: tree.latestTabId,
-                        rootId: tree.rootTabId,
-                        totalTabs: tree.totalTabs,
-                      ),
+                      (tree) {
+                        // Find the container ID for the latest tab
+                        final containerForTab = availableTabs.value
+                            .where((t) => t.tabId == tree.latestTabId)
+                            .firstOrNull
+                            ?.containerId;
+
+                        return TabTreeEntity(
+                          tabId: tree.latestTabId,
+                          containerId: containerForTab,
+                          rootId: tree.rootTabId,
+                          totalTabs: tree.totalTabs,
+                        );
+                      },
                     )
                     .toList() ??
                 [],

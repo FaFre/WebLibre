@@ -529,52 +529,55 @@ class TabViewHeader extends HookConsumerWidget {
                     ),
                   ),
                 ),
-              if (switch (tabsViewMode) {
-                TabsViewMode.list || TabsViewMode.grid => true,
-                TabsViewMode.tree => false,
-              })
-                Consumer(
-                  builder: (context, ref, child) {
-                    final selectedContainer = ref.watch(
-                      selectedContainerDataProvider.select(
-                        (value) => value.value,
-                      ),
-                    );
+              Consumer(
+                builder: (context, ref, child) {
+                  final selectedContainer = ref.watch(
+                    selectedContainerDataProvider.select(
+                      (value) => value.value,
+                    ),
+                  );
 
-                    return ContainerChips(
-                      showGroupSuggestions: true,
-                      selectedContainer: selectedContainer,
-                      onSelected: (container) async {
-                        if (container != null) {
-                          final result = await ref
-                              .read(selectedContainerProvider.notifier)
-                              .setContainerId(container.id);
+                  return ContainerChips(
+                    showGroupSuggestions: switch (tabsViewMode) {
+                      TabsViewMode.list || TabsViewMode.grid => true,
+                      TabsViewMode.tree => false,
+                    },
+                    enableDragAndDrop: switch (tabsViewMode) {
+                      TabsViewMode.list || TabsViewMode.grid => true,
+                      TabsViewMode.tree => false,
+                    },
+                    selectedContainer: selectedContainer,
+                    onSelected: (container) async {
+                      if (container != null) {
+                        final result = await ref
+                            .read(selectedContainerProvider.notifier)
+                            .setContainerId(container.id);
 
-                          if (context.mounted &&
-                              result == SetContainerResult.successHasProxy) {
-                            await ref
-                                .read(startProxyControllerProvider.notifier)
-                                .maybeStartProxy(context);
-                          }
-                        } else {
-                          ref
-                              .read(selectedContainerProvider.notifier)
-                              .clearContainer();
+                        if (context.mounted &&
+                            result == SetContainerResult.successHasProxy) {
+                          await ref
+                              .read(startProxyControllerProvider.notifier)
+                              .maybeStartProxy(context);
                         }
-                      },
-                      onDeleted: (container) {
+                      } else {
                         ref
                             .read(selectedContainerProvider.notifier)
                             .clearContainer();
-                      },
-                      onLongPress: (container) async {
-                        await ContainerEditRoute(
-                          containerData: jsonEncode(container.toJson()),
-                        ).push(context);
-                      },
-                    );
-                  },
-                ),
+                      }
+                    },
+                    onDeleted: (container) {
+                      ref
+                          .read(selectedContainerProvider.notifier)
+                          .clearContainer();
+                    },
+                    onLongPress: (container) async {
+                      await ContainerEditRoute(
+                        containerData: jsonEncode(container.toJson()),
+                      ).push(context);
+                    },
+                  );
+                },
+              ),
               const SizedBox(height: 8),
             ],
           ),

@@ -600,7 +600,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'f2bf14737bc03f71fc61252359979b4e901e5df7';
+    r'590288855aa93162a8f70d37f2b3cd94eabc85e5';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with

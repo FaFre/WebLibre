@@ -37,10 +37,104 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
+class _UnassignedContainerChip extends ConsumerWidget {
+  final int? Function()? containerBadgeCount;
+  final ContainerData? selectedContainer;
+  final void Function(ContainerDataWithCount?)? onSelected;
+
+  const _UnassignedContainerChip({
+    required this.containerBadgeCount,
+    required this.selectedContainer,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final int tabCount =
+        containerBadgeCount?.call() ??
+        ref.watch(
+          containerTabCountProvider(
+            // ignore: provider_parameters
+            ContainerFilterById(containerId: null),
+          ).select((value) => value.value ?? 0),
+        );
+
+    return FilterChip(
+      avatar: const Icon(MdiIcons.folderHidden),
+      labelPadding: (tabCount > 0) ? null : const EdgeInsets.only(right: 2.0),
+      label: (tabCount > 0)
+          ? Text(tabCount.toString())
+          : const SizedBox.shrink(),
+      selected: selectedContainer == null,
+      showCheckmark: false,
+      onSelected: (value) {
+        if (value) {
+          onSelected?.call(null);
+        }
+      },
+    );
+  }
+}
+
+class _ContainerSuggestionsChip extends ConsumerWidget {
+  const _ContainerSuggestionsChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabSuggestionsEnabled = ref.watch(tabSuggestionsControllerProvider);
+    final enableAiFeatures = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.enableLocalAiFeatures,
+      ),
+    );
+
+    if (!enableAiFeatures || !tabSuggestionsEnabled) {
+      return const SizedBox.shrink();
+    }
+
+    final suggestions = ref.watch(suggestClustersProvider);
+
+    return suggestions.when(
+      skipLoadingOnReload: true,
+      data: (data) {
+        if (data.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return FilterChip(
+          avatar: const Icon(MdiIcons.autoFix),
+          label: Text(data!.length.toString()),
+          showCheckmark: false,
+          onSelected: (_) async {
+            await const ContainerDraftRoute().push(context);
+          },
+        );
+      },
+      error: (error, stackTrace) {
+        logger.e(
+          'Error suggesting containers',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        return const SizedBox.shrink();
+      },
+      loading: () {
+        return const FilterChip(
+          avatar: Icon(MdiIcons.autoFix),
+          label: Skeletonizer(child: Text('0')),
+          showCheckmark: false,
+          onSelected: null,
+        );
+      },
+    );
+  }
+}
+
 class ContainerChips extends HookConsumerWidget {
   final bool displayMenu;
   final bool showUnassignedChip;
   final bool showGroupSuggestions;
+  final bool enableDragAndDrop;
 
   final ContainerData? selectedContainer;
   final bool Function(ContainerDataWithCount)? containerFilter;
@@ -62,6 +156,7 @@ class ContainerChips extends HookConsumerWidget {
     this.displayMenu = true,
     this.showUnassignedChip = true,
     this.showGroupSuggestions = false,
+    this.enableDragAndDrop = true,
   });
 
   @override
@@ -95,121 +190,59 @@ class ContainerChips extends HookConsumerWidget {
           child: Row(
             children: [
               Expanded(
-                child: SelectableChips(
-                  enableDelete: false,
-                  itemId: (container) => container.id,
-                  itemBackgroundColor: (container) =>
-                      ContainerColors.forChip(container.color),
-                  selectedBorderColor: Theme.of(context).colorScheme.primary,
-                  itemLabel: (container) =>
-                      ContainerTitle(container: container),
-                  itemBadgeCount: (container) =>
-                      containerBadgeCount?.call(container) ??
-                      container.tabCount,
-                  itemWrap: (child, container) {
-                    return TabDragContainerTarget(
-                      container: container,
-                      child: child,
-                    );
-                  },
-                  prefixListItems: [
-                    if (showUnassignedChip)
-                      TabDragContainerTarget(
-                        container: null,
-                        child: Consumer(
-                          builder: (context, ref, child) {
-                            final int tabCount =
-                                containerBadgeCount?.call(null) ??
-                                ref.watch(
-                                  containerTabCountProvider(
-                                    // ignore: provider_parameters
-                                    ContainerFilterById(containerId: null),
-                                  ).select((value) => value.value ?? 0),
-                                );
-
-                            return FilterChip(
-                              avatar: const Icon(MdiIcons.folderHidden),
-                              labelPadding: (tabCount > 0)
-                                  ? null
-                                  : const EdgeInsets.only(right: 2.0),
-                              label: (tabCount > 0)
-                                  ? Text(tabCount.toString())
-                                  : const SizedBox.shrink(),
-                              selected: selectedContainer == null,
-                              showCheckmark: false,
-                              onSelected: (value) {
-                                if (value) {
-                                  onSelected?.call(null);
-                                }
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    if (showGroupSuggestions)
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final tabSuggestionsEnabled = ref.watch(
-                            tabSuggestionsControllerProvider,
-                          );
-                          final enableAiFeatures = ref.watch(
-                            generalSettingsWithDefaultsProvider.select(
-                              (settings) => settings.enableLocalAiFeatures,
-                            ),
-                          );
-
-                          if (!enableAiFeatures || !tabSuggestionsEnabled) {
-                            return const SizedBox.shrink();
-                          }
-
-                          final suggestions = ref.watch(
-                            suggestClustersProvider,
-                          );
-
-                          return suggestions.when(
-                            skipLoadingOnReload: true,
-                            data: (data) {
-                              if (data.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              return FilterChip(
-                                avatar: const Icon(MdiIcons.autoFix),
-                                label: Text(data!.length.toString()),
-                                showCheckmark: false,
-                                onSelected: (_) async {
-                                  await const ContainerDraftRoute().push(
-                                    context,
-                                  );
-                                },
+                child:
+                    SelectableChips<
+                      ContainerDataWithCount,
+                      ContainerData,
+                      String
+                    >(
+                      enableDelete: false,
+                      itemId: (container) => container.id,
+                      itemBackgroundColor: (container) =>
+                          ContainerColors.forChip(container.color),
+                      selectedBorderColor: Theme.of(
+                        context,
+                      ).colorScheme.primary,
+                      itemLabel: (container) =>
+                          ContainerTitle(container: container),
+                      itemBadgeCount: (container) =>
+                          containerBadgeCount?.call(container) ??
+                          container.tabCount,
+                      itemWrap: enableDragAndDrop
+                          ? (child, container) {
+                              return TabDragContainerTarget(
+                                container: container,
+                                child: child,
                               );
-                            },
-                            error: (error, stackTrace) {
-                              logger.e(
-                                'Error suggesting containers',
-                                error: error,
-                                stackTrace: stackTrace,
-                              );
-                              return const SizedBox.shrink();
-                            },
-                            loading: () {
-                              return const FilterChip(
-                                avatar: Icon(MdiIcons.autoFix),
-                                label: Skeletonizer(child: Text('0')),
-                                showCheckmark: false,
-                                onSelected: null,
-                              );
-                            },
-                          );
-                        },
-                      ),
-                  ],
-                  availableItems: availableContainers,
-                  selectedItem: selectedContainer,
-                  onSelected: onSelected,
-                  onDeleted: onDeleted,
-                  onLongPress: onLongPress,
-                ),
+                            }
+                          : null,
+                      prefixListItems: [
+                        if (showUnassignedChip)
+                          enableDragAndDrop
+                              ? TabDragContainerTarget(
+                                  container: null,
+                                  child: _UnassignedContainerChip(
+                                    containerBadgeCount: () =>
+                                        containerBadgeCount?.call(null),
+                                    selectedContainer: selectedContainer,
+                                    onSelected: onSelected,
+                                  ),
+                                )
+                              : _UnassignedContainerChip(
+                                  containerBadgeCount: () =>
+                                      containerBadgeCount?.call(null),
+                                  selectedContainer: selectedContainer,
+                                  onSelected: onSelected,
+                                ),
+                        if (showGroupSuggestions)
+                          const _ContainerSuggestionsChip(),
+                      ],
+                      availableItems: availableContainers,
+                      selectedItem: selectedContainer,
+                      onSelected: onSelected,
+                      onDeleted: onDeleted,
+                      onLongPress: onLongPress,
+                    ),
               ),
               if (displayMenu)
                 IconButton(

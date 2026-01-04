@@ -55,16 +55,19 @@ class TabTreeEntity extends TabEntity {
   @override
   final String tabId;
 
+  final String? containerId;
+
   final String rootId;
 
   final int totalTabs;
 
   TabTreeEntity({
     required this.tabId,
+    required this.containerId,
     required this.rootId,
     required this.totalTabs,
   });
 
   @override
-  List<Object?> get hashParameters => [tabId, rootId, totalTabs];
+  List<Object?> get hashParameters => [tabId, containerId, rootId, totalTabs];
 }
