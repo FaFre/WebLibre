@@ -81,6 +81,21 @@ class SearchScreen extends HookConsumerWidget {
     );
     final searchFocusNode = useFocusNode();
 
+    useOnAppLifecycleStateChange((previous, current) {
+      switch (current) {
+        case AppLifecycleState.detached:
+        case AppLifecycleState.inactive:
+        case AppLifecycleState.hidden:
+        case AppLifecycleState.paused:
+          //Fixes issue with disappearing keyboard after resume (even we request focus)
+          searchFocusNode.unfocus();
+        case AppLifecycleState.resumed:
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            searchFocusNode.requestFocus();
+          });
+      }
+    });
+
     final defaultSearchBang = ref.watch(
       defaultSearchBangDataProvider.select((value) => value.value),
     );
