@@ -192,7 +192,7 @@ class TabMenu extends HookConsumerWidget {
           SubmenuButton(
             menuChildren: [
               MenuItemButton(
-                leadingIcon: const Icon(MdiIcons.tabPlus),
+                leadingIcon: const Icon(MdiIcons.tab),
                 child: const Text('Regular'),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
@@ -448,7 +448,7 @@ class TabMenu extends HookConsumerWidget {
                 );
               }
             },
-            leadingIcon: const Icon(Icons.close),
+            leadingIcon: const Icon(MdiIcons.tabMinus),
             child: const Text('Close Tab'),
           ),
       ],

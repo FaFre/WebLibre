@@ -990,7 +990,7 @@ class AddTabButton extends HookConsumerWidget {
             const BrowserRoute().go(context);
           }
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(MdiIcons.tabPlus),
         onLongPress: () {
           if (tabMenuController.isOpen) {
             tabMenuController.close();

@@ -51,7 +51,7 @@ class TabCreationMenu extends HookConsumerWidget {
           onPressed: () async {
             await const SearchRoute(tabType: TabType.regular).push(context);
           },
-          leadingIcon: const Icon(MdiIcons.tabPlus),
+          leadingIcon: const Icon(MdiIcons.tab),
           child: const Text('Add Regular Tab'),
         ),
         MenuItemButton(
