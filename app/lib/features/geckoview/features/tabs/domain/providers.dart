@@ -76,7 +76,7 @@ Stream<List<String>> watchContainerTabIds(
 }
 
 @Riverpod(keepAlive: true)
-Stream<List<TabData>> watchgetTabsFifo(Ref ref) {
+Stream<List<TabData>> watchTabsFifo(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
 
   return db.tabDao.getTabsFifo().watch();

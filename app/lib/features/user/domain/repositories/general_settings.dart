@@ -118,6 +118,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'quickTabSwitcherMode': settings['quickTabSwitcherMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 

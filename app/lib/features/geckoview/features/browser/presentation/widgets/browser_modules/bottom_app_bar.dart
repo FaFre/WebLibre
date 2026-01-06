@@ -195,6 +195,12 @@ class BrowserTabBar extends HookConsumerWidget {
       ),
     );
 
+    final quickTabSwitcherMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.quickTabSwitcherMode,
+      ),
+    );
+
     final dragStartPosition = useRef(Offset.zero);
 
     final toolbarHeight = useMemoized(() => getToolbarHeight());
@@ -256,7 +262,9 @@ class BrowserTabBar extends HookConsumerWidget {
             Visibility(
               visible: displayQuickTabSwitcher,
               maintainState: true,
-              child: const QuickTabSwitcher(),
+              child: QuickTabSwitcher(
+                quickTabSwitcherMode: quickTabSwitcherMode,
+              ),
             ),
           if (showMainToolbar)
             Visibility(
@@ -442,20 +450,30 @@ class ContextualToolbar extends HookConsumerWidget {
 }
 
 class QuickTabSwitcher extends HookConsumerWidget {
-  const QuickTabSwitcher();
+  final QuickTabSwitcherMode quickTabSwitcherMode;
+
+  const QuickTabSwitcher({required this.quickTabSwitcherMode});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabStates = ref.watch(fifoTabStatesProvider);
+    final selectedTabId = ref.watch(selectedTabProvider);
+
+    final tabStates = (switch (quickTabSwitcherMode) {
+      QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider),
+      QuickTabSwitcherMode.containerTabs => ref.watch(
+        selectedContainerTabStatesWithContainerProvider,
+      ),
+    }).value.where((state) => state.$1.id != selectedTabId).toList();
+
     final historyAsync = useCachedFuture(() {
-      if (tabStates.value.length <= 1) {
+      if (tabStates.isEmpty) {
         return ref
             .read(historyRepositoryProvider.notifier)
             .getVisitsPaginated(count: 25);
       }
 
       return Future.value(<VisitInfo>[]);
-    }, [tabStates.value.length <= 1]);
+    }, [tabStates.isEmpty]);
 
     final chipScrollController = useScrollController();
 
@@ -536,7 +554,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
               },
             );
           },
-          availableItems: tabStates.value
+          availableItems: tabStates
               .map(
                 (state) => (
                   id: state.$1.id,
@@ -547,7 +565,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   color: state.$2?.color,
                 ),
               )
-              .skip(1)
               .followedBy(
                 (historyAsync.data ?? []).map((state) {
                   final url = Uri.parse(state.url);

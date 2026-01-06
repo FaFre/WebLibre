@@ -33,13 +33,14 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/containe
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
 
-typedef FifoTab = (TabState, ContainerData?);
+typedef TabStateWirthContainer = (TabState, ContainerData?);
 
 @Riverpod(keepAlive: true)
 class SelectedBangTrigger extends _$SelectedBangTrigger {
@@ -85,7 +86,7 @@ class SelectedBangData extends _$SelectedBangData {
 }
 
 @Riverpod()
-EquatableValue<List<DefaultTabEntity>> availableTabIds(
+EquatableValue<List<DefaultTabEntity>> containerTabEntities(
   Ref ref,
   ContainerFilter containerFilter,
 ) {
@@ -130,11 +131,13 @@ EquatableValue<List<DefaultTabEntity>> availableTabIds(
 }
 
 @Riverpod()
-EquatableValue<Map<String, TabState>> availableTabStates(
+EquatableValue<Map<String, TabState>> containerTabStates(
   Ref ref,
   ContainerFilter containerFilter,
 ) {
-  final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
+  final availableTabs = ref.watch(
+    containerTabEntitiesProvider(containerFilter),
+  );
   final tabStates = ref.watch(tabStatesProvider);
 
   return EquatableValue({
@@ -145,7 +148,7 @@ EquatableValue<Map<String, TabState>> availableTabStates(
 }
 
 @Riverpod(keepAlive: true)
-EquatableValue<List<FifoTab>> fifoTabStates(Ref ref) {
+EquatableValue<List<TabStateWirthContainer>> fifoTabStates(Ref ref) {
   final containerData = ref
       .watch(watchContainersWithCountProvider.select((value) => value.value))
       .mapNotNull(
@@ -153,7 +156,7 @@ EquatableValue<List<FifoTab>> fifoTabStates(Ref ref) {
       );
 
   final sortedTabs = ref.watch(
-    watchgetTabsFifoProvider.select((value) => value.value),
+    watchTabsFifoProvider.select((value) => value.value),
   );
 
   final tabStates = ref.watch(tabStatesProvider);
@@ -168,6 +171,39 @@ EquatableValue<List<FifoTab>> fifoTabStates(Ref ref) {
               (containerId) => containerData?[containerId],
             ),
           ),
+  ]);
+}
+
+@Riverpod(keepAlive: true)
+EquatableValue<List<TabStateWirthContainer>>
+selectedContainerTabStatesWithContainer(Ref ref) {
+  final filter = ref.watch(
+    selectedContainerProvider.select(
+      (value) => ContainerFilterById(containerId: value),
+    ),
+  );
+
+  final containerData = ref
+      .watch(watchContainersWithCountProvider.select((value) => value.value))
+      .mapNotNull(
+        (value) => Map.fromEntries(value.map((c) => MapEntry(c.id, c))),
+      );
+
+  final sortedTabs = ref.watch(
+    containerTabEntitiesProvider(filter).select((value) => value.value),
+  );
+
+  final tabStates = ref.watch(tabStatesProvider);
+
+  return EquatableValue([
+    for (final tabEntity in sortedTabs)
+      if (tabStates.containsKey(tabEntity.tabId))
+        (
+          tabStates[tabEntity.tabId]!,
+          tabEntity.containerId.mapNotNull(
+            (containerId) => containerData?[containerId],
+          ),
+        ),
   ]);
 }
 
@@ -244,31 +280,29 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       )
       .value;
 
-  final availableTabs = ref.watch(availableTabIdsProvider(containerFilter));
+  final availableTabs = ref.watch(
+    containerTabEntitiesProvider(containerFilter),
+  );
 
   if (tabSearchResults == null) {
     if (groupTrees) {
       final trees = ref.watch(
         watchTabTreesProvider.select(
           (value) => EquatableValue(
-            value.value
-                    ?.map(
-                      (tree) {
-                        // Find the container ID for the latest tab
-                        final containerForTab = availableTabs.value
-                            .where((t) => t.tabId == tree.latestTabId)
-                            .firstOrNull
-                            ?.containerId;
+            value.value?.map((tree) {
+                  // Find the container ID for the latest tab
+                  final containerForTab = availableTabs.value
+                      .where((t) => t.tabId == tree.latestTabId)
+                      .firstOrNull
+                      ?.containerId;
 
-                        return TabTreeEntity(
-                          tabId: tree.latestTabId,
-                          containerId: containerForTab,
-                          rootId: tree.rootTabId,
-                          totalTabs: tree.totalTabs,
-                        );
-                      },
-                    )
-                    .toList() ??
+                  return TabTreeEntity(
+                    tabId: tree.latestTabId,
+                    containerId: containerForTab,
+                    rootId: tree.rootTabId,
+                    totalTabs: tree.totalTabs,
+                  );
+                }).toList() ??
                 [],
           ),
         ),
@@ -314,7 +348,7 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
       .value;
 
   final availableTabStates = ref.watch(
-    availableTabStatesProvider(containerFilter),
+    containerTabStatesProvider(containerFilter),
   );
 
   if (tabSearchResults == null) {

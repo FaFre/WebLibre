@@ -204,10 +204,10 @@ abstract class _$SelectedBangData extends $Notifier<BangData?> {
   }
 }
 
-@ProviderFor(availableTabIds)
-final availableTabIdsProvider = AvailableTabIdsFamily._();
+@ProviderFor(containerTabEntities)
+final containerTabEntitiesProvider = ContainerTabEntitiesFamily._();
 
-final class AvailableTabIdsProvider
+final class ContainerTabEntitiesProvider
     extends
         $FunctionalProvider<
           EquatableValue<List<DefaultTabEntity>>,
@@ -215,23 +215,23 @@ final class AvailableTabIdsProvider
           EquatableValue<List<DefaultTabEntity>>
         >
     with $Provider<EquatableValue<List<DefaultTabEntity>>> {
-  AvailableTabIdsProvider._({
-    required AvailableTabIdsFamily super.from,
+  ContainerTabEntitiesProvider._({
+    required ContainerTabEntitiesFamily super.from,
     required ContainerFilter super.argument,
   }) : super(
          retry: null,
-         name: r'availableTabIdsProvider',
+         name: r'containerTabEntitiesProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$availableTabIdsHash();
+  String debugGetCreateSourceHash() => _$containerTabEntitiesHash();
 
   @override
   String toString() {
-    return r'availableTabIdsProvider'
+    return r'containerTabEntitiesProvider'
         ''
         '($argument)';
   }
@@ -245,7 +245,7 @@ final class AvailableTabIdsProvider
   @override
   EquatableValue<List<DefaultTabEntity>> create(Ref ref) {
     final argument = this.argument as ContainerFilter;
-    return availableTabIds(ref, argument);
+    return containerTabEntities(ref, argument);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -259,7 +259,7 @@ final class AvailableTabIdsProvider
 
   @override
   bool operator ==(Object other) {
-    return other is AvailableTabIdsProvider && other.argument == argument;
+    return other is ContainerTabEntitiesProvider && other.argument == argument;
   }
 
   @override
@@ -268,34 +268,35 @@ final class AvailableTabIdsProvider
   }
 }
 
-String _$availableTabIdsHash() => r'fa7280a7a5f9c277faa71a30f5dd50afa30a20b1';
+String _$containerTabEntitiesHash() =>
+    r'350b3e2a2672ab0a303344c7d8301af24c991ee5';
 
-final class AvailableTabIdsFamily extends $Family
+final class ContainerTabEntitiesFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<DefaultTabEntity>>,
           ContainerFilter
         > {
-  AvailableTabIdsFamily._()
+  ContainerTabEntitiesFamily._()
     : super(
         retry: null,
-        name: r'availableTabIdsProvider',
+        name: r'containerTabEntitiesProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  AvailableTabIdsProvider call(ContainerFilter containerFilter) =>
-      AvailableTabIdsProvider._(argument: containerFilter, from: this);
+  ContainerTabEntitiesProvider call(ContainerFilter containerFilter) =>
+      ContainerTabEntitiesProvider._(argument: containerFilter, from: this);
 
   @override
-  String toString() => r'availableTabIdsProvider';
+  String toString() => r'containerTabEntitiesProvider';
 }
 
-@ProviderFor(availableTabStates)
-final availableTabStatesProvider = AvailableTabStatesFamily._();
+@ProviderFor(containerTabStates)
+final containerTabStatesProvider = ContainerTabStatesFamily._();
 
-final class AvailableTabStatesProvider
+final class ContainerTabStatesProvider
     extends
         $FunctionalProvider<
           EquatableValue<Map<String, TabState>>,
@@ -303,23 +304,23 @@ final class AvailableTabStatesProvider
           EquatableValue<Map<String, TabState>>
         >
     with $Provider<EquatableValue<Map<String, TabState>>> {
-  AvailableTabStatesProvider._({
-    required AvailableTabStatesFamily super.from,
+  ContainerTabStatesProvider._({
+    required ContainerTabStatesFamily super.from,
     required ContainerFilter super.argument,
   }) : super(
          retry: null,
-         name: r'availableTabStatesProvider',
+         name: r'containerTabStatesProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$availableTabStatesHash();
+  String debugGetCreateSourceHash() => _$containerTabStatesHash();
 
   @override
   String toString() {
-    return r'availableTabStatesProvider'
+    return r'containerTabStatesProvider'
         ''
         '($argument)';
   }
@@ -333,7 +334,7 @@ final class AvailableTabStatesProvider
   @override
   EquatableValue<Map<String, TabState>> create(Ref ref) {
     final argument = this.argument as ContainerFilter;
-    return availableTabStates(ref, argument);
+    return containerTabStates(ref, argument);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -347,7 +348,7 @@ final class AvailableTabStatesProvider
 
   @override
   bool operator ==(Object other) {
-    return other is AvailableTabStatesProvider && other.argument == argument;
+    return other is ContainerTabStatesProvider && other.argument == argument;
   }
 
   @override
@@ -356,29 +357,29 @@ final class AvailableTabStatesProvider
   }
 }
 
-String _$availableTabStatesHash() =>
-    r'32f15b0f739495e11025bdc10d324764465b542d';
+String _$containerTabStatesHash() =>
+    r'320f35a2605b53ab57b299caafd9b71804b67c6c';
 
-final class AvailableTabStatesFamily extends $Family
+final class ContainerTabStatesFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<Map<String, TabState>>,
           ContainerFilter
         > {
-  AvailableTabStatesFamily._()
+  ContainerTabStatesFamily._()
     : super(
         retry: null,
-        name: r'availableTabStatesProvider',
+        name: r'containerTabStatesProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  AvailableTabStatesProvider call(ContainerFilter containerFilter) =>
-      AvailableTabStatesProvider._(argument: containerFilter, from: this);
+  ContainerTabStatesProvider call(ContainerFilter containerFilter) =>
+      ContainerTabStatesProvider._(argument: containerFilter, from: this);
 
   @override
-  String toString() => r'availableTabStatesProvider';
+  String toString() => r'containerTabStatesProvider';
 }
 
 @ProviderFor(fifoTabStates)
@@ -387,11 +388,11 @@ final fifoTabStatesProvider = FifoTabStatesProvider._();
 final class FifoTabStatesProvider
     extends
         $FunctionalProvider<
-          EquatableValue<List<FifoTab>>,
-          EquatableValue<List<FifoTab>>,
-          EquatableValue<List<FifoTab>>
+          EquatableValue<List<TabStateWirthContainer>>,
+          EquatableValue<List<TabStateWirthContainer>>,
+          EquatableValue<List<TabStateWirthContainer>>
         >
-    with $Provider<EquatableValue<List<FifoTab>>> {
+    with $Provider<EquatableValue<List<TabStateWirthContainer>>> {
   FifoTabStatesProvider._()
     : super(
         from: null,
@@ -408,27 +409,85 @@ final class FifoTabStatesProvider
 
   @$internal
   @override
-  $ProviderElement<EquatableValue<List<FifoTab>>> $createElement(
+  $ProviderElement<EquatableValue<List<TabStateWirthContainer>>> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  EquatableValue<List<FifoTab>> create(Ref ref) {
+  EquatableValue<List<TabStateWirthContainer>> create(Ref ref) {
     return fifoTabStates(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(EquatableValue<List<FifoTab>> value) {
+  Override overrideWithValue(
+    EquatableValue<List<TabStateWirthContainer>> value,
+  ) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<EquatableValue<List<FifoTab>>>(
-        value,
-      ),
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<TabStateWirthContainer>>>(
+            value,
+          ),
     );
   }
 }
 
-String _$fifoTabStatesHash() => r'0320c28b328d814ed358ec6a10ec770a1ed634ad';
+String _$fifoTabStatesHash() => r'03298f30559d55e986d97a17d517b9a9abb89be4';
+
+@ProviderFor(selectedContainerTabStatesWithContainer)
+final selectedContainerTabStatesWithContainerProvider =
+    SelectedContainerTabStatesWithContainerProvider._();
+
+final class SelectedContainerTabStatesWithContainerProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabStateWirthContainer>>,
+          EquatableValue<List<TabStateWirthContainer>>,
+          EquatableValue<List<TabStateWirthContainer>>
+        >
+    with $Provider<EquatableValue<List<TabStateWirthContainer>>> {
+  SelectedContainerTabStatesWithContainerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedContainerTabStatesWithContainerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$selectedContainerTabStatesWithContainerHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabStateWirthContainer>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabStateWirthContainer>> create(Ref ref) {
+    return selectedContainerTabStatesWithContainer(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    EquatableValue<List<TabStateWirthContainer>> value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<TabStateWirthContainer>>>(
+            value,
+          ),
+    );
+  }
+}
+
+String _$selectedContainerTabStatesWithContainerHash() =>
+    r'd22d16eba89040fbcf7932e5334155f00312957f';
 
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
@@ -600,7 +659,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'590288855aa93162a8f70d37f2b3cd94eabc85e5';
+    r'b0477aa6297183575264d54a82575dfb01fa4c32';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with
@@ -704,7 +763,7 @@ final class FilteredTabPreviewsProvider
 }
 
 String _$filteredTabPreviewsHash() =>
-    r'9fbf6774433e62ce9b63ef66f6db3446e6182109';
+    r'225d67663d70aa0ad2a5544b75bfe7d6125edb58';
 
 final class FilteredTabPreviewsFamily extends $Family
     with

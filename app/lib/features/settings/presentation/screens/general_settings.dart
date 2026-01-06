@@ -446,6 +446,56 @@ class GeneralSettingsScreen extends HookConsumerWidget {
                       );
                 },
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const ListTile(
+                      title: Text('Quick Tab Switcher Mode'),
+                      leading: Icon(MdiIcons.folderSettings),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    RadioGroup(
+                      groupValue: generalSettings.quickTabSwitcherMode,
+                      onChanged: (value) async {
+                        if (value != null) {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .quickTabSwitcherMode(value),
+                              );
+                        }
+                      },
+                      child: const Column(
+                        children: [
+                          RadioListTile.adaptive(
+                            value: QuickTabSwitcherMode.lastUsedTabs,
+                            title: Text('Recently Used Tabs'),
+                            subtitle: Text(
+                              'Recently used tabs across all containers',
+                            ),
+                          ),
+                          RadioListTile.adaptive(
+                            value: QuickTabSwitcherMode.containerTabs,
+                            title: Text('Container Tabs'),
+                            subtitle: Text(
+                              'Ordered tabs of the selected container',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               SwitchListTile.adaptive(
                 title: const Text('Create Child Tabs'),
                 subtitle: const Text(

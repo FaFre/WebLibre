@@ -36,6 +36,8 @@ const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
+enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
+
 enum TabIntentOpenSetting { regular, private, ask }
 
 enum TabBarPosition { top, bottom }
@@ -77,6 +79,7 @@ class GeneralSettings with FastEquatable {
   final bool tabBarShowContextualBar;
   final bool tabBarShowQuickTabSwitcherBar;
   final TabBarPosition tabBarPosition;
+  final QuickTabSwitcherMode quickTabSwitcherMode;
 
   GeneralSettings({
     required this.themeMode,
@@ -98,6 +101,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarShowContextualBar,
     required this.tabBarShowQuickTabSwitcherBar,
     required this.tabBarPosition,
+    required this.quickTabSwitcherMode,
   });
 
   GeneralSettings.withDefaults({
@@ -120,6 +124,7 @@ class GeneralSettings with FastEquatable {
     bool? tabBarShowContextualBar,
     bool? tabBarShowQuickTabSwitcherBar,
     TabBarPosition? tabBarPosition,
+    QuickTabSwitcherMode? quickTabSwitcherMode,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -140,7 +145,9 @@ class GeneralSettings with FastEquatable {
        tabBarReaderView = tabBarReaderView ?? false,
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true,
-       tabBarPosition = tabBarPosition ?? TabBarPosition.bottom;
+       tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
+       quickTabSwitcherMode =
+           quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -168,5 +175,6 @@ class GeneralSettings with FastEquatable {
     tabBarShowContextualBar,
     tabBarShowQuickTabSwitcherBar,
     tabBarPosition,
+    quickTabSwitcherMode,
   ];
 }

@@ -35,7 +35,7 @@ final class GeneralSettingsRepositoryProvider
 }
 
 String _$generalSettingsRepositoryHash() =>
-    r'09542387844db25334384af115c538348b0ad33f';
+    r'74db28f2adc4e35a4c00bb2b7f137ed05a3bc662';
 
 abstract class _$GeneralSettingsRepository
     extends $StreamNotifier<GeneralSettings> {

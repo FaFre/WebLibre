@@ -53,6 +53,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
 
+  GeneralSettings quickTabSwitcherMode(
+    QuickTabSwitcherMode quickTabSwitcherMode,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -80,6 +84,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabBarShowContextualBar,
     bool tabBarShowQuickTabSwitcherBar,
     TabBarPosition tabBarPosition,
+    QuickTabSwitcherMode quickTabSwitcherMode,
   });
 }
 
@@ -170,6 +175,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabBarPosition: tabBarPosition);
 
   @override
+  GeneralSettings quickTabSwitcherMode(
+    QuickTabSwitcherMode quickTabSwitcherMode,
+  ) => call(quickTabSwitcherMode: quickTabSwitcherMode);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -197,6 +207,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarShowQuickTabSwitcherBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherMode = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -309,6 +320,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarPosition
           // ignore: cast_nullable_to_non_nullable
           : tabBarPosition as TabBarPosition,
+      quickTabSwitcherMode:
+          quickTabSwitcherMode == const $CopyWithPlaceholder() ||
+              quickTabSwitcherMode == null
+          ? _value.quickTabSwitcherMode
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherMode as QuickTabSwitcherMode,
     );
   }
 }
@@ -369,6 +386,10 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabBarPositionEnumMap,
     json['tabBarPosition'],
   ),
+  quickTabSwitcherMode: $enumDecodeNullable(
+    _$QuickTabSwitcherModeEnumMap,
+    json['quickTabSwitcherMode'],
+  ),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -400,6 +421,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
   'tabBarShowQuickTabSwitcherBar': instance.tabBarShowQuickTabSwitcherBar,
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
+  'quickTabSwitcherMode':
+      _$QuickTabSwitcherModeEnumMap[instance.quickTabSwitcherMode]!,
 };
 
 const _$ThemeModeEnumMap = {
@@ -445,4 +468,9 @@ const _$TabBarSwipeActionEnumMap = {
 const _$TabBarPositionEnumMap = {
   TabBarPosition.top: 'top',
   TabBarPosition.bottom: 'bottom',
+};
+
+const _$QuickTabSwitcherModeEnumMap = {
+  QuickTabSwitcherMode.lastUsedTabs: 'lastUsedTabs',
+  QuickTabSwitcherMode.containerTabs: 'containerTabs',
 };
