@@ -187,8 +187,8 @@ class _TabBar extends HookConsumerWidget {
     );
 
     return AnimatedSize(
-      duration: const Duration(milliseconds: 125),
-      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOutQuart,
       child: Visibility(
         visible:
             sheetController.value != null ||

@@ -67,13 +67,6 @@ class BrowserFab extends HookConsumerWidget {
       child = const SizedBox.shrink(key: ValueKey('no_fab'));
     }
 
-    return AnimatedSwitcher(
-      key: child.key,
-      duration: const Duration(milliseconds: 200),
-      transitionBuilder: (child, animation) {
-        return ScaleTransition(scale: animation, child: child);
-      },
-      child: child,
-    );
+    return child;
   }
 }
