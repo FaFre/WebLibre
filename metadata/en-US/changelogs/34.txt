@@ -1,0 +1,71 @@
+GeckoView 146.0.1
+
+**New Features**
+- GitHub and Google Play releases are using libre Fennec-style Gecko builds from now on (on par with F-Droid)
+- Added encrypted profile backup and restore system with password protection
+- Added bookmark import/export functionality
+  - Support for HTML (Netscape format, Firefox/Chrome compatible) and JSON formats
+  - Option to merge with existing bookmarks or replace completely
+- Added private tab tracking system
+  - Visual indicator (private icon) in address bar for private tabs
+  - "Close All Private Tabs" button in tab view
+- Added page content export capabilities
+  - Export current page as PDF file
+  - Copy page content as Markdown to clipboard
+  - Save page content as Markdown file
+- Added multiple tab view modes
+  - Grid view: Traditional grid layout
+  - List view: Compact list showing more tabs at once
+  - Tree view: Hierarchical display of tab relationships
+  - View mode preference persists across app restarts
+- Added quick tab switcher and contextual navigation bar
+  - Contextual bottom toolbar showing recently used tabs or ordered container tabs (configurable)
+  - Dismissible to maximize screen space
+- Added container filter for tree view to show container-specific tab hierarchies
+- Added ML model download progress reporting with real-time indicators
+- Added isolated container data clearing
+  - Clear cookies, cache, and browsing data for specific containers
+  - Option to clear container data on exit
+- Added quit button to profile selector for complete app exit
+- Added address bar auto-focus option for improved navigation UX
+
+**Improvements**
+- Complete tab bar overhaul
+  - Consolidated menu buttons for cleaner interface
+  - Tab reordering now opt-in via settings (not always enabled)
+  - Tab bar dismissible to maximize viewing space
+- Enhanced container color system
+  - Tab bar color now matches current container's color theme
+  - Selected containers use border instead of background color (improved visibility)
+- Redesigned search interface
+  - Improved visual hierarchy and layout
+  - Better organization of suggestions, history, and results
+  - Enhanced container chip display
+  - More efficient use of screen space
+- Improved tab handling and state management
+  - Better tab duplication logic
+  - Enhanced tab parent handling and hierarchy management
+  - Refined tab insertion process
+  - Removed tab deletion cache for simplified architecture
+- Enhanced bookmark management
+  - Assignable folder parents (move bookmarks between folders)
+  - Improved bookmark entry editing interface
+  - Better folder management and organization
+- UI/UX enhancements
+  - Tab icons displayed when screenshots unavailable
+  - Less intense chip background colors for better readability
+  - Auto-hide "Add New Tab" button for cleaner interface
+  - Automatic UI reset after 30+ minutes of inactivity
+  - Updated addon/extension layouts
+  - Various icon updates throughout the app
+
+**Bug Fixes**
+- Fixed search field focus issues preventing proper keyboard interaction
+- Fixed disposed provider exceptions that could cause crashes
+- Fixed unmounted widget exceptions
+- Fixed browser floating action button animation glitches
+- Fixed tab container provider lifecycle coordination
+- Fixed widget/provider lifecycle timing issues
+- Fixed incorrect tab hierarchy when adding multiple tabs (parent ID handling)
+- Fixed tab menu incorrectly showing for history items
+- Improved animation smoothness throughout the app
