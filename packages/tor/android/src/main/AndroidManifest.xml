@@ -1,9 +1,0 @@
-<!--
-SPDX-FileCopyrightText: 2024 Foundation Devices Inc.
-
-SPDX-License-Identifier: MIT
--->
-
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.foundationdevices.tor">
-</manifest>
