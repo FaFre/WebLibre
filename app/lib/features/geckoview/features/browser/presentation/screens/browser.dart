@@ -318,14 +318,19 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Calculate relative safe area for sheet max size
     final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
+    final bottomSafeArea = MediaQuery.of(context).padding.bottom;
 
-    // Calculate bottom toolbar size for FAB positioning
-    final bottomAppBarSize = BrowserBottomAppBar(
+    // Calculate bottom toolbar size for FAB and sheet positioning
+    // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
+    final bottomAppBarContentSize = BrowserBottomAppBar(
       showMainToolbar: tabBarPosition == TabBarPosition.bottom,
       showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-      displayedSheet: null,
+      displayedSheet: displayedSheet,
     ).preferredSize;
+    // Total height includes safe area padding
+    final bottomAppBarTotalHeight =
+        bottomAppBarContentSize.height + bottomSafeArea;
 
     return PopScope(
       //We need this for BackButtonListener to work downstream
@@ -334,11 +339,7 @@ class BrowserScreen extends HookConsumerWidget {
       child: Theme(
         data: themeData,
         child: Scaffold(
-          // Minimal scaffold - only for Material overlay support (SnackBars, BottomSheets)
-          bottomSheetScrimBuilder: (_, _) {
-            // Custom barrier handling - disable scaffold's scrim
-            return null;
-          },
+          // Minimal scaffold - only for Material overlay support (SnackBars)
           body: Stack(
             children: [
               // Layer 0: Browser content (fills entire Stack - constant dimensions)
@@ -358,15 +359,15 @@ class BrowserScreen extends HookConsumerWidget {
                   left: 0,
                   right: 0,
                   top: 0,
-                  bottom: bottomAppBarSize.height,
+                  bottom: bottomAppBarTotalHeight,
                   child: _SheetContainer(
                     displayedSheet: displayedSheet,
                     relativeSafeArea: relativeSafeArea,
-                    bottomAppBarSize: bottomAppBarSize,
+                    bottomAppBarHeight: bottomAppBarTotalHeight,
                   ),
                 ),
 
-              // Layer 2: Bottom Toolbar (overlay, slides in/out) - above sheet
+              // Layer 2: Bottom Toolbar (overlay, slides in/out)
               Positioned(
                 left: 0,
                 right: 0,
@@ -411,8 +412,8 @@ class BrowserScreen extends HookConsumerWidget {
                 curve: Curves.easeInOutQuart,
                 right: 16,
                 bottom: bottomToolbarVisible
-                    ? bottomAppBarSize.height + 16
-                    : 16 + MediaQuery.of(context).padding.bottom,
+                    ? bottomAppBarTotalHeight + 16
+                    : 16 + bottomSafeArea,
                 child: const BrowserFab(),
               ),
             ],
@@ -427,16 +428,19 @@ class BrowserScreen extends HookConsumerWidget {
 class _SheetContainer extends HookConsumerWidget {
   final Sheet displayedSheet;
   final double relativeSafeArea;
-  final Size bottomAppBarSize;
+  final double bottomAppBarHeight;
 
   const _SheetContainer({
     required this.displayedSheet,
     required this.relativeSafeArea,
-    required this.bottomAppBarSize,
+    required this.bottomAppBarHeight,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Memoize maxChildSize to prevent keyboard from affecting sheet size
+    final stableMaxChildSize = useMemoized(() => relativeSafeArea, []);
+
     bool dismissOnThreshold(DraggableScrollableNotification notification) {
       if (notification.extent <= 0.1) {
         logger.i('Dismissing sheet, reached min extend');
@@ -451,7 +455,7 @@ class _SheetContainer extends HookConsumerWidget {
         // Dismiss sheet when tapping outside
         ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
       },
-      child: Container(
+      child: ColoredBox(
         color: Colors.black54, // Scrim
         child: GestureDetector(
           onTap: () {}, // Prevent tap from propagating to parent
@@ -460,18 +464,16 @@ class _SheetContainer extends HookConsumerWidget {
             child: switch (displayedSheet) {
               ViewTabsSheet() =>
                 NotificationListener<DraggableScrollableNotification>(
-                  key: UniqueKey(),
                   onNotification: dismissOnThreshold,
-                  child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
+                  child: _ViewTabsSheet(maxChildSize: stableMaxChildSize),
                 ),
               final EditUrlSheet parameter =>
                 NotificationListener<DraggableScrollableNotification>(
-                  key: UniqueKey(),
                   onNotification: dismissOnThreshold,
                   child: _ViewUrlSheet(
                     initialTabState: parameter.tabState,
-                    maxChildSize: relativeSafeArea,
-                    bottomAppBarSize: bottomAppBarSize,
+                    maxChildSize: stableMaxChildSize,
+                    bottomAppBarHeight: bottomAppBarHeight,
                   ),
                 ),
             },
@@ -649,7 +651,6 @@ class _Browser extends HookConsumerWidget {
                 }
               },
               child: _BrowserView(
-                sheetDisplayed: sheetController.value != null,
                 isFullscreen: tabInFullScreen,
                 pointerMoveEventSink: pointerMoveEventSink,
               ),
@@ -662,89 +663,79 @@ class _Browser extends HookConsumerWidget {
 }
 
 class _BrowserView extends StatelessWidget {
-  final bool sheetDisplayed;
   final bool isFullscreen;
   final StreamSink<Offset>? pointerMoveEventSink;
 
   const _BrowserView({
-    required this.sheetDisplayed,
     required this.isFullscreen,
     this.pointerMoveEventSink,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SafeArea(
-          top: !isFullscreen,
-          right: !isFullscreen,
-          // Bottom SafeArea is handled by the overlay toolbar (BottomAppBar)
-          bottom: false,
-          left: !isFullscreen,
-          child: Stack(
-            children: [
-              BrowserView(pointerMoveEventSink: pointerMoveEventSink),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final value = ref.watch(
-                      selectedTabStateProvider.select((state) {
-                        if (state?.isLoading == true) {
-                          return state?.progress ?? 100;
-                        }
-
-                        //When not loading we assumed finished
-                        return 100;
-                      }),
-                    );
-
-                    return Visibility(
-                      visible: value < 100,
-                      child: LinearProgressIndicator(value: value / 100),
-                    );
-                  },
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final value = ref.watch(
-                      selectedTabStateProvider.select(
-                        (state) => EdgeInsets.only(
-                          bottom:
-                              (state?.isLoading == true &&
-                                  state?.progress != null &&
-                                  state!.progress < 100)
-                              ? 4.0
-                              : 0.0,
-                        ),
-                      ),
-                    );
-
-                    final tabId = ref.watch(selectedTabProvider);
-                    if (tabId == null) {
-                      return const SizedBox.shrink();
+    return SafeArea(
+      top: !isFullscreen,
+      right: !isFullscreen,
+      // Bottom SafeArea is handled by the overlay toolbar (BottomAppBar)
+      bottom: false,
+      left: !isFullscreen,
+      child: Stack(
+        children: [
+          BrowserView(pointerMoveEventSink: pointerMoveEventSink),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Consumer(
+              builder: (context, ref, child) {
+                final value = ref.watch(
+                  selectedTabStateProvider.select((state) {
+                    if (state?.isLoading == true) {
+                      return state?.progress ?? 100;
                     }
 
-                    return FindInPageWidget(tabId: tabId, padding: value);
-                  },
-                ),
-              ),
-            ],
+                    //When not loading we assumed finished
+                    return 100;
+                  }),
+                );
+
+                return Visibility(
+                  visible: value < 100,
+                  child: LinearProgressIndicator(value: value / 100),
+                );
+              },
+            ),
           ),
-        ),
-        if (sheetDisplayed)
-          ModalBarrier(
-            color: Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Consumer(
+              builder: (context, ref, child) {
+                final value = ref.watch(
+                  selectedTabStateProvider.select(
+                    (state) => EdgeInsets.only(
+                      bottom:
+                          (state?.isLoading == true &&
+                              state?.progress != null &&
+                              state!.progress < 100)
+                          ? 4.0
+                          : 0.0,
+                    ),
+                  ),
+                );
+
+                final tabId = ref.watch(selectedTabProvider);
+                if (tabId == null) {
+                  return const SizedBox.shrink();
+                }
+
+                return FindInPageWidget(tabId: tabId, padding: value);
+              },
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -752,11 +743,11 @@ class _BrowserView extends StatelessWidget {
 class _ViewUrlSheet extends HookConsumerWidget {
   final double maxChildSize;
   final TabState initialTabState;
-  final Size bottomAppBarSize;
+  final double bottomAppBarHeight;
 
   const _ViewUrlSheet({
     required this.initialTabState,
-    required this.bottomAppBarSize,
+    required this.bottomAppBarHeight,
     this.maxChildSize = 1.0,
   });
 
@@ -773,11 +764,12 @@ class _ViewUrlSheet extends HookConsumerWidget {
       minChildSize: 0.1,
       maxChildSize: maxChildSize,
       builder: (context, scrollController) {
-        return ClipRRect(
+        return Material(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
           ),
+          clipBehavior: Clip.antiAlias,
           child: ViewTabSheetWidget(
             initialTabState: initialTabState,
             sheetScrollController: scrollController,
@@ -796,7 +788,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
               }
             },
             initialHeight: initialHeight,
-            bottomAppBarHeight: bottomAppBarSize.height,
+            bottomAppBarHeight: bottomAppBarHeight,
           ),
         );
       },
@@ -825,11 +817,12 @@ class _ViewTabsSheet extends HookConsumerWidget {
       minChildSize: 0.1,
       maxChildSize: maxChildSize,
       builder: (context, scrollController) {
-        return ClipRRect(
+        return Material(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
           ),
+          clipBehavior: Clip.antiAlias,
           child: switch (tabsViewMode) {
             TabsViewMode.list => ViewTabListWidget(
               scrollController: scrollController,
