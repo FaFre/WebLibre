@@ -300,9 +300,11 @@ class BrowserScreen extends HookConsumerWidget {
       [],
     );
 
-    final sheetController = useState<PersistentBottomSheetController?>(null);
-
     final pointerMoveEventsController = useStreamController<Offset>();
+
+    // Watch sheet state for rendering in Stack
+    final displayedSheet = ref.watch(bottomSheetControllerProvider);
+    final sheetDisplayed = displayedSheet != null;
 
     // Compute visibility states for toolbars
     final appBarVisible = useValueListenable(displayAppBar);
@@ -310,9 +312,12 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Toolbar is visible when: sheet is shown OR (not fullscreen AND app bar visible)
     final topToolbarVisible =
-        sheetController.value != null || (!tabInFullScreen && !topDismissed);
+        sheetDisplayed || (!tabInFullScreen && !topDismissed);
     final bottomToolbarVisible =
-        sheetController.value != null || (!tabInFullScreen && appBarVisible);
+        sheetDisplayed || (!tabInFullScreen && appBarVisible);
+
+    // Calculate relative safe area for sheet max size
+    final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
 
     // Calculate bottom toolbar size for FAB positioning
     final bottomAppBarSize = BrowserBottomAppBar(
@@ -340,15 +345,28 @@ class BrowserScreen extends HookConsumerWidget {
               Positioned.fill(
                 child: _Browser(
                   overlayController: overlayController,
-                  sheetController: sheetController,
                   displayAppBar: displayAppBar,
                   tabInFullScreen: tabInFullScreen,
                   pointerMoveEventSink: pointerMoveEventsController.sink,
-                  bottomAppBarSize: bottomAppBarSize,
+                  sheetDisplayed: sheetDisplayed,
                 ),
               ),
 
-              // Layer 1: Bottom Toolbar (overlay, slides in/out)
+              // Layer 1: Sheet (when displayed) - positioned above toolbar
+              if (sheetDisplayed)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: bottomAppBarSize.height,
+                  child: _SheetContainer(
+                    displayedSheet: displayedSheet,
+                    relativeSafeArea: relativeSafeArea,
+                    bottomAppBarSize: bottomAppBarSize,
+                  ),
+                ),
+
+              // Layer 2: Bottom Toolbar (overlay, slides in/out) - above sheet
               Positioned(
                 left: 0,
                 right: 0,
@@ -367,7 +385,7 @@ class BrowserScreen extends HookConsumerWidget {
                 ),
               ),
 
-              // Layer 2: Top Toolbar (overlay, slides in/out) - only when position is top
+              // Layer 3: Top Toolbar (overlay, slides in/out) - only when position is top
               if (tabBarPosition == TabBarPosition.top)
                 Positioned(
                   left: 0,
@@ -387,13 +405,76 @@ class BrowserScreen extends HookConsumerWidget {
                   ),
                 ),
 
-              // Layer 3: FAB (positioned above bottom toolbar)
-              Positioned(
+              // Layer 4: FAB (animates position with toolbar visibility)
+              AnimatedPositioned(
+                duration: _AnimatedToolbar._kAnimationDuration,
+                curve: Curves.easeInOutQuart,
                 right: 16,
-                bottom: bottomAppBarSize.height + 16,
+                bottom: bottomToolbarVisible
+                    ? bottomAppBarSize.height + 16
+                    : 16 + MediaQuery.of(context).padding.bottom,
                 child: const BrowserFab(),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Container widget for bottom sheets - renders in Stack for proper layering.
+class _SheetContainer extends HookConsumerWidget {
+  final Sheet displayedSheet;
+  final double relativeSafeArea;
+  final Size bottomAppBarSize;
+
+  const _SheetContainer({
+    required this.displayedSheet,
+    required this.relativeSafeArea,
+    required this.bottomAppBarSize,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    bool dismissOnThreshold(DraggableScrollableNotification notification) {
+      if (notification.extent <= 0.1) {
+        logger.i('Dismissing sheet, reached min extend');
+        ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+        return true;
+      }
+      return false;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        // Dismiss sheet when tapping outside
+        ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+      },
+      child: Container(
+        color: Colors.black54, // Scrim
+        child: GestureDetector(
+          onTap: () {}, // Prevent tap from propagating to parent
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: switch (displayedSheet) {
+              ViewTabsSheet() =>
+                NotificationListener<DraggableScrollableNotification>(
+                  key: UniqueKey(),
+                  onNotification: dismissOnThreshold,
+                  child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
+                ),
+              final EditUrlSheet parameter =>
+                NotificationListener<DraggableScrollableNotification>(
+                  key: UniqueKey(),
+                  onNotification: dismissOnThreshold,
+                  child: _ViewUrlSheet(
+                    initialTabState: parameter.tabState,
+                    maxChildSize: relativeSafeArea,
+                    bottomAppBarSize: bottomAppBarSize,
+                  ),
+                ),
+            },
           ),
         ),
       ),
@@ -405,20 +486,17 @@ class _Browser extends HookConsumerWidget {
   Duration get _backButtonPressTimeout => const Duration(seconds: 2);
 
   final OverlayPortalController overlayController;
-  final ValueNotifier<PersistentBottomSheetController?> sheetController;
   final ValueNotifier<bool> displayAppBar;
   final StreamSink<Offset> pointerMoveEventSink;
-  final Size bottomAppBarSize;
-
   final bool tabInFullScreen;
+  final bool sheetDisplayed;
 
   const _Browser({
     required this.overlayController,
-    required this.sheetController,
     required this.displayAppBar,
     required this.tabInFullScreen,
     required this.pointerMoveEventSink,
-    required this.bottomAppBarSize,
+    required this.sheetDisplayed,
   });
 
   @override
@@ -426,88 +504,6 @@ class _Browser extends HookConsumerWidget {
     final lastBackButtonPress = useRef<DateTime?>(null);
 
     final overlayBuilder = ref.watch(overlayControllerProvider);
-
-    ref.listen(bottomSheetControllerProvider, (previous, next) {
-      if (!context.mounted) {
-        logger.e('Cannot show sheet, context not mounted');
-        return;
-      }
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) {
-          logger.e('Cannot show sheet, context not mounted (post frame)');
-          return;
-        }
-
-        // Close existing sheet
-        if (sheetController.value != null) {
-          try {
-            final existingController = sheetController.value!;
-            sheetController.value = null;
-            existingController.close();
-          } catch (e) {
-            logger.e('Error closing existing sheet', error: e);
-          }
-        }
-
-        // Show new sheet
-        if (next != null) {
-          try {
-            final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
-
-            final controller = Scaffold.of(context).showBottomSheet((context) {
-              logger.i(
-                'Building bottom sheet, relativeSafeArea: $relativeSafeArea, mounted: ${context.mounted}',
-              );
-
-              bool dismissOnThreshold(
-                DraggableScrollableNotification notification,
-              ) {
-                if (notification.extent <= 0.1) {
-                  logger.i('Dismissing sheet, reached min extend');
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                  return true;
-                }
-                return false;
-              }
-
-              final sheet = switch (next) {
-                ViewTabsSheet() =>
-                  NotificationListener<DraggableScrollableNotification>(
-                    key: UniqueKey(),
-                    onNotification: dismissOnThreshold,
-                    child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
-                  ),
-                final EditUrlSheet parameter =>
-                  NotificationListener<DraggableScrollableNotification>(
-                    key: UniqueKey(),
-                    onNotification: dismissOnThreshold,
-                    child: _ViewUrlSheet(
-                      initialTabState: parameter.tabState,
-                      maxChildSize: relativeSafeArea,
-                      bottomAppBarSize: bottomAppBarSize,
-                    ),
-                  ),
-              };
-
-              return sheet;
-            });
-
-            unawaited(
-              controller.closed.whenComplete(() {
-                ref.read(bottomSheetControllerProvider.notifier).closed(next);
-              }),
-            );
-
-            sheetController.value = controller;
-          } catch (e) {
-            debugPrint('Failed to show bottom sheet: $e');
-          }
-        }
-      });
-    });
 
     return DragTarget<TabDragData>(
       onMove: (details) {
@@ -538,7 +534,7 @@ class _Browser extends HookConsumerWidget {
             return overlayBuilder!.call(context);
           },
           child: Listener(
-            onPointerDown: sheetController.value != null
+            onPointerDown: sheetDisplayed
                 ? (_) {
                     ref
                         .read(bottomSheetControllerProvider.notifier)
@@ -683,7 +679,8 @@ class _BrowserView extends StatelessWidget {
         SafeArea(
           top: !isFullscreen,
           right: !isFullscreen,
-          bottom: !isFullscreen,
+          // Bottom SafeArea is handled by the overlay toolbar (BottomAppBar)
+          bottom: false,
           left: !isFullscreen,
           child: Stack(
             children: [

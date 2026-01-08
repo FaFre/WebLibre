@@ -22,21 +22,47 @@ import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
+/// Default bottom margin for floating snackbars to position above toolbar.
+/// This accounts for the typical browser toolbar height.
+const _kSnackBarBottomMargin = 72.0;
+
+/// Creates a floating snackbar with proper margin for overlay toolbar layout.
+SnackBar _createFloatingSnackBar({
+  required Widget content,
+  Color? backgroundColor,
+  SnackBarAction? action,
+  Duration duration = const Duration(seconds: 4),
+  bool persist = false,
+}) {
+  return SnackBar(
+    content: content,
+    backgroundColor: backgroundColor,
+    action: action,
+    duration: duration,
+    persist: persist,
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(
+      left: 16,
+      right: 16,
+      bottom: _kSnackBarBottomMargin,
+    ),
+  );
+}
+
 void showErrorMessage(BuildContext context, String message) {
-  final snackBar = SnackBar(
+  final snackBar = _createFloatingSnackBar(
     content: Text(
       message,
       style: TextStyle(color: Theme.of(context).colorScheme.error),
     ),
     backgroundColor: Theme.of(context).colorScheme.onError,
-    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
 void showInfoMessage(BuildContext context, String message) {
-  final snackBar = SnackBar(content: Text(message), persist: false);
+  final snackBar = _createFloatingSnackBar(content: Text(message));
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
@@ -46,12 +72,11 @@ void showTabBackButtonMessage(
   int tabCount,
   Duration duration,
 ) {
-  final snackbar = SnackBar(
+  final snackbar = _createFloatingSnackBar(
     content: (tabCount > 1)
         ? const Text('Navigate BACK again to close current tab')
         : const Text('Navigate BACK again to exit app'),
     duration: duration,
-    persist: false,
   );
 
   ScaffoldMessenger.of(context)
@@ -70,13 +95,12 @@ void showTabOpenedMessage(
     null => 'New tab opened in background',
   };
 
-  final snackBar = SnackBar(
+  final snackBar = _createFloatingSnackBar(
     content: Text(message),
     action: onShow.mapNotNull(
       (onPressed) => SnackBarAction(label: 'Show', onPressed: onPressed),
     ),
     duration: duration,
-    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -90,7 +114,7 @@ Future<void> showSuggestNewTabMessage(
   final clipboardUrl = await tryGetUriFromClipboard();
 
   if (clipboardUrl != null) {
-    final snackBar = SnackBar(
+    final snackBar = _createFloatingSnackBar(
       content: const Text('Want to open link from clipboard?'),
       action: SnackBarAction(
         label: 'Open',
@@ -99,7 +123,6 @@ Future<void> showSuggestNewTabMessage(
         },
       ),
       duration: duration,
-      persist: false,
     );
 
     if (context.mounted) {
@@ -121,13 +144,12 @@ void showTabSwitchMessage(
     null => 'New tab opened',
   };
 
-  final snackBar = SnackBar(
+  final snackBar = _createFloatingSnackBar(
     content: Text(message),
     action: onSwitch.mapNotNull(
       (onPressed) => SnackBarAction(label: 'Switch', onPressed: onPressed),
     ),
     duration: duration,
-    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -165,13 +187,12 @@ void showTabUndoClose(
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
-  final snackBar = SnackBar(
+  final snackBar = _createFloatingSnackBar(
     content: (count > 1)
         ? Text('$count Tabs closed')
         : const Text('Tab closed'),
     action: SnackBarAction(label: 'Undo', onPressed: onUndo),
     duration: duration,
-    persist: false,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);

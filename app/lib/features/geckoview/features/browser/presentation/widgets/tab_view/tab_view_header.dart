@@ -443,31 +443,18 @@ class TabViewHeader extends HookConsumerWidget {
                                         }
 
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(
+                                          ui_helper.showInfoMessage(
                                             context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                shouldReopenTabs
-                                                    ? 'Container data cleared successfully'
-                                                    : 'Container data cleared. ${tabs.length} tab(s) closed.',
-                                              ),
-                                            ),
+                                            shouldReopenTabs
+                                                ? 'Container data cleared successfully'
+                                                : 'Container data cleared. ${tabs.length} tab(s) closed.',
                                           );
                                         }
                                       } catch (e) {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(
+                                          ui_helper.showErrorMessage(
                                             context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Error clearing data: $e',
-                                              ),
-                                              backgroundColor: Theme.of(
-                                                context,
-                                              ).colorScheme.error,
-                                            ),
+                                            'Error clearing data: $e',
                                           );
                                         }
                                       }
