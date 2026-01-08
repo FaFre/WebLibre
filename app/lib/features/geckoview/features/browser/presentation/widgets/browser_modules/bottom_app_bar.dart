@@ -801,7 +801,9 @@ class NavigationMenuButton extends HookConsumerWidget {
             child: const Text('Tor™ Proxy'),
             builder: (context, ref, child) {
               final torConnected = ref.watch(
-                torProxyServiceProvider.select((value) => value.value != null),
+                torProxyServiceProvider.select(
+                  (value) => value.value?.isRunning == true,
+                ),
               );
 
               return Badge(

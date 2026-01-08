@@ -29,7 +29,8 @@ class TorNotification extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(torProxyServiceProvider, (previous, next) {
-      if (!next.isLoading) {
+      if (next.hasValue & next.requireValue.isRunning &&
+          next.requireValue.bootstrapProgress == 100) {
         ref.read(overlayControllerProvider.notifier).dismiss();
       }
     });
@@ -38,39 +39,59 @@ class TorNotification extends HookConsumerWidget {
       child: ColoredBox(
         color: AppColors.torPurple,
         child: SizedBox(
-          height: 56,
+          height: 56 + 12,
           width: MediaQuery.of(context).size.width,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                AnimateGradientShader(
-                  duration: const Duration(milliseconds: 500),
-                  primaryEnd: Alignment.bottomLeft,
-                  secondaryEnd: Alignment.topRight,
-                  primaryColors: const [
-                    AppColors.torActiveGreen,
-                    AppColors.torActiveGreen,
+                Row(
+                  children: [
+                    AnimateGradientShader(
+                      duration: const Duration(milliseconds: 500),
+                      primaryEnd: Alignment.bottomLeft,
+                      secondaryEnd: Alignment.topRight,
+                      primaryColors: const [
+                        AppColors.torActiveGreen,
+                        AppColors.torActiveGreen,
+                      ],
+                      secondaryColors: const [Colors.white, Colors.white],
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Icon(TorIcons.onionAlt),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Tor Proxy is connecting...',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        ref.read(overlayControllerProvider.notifier).dismiss();
+                      },
+                      icon: const Icon(Icons.close, color: Colors.white),
+                    ),
                   ],
-                  secondaryColors: const [Colors.white, Colors.white],
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Icon(TorIcons.onionAlt),
-                  ),
                 ),
-                Expanded(
-                  child: Text(
-                    'Tor Proxy is connecting...',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.white),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    ref.read(overlayControllerProvider.notifier).dismiss();
+                Consumer(
+                  builder: (context, ref, child) {
+                    final bootstrapProgress = ref.watch(
+                      torProxyServiceProvider.select(
+                        (value) => value.value?.bootstrapProgress ?? 0,
+                      ),
+                    );
+
+                    return LinearProgressIndicator(
+                      backgroundColor: AppColors.torBackgroundGrey,
+                      color: AppColors.torActiveGreen,
+                      value: bootstrapProgress / 100,
+                    );
                   },
-                  icon: const Icon(Icons.close, color: Colors.white),
                 ),
               ],
             ),
