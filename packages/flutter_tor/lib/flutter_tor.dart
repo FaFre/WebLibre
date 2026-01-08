@@ -4,7 +4,6 @@ export 'src/tor_api.g.dart'
     show
         TransportType,
         TorConfiguration,
-        TorStartResult,
         TorStatus,
         TorLogMessage,
         IPtProxyController;

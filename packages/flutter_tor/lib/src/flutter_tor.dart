@@ -84,9 +84,4 @@ class _TorLogApiImpl extends TorLogApi {
   void onStatusChanged(TorStatus status) {
     onStatus(status);
   }
-
-  @override
-  void onBootstrapProgress(int progress) {
-    onBootstrap(progress);
-  }
 }
