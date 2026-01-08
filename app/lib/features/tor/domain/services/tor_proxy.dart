@@ -136,6 +136,8 @@ class TorProxyService extends _$TorProxyService {
           null => TransportType.none,
         },
         bridgeLines: setting?.bridge.bridges ?? [],
+        entryNodeCountries: torSettings.entryNodeCountry?.toLowerCase(),
+        exitNodeCountries: torSettings.exitNodeCountry?.toLowerCase(),
       );
 
       await _tor.start(config);
@@ -153,6 +155,10 @@ class TorProxyService extends _$TorProxyService {
 
   Future<void> disconnect() async {
     await _tor.stop();
+  }
+
+  Future<void> requestNewIdentity() async {
+    await _tor.requestNewIdentity();
   }
 
   @override

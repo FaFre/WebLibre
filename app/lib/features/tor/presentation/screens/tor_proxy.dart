@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:country_codes/country_codes.dart';
+import 'package:country_flags/country_flags.dart';
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
@@ -29,6 +32,7 @@ import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class TorProxyScreen extends HookConsumerWidget {
   const TorProxyScreen();
@@ -89,6 +93,39 @@ class TorProxyScreen extends HookConsumerWidget {
       }
     });
 
+    final countryDropdownEntries = useMemoized(
+      () => [
+        const DropdownMenuEntry(
+          value: null,
+          label: 'Automatic',
+          leadingIcon: Icon(MdiIcons.lightbulbAuto),
+        ),
+        ...CountryCodes.countryCodes().map((country) {
+          final label =
+              country.localizedName ??
+              country.name ??
+              country.alpha2Code ??
+              country.countryCode ??
+              'Unnamed Country';
+
+          return DropdownMenuEntry(
+            value: country.alpha2Code,
+            label: label,
+            leadingIcon: country.alpha2Code.mapNotNull(
+              (code) => CountryFlag.fromCountryCode(
+                code,
+                theme: const ImageTheme(width: 24, height: 16),
+              ),
+            ),
+            labelWidget: Text(
+              label,
+              style: const TextStyle(color: Colors.white),
+            ),
+          );
+        }),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(title: const Text('Tor™ Proxy')),
       body: Theme(
@@ -139,39 +176,72 @@ class TorProxyScreen extends HookConsumerWidget {
                     border: Border.all(color: Colors.white),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: SwitchListTile.adaptive(
-                    inactiveThumbColor: Colors.white,
-                    activeThumbColor: AppColors.torActiveGreen,
-                    thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
-                      Set<WidgetState> states,
-                    ) {
-                      if (states.contains(WidgetState.selected)) {
-                        return const Icon(MdiIcons.axisArrowLock);
-                      }
-                      return null; // Use the default color.
-                    }),
-                    value: torPendingRequest.value ?? torIsRunning,
-                    title: const Text('Tor™ Proxy'),
-                    secondary: const Icon(MdiIcons.power),
-                    onChanged: torIsBusy
-                        ? null
-                        : (value) async {
-                            if (value) {
-                              torPendingRequest.value = true;
+                  child: Column(
+                    children: [
+                      SwitchListTile.adaptive(
+                        inactiveThumbColor: Colors.white,
+                        activeThumbColor: AppColors.torActiveGreen,
+                        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (states.contains(WidgetState.selected)) {
+                            return const Icon(MdiIcons.axisArrowLock);
+                          }
+                          return null; // Use the default color.
+                        }),
+                        value: torPendingRequest.value ?? torIsRunning,
+                        title: const Text('Tor™ Proxy'),
+                        secondary: const Icon(MdiIcons.power),
+                        onChanged: torIsBusy
+                            ? null
+                            : (value) async {
+                                if (value) {
+                                  torPendingRequest.value = true;
 
-                              await ref
-                                  .read(torProxyServiceProvider.notifier)
-                                  .startOrReconfigure(
-                                    reconfigureIfRunning: false,
-                                  );
-                            } else {
-                              torPendingRequest.value = false;
+                                  await ref
+                                      .read(torProxyServiceProvider.notifier)
+                                      .startOrReconfigure(
+                                        reconfigureIfRunning: false,
+                                      );
+                                } else {
+                                  torPendingRequest.value = false;
 
-                              await ref
-                                  .read(torProxyServiceProvider.notifier)
-                                  .disconnect();
-                            }
-                          },
+                                  await ref
+                                      .read(torProxyServiceProvider.notifier)
+                                      .disconnect();
+                                }
+                              },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          right: 16.0,
+                          left: 16,
+                          bottom: 16,
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed:
+                                torIsRunning && torIsBootstrapped && !torIsBusy
+                                ? () async {
+                                    await ref
+                                        .read(torProxyServiceProvider.notifier)
+                                        .requestNewIdentity();
+
+                                    if (context.mounted) {
+                                      showInfoMessage(
+                                        context,
+                                        'Requesting new Tor identity...',
+                                      );
+                                    }
+                                  }
+                                : null,
+                            icon: const Icon(MdiIcons.refresh),
+                            label: const Text('Request New Identity'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -447,6 +517,123 @@ class TorProxyScreen extends HookConsumerWidget {
                                   ),
                                 ),
                               ],
+                              const SizedBox(height: 16),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 24.0),
+                                child: Text(
+                                  'Country Restrictions',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 16.0,
+                                  right: 24.0,
+                                  top: 8.0,
+                                ),
+                                child: DropdownMenu(
+                                  initialSelection:
+                                      torSettings.entryNodeCountry,
+                                  menuHeight: 400,
+                                  requestFocusOnTap: true,
+                                  label: const Text('Entry Country'),
+                                  textStyle: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  inputDecorationTheme:
+                                      const InputDecorationTheme(
+                                        labelStyle: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                        iconColor: Colors.white,
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                  // menuStyle: MenuStyle(
+                                  //   backgroundColor:
+                                  //       WidgetStateProperty.all<Color>(
+                                  //         AppColors.torPurple,
+                                  //       ),
+                                  // ),
+                                  dropdownMenuEntries: countryDropdownEntries,
+                                  onSelected: (value) async {
+                                    await ref
+                                        .read(
+                                          saveTorSettingsControllerProvider
+                                              .notifier,
+                                        )
+                                        .save(
+                                          (currentSettings) => currentSettings
+                                              .copyWith
+                                              .entryNodeCountry(value),
+                                        );
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 16.0,
+                                  right: 24.0,
+                                  top: 8.0,
+                                ),
+                                child: DropdownMenu(
+                                  initialSelection: torSettings.exitNodeCountry,
+                                  menuHeight: 400,
+                                  requestFocusOnTap: true,
+                                  label: const Text('Exit Country'),
+                                  textStyle: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  inputDecorationTheme:
+                                      const InputDecorationTheme(
+                                        labelStyle: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                        iconColor: Colors.white,
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                  // menuStyle: MenuStyle(
+                                  //   backgroundColor:
+                                  //       WidgetStateProperty.all<Color>(
+                                  //         AppColors.torPurple,
+                                  //       ),
+                                  // ),
+                                  dropdownMenuEntries: countryDropdownEntries,
+                                  onSelected: (value) async {
+                                    await ref
+                                        .read(
+                                          saveTorSettingsControllerProvider
+                                              .notifier,
+                                        )
+                                        .save(
+                                          (currentSettings) => currentSettings
+                                              .copyWith
+                                              .exitNodeCountry(value),
+                                        );
+                                  },
+                                ),
+                              ),
                             ],
                           );
                         },
@@ -503,8 +690,8 @@ class TorProxyScreen extends HookConsumerWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
-                    right: 8.0,
-                    left: 8.0,
+                    right: 12.0,
+                    left: 12.0,
                     bottom: 8.0,
                   ),
                   child: Text(

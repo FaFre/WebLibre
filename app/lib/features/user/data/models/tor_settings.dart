@@ -35,6 +35,8 @@ class TorSettings with FastEquatable {
   final TorConnectionConfig config;
   final bool requireBridge;
   final bool fetchRemoteBridges;
+  final String? entryNodeCountry;
+  final String? exitNodeCountry;
 
   TorSettings({
     required this.proxyRegularTabsMode,
@@ -42,6 +44,8 @@ class TorSettings with FastEquatable {
     required this.config,
     required this.requireBridge,
     required this.fetchRemoteBridges,
+    required this.entryNodeCountry,
+    required this.exitNodeCountry,
   });
 
   TorSettings.withDefaults({
@@ -50,6 +54,8 @@ class TorSettings with FastEquatable {
     TorConnectionConfig? config,
     bool? requireBridge,
     bool? fetchRemoteBridges,
+    this.entryNodeCountry,
+    this.exitNodeCountry,
   }) : proxyRegularTabsMode =
            proxyRegularTabsMode ?? TorRegularTabProxyMode.container,
        proxyPrivateTabsTor = proxyPrivateTabsTor ?? false,
@@ -69,5 +75,7 @@ class TorSettings with FastEquatable {
     config,
     requireBridge,
     fetchRemoteBridges,
+    entryNodeCountry,
+    exitNodeCountry,
   ];
 }

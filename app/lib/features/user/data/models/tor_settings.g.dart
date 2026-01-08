@@ -17,6 +17,10 @@ abstract class _$TorSettingsCWProxy {
 
   TorSettings fetchRemoteBridges(bool fetchRemoteBridges);
 
+  TorSettings entryNodeCountry(String? entryNodeCountry);
+
+  TorSettings exitNodeCountry(String? exitNodeCountry);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TorSettings(...).copyWith.fieldName(value)`.
   ///
@@ -30,6 +34,8 @@ abstract class _$TorSettingsCWProxy {
     TorConnectionConfig config,
     bool requireBridge,
     bool fetchRemoteBridges,
+    String? entryNodeCountry,
+    String? exitNodeCountry,
   });
 }
 
@@ -61,6 +67,14 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
       call(fetchRemoteBridges: fetchRemoteBridges);
 
   @override
+  TorSettings entryNodeCountry(String? entryNodeCountry) =>
+      call(entryNodeCountry: entryNodeCountry);
+
+  @override
+  TorSettings exitNodeCountry(String? exitNodeCountry) =>
+      call(exitNodeCountry: exitNodeCountry);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TorSettings(...).copyWith.fieldName(value)`.
   ///
@@ -74,6 +88,8 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
     Object? config = const $CopyWithPlaceholder(),
     Object? requireBridge = const $CopyWithPlaceholder(),
     Object? fetchRemoteBridges = const $CopyWithPlaceholder(),
+    Object? entryNodeCountry = const $CopyWithPlaceholder(),
+    Object? exitNodeCountry = const $CopyWithPlaceholder(),
   }) {
     return TorSettings(
       proxyRegularTabsMode:
@@ -103,6 +119,14 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
           ? _value.fetchRemoteBridges
           // ignore: cast_nullable_to_non_nullable
           : fetchRemoteBridges as bool,
+      entryNodeCountry: entryNodeCountry == const $CopyWithPlaceholder()
+          ? _value.entryNodeCountry
+          // ignore: cast_nullable_to_non_nullable
+          : entryNodeCountry as String?,
+      exitNodeCountry: exitNodeCountry == const $CopyWithPlaceholder()
+          ? _value.exitNodeCountry
+          // ignore: cast_nullable_to_non_nullable
+          : exitNodeCountry as String?,
     );
   }
 }
@@ -128,6 +152,8 @@ TorSettings _$TorSettingsFromJson(Map<String, dynamic> json) =>
       config: $enumDecodeNullable(_$TorConnectionConfigEnumMap, json['config']),
       requireBridge: json['requireBridge'] as bool?,
       fetchRemoteBridges: json['fetchRemoteBridges'] as bool?,
+      entryNodeCountry: json['entryNodeCountry'] as String?,
+      exitNodeCountry: json['exitNodeCountry'] as String?,
     );
 
 Map<String, dynamic> _$TorSettingsToJson(TorSettings instance) =>
@@ -138,6 +164,8 @@ Map<String, dynamic> _$TorSettingsToJson(TorSettings instance) =>
       'config': _$TorConnectionConfigEnumMap[instance.config]!,
       'requireBridge': instance.requireBridge,
       'fetchRemoteBridges': instance.fetchRemoteBridges,
+      'entryNodeCountry': instance.entryNodeCountry,
+      'exitNodeCountry': instance.exitNodeCountry,
     };
 
 const _$TorRegularTabProxyModeEnumMap = {

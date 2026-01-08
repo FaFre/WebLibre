@@ -20,6 +20,7 @@
 import 'dart:developer';
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:country_codes/country_codes.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,8 @@ class _MainWidget extends HookConsumerWidget {
     );
 
     useOnInitialization(() async {
+      await CountryCodes.init();
+
       final engineSettings = await ref
           .read(engineSettingsRepositoryProvider.notifier)
           .fetchSettings();

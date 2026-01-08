@@ -55,6 +55,14 @@ class TorSettingsRepository extends _$TorSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'entryNodeCountry': settings['entryNodeCountry']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'exitNodeCountry': settings['exitNodeCountry']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 
