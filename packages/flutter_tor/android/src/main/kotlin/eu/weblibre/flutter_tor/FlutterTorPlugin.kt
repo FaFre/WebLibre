@@ -23,7 +23,9 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
 
     companion object {
         private const val TAG = "FlutterTorPlugin"
-        private const val SERVICE_CONNECTION_TIMEOUT_MS = 10000L
+        // Increased timeout to 60 seconds to account for native TorService binding
+        // which can take 30+ seconds during initial setup
+        private const val SERVICE_CONNECTION_TIMEOUT_MS = 60000L
     }
 
     private var context: Context? = null

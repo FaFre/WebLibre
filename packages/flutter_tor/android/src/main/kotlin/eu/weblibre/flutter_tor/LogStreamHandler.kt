@@ -47,8 +47,6 @@ class LogStreamHandler(messenger: BinaryMessenger) {
      * @param status Current Tor status
      */
     fun sendStatusChange(status: TorStatus) {
-        Log.d(TorManager.Companion.TAG, "sendStatusChange() returning: isRunning=${status.isRunning}, socksPort=${status.socksPort}, bootstrap=${status.bootstrapProgress}")
-
         mainHandler.post {
             try {
                 torLogApi.onStatusChanged(status) { }

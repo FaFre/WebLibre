@@ -47,7 +47,13 @@ class TorProxyScreen extends HookConsumerWidget {
         if (next.requireValue.isRunning != previous?.value?.isRunning ||
             next.requireValue.bootstrapProgress !=
                 previous?.value?.bootstrapProgress) {
-          torPendingRequest.value = null;
+          if (torPendingRequest.value == true) {
+            if (next.requireValue.bootstrapProgress > 0) {
+              torPendingRequest.value = null;
+            }
+          } else {
+            torPendingRequest.value = null;
+          }
         }
       }
     });
@@ -58,9 +64,16 @@ class TorProxyScreen extends HookConsumerWidget {
       ),
     );
 
+    final torIsBootstrapped = ref.watch(
+      torProxyServiceProvider.select(
+        (value) => value.value?.bootstrapProgress == 100,
+      ),
+    );
+
     final torIsBusy =
         torPendingRequest.value != null ||
         bootstrapProgress > 0 && bootstrapProgress < 100;
+
     final torSettings = ref.watch(torSettingsWithDefaultsProvider);
 
     useOnInitialization(() async {
@@ -446,7 +459,7 @@ class TorProxyScreen extends HookConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (torIsBusy)
+                      if (torPendingRequest.value != false && torIsBusy)
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -463,7 +476,9 @@ class TorProxyScreen extends HookConsumerWidget {
                             ),
                           ],
                         )
-                      else if (torIsRunning)
+                      else if (torPendingRequest.value != false &&
+                          torIsRunning &&
+                          torIsBootstrapped)
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Row(

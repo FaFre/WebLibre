@@ -40,12 +40,20 @@ class TorManager(
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    // Store event listener as a field to prevent garbage collection
+    private var torEventListener: TorEventListener? = null
+
     var socksPort: Int = -1
         private set
     // Note: No controlPort - tor-android uses ControlSocket (Unix domain socket) instead
     // This is more secure than TCP ControlPort as it uses file permissions for access control
+    @Volatile
     private var isRunning = false
+    @Volatile
     private var bootstrapProgress = 0
+
+    // Lock for synchronizing status updates
+    private val statusLock = Any()
 
     /**
      * Start Tor with the given configuration
@@ -119,11 +127,9 @@ class TorManager(
             // Start TorService
             // Note: torrcFile is now written to the correct location via TorService.getTorrc()
             // so TorService will automatically find and use it
+            // Note: isRunning will be set to true in setupControlConnection() before network is enabled
+            // This ensures status is consistent when bootstrap events start arriving
             startTorService()
-
-            isRunning = true
-            logHandler.notice("Tor started successfully")
-            sendStatusUpdate()
 
             socksPort
         } catch (e: Exception) {
@@ -190,7 +196,7 @@ class TorManager(
                         controlConnection = conn
                         setupControlConnection(conn)
                         if (continuation.isActive) {
-                            continuation.resume(Unit) {}
+                            continuation.resume(Unit)
                         }
                     } else {
                         val error = Exception("Failed to get control connection after 30 seconds")
@@ -205,6 +211,7 @@ class TorManager(
                 Log.w(TAG, "TorService disconnected")
                 torService = null
                 controlConnection = null
+                torEventListener = null
             }
         }
 
@@ -225,11 +232,23 @@ class TorManager(
 
     /**
      * Setup control connection and event listeners
+     * This follows Orbot's approach: query ports first, then set up events, then enable network
      */
     private fun setupControlConnection(conn: TorControlConnection) {
         try {
-            // Add event listener
-            conn.addRawEventListener(TorEventListener())
+            // Query control connection to verify SOCKS port (like Orbot's initControlConnection)
+            // This also properly initializes the control connection for event delivery
+            try {
+                conn.getInfo("net/listeners/socks")
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not query SOCKS port from control connection", e)
+            }
+
+            logHandler.notice("Connected to Tor control port")
+
+            // Create and store event listener instance (prevents garbage collection)
+            torEventListener = TorEventListener()
+            conn.addRawEventListener(torEventListener)
 
             // Subscribe to events (matching Orbot's event subscriptions)
             conn.setEvents(listOf(
@@ -243,14 +262,28 @@ class TorManager(
                 TorControlCommands.EVENT_ADDRMAP
             ))
 
-            // Enable network now that configuration is complete (like Orbot does)
-            conn.setConf("DisableNetwork", "0")
+            Log.d(TAG, "Control connection setup complete, enabling network")
 
-            Log.d(TAG, "Control connection setup complete")
-            logHandler.notice("Connected to Tor control port")
+            // Set isRunning=true BEFORE enabling network so status is consistent
+            // when bootstrap events start arriving
+            synchronized(statusLock) {
+                isRunning = true
+            }
+            logHandler.notice("Tor started successfully")
+            sendStatusUpdate()
+
+            // Enable network now that configuration is complete (like Orbot does)
+            // This will trigger bootstrap events to start
+            conn.setConf("DisableNetwork", "0")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to setup control connection", e)
             logHandler.error("Control connection error: ${e.message}")
+            // Reset isRunning on failure
+            synchronized(statusLock) {
+                isRunning = false
+            }
+            torEventListener = null
+            throw e
         }
     }
 
@@ -262,15 +295,19 @@ class TorManager(
         logHandler.notice("Stopping Tor...")
 
         try {
-            // Shutdown Tor gracefully
-            controlConnection?.shutdownTor("SHUTDOWN")
-            delay(1000) // Give Tor time to shutdown
-
+            // DON'T call shutdownTor() here - let the service's onDestroy() handle it
+            // Otherwise we get a broken pipe error when service tries to shutdown again
             cleanup()
+
+            // Give the native service time to fully stop before potential restart
+            // This is CRITICAL to prevent binding to a stale service instance
+            delay(2000)
+
             logHandler.notice("Tor stopped")
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping Tor", e)
             cleanup()
+            delay(2000)
         }
     }
 
@@ -278,32 +315,57 @@ class TorManager(
      * Cleanup resources
      */
     private fun cleanup() {
-        isRunning = false
-        bootstrapProgress = 0
-        socksPort = -1
+        synchronized(statusLock) {
+            isRunning = false
+            bootstrapProgress = 0
+            socksPort = -1
+        }
 
         try {
-            controlConnection?.let {
-                // Don't shutdown again, just close
+            // Unsubscribe from all events before removing listener
+            if (controlConnection != null) {
+                try {
+                    controlConnection?.setEvents(emptyList())
+                } catch (e: Exception) {
+                    // Connection may already be closed
+                }
             }
+
+            // Remove event listener
+            if (torEventListener != null && controlConnection != null) {
+                try {
+                    controlConnection?.removeRawEventListener(torEventListener)
+                } catch (e: Exception) {
+                    // Connection may already be closed
+                }
+            }
+            torEventListener = null
             controlConnection = null
         } catch (e: Exception) {
             Log.w(TAG, "Error closing control connection", e)
         }
 
-        try {
-            torServiceConnection?.let {
-                context.unbindService(it)
+        // Service cleanup
+        runBlocking(Dispatchers.Main) {
+            try {
+                torServiceConnection?.let {
+                    context.unbindService(it)
+                }
+                torServiceConnection = null
+
+                // Small delay to ensure unbind completes before stopping service
+                delay(100)
+
+                // Stop the native TorService to ensure clean restart
+                val intent = Intent(context, org.torproject.jni.TorService::class.java)
+                context.stopService(intent)
+            } catch (e: Exception) {
+                Log.w(TAG, "Error unbinding TorService", e)
             }
-            torServiceConnection = null
-        } catch (e: Exception) {
-            Log.w(TAG, "Error unbinding TorService", e)
         }
 
         torService = null
-
         pluggableTransportManager.stopAll()
-
         sendStatusUpdate()
     }
 
@@ -326,18 +388,19 @@ class TorManager(
      * Get current Tor status
      */
     fun getStatus(): TorStatus {
-        val status = TorStatus(
-            isRunning = isRunning,
-            socksPort = if (isRunning) socksPort.toLong() else null,
-            bootstrapProgress = bootstrapProgress.toLong(),
-            currentCircuit = null, // TODO: track current circuit
-            exitNodeCountry = null // TODO: track exit node country
-        )
+        synchronized(statusLock) {
+            val status = TorStatus(
+                isRunning = isRunning,
+                socksPort = if (isRunning) socksPort.toLong() else null,
+                bootstrapProgress = bootstrapProgress.toLong(),
+                currentCircuit = null, // TODO: track current circuit
+                exitNodeCountry = null // TODO: track exit node country
+            )
 
-        Log.d(TAG, "getStatus() returning: isRunning=$isRunning, socksPort=$socksPort, bootstrap=$bootstrapProgress")
-//        logHandler.sendStatusChange(status)
+            Log.d(TAG, "getStatus() returning: isRunning=$isRunning, socksPort=$socksPort, bootstrap=$bootstrapProgress")
 
-        return status
+            return status
+        }
     }
 
     /**
@@ -352,13 +415,13 @@ class TorManager(
      */
     private inner class TorEventListener : RawEventListener {
         override fun onEvent(eventType: String, eventData: String) {
-            Log.d(TAG, "Tor event: $eventType - $eventData")
-
             // Handle bootstrap progress (comes in NOTICE events)
             if (eventData.contains("Bootstrapped")) {
                 val progress = extractBootstrapProgress(eventData)
                 if (progress >= 0) {
-                    bootstrapProgress = progress
+                    synchronized(statusLock) {
+                        bootstrapProgress = progress
+                    }
                     sendStatusUpdate()
 
                     if (progress == 100) {

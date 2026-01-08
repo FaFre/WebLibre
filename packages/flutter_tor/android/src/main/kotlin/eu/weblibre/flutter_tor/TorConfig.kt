@@ -134,10 +134,10 @@ class TorConfig(private val config: TorConfiguration) {
         append("DormantClientTimeout 10 minutes\n")
         append("DormantCanceledByStartup 1\n")
 
-        // Note: DisableNetwork is set to 1 in defaults.torrc
-        // It will be enabled via control port after setup completes (matching Orbot)
-        // We DON'T set it here to avoid overriding the defaults.torrc setting
-        append("DisableNetwork 0\n")
+        // CRITICAL: Set DisableNetwork 1 to prevent bootstrap before event listener is ready
+        // This will be changed to 0 via control port AFTER we set up event listeners
+        // This matches Orbot's approach and ensures we receive all bootstrap events
+        append("DisableNetwork 1\n")
 
         append("Log notice stdout\n")  // Log to stdout for capture
         append("\n")
