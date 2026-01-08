@@ -91,8 +91,8 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
         serviceConnection = connection
 
         val intent = Intent(ctx, TorService::class.java)
-        intent.action = TorService.ACTION_START
-        ctx.startService(intent)
+        // Only bind to service, don't start it yet
+        // Service will be started when startTor() is called
         ctx.bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 

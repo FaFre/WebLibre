@@ -55,17 +55,14 @@ class TorService : Service() {
         Log.d(TAG, "onStartCommand: ${intent?.action}")
 
         when (intent?.action) {
-            ACTION_START -> {
-                // Start in foreground immediately
-                startForeground(NOTIFICATION_ID, createNotification("Starting Tor..."))
-                // Actual start will be handled via binder methods
-            }
-
             ACTION_STOP -> {
                 scope.launch {
                     stopTor()
                     stopSelf()
                 }
+            }
+            else -> {
+                Log.d(TAG, "Service started via binding, waiting for startTor() call")
             }
         }
 
@@ -94,17 +91,23 @@ class TorService : Service() {
      */
     suspend fun startTor(config: TorConfiguration): Int {
         Log.d(TAG, "Starting Tor...")
-        updateNotification("Starting Tor...")
+
+        // Start foreground service with notification
+        // This keeps the service alive even when the app is backgrounded
+        startForeground(NOTIFICATION_ID, createNotification("Tor is connecting..."))
+        Log.d(TAG, "Started foreground service")
 
         val manager = torManager ?: throw IllegalStateException("Service not initialized")
 
         try {
             val socksPort = manager.start(config)
-            updateNotification("Tor is running (SOCKS: $socksPort)")
+            updateNotification("Tor connected")
             return socksPort
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start Tor", e)
             updateNotification("Failed to start Tor")
+            // Stop foreground on failure
+            stopForeground(STOP_FOREGROUND_REMOVE)
             throw e
         }
     }
@@ -114,10 +117,12 @@ class TorService : Service() {
      */
     suspend fun stopTor() {
         Log.d(TAG, "Stopping Tor...")
-        updateNotification("Stopping Tor...")
 
         torManager?.stop()
-        updateNotification("Tor stopped")
+
+        // Stop foreground service and remove notification
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        Log.d(TAG, "Stopped foreground service")
     }
 
     /**
@@ -162,9 +167,9 @@ class TorService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Tor Service")
+            .setContentTitle("WebLibre Tor")
             .setContentText(text)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // TODO: Use custom icon
+            .setSmallIcon(R.drawable.ic_onion)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
