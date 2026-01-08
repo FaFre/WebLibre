@@ -1,0 +1,177 @@
+/*
+ * Copyright (c) 2024-2025 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+import 'package:json_annotation/json_annotation.dart';
+
+part 'moat.g.dart';
+
+enum MoatTransportType {
+  obfs4('obfs4'),
+  snowflake('snowflake'),
+  meek('meek'),
+  meekAzure('meek-azure'),
+  webtunnel('webtunnel');
+
+  const MoatTransportType(this.value);
+  final String value;
+
+  @override
+  String toString() => value;
+
+  static MoatTransportType? fromString(String value) {
+    for (final transport in MoatTransportType.values) {
+      if (transport.value == value) return transport;
+    }
+    return null;
+  }
+}
+
+@JsonSerializable()
+class SettingsRequest {
+  final String? country;
+  @JsonKey(toJson: _transportsToJson, fromJson: _transportsFromJson)
+  final List<MoatTransportType> transports;
+
+  const SettingsRequest({
+    this.country,
+    this.transports = const [
+      MoatTransportType.obfs4,
+      MoatTransportType.snowflake,
+      MoatTransportType.webtunnel,
+    ],
+  });
+
+  static List<String> _transportsToJson(List<MoatTransportType> transports) =>
+      transports.map((t) => t.value).toList();
+
+  static List<MoatTransportType> _transportsFromJson(List<dynamic> json) => json
+      .cast<String>()
+      .map((s) => MoatTransportType.fromString(s))
+      .where((t) => t != null)
+      .cast<MoatTransportType>()
+      .toList();
+
+  factory SettingsRequest.fromJson(Map<String, dynamic> json) =>
+      _$SettingsRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SettingsRequestToJson(this);
+}
+
+@JsonSerializable()
+class SettingsResponse {
+  final List<Setting>? settings;
+  final String? country;
+  final List<MoatError>? errors;
+
+  const SettingsResponse({this.settings, this.country, this.errors});
+
+  factory SettingsResponse.fromJson(Map<String, dynamic> json) =>
+      _$SettingsResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SettingsResponseToJson(this);
+}
+
+@JsonSerializable()
+class Setting {
+  @JsonKey(name: 'bridges')
+  final Bridge bridge;
+
+  const Setting({required this.bridge});
+
+  factory Setting.fromJson(Map<String, dynamic> json) =>
+      _$SettingFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SettingToJson(this);
+}
+
+@JsonSerializable()
+class Bridge {
+  @JsonKey(toJson: _transportToJson, fromJson: _transportFromJson)
+  final MoatTransportType type;
+  final String source;
+  @JsonKey(name: 'bridge_strings')
+  final List<String>? bridges;
+
+  const Bridge({required this.type, required this.source, this.bridges});
+
+  static String _transportToJson(MoatTransportType transport) =>
+      transport.value;
+
+  static MoatTransportType _transportFromJson(dynamic json) =>
+      MoatTransportType.fromString(json as String)!;
+
+  factory Bridge.fromJson(Map<String, dynamic> json) => _$BridgeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BridgeToJson(this);
+}
+
+@JsonSerializable()
+class MoatError implements Exception {
+  final String? id;
+  final String? type;
+  final String? version;
+  final int? code;
+  final String? status;
+  final String? detail;
+
+  const MoatError({
+    this.id,
+    this.type,
+    this.version,
+    this.code,
+    this.status,
+    this.detail,
+  });
+
+  factory MoatError.fromJson(Map<String, dynamic> json) =>
+      _$MoatErrorFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MoatErrorToJson(this);
+
+  @override
+  String toString() {
+    if (detail != null && detail!.isNotEmpty) {
+      return detail!;
+    }
+    return '$code $status';
+  }
+}
+
+@JsonSerializable()
+class BuiltInBridges {
+  final List<String> meek;
+
+  @JsonKey(name: 'meek-azure')
+  final List<String> meekAzure;
+
+  final List<String> obfs4;
+  final List<String> snowflake;
+
+  const BuiltInBridges({
+    required this.meek,
+    required this.meekAzure,
+    required this.obfs4,
+    required this.snowflake,
+  });
+
+  factory BuiltInBridges.fromJson(Map<String, dynamic> json) =>
+      _$BuiltInBridgesFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BuiltInBridgesToJson(this);
+}

@@ -93,7 +93,9 @@ Future<WebPageInfo> pageInfo(
         (tabState.isPrivate == false &&
             torSettings.proxyRegularTabsMode == TorRegularTabProxyMode.all) ||
         (tabState.isPrivate == true && torSettings.proxyPrivateTabsTor)) {
-      proxyPort = await ref.read(torProxyServiceProvider.future);
+      proxyPort = await ref.read(
+        torProxyServiceProvider.selectAsync((value) => value.socksPort),
+      );
 
       if (proxyPort == null) {
         throw Exception('Could not proxy request');

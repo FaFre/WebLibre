@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:pluggable_transports_proxy/pluggable_transports_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/tor/data/models/moat.dart';
 import 'package:weblibre/features/tor/data/services/builtin_bridges.dart';
+import 'package:weblibre/features/tor/data/services/moat_service.dart';
 
 part 'builtin_bridges.g.dart';
 

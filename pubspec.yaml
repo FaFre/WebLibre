@@ -6,6 +6,8 @@ workspace:
   - app/
   - packages/flutter_mozilla_components
   - packages/flutter_mozilla_components/example
+  - packages/flutter_tor
+  - packages/flutter_tor/example
   - packages/simple_intent_receiver
   - packages/simple_intent_receiver/example
   - packages/locale_resolver

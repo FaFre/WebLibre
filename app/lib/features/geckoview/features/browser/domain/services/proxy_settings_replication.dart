@@ -40,7 +40,7 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       (previous, next) async {
         await ref
             .read(torProxyRepositoryProvider.notifier)
-            .setProxyPort(next ?? -1);
+            .setProxyPort(next?.socksPort ?? -1);
       },
       onError: (error, stackTrace) {
         logger.e(

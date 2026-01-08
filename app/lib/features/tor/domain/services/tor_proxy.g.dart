@@ -13,7 +13,7 @@ part of 'tor_proxy.dart';
 final torProxyServiceProvider = TorProxyServiceProvider._();
 
 final class TorProxyServiceProvider
-    extends $AsyncNotifierProvider<TorProxyService, int?> {
+    extends $StreamNotifierProvider<TorProxyService, TorStatus> {
   TorProxyServiceProvider._()
     : super(
         from: null,
@@ -33,19 +33,19 @@ final class TorProxyServiceProvider
   TorProxyService create() => TorProxyService();
 }
 
-String _$torProxyServiceHash() => r'c63adf96d7b0a865917b8d902071a0b3ae4dfcc6';
+String _$torProxyServiceHash() => r'be69327bdef8feaa2a43bd83f20168988dcdd228';
 
-abstract class _$TorProxyService extends $AsyncNotifier<int?> {
-  FutureOr<int?> build();
+abstract class _$TorProxyService extends $StreamNotifier<TorStatus> {
+  Stream<TorStatus> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<int?>, int?>;
+    final ref = this.ref as $Ref<AsyncValue<TorStatus>, TorStatus>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<int?>, int?>,
-              AsyncValue<int?>,
+              AnyNotifier<AsyncValue<TorStatus>, TorStatus>,
+              AsyncValue<TorStatus>,
               Object?,
               Object?
             >;

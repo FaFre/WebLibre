@@ -19,6 +19,7 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
@@ -34,7 +35,32 @@ class TorProxyScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final torProxyPort = ref.watch(torProxyServiceProvider);
+    final bootstrapProgress = ref.watch(
+      torProxyServiceProvider.select(
+        (value) => value.value?.bootstrapProgress ?? 0,
+      ),
+    );
+
+    final torPendingRequest = useState<bool?>(null);
+    ref.listen(torProxyServiceProvider, (previous, next) {
+      if (next.hasValue && torPendingRequest.value != null) {
+        if (next.requireValue.isRunning != previous?.value?.isRunning ||
+            next.requireValue.bootstrapProgress !=
+                previous?.value?.bootstrapProgress) {
+          torPendingRequest.value = null;
+        }
+      }
+    });
+
+    final torIsRunning = ref.watch(
+      torProxyServiceProvider.select(
+        (value) => value.value?.isRunning ?? false,
+      ),
+    );
+
+    final torIsBusy =
+        torPendingRequest.value != null ||
+        bootstrapProgress > 0 && bootstrapProgress < 100;
     final torSettings = ref.watch(torSettingsWithDefaultsProvider);
 
     useOnInitialization(() async {
@@ -43,9 +69,10 @@ class TorProxyScreen extends HookConsumerWidget {
 
     ref.listen(torSettingsRepositoryProvider, (previous, next) async {
       final torService = ref.read(torProxyServiceProvider.notifier);
+      final currentStatus = await torService.requestSync();
 
-      if (await torService.requestSync() != null) {
-        await torService.startOrReconfigure();
+      if (currentStatus.isRunning) {
+        await torService.startOrReconfigure(reconfigureIfRunning: true);
       }
     });
 
@@ -110,17 +137,23 @@ class TorProxyScreen extends HookConsumerWidget {
                       }
                       return null; // Use the default color.
                     }),
-                    value: torProxyPort.value != null,
+                    value: torPendingRequest.value ?? torIsRunning,
                     title: const Text('Tor™ Proxy'),
                     secondary: const Icon(MdiIcons.power),
-                    onChanged: torProxyPort.isLoading
+                    onChanged: torIsBusy
                         ? null
                         : (value) async {
                             if (value) {
+                              torPendingRequest.value = true;
+
                               await ref
                                   .read(torProxyServiceProvider.notifier)
-                                  .startOrReconfigure();
+                                  .startOrReconfigure(
+                                    reconfigureIfRunning: false,
+                                  );
                             } else {
+                              torPendingRequest.value = false;
+
                               await ref
                                   .read(torProxyServiceProvider.notifier)
                                   .disconnect();
@@ -259,7 +292,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                 secondary: const Icon(
                                   MdiIcons.arrowDecisionAuto,
                                 ),
-                                onChanged: torProxyPort.isLoading
+                                onChanged: torIsBusy
                                     ? null
                                     : (value) async {
                                         await ref
@@ -291,7 +324,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                     left: 56,
                                     right: 24,
                                   ),
-                                  onChanged: torProxyPort.isLoading
+                                  onChanged: torIsBusy
                                       ? null
                                       : (value) async {
                                           await ref
@@ -330,7 +363,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                     children: [
                                       RadioListTile.adaptive(
                                         value: TorConnectionConfig.direct,
-                                        enabled: !torProxyPort.isLoading,
+                                        enabled: !torIsBusy,
                                         contentPadding: const EdgeInsets.only(
                                           left: 56,
                                           right: 24,
@@ -342,7 +375,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                       ),
                                       RadioListTile.adaptive(
                                         value: TorConnectionConfig.obfs4,
-                                        enabled: !torProxyPort.isLoading,
+                                        enabled: !torIsBusy,
                                         contentPadding: const EdgeInsets.only(
                                           left: 56,
                                           right: 24,
@@ -354,7 +387,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                       ),
                                       RadioListTile.adaptive(
                                         value: TorConnectionConfig.snowflake,
-                                        enabled: !torProxyPort.isLoading,
+                                        enabled: !torIsBusy,
                                         contentPadding: const EdgeInsets.only(
                                           left: 56,
                                           right: 24,
@@ -378,7 +411,7 @@ class TorProxyScreen extends HookConsumerWidget {
                                     left: 56,
                                     right: 24,
                                   ),
-                                  onChanged: torProxyPort.isLoading
+                                  onChanged: torIsBusy
                                       ? null
                                       : (value) async {
                                           if (value != null) {
@@ -413,23 +446,24 @@ class TorProxyScreen extends HookConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (torProxyPort.isLoading)
-                        const Column(
+                      if (torIsBusy)
+                        Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             LinearProgressIndicator(
                               backgroundColor: AppColors.torBackgroundGrey,
                               color: AppColors.torActiveGreen,
+                              value: bootstrapProgress / 100,
                             ),
-                            SizedBox(height: 8),
-                            Text(
+                            const SizedBox(height: 8),
+                            const Text(
                               'Establishing connection...',
                               style: TextStyle(color: Colors.white),
                             ),
                           ],
-                        ),
-                      if (torProxyPort.value != null)
+                        )
+                      else if (torIsRunning)
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Row(

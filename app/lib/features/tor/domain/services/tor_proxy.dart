@@ -18,107 +18,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:flutter_tor/flutter_tor.dart';
 import 'package:nullability/nullability.dart';
-import 'package:pluggable_transports_proxy/pluggable_transports_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
+import 'package:weblibre/features/tor/data/models/moat.dart';
+import 'package:weblibre/features/tor/data/services/moat_service.dart';
 import 'package:weblibre/features/tor/domain/repositories/builtin_bridges.dart';
-import 'package:weblibre/features/tor/utils/tor_entrypoint.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'tor_proxy.g.dart';
 
-class _TorService {
-  final service = FlutterBackgroundService();
-
-  final _portSubject = BehaviorSubject<int?>.seeded(null);
-
-  ValueStream<int?> get portStream => _portSubject.stream;
-
-  Future<void> startOrReconfigure({
-    ProxyType? proxyType,
-    String? bridgeLines,
-  }) async {
-    await service.startService();
-    service.invoke('startOrReconfigure', {
-      if (proxyType != null) 'proxyType': proxyType.name,
-      if (bridgeLines != null) 'bridgeLines': bridgeLines,
-    });
-  }
-
-  Future<void> reconfigure({ProxyType? proxyType, String? bridgeLines}) async {
-    service.invoke('reconfigure', {
-      if (proxyType != null) 'proxyType': proxyType.name,
-      if (bridgeLines != null) 'bridgeLines': bridgeLines,
-    });
-  }
-
-  Future<void> requestSync() async {
-    service.invoke("sync");
-  }
-
-  Future<void> sendHeartbeat() async {
-    service.invoke("heartbeat");
-  }
-
-  Future<void> stop() async {
-    service.invoke("stop");
-  }
-
-  Future<void> initializeService() async {
-    await service.configure(
-      iosConfiguration: IosConfiguration(autoStart: false),
-      androidConfiguration: AndroidConfiguration(
-        autoStart: false,
-        onStart: onStart,
-        isForegroundMode: true,
-        autoStartOnBoot: false,
-        initialNotificationTitle: 'Tor Service',
-        initialNotificationContent: 'Running in background',
-      ),
-    );
-
-    service.on('portUpdate').listen((data) {
-      final port = data!['port'] as int;
-      _portSubject.add((port > -1) ? port : null);
-    });
-  }
-
-  Future<void> dispose() async {
-    await stop();
-    await _portSubject.close();
-  }
-}
-
 @Riverpod(keepAlive: true)
 class TorProxyService extends _$TorProxyService {
-  final _tor = _TorService();
+  final _tor = FlutterTor();
+  late StreamController<TorStatus> _statusSyncController;
 
-  Timer? _heartbeatUpdate;
-  //This is managed by widget state changes to resume a timer
-  bool _timerPaused = false;
+  Future<TorStatus> startOrReconfigure({
+    required bool reconfigureIfRunning,
+  }) async {
+    final currentStatus = await _tor.getStatus();
 
-  void _enableHeartbeatTimer() {
-    _heartbeatUpdate?.cancel();
-    _timerPaused = false;
-    _heartbeatUpdate = Timer.periodic(const Duration(seconds: 30), (
-      timer,
-    ) async {
-      await _tor.sendHeartbeat();
-    });
-  }
-
-  Future<void> startOrReconfigure({bool forceReconnect = false}) async {
-    final currentPort = await requestSync();
-
-    if (currentPort == null || forceReconnect) {
+    if (!currentStatus.isRunning ||
+        currentStatus.socksPort == null ||
+        reconfigureIfRunning) {
       state = const AsyncLoading();
 
       final torSettings = await ref
@@ -153,10 +80,10 @@ class TorProxyService extends _$TorProxyService {
         setting = config.mapNotNull(
           (config) =>
               config.firstWhereOrNull(
-                (setting) => setting.bridge.type == TransportType.obfs4,
+                (setting) => setting.bridge.type == MoatTransportType.obfs4,
               ) ??
               config.firstWhereOrNull(
-                (setting) => setting.bridge.type == TransportType.snowflake,
+                (setting) => setting.bridge.type == MoatTransportType.snowflake,
               ),
         );
       } else if (torSettings.config != TorConnectionConfig.direct) {
@@ -186,8 +113,9 @@ class TorProxyService extends _$TorProxyService {
                   switch (torSettings.config) {
                     TorConnectionConfig.auto => throw UnimplementedError(),
                     TorConnectionConfig.direct => throw UnimplementedError(),
-                    TorConnectionConfig.obfs4 => TransportType.obfs4,
-                    TorConnectionConfig.snowflake => TransportType.snowflake,
+                    TorConnectionConfig.obfs4 => MoatTransportType.obfs4,
+                    TorConnectionConfig.snowflake =>
+                      MoatTransportType.snowflake,
                   },
             ),
           );
@@ -198,96 +126,44 @@ class TorProxyService extends _$TorProxyService {
         }
       }
 
-      if (setting != null) {
-        switch (setting.bridge.type) {
-          case TransportType.obfs4:
-            await _tor.startOrReconfigure(
-              proxyType: ProxyType.obfs4,
-              bridgeLines: setting.bridge.bridges?.join('\n'),
-            );
-          case TransportType.snowflake:
-            await _tor.startOrReconfigure(
-              proxyType: ProxyType.snowflake,
-              bridgeLines: setting.bridge.bridges?.join('\n'),
-            );
-          case TransportType.meek:
-          case TransportType.meekAzure:
-          case TransportType.webtunnel:
-            throw UnimplementedError();
-        }
-      } else {
-        await _tor.startOrReconfigure();
-      }
+      final config = TorConfiguration(
+        transport: switch (setting?.bridge.type) {
+          MoatTransportType.obfs4 => TransportType.obfs4,
+          MoatTransportType.snowflake => TransportType.snowflake,
+          MoatTransportType.meek => TransportType.meek,
+          MoatTransportType.meekAzure => TransportType.meekAzure,
+          MoatTransportType.webtunnel => TransportType.webtunnel,
+          null => TransportType.none,
+        },
+        bridgeLines: setting?.bridge.bridges ?? [],
+      );
 
-      _enableHeartbeatTimer();
+      await _tor.start(config);
+      return _tor.getStatus();
     }
+
+    return currentStatus;
   }
 
-  Future<int?> requestSync() async {
-    final nextPortUpdate = _tor.portStream.first;
-
-    await _tor.requestSync();
-    return nextPortUpdate;
+  Future<TorStatus> requestSync() async {
+    final status = await _tor.getStatus();
+    _statusSyncController.add(status);
+    return status;
   }
 
   Future<void> disconnect() async {
-    state = const AsyncLoading();
-
-    _heartbeatUpdate?.cancel();
-    _heartbeatUpdate = null;
-    _timerPaused = false;
-
     await _tor.stop();
   }
 
   @override
-  Future<int?> build() async {
-    final portSub = _tor.portStream.distinct().listen((port) {
-      state = AsyncData(port);
-    });
-
-    await _tor.initializeService();
-
-    if (!ref.mounted) return null;
-
-    ref.listen(
-      fireImmediately: true,
-      browserViewLifecycleProvider,
-      (previous, next) {
-        switch (next) {
-          case AppLifecycleState.resumed:
-            if (_timerPaused) {
-              _enableHeartbeatTimer();
-            }
-          case AppLifecycleState.detached:
-          case AppLifecycleState.inactive:
-          case AppLifecycleState.hidden:
-          case AppLifecycleState.paused:
-          case null:
-            if (_heartbeatUpdate?.isActive == true) {
-              _heartbeatUpdate?.cancel();
-              _timerPaused = true;
-            }
-        }
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to browserViewLifecycleProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
+  Stream<TorStatus> build() {
+    _statusSyncController = StreamController();
 
     ref.onDispose(() async {
-      _heartbeatUpdate?.cancel();
-      _heartbeatUpdate = null;
-      _timerPaused = false;
-
-      await portSub.cancel();
-      await _tor.dispose();
+      await _statusSyncController.close();
+      await _tor.stop();
     });
 
-    return _tor.portStream.valueOrNull;
+    return MergeStream([_tor.statusStream, _statusSyncController.stream]);
   }
 }

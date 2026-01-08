@@ -26,7 +26,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_auto_size_text: ^4.1.0
-  flutter_background_service: ^5.1.0
   flutter_hooks: ^0.21.3+1
   flutter_markdown: ^0.7.7+1
   flutter_material_design_icons: ^1.1.7447
@@ -35,6 +34,8 @@ dependencies:
   flutter_reorderable_grid_view: ^5.5.2
   flutter_slidable: ^4.0.3
   flutter_svg: ^2.2.3
+  flutter_tor:
+    path: ../packages/flutter_tor
   go_router: ^17.0.1
   google_fonts: ^6.3.3
   graphview: ^1.5.1
@@ -58,8 +59,6 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
-  pluggable_transports_proxy:
-    path: ../packages/pluggable_transports_proxy
   pretty_qr_code: ^3.5.0
   quick_actions: ^1.1.0
   riverpod: ^3.1.0
@@ -85,8 +84,6 @@ dependencies:
   synchronized: ^3.4.0
   text_scroll: ^0.2.1
   timeago: ^3.7.1
-  tor:
-    path: ../packages/tor
   uri_to_file:
     git:
       url: https://github.com/FaFre/uri-to-file.git
