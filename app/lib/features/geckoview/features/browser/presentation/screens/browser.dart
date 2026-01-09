@@ -56,12 +56,59 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+/// Animated toolbar that slides in/out without changing layout constraints.
+/// Uses SlideTransition to animate visual transform while maintaining
+/// constant intrinsic size for layout purposes.
+class _AnimatedToolbar extends HookWidget {
+  final bool visible;
+  final TabBarPosition position;
+  final Widget child;
+
+  static const _kAnimationDuration = Duration(milliseconds: 250);
+
+  const _AnimatedToolbar({
+    required this.visible,
+    required this.position,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = useAnimationController(
+      duration: _kAnimationDuration,
+      initialValue: visible ? 1.0 : 0.0,
+    );
+
+    useEffect(() {
+      if (visible) {
+        unawaited(controller.forward());
+      } else {
+        unawaited(controller.reverse());
+      }
+      return null;
+    }, [visible]);
+
+    final slideAnimation = useMemoized(() {
+      final begin = position == TabBarPosition.top
+          ? const Offset(0, -1)
+          : const Offset(0, 1);
+
+      return Tween<Offset>(begin: begin, end: Offset.zero).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOutQuart),
+      );
+    }, [position]);
+
+    return SlideTransition(position: slideAnimation, child: child);
+  }
+}
+
+/// Manages scroll-based auto-hide logic and returns the toolbar widget.
+/// Animation is handled by the parent _AnimatedToolbar wrapper.
 class _TabBar extends HookConsumerWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
   final ValueNotifier<bool> displayAppBar;
-  final ValueNotifier<PersistentBottomSheetController?> sheetController;
   final Stream<Offset>? pointerMoveEvents;
   final TabBarPosition tabBarPosition;
 
@@ -70,7 +117,6 @@ class _TabBar extends HookConsumerWidget {
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
     required this.displayAppBar,
-    required this.sheetController,
     required this.tabBarPosition,
     required this.pointerMoveEvents,
   });
@@ -79,10 +125,6 @@ class _TabBar extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabId = ref.watch(selectedTabProvider);
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
-
-    final tabInFullScreen = ref.watch(
-      selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),
-    );
 
     final autoHideTabBar = switch (tabBarPosition) {
       TabBarPosition.top => false,
@@ -93,48 +135,26 @@ class _TabBar extends HookConsumerWidget {
       ),
     };
 
-    final appBarVisible = tabBarPosition == TabBarPosition.top
-        ? !ref.watch(tabBarDismissableControllerProvider)
-        : useValueListenable(displayAppBar);
-
-    if (!autoHideTabBar) {
-      return Visibility(
-        visible: !tabInFullScreen && appBarVisible,
-        child: switch (tabBarPosition) {
-          TabBarPosition.top => BrowserTopAppBar(
-            showMainToolbar: showMainToolbar,
-            showContextualToolbar: showContextualToolbar,
-            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-          ),
-          TabBarPosition.bottom => BrowserBottomAppBar(
-            displayedSheet: displayedSheet,
-            showMainToolbar: showMainToolbar,
-            showContextualToolbar: showContextualToolbar,
-            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-          ),
-        },
-      );
-    }
-
+    // Auto-hide scroll detection hooks (run unconditionally per hook rules)
     final diffAcc = useRef(0.0);
 
     void resetHiddenState() {
       if (!ref.read(tabBarDismissableControllerProvider)) {
         displayAppBar.value = true;
       }
-
       diffAcc.value = 0.0;
     }
 
     useEffect(() {
+      if (!autoHideTabBar) return null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         resetHiddenState();
       });
-
       return null;
-    }, [tabId]);
+    }, [tabId, autoHideTabBar]);
 
     useOnAppLifecycleStateChange((previous, current) {
+      if (!autoHideTabBar) return;
       if (current == AppLifecycleState.resumed) {
         resetHiddenState();
       }
@@ -144,6 +164,7 @@ class _TabBar extends HookConsumerWidget {
       previous,
       next,
     ) {
+      if (!autoHideTabBar) return;
       if (next == true) {
         resetHiddenState();
       }
@@ -153,6 +174,7 @@ class _TabBar extends HookConsumerWidget {
       previous,
       next,
     ) {
+      if (!autoHideTabBar) return;
       if (next != null && previous != null) {
         if (previous != next) {
           resetHiddenState();
@@ -163,12 +185,12 @@ class _TabBar extends HookConsumerWidget {
     useOnStreamChange(
       pointerMoveEvents,
       onData: (event) {
+        if (!autoHideTabBar) return;
         final diff = event.dy;
         if (diff < 0) {
           if (diffAcc.value > 0) {
             diffAcc.value = 0.0;
           }
-
           diffAcc.value += diff;
           if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
             displayAppBar.value = false;
@@ -177,7 +199,6 @@ class _TabBar extends HookConsumerWidget {
           if (diffAcc.value < 0) {
             diffAcc.value = 0.0;
           }
-
           diffAcc.value += diff;
           if (diffAcc.value.abs() > kToolbarHeight) {
             resetHiddenState();
@@ -186,29 +207,20 @@ class _TabBar extends HookConsumerWidget {
       },
     );
 
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOutQuart,
-      child: Visibility(
-        visible:
-            sheetController.value != null ||
-            (!tabInFullScreen && appBarVisible),
-        maintainState: true,
-        child: switch (tabBarPosition) {
-          TabBarPosition.top => BrowserTopAppBar(
-            showMainToolbar: showMainToolbar,
-            showContextualToolbar: showContextualToolbar,
-            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-          ),
-          TabBarPosition.bottom => BrowserBottomAppBar(
-            showMainToolbar: showMainToolbar,
-            displayedSheet: displayedSheet,
-            showContextualToolbar: showContextualToolbar,
-            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-          ),
-        },
+    // Return the toolbar widget - parent handles animation
+    return switch (tabBarPosition) {
+      TabBarPosition.top => BrowserTopAppBar(
+        showMainToolbar: showMainToolbar,
+        showContextualToolbar: showContextualToolbar,
+        showQuickTabSwitcherBar: showQuickTabSwitcherBar,
       ),
-    );
+      TabBarPosition.bottom => BrowserBottomAppBar(
+        displayedSheet: displayedSheet,
+        showMainToolbar: showMainToolbar,
+        showContextualToolbar: showContextualToolbar,
+        showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      ),
+    };
   }
 }
 
@@ -244,13 +256,9 @@ class BrowserScreen extends HookConsumerWidget {
     );
 
     final displayAppBar = useValueNotifier(true);
-    final removeTopAppBar = useState(false);
 
     ref.listen(tabBarDismissableControllerProvider, (previous, next) {
       displayAppBar.value = !next;
-      if (tabBarPosition == TabBarPosition.bottom) {
-        removeTopAppBar.value = next;
-      }
     });
 
     ref.listen(overlayControllerProvider, (previous, next) {
@@ -270,25 +278,59 @@ class BrowserScreen extends HookConsumerWidget {
       },
     );
 
-    final themeData = useMemoized(
-      () => Theme.of(context).copyWith(
-        bottomSheetTheme: BottomSheetThemeData(
-          constraints: BoxConstraints(
-            maxWidth:
-                MediaQuery.of(context).size.width -
-                math.max(
-                  MediaQuery.of(context).padding.left * 2,
-                  MediaQuery.of(context).padding.right * 2,
-                ),
-          ),
+    final pointerMoveEventsController = useStreamController<Offset>();
+
+    // Watch sheet state for rendering in Stack
+    final displayedSheet = ref.watch(bottomSheetControllerProvider);
+    final sheetDisplayed = displayedSheet != null;
+
+    // Compute visibility states for toolbars
+    final appBarVisible = useValueListenable(displayAppBar);
+    final topDismissed = ref.watch(tabBarDismissableControllerProvider);
+
+    // Toolbar is visible when: sheet is shown OR (not fullscreen AND app bar visible)
+    final topToolbarVisible =
+        sheetDisplayed || (!tabInFullScreen && !topDismissed);
+    final bottomToolbarVisible =
+        sheetDisplayed || (!tabInFullScreen && appBarVisible);
+
+    // Calculate relative safe area for sheet max size
+    final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
+    final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+
+    // Calculate bottom toolbar size for FAB and sheet positioning
+    // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
+    final bottomAppBarContentSize = BrowserBottomAppBar(
+      showMainToolbar: tabBarPosition == TabBarPosition.bottom,
+      showContextualToolbar: showContextualToolbar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      displayedSheet: displayedSheet,
+    ).preferredSize;
+    // Total height includes safe area padding
+    final bottomAppBarTotalHeight =
+        bottomAppBarContentSize.height + bottomSafeArea;
+
+    // Theme with dynamic snackbar margin to position above bottom toolbar
+    final themeData = Theme.of(context).copyWith(
+      bottomSheetTheme: BottomSheetThemeData(
+        constraints: BoxConstraints(
+          maxWidth:
+              MediaQuery.of(context).size.width -
+              math.max(
+                MediaQuery.of(context).padding.left * 2,
+                MediaQuery.of(context).padding.right * 2,
+              ),
         ),
       ),
-      [],
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        insetPadding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: bottomToolbarVisible ? bottomAppBarTotalHeight + 8 : 16,
+        ),
+      ),
     );
-
-    final sheetController = useState<PersistentBottomSheetController?>(null);
-
-    final pointerMoveEventsController = useStreamController<Offset>();
 
     return PopScope(
       //We need this for BackButtonListener to work downstream
@@ -297,57 +339,146 @@ class BrowserScreen extends HookConsumerWidget {
       child: Theme(
         data: themeData,
         child: Scaffold(
-          extendBodyBehindAppBar: tabInFullScreen,
-          bottomSheetScrimBuilder: (_, _) {
-            //This causes issues with a non dismissable barrier pushed, we ahve our own barrier and this does seem to have issues when dismissing, so disable it completely
-            return null;
-          },
-          appBar: (tabBarPosition == TabBarPosition.top)
-              ? PreferredSize(
-                  preferredSize: BrowserTopAppBar(
-                    showMainToolbar: true,
-                    showContextualToolbar: showContextualToolbar,
-                    showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-                  ).preferredSize,
-                  child: _TabBar(
-                    tabBarPosition: TabBarPosition.top,
-                    showMainToolbar: true,
-                    displayAppBar: displayAppBar,
-                    sheetController: sheetController,
-                    showContextualToolbar: showContextualToolbar,
-                    showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-                    pointerMoveEvents: null,
+          // Minimal scaffold - only for Material overlay support (SnackBars)
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            children: [
+              // Layer 0: Browser content (fills entire Stack - constant dimensions)
+              Positioned.fill(
+                child: _Browser(
+                  overlayController: overlayController,
+                  displayAppBar: displayAppBar,
+                  tabInFullScreen: tabInFullScreen,
+                  pointerMoveEventSink: pointerMoveEventsController.sink,
+                  sheetDisplayed: sheetDisplayed,
+                ),
+              ),
+
+              // Layer 1: Sheet (when displayed) - positioned above toolbar
+              if (sheetDisplayed)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: bottomAppBarTotalHeight,
+                  child: _SheetContainer(
+                    displayedSheet: displayedSheet,
+                    relativeSafeArea: relativeSafeArea,
+                    bottomAppBarHeight: bottomAppBarTotalHeight,
                   ),
-                )
-              : removeTopAppBar.value
-              ? const PreferredSize(
-                  preferredSize: Size.zero,
-                  child: SizedBox.shrink(),
-                )
-              : null,
-          bottomNavigationBar: _TabBar(
-            tabBarPosition: TabBarPosition.bottom,
-            displayAppBar: displayAppBar,
-            sheetController: sheetController,
-            showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-            showContextualToolbar: showContextualToolbar,
-            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-            pointerMoveEvents: pointerMoveEventsController.stream,
+                ),
+
+              // Layer 2: Bottom Toolbar (overlay, slides in/out)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _AnimatedToolbar(
+                  position: TabBarPosition.bottom,
+                  visible: bottomToolbarVisible,
+                  child: _TabBar(
+                    tabBarPosition: TabBarPosition.bottom,
+                    displayAppBar: displayAppBar,
+                    showMainToolbar: tabBarPosition == TabBarPosition.bottom,
+                    showContextualToolbar: showContextualToolbar,
+                    showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+                    pointerMoveEvents: pointerMoveEventsController.stream,
+                  ),
+                ),
+              ),
+
+              // Layer 3: Top Toolbar (overlay, slides in/out) - only when position is top
+              if (tabBarPosition == TabBarPosition.top)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  child: _AnimatedToolbar(
+                    position: TabBarPosition.top,
+                    visible: topToolbarVisible,
+                    child: _TabBar(
+                      tabBarPosition: TabBarPosition.top,
+                      showMainToolbar: true,
+                      displayAppBar: displayAppBar,
+                      showContextualToolbar: showContextualToolbar,
+                      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+                      pointerMoveEvents: null,
+                    ),
+                  ),
+                ),
+
+              // Layer 4: FAB (animates position with toolbar visibility)
+              AnimatedPositioned(
+                duration: _AnimatedToolbar._kAnimationDuration,
+                curve: Curves.easeInOutQuart,
+                right: 16,
+                bottom: bottomToolbarVisible
+                    ? bottomAppBarTotalHeight + 16
+                    : 16 + bottomSafeArea,
+                child: const BrowserFab(),
+              ),
+            ],
           ),
-          body: _Browser(
-            overlayController: overlayController,
-            sheetController: sheetController,
-            displayAppBar: displayAppBar,
-            tabInFullScreen: tabInFullScreen,
-            pointerMoveEventSink: pointerMoveEventsController.sink,
-            bottomAppBarSize: BrowserBottomAppBar(
-              showMainToolbar: false,
-              showContextualToolbar: showContextualToolbar,
-              showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-              displayedSheet: null,
-            ).preferredSize,
+        ),
+      ),
+    );
+  }
+}
+
+/// Container widget for bottom sheets - renders in Stack for proper layering.
+class _SheetContainer extends HookConsumerWidget {
+  final Sheet displayedSheet;
+  final double relativeSafeArea;
+  final double bottomAppBarHeight;
+
+  const _SheetContainer({
+    required this.displayedSheet,
+    required this.relativeSafeArea,
+    required this.bottomAppBarHeight,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Memoize maxChildSize to prevent keyboard from affecting sheet size
+    final stableMaxChildSize = useMemoized(() => relativeSafeArea, []);
+
+    bool dismissOnThreshold(DraggableScrollableNotification notification) {
+      if (notification.extent <= 0.1) {
+        logger.i('Dismissing sheet, reached min extend');
+        ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+        return true;
+      }
+      return false;
+    }
+
+    return GestureDetector(
+      onTap: () {
+        // Dismiss sheet when tapping outside
+        ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+      },
+      child: ColoredBox(
+        color: Colors.black54, // Scrim
+        child: GestureDetector(
+          onTap: () {}, // Prevent tap from propagating to parent
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: switch (displayedSheet) {
+              ViewTabsSheet() =>
+                NotificationListener<DraggableScrollableNotification>(
+                  onNotification: dismissOnThreshold,
+                  child: _ViewTabsSheet(maxChildSize: stableMaxChildSize),
+                ),
+              final EditUrlSheet parameter =>
+                NotificationListener<DraggableScrollableNotification>(
+                  onNotification: dismissOnThreshold,
+                  child: _ViewUrlSheet(
+                    initialTabState: parameter.tabState,
+                    maxChildSize: stableMaxChildSize,
+                    bottomAppBarHeight: bottomAppBarHeight,
+                  ),
+                ),
+            },
           ),
-          floatingActionButton: const BrowserFab(),
         ),
       ),
     );
@@ -358,20 +489,17 @@ class _Browser extends HookConsumerWidget {
   Duration get _backButtonPressTimeout => const Duration(seconds: 2);
 
   final OverlayPortalController overlayController;
-  final ValueNotifier<PersistentBottomSheetController?> sheetController;
   final ValueNotifier<bool> displayAppBar;
   final StreamSink<Offset> pointerMoveEventSink;
-  final Size bottomAppBarSize;
-
   final bool tabInFullScreen;
+  final bool sheetDisplayed;
 
   const _Browser({
     required this.overlayController,
-    required this.sheetController,
     required this.displayAppBar,
     required this.tabInFullScreen,
     required this.pointerMoveEventSink,
-    required this.bottomAppBarSize,
+    required this.sheetDisplayed,
   });
 
   @override
@@ -379,88 +507,6 @@ class _Browser extends HookConsumerWidget {
     final lastBackButtonPress = useRef<DateTime?>(null);
 
     final overlayBuilder = ref.watch(overlayControllerProvider);
-
-    ref.listen(bottomSheetControllerProvider, (previous, next) {
-      if (!context.mounted) {
-        logger.e('Cannot show sheet, context not mounted');
-        return;
-      }
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) {
-          logger.e('Cannot show sheet, context not mounted (post frame)');
-          return;
-        }
-
-        // Close existing sheet
-        if (sheetController.value != null) {
-          try {
-            final existingController = sheetController.value!;
-            sheetController.value = null;
-            existingController.close();
-          } catch (e) {
-            logger.e('Error closing existing sheet', error: e);
-          }
-        }
-
-        // Show new sheet
-        if (next != null) {
-          try {
-            final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
-
-            final controller = Scaffold.of(context).showBottomSheet((context) {
-              logger.i(
-                'Building bottom sheet, relativeSafeArea: $relativeSafeArea, mounted: ${context.mounted}',
-              );
-
-              bool dismissOnThreshold(
-                DraggableScrollableNotification notification,
-              ) {
-                if (notification.extent <= 0.1) {
-                  logger.i('Dismissing sheet, reached min extend');
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                  return true;
-                }
-                return false;
-              }
-
-              final sheet = switch (next) {
-                ViewTabsSheet() =>
-                  NotificationListener<DraggableScrollableNotification>(
-                    key: UniqueKey(),
-                    onNotification: dismissOnThreshold,
-                    child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
-                  ),
-                final EditUrlSheet parameter =>
-                  NotificationListener<DraggableScrollableNotification>(
-                    key: UniqueKey(),
-                    onNotification: dismissOnThreshold,
-                    child: _ViewUrlSheet(
-                      initialTabState: parameter.tabState,
-                      maxChildSize: relativeSafeArea,
-                      bottomAppBarSize: bottomAppBarSize,
-                    ),
-                  ),
-              };
-
-              return sheet;
-            });
-
-            unawaited(
-              controller.closed.whenComplete(() {
-                ref.read(bottomSheetControllerProvider.notifier).closed(next);
-              }),
-            );
-
-            sheetController.value = controller;
-          } catch (e) {
-            debugPrint('Failed to show bottom sheet: $e');
-          }
-        }
-      });
-    });
 
     return DragTarget<TabDragData>(
       onMove: (details) {
@@ -491,7 +537,7 @@ class _Browser extends HookConsumerWidget {
             return overlayBuilder!.call(context);
           },
           child: Listener(
-            onPointerDown: sheetController.value != null
+            onPointerDown: sheetDisplayed
                 ? (_) {
                     ref
                         .read(bottomSheetControllerProvider.notifier)
@@ -606,7 +652,6 @@ class _Browser extends HookConsumerWidget {
                 }
               },
               child: _BrowserView(
-                sheetDisplayed: sheetController.value != null,
                 isFullscreen: tabInFullScreen,
                 pointerMoveEventSink: pointerMoveEventSink,
               ),
@@ -619,88 +664,76 @@ class _Browser extends HookConsumerWidget {
 }
 
 class _BrowserView extends StatelessWidget {
-  final bool sheetDisplayed;
   final bool isFullscreen;
   final StreamSink<Offset>? pointerMoveEventSink;
 
-  const _BrowserView({
-    required this.sheetDisplayed,
-    required this.isFullscreen,
-    this.pointerMoveEventSink,
-  });
+  const _BrowserView({required this.isFullscreen, this.pointerMoveEventSink});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SafeArea(
-          top: !isFullscreen,
-          right: !isFullscreen,
-          bottom: !isFullscreen,
-          left: !isFullscreen,
-          child: Stack(
-            children: [
-              BrowserView(pointerMoveEventSink: pointerMoveEventSink),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final value = ref.watch(
-                      selectedTabStateProvider.select((state) {
-                        if (state?.isLoading == true) {
-                          return state?.progress ?? 100;
-                        }
-
-                        //When not loading we assumed finished
-                        return 100;
-                      }),
-                    );
-
-                    return Visibility(
-                      visible: value < 100,
-                      child: LinearProgressIndicator(value: value / 100),
-                    );
-                  },
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final value = ref.watch(
-                      selectedTabStateProvider.select(
-                        (state) => EdgeInsets.only(
-                          bottom:
-                              (state?.isLoading == true &&
-                                  state?.progress != null &&
-                                  state!.progress < 100)
-                              ? 4.0
-                              : 0.0,
-                        ),
-                      ),
-                    );
-
-                    final tabId = ref.watch(selectedTabProvider);
-                    if (tabId == null) {
-                      return const SizedBox.shrink();
+    return SafeArea(
+      top: !isFullscreen,
+      right: !isFullscreen,
+      // Bottom SafeArea is handled by the overlay toolbar (BottomAppBar)
+      bottom: false,
+      left: !isFullscreen,
+      child: Stack(
+        children: [
+          BrowserView(pointerMoveEventSink: pointerMoveEventSink),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Consumer(
+              builder: (context, ref, child) {
+                final value = ref.watch(
+                  selectedTabStateProvider.select((state) {
+                    if (state?.isLoading == true) {
+                      return state?.progress ?? 100;
                     }
 
-                    return FindInPageWidget(tabId: tabId, padding: value);
-                  },
-                ),
-              ),
-            ],
+                    //When not loading we assumed finished
+                    return 100;
+                  }),
+                );
+
+                return Visibility(
+                  visible: value < 100,
+                  child: LinearProgressIndicator(value: value / 100),
+                );
+              },
+            ),
           ),
-        ),
-        if (sheetDisplayed)
-          ModalBarrier(
-            color: Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Consumer(
+              builder: (context, ref, child) {
+                final value = ref.watch(
+                  selectedTabStateProvider.select(
+                    (state) => EdgeInsets.only(
+                      bottom:
+                          (state?.isLoading == true &&
+                              state?.progress != null &&
+                              state!.progress < 100)
+                          ? 4.0
+                          : 0.0,
+                    ),
+                  ),
+                );
+
+                final tabId = ref.watch(selectedTabProvider);
+                if (tabId == null) {
+                  return const SizedBox.shrink();
+                }
+
+                return FindInPageWidget(tabId: tabId, padding: value);
+              },
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -708,11 +741,11 @@ class _BrowserView extends StatelessWidget {
 class _ViewUrlSheet extends HookConsumerWidget {
   final double maxChildSize;
   final TabState initialTabState;
-  final Size bottomAppBarSize;
+  final double bottomAppBarHeight;
 
   const _ViewUrlSheet({
     required this.initialTabState,
-    required this.bottomAppBarSize,
+    required this.bottomAppBarHeight,
     this.maxChildSize = 1.0,
   });
 
@@ -729,11 +762,12 @@ class _ViewUrlSheet extends HookConsumerWidget {
       minChildSize: 0.1,
       maxChildSize: maxChildSize,
       builder: (context, scrollController) {
-        return ClipRRect(
+        return Material(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
           ),
+          clipBehavior: Clip.antiAlias,
           child: ViewTabSheetWidget(
             initialTabState: initialTabState,
             sheetScrollController: scrollController,
@@ -752,7 +786,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
               }
             },
             initialHeight: initialHeight,
-            bottomAppBarHeight: bottomAppBarSize.height,
+            bottomAppBarHeight: bottomAppBarHeight,
           ),
         );
       },
@@ -781,11 +815,12 @@ class _ViewTabsSheet extends HookConsumerWidget {
       minChildSize: 0.1,
       maxChildSize: maxChildSize,
       builder: (context, scrollController) {
-        return ClipRRect(
+        return Material(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
           ),
+          clipBehavior: Clip.antiAlias,
           child: switch (tabsViewMode) {
             TabsViewMode.list => ViewTabListWidget(
               scrollController: scrollController,

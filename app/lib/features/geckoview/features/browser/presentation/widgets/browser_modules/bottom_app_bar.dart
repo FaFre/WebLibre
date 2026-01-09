@@ -120,10 +120,19 @@ class BrowserBottomAppBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return BottomAppBar(
-      height: _size.height,
-      padding: EdgeInsets.zero,
-      child: _tabBar,
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return Material(
+      elevation: 3.0,
+      surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomPadding),
+        child: SizedBox(
+          height: _size.height,
+          child: _tabBar,
+        ),
+      ),
     );
   }
 
@@ -271,8 +280,10 @@ class BrowserTabBar extends HookConsumerWidget {
               visible: displayAppBar,
               maintainState: true,
               child: AppBar(
+                primary: false,
                 automaticallyImplyLeading: false,
                 titleSpacing: 8.0,
+                toolbarHeight: kToolbarHeight,
                 backgroundColor:
                     (containerColor != null && displayedSheet is! ViewTabsSheet)
                     ? ContainerColors.forAppBar(containerColor)

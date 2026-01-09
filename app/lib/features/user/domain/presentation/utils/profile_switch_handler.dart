@@ -25,6 +25,7 @@ import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/utils/exit_app.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Handles the profile switching flow with confirmation dialog and cache clearing options.
 ///
@@ -43,9 +44,7 @@ Future<void> handleSwitchProfile(
   // Don't allow switching to the already active profile
   if (isSelected) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('This profile is already active')),
-      );
+      ui_helper.showInfoMessage(context, 'This profile is already active');
     }
     return;
   }

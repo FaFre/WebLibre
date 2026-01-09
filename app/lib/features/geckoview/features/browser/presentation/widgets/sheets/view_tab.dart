@@ -192,6 +192,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
         controller: sheetScrollController,
         builder: (context, controller) {
           return ListView(
+            padding: EdgeInsets.zero,
             controller: controller,
             physics: const ClampingScrollPhysicsWithoutImplicit(),
             children: [
