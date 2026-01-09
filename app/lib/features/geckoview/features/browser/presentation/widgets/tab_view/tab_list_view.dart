@@ -25,7 +25,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
 
 class _TabDraggable extends HookConsumerWidget {
   final TabEntity entity;
@@ -194,6 +193,7 @@ class _TabListView extends HookConsumerWidget {
         builder: (context, controller) {
           return !tabsReorderable
               ? ListView.builder(
+                  padding: EdgeInsets.zero,
                   controller: scrollController,
                   itemCount: itemCount,
                   itemExtent: _itemHeight,
@@ -359,6 +359,9 @@ class ViewTabListWidget extends HookConsumerWidget {
   final bool tabsReorderable;
   final VoidCallback onClose;
 
+  static const _hideThreshold = 0.02; // 2% of sheet size change
+  static const _showThreshold = 0.02;
+
   const ViewTabListWidget({
     required this.onClose,
     required this.scrollController,
@@ -370,8 +373,74 @@ class ViewTabListWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Track FAB visibility based on scroll direction
-    final isFabVisible = useScrollVisibility(scrollController);
+    final isFabVisible = useState(true);
+    final lastSheetSize = useRef(0.0);
+    final isInitialized = useRef(false);
+
+    // Delay initialization to ignore initial animations
+    useEffect(() {
+      final timer = Timer(const Duration(milliseconds: 500), () {
+        isInitialized.value = true;
+        // Initialize lastSheetSize with current size
+        if (draggableScrollableController?.isAttached == true) {
+          lastSheetSize.value = draggableScrollableController!.size;
+        }
+      });
+      return timer.cancel;
+    }, []);
+
+    // Listen to DraggableScrollableController for sheet size changes
+    useEffect(() {
+      final controller = draggableScrollableController;
+      if (controller == null) return null;
+
+      void listener() {
+        if (!isInitialized.value) return;
+        if (!controller.isAttached) return;
+
+        final currentSize = controller.size;
+        final difference = currentSize - lastSheetSize.value;
+
+        // Hide when sheet expands (dragging up / scrolling down)
+        if (difference > _hideThreshold && isFabVisible.value) {
+          isFabVisible.value = false;
+        }
+        // Show when sheet collapses (dragging down / scrolling up)
+        else if (difference < -_showThreshold && !isFabVisible.value) {
+          isFabVisible.value = true;
+        }
+
+        lastSheetSize.value = currentSize;
+      }
+
+      controller.addListener(listener);
+      return () => controller.removeListener(listener);
+    }, [draggableScrollableController]);
+
+    // Fallback: Also listen to scroll controller for fullscreen mode (no draggable sheet)
+    useEffect(() {
+      if (draggableScrollableController != null) return null;
+
+      var lastOffset = 0.0;
+      void listener() {
+        if (!isInitialized.value) return;
+
+        final currentOffset = scrollController.offset;
+        final difference = currentOffset - lastOffset;
+
+        if (difference > 10.0 && isFabVisible.value) {
+          isFabVisible.value = false;
+        } else if ((difference < -10.0 || currentOffset <= 0) &&
+            !isFabVisible.value) {
+          isFabVisible.value = true;
+        }
+
+        lastOffset = currentOffset;
+      }
+
+      scrollController.addListener(listener);
+      return () => scrollController.removeListener(listener);
+    }, [scrollController, draggableScrollableController]);
 
     return Stack(
       alignment: Alignment.bottomRight,

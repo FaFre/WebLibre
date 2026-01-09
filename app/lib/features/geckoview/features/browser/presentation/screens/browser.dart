@@ -88,21 +88,15 @@ class _AnimatedToolbar extends HookWidget {
       return null;
     }, [visible]);
 
-    final slideAnimation = useMemoized(
-      () {
-        final begin = position == TabBarPosition.top
-            ? const Offset(0, -1)
-            : const Offset(0, 1);
+    final slideAnimation = useMemoized(() {
+      final begin = position == TabBarPosition.top
+          ? const Offset(0, -1)
+          : const Offset(0, 1);
 
-        return Tween<Offset>(
-          begin: begin,
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(parent: controller, curve: Curves.easeInOutQuart),
-        );
-      },
-      [position],
-    );
+      return Tween<Offset>(begin: begin, end: Offset.zero).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOutQuart),
+      );
+    }, [position]);
 
     return SlideTransition(position: slideAnimation, child: child);
   }
@@ -284,22 +278,6 @@ class BrowserScreen extends HookConsumerWidget {
       },
     );
 
-    final themeData = useMemoized(
-      () => Theme.of(context).copyWith(
-        bottomSheetTheme: BottomSheetThemeData(
-          constraints: BoxConstraints(
-            maxWidth:
-                MediaQuery.of(context).size.width -
-                math.max(
-                  MediaQuery.of(context).padding.left * 2,
-                  MediaQuery.of(context).padding.right * 2,
-                ),
-          ),
-        ),
-      ),
-      [],
-    );
-
     final pointerMoveEventsController = useStreamController<Offset>();
 
     // Watch sheet state for rendering in Stack
@@ -332,6 +310,28 @@ class BrowserScreen extends HookConsumerWidget {
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
 
+    // Theme with dynamic snackbar margin to position above bottom toolbar
+    final themeData = Theme.of(context).copyWith(
+      bottomSheetTheme: BottomSheetThemeData(
+        constraints: BoxConstraints(
+          maxWidth:
+              MediaQuery.of(context).size.width -
+              math.max(
+                MediaQuery.of(context).padding.left * 2,
+                MediaQuery.of(context).padding.right * 2,
+              ),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        insetPadding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: bottomToolbarVisible ? bottomAppBarTotalHeight + 8 : 16,
+        ),
+      ),
+    );
+
     return PopScope(
       //We need this for BackButtonListener to work downstream
       //No direct pop result will be handled here
@@ -340,6 +340,7 @@ class BrowserScreen extends HookConsumerWidget {
         data: themeData,
         child: Scaffold(
           // Minimal scaffold - only for Material overlay support (SnackBars)
+          resizeToAvoidBottomInset: false,
           body: Stack(
             children: [
               // Layer 0: Browser content (fills entire Stack - constant dimensions)
@@ -666,10 +667,7 @@ class _BrowserView extends StatelessWidget {
   final bool isFullscreen;
   final StreamSink<Offset>? pointerMoveEventSink;
 
-  const _BrowserView({
-    required this.isFullscreen,
-    this.pointerMoveEventSink,
-  });
+  const _BrowserView({required this.isFullscreen, this.pointerMoveEventSink});
 
   @override
   Widget build(BuildContext context) {

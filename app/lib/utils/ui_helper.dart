@@ -22,11 +22,9 @@ import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
-/// Default bottom margin for floating snackbars to position above toolbar.
-/// This accounts for the typical browser toolbar height.
-const _kSnackBarBottomMargin = 72.0;
-
-/// Creates a floating snackbar with proper margin for overlay toolbar layout.
+/// Creates a floating snackbar.
+/// The margin is controlled by the scaffold's snackBarTheme for proper
+/// positioning above bottom app bars of varying heights.
 SnackBar _createFloatingSnackBar({
   required Widget content,
   Color? backgroundColor,
@@ -41,11 +39,6 @@ SnackBar _createFloatingSnackBar({
     duration: duration,
     persist: persist,
     behavior: SnackBarBehavior.floating,
-    margin: const EdgeInsets.only(
-      left: 16,
-      right: 16,
-      bottom: _kSnackBarBottomMargin,
-    ),
   );
 }
 
