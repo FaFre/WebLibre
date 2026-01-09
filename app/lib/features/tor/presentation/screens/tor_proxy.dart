@@ -19,7 +19,6 @@
  */
 import 'package:country_codes/country_codes.dart';
 import 'package:country_flags/country_flags.dart';
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -31,7 +30,6 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
-import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class TorProxyScreen extends HookConsumerWidget {
@@ -95,11 +93,7 @@ class TorProxyScreen extends HookConsumerWidget {
 
     final countryDropdownEntries = useMemoized(
       () => [
-        const DropdownMenuEntry(
-          value: null,
-          label: 'Automatic',
-          leadingIcon: Icon(MdiIcons.lightbulbAuto),
-        ),
+        const DropdownMenuEntry(value: null, label: 'Automatic'),
         ...CountryCodes.countryCodes().map((country) {
           final label =
               country.localizedName ??
@@ -111,12 +105,6 @@ class TorProxyScreen extends HookConsumerWidget {
           return DropdownMenuEntry(
             value: country.alpha2Code,
             label: label,
-            leadingIcon: country.alpha2Code.mapNotNull(
-              (code) => CountryFlag.fromCountryCode(
-                code,
-                theme: const ImageTheme(width: 24, height: 16),
-              ),
-            ),
             labelWidget: Text(
               label,
               style: const TextStyle(color: Colors.white),
@@ -127,7 +115,6 @@ class TorProxyScreen extends HookConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tor™ Proxy')),
       body: Theme(
         data: Theme.of(context).copyWith(
           listTileTheme: ListTileTheme.of(
@@ -160,171 +147,314 @@ class TorProxyScreen extends HookConsumerWidget {
             fillColor: WidgetStateColor.resolveWith((states) {
               return Colors.white;
             }),
+            checkColor: WidgetStateProperty.all(AppColors.torPurple),
           ),
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         child: SafeArea(
           child: ColoredBox(
             color: AppColors.torPurple,
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                const Icon(TorIcons.onionAlt, size: 84),
-                const SizedBox(height: 16),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(16),
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  title: SwitchListTile.adaptive(
+                    inactiveThumbColor: Colors.white,
+                    activeThumbColor: AppColors.torActiveGreen,
+                    thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                      Set<WidgetState> states,
+                    ) {
+                      if (states.contains(WidgetState.selected)) {
+                        return const Icon(MdiIcons.axisArrowLock);
+                      }
+                      return null; // Use the default color.
+                    }),
+                    value: torPendingRequest.value ?? torIsRunning,
+                    title: const Text('Tor™ Service'),
+                    secondary: const Icon(MdiIcons.power),
+                    onChanged: torIsBusy
+                        ? null
+                        : (value) async {
+                            if (value) {
+                              torPendingRequest.value = true;
+
+                              await ref
+                                  .read(torProxyServiceProvider.notifier)
+                                  .startOrReconfigure(
+                                    reconfigureIfRunning: false,
+                                  );
+                            } else {
+                              torPendingRequest.value = false;
+
+                              await ref
+                                  .read(torProxyServiceProvider.notifier)
+                                  .disconnect();
+                            }
+                          },
                   ),
-                  child: Column(
-                    children: [
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(4 + 40 + 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (torPendingRequest.value != false && torIsBusy)
+                          LinearProgressIndicator(
+                            backgroundColor: AppColors.torBackgroundGrey,
+                            color: AppColors.torActiveGreen,
+                            value: bootstrapProgress / 100,
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 4.0,
+                            right: 16,
+                            left: 16,
+                            bottom: 4,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed:
+                                  torIsRunning &&
+                                      torIsBootstrapped &&
+                                      !torIsBusy
+                                  ? () async {
+                                      await ref
+                                          .read(
+                                            torProxyServiceProvider.notifier,
+                                          )
+                                          .requestNewIdentity();
+
+                                      if (context.mounted) {
+                                        showInfoMessage(
+                                          context,
+                                          'Requesting new Tor identity...',
+                                        );
+                                      }
+                                    }
+                                  : null,
+                              icon: const Icon(MdiIcons.refresh),
+                              label: const Text('Request New Identity'),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverList.list(
+                  children: [
+                    const SizedBox(height: 16),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 24.0),
+                      child: Text(
+                        'Routing',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    RadioGroup(
+                      groupValue: torSettings.proxyRegularTabsMode,
+                      onChanged: (value) async {
+                        if (value != null) {
+                          await ref
+                              .read(saveTorSettingsControllerProvider.notifier)
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .proxyRegularTabsMode(value),
+                              );
+                        }
+                      },
+                      child: const Column(
+                        children: [
+                          RadioListTile.adaptive(
+                            value: TorRegularTabProxyMode.container,
+                            title: Text('Container-Based Routing'),
+                            subtitle: Text(
+                              'Route only tabs in Tor containers through the Tor network. Private tabs remain unaffected.',
+                            ),
+                          ),
+                          RadioListTile.adaptive(
+                            value: TorRegularTabProxyMode.all,
+                            title: Text('Global Routing'),
+                            subtitle: Text(
+                              'Route all regular tabs through the Tor network. Private tabs remain unaffected.',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SwitchListTile.adaptive(
+                      inactiveThumbColor: Colors.white,
+                      activeThumbColor: AppColors.torActiveGreen,
+                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                        Set<WidgetState> states,
+                      ) {
+                        if (states.contains(WidgetState.selected)) {
+                          return const Icon(MdiIcons.incognito);
+                        }
+                        return null; // Use the default color.
+                      }),
+                      value: torSettings.proxyPrivateTabsTor,
+                      title: const Text('Proxy Private Tabs'),
+                      subtitle: const Text(
+                        'When enabled, all Private Tabs will be tunneled through Tor',
+                      ),
+                      secondary: const Icon(MdiIcons.incognito),
+                      onChanged: (value) async {
+                        await ref
+                            .read(saveTorSettingsControllerProvider.notifier)
+                            .save(
+                              (currentSettings) => currentSettings.copyWith
+                                  .proxyPrivateTabsTor(value),
+                            );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 24.0),
+                      child: Text(
+                        'Circumvention',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    SwitchListTile.adaptive(
+                      inactiveThumbColor: Colors.white,
+                      activeThumbColor: AppColors.torActiveGreen,
+                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                        Set<WidgetState> states,
+                      ) {
+                        if (states.contains(WidgetState.selected)) {
+                          return const Icon(MdiIcons.arrowDecisionAuto);
+                        }
+                        return null; // Use the default color.
+                      }),
+                      value: torSettings.config == TorConnectionConfig.auto,
+                      title: const Text('Auto Configure Transport'),
+                      subtitle: const Text(
+                        'From some locations, it is necessary to use a pluggable transport to connect to Tor',
+                      ),
+                      secondary: const Icon(MdiIcons.arrowDecisionAuto),
+                      onChanged: torIsBusy
+                          ? null
+                          : (value) async {
+                              await ref
+                                  .read(
+                                    saveTorSettingsControllerProvider.notifier,
+                                  )
+                                  .save(
+                                    (currentSettings) =>
+                                        currentSettings.copyWith.config(
+                                          value
+                                              ? TorConnectionConfig.auto
+                                              : TorConnectionConfig.direct,
+                                        ),
+                                  );
+                            },
+                    ),
+                    if (torSettings.config == TorConnectionConfig.auto) ...[
                       SwitchListTile.adaptive(
                         inactiveThumbColor: Colors.white,
                         activeThumbColor: AppColors.torActiveGreen,
-                        thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
-                          Set<WidgetState> states,
-                        ) {
-                          if (states.contains(WidgetState.selected)) {
-                            return const Icon(MdiIcons.axisArrowLock);
-                          }
-                          return null; // Use the default color.
-                        }),
-                        value: torPendingRequest.value ?? torIsRunning,
-                        title: const Text('Tor™ Proxy'),
-                        secondary: const Icon(MdiIcons.power),
+                        value: torSettings.requireBridge,
+                        contentPadding: const EdgeInsets.only(
+                          left: 56,
+                          right: 24,
+                        ),
                         onChanged: torIsBusy
                             ? null
                             : (value) async {
-                                if (value) {
-                                  torPendingRequest.value = true;
-
-                                  await ref
-                                      .read(torProxyServiceProvider.notifier)
-                                      .startOrReconfigure(
-                                        reconfigureIfRunning: false,
-                                      );
-                                } else {
-                                  torPendingRequest.value = false;
-
-                                  await ref
-                                      .read(torProxyServiceProvider.notifier)
-                                      .disconnect();
-                                }
+                                await ref
+                                    .read(
+                                      saveTorSettingsControllerProvider
+                                          .notifier,
+                                    )
+                                    .save(
+                                      (currentSettings) => currentSettings
+                                          .copyWith
+                                          .requireBridge(value),
+                                    );
                               },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          right: 16.0,
-                          left: 16,
-                          bottom: 16,
-                        ),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            onPressed:
-                                torIsRunning && torIsBootstrapped && !torIsBusy
-                                ? () async {
-                                    await ref
-                                        .read(torProxyServiceProvider.notifier)
-                                        .requestNewIdentity();
-
-                                    if (context.mounted) {
-                                      showInfoMessage(
-                                        context,
-                                        'Requesting new Tor identity...',
-                                      );
-                                    }
-                                  }
-                                : null,
-                            icon: const Icon(MdiIcons.refresh),
-                            label: const Text('Request New Identity'),
-                          ),
+                        title: const Text(
+                          "I'm sure I cannot connect without a bridge",
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: FadingScroll(
-                    fadingSize: 25,
-                    builder: (context, controller) {
-                      return FadingScroll(
-                        controller: controller,
-                        fadingSize: 25,
-                        builder: (context, controller) {
-                          return ListView(
-                            controller: controller,
-                            children: [
-                              const SizedBox(height: 16),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 24.0),
-                                child: Text(
-                                  'Routing',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                    ] else ...[
+                      RadioGroup(
+                        groupValue: torSettings.config,
+                        onChanged: (value) async {
+                          if (value != null) {
+                            await ref
+                                .read(
+                                  saveTorSettingsControllerProvider.notifier,
+                                )
+                                .save(
+                                  (currentSettings) =>
+                                      currentSettings.copyWith.config(value),
+                                );
+                          }
+                        },
+                        child: Column(
+                          children: [
+                            RadioListTile.adaptive(
+                              value: TorConnectionConfig.direct,
+                              enabled: !torIsBusy,
+                              contentPadding: const EdgeInsets.only(
+                                left: 56,
+                                right: 24,
                               ),
-                              RadioGroup(
-                                groupValue: torSettings.proxyRegularTabsMode,
-                                onChanged: (value) async {
-                                  if (value != null) {
-                                    await ref
-                                        .read(
-                                          saveTorSettingsControllerProvider
-                                              .notifier,
-                                        )
-                                        .save(
-                                          (currentSettings) => currentSettings
-                                              .copyWith
-                                              .proxyRegularTabsMode(value),
-                                        );
-                                  }
-                                },
-                                child: const Column(
-                                  children: [
-                                    RadioListTile.adaptive(
-                                      value: TorRegularTabProxyMode.container,
-                                      title: Text('Container-Based Routing'),
-                                      subtitle: Text(
-                                        'Route only tabs in Tor containers through the Tor network. Private tabs remain unaffected.',
-                                      ),
-                                    ),
-                                    RadioListTile.adaptive(
-                                      value: TorRegularTabProxyMode.all,
-                                      title: Text('Global Routing'),
-                                      subtitle: Text(
-                                        'Route all regular tabs through the Tor network. Private tabs remain unaffected.',
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              title: const Text('Direct Connection'),
+                              subtitle: const Text(
+                                'The best way to connect to Tor if Tor is not blocked',
                               ),
-
-                              SwitchListTile.adaptive(
-                                inactiveThumbColor: Colors.white,
-                                activeThumbColor: AppColors.torActiveGreen,
-                                thumbIcon:
-                                    WidgetStateProperty.resolveWith<Icon?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.selected,
-                                      )) {
-                                        return const Icon(MdiIcons.incognito);
-                                      }
-                                      return null; // Use the default color.
-                                    }),
-                                value: torSettings.proxyPrivateTabsTor,
-                                title: const Text('Proxy Private Tabs'),
-                                subtitle: const Text(
-                                  'When enabled, all Private Tabs will be tunneled through Tor',
-                                ),
-                                secondary: const Icon(MdiIcons.incognito),
-                                onChanged: (value) async {
+                            ),
+                            RadioListTile.adaptive(
+                              value: TorConnectionConfig.obfs4,
+                              enabled: !torIsBusy,
+                              contentPadding: const EdgeInsets.only(
+                                left: 56,
+                                right: 24,
+                              ),
+                              title: const Text('obfs4'),
+                              subtitle: const Text(
+                                'Suitable for light censorship and high bandwidth needs',
+                              ),
+                            ),
+                            RadioListTile.adaptive(
+                              value: TorConnectionConfig.snowflake,
+                              enabled: !torIsBusy,
+                              contentPadding: const EdgeInsets.only(
+                                left: 56,
+                                right: 24,
+                              ),
+                              title: const Text('Snowflake'),
+                              subtitle: const Text(
+                                'Suitable for heavy censorship',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      CheckboxListTile.adaptive(
+                        value: torSettings.fetchRemoteBridges,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        enabled:
+                            torSettings.config != TorConnectionConfig.direct,
+                        contentPadding: const EdgeInsets.only(
+                          left: 56,
+                          right: 24,
+                        ),
+                        onChanged: torIsBusy
+                            ? null
+                            : (value) async {
+                                if (value != null) {
                                   await ref
                                       .read(
                                         saveTorSettingsControllerProvider
@@ -333,372 +463,150 @@ class TorProxyScreen extends HookConsumerWidget {
                                       .save(
                                         (currentSettings) => currentSettings
                                             .copyWith
-                                            .proxyPrivateTabsTor(value),
+                                            .fetchRemoteBridges(value),
                                       );
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 24.0),
-                                child: Text(
-                                  'Circumvention',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              SwitchListTile.adaptive(
-                                inactiveThumbColor: Colors.white,
-                                activeThumbColor: AppColors.torActiveGreen,
-                                thumbIcon:
-                                    WidgetStateProperty.resolveWith<Icon?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.selected,
-                                      )) {
-                                        return const Icon(
-                                          MdiIcons.arrowDecisionAuto,
-                                        );
-                                      }
-                                      return null; // Use the default color.
-                                    }),
-                                value:
-                                    torSettings.config ==
-                                    TorConnectionConfig.auto,
-                                title: const Text('Auto Configure Transport'),
-                                subtitle: const Text(
-                                  'From some locations, it is necessary to use a pluggable transport to connect to Tor',
-                                ),
-                                secondary: const Icon(
-                                  MdiIcons.arrowDecisionAuto,
-                                ),
-                                onChanged: torIsBusy
-                                    ? null
-                                    : (value) async {
-                                        await ref
-                                            .read(
-                                              saveTorSettingsControllerProvider
-                                                  .notifier,
-                                            )
-                                            .save(
-                                              (
-                                                currentSettings,
-                                              ) => currentSettings.copyWith
-                                                  .config(
-                                                    value
-                                                        ? TorConnectionConfig
-                                                              .auto
-                                                        : TorConnectionConfig
-                                                              .direct,
-                                                  ),
-                                            );
-                                      },
-                              ),
-                              if (torSettings.config ==
-                                  TorConnectionConfig.auto) ...[
-                                SwitchListTile.adaptive(
-                                  inactiveThumbColor: Colors.white,
-                                  activeThumbColor: AppColors.torActiveGreen,
-                                  value: torSettings.requireBridge,
-                                  contentPadding: const EdgeInsets.only(
-                                    left: 56,
-                                    right: 24,
-                                  ),
-                                  onChanged: torIsBusy
-                                      ? null
-                                      : (value) async {
-                                          await ref
-                                              .read(
-                                                saveTorSettingsControllerProvider
-                                                    .notifier,
-                                              )
-                                              .save(
-                                                (currentSettings) =>
-                                                    currentSettings.copyWith
-                                                        .requireBridge(value),
-                                              );
-                                        },
-                                  title: const Text(
-                                    "I'm sure I cannot connect without a bridge",
-                                  ),
-                                ),
-                              ] else ...[
-                                RadioGroup(
-                                  groupValue: torSettings.config,
-                                  onChanged: (value) async {
-                                    if (value != null) {
-                                      await ref
-                                          .read(
-                                            saveTorSettingsControllerProvider
-                                                .notifier,
-                                          )
-                                          .save(
-                                            (currentSettings) => currentSettings
-                                                .copyWith
-                                                .config(value),
-                                          );
-                                    }
-                                  },
-                                  child: Column(
-                                    children: [
-                                      RadioListTile.adaptive(
-                                        value: TorConnectionConfig.direct,
-                                        enabled: !torIsBusy,
-                                        contentPadding: const EdgeInsets.only(
-                                          left: 56,
-                                          right: 24,
-                                        ),
-                                        title: const Text('Direct Connection'),
-                                        subtitle: const Text(
-                                          'The best way to connect to Tor if Tor is not blocked',
-                                        ),
-                                      ),
-                                      RadioListTile.adaptive(
-                                        value: TorConnectionConfig.obfs4,
-                                        enabled: !torIsBusy,
-                                        contentPadding: const EdgeInsets.only(
-                                          left: 56,
-                                          right: 24,
-                                        ),
-                                        title: const Text('obfs4'),
-                                        subtitle: const Text(
-                                          'Suitable for light censorship and high bandwidth needs',
-                                        ),
-                                      ),
-                                      RadioListTile.adaptive(
-                                        value: TorConnectionConfig.snowflake,
-                                        enabled: !torIsBusy,
-                                        contentPadding: const EdgeInsets.only(
-                                          left: 56,
-                                          right: 24,
-                                        ),
-                                        title: const Text('Snowflake'),
-                                        subtitle: const Text(
-                                          'Suitable for heavy censorship',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                CheckboxListTile.adaptive(
-                                  value: torSettings.fetchRemoteBridges,
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  enabled:
-                                      torSettings.config !=
-                                      TorConnectionConfig.direct,
-                                  contentPadding: const EdgeInsets.only(
-                                    left: 56,
-                                    right: 24,
-                                  ),
-                                  onChanged: torIsBusy
-                                      ? null
-                                      : (value) async {
-                                          if (value != null) {
-                                            await ref
-                                                .read(
-                                                  saveTorSettingsControllerProvider
-                                                      .notifier,
-                                                )
-                                                .save(
-                                                  (currentSettings) =>
-                                                      currentSettings.copyWith
-                                                          .fetchRemoteBridges(
-                                                            value,
-                                                          ),
-                                                );
-                                          }
-                                        },
-                                  title: const Text(
-                                    "Fetch fresh Bridges before connecting",
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 16),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 24.0),
-                                child: Text(
-                                  'Country Restrictions',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 16.0,
-                                  right: 24.0,
-                                  top: 8.0,
-                                ),
-                                child: DropdownMenu(
-                                  initialSelection:
-                                      torSettings.entryNodeCountry,
-                                  menuHeight: 400,
-                                  requestFocusOnTap: true,
-                                  label: const Text('Entry Country'),
-                                  textStyle: const TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                  inputDecorationTheme:
-                                      const InputDecorationTheme(
-                                        labelStyle: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                        iconColor: Colors.white,
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                  // menuStyle: MenuStyle(
-                                  //   backgroundColor:
-                                  //       WidgetStateProperty.all<Color>(
-                                  //         AppColors.torPurple,
-                                  //       ),
-                                  // ),
-                                  dropdownMenuEntries: countryDropdownEntries,
-                                  onSelected: (value) async {
-                                    await ref
-                                        .read(
-                                          saveTorSettingsControllerProvider
-                                              .notifier,
-                                        )
-                                        .save(
-                                          (currentSettings) => currentSettings
-                                              .copyWith
-                                              .entryNodeCountry(value),
-                                        );
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 16.0,
-                                  right: 24.0,
-                                  top: 8.0,
-                                ),
-                                child: DropdownMenu(
-                                  initialSelection: torSettings.exitNodeCountry,
-                                  menuHeight: 400,
-                                  requestFocusOnTap: true,
-                                  label: const Text('Exit Country'),
-                                  textStyle: const TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                  inputDecorationTheme:
-                                      const InputDecorationTheme(
-                                        labelStyle: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                        iconColor: Colors.white,
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                  // menuStyle: MenuStyle(
-                                  //   backgroundColor:
-                                  //       WidgetStateProperty.all<Color>(
-                                  //         AppColors.torPurple,
-                                  //       ),
-                                  // ),
-                                  dropdownMenuEntries: countryDropdownEntries,
-                                  onSelected: (value) async {
-                                    await ref
-                                        .read(
-                                          saveTorSettingsControllerProvider
-                                              .notifier,
-                                        )
-                                        .save(
-                                          (currentSettings) => currentSettings
-                                              .copyWith
-                                              .exitNodeCountry(value),
-                                        );
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (torPendingRequest.value != false && torIsBusy)
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              backgroundColor: AppColors.torBackgroundGrey,
-                              color: AppColors.torActiveGreen,
-                              value: bootstrapProgress / 100,
+                                }
+                              },
+                        title: const Text(
+                          "Fetch fresh Bridges before connecting",
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 24.0),
+                      child: Text(
+                        'Country Restrictions',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        right: 24.0,
+                        top: 8.0,
+                      ),
+                      child: DropdownMenu(
+                        enabled: !torIsBusy,
+                        initialSelection: torSettings.entryNodeCountry,
+                        menuHeight: 400,
+                        requestFocusOnTap: true,
+                        label: const Text('Entry Country'),
+                        textStyle: const TextStyle(color: Colors.white),
+                        leadingIcon: torSettings.entryNodeCountry.mapNotNull(
+                          (code) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CountryFlag.fromCountryCode(
+                              code,
+                              theme: const EmojiTheme(size: 28),
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Establishing connection...',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        )
-                      else if (torPendingRequest.value != false &&
-                          torIsRunning &&
-                          torIsBootstrapped)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 24.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                MdiIcons.shieldLockOutline,
-                                color: AppColors.torActiveGreen,
-                                size: 32,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Connected to the Tor Network',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(color: AppColors.torActiveGreen),
-                              ),
-                            ],
                           ),
                         ),
-                    ],
-                  ),
+                        trailingIcon: const Icon(
+                          MdiIcons.chevronDown,
+                          color: Colors.white,
+                        ),
+                        inputDecorationTheme: const InputDecorationTheme(
+                          labelStyle: TextStyle(color: Colors.white),
+                          iconColor: Colors.white,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                        // menuStyle: MenuStyle(
+                        //   backgroundColor:
+                        //       WidgetStateProperty.all<Color>(
+                        //         AppColors.torPurple,
+                        //       ),
+                        // ),
+                        dropdownMenuEntries: countryDropdownEntries,
+                        onSelected: (value) async {
+                          await ref
+                              .read(saveTorSettingsControllerProvider.notifier)
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .entryNodeCountry(value),
+                              );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        right: 24.0,
+                        top: 8.0,
+                      ),
+                      child: DropdownMenu(
+                        enabled: !torIsBusy,
+                        initialSelection: torSettings.exitNodeCountry,
+                        menuHeight: 400,
+                        requestFocusOnTap: true,
+                        label: const Text('Exit Country'),
+                        textStyle: const TextStyle(color: Colors.white),
+                        leadingIcon: torSettings.exitNodeCountry.mapNotNull(
+                          (code) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CountryFlag.fromCountryCode(
+                              code,
+                              theme: const EmojiTheme(size: 28),
+                            ),
+                          ),
+                        ),
+                        trailingIcon: const Icon(
+                          MdiIcons.chevronDown,
+                          color: Colors.white,
+                        ),
+                        inputDecorationTheme: const InputDecorationTheme(
+                          labelStyle: TextStyle(color: Colors.white),
+                          iconColor: Colors.white,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                        // menuStyle: MenuStyle(
+                        //   backgroundColor:
+                        //       WidgetStateProperty.all<Color>(
+                        //         AppColors.torPurple,
+                        //       ),
+                        // ),
+                        dropdownMenuEntries: countryDropdownEntries,
+                        onSelected: (value) async {
+                          await ref
+                              .read(saveTorSettingsControllerProvider.notifier)
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .exitNodeCountry(value),
+                              );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    right: 12.0,
-                    left: 12.0,
-                    bottom: 8.0,
-                  ),
-                  child: Text(
-                    'Tor is a trademark of The Tor Project; all rights reserved. WebLibre is not endorsed or sponsored by, or affiliated with, the Tor Project.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontStyle: FontStyle.italic,
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 32.0,
+                      right: 12.0,
+                      left: 12.0,
+                      bottom: 8.0,
+                    ),
+                    child: Text(
+                      'Tor is a trademark of The Tor Project; all rights reserved. WebLibre is not endorsed or sponsored by, or affiliated with, the Tor Project.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
