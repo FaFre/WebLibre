@@ -126,14 +126,11 @@ class _TabBar extends HookConsumerWidget {
     final tabId = ref.watch(selectedTabProvider);
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
 
-    final autoHideTabBar = switch (tabBarPosition) {
-      TabBarPosition.top => false,
-      TabBarPosition.bottom => ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (value) => value.autoHideTabBar,
-        ),
+    final autoHideTabBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.autoHideTabBar,
       ),
-    };
+    );
 
     // Auto-hide scroll detection hooks (run unconditionally per hook rules)
     final diffAcc = useRef(0.0);
@@ -154,7 +151,7 @@ class _TabBar extends HookConsumerWidget {
     }, [tabId, autoHideTabBar]);
 
     useOnAppLifecycleStateChange((previous, current) {
-      if (!autoHideTabBar) return;
+      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
       if (current == AppLifecycleState.resumed) {
         resetHiddenState();
       }
@@ -164,7 +161,7 @@ class _TabBar extends HookConsumerWidget {
       previous,
       next,
     ) {
-      if (!autoHideTabBar) return;
+      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
       if (next == true) {
         resetHiddenState();
       }
@@ -174,7 +171,7 @@ class _TabBar extends HookConsumerWidget {
       previous,
       next,
     ) {
-      if (!autoHideTabBar) return;
+      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
       if (next != null && previous != null) {
         if (previous != next) {
           resetHiddenState();
@@ -185,7 +182,7 @@ class _TabBar extends HookConsumerWidget {
     useOnStreamChange(
       pointerMoveEvents,
       onData: (event) {
-        if (!autoHideTabBar) return;
+        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
         final diff = event.dy;
         if (diff < 0) {
           if (diffAcc.value > 0) {
@@ -255,6 +252,12 @@ class BrowserScreen extends HookConsumerWidget {
       ),
     );
 
+    final autoHideTabBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.autoHideTabBar,
+      ),
+    );
+
     final displayAppBar = useValueNotifier(true);
 
     ref.listen(tabBarDismissableControllerProvider, (previous, next) {
@@ -286,11 +289,11 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Compute visibility states for toolbars
     final appBarVisible = useValueListenable(displayAppBar);
-    final topDismissed = ref.watch(tabBarDismissableControllerProvider);
 
     // Toolbar is visible when: sheet is shown OR (not fullscreen AND app bar visible)
+    // appBarVisible reflects both scroll-based auto-hide and swipe dismiss state
     final topToolbarVisible =
-        sheetDisplayed || (!tabInFullScreen && !topDismissed);
+        sheetDisplayed || (!tabInFullScreen && appBarVisible);
     final bottomToolbarVisible =
         sheetDisplayed || (!tabInFullScreen && appBarVisible);
 
@@ -309,6 +312,29 @@ class BrowserScreen extends HookConsumerWidget {
     // Total height includes safe area padding
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
+
+    // When auto-hide is disabled, constrain browser to not extend behind toolbar
+    // (unless toolbar is manually dismissed via swipe gesture)
+    final browserBottomOffset = (!autoHideTabBar && bottomToolbarVisible)
+        ? bottomAppBarTotalHeight
+        : 0.0;
+
+    // Calculate top toolbar size for browser offset
+    final topSafeArea = MediaQuery.of(context).padding.top;
+    final topAppBarContentSize = BrowserTopAppBar(
+      showMainToolbar: tabBarPosition == TabBarPosition.top,
+      showContextualToolbar: showContextualToolbar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+    ).preferredSize;
+    final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
+
+    // For top bar: always constrain browser below toolbar when visible
+    // (unlike bottom bar which only constrains when auto-hide is disabled)
+    // This ensures top-of-page content is always accessible
+    final browserTopOffset =
+        (tabBarPosition == TabBarPosition.top && topToolbarVisible)
+            ? topAppBarTotalHeight
+            : 0.0;
 
     // Theme with dynamic snackbar margin to position above bottom toolbar
     final themeData = Theme.of(context).copyWith(
@@ -343,14 +369,21 @@ class BrowserScreen extends HookConsumerWidget {
           resizeToAvoidBottomInset: false,
           body: Stack(
             children: [
-              // Layer 0: Browser content (fills entire Stack - constant dimensions)
-              Positioned.fill(
+              // Layer 0: Browser content
+              // Position changes instantly (no animation) to avoid jarring native view resize
+              // The toolbar itself animates, providing visual continuity
+              Positioned(
+                left: 0,
+                right: 0,
+                top: browserTopOffset,
+                bottom: browserBottomOffset,
                 child: _Browser(
                   overlayController: overlayController,
                   displayAppBar: displayAppBar,
                   tabInFullScreen: tabInFullScreen,
                   pointerMoveEventSink: pointerMoveEventsController.sink,
                   sheetDisplayed: sheetDisplayed,
+                  hasTopBarOffset: browserTopOffset > 0,
                 ),
               ),
 
@@ -382,7 +415,10 @@ class BrowserScreen extends HookConsumerWidget {
                     showMainToolbar: tabBarPosition == TabBarPosition.bottom,
                     showContextualToolbar: showContextualToolbar,
                     showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-                    pointerMoveEvents: pointerMoveEventsController.stream,
+                    // Only subscribe to scroll events when this is the active position
+                    pointerMoveEvents: tabBarPosition == TabBarPosition.bottom
+                        ? pointerMoveEventsController.stream
+                        : null,
                   ),
                 ),
               ),
@@ -402,7 +438,7 @@ class BrowserScreen extends HookConsumerWidget {
                       displayAppBar: displayAppBar,
                       showContextualToolbar: showContextualToolbar,
                       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-                      pointerMoveEvents: null,
+                      pointerMoveEvents: pointerMoveEventsController.stream,
                     ),
                   ),
                 ),
@@ -493,6 +529,7 @@ class _Browser extends HookConsumerWidget {
   final StreamSink<Offset> pointerMoveEventSink;
   final bool tabInFullScreen;
   final bool sheetDisplayed;
+  final bool hasTopBarOffset;
 
   const _Browser({
     required this.overlayController,
@@ -500,6 +537,7 @@ class _Browser extends HookConsumerWidget {
     required this.tabInFullScreen,
     required this.pointerMoveEventSink,
     required this.sheetDisplayed,
+    required this.hasTopBarOffset,
   });
 
   @override
@@ -654,6 +692,7 @@ class _Browser extends HookConsumerWidget {
               child: _BrowserView(
                 isFullscreen: tabInFullScreen,
                 pointerMoveEventSink: pointerMoveEventSink,
+                hasTopBarOffset: hasTopBarOffset,
               ),
             ),
           ),
@@ -666,13 +705,19 @@ class _Browser extends HookConsumerWidget {
 class _BrowserView extends StatelessWidget {
   final bool isFullscreen;
   final StreamSink<Offset>? pointerMoveEventSink;
+  final bool hasTopBarOffset;
 
-  const _BrowserView({required this.isFullscreen, this.pointerMoveEventSink});
+  const _BrowserView({
+    required this.isFullscreen,
+    required this.hasTopBarOffset,
+    this.pointerMoveEventSink,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      top: !isFullscreen,
+      // Disable top SafeArea when top bar handles it (has offset applied)
+      top: !isFullscreen && !hasTopBarOffset,
       right: !isFullscreen,
       // Bottom SafeArea is handled by the overlay toolbar (BottomAppBar)
       bottom: false,
