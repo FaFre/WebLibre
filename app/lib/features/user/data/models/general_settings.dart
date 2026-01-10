@@ -80,6 +80,7 @@ class GeneralSettings with FastEquatable {
   final bool tabBarShowQuickTabSwitcherBar;
   final TabBarPosition tabBarPosition;
   final QuickTabSwitcherMode quickTabSwitcherMode;
+  final bool pullToRefreshEnabled;
 
   GeneralSettings({
     required this.themeMode,
@@ -102,6 +103,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarShowQuickTabSwitcherBar,
     required this.tabBarPosition,
     required this.quickTabSwitcherMode,
+    required this.pullToRefreshEnabled,
   });
 
   GeneralSettings.withDefaults({
@@ -125,6 +127,7 @@ class GeneralSettings with FastEquatable {
     bool? tabBarShowQuickTabSwitcherBar,
     TabBarPosition? tabBarPosition,
     QuickTabSwitcherMode? quickTabSwitcherMode,
+    bool? pullToRefreshEnabled,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -147,7 +150,8 @@ class GeneralSettings with FastEquatable {
        tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
        quickTabSwitcherMode =
-           quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs;
+           quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs,
+       pullToRefreshEnabled = pullToRefreshEnabled ?? true;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -176,5 +180,6 @@ class GeneralSettings with FastEquatable {
     tabBarShowQuickTabSwitcherBar,
     tabBarPosition,
     quickTabSwitcherMode,
+    pullToRefreshEnabled,
   ];
 }

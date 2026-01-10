@@ -36,6 +36,15 @@ object GlobalComponents {
     val components: Components?
         get() = _components
 
+    // Pull-to-refresh setting
+    var pullToRefreshEnabled: Boolean = true
+        set(value) {
+            field = value
+            onPullToRefreshEnabledChanged?.invoke(value)
+        }
+
+    var onPullToRefreshEnabledChanged: ((Boolean) -> Unit)? = null
+
     @DelicateCoroutinesApi
     private fun restoreBrowserState(newComponents: Components) =
         GlobalScope.launch(Dispatchers.Main) {

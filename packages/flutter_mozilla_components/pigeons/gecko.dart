@@ -915,6 +915,7 @@ abstract class GeckoBrowserApi {
 abstract class GeckoEngineSettingsApi {
   void setDefaultSettings(GeckoEngineSettings settings);
   void updateRuntimeSettings(GeckoEngineSettings settings);
+  void setPullToRefreshEnabled(bool enabled);
 }
 
 @HostApi()

@@ -66,6 +66,7 @@ class GeneralSettingsScreen extends StatelessWidget {
               _AutoHideTabBarTile(),
               _BottomSheetTabViewTile(),
               _TabBarSwipeBehaviorSection(),
+              _PullToRefreshTile(),
               _IconCacheTile(),
             ],
           );
@@ -836,6 +837,32 @@ class _TabBarSwipeBehaviorSection extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PullToRefreshTile extends HookConsumerWidget {
+  const _PullToRefreshTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pullToRefreshEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Pull to Refresh'),
+      subtitle: const Text('Swipe down on pages to reload them'),
+      secondary: const Icon(MdiIcons.gestureSwipeDown),
+      value: pullToRefreshEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.pullToRefreshEnabled(value),
+            );
+      },
     );
   }
 }

@@ -3504,6 +3504,7 @@ interface GeckoBrowserApi {
 interface GeckoEngineSettingsApi {
   fun setDefaultSettings(settings: GeckoEngineSettings)
   fun updateRuntimeSettings(settings: GeckoEngineSettings)
+  fun setPullToRefreshEnabled(enabled: Boolean)
 
   companion object {
     /** The codec used by GeckoEngineSettingsApi. */
@@ -3540,6 +3541,24 @@ interface GeckoEngineSettingsApi {
             val settingsArg = args[0] as GeckoEngineSettings
             val wrapped: List<Any?> = try {
               api.updateRuntimeSettings(settingsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setPullToRefreshEnabled$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val enabledArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setPullToRefreshEnabled(enabledArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

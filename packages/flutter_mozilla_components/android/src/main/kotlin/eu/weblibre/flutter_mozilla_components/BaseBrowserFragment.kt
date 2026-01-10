@@ -242,6 +242,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
+            // Apply pull-to-refresh setting
+            binding.swipeToRefresh.isEnabled = GlobalComponents.pullToRefreshEnabled
+            GlobalComponents.onPullToRefreshEnabledChanged = { enabled ->
+                _binding?.swipeToRefresh?.isEnabled = enabled
+            }
+
             shareResourceFeature.set(
                 ShareResourceFeature(
                     context = components.profileApplicationContext,
@@ -549,6 +555,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     override fun onDestroyView() {
         super.onDestroyView()
 
+        GlobalComponents.onPullToRefreshEnabledChanged = null
         components.engineView?.setActivityContext(null)
         _binding = null
     }

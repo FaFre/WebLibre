@@ -6,7 +6,6 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
@@ -242,5 +241,9 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         if(reloadSession) {
             components.useCases.sessionUseCases.reload()
         }
+    }
+
+    override fun setPullToRefreshEnabled(enabled: Boolean) {
+        GlobalComponents.pullToRefreshEnabled = enabled
     }
 }

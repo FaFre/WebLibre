@@ -63,6 +63,23 @@ class EngineSettingsReplicationService
 
     ref.listen(
       fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.pullToRefreshEnabled,
+      ),
+      (previous, next) async {
+        await _service.setPullToRefreshEnabled(next);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to pullToRefreshEnabled',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
       engineSettingsRepositoryProvider,
       (previous, next) async {
         final settings = next.value;

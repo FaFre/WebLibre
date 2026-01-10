@@ -100,4 +100,8 @@ class GeckoEngineSettingsService {
       GeckoEngineSettings(fingerprintingProtectionOverrides: state),
     );
   }
+
+  Future<void> setPullToRefreshEnabled(bool enabled) {
+    return _api.setPullToRefreshEnabled(enabled);
+  }
 }
