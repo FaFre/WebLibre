@@ -148,6 +148,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         if (next.isLoading == false &&
             (_periodicScreenshotUpdate?.isActive ?? false) == false) {
           _timerPaused = false;
+          _periodicScreenshotUpdate?.cancel();
           _periodicScreenshotUpdate = Timer.periodic(
             widget.screenshotPeriod,
             _timerTick,
@@ -475,6 +476,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         }
       case AppLifecycleState.resumed:
         if (_timerPaused) {
+          _periodicScreenshotUpdate?.cancel();
           _periodicScreenshotUpdate = Timer.periodic(
             widget.screenshotPeriod,
             _timerTick,
