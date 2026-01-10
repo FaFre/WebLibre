@@ -123,11 +123,8 @@ Stream<ContainerData?> watchContainerData(Ref ref, String containerId) {
 
 @Riverpod()
 Stream<String?> watchContainerTabId(Ref ref, String tabId) {
-  return ref
-      .read(tabDatabaseProvider)
-      .tabDao
-      .getTabContainerId(tabId)
-      .watchSingleOrNull();
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getTabContainerId(tabId).watchSingleOrNull();
 }
 
 @Riverpod()
@@ -145,9 +142,8 @@ Stream<Map<String, String?>> watchTabsContainerId(
   Ref ref,
   EquatableValue<List<String>> tabIds,
 ) {
-  return ref
-      .read(tabDatabaseProvider)
-      .tabDao
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao
       .getTabsContainerId(tabIds.value)
       .watch()
       .map(Map.fromEntries);
@@ -155,7 +151,8 @@ Stream<Map<String, String?>> watchTabsContainerId(
 
 @Riverpod()
 Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
-  return ref.read(tabDatabaseProvider).containerDao.allAssignedSites().watch();
+  final db = ref.watch(tabDatabaseProvider);
+  return db.containerDao.allAssignedSites().watch();
 }
 
 @Riverpod()
@@ -166,9 +163,6 @@ Stream<bool> watchIsCurrentSiteAssignedToContainer(Ref ref) {
     ),
   );
 
-  return ref
-      .read(tabDatabaseProvider)
-      .containerDao
-      .isSiteAssignedToContainer(currentUri)
-      .watchSingle();
+  final db = ref.watch(tabDatabaseProvider);
+  return db.containerDao.isSiteAssignedToContainer(currentUri).watchSingle();
 }

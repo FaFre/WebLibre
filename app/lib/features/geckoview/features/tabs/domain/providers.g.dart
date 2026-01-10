@@ -651,7 +651,7 @@ final class WatchContainerTabIdProvider
 }
 
 String _$watchContainerTabIdHash() =>
-    r'b8f107e462f417b128221240242167a0754f040f';
+    r'c2cb263d4633fae436e7b3b216ab46d93ef49d4f';
 
 final class WatchContainerTabIdFamily extends $Family
     with $FunctionalFamilyOverride<Stream<String?>, String> {
@@ -805,7 +805,7 @@ final class WatchTabsContainerIdProvider
 }
 
 String _$watchTabsContainerIdHash() =>
-    r'ffdebb10f7118cdff93695c821ef5fbb0d434de1';
+    r'75a915a0fd93cbb33a32f0aa521dbd61f1814c75';
 
 final class WatchTabsContainerIdFamily extends $Family
     with
@@ -869,7 +869,7 @@ final class WatchAllAssignedSitesProvider
 }
 
 String _$watchAllAssignedSitesHash() =>
-    r'd755451be0ad7e03db36ba39c64f6f0b5c1d9ba3';
+    r'0e06caeb4a53b5cf976b3f47d328ea238243438b';
 
 @ProviderFor(watchIsCurrentSiteAssignedToContainer)
 final watchIsCurrentSiteAssignedToContainerProvider =
@@ -905,4 +905,4 @@ final class WatchIsCurrentSiteAssignedToContainerProvider
 }
 
 String _$watchIsCurrentSiteAssignedToContainerHash() =>
-    r'2942672c75b671fbe84489606e5341f0290502c3';
+    r'c2a82ca9df526c7a703da52302182e497c91e824';
