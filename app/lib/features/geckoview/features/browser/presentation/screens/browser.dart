@@ -453,6 +453,36 @@ class BrowserScreen extends HookConsumerWidget {
                     : 16 + bottomSafeArea,
                 child: const BrowserFab(),
               ),
+
+              // Layer 5: Page load progress indicator (animates with toolbar visibility)
+              AnimatedPositioned(
+                duration: _AnimatedToolbar._kAnimationDuration,
+                curve: Curves.easeInOutQuart,
+                left: 0,
+                right: 0,
+                bottom: bottomToolbarVisible
+                    ? bottomAppBarTotalHeight
+                    : 0,
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final value = ref.watch(
+                      selectedTabStateProvider.select((state) {
+                        if (state?.isLoading == true) {
+                          return state?.progress ?? 100;
+                        }
+
+                        //When not loading we assumed finished
+                        return 100;
+                      }),
+                    );
+
+                    return Visibility(
+                      visible: value < 100,
+                      child: LinearProgressIndicator(value: value / 100),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -725,30 +755,6 @@ class _BrowserView extends StatelessWidget {
       child: Stack(
         children: [
           BrowserView(pointerMoveEventSink: pointerMoveEventSink),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Consumer(
-              builder: (context, ref, child) {
-                final value = ref.watch(
-                  selectedTabStateProvider.select((state) {
-                    if (state?.isLoading == true) {
-                      return state?.progress ?? 100;
-                    }
-
-                    //When not loading we assumed finished
-                    return 100;
-                  }),
-                );
-
-                return Visibility(
-                  visible: value < 100,
-                  child: LinearProgressIndicator(value: value / 100),
-                );
-              },
-            ),
-          ),
           Positioned(
             bottom: 0,
             left: 0,
