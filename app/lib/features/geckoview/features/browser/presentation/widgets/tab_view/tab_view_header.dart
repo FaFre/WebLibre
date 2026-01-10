@@ -10,8 +10,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/bookmark_all_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/select_folder_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/clear_container_data_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_private_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
@@ -252,6 +255,9 @@ class TabViewHeader extends HookConsumerWidget {
                           leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
                           child: const Text('Bookmark all'),
                           onPressed: () async {
+                            final choice = await showBookmarkAllDialog(context);
+                            if (choice == null || !context.mounted) return;
+
                             final containerId = ref.read(
                               selectedContainerProvider,
                             );
@@ -260,16 +266,44 @@ class TabViewHeader extends HookConsumerWidget {
                                 .read(tabDataRepositoryProvider.notifier)
                                 .getContainerTabsData(containerId);
 
-                            for (final tab in tabData) {
+                            if (choice == BookmarkAllChoice.fast) {
+                              if (!context.mounted) return;
+                              final folderGuid = await showSelectFolderDialog(
+                                context,
+                              );
+                              if (folderGuid == null) return;
+
+                              final repo = ref.read(
+                                bookmarksRepositoryProvider.notifier,
+                              );
+                              for (final tab in tabData) {
+                                if (tab.url != null) {
+                                  await repo.addBookmark(
+                                    parentGuid: folderGuid,
+                                    url: tab.url!,
+                                    title: tab.title ?? tab.url.toString(),
+                                  );
+                                }
+                              }
+
                               if (context.mounted) {
-                                await BookmarkEntryAddRoute(
-                                  bookmarkInfo: jsonEncode(
-                                    BookmarkInfo(
-                                      title: tab.title,
-                                      url: tab.url.toString(),
-                                    ).encode(),
-                                  ),
-                                ).push(context);
+                                ui_helper.showInfoMessage(
+                                  context,
+                                  '${tabData.length} bookmark(s) added',
+                                );
+                              }
+                            } else {
+                              for (final tab in tabData) {
+                                if (context.mounted) {
+                                  await BookmarkEntryAddRoute(
+                                    bookmarkInfo: jsonEncode(
+                                      BookmarkInfo(
+                                        title: tab.title,
+                                        url: tab.url.toString(),
+                                      ).encode(),
+                                    ),
+                                  ).push(context);
+                                }
                               }
                             }
                           },
