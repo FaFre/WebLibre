@@ -205,7 +205,7 @@ class GridTabPreview extends HookConsumerWidget {
               ],
             ),
             const SizedBox(height: 6),
-            if (tabState.thumbnail != null)
+            if (tabState.thumbnail?.value != null)
               Expanded(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(
@@ -284,7 +284,7 @@ class ListTabPreview extends HookConsumerWidget {
               onTap: onTap,
               onLongPress: onLongPress,
               contentPadding: const EdgeInsets.only(left: 4),
-              leading: (tabState.thumbnail != null)
+              leading: (tabState.thumbnail?.value != null)
                   ? RepaintBoundary(
                       child: RawImage(
                         image: tabState.thumbnail!.value,

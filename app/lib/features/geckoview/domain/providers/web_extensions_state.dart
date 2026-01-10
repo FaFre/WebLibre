@@ -61,6 +61,8 @@ class WebExtensionsState extends _$WebExtensionsState {
     } else {
       if (state.containsKey(extensionId)) {
         state = {...state}..remove(extensionId);
+        // Dispose the cached image when extension is removed
+        _imageCache.remove(extensionId)?.dispose();
       }
     }
   }
@@ -71,13 +73,14 @@ class WebExtensionsState extends _$WebExtensionsState {
     final image = await tryDecodeImage(bytes);
 
     if (image != null) {
-      if (_imageCache[extensionId] != image) {
-        _imageCache[extensionId] = image;
+      // Dispose old image before replacing
+      _imageCache[extensionId]?.dispose();
 
-        if (state.containsKey(extensionId)) {
-          state = {...state}
-            ..[extensionId] = state[extensionId]!.copyWith.icon(image);
-        }
+      _imageCache[extensionId] = image;
+
+      if (state.containsKey(extensionId)) {
+        state = {...state}
+          ..[extensionId] = state[extensionId]!.copyWith.icon(image);
       }
     }
   }
@@ -106,6 +109,13 @@ class WebExtensionsState extends _$WebExtensionsState {
     };
 
     ref.onDispose(() async {
+      // Dispose all cached images
+      for (final image in _imageCache.values) {
+        image.dispose();
+      }
+      _imageCache.clear();
+
+      // Cancel all stream subscriptions
       for (final sub in subscriptions) {
         await sub.cancel();
       }

@@ -24,7 +24,10 @@ import 'package:fast_equatable/hash.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 
-final _cache = LRUCache<int, EquatableImage>(100);
+final _cache = LRUCache<int, EquatableImage>(
+  100,
+  onEvict: (image) => image.dispose(),
+);
 
 Future<EquatableImage?> tryDecodeImage(
   Uint8List bytes, {
@@ -35,7 +38,7 @@ Future<EquatableImage?> tryDecodeImage(
   final digest = secureHash(bytes);
 
   final cached = _cache.get(digest);
-  if (cached != null) {
+  if (cached != null && !cached.isDisposed) {
     return cached;
   }
 
@@ -50,7 +53,7 @@ Future<EquatableImage?> tryDecodeImage(
     final frameInfo = await codec.getNextFrame();
     final image = EquatableImage(frameInfo.image, hash: digest);
 
-    if (image.value.width > 0) {
+    if (image.value != null && image.value!.width > 0) {
       _cache.set(digest, image);
       return image;
     }

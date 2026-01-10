@@ -20,10 +20,28 @@
 import 'dart:ui';
 
 class EquatableImage {
-  final Image value;
+  Image? _value;
   final int _imageHash;
+  bool _isDisposed = false;
 
-  EquatableImage(this.value, {required int hash}) : _imageHash = hash;
+  EquatableImage(Image value, {required int hash})
+      : _value = value,
+        _imageHash = hash;
+
+  /// The underlying ui.Image. Returns null if disposed.
+  Image? get value => _isDisposed ? null : _value;
+
+  /// Whether this image has been disposed.
+  bool get isDisposed => _isDisposed;
+
+  /// Disposes the underlying ui.Image to free GPU memory.
+  /// This is safe to call multiple times.
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    _value?.dispose();
+    _value = null;
+  }
 
   @override
   int get hashCode => _imageHash.hashCode;

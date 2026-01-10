@@ -45,6 +45,24 @@ part 'tab_state.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabStates extends _$TabStates {
+  /// Disposes images from a TabState to free GPU memory.
+  void _disposeTabImages(TabState tab) {
+    tab.icon?.dispose();
+    tab.thumbnail?.dispose();
+  }
+
+  /// Updates state while disposing images from removed tabs.
+  void _updateState(Map<String, TabState> newState) {
+    // Find and dispose images from tabs that are being removed
+    for (final tabId in state.keys) {
+      if (!newState.containsKey(tabId)) {
+        _disposeTabImages(state[tabId]!);
+      }
+    }
+
+    state = newState;
+  }
+
   Future<void> _onTabContentStateChange(TabContentState contentState) async {
     final current = await patchedState(contentState.id);
 
@@ -71,7 +89,7 @@ class TabStates extends _$TabStates {
       isLoading: contentState.isLoading,
     );
 
-    state = {...state}..[contentState.id] = newState;
+    _updateState({...state}..[contentState.id] = newState);
 
     if (newState.isFinishedLoading) {
       ref
@@ -104,6 +122,9 @@ class TabStates extends _$TabStates {
   Future<void> _onIconChange(IconChangeEvent event) async {
     final IconChangeEvent(:tabId, :bytes) = event;
 
+    // Dispose old icon before replacing
+    state[tabId]?.icon?.dispose();
+
     final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
 
     final current = state[tabId] ?? TabState.$default(tabId);
@@ -112,6 +133,9 @@ class TabStates extends _$TabStates {
 
   Future<void> _onThumbnailChange(ThumbnailEvent event) async {
     final ThumbnailEvent(:tabId, :bytes) = event;
+
+    // Dispose old thumbnail before replacing
+    state[tabId]?.thumbnail?.dispose();
 
     final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
 
@@ -244,6 +268,12 @@ class TabStates extends _$TabStates {
     );
 
     ref.onDispose(() async {
+      // Dispose all images from all tabs
+      for (final tab in state.values) {
+        _disposeTabImages(tab);
+      }
+
+      // Cancel all stream subscriptions
       for (final sub in subscriptions) {
         await sub.cancel();
       }

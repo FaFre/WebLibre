@@ -86,11 +86,14 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   //Global icon cache
   late CacheRepository _cacheRepository;
   //Local decoded icon cache
-  final LRUCache<String, BrowserIcon> _browserIconCache;
+  late final LRUCache<String, BrowserIcon> _browserIconCache;
 
   GenericWebsiteService()
     : _iconsService = GeckoIconService(),
-      _browserIconCache = LRUCache(50);
+      _browserIconCache = LRUCache(
+        50,
+        onEvict: (icon) => icon.image.dispose(),
+      );
 
   @override
   void build() {

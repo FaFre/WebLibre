@@ -22,13 +22,16 @@ import 'dart:collection';
 class LRUCache<K, V> {
   int _capacity;
   final LinkedHashMap<K, V> _cache;
+  final void Function(V)? _onEvict;
 
   LRUCache(
     this._capacity, {
     bool Function(K, K)? equals,
     int Function(K)? hashCode,
     bool Function(dynamic)? isValidKey,
-  }) : _cache = LinkedHashMap<K, V>(
+    void Function(V)? onEvict,
+  }) : _onEvict = onEvict,
+       _cache = LinkedHashMap<K, V>(
          equals: equals,
          hashCode: hashCode,
          isValidKey: isValidKey,
@@ -36,7 +39,12 @@ class LRUCache<K, V> {
 
   void resize(int capacity) {
     if (_capacity > capacity) {
-      _cache.keys.take(_capacity - capacity).forEach(_cache.remove);
+      _cache.keys.take(_capacity - capacity).forEach((key) {
+        final evicted = _cache.remove(key);
+        if (evicted != null) {
+          _onEvict?.call(evicted);
+        }
+      });
     }
 
     _capacity = capacity;
@@ -58,14 +66,39 @@ class LRUCache<K, V> {
   }
 
   V set(K key, V value) {
+    V? evicted;
+
     if (_cache.containsKey(key)) {
-      _cache.remove(key); // Remove the existing item before updating.
+      evicted = _cache.remove(key); // Remove the existing item before updating.
     } else if (_cache.length == _capacity) {
-      _cache.remove(
+      evicted = _cache.remove(
         _cache.keys.first,
       ); // Explicitly remove the least recently used item if at capacity.
     }
 
+    if (evicted != null) {
+      _onEvict?.call(evicted);
+    }
+
     return _cache[key] = value; // Inserting or updating the item.
+  }
+
+  /// Clears all entries from the cache, calling onEvict for each entry.
+  void clear() {
+    if (_onEvict != null) {
+      for (final value in _cache.values) {
+        _onEvict(value);
+      }
+    }
+    _cache.clear();
+  }
+
+  /// Removes an entry by key, calling onEvict if it existed.
+  V? remove(K key) {
+    final value = _cache.remove(key);
+    if (value != null) {
+      _onEvict?.call(value);
+    }
+    return value;
   }
 }
