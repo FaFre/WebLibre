@@ -34,6 +34,7 @@ class AppBarTitle extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final appColors = AppColors.of(context);
 
     final tabState = ref.watch(selectedTabStateProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
@@ -108,9 +109,9 @@ class AppBarTitle extends HookConsumerWidget {
                   icon,
                   const SizedBox(width: 4),
                   if (tabState.isPrivate) ...[
-                    const Icon(
+                    Icon(
                       MdiIcons.dominoMask,
-                      color: AppColors.privateTabPurple,
+                      color: appColors.privateTabPurple,
                       size: 14,
                     ),
                     const SizedBox(width: 4),

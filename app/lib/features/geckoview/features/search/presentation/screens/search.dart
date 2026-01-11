@@ -55,6 +55,7 @@ class SearchScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final createChildTabsOption = ref.watch(
@@ -190,13 +191,13 @@ class SearchScreen extends HookConsumerWidget {
                             TabType.regular => null,
                             TabType.private => SegmentedButton.styleFrom(
                               selectedBackgroundColor:
-                                  AppColors.privateSelectionOverlay,
+                                  appColors.privateSelectionOverlay,
                             ),
                             TabType.child =>
                               (currentTabTabType == TabType.private)
                                   ? SegmentedButton.styleFrom(
                                       selectedBackgroundColor:
-                                          AppColors.privateSelectionOverlay,
+                                          appColors.privateSelectionOverlay,
                                     )
                                   : null,
                           },

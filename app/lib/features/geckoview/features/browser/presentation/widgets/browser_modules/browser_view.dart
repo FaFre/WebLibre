@@ -97,6 +97,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final initializationCompleter = useMemoized(() => Completer());
 
     useOnInitialization(() async {
@@ -313,7 +314,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           ),
           if (!hasTab)
             Positioned.fill(
-              child: SizedBox.expand(child: Container(color: Colors.grey[800])),
+              child: SizedBox.expand(
+                child: Container(color: colorScheme.surfaceContainerHighest),
+              ),
             ),
         ],
       ),

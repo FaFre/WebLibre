@@ -24,10 +24,10 @@ import 'package:weblibre/core/design/app_colors.dart';
 part 'defaults.g.dart';
 
 @Riverpod(keepAlive: true)
-Color lightSeedColorFallback(Ref ref) => AppColors.seedColor;
+Color lightSeedColorFallback(Ref ref) => AppColors.light.seedColor;
 
 @Riverpod(keepAlive: true)
-Color darkSeedColorFallback(Ref ref) => AppColors.seedColor;
+Color darkSeedColorFallback(Ref ref) => AppColors.dark.seedColor;
 
 @Riverpod(keepAlive: true)
 Uri docsUri(Ref ref) => Uri.parse('https://docs.weblibre.eu/');

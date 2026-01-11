@@ -28,6 +28,8 @@ import 'package:weblibre/presentation/widgets/animate_gradient_shader.dart';
 class TorNotification extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
+
     ref.listen(torProxyServiceProvider, (previous, next) {
       if (next.hasValue & next.requireValue.isRunning &&
           next.requireValue.bootstrapProgress == 100) {
@@ -37,7 +39,7 @@ class TorNotification extends HookConsumerWidget {
 
     return SafeArea(
       child: ColoredBox(
-        color: AppColors.torPurple,
+        color: appColors.torPurple,
         child: SizedBox(
           height: 56 + 12,
           width: MediaQuery.of(context).size.width,
@@ -52,9 +54,9 @@ class TorNotification extends HookConsumerWidget {
                       duration: const Duration(milliseconds: 500),
                       primaryEnd: Alignment.bottomLeft,
                       secondaryEnd: Alignment.topRight,
-                      primaryColors: const [
-                        AppColors.torActiveGreen,
-                        AppColors.torActiveGreen,
+                      primaryColors: [
+                        appColors.torActiveGreen,
+                        appColors.torActiveGreen,
                       ],
                       secondaryColors: const [Colors.white, Colors.white],
                       child: const Padding(
@@ -87,8 +89,8 @@ class TorNotification extends HookConsumerWidget {
                     );
 
                     return LinearProgressIndicator(
-                      backgroundColor: AppColors.torBackgroundGrey,
-                      color: AppColors.torActiveGreen,
+                      backgroundColor: AppColors.of(context).torBackgroundGrey,
+                      color: AppColors.of(context).torActiveGreen,
                       value: bootstrapProgress / 100,
                     );
                   },

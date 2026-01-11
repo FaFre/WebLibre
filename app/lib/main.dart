@@ -30,6 +30,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
@@ -141,10 +142,15 @@ class _MainWidget extends HookConsumerWidget {
 
         return MainApp(
           key: rootKey,
-          theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: lightColorScheme,
+            extensions: const <ThemeExtension<dynamic>>[AppColors.light],
+          ),
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: darkColorScheme,
+            extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
           ),
           themeMode: themeMode,
         );

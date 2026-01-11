@@ -27,8 +27,9 @@ class TorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = AppColors.of(context);
     return AlertDialog(
-      icon: const Icon(TorIcons.onionAlt, color: AppColors.torPurple),
+      icon: Icon(TorIcons.onionAlt, color: appColors.torPurple),
       title: const Text('Tor™ Proxy'),
       content: const Text(
         'This container requires a Tor proxy for secure connections, which is not currently running.',

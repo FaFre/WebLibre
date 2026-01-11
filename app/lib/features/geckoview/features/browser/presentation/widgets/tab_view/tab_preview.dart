@@ -51,6 +51,7 @@ class GridTabItemContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final appColors = AppColors.of(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -62,7 +63,7 @@ class GridTabItemContainer extends StatelessWidget {
       ),
       child: Material(
         color: isPrivate
-            ? AppColors.privateTabBackground
+            ? appColors.privateTabBackground
             : colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(14.0)),
         child: child,
@@ -97,6 +98,9 @@ class GridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final appColors = AppColors.of(context);
+
     final tabState =
         ref.watch(
           tabStateWithFallbackProvider(
@@ -127,7 +131,7 @@ class GridTabPreview extends HookConsumerWidget {
                       tabState.titleOrAuthority,
                       maxLines: 2,
                       style: tabState.isPrivate
-                          ? const TextStyle(color: Colors.white)
+                          ? TextStyle(color: colorScheme.onSurface)
                           : null,
                     ),
                   ),
@@ -178,13 +182,13 @@ class GridTabPreview extends HookConsumerWidget {
                   child: Text(
                     tabState.url.authority,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: tabState.isPrivate ? Colors.white : null,
+                      color: tabState.isPrivate ? colorScheme.onSurface : null,
                     ),
                   ),
                 ),
                 if (tabState.isPrivate) ...[
                   const SizedBox(width: 6.0),
-                  const SizedBox(
+                  SizedBox(
                     height: 16,
                     width: 24,
                     child: Stack(
@@ -194,7 +198,7 @@ class GridTabPreview extends HookConsumerWidget {
                           top: -4,
                           child: Icon(
                             MdiIcons.dominoMask,
-                            color: AppColors.privateTabPurple,
+                            color: appColors.privateTabPurple,
                           ),
                         ),
                       ],
@@ -259,6 +263,7 @@ class ListTabPreview extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final appColors = AppColors.of(context);
 
     final tabState =
         ref.watch(
@@ -272,7 +277,7 @@ class ListTabPreview extends HookConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: tabState.isPrivate ? AppColors.privateTabBackground : null,
+        color: tabState.isPrivate ? appColors.privateTabBackground : null,
         border: isActive ? Border.all(color: colorScheme.primary) : null,
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
       ),
@@ -297,15 +302,15 @@ class ListTabPreview extends HookConsumerWidget {
                 tabState.titleOrAuthority,
                 maxLines: 2,
                 style: tabState.isPrivate
-                    ? const TextStyle(color: Colors.white)
+                    ? TextStyle(color: colorScheme.onSurface)
                     : null,
               ),
               subtitle: Row(
                 children: [
                   if (tabState.isPrivate) ...[
-                    const Icon(
+                    Icon(
                       MdiIcons.dominoMask,
-                      color: AppColors.privateTabPurple,
+                      color: appColors.privateTabPurple,
                       size: 14,
                     ),
                     const SizedBox(width: 4),
@@ -314,7 +319,7 @@ class ListTabPreview extends HookConsumerWidget {
                     child: UriBreadcrumb(
                       uri: tabState.url,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: tabState.isPrivate ? Colors.white : null,
+                        color: tabState.isPrivate ? colorScheme.onSurface : null,
                       ),
                     ),
                   ),

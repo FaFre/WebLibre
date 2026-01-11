@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 Future<void> showQrCode(BuildContext context, String data) {
+  final colorScheme = Theme.of(context).colorScheme;
   return showDialog(
     context: context,
     builder: (context) {
@@ -39,9 +40,9 @@ Future<void> showQrCode(BuildContext context, String data) {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: PrettyQrView.data(
                   data: data,

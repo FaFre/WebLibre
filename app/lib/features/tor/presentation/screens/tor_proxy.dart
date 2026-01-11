@@ -37,6 +37,7 @@ class TorProxyScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
     final bootstrapProgress = ref.watch(
       torProxyServiceProvider.select(
         (value) => value.value?.bootstrapProgress ?? 0,
@@ -125,7 +126,7 @@ class TorProxyScreen extends HookConsumerWidget {
               Set<WidgetState> states,
             ) {
               if (states.isEmpty) {
-                return AppColors.torBackgroundGrey;
+                return appColors.torBackgroundGrey;
               }
               return null; // Use the default color.
             }),
@@ -147,20 +148,20 @@ class TorProxyScreen extends HookConsumerWidget {
             fillColor: WidgetStateColor.resolveWith((states) {
               return Colors.white;
             }),
-            checkColor: WidgetStateProperty.all(AppColors.torPurple),
+            checkColor: WidgetStateProperty.all(appColors.torPurple),
           ),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         child: SafeArea(
           child: ColoredBox(
-            color: AppColors.torPurple,
+            color: appColors.torPurple,
             child: CustomScrollView(
               slivers: [
                 SliverAppBar(
                   pinned: true,
                   title: SwitchListTile.adaptive(
                     inactiveThumbColor: Colors.white,
-                    activeThumbColor: AppColors.torActiveGreen,
+                    activeThumbColor: appColors.torActiveGreen,
                     thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
                       Set<WidgetState> states,
                     ) {
@@ -199,8 +200,8 @@ class TorProxyScreen extends HookConsumerWidget {
                       children: [
                         if (torPendingRequest.value != false && torIsBusy)
                           LinearProgressIndicator(
-                            backgroundColor: AppColors.torBackgroundGrey,
-                            color: AppColors.torActiveGreen,
+                            backgroundColor: appColors.torBackgroundGrey,
+                            color: appColors.torActiveGreen,
                             value: bootstrapProgress / 100,
                           ),
                         Padding(
@@ -289,7 +290,7 @@ class TorProxyScreen extends HookConsumerWidget {
 
                     SwitchListTile.adaptive(
                       inactiveThumbColor: Colors.white,
-                      activeThumbColor: AppColors.torActiveGreen,
+                      activeThumbColor: appColors.torActiveGreen,
                       thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
                         Set<WidgetState> states,
                       ) {
@@ -327,7 +328,7 @@ class TorProxyScreen extends HookConsumerWidget {
                     ),
                     SwitchListTile.adaptive(
                       inactiveThumbColor: Colors.white,
-                      activeThumbColor: AppColors.torActiveGreen,
+                      activeThumbColor: appColors.torActiveGreen,
                       thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
                         Set<WidgetState> states,
                       ) {
@@ -362,7 +363,7 @@ class TorProxyScreen extends HookConsumerWidget {
                     if (torSettings.config == TorConnectionConfig.auto) ...[
                       SwitchListTile.adaptive(
                         inactiveThumbColor: Colors.white,
-                        activeThumbColor: AppColors.torActiveGreen,
+                        activeThumbColor: appColors.torActiveGreen,
                         value: torSettings.requireBridge,
                         contentPadding: const EdgeInsets.only(
                           left: 56,

@@ -143,6 +143,7 @@ class _NewTabDefaultSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
     final defaultCreateTabType = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.defaultCreateTabType),
     );
@@ -193,7 +194,7 @@ class _NewTabDefaultSection extends HookConsumerWidget {
               style: switch (defaultCreateTabType) {
                 TabType.regular => null,
                 TabType.private => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: AppColors.privateSelectionOverlay,
+                  selectedBackgroundColor: appColors.privateSelectionOverlay,
                 ),
                 TabType.child => null,
               },
@@ -210,6 +211,7 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
     final tabIntentOpenSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabIntentOpenSetting),
     );
@@ -265,7 +267,7 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
               style: switch (tabIntentOpenSetting) {
                 TabIntentOpenSetting.regular => null,
                 TabIntentOpenSetting.private => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: AppColors.privateSelectionOverlay,
+                  selectedBackgroundColor: appColors.privateSelectionOverlay,
                 ),
                 TabIntentOpenSetting.ask => null,
               },

@@ -41,6 +41,7 @@ class _TabDraggable extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final activeTab = ref.watch(selectedTabProvider);
 
     final dragData = ref.watch(
@@ -102,7 +103,7 @@ class _TabDraggable extends HookConsumerWidget {
       DeleteDropData() => Opacity(
         opacity: 0.3,
         child: ColorFiltered(
-          colorFilter: const ColorFilter.mode(Colors.red, BlendMode.modulate),
+          colorFilter: ColorFilter.mode(colorScheme.error, BlendMode.modulate),
           child: tab,
         ),
       ),

@@ -482,6 +482,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
     final selectedTabId = ref.watch(selectedTabProvider);
 
     final tabStates = (switch (quickTabSwitcherMode) {
@@ -521,11 +522,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   child: Text(item.title),
                 ),
                 if (item.isPrivate)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
                     child: Icon(
                       MdiIcons.dominoMask,
-                      color: AppColors.privateTabPurple,
+                      color: appColors.privateTabPurple,
                       size: 20,
                     ),
                   ),
@@ -834,7 +835,7 @@ class NavigationMenuButton extends HookConsumerWidget {
 
               return Badge(
                 isLabelVisible: torConnected,
-                backgroundColor: AppColors.torActiveGreen,
+                backgroundColor: AppColors.of(context).torActiveGreen,
                 child: child,
               );
             },

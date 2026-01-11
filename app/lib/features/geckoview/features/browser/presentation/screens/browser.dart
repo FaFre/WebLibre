@@ -44,8 +44,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
@@ -183,8 +183,9 @@ class _TabBar extends HookConsumerWidget {
     useOnStreamChange(
       pointerMoveEvents,
       onData: (event) {
-        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar)
+        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) {
           return;
+        }
         final diff = event.dy;
         if (diff < 0) {
           if (diffAcc.value > 0) {
@@ -502,6 +503,7 @@ class _SheetContainer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Memoize maxChildSize to prevent keyboard from affecting sheet size
     final stableMaxChildSize = useMemoized(() => relativeSafeArea, []);
 
@@ -520,7 +522,7 @@ class _SheetContainer extends HookConsumerWidget {
         ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
       },
       child: ColoredBox(
-        color: Colors.black54, // Scrim
+        color: colorScheme.scrim,
         child: GestureDetector(
           onTap: () {}, // Prevent tap from propagating to parent
           child: Align(
