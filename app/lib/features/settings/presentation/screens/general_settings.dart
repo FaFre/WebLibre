@@ -67,6 +67,7 @@ class GeneralSettingsScreen extends StatelessWidget {
               _BottomSheetTabViewTile(),
               _TabBarSwipeBehaviorSection(),
               _PullToRefreshTile(),
+              _DoubleBackCloseTabTile(),
               _IconCacheTile(),
             ],
           );
@@ -861,6 +862,34 @@ class _PullToRefreshTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.pullToRefreshEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _DoubleBackCloseTabTile extends HookConsumerWidget {
+  const _DoubleBackCloseTabTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final doubleBackCloseTab = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.doubleBackCloseTab),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Double Back to Close Tab'),
+      subtitle: const Text(
+        'When enabled, press back twice to close the tab. When disabled, back button only navigates page history.',
+      ),
+      secondary: const Icon(MdiIcons.gestureDoubleTap),
+      value: doubleBackCloseTab,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.doubleBackCloseTab(value),
             );
       },
     );

@@ -569,6 +569,10 @@ class _Browser extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final doubleBackCloseTab = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.doubleBackCloseTab),
+    );
+
     final lastBackButtonPress = useRef<DateTime?>(null);
 
     final overlayBuilder = ref.watch(overlayControllerProvider);
@@ -682,39 +686,44 @@ class _Browser extends HookConsumerWidget {
                   return false;
                 }
 
-                if (lastBackButtonPress.value != null &&
-                    DateTime.now().difference(lastBackButtonPress.value!) <
-                        _backButtonPressTimeout) {
-                  lastBackButtonPress.value = null;
+                // Handle double back to close (if enabled)
+                if (doubleBackCloseTab) {
+                  if (lastBackButtonPress.value != null &&
+                      DateTime.now().difference(lastBackButtonPress.value!) <
+                          _backButtonPressTimeout) {
+                    lastBackButtonPress.value = null;
 
-                  if (tabState != null && tabCount > 1) {
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .closeTab(tabState.id);
+                    if (tabState != null && tabCount > 1) {
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .closeTab(tabState.id);
 
-                    if (context.mounted) {
-                      ui_helper.showTabUndoClose(
-                        context,
-                        ref.read(tabRepositoryProvider.notifier).undoClose,
-                      );
+                      if (context.mounted) {
+                        ui_helper.showTabUndoClose(
+                          context,
+                          ref.read(tabRepositoryProvider.notifier).undoClose,
+                        );
+                      }
+
+                      return true;
+                    } else {
+                      //Mark back as unhandled and navigator will pop
+                      await SystemNavigator.pop();
+                      return false;
                     }
+                  } else {
+                    lastBackButtonPress.value = DateTime.now();
+                    ui_helper.showTabBackButtonMessage(
+                      context,
+                      tabCount,
+                      _backButtonPressTimeout,
+                    );
 
                     return true;
-                  } else {
-                    //Mark back as unhandled and navigator will pop
-                    await SystemNavigator.pop();
-                    return false;
                   }
-                } else {
-                  lastBackButtonPress.value = DateTime.now();
-                  ui_helper.showTabBackButtonMessage(
-                    context,
-                    tabCount,
-                    _backButtonPressTimeout,
-                  );
-
-                  return true;
                 }
+
+                return true;
               },
               child: _BrowserView(
                 isFullscreen: tabInFullScreen,

@@ -59,6 +59,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
 
+  GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -88,6 +90,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarPosition tabBarPosition,
     QuickTabSwitcherMode quickTabSwitcherMode,
     bool pullToRefreshEnabled,
+    bool doubleBackCloseTab,
   });
 }
 
@@ -187,6 +190,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(pullToRefreshEnabled: pullToRefreshEnabled);
 
   @override
+  GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab) =>
+      call(doubleBackCloseTab: doubleBackCloseTab);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -216,6 +223,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
+    Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -340,6 +348,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.pullToRefreshEnabled
           // ignore: cast_nullable_to_non_nullable
           : pullToRefreshEnabled as bool,
+      doubleBackCloseTab:
+          doubleBackCloseTab == const $CopyWithPlaceholder() ||
+              doubleBackCloseTab == null
+          ? _value.doubleBackCloseTab
+          // ignore: cast_nullable_to_non_nullable
+          : doubleBackCloseTab as bool,
     );
   }
 }
@@ -405,6 +419,7 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['quickTabSwitcherMode'],
   ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
+  doubleBackCloseTab: json['doubleBackCloseTab'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -439,6 +454,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherMode':
       _$QuickTabSwitcherModeEnumMap[instance.quickTabSwitcherMode]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
+  'doubleBackCloseTab': instance.doubleBackCloseTab,
 };
 
 const _$ThemeModeEnumMap = {

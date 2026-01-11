@@ -126,6 +126,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'doubleBackCloseTab': settings['doubleBackCloseTab']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 
