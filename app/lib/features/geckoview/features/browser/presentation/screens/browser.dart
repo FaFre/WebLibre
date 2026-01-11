@@ -44,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
@@ -182,7 +183,8 @@ class _TabBar extends HookConsumerWidget {
     useOnStreamChange(
       pointerMoveEvents,
       onData: (event) {
-        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
+        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar)
+          return;
         final diff = event.dy;
         if (diff < 0) {
           if (diffAcc.value > 0) {
@@ -333,8 +335,8 @@ class BrowserScreen extends HookConsumerWidget {
     // This ensures top-of-page content is always accessible
     final browserTopOffset =
         (tabBarPosition == TabBarPosition.top && topToolbarVisible)
-            ? topAppBarTotalHeight
-            : 0.0;
+        ? topAppBarTotalHeight
+        : 0.0;
 
     // Theme with dynamic snackbar margin to position above bottom toolbar
     final themeData = Theme.of(context).copyWith(
@@ -443,14 +445,11 @@ class BrowserScreen extends HookConsumerWidget {
                   ),
                 ),
 
-              // Layer 4: FAB (animates position with toolbar visibility)
-              AnimatedPositioned(
-                duration: _AnimatedToolbar._kAnimationDuration,
-                curve: Curves.easeInOutQuart,
-                right: 16,
-                bottom: bottomToolbarVisible
-                    ? bottomAppBarTotalHeight + 16
-                    : 16 + bottomSafeArea,
+              // Layer 4: FAB (draggable via long press)
+              DraggableFab(
+                bottomToolbarVisible: bottomToolbarVisible,
+                bottomAppBarHeight: bottomAppBarTotalHeight,
+                bottomSafeArea: bottomSafeArea,
                 child: const BrowserFab(),
               ),
 
@@ -460,9 +459,7 @@ class BrowserScreen extends HookConsumerWidget {
                 curve: Curves.easeInOutQuart,
                 left: 0,
                 right: 0,
-                bottom: bottomToolbarVisible
-                    ? bottomAppBarTotalHeight
-                    : 0,
+                bottom: bottomToolbarVisible ? bottomAppBarTotalHeight : 0,
                 child: Consumer(
                   builder: (context, ref, child) {
                     final value = ref.watch(
