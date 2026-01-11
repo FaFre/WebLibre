@@ -289,13 +289,18 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     store = components.core.store,
                     sessionId = sessionId,
                     fragmentManager = parentFragmentManager,
-                    launchInApp = {
-                        components.core.prefs.getBoolean(
-                            context?.getPreferenceKey(R.string.pref_key_launch_external_app),
-                            false
-                        )
-                    },
                     loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
+                    launchInApp = { true },
+                    shouldPrompt = { true },
+                    failedToLaunchAction = { fallbackUrl ->
+                        fallbackUrl?.let {
+                            val appLinksUseCases = components.useCases.appLinksUseCases
+                            val getRedirect = appLinksUseCases.appLinkRedirect
+                            val redirect = getRedirect.invoke(fallbackUrl)
+                            redirect.appIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            appLinksUseCases.openAppLink.invoke(redirect.appIntent)
+                        }
+                    },
                 ),
                 owner = this,
                 view = view,

@@ -45,7 +45,7 @@ class Components(val profileApplicationContext: ProfileContext,
     val core by lazy { Core(profileApplicationContext, this, flutterEvents, extensionEvents) }
     val events by lazy { Events(flutterEvents) }
     val useCases by lazy { UseCases(profileApplicationContext, core.engine, core.store) }
-    val services by lazy { Services(profileApplicationContext, useCases.tabsUseCases) }
+    val services by lazy { Services(profileApplicationContext, core.store, useCases.tabsUseCases) }
     val features by lazy { Features(core.engine, core.store, addonEvents, tabContentEvents) }
     val search by lazy { Search(profileApplicationContext, core, useCases) }
 

@@ -28,34 +28,16 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
-
-        return when (uri) {
-//            "about:privatebrowsing" -> {
-//                val page = PrivatePage.createPrivateBrowsingPage(context, uri)
-//                RequestInterceptor.InterceptionResponse.Content(page, encoding = "base64")
-//            }
-
-//            "about:crashes" -> {
-//                val intent = Intent(context, CrashListActivity::class.java)
-//                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-//                context.startActivity(intent)
-//
-//                RequestInterceptor.InterceptionResponse.Url("about:blank")
-//            }
-
-            else -> {
-                 components.services.appLinksInterceptor.onLoadRequest(
-                    engineSession,
-                    uri,
-                    lastUri,
-                    hasUserGesture,
-                    isSameDomain,
-                    isRedirect,
-                    isDirectNavigation,
-                    isSubframeRequest,
-                )
-            }
-        }
+        return components.services.appLinksInterceptor.onLoadRequest(
+            engineSession,
+            uri,
+            lastUri,
+            hasUserGesture,
+            isSameDomain,
+            isRedirect,
+            isDirectNavigation,
+            isSubframeRequest,
+        )
     }
 
     override fun onErrorRequest(

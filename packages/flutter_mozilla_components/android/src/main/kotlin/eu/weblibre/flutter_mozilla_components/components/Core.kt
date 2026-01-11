@@ -79,7 +79,7 @@ class Core(
     val engineSettings by lazy {
         DefaultSettings(
             //historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage)
-            requestInterceptor = AppRequestInterceptor(context),
+            requestInterceptor = requestInterceptor,
             historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage),
             testingModeEnabled = false,
             remoteDebuggingEnabled = false,
@@ -251,6 +251,8 @@ class Core(
     val bookmarksStorage by lazy { lazyBookmarksStorage.value }
 
     val permissionStorage by lazy { PermissionStorage(geckoSitePermissionsStorage) }
+
+    val requestInterceptor = AppRequestInterceptor(context)
 
     /**
      * Constructs a [TrackingProtectionPolicy] based on current preferences.

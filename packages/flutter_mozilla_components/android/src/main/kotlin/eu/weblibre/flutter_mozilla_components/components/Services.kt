@@ -8,6 +8,7 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
+import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.app.links.AppLinksInterceptor
 import mozilla.components.feature.tabs.TabsUseCases
 
@@ -16,16 +17,16 @@ import mozilla.components.feature.tabs.TabsUseCases
  */
 class Services(
     private val context: Context,
+    private val store: BrowserStore,
     private val tabsUseCases: TabsUseCases,
 ) {
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
     val appLinksInterceptor by lazy {
         AppLinksInterceptor(
-            context,
-            launchInApp = {
-                prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_launch_external_app), false)
-            },
+            context = context,
+            launchInApp = { true },
+            store = store,
         )
     }
 }
