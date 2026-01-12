@@ -27,6 +27,13 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositori
 
 part 'bookmarks.g.dart';
 
+/// Check if a root folder is effectively empty (has no non-root children)
+bool _isEmptyRootFolder(BookmarkFolder folder) {
+  if (folder.children == null) return true;
+  // A root folder is empty if it has no children, or only contains other root folders
+  return folder.children!.every((child) => bookmarkRootIds.contains(child.guid));
+}
+
 T? _selectChildRecursive<T extends BookmarkItem>(
   List<BookmarkItem> children,
   String guid,
@@ -117,7 +124,11 @@ class BookmarksSearch extends _$BookmarksSearch {
 }
 
 @Riverpod()
-AsyncValue<T?> bookmarks<T extends BookmarkItem>(Ref ref, String entryGuid) {
+AsyncValue<T?> bookmarks<T extends BookmarkItem>(
+  Ref ref,
+  String entryGuid, {
+  bool hideEmptyRoots = false,
+}) {
   final bookmarksAsync = ref.watch(bookmarksRepositoryProvider);
 
   return bookmarksAsync.whenData((bookmarkNode) {
@@ -134,7 +145,22 @@ AsyncValue<T?> bookmarks<T extends BookmarkItem>(Ref ref, String entryGuid) {
     }
 
     if (selectedNode != null) {
-      return _cloneAndFilterChildrenType<T>(selectedNode);
+      var result = _cloneAndFilterChildrenType<T>(selectedNode);
+
+      // Filter empty root folders when viewing root level (excluding WebLibre root)
+      if (hideEmptyRoots &&
+          entryGuid == BookmarkRoot.root.id &&
+          result is BookmarkFolder) {
+        final filteredChildren = result.children
+            ?.where((child) =>
+                child is! BookmarkFolder ||
+                child.guid == BookmarkRoot.mobile.id ||
+                !_isEmptyRootFolder(child))
+            .toList();
+        result = result.copyWith.children(filteredChildren) as T;
+      }
+
+      return result;
     }
 
     return null;
@@ -161,8 +187,8 @@ class SeamlessBookmarks extends _$SeamlessBookmarks {
   }
 
   @override
-  AsyncValue<BookmarkItem?> build(String entryGuid) {
-    final bookmarks = ref.watch(bookmarksProvider<BookmarkItem>(entryGuid));
+  AsyncValue<BookmarkItem?> build(String entryGuid, {bool hideEmptyRoots = false}) {
+    final bookmarks = ref.watch(bookmarksProvider<BookmarkItem>(entryGuid, hideEmptyRoots: hideEmptyRoots));
 
     if (_hasSearch) {
       final filterGuids = ref.watch(bookmarksSearchProvider);

@@ -48,15 +48,16 @@ class BookmarkListScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final treeKey = useMemoized(() => GlobalKey<TreeViewState>());
-    final bookmarkList = ref.watch(seamlessBookmarksProvider(entryGuid));
+    final hideEmptyRoots = useState(true);
+    final bookmarkList = ref.watch(seamlessBookmarksProvider(entryGuid, hideEmptyRoots: hideEmptyRoots.value));
 
     final textFilterEnabled = useState(false);
     final textFilterController = useTextEditingController();
 
     useOnListenableChange(textFilterController, () {
-      if (ref.exists(seamlessBookmarksProvider(entryGuid))) {
+      if (ref.exists(seamlessBookmarksProvider(entryGuid, hideEmptyRoots: hideEmptyRoots.value))) {
         ref
-            .read(seamlessBookmarksProvider(entryGuid).notifier)
+            .read(seamlessBookmarksProvider(entryGuid, hideEmptyRoots: hideEmptyRoots.value).notifier)
             .search(textFilterController.text);
       }
     });
@@ -106,6 +107,18 @@ class BookmarkListScreen extends HookConsumerWidget {
                   });
                 },
               ),
+              if (entryGuid == BookmarkRoot.root.id)
+                MenuItemButton(
+                  leadingIcon: Icon(hideEmptyRoots.value
+                      ? MdiIcons.eyeOff
+                      : MdiIcons.eye),
+                  child: Text(hideEmptyRoots.value
+                      ? 'Show Empty Root Folders'
+                      : 'Hide Empty Root Folders'),
+                  onPressed: () {
+                    hideEmptyRoots.value = !hideEmptyRoots.value;
+                  },
+                ),
               SubmenuButton(
                 leadingIcon: const Icon(MdiIcons.import),
                 menuChildren: [

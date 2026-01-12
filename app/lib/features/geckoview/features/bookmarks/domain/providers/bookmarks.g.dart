@@ -61,7 +61,7 @@ final class BookmarksProvider<T extends BookmarkItem>
     with $Provider<AsyncValue<T?>> {
   BookmarksProvider._({
     required BookmarksFamily super.from,
-    required String super.argument,
+    required (String, {bool hideEmptyRoots}) super.argument,
   }) : super(
          retry: null,
          name: r'bookmarksProvider',
@@ -77,7 +77,7 @@ final class BookmarksProvider<T extends BookmarkItem>
   String toString() {
     return r'bookmarksProvider'
         '<${T}>'
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -87,8 +87,12 @@ final class BookmarksProvider<T extends BookmarkItem>
 
   @override
   AsyncValue<T?> create(Ref ref) {
-    final argument = this.argument as String;
-    return bookmarks<T>(ref, argument);
+    final argument = this.argument as (String, {bool hideEmptyRoots});
+    return bookmarks<T>(
+      ref,
+      argument.$1,
+      hideEmptyRoots: argument.hideEmptyRoots,
+    );
   }
 
   $R _captureGenerics<$R>($R Function<T extends BookmarkItem>() cb) {
@@ -116,7 +120,7 @@ final class BookmarksProvider<T extends BookmarkItem>
   }
 }
 
-String _$bookmarksHash() => r'dfa19aea04f352b8a6cefe35a0b283c9fddb214f';
+String _$bookmarksHash() => r'72b54c4ff18cfdb60824a57607628be6b61d25d4';
 
 final class BookmarksFamily extends $Family {
   BookmarksFamily._()
@@ -128,15 +132,23 @@ final class BookmarksFamily extends $Family {
         isAutoDispose: true,
       );
 
-  BookmarksProvider<T> call<T extends BookmarkItem>(String entryGuid) =>
-      BookmarksProvider<T>._(argument: entryGuid, from: this);
+  BookmarksProvider<T> call<T extends BookmarkItem>(
+    String entryGuid, {
+    bool hideEmptyRoots = false,
+  }) => BookmarksProvider<T>._(
+    argument: (entryGuid, hideEmptyRoots: hideEmptyRoots),
+    from: this,
+  );
 
   @override
   String toString() => r'bookmarksProvider';
 
   /// {@macro riverpod.override_with}
   Override overrideWith(
-    AsyncValue<T?> Function<T extends BookmarkItem>(Ref ref, String args)
+    AsyncValue<T?> Function<T extends BookmarkItem>(
+      Ref ref,
+      (String, {bool hideEmptyRoots}) args,
+    )
     create,
   ) => $FamilyOverride(
     from: this,
@@ -144,7 +156,7 @@ final class BookmarksFamily extends $Family {
       final provider = pointer.origin as BookmarksProvider;
       return provider._captureGenerics(<T extends BookmarkItem>() {
         provider as BookmarksProvider<T>;
-        final argument = provider.argument as String;
+        final argument = provider.argument as (String, {bool hideEmptyRoots});
         return provider
             .$view(create: (ref) => create(ref, argument))
             .$createElement(pointer);
@@ -160,7 +172,7 @@ final class SeamlessBookmarksProvider
     extends $NotifierProvider<SeamlessBookmarks, AsyncValue<BookmarkItem?>> {
   SeamlessBookmarksProvider._({
     required SeamlessBookmarksFamily super.from,
-    required String super.argument,
+    required (String, {bool hideEmptyRoots}) super.argument,
   }) : super(
          retry: null,
          name: r'seamlessBookmarksProvider',
@@ -176,7 +188,7 @@ final class SeamlessBookmarksProvider
   String toString() {
     return r'seamlessBookmarksProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -202,7 +214,7 @@ final class SeamlessBookmarksProvider
   }
 }
 
-String _$seamlessBookmarksHash() => r'ddbc51ba22141a2c81bd9cf25adc610e5cdd72d9';
+String _$seamlessBookmarksHash() => r'240b213fa8fe595781ccc608c5d551be54c31992';
 
 final class SeamlessBookmarksFamily extends $Family
     with
@@ -211,7 +223,7 @@ final class SeamlessBookmarksFamily extends $Family
           AsyncValue<BookmarkItem?>,
           AsyncValue<BookmarkItem?>,
           AsyncValue<BookmarkItem?>,
-          String
+          (String, {bool hideEmptyRoots})
         > {
   SeamlessBookmarksFamily._()
     : super(
@@ -222,8 +234,13 @@ final class SeamlessBookmarksFamily extends $Family
         isAutoDispose: true,
       );
 
-  SeamlessBookmarksProvider call(String entryGuid) =>
-      SeamlessBookmarksProvider._(argument: entryGuid, from: this);
+  SeamlessBookmarksProvider call(
+    String entryGuid, {
+    bool hideEmptyRoots = false,
+  }) => SeamlessBookmarksProvider._(
+    argument: (entryGuid, hideEmptyRoots: hideEmptyRoots),
+    from: this,
+  );
 
   @override
   String toString() => r'seamlessBookmarksProvider';
@@ -231,10 +248,14 @@ final class SeamlessBookmarksFamily extends $Family
 
 abstract class _$SeamlessBookmarks
     extends $Notifier<AsyncValue<BookmarkItem?>> {
-  late final _$args = ref.$arg as String;
-  String get entryGuid => _$args;
+  late final _$args = ref.$arg as (String, {bool hideEmptyRoots});
+  String get entryGuid => _$args.$1;
+  bool get hideEmptyRoots => _$args.hideEmptyRoots;
 
-  AsyncValue<BookmarkItem?> build(String entryGuid);
+  AsyncValue<BookmarkItem?> build(
+    String entryGuid, {
+    bool hideEmptyRoots = false,
+  });
   @$mustCallSuper
   @override
   void runBuild() {
@@ -248,6 +269,9 @@ abstract class _$SeamlessBookmarks
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleCreate(
+      ref,
+      () => build(_$args.$1, hideEmptyRoots: _$args.hideEmptyRoots),
+    );
   }
 }
