@@ -30,12 +30,14 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
+import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -52,14 +54,31 @@ class _MainWidget extends HookConsumerWidget {
     final rootKey = ref.watch(appStateKeyProvider);
 
     final pauseTime = useRef<DateTime?>(null);
-    useOnAppLifecycleStateChange((previous, current) {
+    useOnAppLifecycleStateChange((previous, current) async {
       switch (current) {
         case AppLifecycleState.resumed:
           if (pauseTime.value != null &&
               DateTime.now().difference(pauseTime.value!) >
                   const Duration(minutes: 30)) {
+            final routerConfig = ref
+                .read(routerProvider)
+                .value
+                ?.routerDelegate
+                .currentConfiguration;
+
             //Rebuild widget tree after long time of inactivity
             ref.read(appStateKeyProvider.notifier).reset();
+
+            //Wait for the new router to start
+            await Future.delayed(
+              const Duration(milliseconds: 250),
+            ).whenComplete(() {
+              routerConfig.mapNotNull(
+                (routerConfig) =>
+                    ref.read(routerProvider).value?.restore(routerConfig),
+              );
+            });
+
             logger.i('UI reset');
           }
           pauseTime.value = null;
