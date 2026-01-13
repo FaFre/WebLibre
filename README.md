@@ -22,7 +22,7 @@ WebLibre is an independent privacy-focused browser for Android built on [Mozilla
   <a href="https://liberapay.com/FaFre/donate">
     <img alt="Donate using Liberapay" src="https://docs.weblibre.eu/static/images/badges/liberapay.svg">
   </a>
-  <a href="monero:89rpdkq1XJYJYUshjF23YZhJdNEpghrQTXnz7vxnrLVHGrrqXTZ6BdKbqgyQnNZCkxTDA4RfhDsUcF6eHAAqco4WDQR2cZF">
+  <a href="#donation">
     <img alt="Donate using Monero" src="https://docs.weblibre.eu/static/images/badges/monero.svg">
   </a>
 </p>
@@ -142,3 +142,21 @@ WebLibre is in active development, and your feedback shapes its future!
 - **Documentation:** [Documentation](https://docs.weblibre.eu/) - Learn more about features and configuration
 
 Since WebLibre respects your privacy by design—**no tracking, no telemetry**—we rely entirely on community feedback to improve. Share your experience, request features, or report bugs!
+
+---
+
+## Donation
+
+<a id="donation"></a>
+
+If you find WebLibre useful and want to support its development, you can donate through any of the following platforms:
+
+- **[GitHub Sponsors](https://github.com/sponsors/FaFre)** - Sponsor via GitHub
+- **[Liberapay](https://liberapay.com/FaFre/donate)** - Recurring donations
+- **[Ko-fi](https://ko-fi.com/FaFre)** - One-time donations
+
+### Monero
+
+```
+89rpdkq1XJYJYUshjF23YZhJdNEpghrQTXnz7vxnrLVHGrrqXTZ6BdKbqgyQnNZCkxTDA4RfhDsUcF6eHAAqco4WDQR2cZF
+```
