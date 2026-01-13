@@ -534,7 +534,7 @@ class TabViewHeader extends HookConsumerWidget {
                         if (!hasSearchText)
                           SpeechToTextButton(
                             onTextReceived: (data) {
-                              searchTextController.text = data.toString();
+                              searchTextController.text = data;
                             },
                           ),
                         IconButton(

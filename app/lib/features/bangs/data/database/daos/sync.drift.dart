@@ -3,4 +3,11 @@
 import 'package:drift/drift.dart' as i0;
 import 'package:weblibre/features/bangs/data/database/database.dart' as i1;
 
-mixin $SyncDaoMixin on i0.DatabaseAccessor<i1.BangDatabase> {}
+mixin $SyncDaoMixin on i0.DatabaseAccessor<i1.BangDatabase> {
+  SyncDaoManager get managers => SyncDaoManager(this);
+}
+
+class SyncDaoManager {
+  final $SyncDaoMixin _db;
+  SyncDaoManager(this._db);
+}

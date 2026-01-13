@@ -21,10 +21,10 @@ dependencies:
     path: ../
 
   # HTTP client for testing Tor connectivity
-  http: any
+  http: ^1.6.0
 
   # SOCKS5 proxy client for Tor
-  socks5_proxy: any
+  socks5_proxy: ^2.1.1
 
 dev_dependencies:
   flutter_lints: ^6.0.0

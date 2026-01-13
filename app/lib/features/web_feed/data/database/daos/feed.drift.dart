@@ -3,4 +3,11 @@
 import 'package:drift/drift.dart' as i0;
 import 'package:weblibre/features/web_feed/data/database/database.dart' as i1;
 
-mixin $FeedDaoMixin on i0.DatabaseAccessor<i1.FeedDatabase> {}
+mixin $FeedDaoMixin on i0.DatabaseAccessor<i1.FeedDatabase> {
+  FeedDaoManager get managers => FeedDaoManager(this);
+}
+
+class FeedDaoManager {
+  final $FeedDaoMixin _db;
+  FeedDaoManager(this._db);
+}

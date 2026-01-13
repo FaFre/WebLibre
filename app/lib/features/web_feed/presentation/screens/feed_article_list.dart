@@ -101,7 +101,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
                                 )
                               : SpeechToTextButton(
                                   onTextReceived: (data) {
-                                    searchTextController.text = data.toString();
+                                    searchTextController.text = data;
                                   },
                                 ),
                         ),
