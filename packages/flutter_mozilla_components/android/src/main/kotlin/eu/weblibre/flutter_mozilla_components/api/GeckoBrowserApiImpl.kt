@@ -44,6 +44,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.LogLevel
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewEvents
@@ -262,6 +264,17 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoHistoryApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoHistoryApiImpl())
         GeckoFetchApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFetchApiImpl())
         GeckoBookmarksApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoBookmarksApiImpl())
+
+        // Viewport API for dynamic toolbar and keyboard handling
+        val viewportEvents = GeckoViewportEvents(_flutterPluginBinding.binaryMessenger)
+        val viewportApi = GeckoViewportApiImpl()
+        GeckoViewportApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            viewportApi
+        )
+        // Store viewport events and API for keyboard feature and pending settings
+        GlobalComponents.viewportEvents = viewportEvents
+        GlobalComponents.viewportApi = viewportApi
 
         ReaderViewEvents.setUp(
             _flutterPluginBinding.binaryMessenger,

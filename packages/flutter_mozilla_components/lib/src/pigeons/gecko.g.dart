@@ -7121,6 +7121,148 @@ class GeckoFetchApi {
   }
 }
 
+/// Controls GeckoView's viewport behavior for dynamic toolbar and keyboard handling.
+///
+/// This API allows Flutter to control how GeckoView adjusts its internal viewport
+/// without resizing the platform view itself, avoiding visual flickering.
+///
+/// The dynamic toolbar system works by:
+/// 1. Setting the maximum toolbar height via [setDynamicToolbarMaxHeight]
+/// 2. Updating the vertical clipping as toolbar animates via [setVerticalClipping]
+/// 3. GeckoView internally adjusts viewport and notifies the website
+class GeckoViewportApi {
+  /// Constructor for [GeckoViewportApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoViewportApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// Sets the maximum height that dynamic toolbars (top + bottom) can occupy.
+  ///
+  /// GeckoView will adjust its internal viewport calculations to account for
+  /// this space. The website will receive proper viewport dimensions through
+  /// standard web APIs (CSS viewport units, window.innerHeight).
+  ///
+  /// Call this once when toolbar dimensions are known, and again if they change.
+  ///
+  /// [heightPx] Combined height of top and bottom toolbars in pixels.
+  Future<void> setDynamicToolbarMaxHeight(int heightPx) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportApi.setDynamicToolbarMaxHeight$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[heightPx]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  /// Sets the vertical clipping offset for the GeckoView content.
+  ///
+  /// Use this as the toolbar animates to clip content at the bottom.
+  /// Negative values clip from the bottom (for bottom toolbar sliding up).
+  /// Positive values clip from the top (for top toolbar sliding down).
+  ///
+  /// Call this during toolbar animation frames to smoothly adjust the visible area.
+  ///
+  /// [clippingPx] The clipping offset in pixels. Negative = bottom clip.
+  Future<void> setVerticalClipping(int clippingPx) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportApi.setVerticalClipping$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[clippingPx]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+}
+
+/// Events from native side about viewport and input-related changes.
+///
+/// These events allow Flutter to react to native viewport changes,
+/// particularly keyboard visibility which is detected natively.
+abstract class GeckoViewportEvents {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  /// Called when keyboard visibility changes.
+  ///
+  /// This is detected natively using WindowInsets API and provides
+  /// accurate keyboard height information.
+  ///
+  /// [timestamp] Event timestamp for ordering.
+  /// [heightPx] Keyboard height in pixels (0 when hidden).
+  /// [isVisible] Whether the keyboard is currently visible.
+  /// [isAnimating] Whether the keyboard is currently animating.
+  void onKeyboardVisibilityChanged(int timestamp, int heightPx, bool isVisible, bool isAnimating);
+
+  static void setUp(GeckoViewportEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_timestamp = (args[0] as int?);
+          assert(arg_timestamp != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null, expected non-null int.');
+          final int? arg_heightPx = (args[1] as int?);
+          assert(arg_heightPx != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null, expected non-null int.');
+          final bool? arg_isVisible = (args[2] as bool?);
+          assert(arg_isVisible != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null, expected non-null bool.');
+          final bool? arg_isAnimating = (args[3] as bool?);
+          assert(arg_isAnimating != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null, expected non-null bool.');
+          try {
+            api.onKeyboardVisibilityChanged(arg_timestamp!, arg_heightPx!, arg_isVisible!, arg_isAnimating!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+  }
+}
+
 class GeckoBookmarksApi {
   /// Constructor for [GeckoBookmarksApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default

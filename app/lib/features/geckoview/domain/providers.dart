@@ -172,6 +172,18 @@ GeckoSuggestionsService engineSuggestionsService(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
+GeckoViewportService viewportService(Ref ref) {
+  final service = GeckoViewportService();
+  service.setUp();
+
+  ref.onDispose(() async {
+    await service.dispose();
+  });
+
+  return service;
+}
+
+@Riverpod(keepAlive: true)
 class EngineReadyState extends _$EngineReadyState {
   @override
   bool build() {

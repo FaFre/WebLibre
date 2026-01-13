@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, deprecated_member_use
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -71,12 +73,12 @@ class _TorDemoPageState extends State<TorDemoPage> {
       );
       setState(() {
         _isRunning = status.isRunning;
-        final newPort = status.socksPort?.toInt();
+        final newPort = status.socksPort;
         if (newPort != _socksPort) {
           print('DEBUG: Port changed from $_socksPort to $newPort');
         }
         _socksPort = newPort;
-        _bootstrapProgress = status.bootstrapProgress.toInt();
+        _bootstrapProgress = status.bootstrapProgress;
       });
     });
 
@@ -104,15 +106,15 @@ class _TorDemoPageState extends State<TorDemoPage> {
       );
 
       final socksPort = await _tor.start(config);
-      print('DEBUG startTor result: socksPort=${socksPort}');
+      print('DEBUG startTor result: socksPort=$socksPort');
       setState(() {
-        _socksPort = socksPort.toInt();
+        _socksPort = socksPort;
         print('DEBUG: Set _socksPort to $_socksPort from start result');
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tor started on port ${socksPort}')),
+          SnackBar(content: Text('Tor started on port $socksPort')),
         );
       }
     } catch (e) {
@@ -218,7 +220,7 @@ class _TorDemoPageState extends State<TorDemoPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Your Tor IP: ${_currentIp}'),
+            content: Text('Your Tor IP: $_currentIp'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 5),
           ),
@@ -438,13 +440,10 @@ class _TorDemoPageState extends State<TorDemoPage> {
                         switch (log.severity) {
                           case 'ERR':
                             color = Colors.red;
-                            break;
                           case 'WARN':
                             color = Colors.orange;
-                            break;
                           case 'NOTICE':
                             color = Colors.blue;
-                            break;
                           default:
                             color = Colors.black;
                         }

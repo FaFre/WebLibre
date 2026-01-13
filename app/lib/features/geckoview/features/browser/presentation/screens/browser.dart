@@ -57,6 +57,12 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+/// Callback for toolbar animation progress updates.
+/// [progress] is 0.0 when hidden, 1.0 when fully visible.
+/// [heightPx] is the toolbar height in pixels.
+typedef ToolbarAnimationCallback =
+    void Function(double progress, double heightPx);
+
 /// Animated toolbar that slides in/out without changing layout constraints.
 /// Uses SlideTransition to animate visual transform while maintaining
 /// constant intrinsic size for layout purposes.
@@ -64,6 +70,8 @@ class _AnimatedToolbar extends HookWidget {
   final bool visible;
   final TabBarPosition position;
   final Widget child;
+  final double toolbarHeight;
+  final ToolbarAnimationCallback? onAnimationProgress;
 
   static const _kAnimationDuration = Duration(milliseconds: 250);
 
@@ -71,6 +79,9 @@ class _AnimatedToolbar extends HookWidget {
     required this.visible,
     required this.position,
     required this.child,
+    required this.toolbarHeight,
+    // ignore: unused_element_parameter
+    this.onAnimationProgress,
   });
 
   @override
@@ -79,6 +90,18 @@ class _AnimatedToolbar extends HookWidget {
       duration: _kAnimationDuration,
       initialValue: visible ? 1.0 : 0.0,
     );
+
+    // Listen to animation changes and report progress
+    useEffect(() {
+      if (onAnimationProgress == null) return null;
+
+      void listener() {
+        onAnimationProgress?.call(controller.value, toolbarHeight);
+      }
+
+      controller.addListener(listener);
+      return () => controller.removeListener(listener);
+    }, [onAnimationProgress, toolbarHeight]);
 
     useEffect(() {
       if (visible) {
@@ -230,6 +253,7 @@ class BrowserScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final eventService = ref.watch(eventServiceProvider);
+    final viewportService = ref.watch(viewportServiceProvider);
 
     final tabInFullScreen = ref.watch(
       selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),
@@ -339,6 +363,38 @@ class BrowserScreen extends HookConsumerWidget {
         ? topAppBarTotalHeight
         : 0.0;
 
+    // Get pixel ratio for converting logical pixels to physical pixels
+    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+    // Set up GeckoView dynamic toolbar height
+    // This tells GeckoView the maximum toolbar space so it can adjust viewport
+    final bottomToolbarHeightPx = bottomToolbarVisible
+        ? (bottomAppBarTotalHeight * pixelRatio).round()
+        : 0;
+    useEffect(() {
+      final lastKeyboardEvent = viewportService.keyboardEvents.valueOrNull;
+
+      if (lastKeyboardEvent == null || !lastKeyboardEvent.isVisible) {
+        unawaited(
+          viewportService.setDynamicToolbarMaxHeight(bottomToolbarHeightPx),
+        );
+      }
+
+      return null;
+    }, [bottomToolbarHeightPx]);
+
+    // Listen to keyboard visibility changes from native
+    useOnStreamChange(
+      viewportService.keyboardEvents,
+      onData: (event) {
+        if (event.isVisible && event.heightPx > 0) {
+          // When keyboard is visible, notify GeckoView to adjust viewport
+          // This uses the native API to handle keyboard without Flutter resize
+          unawaited(viewportService.setDynamicToolbarMaxHeight(event.heightPx));
+        }
+      },
+    );
+
     // Theme with dynamic snackbar margin to position above bottom toolbar
     final themeData = Theme.of(context).copyWith(
       bottomSheetTheme: BottomSheetThemeData(
@@ -412,6 +468,7 @@ class BrowserScreen extends HookConsumerWidget {
                 child: _AnimatedToolbar(
                   position: TabBarPosition.bottom,
                   visible: bottomToolbarVisible,
+                  toolbarHeight: bottomAppBarTotalHeight,
                   child: _TabBar(
                     tabBarPosition: TabBarPosition.bottom,
                     displayAppBar: displayAppBar,
@@ -435,6 +492,7 @@ class BrowserScreen extends HookConsumerWidget {
                   child: _AnimatedToolbar(
                     position: TabBarPosition.top,
                     visible: topToolbarVisible,
+                    toolbarHeight: topAppBarTotalHeight,
                     child: _TabBar(
                       tabBarPosition: TabBarPosition.top,
                       showMainToolbar: true,

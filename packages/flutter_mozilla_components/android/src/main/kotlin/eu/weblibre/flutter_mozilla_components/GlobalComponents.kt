@@ -14,7 +14,9 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
+import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -44,6 +46,12 @@ object GlobalComponents {
         }
 
     var onPullToRefreshEnabledChanged: ((Boolean) -> Unit)? = null
+
+    // Viewport events for keyboard visibility notifications
+    var viewportEvents: GeckoViewportEvents? = null
+
+    // Viewport API for applying pending settings when engineView becomes available
+    var viewportApi: GeckoViewportApiImpl? = null
 
     @DelicateCoroutinesApi
     private fun restoreBrowserState(newComponents: Components) =

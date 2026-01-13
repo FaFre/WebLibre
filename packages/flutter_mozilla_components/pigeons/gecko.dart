@@ -1563,6 +1563,71 @@ class BookmarkInfo {
   });
 }
 
+// =============================================================================
+// Viewport & Dynamic Toolbar APIs
+// =============================================================================
+
+/// Controls GeckoView's viewport behavior for dynamic toolbar and keyboard handling.
+///
+/// This API allows Flutter to control how GeckoView adjusts its internal viewport
+/// without resizing the platform view itself, avoiding visual flickering.
+///
+/// The dynamic toolbar system works by:
+/// 1. Setting the maximum toolbar height via [setDynamicToolbarMaxHeight]
+/// 2. Updating the vertical clipping as toolbar animates via [setVerticalClipping]
+/// 3. GeckoView internally adjusts viewport and notifies the website
+@HostApi()
+abstract class GeckoViewportApi {
+  /// Sets the maximum height that dynamic toolbars (top + bottom) can occupy.
+  ///
+  /// GeckoView will adjust its internal viewport calculations to account for
+  /// this space. The website will receive proper viewport dimensions through
+  /// standard web APIs (CSS viewport units, window.innerHeight).
+  ///
+  /// Call this once when toolbar dimensions are known, and again if they change.
+  ///
+  /// [heightPx] Combined height of top and bottom toolbars in pixels.
+  void setDynamicToolbarMaxHeight(int heightPx);
+
+  /// Sets the vertical clipping offset for the GeckoView content.
+  ///
+  /// Use this as the toolbar animates to clip content at the bottom.
+  /// Negative values clip from the bottom (for bottom toolbar sliding up).
+  /// Positive values clip from the top (for top toolbar sliding down).
+  ///
+  /// Call this during toolbar animation frames to smoothly adjust the visible area.
+  ///
+  /// [clippingPx] The clipping offset in pixels. Negative = bottom clip.
+  void setVerticalClipping(int clippingPx);
+}
+
+/// Events from native side about viewport and input-related changes.
+///
+/// These events allow Flutter to react to native viewport changes,
+/// particularly keyboard visibility which is detected natively.
+@FlutterApi()
+abstract class GeckoViewportEvents {
+  /// Called when keyboard visibility changes.
+  ///
+  /// This is detected natively using WindowInsets API and provides
+  /// accurate keyboard height information.
+  ///
+  /// [timestamp] Event timestamp for ordering.
+  /// [heightPx] Keyboard height in pixels (0 when hidden).
+  /// [isVisible] Whether the keyboard is currently visible.
+  /// [isAnimating] Whether the keyboard is currently animating.
+  void onKeyboardVisibilityChanged(
+    int timestamp,
+    int heightPx,
+    bool isVisible,
+    bool isAnimating,
+  );
+}
+
+// =============================================================================
+// Bookmarks API
+// =============================================================================
+
 @HostApi()
 abstract class GeckoBookmarksApi {
   /// Produces a bookmarks tree for the given guid string.

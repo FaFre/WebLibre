@@ -80,6 +80,10 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// Get AppColors from the current theme
   static AppColors of(BuildContext context) {
-    return Theme.of(context).extension<AppColors>() ?? light;
+    return Theme.of(context).extension<AppColors>() ??
+        switch (Theme.of(context).brightness) {
+          Brightness.dark => dark,
+          Brightness.light => light,
+        };
   }
 }

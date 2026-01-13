@@ -39,8 +39,11 @@ class EquatableImage {
   void dispose() {
     if (_isDisposed) return;
     _isDisposed = true;
-    _value?.dispose();
-    _value = null;
+    // Delay disposal to allow widgets to finish rendering
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _value?.dispose();
+      _value = null;
+    });
   }
 
   @override

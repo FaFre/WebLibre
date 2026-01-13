@@ -5995,6 +5995,137 @@ interface GeckoFetchApi {
     }
   }
 }
+/**
+ * Controls GeckoView's viewport behavior for dynamic toolbar and keyboard handling.
+ *
+ * This API allows Flutter to control how GeckoView adjusts its internal viewport
+ * without resizing the platform view itself, avoiding visual flickering.
+ *
+ * The dynamic toolbar system works by:
+ * 1. Setting the maximum toolbar height via [setDynamicToolbarMaxHeight]
+ * 2. Updating the vertical clipping as toolbar animates via [setVerticalClipping]
+ * 3. GeckoView internally adjusts viewport and notifies the website
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoViewportApi {
+  /**
+   * Sets the maximum height that dynamic toolbars (top + bottom) can occupy.
+   *
+   * GeckoView will adjust its internal viewport calculations to account for
+   * this space. The website will receive proper viewport dimensions through
+   * standard web APIs (CSS viewport units, window.innerHeight).
+   *
+   * Call this once when toolbar dimensions are known, and again if they change.
+   *
+   * [heightPx] Combined height of top and bottom toolbars in pixels.
+   */
+  fun setDynamicToolbarMaxHeight(heightPx: Long)
+  /**
+   * Sets the vertical clipping offset for the GeckoView content.
+   *
+   * Use this as the toolbar animates to clip content at the bottom.
+   * Negative values clip from the bottom (for bottom toolbar sliding up).
+   * Positive values clip from the top (for top toolbar sliding down).
+   *
+   * Call this during toolbar animation frames to smoothly adjust the visible area.
+   *
+   * [clippingPx] The clipping offset in pixels. Negative = bottom clip.
+   */
+  fun setVerticalClipping(clippingPx: Long)
+
+  companion object {
+    /** The codec used by GeckoViewportApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoViewportApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoViewportApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportApi.setDynamicToolbarMaxHeight$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val heightPxArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.setDynamicToolbarMaxHeight(heightPxArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportApi.setVerticalClipping$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val clippingPxArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.setVerticalClipping(clippingPxArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * Events from native side about viewport and input-related changes.
+ *
+ * These events allow Flutter to react to native viewport changes,
+ * particularly keyboard visibility which is detected natively.
+ *
+ * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
+ */
+class GeckoViewportEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by GeckoViewportEvents. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  /**
+   * Called when keyboard visibility changes.
+   *
+   * This is detected natively using WindowInsets API and provides
+   * accurate keyboard height information.
+   *
+   * [timestamp] Event timestamp for ordering.
+   * [heightPx] Keyboard height in pixels (0 when hidden).
+   * [isVisible] Whether the keyboard is currently visible.
+   * [isAnimating] Whether the keyboard is currently animating.
+   */
+  fun onKeyboardVisibilityChanged(timestampArg: Long, heightPxArg: Long, isVisibleArg: Boolean, isAnimatingArg: Boolean, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(timestampArg, heightPxArg, isVisibleArg, isAnimatingArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+}
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBookmarksApi {
   /**

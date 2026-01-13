@@ -24,6 +24,7 @@ import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActi
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
+import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
@@ -89,6 +90,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val readabilityExtractFeature = ViewBoundFeatureWrapper<ReadabilityExtractFeature>()
     private val webExtensionPopupObserver = ViewBoundFeatureWrapper<WebExtensionPopupObserver>()
     private val webExtToolbarFeature = ViewBoundFeatureWrapper<WebExtensionToolbarFeature>()
+
+    // Keyboard visibility detection feature
+    private var keyboardVisibilityFeature: KeyboardVisibilityFeature? = null
 
     // Registers a photo picker activity launcher in single-select mode.
     private val singleMediaPicker =
@@ -219,6 +223,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             binding.swipeToRefresh.addView(engineNativeView)
 
             components.engineView = engineView
+
+            // Apply any pending viewport settings that were set before engineView was ready
+            GlobalComponents.viewportApi?.applyPendingSettings()
 
             sessionFeature.set(
                 feature = SessionFeature(
@@ -468,6 +475,13 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             components.core.historyStorage.registerStorageMaintenanceWorker()
 
+            // Start keyboard visibility detection if viewport events are available
+            GlobalComponents.viewportEvents?.let { viewportEvents ->
+                keyboardVisibilityFeature = KeyboardVisibilityFeature(viewportEvents).also {
+                    it.start(binding.root)
+                }
+            }
+
         } catch (e: Exception) {
             Log.e("EngineCreation", "Failed to create engine: ${e.message}", e)
             context?.let { restartApp(it) }
@@ -559,6 +573,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // Stop keyboard visibility detection
+        keyboardVisibilityFeature?.stop()
+        keyboardVisibilityFeature = null
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
         components.engineView?.setActivityContext(null)

@@ -246,6 +246,53 @@ final class EngineSuggestionsServiceProvider
 String _$engineSuggestionsServiceHash() =>
     r'1ec1192f0c5c86cecc7ad448ee2b039f7a48e32b';
 
+@ProviderFor(viewportService)
+final viewportServiceProvider = ViewportServiceProvider._();
+
+final class ViewportServiceProvider
+    extends
+        $FunctionalProvider<
+          GeckoViewportService,
+          GeckoViewportService,
+          GeckoViewportService
+        >
+    with $Provider<GeckoViewportService> {
+  ViewportServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'viewportServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$viewportServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeckoViewportService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GeckoViewportService create(Ref ref) {
+    return viewportService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeckoViewportService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeckoViewportService>(value),
+    );
+  }
+}
+
+String _$viewportServiceHash() => r'bab39db3180bb6a1cf8c055966b7f5910b41b424';
+
 @ProviderFor(EngineReadyState)
 final engineReadyStateProvider = EngineReadyStateProvider._();
 

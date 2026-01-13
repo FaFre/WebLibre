@@ -1,5 +1,3 @@
-library flutter_tor;
-
 export 'src/tor_api.g.dart'
     show
         TransportType,
