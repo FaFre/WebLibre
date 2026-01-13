@@ -19,59 +19,53 @@
  */
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:speech_to_text_dialog/speech_to_text_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
-class SpeechToTextButton extends StatefulWidget {
+class SpeechToTextButton extends HookWidget {
   final Function(String text) onTextReceived;
 
   const SpeechToTextButton({required this.onTextReceived, super.key});
 
   @override
-  State<SpeechToTextButton> createState() => _SpeechToTextButtonState();
-}
-
-class _SpeechToTextButtonState extends State<SpeechToTextButton> {
-  final _speechDialog = SpeechToTextDialog();
-  StreamSubscription<String>? _textSubscription;
-
-  @override
-  void dispose() {
-    _textSubscription?.cancel().ignore();
-    _speechDialog.dispose();
-    super.dispose();
-  }
-
-  Future<void> _showSpeechDialog(BuildContext context) async {
-    // Cancel any existing subscription
-    await _textSubscription?.cancel();
-
-    // Listen for the next text result
-    _textSubscription = _speechDialog.textStream.take(1).listen((text) {
-      if (text.isNotEmpty) {
-        widget.onTextReceived(text);
-      }
-    });
-
-    // Show the dialog
-    final isServiceAvailable = await _speechDialog.showDialog(
-      // locale: "en-US",
-    );
-
-    if (!isServiceAvailable) {
-      if (context.mounted) {
-        ui_helper.showErrorMessage(context, 'Service is not available');
-      }
-      await _textSubscription?.cancel();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () => _showSpeechDialog(context),
-      icon: const Icon(Icons.mic),
-    );
+    final speechDialog = useMemoized(() => SpeechToTextDialog());
+    final subscription = useRef<StreamSubscription<String>?>(null);
+
+    useEffect(() {
+      return () {
+        subscription.value?.cancel().ignore();
+        speechDialog.dispose();
+      };
+    }, [speechDialog]);
+
+    Future<void> showSpeechDialog() async {
+      // Cancel any existing subscription
+      await subscription.value?.cancel();
+
+      // Listen for the next text result
+      subscription.value = speechDialog.textStream.take(1).listen((text) {
+        if (text.isNotEmpty) {
+          onTextReceived(text);
+        }
+      });
+
+      // Show the dialog
+      final isServiceAvailable = await speechDialog.showDialog(
+        locale: PlatformDispatcher.instance.locale.toLanguageTag(),
+      );
+
+      if (!isServiceAvailable) {
+        if (context.mounted) {
+          ui_helper.showErrorMessage(context, 'Service is not available');
+        }
+        await subscription.value?.cancel();
+      }
+    }
+
+    return IconButton(onPressed: showSpeechDialog, icon: const Icon(Icons.mic));
   }
 }
