@@ -10,7 +10,7 @@
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without even the the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
@@ -36,76 +36,165 @@ class SettingsScreen extends HookConsumerWidget {
           return ListView(
             controller: controller,
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: [
-              Card(
-                color: Theme.of(context).highlightColor,
-                clipBehavior: Clip.antiAlias,
-                child: ListTile(
-                  title: const Text('General'),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
-                  ),
-                  leading: const Icon(Icons.settings),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    await GeneralSettingsRoute().push(context);
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                color: Theme.of(context).highlightColor,
-                clipBehavior: Clip.antiAlias,
-                child: ListTile(
-                  title: const Text('Web Engine'),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
-                  ),
-                  leading: const Icon(MdiIcons.web),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    await WebEngineSettingsRoute().push(context);
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                color: Theme.of(context).highlightColor,
-                clipBehavior: Clip.antiAlias,
-                child: ListTile(
-                  title: const Text('Bangs'),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
-                  ),
-                  leading: const Icon(MdiIcons.exclamationThick),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    await BangSettingsRoute().push(context);
-                  },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                color: Theme.of(context).highlightColor,
-                clipBehavior: Clip.antiAlias,
-                child: ListTile(
-                  title: const Text('Developer'),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
-                  ),
-                  leading: const Icon(Icons.developer_mode),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    await DeveloperSettingsRoute().push(context);
-                  },
-                ),
-              ),
+            children: const [
+              _AppearanceDisplayTile(),
+              _PrivacySecurityTile(),
+              _SearchContentTile(),
+              _TabsBehaviorTile(),
+              _FingerprintingTile(),
+              _AdvancedTile(),
             ],
           );
+        },
+      ),
+    );
+  }
+}
+
+class _AppearanceDisplayTile extends StatelessWidget {
+  const _AppearanceDisplayTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).highlightColor,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Appearance & Display'),
+        subtitle: const Text('Theme, tabs, toolbars, gestures'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(Icons.palette),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await AppearanceDisplaySettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _PrivacySecurityTile extends StatelessWidget {
+  const _PrivacySecurityTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).highlightColor,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Privacy & Security'),
+        subtitle: const Text('Tracking protection, data clearing'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(MdiIcons.shieldLock),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await PrivacySecuritySettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _SearchContentTile extends StatelessWidget {
+  const _SearchContentTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).highlightColor,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Search & Content'),
+        subtitle: const Text('Search providers, reader mode, AI'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(MdiIcons.magnify),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await SearchContentSettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _TabsBehaviorTile extends StatelessWidget {
+  const _TabsBehaviorTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).highlightColor,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Tabs & Behavior'),
+        subtitle: const Text('New tab defaults, link handling'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(MdiIcons.tab),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await TabsBehaviorSettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _FingerprintingTile extends StatelessWidget {
+  const _FingerprintingTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).highlightColor,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Fingerprinting'),
+        subtitle: const Text('Language, fingerprint protection'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(MdiIcons.fingerprint),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await FingerprintingSettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _AdvancedTile extends StatelessWidget {
+  const _AdvancedTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).highlightColor,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Advanced'),
+        subtitle: const Text('JavaScript, user agent, debugging'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(Icons.developer_mode),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await AdvancedSettingsRoute().push(context);
         },
       ),
     );

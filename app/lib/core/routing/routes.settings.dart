@@ -23,45 +23,53 @@ part of 'routes.dart';
   name: 'SettingsRoute',
   path: '/settings',
   routes: [
-    TypedGoRoute<GeneralSettingsRoute>(
-      name: 'GeneralSettingsRoute',
-      path: 'general',
+    TypedGoRoute<AppearanceDisplaySettingsRoute>(
+      name: 'AppearanceDisplaySettingsRoute',
+      path: 'appearance_display',
+    ),
+    TypedGoRoute<PrivacySecuritySettingsRoute>(
+      name: 'PrivacySecuritySettingsRoute',
+      path: 'privacy_security',
+    ),
+    TypedGoRoute<SearchContentSettingsRoute>(
+      name: 'SearchContentSettingsRoute',
+      path: 'search_content',
+    ),
+    TypedGoRoute<TabsBehaviorSettingsRoute>(
+      name: 'TabsBehaviorSettingsRoute',
+      path: 'tabs_behavior',
+    ),
+    TypedGoRoute<FingerprintingSettingsRoute>(
+      name: 'FingerprintingSettingsRoute',
+      path: 'fingerprinting',
+    ),
+    TypedGoRoute<AdvancedSettingsRoute>(
+      name: 'AdvancedSettingsRoute',
+      path: 'advanced',
     ),
     TypedGoRoute<BangSettingsRoute>(name: 'BangSettingsRoute', path: 'bang'),
-    TypedGoRoute<WebEngineSettingsRoute>(
-      name: 'WebEngineSettingsRoute',
-      path: 'web_engine',
+    TypedGoRoute<WebEngineHardeningRoute>(
+      name: 'WebEngineHardeningRoute',
+      path: 'hardening',
       routes: [
-        TypedGoRoute<WebEngineHardeningRoute>(
-          name: 'WebEngineHardeningRoute',
-          path: 'hardening',
-          routes: [
-            TypedGoRoute<WebEngineHardeningGroupRoute>(
-              name: 'WebEngineHardeningGroupRoute',
-              path: 'group/:group',
-            ),
-          ],
-        ),
-        TypedGoRoute<DohSettingsRoute>(name: 'DohSettingsRoute', path: 'doh'),
-        TypedGoRoute<FingerprintSettingsRoute>(
-          name: 'FingerprintSettingsRoute',
-          path: 'fingerprint',
-        ),
-        TypedGoRoute<LocaleSettingsRoute>(
-          name: 'LocaleSettingsRoute',
-          path: 'locales',
+        TypedGoRoute<WebEngineHardeningGroupRoute>(
+          name: 'WebEngineHardeningGroupRoute',
+          path: 'group/:group',
         ),
       ],
     ),
-    TypedGoRoute<DeveloperSettingsRoute>(
-      name: 'DeveloperSettingsRoute',
-      path: 'developer',
-      routes: [
-        TypedGoRoute<AddonCollectionRoute>(
-          name: 'AddonCollectionRoute',
-          path: 'addon_collection',
-        ),
-      ],
+    TypedGoRoute<DohSettingsRoute>(name: 'DohSettingsRoute', path: 'doh'),
+    TypedGoRoute<FingerprintSettingsRoute>(
+      name: 'FingerprintSettingsRoute',
+      path: 'fingerprint',
+    ),
+    TypedGoRoute<LocaleSettingsRoute>(
+      name: 'LocaleSettingsRoute',
+      path: 'locales',
+    ),
+    TypedGoRoute<AddonCollectionRoute>(
+      name: 'AddonCollectionRoute',
+      path: 'addon_collection',
     ),
   ],
 )
@@ -72,10 +80,50 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   }
 }
 
-class GeneralSettingsRoute extends GoRouteData with $GeneralSettingsRoute {
+class AppearanceDisplaySettingsRoute extends GoRouteData
+    with $AppearanceDisplaySettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const GeneralSettingsScreen();
+    return const AppearanceDisplaySettingsScreen();
+  }
+}
+
+class PrivacySecuritySettingsRoute extends GoRouteData
+    with $PrivacySecuritySettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const PrivacySecuritySettingsScreen();
+  }
+}
+
+class SearchContentSettingsRoute extends GoRouteData
+    with $SearchContentSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SearchContentSettingsScreen();
+  }
+}
+
+class TabsBehaviorSettingsRoute extends GoRouteData
+    with $TabsBehaviorSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const TabsBehaviorSettingsScreen();
+  }
+}
+
+class FingerprintingSettingsRoute extends GoRouteData
+    with $FingerprintingSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const FingerprintingSettingsScreen();
+  }
+}
+
+class AdvancedSettingsRoute extends GoRouteData with $AdvancedSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const AdvancedSettingsScreen();
   }
 }
 
@@ -105,20 +153,6 @@ class LocaleSettingsRoute extends GoRouteData with $LocaleSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const LocaleSettingsScreen();
-  }
-}
-
-class WebEngineSettingsRoute extends GoRouteData with $WebEngineSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const WebEngineSettingsScreen();
-  }
-}
-
-class DeveloperSettingsRoute extends GoRouteData with $DeveloperSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const DeveloperSettingsScreen();
   }
 }
 

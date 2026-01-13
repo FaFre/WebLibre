@@ -25,45 +25,90 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
+import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-class DeveloperSettingsScreen extends StatelessWidget {
-  const DeveloperSettingsScreen();
+class AdvancedSettingsScreen extends StatelessWidget {
+  const AdvancedSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Developer Settings')),
-      body: FadingScroll(
-        fadingSize: 25,
-        builder: (context, controller) {
+      appBar: AppBar(title: const Text('Advanced')),
+      body: SafeArea(
+        child: FadingScroll(
+          fadingSize: 25,
+          builder: (context, controller) {
           return ListView(
             controller: controller,
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             children: const [
-              _JavaScriptTile(),
-              _UserAgentTile(),
-              _EnterpriseRootsTile(),
-              _FingerprintProtectionTile(),
-              _ErrorLogsTile(),
-              _DartVmTile(),
-              _AddonCollectionTile(),
-              _ResetUITile(),
+              _ContentBehaviorSection(),
+              _StorageDebuggingSection(),
+              _ResetSection(),
             ],
           );
         },
       ),
+      ),
+    );
+  }
+}
+
+class _ContentBehaviorSection extends StatelessWidget {
+  const _ContentBehaviorSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Content Behavior'),
+        _JavaScriptTile(),
+        _UserAgentTile(),
+        _EnterpriseRootsTile(),
+      ],
+    );
+  }
+}
+
+class _StorageDebuggingSection extends StatelessWidget {
+  const _StorageDebuggingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Storage & Debugging'),
+        _IconCacheTile(),
+        _ErrorLogsTile(),
+        _DartVmTile(),
+      ],
+    );
+  }
+}
+
+class _ResetSection extends StatelessWidget {
+  const _ResetSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Reset'),
+        _ResetUITile(),
+      ],
     );
   }
 }
@@ -172,22 +217,52 @@ class _EnterpriseRootsTile extends HookConsumerWidget {
   }
 }
 
-class _FingerprintProtectionTile extends StatelessWidget {
-  const _FingerprintProtectionTile();
+class _IconCacheTile extends HookConsumerWidget {
+  const _IconCacheTile();
 
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Fingerprint Protection'),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final size = ref.watch(
+      iconCacheSizeMegabytesProvider.select((value) => value.value),
+    );
+
+    return CustomListTile(
+      title: 'Icon Cache',
+      subtitle: 'Stored favicons',
+      prefix: Padding(
+        padding: const EdgeInsets.only(right: 16.0),
+        child: Icon(
+          Icons.image,
+          size: 24,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
-      leading: const Icon(MdiIcons.fingerprint),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await FingerprintSettingsRoute().push(context);
-      },
+      content: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: DefaultTextStyle(
+          style: GoogleFonts.robotoMono(
+            textStyle: DefaultTextStyle.of(context).style,
+          ),
+          child: Table(
+            columnWidths: const {0: FixedColumnWidth(100)},
+            children: [
+              TableRow(
+                children: [
+                  const Text('Size'),
+                  Text('${size?.toStringAsFixed(2) ?? 0} MB'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      suffix: FilledButton.icon(
+        onPressed: () async {
+          await ref.read(cacheRepositoryProvider.notifier).clearCache();
+        },
+        icon: const Icon(Icons.delete),
+        label: const Text('Clear'),
+      ),
     );
   }
 }
@@ -264,25 +339,6 @@ class _DartVmTile extends StatelessWidget {
         icon: const Icon(Icons.copy),
         label: const Text('Copy'),
       ),
-    );
-  }
-}
-
-class _AddonCollectionTile extends StatelessWidget {
-  const _AddonCollectionTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(MdiIcons.puzzle),
-      title: const Text('Custom Extension Collection'),
-      subtitle: const Text(
-        'Custom Add-on Collections are curated lists of extensions that users can create and share.',
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await AddonCollectionRoute().push(context);
-      },
     );
   }
 }

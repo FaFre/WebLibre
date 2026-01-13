@@ -80,9 +80,34 @@ RouteBase get $settingsRoute => GoRouteData.$route(
   factory: $SettingsRoute._fromState,
   routes: [
     GoRouteData.$route(
-      path: 'general',
-      name: 'GeneralSettingsRoute',
-      factory: $GeneralSettingsRoute._fromState,
+      path: 'appearance_display',
+      name: 'AppearanceDisplaySettingsRoute',
+      factory: $AppearanceDisplaySettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'privacy_security',
+      name: 'PrivacySecuritySettingsRoute',
+      factory: $PrivacySecuritySettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'search_content',
+      name: 'SearchContentSettingsRoute',
+      factory: $SearchContentSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'tabs_behavior',
+      name: 'TabsBehaviorSettingsRoute',
+      factory: $TabsBehaviorSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'fingerprinting',
+      name: 'FingerprintingSettingsRoute',
+      factory: $FingerprintingSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'advanced',
+      name: 'AdvancedSettingsRoute',
+      factory: $AdvancedSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'bang',
@@ -90,50 +115,36 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $BangSettingsRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'web_engine',
-      name: 'WebEngineSettingsRoute',
-      factory: $WebEngineSettingsRoute._fromState,
+      path: 'hardening',
+      name: 'WebEngineHardeningRoute',
+      factory: $WebEngineHardeningRoute._fromState,
       routes: [
         GoRouteData.$route(
-          path: 'hardening',
-          name: 'WebEngineHardeningRoute',
-          factory: $WebEngineHardeningRoute._fromState,
-          routes: [
-            GoRouteData.$route(
-              path: 'group/:group',
-              name: 'WebEngineHardeningGroupRoute',
-              factory: $WebEngineHardeningGroupRoute._fromState,
-            ),
-          ],
-        ),
-        GoRouteData.$route(
-          path: 'doh',
-          name: 'DohSettingsRoute',
-          factory: $DohSettingsRoute._fromState,
-        ),
-        GoRouteData.$route(
-          path: 'fingerprint',
-          name: 'FingerprintSettingsRoute',
-          factory: $FingerprintSettingsRoute._fromState,
-        ),
-        GoRouteData.$route(
-          path: 'locales',
-          name: 'LocaleSettingsRoute',
-          factory: $LocaleSettingsRoute._fromState,
+          path: 'group/:group',
+          name: 'WebEngineHardeningGroupRoute',
+          factory: $WebEngineHardeningGroupRoute._fromState,
         ),
       ],
     ),
     GoRouteData.$route(
-      path: 'developer',
-      name: 'DeveloperSettingsRoute',
-      factory: $DeveloperSettingsRoute._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'addon_collection',
-          name: 'AddonCollectionRoute',
-          factory: $AddonCollectionRoute._fromState,
-        ),
-      ],
+      path: 'doh',
+      name: 'DohSettingsRoute',
+      factory: $DohSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'fingerprint',
+      name: 'FingerprintSettingsRoute',
+      factory: $FingerprintSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'locales',
+      name: 'LocaleSettingsRoute',
+      factory: $LocaleSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'addon_collection',
+      name: 'AddonCollectionRoute',
+      factory: $AddonCollectionRoute._fromState,
     ),
   ],
 );
@@ -158,12 +169,117 @@ mixin $SettingsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $GeneralSettingsRoute on GoRouteData {
-  static GeneralSettingsRoute _fromState(GoRouterState state) =>
-      GeneralSettingsRoute();
+mixin $AppearanceDisplaySettingsRoute on GoRouteData {
+  static AppearanceDisplaySettingsRoute _fromState(GoRouterState state) =>
+      AppearanceDisplaySettingsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings/general');
+  String get location => GoRouteData.$location('/settings/appearance_display');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PrivacySecuritySettingsRoute on GoRouteData {
+  static PrivacySecuritySettingsRoute _fromState(GoRouterState state) =>
+      PrivacySecuritySettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/privacy_security');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SearchContentSettingsRoute on GoRouteData {
+  static SearchContentSettingsRoute _fromState(GoRouterState state) =>
+      SearchContentSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/search_content');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TabsBehaviorSettingsRoute on GoRouteData {
+  static TabsBehaviorSettingsRoute _fromState(GoRouterState state) =>
+      TabsBehaviorSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/tabs_behavior');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $FingerprintingSettingsRoute on GoRouteData {
+  static FingerprintingSettingsRoute _fromState(GoRouterState state) =>
+      FingerprintingSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/fingerprinting');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AdvancedSettingsRoute on GoRouteData {
+  static AdvancedSettingsRoute _fromState(GoRouterState state) =>
+      AdvancedSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/advanced');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -200,34 +316,12 @@ mixin $BangSettingsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $WebEngineSettingsRoute on GoRouteData {
-  static WebEngineSettingsRoute _fromState(GoRouterState state) =>
-      WebEngineSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/web_engine');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
 mixin $WebEngineHardeningRoute on GoRouteData {
   static WebEngineHardeningRoute _fromState(GoRouterState state) =>
       WebEngineHardeningRoute();
 
   @override
-  String get location =>
-      GoRouteData.$location('/settings/web_engine/hardening');
+  String get location => GoRouteData.$location('/settings/hardening');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -252,7 +346,7 @@ mixin $WebEngineHardeningGroupRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-    '/settings/web_engine/hardening/group/${Uri.encodeComponent(_self.group)}',
+    '/settings/hardening/group/${Uri.encodeComponent(_self.group)}',
   );
 
   @override
@@ -273,7 +367,7 @@ mixin $DohSettingsRoute on GoRouteData {
   static DohSettingsRoute _fromState(GoRouterState state) => DohSettingsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings/web_engine/doh');
+  String get location => GoRouteData.$location('/settings/doh');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -294,8 +388,7 @@ mixin $FingerprintSettingsRoute on GoRouteData {
       FingerprintSettingsRoute();
 
   @override
-  String get location =>
-      GoRouteData.$location('/settings/web_engine/fingerprint');
+  String get location => GoRouteData.$location('/settings/fingerprint');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -316,28 +409,7 @@ mixin $LocaleSettingsRoute on GoRouteData {
       LocaleSettingsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings/web_engine/locales');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $DeveloperSettingsRoute on GoRouteData {
-  static DeveloperSettingsRoute _fromState(GoRouterState state) =>
-      DeveloperSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/developer');
+  String get location => GoRouteData.$location('/settings/locales');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -358,8 +430,7 @@ mixin $AddonCollectionRoute on GoRouteData {
       AddonCollectionRoute();
 
   @override
-  String get location =>
-      GoRouteData.$location('/settings/developer/addon_collection');
+  String get location => GoRouteData.$location('/settings/addon_collection');
 
   @override
   void go(BuildContext context) => context.go(location);

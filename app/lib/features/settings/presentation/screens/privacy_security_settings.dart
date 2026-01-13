@@ -26,41 +26,112 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
-class WebEngineSettingsScreen extends StatelessWidget {
-  const WebEngineSettingsScreen();
+class PrivacySecuritySettingsScreen extends StatelessWidget {
+  const PrivacySecuritySettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Web Engine Settings')),
-      body: FadingScroll(
-        fadingSize: 25,
-        builder: (context, controller) {
+      appBar: AppBar(title: const Text('Privacy & Security')),
+      body: SafeArea(
+        child: FadingScroll(
+          fadingSize: 25,
+          builder: (context, controller) {
           return ListView(
             controller: controller,
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             children: const [
-              _IncognitoModeSection(),
-              _DeleteBrowsingDataTile(),
-              _AutoClearHistorySection(),
-              _BrowserLanguagesTile(),
-              _GlobalPrivacyControlTile(),
-              _HttpsOnlyModeSection(),
-              _DnsTile(),
+              _PrivacyModesSection(),
               _TrackingProtectionSection(),
-              _BounceTrackingProtectionTile(),
-              _QueryParameterStrippingSection(),
-              _PdfViewerTile(),
-              _WebEngineHardeningTile(),
+              _ConnectionSecuritySection(),
+              _DataManagementSection(),
+              _AdvancedSection(),
             ],
           );
         },
       ),
+      ),
+    );
+  }
+}
+
+class _PrivacyModesSection extends StatelessWidget {
+  const _PrivacyModesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Privacy Modes'),
+        _IncognitoModeSection(),
+        _GlobalPrivacyControlTile(),
+      ],
+    );
+  }
+}
+
+class _TrackingProtectionSection extends StatelessWidget {
+  const _TrackingProtectionSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Tracking Protection'),
+        _EnhancedTrackingProtectionSection(),
+        _BounceTrackingProtectionTile(),
+        _QueryParameterStrippingSection(),
+      ],
+    );
+  }
+}
+
+class _ConnectionSecuritySection extends StatelessWidget {
+  const _ConnectionSecuritySection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Connection Security'),
+        _HttpsOnlyModeSection(),
+        _DnsTile(),
+      ],
+    );
+  }
+}
+
+class _DataManagementSection extends StatelessWidget {
+  const _DataManagementSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Data Management'),
+        _DeleteBrowsingDataTile(),
+        _AutoClearHistorySection(),
+      ],
+    );
+  }
+}
+
+class _AdvancedSection extends StatelessWidget {
+  const _AdvancedSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Advanced'),
+        _WebEngineHardeningTile(),
+      ],
     );
   }
 }
@@ -270,26 +341,6 @@ class _AutoClearHistorySection extends HookConsumerWidget {
   }
 }
 
-class _BrowserLanguagesTile extends StatelessWidget {
-  const _BrowserLanguagesTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Browser Languages'),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(MdiIcons.translate),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await LocaleSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
 class _GlobalPrivacyControlTile extends HookConsumerWidget {
   const _GlobalPrivacyControlTile();
 
@@ -395,8 +446,8 @@ class _DnsTile extends StatelessWidget {
   }
 }
 
-class _TrackingProtectionSection extends HookConsumerWidget {
-  const _TrackingProtectionSection();
+class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
+  const _EnhancedTrackingProtectionSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -558,41 +609,14 @@ class _QueryParameterStrippingSection extends HookConsumerWidget {
                       saveEngineSettingsControllerProvider.notifier,
                     )
                     .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .queryParameterStripping(value.first),
+                      (currentSettings) =>
+                          currentSettings.copyWith.queryParameterStripping(value.first),
                     );
               },
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _PdfViewerTile extends HookConsumerWidget {
-  const _PdfViewerTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enablePdfJs = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.enablePdfJs),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Built-in PDF Viewer'),
-      subtitle: const Text(
-        'Open PDF files directly in the browser without downloading',
-      ),
-      secondary: const Icon(MdiIcons.filePdfBox),
-      value: enablePdfJs,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) => currentSettings.copyWith.enablePdfJs(value),
-            );
-      },
     );
   }
 }
