@@ -61,6 +61,7 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
   pretty_qr_code: ^3.5.0
+  qr_code_scanner_plus: ^2.0.14
   quick_actions: ^1.1.0
   riverpod: ^3.1.0
   riverpod_annotation: ^4.0.0
