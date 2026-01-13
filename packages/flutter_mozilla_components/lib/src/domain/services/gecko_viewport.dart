@@ -10,11 +10,7 @@ import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// Keyboard visibility event data
-typedef KeyboardEvent = ({
-  int heightPx,
-  bool isVisible,
-  bool isAnimating,
-});
+typedef KeyboardEvent = ({int heightPx, bool isVisible, bool isAnimating});
 
 /// Service for controlling GeckoView's viewport behavior.
 ///
@@ -57,9 +53,9 @@ class GeckoViewportService extends GeckoViewportEvents {
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
   }) : _api = GeckoViewportApi(
-          binaryMessenger: binaryMessenger,
-          messageChannelSuffix: messageChannelSuffix,
-        );
+         binaryMessenger: binaryMessenger,
+         messageChannelSuffix: messageChannelSuffix,
+       );
 
   /// Sets up the service to receive events from native.
   ///
@@ -110,15 +106,11 @@ class GeckoViewportService extends GeckoViewportEvents {
     bool isVisible,
     bool isAnimating,
   ) {
-    _keyboardSubject.addWhenMoreRecent(
-      timestamp,
-      null,
-      (
-        heightPx: heightPx,
-        isVisible: isVisible,
-        isAnimating: isAnimating,
-      ),
-    );
+    _keyboardSubject.addWhenMoreRecent(timestamp, null, (
+      heightPx: heightPx,
+      isVisible: isVisible,
+      isAnimating: isAnimating,
+    ));
   }
 
   /// Disposes the service and closes all streams.

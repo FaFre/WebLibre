@@ -49,15 +49,30 @@ class BookmarkListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final treeKey = useMemoized(() => GlobalKey<TreeViewState>());
     final hideEmptyRoots = useState(true);
-    final bookmarkList = ref.watch(seamlessBookmarksProvider(entryGuid, hideEmptyRoots: hideEmptyRoots.value));
+    final bookmarkList = ref.watch(
+      seamlessBookmarksProvider(
+        entryGuid,
+        hideEmptyRoots: hideEmptyRoots.value,
+      ),
+    );
 
     final textFilterEnabled = useState(false);
     final textFilterController = useTextEditingController();
 
     useOnListenableChange(textFilterController, () {
-      if (ref.exists(seamlessBookmarksProvider(entryGuid, hideEmptyRoots: hideEmptyRoots.value))) {
+      if (ref.exists(
+        seamlessBookmarksProvider(
+          entryGuid,
+          hideEmptyRoots: hideEmptyRoots.value,
+        ),
+      )) {
         ref
-            .read(seamlessBookmarksProvider(entryGuid, hideEmptyRoots: hideEmptyRoots.value).notifier)
+            .read(
+              seamlessBookmarksProvider(
+                entryGuid,
+                hideEmptyRoots: hideEmptyRoots.value,
+              ).notifier,
+            )
             .search(textFilterController.text);
       }
     });
@@ -109,12 +124,14 @@ class BookmarkListScreen extends HookConsumerWidget {
               ),
               if (entryGuid == BookmarkRoot.root.id)
                 MenuItemButton(
-                  leadingIcon: Icon(hideEmptyRoots.value
-                      ? MdiIcons.eyeOff
-                      : MdiIcons.eye),
-                  child: Text(hideEmptyRoots.value
-                      ? 'Show Empty Root Folders'
-                      : 'Hide Empty Root Folders'),
+                  leadingIcon: Icon(
+                    hideEmptyRoots.value ? MdiIcons.eyeOff : MdiIcons.eye,
+                  ),
+                  child: Text(
+                    hideEmptyRoots.value
+                        ? 'Show Empty Root Folders'
+                        : 'Hide Empty Root Folders',
+                  ),
                   onPressed: () {
                     hideEmptyRoots.value = !hideEmptyRoots.value;
                   },

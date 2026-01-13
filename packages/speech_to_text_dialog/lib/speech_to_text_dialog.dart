@@ -48,11 +48,9 @@ class SpeechToTextDialog implements SpeechToTextEvents {
   ///
   /// Optionally provide a custom [api] for testing or dependency injection.
   /// If [binaryMessenger] is provided, it will be used for Pigeon communication.
-  SpeechToTextDialog({
-    SpeechToTextApi? api,
-    BinaryMessenger? binaryMessenger,
-  })  : _api = api ?? SpeechToTextApi(binaryMessenger: binaryMessenger),
-        _binaryMessenger = binaryMessenger {
+  SpeechToTextDialog({SpeechToTextApi? api, BinaryMessenger? binaryMessenger})
+    : _api = api ?? SpeechToTextApi(binaryMessenger: binaryMessenger),
+      _binaryMessenger = binaryMessenger {
     // Set up the event handler
     SpeechToTextEvents.setUp(this, binaryMessenger: binaryMessenger);
   }

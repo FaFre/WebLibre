@@ -51,17 +51,17 @@ class AdvancedSettingsScreen extends StatelessWidget {
         child: FadingScroll(
           fadingSize: 25,
           builder: (context, controller) {
-          return ListView(
-            controller: controller,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const [
-              _ContentBehaviorSection(),
-              _StorageDebuggingSection(),
-              _ResetSection(),
-            ],
-          );
-        },
-      ),
+            return ListView(
+              controller: controller,
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              children: const [
+                _ContentBehaviorSection(),
+                _StorageDebuggingSection(),
+                _ResetSection(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -119,9 +119,7 @@ class _JavaScriptTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final javascriptEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.javascriptEnabled,
-      ),
+      engineSettingsWithDefaultsProvider.select((s) => s.javascriptEnabled),
     );
 
     return SwitchListTile.adaptive(

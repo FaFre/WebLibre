@@ -39,17 +39,17 @@ class TabsBehaviorSettingsScreen extends StatelessWidget {
         child: FadingScroll(
           fadingSize: 25,
           builder: (context, controller) {
-          return ListView(
-            controller: controller,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const [
-              _TabCreationSection(),
-              _TabOrganizationSection(),
-              _TabInteractionSection(),
-            ],
-          );
-        },
-      ),
+            return ListView(
+              controller: controller,
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              children: const [
+                _TabCreationSection(),
+                _TabOrganizationSection(),
+                _TabInteractionSection(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -110,19 +110,14 @@ class _NewTabDefaultSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const ListTile(
             title: Text('New Tab Default'),
-            subtitle: Text(
-              'Choose the default type for manually created tabs',
-            ),
+            subtitle: Text('Choose the default type for manually created tabs'),
             leading: Icon(MdiIcons.tab),
             contentPadding: EdgeInsets.zero,
           ),
@@ -144,12 +139,10 @@ class _NewTabDefaultSection extends HookConsumerWidget {
               selected: {defaultCreateTabType},
               onSelectionChanged: (value) async {
                 await ref
-                    .read(
-                      saveGeneralSettingsControllerProvider.notifier,
-                    )
+                    .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.defaultCreateTabType(value.first),
+                      (currentSettings) => currentSettings.copyWith
+                          .defaultCreateTabType(value.first),
                     );
               },
               style: switch (defaultCreateTabType) {
@@ -178,19 +171,14 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const ListTile(
             title: Text('External Link Handling'),
-            subtitle: Text(
-              'Choose how external links open in WebLibre',
-            ),
+            subtitle: Text('Choose how external links open in WebLibre'),
             leading: Icon(MdiIcons.tabPlus),
             contentPadding: EdgeInsets.zero,
           ),
@@ -217,12 +205,10 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
               selected: {tabIntentOpenSetting},
               onSelectionChanged: (value) async {
                 await ref
-                    .read(
-                      saveGeneralSettingsControllerProvider.notifier,
-                    )
+                    .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabIntentOpenSetting(value.first),
+                      (currentSettings) => currentSettings.copyWith
+                          .tabIntentOpenSetting(value.first),
                     );
               },
               style: switch (tabIntentOpenSetting) {
@@ -246,7 +232,9 @@ class _CreateChildTabsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final createChildTabsOption = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.createChildTabsOption),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.createChildTabsOption,
+      ),
     );
 
     return SwitchListTile.adaptive(
@@ -274,14 +262,14 @@ class _ShowExtensionShortcutTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showExtensionShortcut = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showExtensionShortcut),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.showExtensionShortcut,
+      ),
     );
 
     return SwitchListTile.adaptive(
       title: const Text('Show Extension Shortcut'),
-      subtitle: const Text(
-        'Display an extension menu directly on the tab bar',
-      ),
+      subtitle: const Text('Display an extension menu directly on the tab bar'),
       secondary: const Icon(MdiIcons.puzzleHeart),
       value: showExtensionShortcut,
       onChanged: (value) async {
@@ -306,10 +294,7 @@ class _TabBarSwipeBehaviorSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,9 +309,7 @@ class _TabBarSwipeBehaviorSection extends HookConsumerWidget {
             onChanged: (value) async {
               if (value != null) {
                 await ref
-                    .read(
-                      saveGeneralSettingsControllerProvider.notifier,
-                    )
+                    .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) =>
                           currentSettings.copyWith.tabBarSwipeAction(value),

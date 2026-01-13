@@ -319,7 +319,9 @@ class ListTabPreview extends HookConsumerWidget {
                     child: UriBreadcrumb(
                       uri: tabState.url,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: tabState.isPrivate ? colorScheme.onSurface : null,
+                        color: tabState.isPrivate
+                            ? colorScheme.onSurface
+                            : null,
                       ),
                     ),
                   ),

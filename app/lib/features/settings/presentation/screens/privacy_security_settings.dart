@@ -43,19 +43,19 @@ class PrivacySecuritySettingsScreen extends StatelessWidget {
         child: FadingScroll(
           fadingSize: 25,
           builder: (context, controller) {
-          return ListView(
-            controller: controller,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const [
-              _PrivacyModesSection(),
-              _TrackingProtectionSection(),
-              _ConnectionSecuritySection(),
-              _DataManagementSection(),
-              _AdvancedSection(),
-            ],
-          );
-        },
-      ),
+            return ListView(
+              controller: controller,
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              children: const [
+                _PrivacyModesSection(),
+                _TrackingProtectionSection(),
+                _ConnectionSecuritySection(),
+                _DataManagementSection(),
+                _AdvancedSection(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -161,19 +161,13 @@ class _IncognitoModeSection extends HookConsumerWidget {
                 .read(saveGeneralSettingsControllerProvider.notifier)
                 .save(
                   (currentSettings) => value
-                      ? currentSettings.copyWith.deleteBrowsingDataOnQuit(
-                          {},
-                        )
-                      : currentSettings.copyWith.deleteBrowsingDataOnQuit(
-                          null,
-                        ),
+                      ? currentSettings.copyWith.deleteBrowsingDataOnQuit({})
+                      : currentSettings.copyWith.deleteBrowsingDataOnQuit(null),
                 );
           },
         ),
         if (deleteBrowsingDataOnQuit != null)
-          _DeleteBrowsingDataTypes(
-            selectedTypes: deleteBrowsingDataOnQuit,
-          ),
+          _DeleteBrowsingDataTypes(selectedTypes: deleteBrowsingDataOnQuit),
       ],
     );
   }
@@ -187,10 +181,7 @@ class _DeleteBrowsingDataTypes extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         children: [
           for (final type in DeleteBrowsingDataType.values)
@@ -208,20 +199,19 @@ class _DeleteBrowsingDataTypes extends HookConsumerWidget {
 
                 if (value == true) {
                   await notifier.save(
-                    (currentSettings) => currentSettings.copyWith
-                        .deleteBrowsingDataOnQuit({
-                      ...currentSettings.deleteBrowsingDataOnQuit!,
-                      type,
-                    }),
+                    (currentSettings) =>
+                        currentSettings.copyWith.deleteBrowsingDataOnQuit({
+                          ...currentSettings.deleteBrowsingDataOnQuit!,
+                          type,
+                        }),
                   );
                 } else {
                   await notifier.save(
-                    (currentSettings) => currentSettings.copyWith
-                        .deleteBrowsingDataOnQuit(
-                      {
-                        ...currentSettings.deleteBrowsingDataOnQuit!,
-                      }..remove(type),
-                    ),
+                    (currentSettings) =>
+                        currentSettings.copyWith.deleteBrowsingDataOnQuit(
+                          {...currentSettings.deleteBrowsingDataOnQuit!}
+                            ..remove(type),
+                        ),
                   );
                 }
               },
@@ -269,10 +259,7 @@ class _AutoClearHistorySection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,41 +283,19 @@ class _AutoClearHistorySection extends HookConsumerWidget {
               ),
               width: double.infinity,
               dropdownMenuEntries: const [
-                DropdownMenuEntry(
-                  value: Duration.zero,
-                  label: 'Never',
-                ),
-                DropdownMenuEntry(
-                  value: Duration(days: 1),
-                  label: '1 Day',
-                ),
-                DropdownMenuEntry(
-                  value: Duration(days: 7),
-                  label: '1 Week',
-                ),
-                DropdownMenuEntry(
-                  value: Duration(days: 14),
-                  label: '2 Weeks',
-                ),
-                DropdownMenuEntry(
-                  value: Duration(days: 30),
-                  label: '1 Month',
-                ),
-                DropdownMenuEntry(
-                  value: Duration(days: 90),
-                  label: '3 Months',
-                ),
+                DropdownMenuEntry(value: Duration.zero, label: 'Never'),
+                DropdownMenuEntry(value: Duration(days: 1), label: '1 Day'),
+                DropdownMenuEntry(value: Duration(days: 7), label: '1 Week'),
+                DropdownMenuEntry(value: Duration(days: 14), label: '2 Weeks'),
+                DropdownMenuEntry(value: Duration(days: 30), label: '1 Month'),
+                DropdownMenuEntry(value: Duration(days: 90), label: '3 Months'),
               ],
               onSelected: (value) async {
                 await ref
-                    .read(
-                      saveGeneralSettingsControllerProvider.notifier,
-                    )
+                    .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) => currentSettings.copyWith
-                          .historyAutoCleanInterval(
-                            value ?? Duration.zero,
-                          ),
+                          .historyAutoCleanInterval(value ?? Duration.zero),
                     );
               },
             ),
@@ -378,10 +343,7 @@ class _HttpsOnlyModeSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,9 +372,7 @@ class _HttpsOnlyModeSection extends HookConsumerWidget {
               selected: {httpsOnlyMode},
               onSelectionChanged: (value) async {
                 await ref
-                    .read(
-                      saveEngineSettingsControllerProvider.notifier,
-                    )
+                    .read(saveEngineSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) =>
                           currentSettings.copyWith.httpsOnlyMode(value.first),
@@ -458,10 +418,7 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,8 +434,8 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
               await ref
                   .read(saveEngineSettingsControllerProvider.notifier)
                   .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.trackingProtectionPolicy(value),
+                    (currentSettings) => currentSettings.copyWith
+                        .trackingProtectionPolicy(value),
                   );
             },
             child: const Column(
@@ -504,9 +461,7 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
                 RadioListTile<TrackingProtectionPolicy>.adaptive(
                   value: TrackingProtectionPolicy.custom,
                   title: Text('Custom'),
-                  subtitle: Text(
-                    'Choose which trackers and scripts to block.',
-                  ),
+                  subtitle: Text('Choose which trackers and scripts to block.'),
                 ),
               ],
             ),
@@ -546,8 +501,8 @@ class _BounceTrackingProtectionTile extends HookConsumerWidget {
         await ref
             .read(saveEngineSettingsControllerProvider.notifier)
             .save(
-              (currentSettings) => currentSettings.copyWith
-                  .bounceTrackingProtectionMode(
+              (currentSettings) =>
+                  currentSettings.copyWith.bounceTrackingProtectionMode(
                     value
                         ? BounceTrackingProtectionMode.enabled
                         : BounceTrackingProtectionMode.disabled,
@@ -570,10 +525,7 @@ class _QueryParameterStrippingSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,12 +557,10 @@ class _QueryParameterStrippingSection extends HookConsumerWidget {
               selected: {queryParameterStripping},
               onSelectionChanged: (value) async {
                 await ref
-                    .read(
-                      saveEngineSettingsControllerProvider.notifier,
-                    )
+                    .read(saveEngineSettingsControllerProvider.notifier)
                     .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.queryParameterStripping(value.first),
+                      (currentSettings) => currentSettings.copyWith
+                          .queryParameterStripping(value.first),
                     );
               },
             ),

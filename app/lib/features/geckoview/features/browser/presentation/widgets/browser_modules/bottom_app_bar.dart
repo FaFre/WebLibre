@@ -128,10 +128,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
       color: Theme.of(context).colorScheme.surfaceContainer,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
-        child: SizedBox(
-          height: _size.height,
-          child: _tabBar,
-        ),
+        child: SizedBox(height: _size.height, child: _tabBar),
       ),
     );
   }

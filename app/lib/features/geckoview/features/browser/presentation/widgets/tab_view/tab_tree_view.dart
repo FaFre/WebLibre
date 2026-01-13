@@ -184,7 +184,9 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                       searchPartition: TabSearchPartition.preview,
                       // ignore: document_ignores using fast equatable
                       // ignore: provider_parameters
-                      containerFilter: ContainerFilterById(containerId: containerId),
+                      containerFilter: ContainerFilterById(
+                        containerId: containerId,
+                      ),
                       groupTrees: true,
                     ),
                   );

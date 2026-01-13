@@ -111,10 +111,7 @@ class _ThemeSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,9 +143,7 @@ class _ThemeSection extends HookConsumerWidget {
               selected: {themeMode},
               onSelectionChanged: (value) async {
                 await ref
-                    .read(
-                      saveGeneralSettingsControllerProvider.notifier,
-                    )
+                    .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) =>
                           currentSettings.copyWith.themeMode(value.first),
@@ -172,10 +167,7 @@ class _TabBarPositionSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,9 +182,7 @@ class _TabBarPositionSection extends HookConsumerWidget {
             onChanged: (value) async {
               if (value != null) {
                 await ref
-                    .read(
-                      saveGeneralSettingsControllerProvider.notifier,
-                    )
+                    .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) =>
                           currentSettings.copyWith.tabBarPosition(value),
@@ -204,9 +194,7 @@ class _TabBarPositionSection extends HookConsumerWidget {
                 RadioListTile.adaptive(
                   value: TabBarPosition.top,
                   title: Text('Top'),
-                  subtitle: Text(
-                    'Persistent tab bar without auto-hide',
-                  ),
+                  subtitle: Text('Persistent tab bar without auto-hide'),
                 ),
                 RadioListTile.adaptive(
                   value: TabBarPosition.bottom,
@@ -228,8 +216,9 @@ class _ShowContextualTabBarTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabBarShowContextualBar = ref.watch(
-      generalSettingsWithDefaultsProvider
-          .select((s) => s.tabBarShowContextualBar),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarShowContextualBar,
+      ),
     );
 
     return SwitchListTile.adaptive(
@@ -257,8 +246,9 @@ class _ShowQuickTabSwitcherBarTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabBarShowQuickTabSwitcherBar = ref.watch(
-      generalSettingsWithDefaultsProvider
-          .select((s) => s.tabBarShowQuickTabSwitcherBar),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarShowQuickTabSwitcherBar,
+      ),
     );
 
     return SwitchListTile.adaptive(
@@ -272,8 +262,8 @@ class _ShowQuickTabSwitcherBarTile extends HookConsumerWidget {
         await ref
             .read(saveGeneralSettingsControllerProvider.notifier)
             .save(
-              (currentSettings) => currentSettings.copyWith
-                  .tabBarShowQuickTabSwitcherBar(value),
+              (currentSettings) =>
+                  currentSettings.copyWith.tabBarShowQuickTabSwitcherBar(value),
             );
       },
     );
@@ -290,10 +280,7 @@ class _QuickTabSwitcherModeSection extends HookConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,12 +295,10 @@ class _QuickTabSwitcherModeSection extends HookConsumerWidget {
             onChanged: (value) async {
               if (value != null) {
                 await ref
-                    .read(
-                      saveGeneralSettingsControllerProvider.notifier,
-                    )
+                    .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .quickTabSwitcherMode(value),
+                      (currentSettings) =>
+                          currentSettings.copyWith.quickTabSwitcherMode(value),
                     );
               }
             },
@@ -322,16 +307,12 @@ class _QuickTabSwitcherModeSection extends HookConsumerWidget {
                 RadioListTile.adaptive(
                   value: QuickTabSwitcherMode.lastUsedTabs,
                   title: Text('Recently Used Tabs'),
-                  subtitle: Text(
-                    'Recently used tabs across all containers',
-                  ),
+                  subtitle: Text('Recently used tabs across all containers'),
                 ),
                 RadioListTile.adaptive(
                   value: QuickTabSwitcherMode.containerTabs,
                   title: Text('Container Tabs'),
-                  subtitle: Text(
-                    'Ordered tabs of the selected container',
-                  ),
+                  subtitle: Text('Ordered tabs of the selected container'),
                 ),
               ],
             ),

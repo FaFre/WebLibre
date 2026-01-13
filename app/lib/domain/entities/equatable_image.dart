@@ -25,8 +25,8 @@ class EquatableImage {
   bool _isDisposed = false;
 
   EquatableImage(Image value, {required int hash})
-      : _value = value,
-        _imageHash = hash;
+    : _value = value,
+      _imageHash = hash;
 
   /// The underlying ui.Image. Returns null if disposed.
   Image? get value => _isDisposed ? null : _value;

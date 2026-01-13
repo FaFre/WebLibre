@@ -84,11 +84,7 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.mic,
-                size: 80,
-                color: Colors.blue,
-              ),
+              const Icon(Icons.mic, size: 80, color: Colors.blue),
               const SizedBox(height: 24),
               Text(
                 _recognizedText,

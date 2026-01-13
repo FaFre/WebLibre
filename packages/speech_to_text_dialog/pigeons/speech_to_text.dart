@@ -35,7 +35,6 @@ import 'package:pigeon/pigeon.dart';
     dartPackageName: 'speech_to_text_dialog',
   ),
 )
-
 /// Host API - methods called from Flutter to native Android.
 @HostApi()
 abstract class SpeechToTextApi {

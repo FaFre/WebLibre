@@ -31,7 +31,9 @@ part 'bookmarks.g.dart';
 bool _isEmptyRootFolder(BookmarkFolder folder) {
   if (folder.children == null) return true;
   // A root folder is empty if it has no children, or only contains other root folders
-  return folder.children!.every((child) => bookmarkRootIds.contains(child.guid));
+  return folder.children!.every(
+    (child) => bookmarkRootIds.contains(child.guid),
+  );
 }
 
 T? _selectChildRecursive<T extends BookmarkItem>(
@@ -152,10 +154,12 @@ AsyncValue<T?> bookmarks<T extends BookmarkItem>(
           entryGuid == BookmarkRoot.root.id &&
           result is BookmarkFolder) {
         final filteredChildren = result.children
-            ?.where((child) =>
-                child is! BookmarkFolder ||
-                child.guid == BookmarkRoot.mobile.id ||
-                !_isEmptyRootFolder(child))
+            ?.where(
+              (child) =>
+                  child is! BookmarkFolder ||
+                  child.guid == BookmarkRoot.mobile.id ||
+                  !_isEmptyRootFolder(child),
+            )
             .toList();
         result = result.copyWith.children(filteredChildren) as T;
       }
@@ -187,8 +191,16 @@ class SeamlessBookmarks extends _$SeamlessBookmarks {
   }
 
   @override
-  AsyncValue<BookmarkItem?> build(String entryGuid, {bool hideEmptyRoots = false}) {
-    final bookmarks = ref.watch(bookmarksProvider<BookmarkItem>(entryGuid, hideEmptyRoots: hideEmptyRoots));
+  AsyncValue<BookmarkItem?> build(
+    String entryGuid, {
+    bool hideEmptyRoots = false,
+  }) {
+    final bookmarks = ref.watch(
+      bookmarksProvider<BookmarkItem>(
+        entryGuid,
+        hideEmptyRoots: hideEmptyRoots,
+      ),
+    );
 
     if (_hasSearch) {
       final filterGuids = ref.watch(bookmarksSearchProvider);

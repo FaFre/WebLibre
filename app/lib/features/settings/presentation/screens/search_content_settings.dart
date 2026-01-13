@@ -44,18 +44,18 @@ class SearchContentSettingsScreen extends StatelessWidget {
         child: FadingScroll(
           fadingSize: 25,
           builder: (context, controller) {
-          return ListView(
-            controller: controller,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const [
-              _SearchSection(),
-              _ContentViewingSection(),
-              _ContentEnhancementSection(),
-              _ExtensionsSection(),
-            ],
-          );
-        },
-      ),
+            return ListView(
+              controller: controller,
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              children: const [
+                _SearchSection(),
+                _ContentViewingSection(),
+                _ContentEnhancementSection(),
+                _ExtensionsSection(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -154,16 +154,14 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final defaultSearchSuggestionsProvider = ref.watch(
-      generalSettingsWithDefaultsProvider
-          .select((s) => s.defaultSearchSuggestionsProvider),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.defaultSearchSuggestionsProvider,
+      ),
     );
     final relatedBang = defaultSearchSuggestionsProvider.relatedBang;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,28 +181,27 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
                 ),
               ),
               width: double.infinity,
-              leadingIcon:
-                  relatedBang.mapNotNull((trigger) => BangIcon(trigger: trigger)),
-              dropdownMenuEntries: SearchSuggestionProviders.values
-                  .map((provider) {
-                    return DropdownMenuEntry(
-                      value: provider,
-                      label: provider.label,
-                      leadingIcon: provider.relatedBang.mapNotNull(
-                        (trigger) => BangIcon(trigger: trigger),
-                      ),
-                    );
-                  })
-                  .toList(),
+              leadingIcon: relatedBang.mapNotNull(
+                (trigger) => BangIcon(trigger: trigger),
+              ),
+              dropdownMenuEntries: SearchSuggestionProviders.values.map((
+                provider,
+              ) {
+                return DropdownMenuEntry(
+                  value: provider,
+                  label: provider.label,
+                  leadingIcon: provider.relatedBang.mapNotNull(
+                    (trigger) => BangIcon(trigger: trigger),
+                  ),
+                );
+              }).toList(),
               onSelected: (value) async {
                 if (value != null) {
                   await ref
-                      .read(
-                        saveGeneralSettingsControllerProvider.notifier,
-                      )
+                      .read(saveGeneralSettingsControllerProvider.notifier)
                       .save(
-                        (currentSettings) =>
-                            currentSettings.copyWith.defaultSearchSuggestionsProvider(value),
+                        (currentSettings) => currentSettings.copyWith
+                            .defaultSearchSuggestionsProvider(value),
                       );
                 }
               },
@@ -243,7 +240,9 @@ class _OnDeviceAiTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enableLocalAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enableLocalAiFeatures),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.enableLocalAiFeatures,
+      ),
     );
 
     return SwitchListTile.adaptive(
@@ -315,9 +314,7 @@ class _EnforceReaderModeTile extends HookConsumerWidget {
       onChanged: enableReadability
           ? (value) async {
               await ref
-                  .read(
-                    saveGeneralSettingsControllerProvider.notifier,
-                  )
+                  .read(saveGeneralSettingsControllerProvider.notifier)
                   .save(
                     (currentSettings) =>
                         currentSettings.copyWith.enforceReadability(value),

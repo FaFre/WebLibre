@@ -260,7 +260,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       for (final state in next.values) {
         final previousState = previous?[state.id];
 
-        if (previousState?.parentId != state.parentId && state.parentId != null) {
+        if (previousState?.parentId != state.parentId &&
+            state.parentId != null) {
           if (next.containsKey(state.parentId)) {
             // Parent exists in current state
             validatedParentIds[state.id] = state.parentId;
@@ -272,8 +273,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       }
 
       // Batch validate parent IDs that aren't in the current state
-      final existingParentIds =
-          await getExistingTabIds(parentIdsToValidate).get().then((ids) => ids.toSet());
+      final existingParentIds = await getExistingTabIds(
+        parentIdsToValidate,
+      ).get().then((ids) => ids.toSet());
 
       // Complete validation map
       for (final state in next.values) {
@@ -282,7 +284,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         if (previousState?.parentId != state.parentId) {
           if (!validatedParentIds.containsKey(state.id)) {
             // This parent ID needed database validation
-            if (state.parentId != null && existingParentIds.contains(state.parentId)) {
+            if (state.parentId != null &&
+                existingParentIds.contains(state.parentId)) {
               validatedParentIds[state.id] = state.parentId;
             } else {
               validatedParentIds[state.id] = null;

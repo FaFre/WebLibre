@@ -90,10 +90,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
   GenericWebsiteService()
     : _iconsService = GeckoIconService(),
-      _browserIconCache = LRUCache(
-        50,
-        onEvict: (icon) => icon.image.dispose(),
-      );
+      _browserIconCache = LRUCache(50, onEvict: (icon) => icon.image.dispose());
 
   @override
   void build() {

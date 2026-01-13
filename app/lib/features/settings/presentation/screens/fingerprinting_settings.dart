@@ -34,17 +34,17 @@ class FingerprintingSettingsScreen extends StatelessWidget {
         child: FadingScroll(
           fadingSize: 25,
           builder: (context, controller) {
-          return ListView(
-            controller: controller,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const [
-              _MainProtectionSection(),
-              _IdentitySection(),
-              _AdvancedSection(),
-            ],
-          );
-        },
-      ),
+            return ListView(
+              controller: controller,
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              children: const [
+                _MainProtectionSection(),
+                _IdentitySection(),
+                _AdvancedSection(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -120,9 +120,7 @@ class _FingerprintProtectionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: const Text('Fingerprint Protection'),
-      subtitle: const Text(
-        'Granular control over browser fingerprinting',
-      ),
+      subtitle: const Text('Granular control over browser fingerprinting'),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
         horizontal: 16.0,
@@ -143,9 +141,7 @@ class _ResistFingerprintingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: const Text('Resist Fingerprinting'),
-      subtitle: const Text(
-        'Advanced fingerprinting protection hardening',
-      ),
+      subtitle: const Text('Advanced fingerprinting protection hardening'),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
         horizontal: 16.0,

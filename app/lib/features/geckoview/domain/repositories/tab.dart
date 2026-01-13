@@ -460,14 +460,17 @@ class TabRepository extends _$TabRepository {
                   .read(tabDataRepositoryProvider.notifier)
                   .getTabContainerData(tabState.id);
 
-              final contextChanging = containerData.metadata.contextualIdentity !=
+              final contextChanging =
+                  containerData.metadata.contextualIdentity !=
                   currentContainerData?.metadata.contextualIdentity;
 
               await addTab(
                 url: uri,
                 private: tabState.isPrivate,
                 container: Value(containerData),
-                parentId: contextChanging ? null : tabState.id, // Break parent chain if context changes
+                parentId: contextChanging
+                    ? null
+                    : tabState.id, // Break parent chain if context changes
                 selectTab: true,
               );
 
