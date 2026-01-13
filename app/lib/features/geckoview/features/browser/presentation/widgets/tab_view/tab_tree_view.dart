@@ -261,6 +261,7 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: GridView.builder(
                       controller: scrollController,
+                      padding: EdgeInsets.zero,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         //Sync values for itemHeight calculation _calculateItemHeight
                         childAspectRatio: 0.75,
