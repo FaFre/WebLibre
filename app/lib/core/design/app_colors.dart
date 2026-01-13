@@ -6,6 +6,7 @@ class AppColors extends ThemeExtension<AppColors> {
     this.seedColor = const Color(0xFF167C80),
     this.privateTabPurple = const Color(0xFF8000D7),
     this.privateTabBackground = const Color(0xFF25003E),
+    this.privateTabForeground = const Color(0xFFFFFFFF),
     this.privateSelectionOverlay = const Color(0x648000D7),
     this.torPurple = const Color(0xFF7D4698),
     this.torActiveGreen = const Color(0xFF68B030),
@@ -15,6 +16,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color seedColor;
   final Color privateTabPurple;
   final Color privateTabBackground;
+  final Color privateTabForeground;
   final Color privateSelectionOverlay;
   final Color torPurple;
   final Color torActiveGreen;
@@ -28,6 +30,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? seedColor,
     Color? privateTabPurple,
     Color? privateTabBackground,
+    Color? privateTabForeground,
     Color? privateSelectionOverlay,
     Color? torPurple,
     Color? torActiveGreen,
@@ -37,6 +40,7 @@ class AppColors extends ThemeExtension<AppColors> {
       seedColor: seedColor ?? this.seedColor,
       privateTabPurple: privateTabPurple ?? this.privateTabPurple,
       privateTabBackground: privateTabBackground ?? this.privateTabBackground,
+      privateTabForeground: privateTabForeground ?? this.privateTabForeground,
       privateSelectionOverlay:
           privateSelectionOverlay ?? this.privateSelectionOverlay,
       torPurple: torPurple ?? this.torPurple,
@@ -61,6 +65,11 @@ class AppColors extends ThemeExtension<AppColors> {
       privateTabBackground: Color.lerp(
         privateTabBackground,
         other.privateTabBackground,
+        t,
+      )!,
+      privateTabForeground: Color.lerp(
+        privateTabForeground,
+        other.privateTabForeground,
         t,
       )!,
       privateSelectionOverlay: Color.lerp(

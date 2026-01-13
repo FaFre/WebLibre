@@ -26,7 +26,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/presentation/widgets/non_focusable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
@@ -34,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/domain/entitie
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/widgets/non_focusable.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -99,7 +99,6 @@ class GridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
     final appColors = AppColors.of(context);
 
     final tabState =
@@ -132,7 +131,7 @@ class GridTabPreview extends HookConsumerWidget {
                       tabState.titleOrAuthority,
                       maxLines: 2,
                       style: tabState.isPrivate
-                          ? TextStyle(color: colorScheme.onSurface)
+                          ? TextStyle(color: appColors.privateTabForeground)
                           : null,
                     ),
                   ),
@@ -185,7 +184,9 @@ class GridTabPreview extends HookConsumerWidget {
                   child: Text(
                     tabState.url.authority,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: tabState.isPrivate ? colorScheme.onSurface : null,
+                      color: tabState.isPrivate
+                          ? appColors.privateTabForeground
+                          : null,
                     ),
                   ),
                 ),
@@ -305,7 +306,7 @@ class ListTabPreview extends HookConsumerWidget {
                 tabState.titleOrAuthority,
                 maxLines: 2,
                 style: tabState.isPrivate
-                    ? TextStyle(color: colorScheme.onSurface)
+                    ? TextStyle(color: appColors.privateTabForeground)
                     : null,
               ),
               subtitle: Row(
@@ -323,7 +324,7 @@ class ListTabPreview extends HookConsumerWidget {
                       uri: tabState.url,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: tabState.isPrivate
-                            ? colorScheme.onSurface
+                            ? appColors.privateTabForeground
                             : null,
                       ),
                     ),

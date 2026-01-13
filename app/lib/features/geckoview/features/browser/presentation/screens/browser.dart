@@ -580,7 +580,7 @@ class _SheetContainer extends HookConsumerWidget {
         ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
       },
       child: ColoredBox(
-        color: colorScheme.scrim,
+        color: colorScheme.scrim.withValues(alpha: 0.5),
         child: GestureDetector(
           onTap: () {}, // Prevent tap from propagating to parent
           child: Align(
