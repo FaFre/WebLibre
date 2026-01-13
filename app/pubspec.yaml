@@ -77,9 +77,8 @@ dependencies:
   sliver_tools: ^0.2.12
   smooth_page_indicator: ^2.0.1
   socks5_proxy: ^2.1.1
-  speech_to_text_google_dialog: 
-    git:
-      url: https://github.com/FaFre/speech_to_text_google_dialog.git
+  speech_to_text_dialog:
+    path: ../packages/speech_to_text_dialog
   sqlite3: ^2.9.4
   sqlite3_flutter_libs: ^0.5.41
   synchronized: ^3.4.0

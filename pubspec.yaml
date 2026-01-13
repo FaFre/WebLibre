@@ -12,6 +12,8 @@ workspace:
   - packages/simple_intent_receiver/example
   - packages/locale_resolver
   - packages/locale_resolver/example
+  - packages/speech_to_text_dialog
+  - packages/speech_to_text_dialog/example
 dev_dependencies:
   melos: ^7.3.0
 

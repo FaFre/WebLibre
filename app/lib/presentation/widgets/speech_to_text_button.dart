@@ -17,31 +17,60 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:speech_to_text_google_dialog/speech_to_text_google_dialog.dart';
+import 'package:speech_to_text_dialog/speech_to_text_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
-class SpeechToTextButton extends StatelessWidget {
-  final Function(dynamic data) onTextReceived;
+class SpeechToTextButton extends StatefulWidget {
+  final Function(String text) onTextReceived;
 
   const SpeechToTextButton({required this.onTextReceived, super.key});
 
   @override
+  State<SpeechToTextButton> createState() => _SpeechToTextButtonState();
+}
+
+class _SpeechToTextButtonState extends State<SpeechToTextButton> {
+  final _speechDialog = SpeechToTextDialog();
+  StreamSubscription<String>? _textSubscription;
+
+  @override
+  void dispose() {
+    _textSubscription?.cancel().ignore();
+    _speechDialog.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showSpeechDialog(BuildContext context) async {
+    // Cancel any existing subscription
+    await _textSubscription?.cancel();
+
+    // Listen for the next text result
+    _textSubscription = _speechDialog.textStream.take(1).listen((text) {
+      if (text.isNotEmpty) {
+        widget.onTextReceived(text);
+      }
+    });
+
+    // Show the dialog
+    final isServiceAvailable = await _speechDialog.showDialog(
+      // locale: "en-US",
+    );
+
+    if (!isServiceAvailable) {
+      if (context.mounted) {
+        ui_helper.showErrorMessage(context, 'Service is not available');
+      }
+      await _textSubscription?.cancel();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () async {
-        final isServiceAvailable = await SpeechToTextGoogleDialog.getInstance()
-            .showGoogleDialog(
-              onTextReceived: onTextReceived,
-              // locale: "en-US",
-            );
-
-        if (!isServiceAvailable) {
-          if (context.mounted) {
-            ui_helper.showErrorMessage(context, 'Service is not available');
-          }
-        }
-      },
+      onPressed: () => _showSpeechDialog(context),
       icon: const Icon(Icons.mic),
     );
   }

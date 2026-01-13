@@ -1,0 +1,26 @@
+name: speech_to_text_dialog
+description: Speech recognition dialog using Android's RecognizerIntent with type-safe Pigeon channels.
+version: 0.0.1
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: ^3.10.4
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  pigeon: ^26.1.5
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: eu.weblibre.speech_to_text_dialog
+        pluginClass: SpeechToTextDialogPlugin
