@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/containe
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/presentation/widgets/non_focusable.dart';
 
 class TabsActionButton extends HookConsumerWidget {
   final bool isActive;
@@ -56,63 +57,65 @@ class TabsActionButton extends HookConsumerWidget {
             selectedContainerDataProvider.select((value) => value.value?.color),
           );
 
-    return InkWell(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      onLongPress: onLongPress,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              width: 2.0,
-              color: isActive
-                  ? theme.colorScheme.primary
-                  : DefaultTextStyle.of(context).style.color!,
+    return NonFocusable(
+      child: InkWell(
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 2.0,
+                color: isActive
+                    ? theme.colorScheme.primary
+                    : DefaultTextStyle.of(context).style.color!,
+              ),
+              borderRadius: BorderRadius.circular(5.0),
+              color: containerColor.mapNotNull(ContainerColors.forAppBar),
             ),
-            borderRadius: BorderRadius.circular(5.0),
-            color: containerColor.mapNotNull(ContainerColors.forAppBar),
-          ),
-          constraints: const BoxConstraints(minWidth: 25.0),
-          child: Center(
-            child: tabCount.when(
-              skipLoadingOnReload: true,
-              data: (count) {
-                return Text(
-                  count.toString(),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.0,
-                    color: isActive ? theme.colorScheme.primary : null,
-                  ),
-                );
-              },
-              loading: () => (tabCount.hasValue)
-                  ? Text(
-                      tabCount.value.toString(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                        color: isActive ? theme.colorScheme.primary : null,
-                      ),
-                    )
-                  : const Skeletonizer(child: Text('00')),
-              error: (error, stackTrace) {
-                logger.e(
-                  'Could not determine tab count',
-                  error: error,
-                  stackTrace: stackTrace,
-                );
+            constraints: const BoxConstraints(minWidth: 25.0),
+            child: Center(
+              child: tabCount.when(
+                skipLoadingOnReload: true,
+                data: (count) {
+                  return Text(
+                    count.toString(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0,
+                      color: isActive ? theme.colorScheme.primary : null,
+                    ),
+                  );
+                },
+                loading: () => (tabCount.hasValue)
+                    ? Text(
+                        tabCount.value.toString(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.0,
+                          color: isActive ? theme.colorScheme.primary : null,
+                        ),
+                      )
+                    : const Skeletonizer(child: Text('00')),
+                error: (error, stackTrace) {
+                  logger.e(
+                    'Could not determine tab count',
+                    error: error,
+                    stackTrace: stackTrace,
+                  );
 
-                return Text(
-                  '-1',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.0,
-                    color: isActive ? theme.colorScheme.primary : null,
-                  ),
-                );
-              },
+                  return Text(
+                    '-1',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0,
+                      color: isActive ? theme.colorScheme.primary : null,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),

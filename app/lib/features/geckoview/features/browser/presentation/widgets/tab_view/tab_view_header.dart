@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/widgets/non_focusable.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -82,27 +83,31 @@ class TabViewHeader extends HookConsumerWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(MdiIcons.tabSearch),
-                          iconSize: 18,
-                          padding: EdgeInsets.zero,
-                          tooltip: 'Search inside tabs',
-                          onPressed: () {
-                            switch (ref.read(tabsViewModeControllerProvider)) {
-                              case TabsViewMode.tree:
-                              case TabsViewMode.list:
-                                break;
-                              case TabsViewMode.grid:
-                                ref
-                                    .read(
-                                      tabsViewModeControllerProvider.notifier,
-                                    )
-                                    .set(TabsViewMode.list);
-                            }
+                        NonFocusable(
+                          child: IconButton(
+                            icon: const Icon(MdiIcons.tabSearch),
+                            iconSize: 18,
+                            padding: EdgeInsets.zero,
+                            tooltip: 'Search inside tabs',
+                            onPressed: () {
+                              switch (ref.read(
+                                tabsViewModeControllerProvider,
+                              )) {
+                                case TabsViewMode.tree:
+                                case TabsViewMode.list:
+                                  break;
+                                case TabsViewMode.grid:
+                                  ref
+                                      .read(
+                                        tabsViewModeControllerProvider.notifier,
+                                      )
+                                      .set(TabsViewMode.list);
+                              }
 
-                            searchMode.value = true;
-                            searchTextFocus.requestFocus();
-                          },
+                              searchMode.value = true;
+                              searchTextFocus.requestFocus();
+                            },
+                          ),
                         ),
                         const SizedBox(
                           height: 32,
@@ -126,21 +131,23 @@ class TabViewHeader extends HookConsumerWidget {
                                 ),
                               )
                               .toList(),
-                          child: IconButton(
-                            tooltip: 'Change view mode',
-                            onPressed: () {
-                              if (viewModeMenuController.isOpen) {
-                                viewModeMenuController.close();
-                              } else {
-                                viewModeMenuController.open();
-                              }
-                            },
-                            icon: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(tabsViewMode.icon, size: 18),
-                                const Icon(Icons.arrow_drop_down, size: 18),
-                              ],
+                          child: NonFocusable(
+                            child: IconButton(
+                              tooltip: 'Change view mode',
+                              onPressed: () {
+                                if (viewModeMenuController.isOpen) {
+                                  viewModeMenuController.close();
+                                } else {
+                                  viewModeMenuController.open();
+                                }
+                              },
+                              icon: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(tabsViewMode.icon, size: 18),
+                                  const Icon(Icons.arrow_drop_down, size: 18),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -167,40 +174,42 @@ class TabViewHeader extends HookConsumerWidget {
                                         style: const TextStyle(fontSize: 10),
                                       )
                                     : null,
-                                child: IconButton.filledTonal(
-                                  icon: const Icon(MdiIcons.imageAutoAdjust),
-                                  isSelected: tabSuggestionsEnabled,
-                                  iconSize: 18,
-                                  padding: EdgeInsets.zero,
-                                  tooltip: downloadProgress != null
-                                      ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
-                                      : tabSuggestionsEnabled
-                                      ? 'Disable AI tab suggestions'
-                                      : 'Enable AI tab suggestions',
-                                  onPressed: () async {
-                                    if (!tabSuggestionsEnabled) {
-                                      final result =
-                                          await showEnableAiTabSuggestionsDialog(
-                                            context,
-                                          );
+                                child: NonFocusable(
+                                  child: IconButton.filledTonal(
+                                    icon: const Icon(MdiIcons.imageAutoAdjust),
+                                    isSelected: tabSuggestionsEnabled,
+                                    iconSize: 18,
+                                    padding: EdgeInsets.zero,
+                                    tooltip: downloadProgress != null
+                                        ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
+                                        : tabSuggestionsEnabled
+                                        ? 'Disable AI tab suggestions'
+                                        : 'Enable AI tab suggestions',
+                                    onPressed: () async {
+                                      if (!tabSuggestionsEnabled) {
+                                        final result =
+                                            await showEnableAiTabSuggestionsDialog(
+                                              context,
+                                            );
 
-                                      if (result == true) {
+                                        if (result == true) {
+                                          ref
+                                              .read(
+                                                tabSuggestionsControllerProvider
+                                                    .notifier,
+                                              )
+                                              .enable();
+                                        }
+                                      } else {
                                         ref
                                             .read(
                                               tabSuggestionsControllerProvider
                                                   .notifier,
                                             )
-                                            .enable();
+                                            .disable();
                                       }
-                                    } else {
-                                      ref
-                                          .read(
-                                            tabSuggestionsControllerProvider
-                                                .notifier,
-                                          )
-                                          .disable();
-                                    }
-                                  },
+                                    },
+                                  ),
                                 ),
                               );
                             },
@@ -504,16 +513,18 @@ class TabViewHeader extends HookConsumerWidget {
                           },
                         ),
                       ],
-                      child: IconButton(
-                        tooltip: 'Tab actions',
-                        onPressed: () {
-                          if (tabsActionMenuController.isOpen) {
-                            tabsActionMenuController.close();
-                          } else {
-                            tabsActionMenuController.open();
-                          }
-                        },
-                        icon: const Icon(MdiIcons.dotsVertical),
+                      child: NonFocusable(
+                        child: IconButton(
+                          tooltip: 'Tab actions',
+                          onPressed: () {
+                            if (tabsActionMenuController.isOpen) {
+                              tabsActionMenuController.close();
+                            } else {
+                              tabsActionMenuController.open();
+                            }
+                          },
+                          icon: const Icon(MdiIcons.dotsVertical),
+                        ),
                       ),
                     ),
                   ],
@@ -537,13 +548,15 @@ class TabViewHeader extends HookConsumerWidget {
                               searchTextController.text = data;
                             },
                           ),
-                        IconButton(
-                          onPressed: () {
-                            searchTextController.clear();
-                            searchTextFocus.requestFocus();
-                            searchMode.value = false;
-                          },
-                          icon: const Icon(Icons.clear),
+                        NonFocusable(
+                          child: IconButton(
+                            onPressed: () {
+                              searchTextController.clear();
+                              searchTextFocus.requestFocus();
+                              searchMode.value = false;
+                            },
+                            icon: const Icon(Icons.clear),
+                          ),
                         ),
                       ],
                     ),

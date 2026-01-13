@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/presentation/widgets/non_focusable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
@@ -152,22 +153,24 @@ class GridTabPreview extends HookConsumerWidget {
                         child: Text('Close all from ${tabState.url.host}'),
                       ),
                     ],
-                    child: IconButton(
-                      visualDensity: const VisualDensity(
-                        horizontal: -4.0,
-                        vertical: -4.0,
-                      ),
-                      onPressed: onDelete,
-                      onLongPress: onDeleteAll != null
-                          ? () {
-                              if (extendedDeleteMenuController.isOpen) {
-                                extendedDeleteMenuController.close();
-                              } else {
-                                extendedDeleteMenuController.open();
+                    child: NonFocusable(
+                      child: IconButton(
+                        visualDensity: const VisualDensity(
+                          horizontal: -4.0,
+                          vertical: -4.0,
+                        ),
+                        onPressed: onDelete,
+                        onLongPress: onDeleteAll != null
+                            ? () {
+                                if (extendedDeleteMenuController.isOpen) {
+                                  extendedDeleteMenuController.close();
+                                } else {
+                                  extendedDeleteMenuController.open();
+                                }
                               }
-                            }
-                          : null,
-                      icon: const Icon(Icons.close),
+                            : null,
+                        icon: const Icon(Icons.close),
+                      ),
                     ),
                   ),
                 ?trailingChild,
@@ -348,18 +351,20 @@ class ListTabPreview extends HookConsumerWidget {
                       child: Text('Close all from ${tabState.url.host}'),
                     ),
                   ],
-                  child: IconButton(
-                    onPressed: onDelete,
-                    onLongPress: onDeleteAll != null
-                        ? () {
-                            if (extendedDeleteMenuController.isOpen) {
-                              extendedDeleteMenuController.close();
-                            } else {
-                              extendedDeleteMenuController.open();
+                  child: NonFocusable(
+                    child: IconButton(
+                      onPressed: onDelete,
+                      onLongPress: onDeleteAll != null
+                          ? () {
+                              if (extendedDeleteMenuController.isOpen) {
+                                extendedDeleteMenuController.close();
+                              } else {
+                                extendedDeleteMenuController.open();
+                              }
                             }
-                          }
-                        : null,
-                    icon: const Icon(Icons.close),
+                          : null,
+                      icon: const Icon(Icons.close),
+                    ),
                   ),
                 ),
               ?trailingChild,
@@ -625,10 +630,12 @@ class SuggestedSingleGridTabPreview extends StatelessWidget {
         tabId: tabId,
         isActive: tabId == activeTabId,
         onTap: onTap,
-        trailingChild: const IconButton(
-          visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
-          icon: Icon(MdiIcons.creation),
-          onPressed: null,
+        trailingChild: const NonFocusable(
+          child: IconButton(
+            visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
+            icon: Icon(MdiIcons.creation),
+            onPressed: null,
+          ),
         ),
       ),
     );
@@ -657,10 +664,12 @@ class SuggestedSingleListTabPreview extends StatelessWidget {
         tabId: tabId,
         isActive: tabId == activeTabId,
         onTap: onTap,
-        trailingChild: const IconButton(
-          visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
-          icon: Icon(MdiIcons.creation),
-          onPressed: null,
+        trailingChild: const NonFocusable(
+          child: IconButton(
+            visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
+            icon: Icon(MdiIcons.creation),
+            onPressed: null,
+          ),
         ),
       ),
     );
