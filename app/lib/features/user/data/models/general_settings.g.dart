@@ -61,6 +61,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab);
 
+  GeneralSettings unassignedTabsAutoCleanInterval(
+    Duration unassignedTabsAutoCleanInterval,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -91,6 +95,7 @@ abstract class _$GeneralSettingsCWProxy {
     QuickTabSwitcherMode quickTabSwitcherMode,
     bool pullToRefreshEnabled,
     bool doubleBackCloseTab,
+    Duration unassignedTabsAutoCleanInterval,
   });
 }
 
@@ -194,6 +199,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(doubleBackCloseTab: doubleBackCloseTab);
 
   @override
+  GeneralSettings unassignedTabsAutoCleanInterval(
+    Duration unassignedTabsAutoCleanInterval,
+  ) => call(unassignedTabsAutoCleanInterval: unassignedTabsAutoCleanInterval);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -224,6 +234,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
+    Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -354,6 +365,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.doubleBackCloseTab
           // ignore: cast_nullable_to_non_nullable
           : doubleBackCloseTab as bool,
+      unassignedTabsAutoCleanInterval:
+          unassignedTabsAutoCleanInterval == const $CopyWithPlaceholder() ||
+              unassignedTabsAutoCleanInterval == null
+          ? _value.unassignedTabsAutoCleanInterval
+          // ignore: cast_nullable_to_non_nullable
+          : unassignedTabsAutoCleanInterval as Duration,
     );
   }
 }
@@ -420,6 +437,13 @@ GeneralSettings _$GeneralSettingsFromJson(
   ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
   doubleBackCloseTab: json['doubleBackCloseTab'] as bool?,
+  unassignedTabsAutoCleanInterval:
+      json['unassignedTabsAutoCleanInterval'] == null
+      ? null
+      : Duration(
+          microseconds: (json['unassignedTabsAutoCleanInterval'] as num)
+              .toInt(),
+        ),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -455,6 +479,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$QuickTabSwitcherModeEnumMap[instance.quickTabSwitcherMode]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
   'doubleBackCloseTab': instance.doubleBackCloseTab,
+  'unassignedTabsAutoCleanInterval':
+      instance.unassignedTabsAutoCleanInterval.inMicroseconds,
 };
 
 const _$ThemeModeEnumMap = {

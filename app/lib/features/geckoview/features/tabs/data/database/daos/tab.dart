@@ -387,4 +387,15 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       );
     }
   }
+
+  Future<List<String>> getUnassignedTabsOlderThan(DateTime threshold) {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(
+        db.tab.containerId.isNull() &
+            db.tab.timestamp.isSmallerThanValue(threshold),
+      );
+
+    return query.map((row) => row.read(db.tab.id)!).get();
+  }
 }

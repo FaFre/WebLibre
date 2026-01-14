@@ -82,6 +82,7 @@ class GeneralSettings with FastEquatable {
   final QuickTabSwitcherMode quickTabSwitcherMode;
   final bool pullToRefreshEnabled;
   final bool doubleBackCloseTab;
+  final Duration unassignedTabsAutoCleanInterval;
 
   GeneralSettings({
     required this.themeMode,
@@ -106,6 +107,7 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherMode,
     required this.pullToRefreshEnabled,
     required this.doubleBackCloseTab,
+    required this.unassignedTabsAutoCleanInterval,
   });
 
   GeneralSettings.withDefaults({
@@ -131,6 +133,7 @@ class GeneralSettings with FastEquatable {
     QuickTabSwitcherMode? quickTabSwitcherMode,
     bool? pullToRefreshEnabled,
     bool? doubleBackCloseTab,
+    Duration? unassignedTabsAutoCleanInterval,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -155,7 +158,9 @@ class GeneralSettings with FastEquatable {
        quickTabSwitcherMode =
            quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
-       doubleBackCloseTab = doubleBackCloseTab ?? true;
+       doubleBackCloseTab = doubleBackCloseTab ?? true,
+       unassignedTabsAutoCleanInterval =
+           unassignedTabsAutoCleanInterval ?? Duration.zero;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -186,5 +191,6 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherMode,
     pullToRefreshEnabled,
     doubleBackCloseTab,
+    unassignedTabsAutoCleanInterval,
   ];
 }

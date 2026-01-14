@@ -117,6 +117,7 @@ class _DataManagementSection extends StatelessWidget {
         SettingSection(name: 'Data Management'),
         _DeleteBrowsingDataTile(),
         _AutoClearHistorySection(),
+        _AutoClearUnassignedTabsSection(),
       ],
     );
   }
@@ -285,6 +286,7 @@ class _AutoClearHistorySection extends HookConsumerWidget {
               dropdownMenuEntries: const [
                 DropdownMenuEntry(value: Duration.zero, label: 'Never'),
                 DropdownMenuEntry(value: Duration(days: 1), label: '1 Day'),
+                DropdownMenuEntry(value: Duration(days: 3), label: '3 Days'),
                 DropdownMenuEntry(value: Duration(days: 7), label: '1 Week'),
                 DropdownMenuEntry(value: Duration(days: 14), label: '2 Weeks'),
                 DropdownMenuEntry(value: Duration(days: 30), label: '1 Month'),
@@ -296,6 +298,68 @@ class _AutoClearHistorySection extends HookConsumerWidget {
                     .save(
                       (currentSettings) => currentSettings.copyWith
                           .historyAutoCleanInterval(value ?? Duration.zero),
+                    );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AutoClearUnassignedTabsSection extends HookConsumerWidget {
+  const _AutoClearUnassignedTabsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unassignedTabsAutoCleanInterval = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.unassignedTabsAutoCleanInterval,
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Auto-Clear Unassigned Tabs'),
+            subtitle: Text(
+              'Automatically close unassigned tabs older than the selected time period',
+            ),
+            leading: Icon(MdiIcons.tabRemove),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40.0),
+            child: DropdownMenu<Duration>(
+              initialSelection: unassignedTabsAutoCleanInterval,
+              inputDecorationTheme: InputDecorationTheme(
+                prefixIconConstraints: BoxConstraints.tight(
+                  const Size.square(24),
+                ),
+              ),
+              width: double.infinity,
+              dropdownMenuEntries: const [
+                DropdownMenuEntry(value: Duration.zero, label: 'Never'),
+                DropdownMenuEntry(value: Duration(days: 1), label: '1 Day'),
+                DropdownMenuEntry(value: Duration(days: 3), label: '3 Days'),
+                DropdownMenuEntry(value: Duration(days: 7), label: '1 Week'),
+                DropdownMenuEntry(value: Duration(days: 14), label: '2 Weeks'),
+                DropdownMenuEntry(value: Duration(days: 30), label: '1 Month'),
+                DropdownMenuEntry(value: Duration(days: 90), label: '3 Months'),
+              ],
+              onSelected: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .unassignedTabsAutoCleanInterval(
+                            value ?? Duration.zero,
+                          ),
                     );
               },
             ),

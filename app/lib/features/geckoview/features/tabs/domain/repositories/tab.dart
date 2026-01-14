@@ -210,6 +210,19 @@ class TabDataRepository extends _$TabDataRepository {
     );
   }
 
+  Future<int> deleteUnassignedTabsOlderThan(DateTime threshold) async {
+    final tabIds = await ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getUnassignedTabsOlderThan(threshold);
+
+    if (tabIds.isNotEmpty) {
+      await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
+    }
+
+    return tabIds.length;
+  }
+
   @override
   void build() {}
 }

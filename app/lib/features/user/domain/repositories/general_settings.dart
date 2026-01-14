@@ -130,6 +130,11 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'unassignedTabsAutoCleanInterval':
+          settings['unassignedTabsAutoCleanInterval']?.readAs(
+            DriftSqlType.int,
+            db.typeMapping,
+          ),
     });
   }
 
