@@ -174,17 +174,26 @@ class ShareScreenshotMenuItemButton extends HookConsumerWidget {
 
         if (screenshot != null) {
           ui.decodeImageFromList(screenshot, (result) async {
-            final png = await result.toByteData(format: ui.ImageByteFormat.png);
-
-            if (png != null) {
-              final file = XFile.fromData(
-                png.buffer.asUint8List(),
-                mimeType: 'image/png',
+            try {
+              final png = await result.toByteData(
+                format: ui.ImageByteFormat.png,
               );
 
-              await SharePlus.instance.share(
-                ShareParams(files: [file], subject: tabState.titleOrAuthority),
-              );
+              if (png != null) {
+                final file = XFile.fromData(
+                  png.buffer.asUint8List(),
+                  mimeType: 'image/png',
+                );
+
+                await SharePlus.instance.share(
+                  ShareParams(
+                    files: [file],
+                    subject: tabState.titleOrAuthority,
+                  ),
+                );
+              }
+            } finally {
+              result.dispose();
             }
           });
         }

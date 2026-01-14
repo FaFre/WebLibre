@@ -184,8 +184,10 @@ class TabSearch extends HookConsumerWidget {
               leading: RepaintBoundary(
                 child:
                     result.icon.mapNotNull(
-                      (icon) =>
-                          RawImage(image: icon.value, height: 24, width: 24),
+                      (icon) => icon.value.mapNotNull(
+                        (image) =>
+                            RawImage(image: image, height: 24, width: 24),
+                      ),
                     ) ??
                     UrlIcon([result.url], iconSize: 24),
               ),

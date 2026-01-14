@@ -294,8 +294,10 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   Future<BrowserIcon?> getCachedIcon(Uri url) async {
     if (url.scheme.startsWith('https') || url.scheme.startsWith('http')) {
       final cachedBrowserIcon = _browserIconCache.get(url.origin);
-      if (cachedBrowserIcon != null) {
+      if (cachedBrowserIcon?.image.value != null) {
         return cachedBrowserIcon;
+      } else if (cachedBrowserIcon != null) {
+        _browserIconCache.remove(url.origin);
       }
 
       final cachedIcon = await _cacheRepository.getCachedIcon(url.origin);

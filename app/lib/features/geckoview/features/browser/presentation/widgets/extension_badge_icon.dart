@@ -36,7 +36,11 @@ class ExtensionBadgeIcon extends StatelessWidget {
       textColor: state.badgeTextColor,
       backgroundColor: state.badgeBackgroundColor,
       child: RepaintBoundary(
-        child: RawImage(image: state.icon?.value, width: 24, height: 24),
+        child:
+            state.icon?.value.mapNotNull(
+              (image) => RawImage(image: image, width: 24, height: 24),
+            ) ??
+            const SizedBox(width: 24, height: 24),
       ),
     );
   }

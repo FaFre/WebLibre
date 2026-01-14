@@ -62,7 +62,7 @@ final class WebExtensionsStateProvider
 }
 
 String _$webExtensionsStateHash() =>
-    r'd7147f419889386f8cf526aed3318839ac22d893';
+    r'2664a50bb776197010e9da9b4e3a9379c849ba75';
 
 final class WebExtensionsStateFamily extends $Family
     with

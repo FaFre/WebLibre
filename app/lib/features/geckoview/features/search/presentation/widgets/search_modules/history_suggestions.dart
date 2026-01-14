@@ -97,8 +97,8 @@ class HistorySuggestions extends HookConsumerWidget {
                         leading: RepaintBoundary(
                           child:
                               icon.data?.value.mapNotNull(
-                                (favicon) => RawImage(
-                                  image: favicon,
+                                (image) => RawImage(
+                                  image: image,
                                   height: 24,
                                   width: 24,
                                 ),

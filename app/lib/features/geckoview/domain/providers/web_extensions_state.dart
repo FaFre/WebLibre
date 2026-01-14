@@ -27,22 +27,31 @@ import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/web_extension.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
+import 'package:weblibre/utils/lru_cache.dart';
 
 part 'web_extensions_state.g.dart';
 
 @Riverpod(keepAlive: true)
 class WebExtensionsState extends _$WebExtensionsState {
-  final _imageCache = <String, EquatableImage>{};
+  late final LRUCache<String, EquatableImage> _imageCache;
+
+  WebExtensionsState()
+    : _imageCache = LRUCache(50, onEvict: (image) => image.dispose());
 
   void _onExtensionUpdate(ExtensionDataEvent event) {
     final ExtensionDataEvent(:extensionId, :data) = event;
 
     if (data != null) {
+      final cachedIcon = _imageCache.get(extensionId);
+      if (cachedIcon != null && cachedIcon.value == null) {
+        _imageCache.remove(extensionId);
+      }
+
       final current =
           state[extensionId] ??
           WebExtensionState(
             extensionId: extensionId,
-            icon: _imageCache[extensionId],
+            icon: _imageCache.get(extensionId),
             enabled: false,
           );
 
@@ -73,10 +82,10 @@ class WebExtensionsState extends _$WebExtensionsState {
     final image = await tryDecodeImage(bytes);
 
     if (image != null) {
-      // Dispose old image before replacing
-      _imageCache[extensionId]?.dispose();
+      // Dispose old image only after successfully creating new one
+      _imageCache.get(extensionId)?.dispose();
 
-      _imageCache[extensionId] = image;
+      _imageCache.set(extensionId, image);
 
       if (state.containsKey(extensionId)) {
         state = {...state}
@@ -110,9 +119,6 @@ class WebExtensionsState extends _$WebExtensionsState {
 
     ref.onDispose(() async {
       // Dispose all cached images
-      for (final image in _imageCache.values) {
-        image.dispose();
-      }
       _imageCache.clear();
 
       // Cancel all stream subscriptions

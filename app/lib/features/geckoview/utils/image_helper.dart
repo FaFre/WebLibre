@@ -29,6 +29,11 @@ final _cache = LRUCache<int, EquatableImage>(
   onEvict: (image) => image.dispose(),
 );
 
+/// Clears the global image cache, disposing all cached images.
+void clearImageCache() {
+  _cache.clear();
+}
+
 Future<EquatableImage?> tryDecodeImage(
   Uint8List bytes, {
   int? targetWidth,
@@ -38,8 +43,10 @@ Future<EquatableImage?> tryDecodeImage(
   final digest = secureHash(bytes);
 
   final cached = _cache.get(digest);
-  if (cached != null && !cached.isDisposed) {
+  if (cached?.value != null) {
     return cached;
+  } else if (cached != null) {
+    _cache.remove(digest);
   }
 
   try {

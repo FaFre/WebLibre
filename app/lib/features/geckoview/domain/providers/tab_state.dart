@@ -122,24 +122,24 @@ class TabStates extends _$TabStates {
   Future<void> _onIconChange(IconChangeEvent event) async {
     final IconChangeEvent(:tabId, :bytes) = event;
 
-    // Dispose old icon before replacing
-    state[tabId]?.icon?.dispose();
-
     final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
-
     final current = state[tabId] ?? TabState.$default(tabId);
+
+    // Dispose old icon only after successfully creating new one
+    current.icon?.dispose();
+
     state = {...state}..[tabId] = current.copyWith.icon(image);
   }
 
   Future<void> _onThumbnailChange(ThumbnailEvent event) async {
     final ThumbnailEvent(:tabId, :bytes) = event;
 
-    // Dispose old thumbnail before replacing
-    state[tabId]?.thumbnail?.dispose();
-
     final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
-
     final current = state[tabId] ?? TabState.$default(tabId);
+
+    // Dispose old thumbnail only after successfully creating new one
+    current.thumbnail?.dispose();
+
     state = {...state}..[tabId] = current.copyWith.thumbnail(image);
   }
 

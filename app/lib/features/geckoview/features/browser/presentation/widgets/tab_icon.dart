@@ -36,8 +36,10 @@ class TabIcon extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final icon = useCachedFuture(() async {
-      if (tabState.icon != null) {
-        return tabState.icon!.value;
+      final faviconIcon = tabState.icon?.value;
+
+      if (faviconIcon != null) {
+        return faviconIcon;
       }
 
       final icon = await ref
