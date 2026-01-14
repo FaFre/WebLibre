@@ -57,7 +57,6 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
-import 'package:weblibre/presentation/widgets/non_focusable.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -326,90 +325,78 @@ class BrowserTabBar extends HookConsumerWidget {
 
                         return Visibility(
                           visible: tabBarReaderView || readerabilityStateActive,
-                          child: NonFocusable(
-                            child: ReaderButton(
-                              buttonBuilder: (isLoading, readerActive, icon) =>
-                                  InkWell(
-                                    onTap: isLoading
-                                        ? null
-                                        : () async {
-                                            await ref
-                                                .read(
-                                                  readerableScreenControllerProvider
-                                                      .notifier,
-                                                )
-                                                .toggleReaderView(
-                                                  !readerActive,
-                                                );
-                                          },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 15.0,
-                                        horizontal: 8.0,
-                                      ),
-                                      child: icon,
+                          child: ReaderButton(
+                            buttonBuilder: (isLoading, readerActive, icon) =>
+                                InkWell(
+                                  onTap: isLoading
+                                      ? null
+                                      : () async {
+                                          await ref
+                                              .read(
+                                                readerableScreenControllerProvider
+                                                    .notifier,
+                                              )
+                                              .toggleReaderView(!readerActive);
+                                        },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15.0,
+                                      horizontal: 8.0,
                                     ),
+                                    child: icon,
                                   ),
-                            ),
+                                ),
                           ),
                         );
                       },
                     ),
                   if (showExtensionShortcut)
-                    NonFocusable(
-                      child: ExtensionShortcutMenu(
-                        controller: extensionMenuController,
-                        child: IconButton(
-                          onPressed: () {
-                            if (extensionMenuController.isOpen) {
-                              extensionMenuController.close();
-                            } else {
-                              extensionMenuController.open();
-                            }
-                          },
-                          icon: const Icon(MdiIcons.puzzle),
-                        ),
+                    ExtensionShortcutMenu(
+                      controller: extensionMenuController,
+                      child: IconButton(
+                        onPressed: () {
+                          if (extensionMenuController.isOpen) {
+                            extensionMenuController.close();
+                          } else {
+                            extensionMenuController.open();
+                          }
+                        },
+                        icon: const Icon(MdiIcons.puzzle),
                       ),
                     ),
                   if (selectedTabId != null)
-                    NonFocusable(
-                      child: TabMenu(
-                        controller: trippleDotMenuController,
-                        selectedTabId: selectedTabId,
-                        builder: (context, controller, child) {
-                          return InkWell(
-                            onTap: () {
-                              if (controller.isOpen) {
-                                controller.close();
-                              } else {
-                                controller.open();
-                              }
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                                vertical: 15.0,
-                              ),
-                              child: Icon(MdiIcons.dotsVertical),
+                    TabMenu(
+                      controller: trippleDotMenuController,
+                      selectedTabId: selectedTabId,
+                      builder: (context, controller, child) {
+                        return InkWell(
+                          onTap: () {
+                            if (controller.isOpen) {
+                              controller.close();
+                            } else {
+                              controller.open();
+                            }
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 15.0,
                             ),
-                          );
-                        },
-                      ),
+                            child: Icon(MdiIcons.dotsVertical),
+                          ),
+                        );
+                      },
                     ),
                   if (showMainToolbarTabsCount)
-                    NonFocusable(
-                      child: TabsCountButton(
-                        selectedTabId: selectedTabId,
-                        displayedSheet: displayedSheet,
-                        showLongPressMenu: true,
-                      ),
+                    TabsCountButton(
+                      selectedTabId: selectedTabId,
+                      displayedSheet: displayedSheet,
+                      showLongPressMenu: true,
                     ),
                   if (showMainToolbarNavigationButton)
-                    NonFocusable(
-                      child: NavigationMenuButton(
-                        selectedTabId: selectedTabId,
-                        showNavigationButtons: true,
-                      ),
+                    NavigationMenuButton(
+                      selectedTabId: selectedTabId,
+                      showNavigationButtons: true,
                     ),
                 ],
               ),
@@ -453,42 +440,32 @@ class ContextualToolbar extends HookConsumerWidget {
       children: [
         if (tabState?.historyState.canGoBack == true ||
             tabState?.isLoading == true)
-          NonFocusable(
-            child: NavigateBackButton(
-              selectedTabId: selectedTabId,
-              isLoading: tabState?.isLoading ?? false,
-            ),
+          NavigateBackButton(
+            selectedTabId: selectedTabId,
+            isLoading: tabState?.isLoading ?? false,
           )
         else
-          NonFocusable(
-            child: IconButton(
-              onPressed: () async {
-                await BookmarkListRoute(
-                  entryGuid: BookmarkRoot.root.id,
-                ).push(context);
-              },
-              icon: const Icon(MdiIcons.bookmarkMultiple),
-            ),
+          IconButton(
+            onPressed: () async {
+              await BookmarkListRoute(
+                entryGuid: BookmarkRoot.root.id,
+              ).push(context);
+            },
+            icon: const Icon(MdiIcons.bookmarkMultiple),
           ),
         if (tabState?.historyState.canGoForward == true)
-          NonFocusable(
-            child: NavigateForwardButton(selectedTabId: selectedTabId),
-          )
+          NavigateForwardButton(selectedTabId: selectedTabId)
         else
-          NonFocusable(child: ShareMenuButton(selectedTabId: selectedTabId)),
-        const NonFocusable(child: AddTabButton()),
-        NonFocusable(
-          child: TabsCountButton(
-            selectedTabId: selectedTabId,
-            displayedSheet: displayedSheet,
-            showLongPressMenu: false,
-          ),
+          ShareMenuButton(selectedTabId: selectedTabId),
+        const AddTabButton(),
+        TabsCountButton(
+          selectedTabId: selectedTabId,
+          displayedSheet: displayedSheet,
+          showLongPressMenu: false,
         ),
-        NonFocusable(
-          child: NavigationMenuButton(
-            selectedTabId: selectedTabId,
-            showNavigationButtons: false,
-          ),
+        NavigationMenuButton(
+          selectedTabId: selectedTabId,
+          showNavigationButtons: false,
         ),
       ],
     );
@@ -651,17 +628,15 @@ class ShareMenuButton extends HookConsumerWidget {
         ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
       ],
       builder: (context, controller, child) {
-        return NonFocusable(
-          child: IconButton(
-            onPressed: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-            icon: const Icon(Icons.share),
-          ),
+        return IconButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          icon: const Icon(Icons.share),
         );
       },
     );
@@ -730,19 +705,17 @@ class NavigationMenuButton extends HookConsumerWidget {
               alignment: WrapAlignment.center,
               children: [
                 ...pageExtensions.map(
-                  (extension) => NonFocusable(
-                    child: IconButton(
-                      onPressed: () async {
-                        //Use parents .ref because after onPressed this consumer gets disposed already
-                        await addonService.invokeAddonAction(
-                          extension.extensionId,
-                          WebExtensionActionType.page,
-                        );
-                      },
-                      icon: Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
-                        child: ExtensionBadgeIcon(extension),
-                      ),
+                  (extension) => IconButton(
+                    onPressed: () async {
+                      //Use parents .ref because after onPressed this consumer gets disposed already
+                      await addonService.invokeAddonAction(
+                        extension.extensionId,
+                        WebExtensionActionType.page,
+                      );
+                    },
+                    icon: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: ExtensionBadgeIcon(extension),
                     ),
                   ),
                 ),
@@ -974,20 +947,18 @@ class NavigateForwardButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return NonFocusable(
-      child: IconButton(
-        onPressed: canGoForward
-            ? () async {
-                final controller = ref.read(
-                  tabSessionProvider(tabId: selectedTabId).notifier,
-                );
+    return IconButton(
+      onPressed: canGoForward
+          ? () async {
+              final controller = ref.read(
+                tabSessionProvider(tabId: selectedTabId).notifier,
+              );
 
-                await controller.goForward();
-                menuControllerToClose?.close();
-              }
-            : null,
-        icon: const Icon(Icons.arrow_forward),
-      ),
+              await controller.goForward();
+              menuControllerToClose?.close();
+            }
+          : null,
+      icon: const Icon(Icons.arrow_forward),
     );
   }
 }
@@ -1008,37 +979,33 @@ class NavigateBackButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return NonFocusable(
-      child: IconButton(
-        onPressed: (canGoBack || isLoading)
-            ? () async {
-                final controller = ref.read(
-                  tabSessionProvider(tabId: selectedTabId).notifier,
-                );
+    return IconButton(
+      onPressed: (canGoBack || isLoading)
+          ? () async {
+              final controller = ref.read(
+                tabSessionProvider(tabId: selectedTabId).notifier,
+              );
 
-                final isReaderActive = ref.read(
-                  selectedTabStateProvider.select(
-                    (state) => state?.readerableState.active ?? false,
-                  ),
-                );
+              final isReaderActive = ref.read(
+                selectedTabStateProvider.select(
+                  (state) => state?.readerableState.active ?? false,
+                ),
+              );
 
-                if (isLoading) {
-                  await controller.stopLoading();
-                } else if (isReaderActive) {
-                  await ref
-                      .read(readerableScreenControllerProvider.notifier)
-                      .toggleReaderView(false);
-                } else {
-                  await controller.goBack();
-                }
-
-                menuControllerToClose?.close();
+              if (isLoading) {
+                await controller.stopLoading();
+              } else if (isReaderActive) {
+                await ref
+                    .read(readerableScreenControllerProvider.notifier)
+                    .toggleReaderView(false);
+              } else {
+                await controller.goBack();
               }
-            : null,
-        icon: isLoading
-            ? const Icon(Icons.close)
-            : const Icon(Icons.arrow_back),
-      ),
+
+              menuControllerToClose?.close();
+            }
+          : null,
+      icon: isLoading ? const Icon(Icons.close) : const Icon(Icons.arrow_back),
     );
   }
 }
@@ -1052,30 +1019,28 @@ class AddTabButton extends HookConsumerWidget {
 
     return TabCreationMenu(
       controller: tabMenuController,
-      child: NonFocusable(
-        child: IconButton(
-          onPressed: () async {
-            final settings = ref.read(generalSettingsWithDefaultsProvider);
+      child: IconButton(
+        onPressed: () async {
+          final settings = ref.read(generalSettingsWithDefaultsProvider);
 
-            await SearchRoute(
-              tabType:
-                  ref.read(selectedTabTypeProvider) ??
-                  settings.defaultCreateTabType,
-            ).push(context);
+          await SearchRoute(
+            tabType:
+                ref.read(selectedTabTypeProvider) ??
+                settings.defaultCreateTabType,
+          ).push(context);
 
-            if (context.mounted) {
-              const BrowserRoute().go(context);
-            }
-          },
-          icon: const Icon(MdiIcons.tabPlus),
-          onLongPress: () {
-            if (tabMenuController.isOpen) {
-              tabMenuController.close();
-            } else {
-              tabMenuController.open();
-            }
-          },
-        ),
+          if (context.mounted) {
+            const BrowserRoute().go(context);
+          }
+        },
+        icon: const Icon(MdiIcons.tabPlus),
+        onLongPress: () {
+          if (tabMenuController.isOpen) {
+            tabMenuController.close();
+          } else {
+            tabMenuController.open();
+          }
+        },
       ),
     );
   }

@@ -152,24 +152,22 @@ class GridTabPreview extends HookConsumerWidget {
                         child: Text('Close all from ${tabState.url.host}'),
                       ),
                     ],
-                    child: NonFocusable(
-                      child: IconButton(
-                        visualDensity: const VisualDensity(
-                          horizontal: -4.0,
-                          vertical: -4.0,
-                        ),
-                        onPressed: onDelete,
-                        onLongPress: onDeleteAll != null
-                            ? () {
-                                if (extendedDeleteMenuController.isOpen) {
-                                  extendedDeleteMenuController.close();
-                                } else {
-                                  extendedDeleteMenuController.open();
-                                }
-                              }
-                            : null,
-                        icon: const Icon(Icons.close),
+                    child: IconButton(
+                      visualDensity: const VisualDensity(
+                        horizontal: -4.0,
+                        vertical: -4.0,
                       ),
+                      onPressed: onDelete,
+                      onLongPress: onDeleteAll != null
+                          ? () {
+                              if (extendedDeleteMenuController.isOpen) {
+                                extendedDeleteMenuController.close();
+                              } else {
+                                extendedDeleteMenuController.open();
+                              }
+                            }
+                          : null,
+                      icon: const Icon(Icons.close),
                     ),
                   ),
                 ?trailingChild,
@@ -352,20 +350,18 @@ class ListTabPreview extends HookConsumerWidget {
                       child: Text('Close all from ${tabState.url.host}'),
                     ),
                   ],
-                  child: NonFocusable(
-                    child: IconButton(
-                      onPressed: onDelete,
-                      onLongPress: onDeleteAll != null
-                          ? () {
-                              if (extendedDeleteMenuController.isOpen) {
-                                extendedDeleteMenuController.close();
-                              } else {
-                                extendedDeleteMenuController.open();
-                              }
+                  child: IconButton(
+                    onPressed: onDelete,
+                    onLongPress: onDeleteAll != null
+                        ? () {
+                            if (extendedDeleteMenuController.isOpen) {
+                              extendedDeleteMenuController.close();
+                            } else {
+                              extendedDeleteMenuController.open();
                             }
-                          : null,
-                      icon: const Icon(Icons.close),
-                    ),
+                          }
+                        : null,
+                    icon: const Icon(Icons.close),
                   ),
                 ),
               ?trailingChild,
@@ -631,12 +627,10 @@ class SuggestedSingleGridTabPreview extends StatelessWidget {
         tabId: tabId,
         isActive: tabId == activeTabId,
         onTap: onTap,
-        trailingChild: const NonFocusable(
-          child: IconButton(
-            visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
-            icon: Icon(MdiIcons.creation),
-            onPressed: null,
-          ),
+        trailingChild: const IconButton(
+          visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
+          icon: Icon(MdiIcons.creation),
+          onPressed: null,
         ),
       ),
     );
@@ -665,12 +659,10 @@ class SuggestedSingleListTabPreview extends StatelessWidget {
         tabId: tabId,
         isActive: tabId == activeTabId,
         onTap: onTap,
-        trailingChild: const NonFocusable(
-          child: IconButton(
-            visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
-            icon: Icon(MdiIcons.creation),
-            onPressed: null,
-          ),
+        trailingChild: const IconButton(
+          visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
+          icon: Icon(MdiIcons.creation),
+          onPressed: null,
         ),
       ),
     );
