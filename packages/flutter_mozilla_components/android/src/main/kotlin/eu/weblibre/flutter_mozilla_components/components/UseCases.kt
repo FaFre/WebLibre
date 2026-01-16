@@ -51,5 +51,5 @@ class UseCases(
 
     val appLinksUseCases by lazy { AppLinksUseCases(context) }
 
-    //val trackingProtectionUseCases by lazy { TrackingProtectionUseCases(store, engine) }
+    val trackingProtectionUseCases by lazy { TrackingProtectionUseCases(store, engine) }
 }

@@ -21,6 +21,7 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -87,7 +88,23 @@ class _TrackingProtectionSection extends StatelessWidget {
         _EnhancedTrackingProtectionSection(),
         _BounceTrackingProtectionTile(),
         _QueryParameterStrippingSection(),
+        _TrackingProtectionExceptionsTile(),
       ],
+    );
+  }
+}
+
+class _TrackingProtectionExceptionsTile extends StatelessWidget {
+  const _TrackingProtectionExceptionsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(MdiIcons.shieldOffOutline),
+      title: const Text('Tracking Protection Exceptions'),
+      subtitle: const Text('Sites where tracking protection is disabled'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => context.push('/settings/tracking_protection_exceptions'),
     );
   }
 }

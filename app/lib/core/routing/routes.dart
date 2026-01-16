@@ -64,6 +64,7 @@ import 'package:weblibre/features/settings/presentation/screens/privacy_security
 import 'package:weblibre/features/settings/presentation/screens/search_content_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/tabs_behavior_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/tracking_protection_exceptions.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
 import 'package:weblibre/features/tor/presentation/screens/tor_proxy.dart';

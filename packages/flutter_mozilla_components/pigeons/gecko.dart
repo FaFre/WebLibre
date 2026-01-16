@@ -1825,3 +1825,59 @@ abstract class GeckoPublicSuffixListApi {
   @async
   String getPublicSuffixPlusOne(String host);
 }
+
+/// Tracking protection exception for a site
+///
+/// This represents a site that has been added to the exceptions list,
+/// meaning tracking protection is disabled for this specific site.
+class TrackingProtectionException {
+  final String url;
+
+  TrackingProtectionException({required this.url});
+}
+
+/// API for managing per-site tracking protection exceptions
+///
+/// This API wraps Mozilla Android Components' TrackingProtectionUseCases
+/// to allow Flutter code to add/remove/check tracking protection exceptions
+/// on a per-site basis.
+@HostApi()
+abstract class GeckoTrackingProtectionApi {
+  /// Check if a tab has a tracking protection exception
+  ///
+  /// Uses callback pattern to match Mozilla Android Components API.
+  /// Returns true if the site is in the exceptions list (ETP disabled).
+  @async
+  bool containsException(String tabId);
+
+  /// Add tracking protection exception for a tab (disable ETP for this site)
+  ///
+  /// This adds the current tab's URL to the exceptions list.
+  /// ETP will be disabled for this site until the exception is removed.
+  void addException(String tabId);
+
+  /// Remove tracking protection exception for a tab (enable ETP for this site)
+  ///
+  /// This removes the current tab's URL from the exceptions list.
+  /// ETP will be re-enabled for this site.
+  void removeException(String tabId);
+
+  /// Remove a specific exception by URL
+  ///
+  /// Alternative to removeException(tabId) for cases where you
+  /// have a URL rather than a tabId.
+  @async
+  void removeExceptionByUrl(String url);
+
+  /// Fetch all tracking protection exceptions
+  ///
+  /// Returns list of all sites that have exceptions (ETP disabled).
+  @async
+  List<TrackingProtectionException> fetchExceptions();
+
+  /// Remove all tracking protection exceptions
+  ///
+  /// This re-enables ETP for all exception sites.
+  @async
+  void removeAllExceptions();
+}

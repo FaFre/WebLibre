@@ -68,7 +68,7 @@ final class SitePermissionsProvider
   }
 }
 
-String _$sitePermissionsHash() => r'c605e9a1acb261ec46659431b5bb1e105b8aa2a1';
+String _$sitePermissionsHash() => r'785af0f938bfe53799fc8b6ee8be71015afbc86c';
 
 /// Provider to fetch site permissions for a given origin
 
@@ -147,7 +147,7 @@ final class PublicSuffixPlusOneProvider
 }
 
 String _$publicSuffixPlusOneHash() =>
-    r'e259f66e3ebf278468223d8e25618eb9f67a3504';
+    r'2871740bee033e634047b1374ae8dfad508f2cb2';
 
 /// Provider to get the public suffix plus one (eTLD+1) for a host
 

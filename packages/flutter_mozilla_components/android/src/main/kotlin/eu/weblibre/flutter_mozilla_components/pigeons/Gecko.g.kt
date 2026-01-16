@@ -2825,6 +2825,41 @@ data class SitePermissions (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/**
+ * Tracking protection exception for a site
+ *
+ * This represents a site that has been added to the exceptions list,
+ * meaning tracking protection is disabled for this specific site.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TrackingProtectionException (
+  val url: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TrackingProtectionException {
+      val url = pigeonVar_list[0] as String
+      return TrackingProtectionException(url)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      url,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is TrackingProtectionException) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class GeckoPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -3233,6 +3268,11 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
           SitePermissions.fromList(it)
         }
       }
+      210.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TrackingProtectionException.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -3560,6 +3600,10 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       is SitePermissions -> {
         stream.write(209)
+        writeValue(stream, value.toList())
+      }
+      is TrackingProtectionException -> {
+        stream.write(210)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -6707,6 +6751,179 @@ interface GeckoPublicSuffixListApi {
               } else {
                 val data = result.getOrNull()
                 reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * API for managing per-site tracking protection exceptions
+ *
+ * This API wraps Mozilla Android Components' TrackingProtectionUseCases
+ * to allow Flutter code to add/remove/check tracking protection exceptions
+ * on a per-site basis.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoTrackingProtectionApi {
+  /**
+   * Check if a tab has a tracking protection exception
+   *
+   * Uses callback pattern to match Mozilla Android Components API.
+   * Returns true if the site is in the exceptions list (ETP disabled).
+   */
+  fun containsException(tabId: String, callback: (Result<Boolean>) -> Unit)
+  /**
+   * Add tracking protection exception for a tab (disable ETP for this site)
+   *
+   * This adds the current tab's URL to the exceptions list.
+   * ETP will be disabled for this site until the exception is removed.
+   */
+  fun addException(tabId: String)
+  /**
+   * Remove tracking protection exception for a tab (enable ETP for this site)
+   *
+   * This removes the current tab's URL from the exceptions list.
+   * ETP will be re-enabled for this site.
+   */
+  fun removeException(tabId: String)
+  /**
+   * Remove a specific exception by URL
+   *
+   * Alternative to removeException(tabId) for cases where you
+   * have a URL rather than a tabId.
+   */
+  fun removeExceptionByUrl(url: String, callback: (Result<Unit>) -> Unit)
+  /**
+   * Fetch all tracking protection exceptions
+   *
+   * Returns list of all sites that have exceptions (ETP disabled).
+   */
+  fun fetchExceptions(callback: (Result<List<TrackingProtectionException>>) -> Unit)
+  /**
+   * Remove all tracking protection exceptions
+   *
+   * This re-enables ETP for all exception sites.
+   */
+  fun removeAllExceptions(callback: (Result<Unit>) -> Unit)
+
+  companion object {
+    /** The codec used by GeckoTrackingProtectionApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoTrackingProtectionApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoTrackingProtectionApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.containsException$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String
+            api.containsException(tabIdArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.addException$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.addException(tabIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.removeException$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.removeException(tabIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.removeExceptionByUrl$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val urlArg = args[0] as String
+            api.removeExceptionByUrl(urlArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.fetchExceptions$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.fetchExceptions{ result: Result<List<TrackingProtectionException>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.removeAllExceptions$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.removeAllExceptions{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
               }
             }
           }

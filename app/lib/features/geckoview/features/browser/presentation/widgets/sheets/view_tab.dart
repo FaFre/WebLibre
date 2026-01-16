@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/clear_site_data_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
 
 class ClampingScrollPhysicsWithoutImplicit extends ClampingScrollPhysics {
@@ -206,6 +207,11 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                   availableBangs: availableBangs,
                   controller: searchTextController,
                 ),
+              ),
+              const Divider(),
+              // Tracking Protection Section
+              TrackingProtectionSection(
+                tabId: initialTabState.id,
               ),
               const Divider(),
               // Permissions Section

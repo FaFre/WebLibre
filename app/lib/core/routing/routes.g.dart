@@ -146,6 +146,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       name: 'AddonCollectionRoute',
       factory: $AddonCollectionRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: 'tracking_protection_exceptions',
+      name: 'TrackingProtectionExceptionsRoute',
+      factory: $TrackingProtectionExceptionsRoute._fromState,
+    ),
   ],
 );
 
@@ -431,6 +436,28 @@ mixin $AddonCollectionRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/addon_collection');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TrackingProtectionExceptionsRoute on GoRouteData {
+  static TrackingProtectionExceptionsRoute _fromState(GoRouterState state) =>
+      TrackingProtectionExceptionsRoute();
+
+  @override
+  String get location =>
+      GoRouteData.$location('/settings/tracking_protection_exceptions');
 
   @override
   void go(BuildContext context) => context.go(location);

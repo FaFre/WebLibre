@@ -71,6 +71,10 @@ part of 'routes.dart';
       name: 'AddonCollectionRoute',
       path: 'addon_collection',
     ),
+    TypedGoRoute<TrackingProtectionExceptionsRoute>(
+      name: 'TrackingProtectionExceptionsRoute',
+      path: 'tracking_protection_exceptions',
+    ),
   ],
 )
 class SettingsRoute extends GoRouteData with $SettingsRoute {
@@ -180,5 +184,13 @@ class WebEngineHardeningGroupRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return WebEngineHardeningGroupScreen(groupName: group);
+  }
+}
+
+class TrackingProtectionExceptionsRoute extends GoRouteData
+    with $TrackingProtectionExceptionsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const TrackingProtectionExceptionsScreen();
   }
 }

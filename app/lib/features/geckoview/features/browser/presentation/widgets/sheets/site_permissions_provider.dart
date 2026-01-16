@@ -28,17 +28,14 @@ Future<SitePermissions?> sitePermissions(
   Ref ref,
   String origin,
   bool isPrivate,
-) async {
+) {
   final api = GeckoSitePermissionsApi();
   return api.getSitePermissions(origin, isPrivate);
 }
 
 /// Provider to get the public suffix plus one (eTLD+1) for a host
 @Riverpod()
-Future<String> publicSuffixPlusOne(
-  Ref ref,
-  String host,
-) async {
+Future<String> publicSuffixPlusOne(Ref ref, String host) {
   final api = GeckoPublicSuffixListApi();
   return api.getPublicSuffixPlusOne(host);
 }
@@ -49,10 +46,7 @@ class SelectedClearDataTypes extends _$SelectedClearDataTypes {
   @override
   Set<ClearDataType> build() {
     // Default to clearing all site data and auth sessions (most common use case)
-    return {
-      ClearDataType.allSiteData,
-      ClearDataType.authSessions,
-    };
+    return {ClearDataType.allSiteData, ClearDataType.authSessions};
   }
 
   void toggle(ClearDataType type) {
