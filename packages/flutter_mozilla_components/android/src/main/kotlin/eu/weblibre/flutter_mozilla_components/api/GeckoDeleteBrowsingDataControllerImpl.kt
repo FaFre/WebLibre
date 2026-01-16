@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.pigeons.ClearDataType
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -120,6 +121,42 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
                 components.core.runtime.storageController.clearDataForSessionContext(contextId)
 
                 callback(Result.success(Unit))
+            }
+        }
+    }
+
+    override fun clearDataForHost(
+        host: String,
+        dataTypes: List<ClearDataType>,
+        callback: (Result<Unit>) -> Unit
+    ) {
+        coroutineScope.launch {
+            try {
+                withContext(Dispatchers.Main) {
+                    // Convert ClearDataType to Engine.BrowsingData flags
+                    val browsingDataTypes = dataTypes.map { dataType ->
+                        when (dataType) {
+                            ClearDataType.AUTH_SESSIONS -> Engine.BrowsingData.AUTH_SESSIONS
+                            ClearDataType.ALL_SITE_DATA -> Engine.BrowsingData.ALL_SITE_DATA
+                            ClearDataType.COOKIES -> Engine.BrowsingData.COOKIES
+                            ClearDataType.ALL_CACHES -> Engine.BrowsingData.ALL_CACHES
+                        }
+                    }.toIntArray()
+
+                    // Clear data for the specific host
+                    components.core.engine.clearData(
+                        data = Engine.BrowsingData.select(*browsingDataTypes),
+                        host = host,
+                        onSuccess = {
+                            callback(Result.success(Unit))
+                        },
+                        onError = { throwable ->
+                            callback(Result.failure(throwable))
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                callback(Result.failure(e))
             }
         }
     }

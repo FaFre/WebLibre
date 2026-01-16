@@ -128,6 +128,7 @@ dependencies {
     implementation "org.mozilla.components:feature-webnotifications:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-webauthn:$mozillaComponentsVersion"
     implementation "org.mozilla.components:ui-widgets:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:lib-publicsuffixlist:$mozillaComponentsVersion"
 
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.3.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'

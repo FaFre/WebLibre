@@ -1417,6 +1417,25 @@ abstract class GeckoDeleteBrowsingDataController {
 
   @async
   void clearDataForSessionContext(String contextId);
+
+  /// Clear browsing data for a specific host/domain
+  @async
+  void clearDataForHost(String host, List<ClearDataType> dataTypes);
+}
+
+/// Types of browsing data that can be cleared
+enum ClearDataType {
+  /// Authentication sessions
+  authSessions,
+
+  /// All site data (cookies, storage, etc.)
+  allSiteData,
+
+  /// Cookies only
+  cookies,
+
+  /// Cache only
+  allCaches,
 }
 
 @HostApi()
@@ -1712,4 +1731,97 @@ abstract class GeckoBookmarksApi {
   /// @return Whether the bookmark existed or not.
   @async
   bool deleteNode(String guid);
+}
+
+// =============================================================================
+// Site Permissions API
+// =============================================================================
+
+/// Permission status for a site permission
+enum SitePermissionStatus {
+  /// Permission has been granted
+  allowed,
+
+  /// Permission has been denied
+  blocked,
+
+  /// No decision has been made yet (ask to allow)
+  noDecision,
+}
+
+/// Autoplay permission values (matches Fenix's 4 states)
+enum AutoplayStatus {
+  /// Allow all autoplay (audible and inaudible)
+  allowed,
+
+  /// Block all autoplay
+  blocked,
+
+  /// Block audible autoplay only (allow inaudible)
+  blockAudible,
+
+  /// Allow autoplay on WiFi only
+  allowOnWifi,
+}
+
+/// Site permissions data structure
+class SitePermissions {
+  final String origin;
+  final SitePermissionStatus? camera;
+  final SitePermissionStatus? microphone;
+  final SitePermissionStatus? location;
+  final SitePermissionStatus? notification;
+  final SitePermissionStatus? persistentStorage;
+  final SitePermissionStatus? crossOriginStorageAccess;
+  final SitePermissionStatus? mediaKeySystemAccess;
+  final SitePermissionStatus? localDeviceAccess;
+  final SitePermissionStatus? localNetworkAccess;
+  final AutoplayStatus? autoplayAudible;
+  final AutoplayStatus? autoplayInaudible;
+  final int savedAt;
+
+  SitePermissions({
+    required this.origin,
+    this.camera,
+    this.microphone,
+    this.location,
+    this.notification,
+    this.persistentStorage,
+    this.crossOriginStorageAccess,
+    this.mediaKeySystemAccess,
+    this.localDeviceAccess,
+    this.localNetworkAccess,
+    this.autoplayAudible,
+    this.autoplayInaudible,
+    this.savedAt = 0,
+  });
+}
+
+/// API for managing site permissions stored in GeckoView
+@HostApi()
+abstract class GeckoSitePermissionsApi {
+  /// Get permissions for origin (single source of truth from GeckoView)
+  @async
+  SitePermissions? getSitePermissions(String origin, bool private);
+
+  /// Save/update permissions (persisted by GeckoView)
+  @async
+  void setSitePermissions(SitePermissions permissions, bool private);
+
+  /// Delete permissions for origin (removed from GeckoView storage)
+  @async
+  void deleteSitePermissions(String origin, bool private);
+}
+
+// =============================================================================
+// Public Suffix List API
+// =============================================================================
+
+/// Native wrapper for Mozilla's Public Suffix List
+@HostApi()
+abstract class GeckoPublicSuffixListApi {
+  /// Get base domain (eTLD+1) from host using Mozilla's Public Suffix List
+  /// Returns the host unchanged if PSL lookup fails
+  @async
+  String getPublicSuffixPlusOne(String host);
 }

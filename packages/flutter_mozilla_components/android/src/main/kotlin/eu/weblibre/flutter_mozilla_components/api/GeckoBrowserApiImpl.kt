@@ -33,6 +33,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFindApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoIconsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPublicSuffixListApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
@@ -264,6 +266,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoHistoryApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoHistoryApiImpl())
         GeckoFetchApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFetchApiImpl())
         GeckoBookmarksApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoBookmarksApiImpl())
+        GeckoSitePermissionsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoSitePermissionsApiImpl())
+        GeckoPublicSuffixListApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPublicSuffixListApiImpl(profileApplicationContext))
 
         // Viewport API for dynamic toolbar and keyboard handling
         val viewportEvents = GeckoViewportEvents(_flutterPluginBinding.binaryMessenger)

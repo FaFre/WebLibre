@@ -64,9 +64,10 @@ class PermissionStorage(
     /**
      * Deletes all sitePermissions that match the sitePermissions provided as a parameter.
      * @param sitePermissions The [SitePermissions] to be deleted from the storage.
+     * @param private Indicates if the [SitePermissions] belongs to a private session.
      */
-    suspend fun deleteSitePermissions(sitePermissions: SitePermissions) = withContext(dispatcher) {
-        permissionsStorage.remove(sitePermissions, private = false)
+    suspend fun deleteSitePermissions(sitePermissions: SitePermissions, private: Boolean = false) = withContext(dispatcher) {
+        permissionsStorage.remove(sitePermissions, private = private)
     }
 
     /**
