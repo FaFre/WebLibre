@@ -112,7 +112,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
                         context,
                         ref,
                         isClearing,
-                        selectedTypes,
+                        selectedTypes.value,
                       ),
                 icon: isClearing.value
                     ? const SizedBox(
@@ -134,9 +134,9 @@ class ClearSiteDataSection extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ValueNotifier<bool> isClearing,
-    ValueNotifier<Set<ClearDataType>> selectedTypes,
+    Set<ClearDataType> selectedTypes,
   ) async {
-    if (selectedTypes.value.isEmpty) {
+    if (selectedTypes.isEmpty) {
       showErrorMessage(context, 'Select at least one data type');
       return;
     }
@@ -144,13 +144,13 @@ class ClearSiteDataSection extends HookConsumerWidget {
     final confirmed = await showClearSiteDataDialog(
       context,
       host: url.host,
-      formattedTypes: _formatTypes(selectedTypes.value),
+      formattedTypes: _formatTypes(selectedTypes),
     );
 
     if (confirmed == true && context.mounted) {
       isClearing.value = true;
       try {
-        await _clearData(ref, selectedTypes.value);
+        await _clearData(ref, selectedTypes);
         if (context.mounted) {
           showInfoMessage(context, 'Site data cleared');
         }
