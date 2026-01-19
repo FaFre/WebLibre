@@ -24,11 +24,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
@@ -46,8 +43,6 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
-import 'package:weblibre/presentation/widgets/selectable_chips.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/text_field_line_count.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -152,28 +147,30 @@ class SearchScreen extends HookConsumerWidget {
       return null;
     }, []);
 
-    useEffect(() {
-      void measureHeight() {
+    Future<void> measureHeightWithRetry() async {
+      const delays = [25, 50, 75, 100];
+
+      for (final delay in delays) {
+        await Future.delayed(Duration(milliseconds: delay));
         final measuredHeight = getTextFieldHeight(textFieldKey);
 
         if (measuredHeight != null) {
           preferredHeight.value = measuredHeight;
+          return;
         }
       }
+    }
 
+    useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        measureHeight();
+        measureHeightWithRetry(); // ignore: discarded_futures
       });
 
       return null;
     }, [textFieldKey, isEditMode]);
 
     useOnListenableChange(isEditMode ? searchTextController : null, () {
-      final measuredHeight = getTextFieldHeight(textFieldKey);
-
-      if (measuredHeight != null && preferredHeight.value != measuredHeight) {
-        preferredHeight.value = measuredHeight;
-      }
+      measureHeightWithRetry(); // ignore: discarded_futures
     });
 
     useOnAppLifecycleStateChange((previous, current) {
@@ -195,22 +192,25 @@ class SearchScreen extends HookConsumerWidget {
       defaultSearchBangDataProvider.select((value) => value.value),
     );
 
-    final selectedBang = useState<BangData?>(null);
-    final activeBang = selectedBang.value ?? defaultSearchBang;
-    final showBangIcon = useState(false);
+    // Watch both selection providers - only one should be set at a time
+    // due to mutual exclusion in SmartBangSelector
+    final siteSelectedBang = isEditMode
+        ? ref.watch(selectedBangDataProvider(domain: existingTabState.url.host))
+        : null;
+    final globalSelectedBang = ref.watch(selectedBangDataProvider());
 
-    ref.listen(
-      selectedBangDataProvider(
-        domain: isEditMode ? existingTabState.url.host : null,
-      ),
-      (previous, next) {
-        if (previous != next) {
-          showBangIcon.value = true;
-        }
+    // The active selection is whichever one is set (site takes priority if both somehow set)
+    final selectedBang = siteSelectedBang ?? globalSelectedBang;
+    final activeBang = selectedBang ?? defaultSearchBang;
+    final showBangIcon = selectedBang != null;
 
-        selectedBang.value = next;
-      },
-    );
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        measureHeightWithRetry(); // ignore: discarded_futures
+      });
+
+      return null;
+    }, [showBangIcon]);
 
     Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
@@ -263,12 +263,9 @@ class SearchScreen extends HookConsumerWidget {
                     floating: true,
                     pinned: true,
                     automaticallyImplyLeading: false,
+                    toolbarHeight: isEditMode ? 0 : kToolbarHeight,
                     title: isEditMode
-                        ? _SiteBangsSelector(
-                            tabId: tabId!,
-                            domain: existingTabState.url.host,
-                            searchTextController: searchTextController,
-                          )
+                        ? null
                         : Align(
                             child: Focus(
                               canRequestFocus: false,
@@ -325,7 +322,7 @@ class SearchScreen extends HookConsumerWidget {
                         padding: const EdgeInsets.only(left: 16.0),
                         child: SearchField(
                           textFieldKey: textFieldKey,
-                          showBangIcon: showBangIcon.value,
+                          showBangIcon: showBangIcon,
                           textEditingController: searchTextController,
                           focusNode: searchFocusNode,
                           maxLines: isEditMode ? 3 : 1,
@@ -342,14 +339,20 @@ class SearchScreen extends HookConsumerWidget {
                               );
 
                               if (newUrl == null) {
+                                // Read from both providers - use site if set, otherwise global
+                                final siteBang = isEditMode
+                                    ? ref.read(
+                                        selectedBangDataProvider(
+                                          domain: existingTabState.url.host,
+                                        ),
+                                      )
+                                    : null;
+                                final globalBang = ref.read(
+                                  selectedBangDataProvider(),
+                                );
                                 final bang =
-                                    ref.read(
-                                      selectedBangDataProvider(
-                                        domain: isEditMode
-                                            ? existingTabState.url.host
-                                            : null,
-                                      ),
-                                    ) ??
+                                    siteBang ??
+                                    globalBang ??
                                     await ref.read(
                                       defaultSearchBangDataProvider.future,
                                     );
@@ -418,6 +421,7 @@ class SearchScreen extends HookConsumerWidget {
                     searchTextController: searchTextController,
                     activeBang: activeBang,
                     submitSearch: submitSearch,
+                    domain: isEditMode ? existingTabState.url.host : null,
                   ),
                   TabSearch(searchTextListenable: sampledSearchText),
                   FeedSearch(searchTextNotifier: sampledSearchText),
@@ -430,71 +434,6 @@ class SearchScreen extends HookConsumerWidget {
             },
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SiteBangsSelector extends HookConsumerWidget {
-  final String tabId;
-  final String domain;
-  final TextEditingController searchTextController;
-
-  const _SiteBangsSelector({
-    required this.tabId,
-    required this.domain,
-    required this.searchTextController,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));
-    final availableBangs = ref.watch(
-      bangListProvider(
-        domain: domain,
-        orderMostFrequentFirst: true,
-      ).select((value) => value.value ?? const []),
-    );
-
-    if (availableBangs.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return SizedBox(
-      height: 48,
-      width: double.maxFinite,
-      child: SelectableChips(
-        itemId: (bang) => bang.trigger,
-        itemAvatar: (bang) => UrlIcon([bang.getDefaultUrl()], iconSize: 20),
-        itemLabel: (bang) => Text(bang.websiteName),
-        itemTooltip: (bang) => bang.trigger,
-        availableItems: availableBangs,
-        selectedItem: selectedBang,
-        onSelected: (bang) {
-          if (selectedBang == null) {
-            final hasSupportedScheme =
-                uri_parser
-                    .tryParseUrl(searchTextController.text)
-                    .mapNotNull((uri) => uri.hasSupportedScheme) ??
-                false;
-
-            if (hasSupportedScheme) {
-              searchTextController.clear();
-            }
-          }
-
-          ref
-              .read(selectedBangTriggerProvider(domain: domain).notifier)
-              .setTrigger(bang.toKey());
-        },
-        onDeleted: (bang) {
-          if (ref.read(selectedBangTriggerProvider(domain: domain)) ==
-              bang.toKey()) {
-            ref
-                .read(selectedBangTriggerProvider(domain: domain).notifier)
-                .clearTrigger();
-          }
-        },
       ),
     );
   }

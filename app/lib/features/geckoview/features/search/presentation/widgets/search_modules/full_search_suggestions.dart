@@ -27,20 +27,23 @@ import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chips.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/smart_bang_selector.dart';
 
 class FullSearchTermSuggestions extends HookConsumerWidget {
   final TextEditingController searchTextController;
   final Future<void> Function(String query) submitSearch;
   final BangData? activeBang;
 
+  /// The domain to scope site-specific bangs to.
+  /// When null, only global bangs are shown (new tab mode).
+  final String? domain;
+
   const FullSearchTermSuggestions({
     required this.searchTextController,
     required this.submitSearch,
     required this.activeBang,
+    this.domain,
     super.key,
   });
 
@@ -152,35 +155,8 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                   'Search Provider',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
-                BangChips(
-                  key: ValueKey(activeBang),
-                  activeBang: activeBang,
-                  onSelected: (bang) {
-                    searchTextController.clear();
-
-                    ref
-                        .read(selectedBangTriggerProvider().notifier)
-                        .setTrigger(bang.toKey());
-                  },
-                  onDeleted: (bang) async {
-                    if (ref.read(selectedBangTriggerProvider()) ==
-                        bang.toKey()) {
-                      ref
-                          .read(selectedBangTriggerProvider().notifier)
-                          .clearTrigger();
-                    } else {
-                      final dialogResult = await showResetBangDialog(
-                        context,
-                        triggerName: bang.trigger,
-                      );
-
-                      if (dialogResult == true) {
-                        await ref
-                            .read(bangDataRepositoryProvider.notifier)
-                            .resetFrequency(bang.trigger);
-                      }
-                    }
-                  },
+                SmartBangSelector(
+                  domain: domain,
                   searchTextController: searchTextController,
                 ),
               ],
