@@ -330,7 +330,7 @@ class SearchScreen extends HookConsumerWidget {
                           label: (activeBang != null)
                               ? const Text('Search')
                               : const Text('Address / Search'),
-                          unfocusOnTapOutside: !isEditMode,
+                          unfocusOnTapOutside: false,
                           onSubmitted: (value) async {
                             if (value.isNotEmpty) {
                               var newUrl = uri_parser.tryParseUrl(

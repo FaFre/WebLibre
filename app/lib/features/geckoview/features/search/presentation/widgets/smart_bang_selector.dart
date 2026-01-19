@@ -284,7 +284,8 @@ class _BangChipsList extends HookConsumerWidget {
       searchTextController.clear();
     } else {
       // Site tab - only clear if text is a valid URL
-      final hasSupportedScheme = uri_parser
+      final hasSupportedScheme =
+          uri_parser
               .tryParseUrl(searchTextController.text)
               .mapNotNull((uri) => uri.hasSupportedScheme) ??
           false;
@@ -318,8 +319,9 @@ class _BangChipsList extends HookConsumerWidget {
     WidgetRef ref,
     BangData bang,
   ) async {
-    final currentSelection =
-        ref.read(selectedBangTriggerProvider(domain: domain));
+    final currentSelection = ref.read(
+      selectedBangTriggerProvider(domain: domain),
+    );
 
     if (currentSelection == bang.toKey()) {
       // Clear selection if the deleted bang is currently selected

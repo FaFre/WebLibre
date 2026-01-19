@@ -175,7 +175,7 @@ class GridTabPreview extends HookConsumerWidget {
             Row(
               children: [
                 const SizedBox(width: 6.0),
-                TabIcon(tabState: tabState),
+                TabIcon(tabState: tabState, iconSize: 16.0),
                 const SizedBox(width: 6.0),
                 Expanded(
                   child: Text(

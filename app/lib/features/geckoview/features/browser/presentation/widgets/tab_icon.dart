@@ -31,7 +31,7 @@ class TabIcon extends HookConsumerWidget {
 
   final double iconSize;
 
-  const TabIcon({super.key, required this.tabState, this.iconSize = 16});
+  const TabIcon({super.key, required this.tabState, required this.iconSize});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

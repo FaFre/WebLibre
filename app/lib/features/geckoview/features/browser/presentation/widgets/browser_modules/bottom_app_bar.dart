@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
@@ -281,7 +282,7 @@ class BrowserTabBar extends HookConsumerWidget {
               child: AppBar(
                 primary: false,
                 automaticallyImplyLeading: false,
-                titleSpacing: 8.0,
+                titleSpacing: 0.0,
                 toolbarHeight: kToolbarHeight,
                 backgroundColor:
                     (containerColor != null && displayedSheet is! ViewTabsSheet)
@@ -314,7 +315,7 @@ class BrowserTabBar extends HookConsumerWidget {
                           visible: tabBarReaderView || readerabilityStateActive,
                           child: ReaderButton(
                             buttonBuilder: (isLoading, readerActive, icon) =>
-                                InkWell(
+                                ToolbarButton(
                                   onTap: isLoading
                                       ? null
                                       : () async {
@@ -325,13 +326,7 @@ class BrowserTabBar extends HookConsumerWidget {
                                               )
                                               .toggleReaderView(!readerActive);
                                         },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 15.0,
-                                      horizontal: 8.0,
-                                    ),
-                                    child: icon,
-                                  ),
+                                  child: icon,
                                 ),
                           ),
                         );
@@ -340,15 +335,15 @@ class BrowserTabBar extends HookConsumerWidget {
                   if (showExtensionShortcut)
                     ExtensionShortcutMenu(
                       controller: extensionMenuController,
-                      child: IconButton(
-                        onPressed: () {
+                      child: ToolbarButton(
+                        onTap: () {
                           if (extensionMenuController.isOpen) {
                             extensionMenuController.close();
                           } else {
                             extensionMenuController.open();
                           }
                         },
-                        icon: const Icon(MdiIcons.puzzle),
+                        child: const Icon(MdiIcons.puzzle),
                       ),
                     ),
                   if (selectedTabId != null)
@@ -356,7 +351,7 @@ class BrowserTabBar extends HookConsumerWidget {
                       controller: trippleDotMenuController,
                       selectedTabId: selectedTabId,
                       builder: (context, controller, child) {
-                        return InkWell(
+                        return ToolbarButton(
                           onTap: () {
                             if (controller.isOpen) {
                               controller.close();
@@ -364,13 +359,7 @@ class BrowserTabBar extends HookConsumerWidget {
                               controller.open();
                             }
                           },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                              vertical: 15.0,
-                            ),
-                            child: Icon(MdiIcons.dotsVertical),
-                          ),
+                          child: const Icon(MdiIcons.dotsVertical),
                         );
                       },
                     ),

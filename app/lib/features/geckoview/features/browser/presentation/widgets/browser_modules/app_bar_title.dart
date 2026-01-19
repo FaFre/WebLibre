@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class AppBarTitle extends HookConsumerWidget {
@@ -70,16 +71,14 @@ class AppBarTitle extends HookConsumerWidget {
 
     return Row(
       children: [
-        // Icon tap → opens site settings sheet
-        GestureDetector(
+        ToolbarButton(
           onTap: () {
             ref
                 .read(bottomSheetControllerProvider.notifier)
                 .show(SiteSettingsSheet(tabState: tabState));
           },
-          child: TabIcon(tabState: tabState),
+          child: TabIcon(tabState: tabState, iconSize: 24),
         ),
-        const SizedBox(width: 8),
         // Title/URL tap → opens search screen
         Expanded(
           child: GestureDetector(
