@@ -17,13 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
@@ -40,9 +44,11 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/text_field_line_count.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class SearchScreen extends HookConsumerWidget {
@@ -101,6 +107,74 @@ class SearchScreen extends HookConsumerWidget {
       sampleDuration: const Duration(milliseconds: 150),
     );
     final searchFocusNode = useFocusNode();
+    final textFieldKey = useMemoized(() => GlobalKey());
+    final preferredHeight = useState<double>(kToolbarHeight);
+
+    useOnListenableChangeSelector(
+      searchFocusNode,
+      () => searchFocusNode.hasFocus,
+      () {
+        if (searchFocusNode.hasFocus && isEditMode) {
+          // Select all text when the field is focused
+          searchTextController.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: searchTextController.text.length,
+          );
+        }
+      },
+    );
+
+    useEffect(() {
+      if (isEditMode) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          searchTextController.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: searchTextController.text.length,
+          );
+        });
+      }
+      return null;
+    }, []);
+
+    //Request initial focus in a way our useOnListenableChangeSelector is triggered
+    useEffect(() {
+      //Wait for first frame then request focus
+      unawaited(
+        Future.delayed(const Duration(milliseconds: 1000 ~/ 60)).whenComplete(
+          () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              searchFocusNode.requestFocus();
+            });
+          },
+        ),
+      );
+
+      return null;
+    }, []);
+
+    useEffect(() {
+      void measureHeight() {
+        final measuredHeight = getTextFieldHeight(textFieldKey);
+
+        if (measuredHeight != null) {
+          preferredHeight.value = measuredHeight;
+        }
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        measureHeight();
+      });
+
+      return null;
+    }, [textFieldKey, isEditMode]);
+
+    useOnListenableChange(isEditMode ? searchTextController : null, () {
+      final measuredHeight = getTextFieldHeight(textFieldKey);
+
+      if (measuredHeight != null && preferredHeight.value != measuredHeight) {
+        preferredHeight.value = measuredHeight;
+      }
+    });
 
     useOnAppLifecycleStateChange((previous, current) {
       switch (current) {
@@ -126,7 +200,9 @@ class SearchScreen extends HookConsumerWidget {
     final showBangIcon = useState(false);
 
     ref.listen(
-      selectedBangDataProvider(domain: isEditMode ? existingTabState.url.host : null),
+      selectedBangDataProvider(
+        domain: isEditMode ? existingTabState.url.host : null,
+      ),
       (previous, next) {
         if (previous != next) {
           showBangIcon.value = true;
@@ -188,20 +264,10 @@ class SearchScreen extends HookConsumerWidget {
                     pinned: true,
                     automaticallyImplyLeading: false,
                     title: isEditMode
-                        ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _SiteBangsSelector(
-                                tabId: tabId!,
-                                domain: existingTabState.url.host,
-                              ),
-                              Text(
-                                'Editing current tab',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
+                        ? _SiteBangsSelector(
+                            tabId: tabId!,
+                            domain: existingTabState.url.host,
+                            searchTextController: searchTextController,
                           )
                         : Align(
                             child: Focus(
@@ -230,7 +296,9 @@ class SearchScreen extends HookConsumerWidget {
                                 onSelectionChanged: (value) {
                                   selectedTabType.value = value.first;
                                   // Restore focus to search field after segment change
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
                                     searchFocusNode.requestFocus();
                                   });
                                 },
@@ -243,8 +311,8 @@ class SearchScreen extends HookConsumerWidget {
                                   TabType.child =>
                                     (currentTabTabType == TabType.private)
                                         ? SegmentedButton.styleFrom(
-                                            selectedBackgroundColor:
-                                                appColors.privateSelectionOverlay,
+                                            selectedBackgroundColor: appColors
+                                                .privateSelectionOverlay,
                                           )
                                         : null,
                                 },
@@ -252,15 +320,20 @@ class SearchScreen extends HookConsumerWidget {
                             ),
                           ),
                     bottom: PreferredSize(
-                      preferredSize: const Size.fromHeight(kToolbarHeight),
+                      preferredSize: Size.fromHeight(preferredHeight.value),
                       child: Padding(
                         padding: const EdgeInsets.only(left: 16.0),
                         child: SearchField(
+                          textFieldKey: textFieldKey,
                           showBangIcon: showBangIcon.value,
                           textEditingController: searchTextController,
                           focusNode: searchFocusNode,
+                          maxLines: isEditMode ? 3 : 1,
                           autofocus: true,
-                          label: const Text('Address / Search'),
+                          label: (activeBang != null)
+                              ? const Text('Search')
+                              : const Text('Address / Search'),
+                          unfocusOnTapOutside: !isEditMode,
                           onSubmitted: (value) async {
                             if (value.isNotEmpty) {
                               var newUrl = uri_parser.tryParseUrl(
@@ -270,9 +343,13 @@ class SearchScreen extends HookConsumerWidget {
 
                               if (newUrl == null) {
                                 final bang =
-                                    ref.read(selectedBangDataProvider(
-                                      domain: isEditMode ? existingTabState.url.host : null,
-                                    )) ??
+                                    ref.read(
+                                      selectedBangDataProvider(
+                                        domain: isEditMode
+                                            ? existingTabState.url.host
+                                            : null,
+                                      ),
+                                    ) ??
                                     await ref.read(
                                       defaultSearchBangDataProvider.future,
                                     );
@@ -292,7 +369,11 @@ class SearchScreen extends HookConsumerWidget {
                                 if (isEditMode) {
                                   // Load into existing tab
                                   await ref
-                                      .read(tabSessionProvider(tabId: tabId).notifier)
+                                      .read(
+                                        tabSessionProvider(
+                                          tabId: tabId,
+                                        ).notifier,
+                                      )
                                       .loadUrl(url: newUrl);
                                 } else {
                                   // Create new tab
@@ -357,17 +438,17 @@ class SearchScreen extends HookConsumerWidget {
 class _SiteBangsSelector extends HookConsumerWidget {
   final String tabId;
   final String domain;
+  final TextEditingController searchTextController;
 
   const _SiteBangsSelector({
     required this.tabId,
     required this.domain,
+    required this.searchTextController,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedBang = ref.watch(
-      selectedBangDataProvider(domain: domain),
-    );
+    final selectedBang = ref.watch(selectedBangDataProvider(domain: domain));
     final availableBangs = ref.watch(
       bangListProvider(
         domain: domain,
@@ -390,6 +471,18 @@ class _SiteBangsSelector extends HookConsumerWidget {
         availableItems: availableBangs,
         selectedItem: selectedBang,
         onSelected: (bang) {
+          if (selectedBang == null) {
+            final hasSupportedScheme =
+                uri_parser
+                    .tryParseUrl(searchTextController.text)
+                    .mapNotNull((uri) => uri.hasSupportedScheme) ??
+                false;
+
+            if (hasSupportedScheme) {
+              searchTextController.clear();
+            }
+          }
+
           ref
               .read(selectedBangTriggerProvider(domain: domain).notifier)
               .setTrigger(bang.toKey());

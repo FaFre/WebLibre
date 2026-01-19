@@ -594,7 +594,7 @@ class _SheetContainer extends HookConsumerWidget {
               final SiteSettingsSheet parameter =>
                 NotificationListener<DraggableScrollableNotification>(
                   onNotification: dismissOnThreshold,
-                  child: _ViewUrlSheet(
+                  child: _SiteSettingsSheet(
                     initialTabState: parameter.tabState,
                     maxChildSize: stableMaxChildSize,
                     bottomAppBarHeight: bottomAppBarHeight,
@@ -855,12 +855,14 @@ class _BrowserView extends StatelessWidget {
   }
 }
 
-class _ViewUrlSheet extends HookConsumerWidget {
+class _SiteSettingsSheet extends HookConsumerWidget {
   final double maxChildSize;
   final TabState initialTabState;
   final double bottomAppBarHeight;
 
-  const _ViewUrlSheet({
+  static const initialHeight = 0.8;
+
+  const _SiteSettingsSheet({
     required this.initialTabState,
     required this.bottomAppBarHeight,
     this.maxChildSize = 1.0,
@@ -870,7 +872,17 @@ class _ViewUrlSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draggableScrollableController = useDraggableScrollableController();
 
-    final initialHeight = 172.0 / MediaQuery.of(context).size.height;
+    void handleClearSiteDataExpansion(bool isExpanded) {
+      if (isExpanded) {
+        unawaited(
+          draggableScrollableController.animateTo(
+            1.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.decelerate,
+          ),
+        );
+      }
+    }
 
     return DraggableScrollableSheet(
       controller: draggableScrollableController,
@@ -904,6 +916,7 @@ class _ViewUrlSheet extends HookConsumerWidget {
             },
             initialHeight: initialHeight,
             bottomAppBarHeight: bottomAppBarHeight,
+            onClearSiteDataExpandedChanged: handleClearSiteDataExpansion,
           ),
         );
       },

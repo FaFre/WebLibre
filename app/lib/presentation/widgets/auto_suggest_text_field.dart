@@ -50,6 +50,7 @@ class AutoSuggestTextField extends HookWidget {
   final TapRegionCallback? onTapOutside;
   final VoidCallback? onTap;
   final bool autocorrect;
+  final GlobalKey? textFieldKey;
 
   const AutoSuggestTextField({
     super.key,
@@ -79,6 +80,7 @@ class AutoSuggestTextField extends HookWidget {
     this.onTapOutside,
     this.onTap,
     this.autocorrect = false,
+    this.textFieldKey,
   });
 
   bool _suggestionHasMatch() =>
@@ -88,7 +90,8 @@ class AutoSuggestTextField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textFieldKey = useMemoized(() => GlobalKey());
+    final textFieldKey =
+        this.textFieldKey ?? useMemoized<GlobalKey>(() => GlobalKey());
 
     final showSuggestion = useListenableSelector(controller, () {
       if (maxLines != 1) {

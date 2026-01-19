@@ -47,3 +47,12 @@ int? getTextFieldLineCount(GlobalKey key, String text, TextStyle style) {
 
   return null;
 }
+
+double? getTextFieldHeight(GlobalKey key) {
+  final box = key.currentContext?.findRenderObject();
+  if (box case final RenderBox box) {
+    return box.size.height;
+  }
+
+  return null;
+}

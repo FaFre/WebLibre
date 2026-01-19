@@ -50,6 +50,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
   final VoidCallback onClose;
   final double initialHeight;
   final double bottomAppBarHeight;
+  final ValueChanged<bool>? onClearSiteDataExpandedChanged;
 
   const ViewTabSheetWidget({
     required this.initialTabState,
@@ -58,6 +59,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     required this.onClose,
     required this.initialHeight,
     required this.bottomAppBarHeight,
+    this.onClearSiteDataExpandedChanged,
   });
 
   @override
@@ -152,7 +154,10 @@ class ViewTabSheetWidget extends HookConsumerWidget {
               ),
               const Divider(),
               // Clear Site Data Section
-              ClearSiteDataSection(url: initialTabState.url),
+              ClearSiteDataSection(
+                url: initialTabState.url,
+                onExpandedChanged: onClearSiteDataExpandedChanged,
+              ),
               const SizedBox(height: 16.0),
             ],
           );

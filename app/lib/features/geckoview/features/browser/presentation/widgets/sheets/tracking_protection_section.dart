@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
@@ -41,7 +42,15 @@ class TrackingProtectionSection extends HookConsumerWidget {
         tabId: tabId,
         isEnabled: !hasException, // ETP enabled when NOT in exceptions
       ),
-      loading: () => const SizedBox.shrink(),
+      loading: () => Skeletonizer(
+        child: SwitchListTile.adaptive(
+          value: false,
+          onChanged: null,
+          title: Text(BoneMock.title),
+          subtitle: Text(BoneMock.subtitle),
+          secondary: const Icon(Icons.shield_outlined),
+        ),
+      ),
       error: (error, stack) => const SizedBox.shrink(),
     );
   }

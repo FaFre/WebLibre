@@ -28,8 +28,13 @@ import 'package:weblibre/utils/ui_helper.dart';
 /// Section widget for clearing site data
 class ClearSiteDataSection extends HookConsumerWidget {
   final Uri url;
+  final ValueChanged<bool>? onExpandedChanged;
 
-  const ClearSiteDataSection({required this.url, super.key});
+  const ClearSiteDataSection({
+    required this.url,
+    this.onExpandedChanged,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +70,11 @@ class ClearSiteDataSection extends HookConsumerWidget {
           trailing: Icon(
             isExpanded.value ? Icons.expand_less : Icons.expand_more,
           ),
-          onTap: () => isExpanded.value = !isExpanded.value,
+          onTap: () {
+            final newValue = !isExpanded.value;
+            isExpanded.value = newValue;
+            onExpandedChanged?.call(newValue);
+          },
         ),
         if (isExpanded.value) ...[
           _DataTypeCheckbox(

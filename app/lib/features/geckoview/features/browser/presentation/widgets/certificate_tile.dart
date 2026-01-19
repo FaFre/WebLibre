@@ -73,6 +73,7 @@ class CertificateTile extends HookConsumerWidget {
           child: ListTile(
             leading: const Skeleton.keep(child: Icon(MdiIcons.timerSand)),
             title: Text(BoneMock.title),
+            subtitle: Text(BoneMock.subtitle),
           ),
         );
       }
