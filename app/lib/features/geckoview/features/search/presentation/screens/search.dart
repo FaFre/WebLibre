@@ -29,6 +29,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
@@ -40,6 +41,8 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
+import 'package:weblibre/presentation/widgets/selectable_chips.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class SearchScreen extends HookConsumerWidget {
@@ -47,10 +50,15 @@ class SearchScreen extends HookConsumerWidget {
   final TabType tabType;
   final bool launchedFromIntent;
 
+  /// When provided, URLs will be loaded into this existing tab.
+  /// When null, a new tab will be created.
+  final String? tabId;
+
   const SearchScreen({
     required this.initialSearchText,
     required this.tabType,
     this.launchedFromIntent = false,
+    this.tabId,
   });
 
   @override
@@ -67,11 +75,23 @@ class SearchScreen extends HookConsumerWidget {
     final selectedTabType = useState(tabType);
     final currentTabTabType = ref.watch(selectedTabTypeProvider);
 
-    final privateTabMode = switch (selectedTabType.value) {
-      TabType.regular => false,
-      TabType.private => true,
-      TabType.child => currentTabTabType == TabType.private,
-    };
+    // When editing an existing tab, get its state
+    // If tab no longer exists (null), fall back to new tab mode
+    final existingTabState = tabId != null
+        ? ref.watch(tabStateProvider(tabId))
+        : null;
+
+    // Determine if we're in edit mode (tabId provided AND tab still exists)
+    final isEditMode = tabId != null && existingTabState != null;
+
+    // Derive private mode from existing tab or from selector
+    final privateTabMode = isEditMode
+        ? existingTabState.isPrivate
+        : switch (selectedTabType.value) {
+            TabType.regular => false,
+            TabType.private => true,
+            TabType.child => currentTabTabType == TabType.private,
+          };
 
     final searchTextController = useTextEditingController(
       text: initialSearchText,
@@ -105,13 +125,16 @@ class SearchScreen extends HookConsumerWidget {
     final activeBang = selectedBang.value ?? defaultSearchBang;
     final showBangIcon = useState(false);
 
-    ref.listen(selectedBangDataProvider(), (previous, next) {
-      if (previous != next) {
-        showBangIcon.value = true;
-      }
+    ref.listen(
+      selectedBangDataProvider(domain: isEditMode ? existingTabState.url.host : null),
+      (previous, next) {
+        if (previous != next) {
+          showBangIcon.value = true;
+        }
 
-      selectedBang.value = next;
-    });
+        selectedBang.value = next;
+      },
+    );
 
     Future<void> submitSearch(String query) async {
       if (activeBang != null && (formKey.currentState?.validate() == true)) {
@@ -123,17 +146,25 @@ class SearchScreen extends HookConsumerWidget {
               .triggerBangSearch(activeBang, query);
         }
 
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: searchUri,
-              private: privateTabMode,
-              parentId: (selectedTabType.value == TabType.child)
-                  ? ref.read(selectedTabProvider)
-                  : null,
-              launchedFromIntent: launchedFromIntent,
-              selectTab: true,
-            );
+        if (isEditMode) {
+          // Load into existing tab
+          await ref
+              .read(tabSessionProvider(tabId: tabId).notifier)
+              .loadUrl(url: searchUri);
+        } else {
+          // Create new tab
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(
+                url: searchUri,
+                private: privateTabMode,
+                parentId: (selectedTabType.value == TabType.child)
+                    ? ref.read(selectedTabProvider)
+                    : null,
+                launchedFromIntent: launchedFromIntent,
+                selectTab: true,
+              );
+        }
 
         if (context.mounted) {
           ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
@@ -156,54 +187,70 @@ class SearchScreen extends HookConsumerWidget {
                     floating: true,
                     pinned: true,
                     automaticallyImplyLeading: false,
-                    title: Align(
-                      child: Focus(
-                        canRequestFocus: false,
-                        child: SegmentedButton(
-                          showSelectedIcon: false,
-                          segments: [
-                            const ButtonSegment(
-                              value: TabType.regular,
-                              label: Text('Regular'),
-                              icon: Icon(MdiIcons.tab),
-                            ),
-                            const ButtonSegment(
-                              value: TabType.private,
-                              label: Text('Private'),
-                              icon: Icon(MdiIcons.tabUnselected),
-                            ),
-                            if (createChildTabsOption)
-                              const ButtonSegment(
-                                value: TabType.child,
-                                label: Text('Child'),
-                                icon: Icon(MdiIcons.fileTree),
+                    title: isEditMode
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _SiteBangsSelector(
+                                tabId: tabId!,
+                                domain: existingTabState.url.host,
                               ),
-                          ],
-                          selected: {selectedTabType.value},
-                          onSelectionChanged: (value) {
-                            selectedTabType.value = value.first;
-                            // Restore focus to search field after segment change
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              searchFocusNode.requestFocus();
-                            });
-                          },
-                          style: switch (selectedTabType.value) {
-                            TabType.regular => null,
-                            TabType.private => SegmentedButton.styleFrom(
-                              selectedBackgroundColor:
-                                  appColors.privateSelectionOverlay,
+                              Text(
+                                'Editing current tab',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Align(
+                            child: Focus(
+                              canRequestFocus: false,
+                              child: SegmentedButton(
+                                showSelectedIcon: false,
+                                segments: [
+                                  const ButtonSegment(
+                                    value: TabType.regular,
+                                    label: Text('Regular'),
+                                    icon: Icon(MdiIcons.tab),
+                                  ),
+                                  const ButtonSegment(
+                                    value: TabType.private,
+                                    label: Text('Private'),
+                                    icon: Icon(MdiIcons.tabUnselected),
+                                  ),
+                                  if (createChildTabsOption)
+                                    const ButtonSegment(
+                                      value: TabType.child,
+                                      label: Text('Child'),
+                                      icon: Icon(MdiIcons.fileTree),
+                                    ),
+                                ],
+                                selected: {selectedTabType.value},
+                                onSelectionChanged: (value) {
+                                  selectedTabType.value = value.first;
+                                  // Restore focus to search field after segment change
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    searchFocusNode.requestFocus();
+                                  });
+                                },
+                                style: switch (selectedTabType.value) {
+                                  TabType.regular => null,
+                                  TabType.private => SegmentedButton.styleFrom(
+                                    selectedBackgroundColor:
+                                        appColors.privateSelectionOverlay,
+                                  ),
+                                  TabType.child =>
+                                    (currentTabTabType == TabType.private)
+                                        ? SegmentedButton.styleFrom(
+                                            selectedBackgroundColor:
+                                                appColors.privateSelectionOverlay,
+                                          )
+                                        : null,
+                                },
+                              ),
                             ),
-                            TabType.child =>
-                              (currentTabTabType == TabType.private)
-                                  ? SegmentedButton.styleFrom(
-                                      selectedBackgroundColor:
-                                          appColors.privateSelectionOverlay,
-                                    )
-                                  : null,
-                          },
-                        ),
-                      ),
-                    ),
+                          ),
                     bottom: PreferredSize(
                       preferredSize: const Size.fromHeight(kToolbarHeight),
                       child: Padding(
@@ -223,7 +270,9 @@ class SearchScreen extends HookConsumerWidget {
 
                               if (newUrl == null) {
                                 final bang =
-                                    ref.read(selectedBangDataProvider()) ??
+                                    ref.read(selectedBangDataProvider(
+                                      domain: isEditMode ? existingTabState.url.host : null,
+                                    )) ??
                                     await ref.read(
                                       defaultSearchBangDataProvider.future,
                                     );
@@ -240,19 +289,27 @@ class SearchScreen extends HookConsumerWidget {
                               }
 
                               if (newUrl != null) {
-                                await ref
-                                    .read(tabRepositoryProvider.notifier)
-                                    .addTab(
-                                      url: newUrl,
-                                      private: privateTabMode,
-                                      parentId:
-                                          (selectedTabType.value ==
-                                              TabType.child)
-                                          ? ref.read(selectedTabProvider)
-                                          : null,
-                                      launchedFromIntent: launchedFromIntent,
-                                      selectTab: true,
-                                    );
+                                if (isEditMode) {
+                                  // Load into existing tab
+                                  await ref
+                                      .read(tabSessionProvider(tabId: tabId).notifier)
+                                      .loadUrl(url: newUrl);
+                                } else {
+                                  // Create new tab
+                                  await ref
+                                      .read(tabRepositoryProvider.notifier)
+                                      .addTab(
+                                        url: newUrl,
+                                        private: privateTabMode,
+                                        parentId:
+                                            (selectedTabType.value ==
+                                                TabType.child)
+                                            ? ref.read(selectedTabProvider)
+                                            : null,
+                                        launchedFromIntent: launchedFromIntent,
+                                        selectTab: true,
+                                      );
+                                }
 
                                 if (context.mounted) {
                                   ref
@@ -292,6 +349,59 @@ class SearchScreen extends HookConsumerWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SiteBangsSelector extends HookConsumerWidget {
+  final String tabId;
+  final String domain;
+
+  const _SiteBangsSelector({
+    required this.tabId,
+    required this.domain,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedBang = ref.watch(
+      selectedBangDataProvider(domain: domain),
+    );
+    final availableBangs = ref.watch(
+      bangListProvider(
+        domain: domain,
+        orderMostFrequentFirst: true,
+      ).select((value) => value.value ?? const []),
+    );
+
+    if (availableBangs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return SizedBox(
+      height: 48,
+      width: double.maxFinite,
+      child: SelectableChips(
+        itemId: (bang) => bang.trigger,
+        itemAvatar: (bang) => UrlIcon([bang.getDefaultUrl()], iconSize: 20),
+        itemLabel: (bang) => Text(bang.websiteName),
+        itemTooltip: (bang) => bang.trigger,
+        availableItems: availableBangs,
+        selectedItem: selectedBang,
+        onSelected: (bang) {
+          ref
+              .read(selectedBangTriggerProvider(domain: domain).notifier)
+              .setTrigger(bang.toKey());
+        },
+        onDeleted: (bang) {
+          if (ref.read(selectedBangTriggerProvider(domain: domain)) ==
+              bang.toKey()) {
+            ref
+                .read(selectedBangTriggerProvider(domain: domain).notifier)
+                .clearTrigger();
+          }
+        },
       ),
     );
   }

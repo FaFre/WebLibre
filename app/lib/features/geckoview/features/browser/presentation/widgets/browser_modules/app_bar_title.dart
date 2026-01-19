@@ -24,7 +24,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
@@ -67,66 +70,91 @@ class AppBarTitle extends HookConsumerWidget {
 
     return Row(
       children: [
-        TabIcon(tabState: tabState),
+        // Icon tap → opens site settings sheet
+        GestureDetector(
+          onTap: () {
+            ref
+                .read(bottomSheetControllerProvider.notifier)
+                .show(SiteSettingsSheet(tabState: tabState));
+          },
+          child: TabIcon(tabState: tabState),
+        ),
         const SizedBox(width: 8),
+        // Title/URL tap → opens search screen
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Skeletonizer(
-                enabled: tabState.title.isEmpty,
-                child: Skeleton.replace(
-                  replacement: const Padding(
-                    padding: EdgeInsets.only(right: 4, top: 1, bottom: 1),
-                    child: Bone.text(),
-                  ),
-                  child: TextScroll(
-                    key: ValueKey(tabState.title),
-                    tabState.title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
+          child: GestureDetector(
+            onTap: () async {
+              // Don't pre-fill for internal URLs
+              final searchText = tabState.url.scheme == 'about'
+                  ? ''
+                  : tabState.url.toString();
+
+              await SearchRoute(
+                tabId: tabState.id,
+                searchText: searchText.isEmpty
+                    ? SearchRoute.emptySearchText
+                    : searchText,
+                tabType: tabState.isPrivate ? TabType.private : TabType.regular,
+              ).push(context);
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Skeletonizer(
+                  enabled: tabState.title.isEmpty,
+                  child: Skeleton.replace(
+                    replacement: const Padding(
+                      padding: EdgeInsets.only(right: 4, top: 1, bottom: 1),
+                      child: Bone.text(),
                     ),
-                    // mode: TextScrollMode.bouncing,
-                    velocity: const Velocity(pixelsPerSecond: Offset(75, 0)),
-                    delayBefore: const Duration(milliseconds: 500),
-                    pauseBetween: const Duration(milliseconds: 5000),
-                    fadedBorder: true,
-                    fadeBorderSide: FadeBorderSide.right,
-                    fadedBorderWidth: 0.05,
-                    intervalSpaces: 4,
-                    numberOfReps: 2,
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  if (isTabTuneledAsync.hasValue &&
-                      isTabTuneledAsync.value == true) ...[
-                    const Icon(MdiIcons.tunnelOutline, size: 14),
-                    const SizedBox(width: 4),
-                  ],
-                  icon,
-                  const SizedBox(width: 4),
-                  if (tabState.isPrivate) ...[
-                    Icon(
-                      MdiIcons.dominoMask,
-                      color: appColors.privateTabPurple,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                  ],
-                  Expanded(
-                    child: UriBreadcrumb(
-                      uri: tabState.url,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                    child: TextScroll(
+                      key: ValueKey(tabState.title),
+                      tabState.title,
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
+                      // mode: TextScrollMode.bouncing,
+                      velocity: const Velocity(pixelsPerSecond: Offset(75, 0)),
+                      delayBefore: const Duration(milliseconds: 500),
+                      pauseBetween: const Duration(milliseconds: 5000),
+                      fadedBorder: true,
+                      fadeBorderSide: FadeBorderSide.right,
+                      fadedBorderWidth: 0.05,
+                      intervalSpaces: 4,
+                      numberOfReps: 2,
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+                Row(
+                  children: [
+                    if (isTabTuneledAsync.hasValue &&
+                        isTabTuneledAsync.value == true) ...[
+                      const Icon(MdiIcons.tunnelOutline, size: 14),
+                      const SizedBox(width: 4),
+                    ],
+                    icon,
+                    const SizedBox(width: 4),
+                    if (tabState.isPrivate) ...[
+                      Icon(
+                        MdiIcons.dominoMask,
+                        color: appColors.privateTabPurple,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    Expanded(
+                      child: UriBreadcrumb(
+                        uri: tabState.url,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ],

@@ -591,7 +591,7 @@ class _SheetContainer extends HookConsumerWidget {
                   onNotification: dismissOnThreshold,
                   child: _ViewTabsSheet(maxChildSize: stableMaxChildSize),
                 ),
-              final EditUrlSheet parameter =>
+              final SiteSettingsSheet parameter =>
                 NotificationListener<DraggableScrollableNotification>(
                   onNotification: dismissOnThreshold,
                   child: _ViewUrlSheet(

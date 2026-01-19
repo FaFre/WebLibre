@@ -27,10 +27,10 @@ final class ViewTabsSheet extends Sheet {
   List<Object?> get hashParameters => [null];
 }
 
-final class EditUrlSheet extends Sheet {
+final class SiteSettingsSheet extends Sheet {
   final TabState tabState;
 
-  EditUrlSheet({required this.tabState});
+  SiteSettingsSheet({required this.tabState});
 
   @override
   List<Object?> get hashParameters => [tabState];

@@ -22,8 +22,7 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
-import 'package:weblibre/features/bangs/presentation/widgets/site_search.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/certificate_tile.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
@@ -64,64 +63,6 @@ class ViewTabSheetWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final headerKey = useMemoized(() => GlobalKey());
-    final textFieldKey = useMemoized(() => GlobalKey());
-
-    final scrolledTo = useRef(0.0);
-
-    final searchTextController = useTextEditingController(
-      text: initialTabState.url.toString(),
-    );
-
-    Future<void> scroll() async {
-      if (!context.mounted) return;
-
-      final header = headerKey.currentContext?.findRenderObject();
-      final text = textFieldKey.currentContext?.findRenderObject();
-
-      if (header case final RenderBox headerBox) {
-        if (text case final RenderBox textBox) {
-          final totalHeight =
-              headerBox.size.height +
-              textBox.size.height +
-              bottomAppBarHeight +
-              MediaQuery.of(context).viewInsets.bottom;
-
-          final relative = (totalHeight / MediaQuery.of(context).size.height)
-              .clamp(0.0, 1.0);
-
-          if (draggableScrollableController.size < relative &&
-              relative > scrolledTo.value) {
-            await draggableScrollableController.animateTo(
-              relative,
-              duration: const Duration(milliseconds: 150),
-              curve: Curves.easeInOut,
-            );
-            scrolledTo.value = relative;
-          }
-        }
-      }
-    }
-
-    useOnListenableChange(searchTextController, () {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await scroll();
-      });
-    });
-
-    final availableBangs = ref.watch(
-      bangListProvider(
-        domain: initialTabState.url.host,
-        orderMostFrequentFirst: true,
-      ).select((value) => value.value ?? const []),
-    );
-
-    useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await scroll();
-      });
-
-      return null;
-    });
 
     final bottomInsets = useRef(0.0);
     useEffect(
@@ -164,21 +105,23 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 0.0),
                   child: GestureDetector(
                     onTap: () async {
-                      if (draggableScrollableController.size > 0.85) {
-                        await draggableScrollableController.animateTo(
-                          (scrolledTo.value > 0.0)
-                              ? scrolledTo.value
-                              : initialHeight,
-                          duration: const Duration(milliseconds: 150),
-                          curve: Curves.easeInOut,
-                        );
-                      } else {
-                        await draggableScrollableController.animateTo(
-                          1.0,
-                          duration: const Duration(milliseconds: 150),
-                          curve: Curves.easeInOut,
-                        );
-                      }
+                      // Dismiss sheet and open search screen with tab context
+                      onClose();
+
+                      // Don't pre-fill for internal URLs
+                      final searchText = initialTabState.url.scheme == 'about'
+                          ? ''
+                          : initialTabState.url.toString();
+
+                      await SearchRoute(
+                        tabId: initialTabState.id,
+                        searchText: searchText.isEmpty
+                            ? SearchRoute.emptySearchText
+                            : searchText,
+                        tabType: initialTabState.isPrivate
+                            ? TabType.private
+                            : TabType.regular,
+                      ).push(context);
                     },
                     child: WebsiteTitleTile(initialTabState),
                   ),
@@ -199,20 +142,8 @@ class ViewTabSheetWidget extends HookConsumerWidget {
             controller: controller,
             physics: const ClampingScrollPhysicsWithoutImplicit(),
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: SiteSearch(
-                  key: textFieldKey,
-                  domain: initialTabState.url.host,
-                  availableBangs: availableBangs,
-                  controller: searchTextController,
-                ),
-              ),
-              const Divider(),
               // Tracking Protection Section
-              TrackingProtectionSection(
-                tabId: initialTabState.id,
-              ),
+              TrackingProtectionSection(tabId: initialTabState.id),
               const Divider(),
               // Permissions Section
               PermissionsSection(
@@ -221,9 +152,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
               ),
               const Divider(),
               // Clear Site Data Section
-              ClearSiteDataSection(
-                url: initialTabState.url,
-              ),
+              ClearSiteDataSection(url: initialTabState.url),
               const SizedBox(height: 16.0),
             ],
           );

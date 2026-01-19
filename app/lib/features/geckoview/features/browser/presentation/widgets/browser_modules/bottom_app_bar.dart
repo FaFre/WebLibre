@@ -218,20 +218,7 @@ class BrowserTabBar extends HookConsumerWidget {
     final toolbarHeight = useMemoized(() => getToolbarHeight());
 
     return GestureDetector(
-      onTap: () {
-        if (displayedSheet case EditUrlSheet()) {
-          ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-          return;
-        }
-
-        final tabState = ref.read(selectedTabStateProvider);
-
-        if (tabState != null) {
-          ref
-              .read(bottomSheetControllerProvider.notifier)
-              .show(EditUrlSheet(tabState: tabState));
-        }
-      },
+      // Tap handling moved to AppBarTitle for split icon/title behavior
       onHorizontalDragStart: (details) {
         dragStartPosition.value = details.globalPosition;
       },

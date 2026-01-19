@@ -637,6 +637,7 @@ mixin $SearchRoute on GoRouteData {
           _$boolConverter,
         ) ??
         false,
+    tabId: state.uri.queryParameters['tab-id'],
   );
 
   SearchRoute get _self => this as SearchRoute;
@@ -647,6 +648,7 @@ mixin $SearchRoute on GoRouteData {
     queryParams: {
       if (_self.launchedFromIntent != false)
         'launched-from-intent': _self.launchedFromIntent.toString(),
+      if (_self.tabId != null) 'tab-id': _self.tabId,
     },
   );
 
