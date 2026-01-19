@@ -28,29 +28,3 @@ Future<String> publicSuffixPlusOne(Ref ref, String host) {
   final api = GeckoPublicSuffixListApi();
   return api.getPublicSuffixPlusOne(host);
 }
-
-/// Notifier for managing selected clear data types
-@Riverpod()
-class SelectedClearDataTypes extends _$SelectedClearDataTypes {
-  @override
-  Set<ClearDataType> build() {
-    // Default to clearing all site data and auth sessions (most common use case)
-    return {ClearDataType.allSiteData, ClearDataType.authSessions};
-  }
-
-  void toggle(ClearDataType type) {
-    if (state.contains(type)) {
-      state = Set.from(state)..remove(type);
-    } else {
-      state = Set.from(state)..add(type);
-    }
-  }
-
-  void selectAll() {
-    state = Set.from(ClearDataType.values);
-  }
-
-  void clearAll() {
-    state = {};
-  }
-}

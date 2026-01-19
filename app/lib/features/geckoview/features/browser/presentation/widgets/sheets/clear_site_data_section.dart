@@ -22,7 +22,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/site_permissions_provider.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Section widget for clearing site data
@@ -35,7 +34,20 @@ class ClearSiteDataSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isExpanded = useState(false);
     final isClearing = useState(false);
-    final selectedTypes = ref.watch(selectedClearDataTypesProvider);
+    final selectedTypes = useState<Set<ClearDataType>>({
+      ClearDataType.allSiteData,
+      ClearDataType.authSessions,
+    });
+
+    void toggleType(ClearDataType type) {
+      final newTypes = Set<ClearDataType>.from(selectedTypes.value);
+      if (newTypes.contains(type)) {
+        newTypes.remove(type);
+      } else {
+        newTypes.add(type);
+      }
+      selectedTypes.value = newTypes;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,45 +71,31 @@ class ClearSiteDataSection extends HookConsumerWidget {
             label: 'Cookies',
             subtitle: 'Login tokens, preferences, tracking data',
             type: ClearDataType.cookies,
-            isSelected: selectedTypes.contains(ClearDataType.cookies),
-            onChanged: (selected) {
-              ref
-                  .read(selectedClearDataTypesProvider.notifier)
-                  .toggle(ClearDataType.cookies);
-            },
+            isSelected: selectedTypes.value.contains(ClearDataType.cookies),
+            onChanged: (selected) => toggleType(ClearDataType.cookies),
           ),
           _DataTypeCheckbox(
             label: 'Cached Files',
             subtitle: 'Images, scripts, stylesheets',
             type: ClearDataType.allCaches,
-            isSelected: selectedTypes.contains(ClearDataType.allCaches),
-            onChanged: (selected) {
-              ref
-                  .read(selectedClearDataTypesProvider.notifier)
-                  .toggle(ClearDataType.allCaches);
-            },
+            isSelected: selectedTypes.value.contains(ClearDataType.allCaches),
+            onChanged: (selected) => toggleType(ClearDataType.allCaches),
           ),
           _DataTypeCheckbox(
             label: 'Site Data',
             subtitle: 'Offline storage, databases, local files',
             type: ClearDataType.allSiteData,
-            isSelected: selectedTypes.contains(ClearDataType.allSiteData),
-            onChanged: (selected) {
-              ref
-                  .read(selectedClearDataTypesProvider.notifier)
-                  .toggle(ClearDataType.allSiteData);
-            },
+            isSelected: selectedTypes.value.contains(ClearDataType.allSiteData),
+            onChanged: (selected) => toggleType(ClearDataType.allSiteData),
           ),
           _DataTypeCheckbox(
             label: 'Auth Sessions',
             subtitle: 'Saved logins, active sessions',
             type: ClearDataType.authSessions,
-            isSelected: selectedTypes.contains(ClearDataType.authSessions),
-            onChanged: (selected) {
-              ref
-                  .read(selectedClearDataTypesProvider.notifier)
-                  .toggle(ClearDataType.authSessions);
-            },
+            isSelected: selectedTypes.value.contains(
+              ClearDataType.authSessions,
+            ),
+            onChanged: (selected) => toggleType(ClearDataType.authSessions),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -107,9 +105,14 @@ class ClearSiteDataSection extends HookConsumerWidget {
             child: SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: isClearing.value || selectedTypes.isEmpty
+                onPressed: isClearing.value || selectedTypes.value.isEmpty
                     ? null
-                    : () => _showConfirmationAndClear(context, ref, isClearing),
+                    : () => _showConfirmationAndClear(
+                        context,
+                        ref,
+                        isClearing,
+                        selectedTypes,
+                      ),
                 icon: isClearing.value
                     ? const SizedBox(
                         width: 16,
@@ -130,9 +133,9 @@ class ClearSiteDataSection extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ValueNotifier<bool> isClearing,
+    ValueNotifier<Set<ClearDataType>> selectedTypes,
   ) async {
-    final selectedTypes = ref.read(selectedClearDataTypesProvider);
-    if (selectedTypes.isEmpty) {
+    if (selectedTypes.value.isEmpty) {
       showErrorMessage(context, 'Select at least one data type');
       return;
     }
@@ -143,7 +146,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
         icon: const Icon(Icons.warning),
         title: const Text('Clear Site Data'),
         content: Text(
-          'This will clear ${_formatTypes(selectedTypes)} for ${url.host}.\n\n'
+          'This will clear ${_formatTypes(selectedTypes.value)} for ${url.host}.\n\n'
           'You may need to log in again.',
         ),
         actions: [
@@ -162,7 +165,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
     if (confirmed == true && context.mounted) {
       isClearing.value = true;
       try {
-        await _clearData(ref, selectedTypes);
+        await _clearData(ref, selectedTypes.value);
         if (context.mounted) {
           showInfoMessage(context, 'Site data cleared');
         }
