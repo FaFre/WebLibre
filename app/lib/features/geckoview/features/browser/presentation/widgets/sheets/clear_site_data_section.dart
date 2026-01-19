@@ -23,15 +23,13 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/site_permissions_provider.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 /// Section widget for clearing site data
 class ClearSiteDataSection extends HookConsumerWidget {
   final Uri url;
 
-  const ClearSiteDataSection({
-    required this.url,
-    super.key,
-  });
+  const ClearSiteDataSection({required this.url, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,7 +61,9 @@ class ClearSiteDataSection extends HookConsumerWidget {
             type: ClearDataType.cookies,
             isSelected: selectedTypes.contains(ClearDataType.cookies),
             onChanged: (selected) {
-              ref.read(selectedClearDataTypesProvider.notifier).toggle(ClearDataType.cookies);
+              ref
+                  .read(selectedClearDataTypesProvider.notifier)
+                  .toggle(ClearDataType.cookies);
             },
           ),
           _DataTypeCheckbox(
@@ -72,7 +72,9 @@ class ClearSiteDataSection extends HookConsumerWidget {
             type: ClearDataType.allCaches,
             isSelected: selectedTypes.contains(ClearDataType.allCaches),
             onChanged: (selected) {
-              ref.read(selectedClearDataTypesProvider.notifier).toggle(ClearDataType.allCaches);
+              ref
+                  .read(selectedClearDataTypesProvider.notifier)
+                  .toggle(ClearDataType.allCaches);
             },
           ),
           _DataTypeCheckbox(
@@ -81,7 +83,9 @@ class ClearSiteDataSection extends HookConsumerWidget {
             type: ClearDataType.allSiteData,
             isSelected: selectedTypes.contains(ClearDataType.allSiteData),
             onChanged: (selected) {
-              ref.read(selectedClearDataTypesProvider.notifier).toggle(ClearDataType.allSiteData);
+              ref
+                  .read(selectedClearDataTypesProvider.notifier)
+                  .toggle(ClearDataType.allSiteData);
             },
           ),
           _DataTypeCheckbox(
@@ -90,11 +94,16 @@ class ClearSiteDataSection extends HookConsumerWidget {
             type: ClearDataType.authSessions,
             isSelected: selectedTypes.contains(ClearDataType.authSessions),
             onChanged: (selected) {
-              ref.read(selectedClearDataTypesProvider.notifier).toggle(ClearDataType.authSessions);
+              ref
+                  .read(selectedClearDataTypesProvider.notifier)
+                  .toggle(ClearDataType.authSessions);
             },
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -124,9 +133,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
   ) async {
     final selectedTypes = ref.read(selectedClearDataTypesProvider);
     if (selectedTypes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select at least one data type')),
-      );
+      showErrorMessage(context, 'Select at least one data type');
       return;
     }
 
@@ -157,15 +164,11 @@ class ClearSiteDataSection extends HookConsumerWidget {
       try {
         await _clearData(ref, selectedTypes);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Site data cleared')),
-          );
+          showInfoMessage(context, 'Site data cleared');
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to clear site data: $e')),
-          );
+          showErrorMessage(context, 'Failed to clear site data: $e');
         }
       } finally {
         isClearing.value = false;
@@ -192,7 +195,10 @@ class ClearSiteDataSection extends HookConsumerWidget {
     return '${labels.sublist(0, labels.length - 1).join(', ')}, and ${labels.last}';
   }
 
-  Future<void> _clearData(WidgetRef ref, Set<ClearDataType> selectedTypes) async {
+  Future<void> _clearData(
+    WidgetRef ref,
+    Set<ClearDataType> selectedTypes,
+  ) async {
     final host = url.host;
 
     // Get base domain using PSL API (falls back to host on error)

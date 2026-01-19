@@ -51,7 +51,7 @@ final class TrackingProtectionRepositoryProvider
 }
 
 String _$trackingProtectionRepositoryHash() =>
-    r'6d4407034b2c67317d0a0e106002f1785fd86a34';
+    r'f4b09ed513da6bd5a9f4d01833a2dbba990f59de';
 
 /// Repository for managing per-site Enhanced Tracking Protection exceptions
 ///

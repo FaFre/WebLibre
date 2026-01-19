@@ -22,7 +22,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/site_permissions_provider.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/site_permissions.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
 
 /// Section widget displaying site permissions with toggles
 class PermissionsSection extends HookConsumerWidget {
@@ -38,7 +39,7 @@ class PermissionsSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final permissionsAsync = ref.watch(
-      sitePermissionsProvider(origin, isPrivate),
+      sitePermissionsRepositoryProvider(origin: origin, isPrivate: isPrivate),
     );
 
     return permissionsAsync.when(
@@ -80,50 +81,75 @@ class _PermissionsList extends HookConsumerWidget {
         icon: Icons.videocam,
         label: 'Camera',
         status: permissions?.camera,
-        onChanged: (status) => _updatePermission(ref, (p) => _copyWithCamera(p, status)),
+        onChanged: (status) => _updatePermission(
+          ref,
+          (permissions) => permissions.copyWith.camera(status),
+        ),
       ),
       _PermissionEntry(
         icon: Icons.mic,
         label: 'Microphone',
         status: permissions?.microphone,
-        onChanged: (status) => _updatePermission(ref, (p) => _copyWithMicrophone(p, status)),
+        onChanged: (status) => _updatePermission(
+          ref,
+          (permissions) => permissions.copyWith.microphone(status),
+        ),
       ),
       _PermissionEntry(
         icon: Icons.location_on,
         label: 'Location',
         status: permissions?.location,
-        onChanged: (status) => _updatePermission(ref, (p) => _copyWithLocation(p, status)),
+        onChanged: (status) => _updatePermission(
+          ref,
+          (permissions) => permissions.copyWith.location(status),
+        ),
       ),
       _PermissionEntry(
         icon: Icons.notifications,
         label: 'Notifications',
         status: permissions?.notification,
-        onChanged: (status) => _updatePermission(ref, (p) => _copyWithNotification(p, status)),
+        onChanged: (status) => _updatePermission(
+          ref,
+          (permissions) => permissions.copyWith.notification(status),
+        ),
       ),
       _PermissionEntry(
         icon: Icons.storage,
         label: 'Persistent Storage',
         status: permissions?.persistentStorage,
-        onChanged: (status) => _updatePermission(ref, (p) => _copyWithPersistentStorage(p, status)),
+        onChanged: (status) => _updatePermission(
+          ref,
+          (permissions) => permissions.copyWith.persistentStorage(status),
+        ),
       ),
       _PermissionEntry(
         icon: Icons.cookie,
         label: 'Cross-Origin Storage',
         status: permissions?.crossOriginStorageAccess,
-        onChanged: (status) => _updatePermission(ref, (p) => _copyWithCrossOriginStorage(p, status)),
+        onChanged: (status) => _updatePermission(
+          ref,
+          (permissions) =>
+              permissions.copyWith.crossOriginStorageAccess(status),
+        ),
       ),
       _PermissionEntry(
         icon: Icons.key,
         label: 'Media Key System (DRM)',
         status: permissions?.mediaKeySystemAccess,
-        onChanged: (status) => _updatePermission(ref, (p) => _copyWithMediaKeySystem(p, status)),
+        onChanged: (status) => _updatePermission(
+          ref,
+          (permissions) => permissions.copyWith.mediaKeySystemAccess(status),
+        ),
       ),
     ];
 
     // Filter to only show permissions that have been explicitly set (not noDecision)
-    final setPermissions = allPermissions.where(
-      (p) => p.status != null && p.status != SitePermissionStatus.noDecision,
-    ).toList();
+    final setPermissions = allPermissions
+        .where(
+          (p) =>
+              p.status != null && p.status != SitePermissionStatus.noDecision,
+        )
+        .toList();
 
     final permissionsToShow = showAll.value ? allPermissions : setPermissions;
     final hiddenCount = allPermissions.length - setPermissions.length;
@@ -151,15 +177,20 @@ class _PermissionsList extends HookConsumerWidget {
             ],
           ),
         ),
-        ...permissionsToShow.map((entry) => _PermissionTile(
-          icon: entry.icon,
-          label: entry.label,
-          status: entry.status,
-          onChanged: entry.onChanged,
-        )),
+        ...permissionsToShow.map(
+          (entry) => _PermissionTile(
+            icon: entry.icon,
+            label: entry.label,
+            status: entry.status,
+            onChanged: entry.onChanged,
+          ),
+        ),
         if (permissionsToShow.isEmpty && !showAll.value)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Text(
               'No permissions set for this site',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -171,7 +202,13 @@ class _PermissionsList extends HookConsumerWidget {
         _AutoplayTile(
           audibleStatus: permissions?.autoplayAudible,
           inaudibleStatus: permissions?.autoplayInaudible,
-          onChanged: (audible, inaudible) => _updateAutoplay(ref, audible, inaudible),
+          onChanged: (audible, inaudible) => _updatePermission(
+            ref,
+            (permissions) => permissions.copyWith(
+              autoplayAudible: audible,
+              autoplayInaudible: inaudible,
+            ),
+          ),
         ),
       ],
     );
@@ -179,183 +216,19 @@ class _PermissionsList extends HookConsumerWidget {
 
   Future<void> _updatePermission(
     WidgetRef ref,
-    SitePermissions Function(SitePermissions) updater,
+    SitePermissions Function(SitePermissionsWrapper) updater,
   ) async {
-    final currentPermissions = permissions ?? SitePermissions(
-      origin: origin,
-      savedAt: DateTime.now().millisecondsSinceEpoch,
-    );
-
-    final updatedPermissions = updater(currentPermissions);
-
-    final api = GeckoSitePermissionsApi();
-    await api.setSitePermissions(updatedPermissions, isPrivate);
-
-    // Invalidate the provider to refetch
-    ref.invalidate(sitePermissionsProvider(origin, isPrivate));
+    await ref
+        .read(
+          sitePermissionsRepositoryProvider(
+            origin: origin,
+            isPrivate: isPrivate,
+          ).notifier,
+        )
+        .updatePermission(updater);
 
     // Reload the tab to apply changes
     await ref.read(selectedTabSessionProvider).reload();
-  }
-
-  Future<void> _updateAutoplay(
-    WidgetRef ref,
-    AutoplayStatus? audible,
-    AutoplayStatus? inaudible,
-  ) async {
-    final currentPermissions = permissions ?? SitePermissions(
-      origin: origin,
-      savedAt: DateTime.now().millisecondsSinceEpoch,
-    );
-
-    final updatedPermissions = SitePermissions(
-      origin: currentPermissions.origin,
-      camera: currentPermissions.camera,
-      microphone: currentPermissions.microphone,
-      location: currentPermissions.location,
-      notification: currentPermissions.notification,
-      persistentStorage: currentPermissions.persistentStorage,
-      crossOriginStorageAccess: currentPermissions.crossOriginStorageAccess,
-      mediaKeySystemAccess: currentPermissions.mediaKeySystemAccess,
-      localDeviceAccess: currentPermissions.localDeviceAccess,
-      localNetworkAccess: currentPermissions.localNetworkAccess,
-      autoplayAudible: audible ?? currentPermissions.autoplayAudible,
-      autoplayInaudible: inaudible ?? currentPermissions.autoplayInaudible,
-      savedAt: currentPermissions.savedAt,
-    );
-
-    final api = GeckoSitePermissionsApi();
-    await api.setSitePermissions(updatedPermissions, isPrivate);
-
-    ref.invalidate(sitePermissionsProvider(origin, isPrivate));
-    await ref.read(selectedTabSessionProvider).reload();
-  }
-
-  // Copy helper methods since Pigeon doesn't generate copyWith
-  SitePermissions _copyWithCamera(SitePermissions p, SitePermissionStatus status) {
-    return SitePermissions(
-      origin: p.origin,
-      camera: status,
-      microphone: p.microphone,
-      location: p.location,
-      notification: p.notification,
-      persistentStorage: p.persistentStorage,
-      crossOriginStorageAccess: p.crossOriginStorageAccess,
-      mediaKeySystemAccess: p.mediaKeySystemAccess,
-      localDeviceAccess: p.localDeviceAccess,
-      localNetworkAccess: p.localNetworkAccess,
-      autoplayAudible: p.autoplayAudible,
-      autoplayInaudible: p.autoplayInaudible,
-      savedAt: p.savedAt,
-    );
-  }
-
-  SitePermissions _copyWithMicrophone(SitePermissions p, SitePermissionStatus status) {
-    return SitePermissions(
-      origin: p.origin,
-      camera: p.camera,
-      microphone: status,
-      location: p.location,
-      notification: p.notification,
-      persistentStorage: p.persistentStorage,
-      crossOriginStorageAccess: p.crossOriginStorageAccess,
-      mediaKeySystemAccess: p.mediaKeySystemAccess,
-      localDeviceAccess: p.localDeviceAccess,
-      localNetworkAccess: p.localNetworkAccess,
-      autoplayAudible: p.autoplayAudible,
-      autoplayInaudible: p.autoplayInaudible,
-      savedAt: p.savedAt,
-    );
-  }
-
-  SitePermissions _copyWithLocation(SitePermissions p, SitePermissionStatus status) {
-    return SitePermissions(
-      origin: p.origin,
-      camera: p.camera,
-      microphone: p.microphone,
-      location: status,
-      notification: p.notification,
-      persistentStorage: p.persistentStorage,
-      crossOriginStorageAccess: p.crossOriginStorageAccess,
-      mediaKeySystemAccess: p.mediaKeySystemAccess,
-      localDeviceAccess: p.localDeviceAccess,
-      localNetworkAccess: p.localNetworkAccess,
-      autoplayAudible: p.autoplayAudible,
-      autoplayInaudible: p.autoplayInaudible,
-      savedAt: p.savedAt,
-    );
-  }
-
-  SitePermissions _copyWithNotification(SitePermissions p, SitePermissionStatus status) {
-    return SitePermissions(
-      origin: p.origin,
-      camera: p.camera,
-      microphone: p.microphone,
-      location: p.location,
-      notification: status,
-      persistentStorage: p.persistentStorage,
-      crossOriginStorageAccess: p.crossOriginStorageAccess,
-      mediaKeySystemAccess: p.mediaKeySystemAccess,
-      localDeviceAccess: p.localDeviceAccess,
-      localNetworkAccess: p.localNetworkAccess,
-      autoplayAudible: p.autoplayAudible,
-      autoplayInaudible: p.autoplayInaudible,
-      savedAt: p.savedAt,
-    );
-  }
-
-  SitePermissions _copyWithPersistentStorage(SitePermissions p, SitePermissionStatus status) {
-    return SitePermissions(
-      origin: p.origin,
-      camera: p.camera,
-      microphone: p.microphone,
-      location: p.location,
-      notification: p.notification,
-      persistentStorage: status,
-      crossOriginStorageAccess: p.crossOriginStorageAccess,
-      mediaKeySystemAccess: p.mediaKeySystemAccess,
-      localDeviceAccess: p.localDeviceAccess,
-      localNetworkAccess: p.localNetworkAccess,
-      autoplayAudible: p.autoplayAudible,
-      autoplayInaudible: p.autoplayInaudible,
-      savedAt: p.savedAt,
-    );
-  }
-
-  SitePermissions _copyWithCrossOriginStorage(SitePermissions p, SitePermissionStatus status) {
-    return SitePermissions(
-      origin: p.origin,
-      camera: p.camera,
-      microphone: p.microphone,
-      location: p.location,
-      notification: p.notification,
-      persistentStorage: p.persistentStorage,
-      crossOriginStorageAccess: status,
-      mediaKeySystemAccess: p.mediaKeySystemAccess,
-      localDeviceAccess: p.localDeviceAccess,
-      localNetworkAccess: p.localNetworkAccess,
-      autoplayAudible: p.autoplayAudible,
-      autoplayInaudible: p.autoplayInaudible,
-      savedAt: p.savedAt,
-    );
-  }
-
-  SitePermissions _copyWithMediaKeySystem(SitePermissions p, SitePermissionStatus status) {
-    return SitePermissions(
-      origin: p.origin,
-      camera: p.camera,
-      microphone: p.microphone,
-      location: p.location,
-      notification: p.notification,
-      persistentStorage: p.persistentStorage,
-      crossOriginStorageAccess: p.crossOriginStorageAccess,
-      mediaKeySystemAccess: status,
-      localDeviceAccess: p.localDeviceAccess,
-      localNetworkAccess: p.localNetworkAccess,
-      autoplayAudible: p.autoplayAudible,
-      autoplayInaudible: p.autoplayInaudible,
-      savedAt: p.savedAt,
-    );
   }
 }
 
@@ -475,9 +348,11 @@ class _AutoplayTile extends StatelessWidget {
     final audible = audibleStatus ?? AutoplayStatus.blocked;
     final inaudible = inaudibleStatus ?? AutoplayStatus.allowed;
 
-    if (audible == AutoplayStatus.allowed && inaudible == AutoplayStatus.allowed) {
+    if (audible == AutoplayStatus.allowed &&
+        inaudible == AutoplayStatus.allowed) {
       return _AutoplayCombined.allowAll;
-    } else if (audible == AutoplayStatus.blocked && inaudible == AutoplayStatus.allowed) {
+    } else if (audible == AutoplayStatus.blocked &&
+        inaudible == AutoplayStatus.allowed) {
       return _AutoplayCombined.blockAudible;
     } else {
       return _AutoplayCombined.blockAll;
@@ -485,8 +360,4 @@ class _AutoplayTile extends StatelessWidget {
   }
 }
 
-enum _AutoplayCombined {
-  allowAll,
-  blockAudible,
-  blockAll,
-}
+enum _AutoplayCombined { allowAll, blockAudible, blockAll }

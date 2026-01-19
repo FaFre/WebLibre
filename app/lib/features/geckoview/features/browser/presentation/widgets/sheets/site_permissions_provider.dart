@@ -22,17 +22,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'site_permissions_provider.g.dart';
 
-/// Provider to fetch site permissions for a given origin
-@Riverpod()
-Future<SitePermissions?> sitePermissions(
-  Ref ref,
-  String origin,
-  bool isPrivate,
-) {
-  final api = GeckoSitePermissionsApi();
-  return api.getSitePermissions(origin, isPrivate);
-}
-
 /// Provider to get the public suffix plus one (eTLD+1) for a host
 @Riverpod()
 Future<String> publicSuffixPlusOne(Ref ref, String host) {
