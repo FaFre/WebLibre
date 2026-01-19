@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/permission_type.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/site_permissions.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
 
@@ -75,81 +76,48 @@ class _PermissionsList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showAll = useState(false);
 
-    // Build list of permission entries with their current status
-    final allPermissions = [
-      _PermissionEntry(
-        icon: Icons.videocam,
-        label: 'Camera',
-        status: permissions?.camera,
-        onChanged: (status) => _updatePermission(
-          ref,
-          (permissions) => permissions.copyWith.camera(status),
-        ),
-      ),
-      _PermissionEntry(
-        icon: Icons.mic,
-        label: 'Microphone',
-        status: permissions?.microphone,
-        onChanged: (status) => _updatePermission(
-          ref,
-          (permissions) => permissions.copyWith.microphone(status),
-        ),
-      ),
-      _PermissionEntry(
-        icon: Icons.location_on,
-        label: 'Location',
-        status: permissions?.location,
-        onChanged: (status) => _updatePermission(
-          ref,
-          (permissions) => permissions.copyWith.location(status),
-        ),
-      ),
-      _PermissionEntry(
-        icon: Icons.notifications,
-        label: 'Notifications',
-        status: permissions?.notification,
-        onChanged: (status) => _updatePermission(
-          ref,
-          (permissions) => permissions.copyWith.notification(status),
-        ),
-      ),
-      _PermissionEntry(
-        icon: Icons.storage,
-        label: 'Persistent Storage',
-        status: permissions?.persistentStorage,
-        onChanged: (status) => _updatePermission(
-          ref,
-          (permissions) => permissions.copyWith.persistentStorage(status),
-        ),
-      ),
-      _PermissionEntry(
-        icon: Icons.cookie,
-        label: 'Cross-Origin Storage',
-        status: permissions?.crossOriginStorageAccess,
-        onChanged: (status) => _updatePermission(
-          ref,
-          (permissions) =>
-              permissions.copyWith.crossOriginStorageAccess(status),
-        ),
-      ),
-      _PermissionEntry(
-        icon: Icons.key,
-        label: 'Media Key System (DRM)',
-        status: permissions?.mediaKeySystemAccess,
-        onChanged: (status) => _updatePermission(
-          ref,
-          (permissions) => permissions.copyWith.mediaKeySystemAccess(status),
-        ),
-      ),
-    ];
+    // Memoize the update callback to avoid recreating closures
+    final updatePermission = useCallback((
+      SitePermissions Function(SitePermissionsWrapper) updater,
+    ) async {
+      await ref
+          .read(
+            sitePermissionsRepositoryProvider(
+              origin: origin,
+              isPrivate: isPrivate,
+            ).notifier,
+          )
+          .updatePermission(updater);
+      await ref.read(selectedTabSessionProvider).reload();
+    }, [origin, isPrivate]);
+
+    // Build permission entries - only recalculates when permissions change
+    final allPermissions = useMemoized(
+      () => PermissionType.values
+          .map(
+            (type) => _PermissionEntry(
+              icon: type.icon,
+              label: type.label,
+              status: permissions.getStatus(type),
+              onChanged: (status) =>
+                  updatePermission((w) => w.withStatus(type, status)),
+            ),
+          )
+          .toList(),
+      [permissions, updatePermission],
+    );
 
     // Filter to only show permissions that have been explicitly set (not noDecision)
-    final setPermissions = allPermissions
-        .where(
-          (p) =>
-              p.status != null && p.status != SitePermissionStatus.noDecision,
-        )
-        .toList();
+    // Only recalculates when allPermissions changes
+    final setPermissions = useMemoized(
+      () => allPermissions
+          .where(
+            (p) =>
+                p.status != null && p.status != SitePermissionStatus.noDecision,
+          )
+          .toList(),
+      [allPermissions],
+    );
 
     final permissionsToShow = showAll.value ? allPermissions : setPermissions;
     final hiddenCount = allPermissions.length - setPermissions.length;
@@ -202,9 +170,8 @@ class _PermissionsList extends HookConsumerWidget {
         _AutoplayTile(
           audibleStatus: permissions?.autoplayAudible,
           inaudibleStatus: permissions?.autoplayInaudible,
-          onChanged: (audible, inaudible) => _updatePermission(
-            ref,
-            (permissions) => permissions.copyWith(
+          onChanged: (audible, inaudible) => updatePermission(
+            (p) => p.copyWith(
               autoplayAudible: audible,
               autoplayInaudible: inaudible,
             ),
@@ -212,23 +179,6 @@ class _PermissionsList extends HookConsumerWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _updatePermission(
-    WidgetRef ref,
-    SitePermissions Function(SitePermissionsWrapper) updater,
-  ) async {
-    await ref
-        .read(
-          sitePermissionsRepositoryProvider(
-            origin: origin,
-            isPrivate: isPrivate,
-          ).notifier,
-        )
-        .updatePermission(updater);
-
-    // Reload the tab to apply changes
-    await ref.read(selectedTabSessionProvider).reload();
   }
 }
 
