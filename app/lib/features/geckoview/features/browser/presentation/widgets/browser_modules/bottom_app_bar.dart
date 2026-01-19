@@ -254,12 +254,13 @@ class BrowserTabBar extends HookConsumerWidget {
           // Swipe direction for dismiss depends on toolbar position:
           // - Bottom bar: swipe down to dismiss (distance.dy negative or small positive)
           // - Top bar: swipe up to dismiss (distance.dy positive or small negative)
-          final dismissThreshold = toolbarHeight / 3;
+          final dismissThreshold = toolbarHeight * 0.75;
           final shouldDismiss = switch (tabBarPosition) {
             TabBarPosition.bottom => distance.dy < dismissThreshold,
             TabBarPosition.top => distance.dy > -dismissThreshold,
           };
-          if (shouldDismiss) {
+          if (shouldDismiss &&
+              ref.read(bottomSheetControllerProvider) == null) {
             ref.read(tabBarDismissableControllerProvider.notifier).dismiss();
           }
         }
