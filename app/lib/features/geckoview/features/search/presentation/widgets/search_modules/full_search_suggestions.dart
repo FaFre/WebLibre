@@ -29,6 +29,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chips.dart';
 
 class FullSearchTermSuggestions extends HookConsumerWidget {
@@ -168,9 +169,9 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                           .read(selectedBangTriggerProvider().notifier)
                           .clearTrigger();
                     } else {
-                      final dialogResult = await BangChips.resetBangDialog(
+                      final dialogResult = await showResetBangDialog(
                         context,
-                        bang.trigger,
+                        triggerName: bang.trigger,
                       );
 
                       if (dialogResult == true) {

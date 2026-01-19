@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/clear_site_data_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Section widget for clearing site data
@@ -140,26 +141,10 @@ class ClearSiteDataSection extends HookConsumerWidget {
       return;
     }
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: const Icon(Icons.warning),
-        title: const Text('Clear Site Data'),
-        content: Text(
-          'This will clear ${_formatTypes(selectedTypes.value)} for ${url.host}.\n\n'
-          'You may need to log in again.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Clear'),
-          ),
-        ],
-      ),
+    final confirmed = await showClearSiteDataDialog(
+      context,
+      host: url.host,
+      formattedTypes: _formatTypes(selectedTypes.value),
     );
 
     if (confirmed == true && context.mounted) {

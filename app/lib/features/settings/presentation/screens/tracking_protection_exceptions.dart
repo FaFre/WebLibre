@@ -23,6 +23,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
+import 'package:weblibre/features/settings/presentation/dialogs/delete_all_exceptions_dialog.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -91,36 +92,19 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
   }
 
   Future<void> _showDeleteAllDialog(BuildContext context, WidgetRef ref) async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete All Exceptions?'),
-        content: const Text(
-          'This will re-enable tracking protection for all exception sites.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await ref
-                    .read(trackingProtectionRepositoryProvider.notifier)
-                    .removeAllExceptions();
-              } catch (e) {
-                if (context.mounted) {
-                  showErrorMessage(context, 'Failed to delete exceptions: $e');
-                }
-              }
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+    final confirmed = await showDeleteAllExceptionsDialog(context);
+
+    if (confirmed == true) {
+      try {
+        await ref
+            .read(trackingProtectionRepositoryProvider.notifier)
+            .removeAllExceptions();
+      } catch (e) {
+        if (context.mounted) {
+          showErrorMessage(context, 'Failed to delete exceptions: $e');
+        }
+      }
+    }
   }
 
   Future<void> _deleteException(

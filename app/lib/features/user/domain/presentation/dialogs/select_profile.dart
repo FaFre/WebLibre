@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -70,32 +71,7 @@ class SelectProfileDialog extends HookConsumerWidget {
           iconAlignment: IconAlignment.start,
           label: const Text('Quit Browser'),
           onPressed: () async {
-            final result = await showDialog<bool?>(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  icon: const Icon(Icons.warning),
-                  title: const Text('Quit Browser'),
-                  content: const Text(
-                    'This will properly shutdown the browser and clear private tabs',
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context, false);
-                      },
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context, true);
-                      },
-                      child: const Text('Quit'),
-                    ),
-                  ],
-                );
-              },
-            );
+            final result = await showQuitBrowserDialog(context);
 
             if (result == true) {
               await exitApp(ref.container);

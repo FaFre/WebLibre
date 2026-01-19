@@ -47,29 +47,6 @@ class BangChips extends HookConsumerWidget {
     super.key,
   });
 
-  static Future<bool?> resetBangDialog(
-    BuildContext context,
-    String triggerName,
-  ) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Reset usage frequency of $triggerName?'),
-        content: const Text('This will remove the Bang from quick select.'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Reset'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final availableBangs = ref.watch(seamlessBangProvider);
