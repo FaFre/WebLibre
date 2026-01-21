@@ -41,7 +41,7 @@ final class SelectedTabProvider
   }
 }
 
-String _$selectedTabHash() => r'26d1bb90c777d7011f4f27f7b962584a4a62a0a7';
+String _$selectedTabHash() => r'5caa359376e9103767e2d2e94c548d53cba79d0f';
 
 abstract class _$SelectedTab extends $Notifier<String?> {
   String? build();

@@ -19,6 +19,7 @@
  */
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
 class BangKey {
@@ -50,7 +51,8 @@ class BangKey {
         group: BangGroup.values.firstWhere((g) => g.name == group),
         trigger: trigger,
       );
-    } catch (_) {
+    } catch (e, s) {
+      logger.w('Failed to parse BangKey from string: "$key"', error: e, stackTrace: s);
       return null;
     }
   }

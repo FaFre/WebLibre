@@ -218,29 +218,64 @@ class TabStates extends _$TabStates {
     final eventService = ref.watch(eventServiceProvider);
 
     final subscriptions = [
-      eventService.tabContentEvents.listen((event) async {
-        await _onTabContentStateChange(event);
-      }),
-      eventService.iconChangeEvents.listen((event) async {
-        await _onIconChange(event);
-      }),
-      eventService.thumbnailEvents.listen((event) async {
-        await _onThumbnailChange(event);
-      }),
-      eventService.securityInfoEvents.listen((event) {
-        _onSecurityInfoStateChange(event);
-      }),
-      eventService.historyEvents.listen((event) {
-        _onHistoryStateChange(event);
-      }),
-      eventService.readerableEvents.listen((event) {
-        _onReaderableStateChange(event);
-      }),
+      eventService.tabContentEvents.listen(
+        (event) async {
+          await _onTabContentStateChange(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e('Error in tab content events', error: error, stackTrace: stackTrace);
+        },
+      ),
+      eventService.iconChangeEvents.listen(
+        (event) async {
+          await _onIconChange(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e('Error in icon change events', error: error, stackTrace: stackTrace);
+        },
+      ),
+      eventService.thumbnailEvents.listen(
+        (event) async {
+          await _onThumbnailChange(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e('Error in thumbnail events', error: error, stackTrace: stackTrace);
+        },
+      ),
+      eventService.securityInfoEvents.listen(
+        (event) {
+          _onSecurityInfoStateChange(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e('Error in security info events', error: error, stackTrace: stackTrace);
+        },
+      ),
+      eventService.historyEvents.listen(
+        (event) {
+          _onHistoryStateChange(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e('Error in history events', error: error, stackTrace: stackTrace);
+        },
+      ),
+      eventService.readerableEvents.listen(
+        (event) {
+          _onReaderableStateChange(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e('Error in readerable events', error: error, stackTrace: stackTrace);
+        },
+      ),
       eventService.findResultsEvent
           .debounceTime(const Duration(milliseconds: 25))
-          .listen((event) {
-            _onFindResultsChange(event);
-          }),
+          .listen(
+            (event) {
+              _onFindResultsChange(event);
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              logger.e('Error in find results events', error: error, stackTrace: stackTrace);
+            },
+          ),
     ];
 
     ref.listen(

@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -484,7 +485,8 @@ class TabViewHeader extends HookConsumerWidget {
                                                 : 'Container data cleared. ${tabs.length} tab(s) closed.',
                                           );
                                         }
-                                      } catch (e) {
+                                      } catch (e, s) {
+                                        logger.e('Failed to clear container data', error: e, stackTrace: s);
                                         if (context.mounted) {
                                           ui_helper.showErrorMessage(
                                             context,

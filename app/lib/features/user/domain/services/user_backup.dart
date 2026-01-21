@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:secure_archive/secure_archive.dart';
 import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 
@@ -95,8 +96,12 @@ class UserBackupService extends _$UserBackupService {
         if (await outputDirectory.exists()) {
           await outputDirectory.delete(recursive: true);
         }
-      } catch (_) {
-        // Ignore cleanup errors
+      } catch (e, s) {
+        logger.w(
+          'Failed to cleanup temporary backup directory: ${outputDirectory.path}',
+          error: e,
+          stackTrace: s,
+        );
       }
     }
   }

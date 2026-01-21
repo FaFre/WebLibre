@@ -33,7 +33,7 @@ final class TorProxyServiceProvider
   TorProxyService create() => TorProxyService();
 }
 
-String _$torProxyServiceHash() => r'0bf00b61bf7e739fe8c77696cf1b2a151d137671';
+String _$torProxyServiceHash() => r'7b430ca32fbfc9ebebb1e52271c0183efdf60971';
 
 abstract class _$TorProxyService extends $StreamNotifier<TorStatus> {
   Stream<TorStatus> build();

@@ -23,6 +23,7 @@ import 'dart:ui';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/web_extension.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -100,20 +101,40 @@ class WebExtensionsState extends _$WebExtensionsState {
 
     final subscriptions = switch (actionType) {
       WebExtensionActionType.browser => [
-        addonService.browserExtensionStream.listen((event) {
-          _onExtensionUpdate(event);
-        }),
-        addonService.browserIconStream.listen((event) async {
-          await _onIconChange(event);
-        }),
+        addonService.browserExtensionStream.listen(
+          (event) {
+            _onExtensionUpdate(event);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            logger.e('Error in browser extension stream', error: error, stackTrace: stackTrace);
+          },
+        ),
+        addonService.browserIconStream.listen(
+          (event) async {
+            await _onIconChange(event);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            logger.e('Error in browser icon stream', error: error, stackTrace: stackTrace);
+          },
+        ),
       ],
       WebExtensionActionType.page => [
-        addonService.pageExtensionStream.listen((event) {
-          _onExtensionUpdate(event);
-        }),
-        addonService.pageIconStream.listen((event) async {
-          await _onIconChange(event);
-        }),
+        addonService.pageExtensionStream.listen(
+          (event) {
+            _onExtensionUpdate(event);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            logger.e('Error in page extension stream', error: error, stackTrace: stackTrace);
+          },
+        ),
+        addonService.pageIconStream.listen(
+          (event) async {
+            await _onIconChange(event);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            logger.e('Error in page icon stream', error: error, stackTrace: stackTrace);
+          },
+        ),
       ],
     };
 

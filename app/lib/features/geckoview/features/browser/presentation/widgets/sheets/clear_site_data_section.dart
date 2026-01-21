@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/clear_site_data_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -163,7 +164,8 @@ class ClearSiteDataSection extends HookConsumerWidget {
         if (context.mounted) {
           showInfoMessage(context, 'Site data cleared');
         }
-      } catch (e) {
+      } catch (e, s) {
+        logger.e('Failed to clear site data', error: e, stackTrace: s);
         if (context.mounted) {
           showErrorMessage(context, 'Failed to clear site data: $e');
         }

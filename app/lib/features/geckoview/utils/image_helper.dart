@@ -21,6 +21,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:fast_equatable/hash.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 
@@ -64,8 +65,8 @@ Future<EquatableImage?> tryDecodeImage(
       _cache.set(digest, image);
       return image;
     }
-  } catch (e) {
-    //swallow
+  } catch (e, s) {
+    logger.w('Failed to decode image', error: e, stackTrace: s);
   }
 
   return null;

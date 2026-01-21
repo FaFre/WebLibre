@@ -50,7 +50,7 @@ class GeckoHistoryService {
       case VisitType.download:
         return _api.deleteDownload(info.contentId!);
       case VisitType.bookmark:
-        throw UnimplementedError();
+        throw UnimplementedError('VisitType.bookmark deletion not implemented');
     }
   }
 

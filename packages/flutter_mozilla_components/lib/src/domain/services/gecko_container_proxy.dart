@@ -5,6 +5,7 @@
  */
 
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 
@@ -32,7 +33,13 @@ class GeckoContainerProxyService {
       return await _apiInstance.healthcheck().timeout(
         const Duration(milliseconds: 250),
       );
-    } catch (_) {
+    } catch (e, s) {
+      developer.log(
+        'Container proxy healthcheck failed',
+        error: e,
+        stackTrace: s,
+        name: 'GeckoContainerProxyService',
+      );
       return Future.value(false);
     }
   }

@@ -424,16 +424,21 @@ class TabRepository extends _$TabRepository {
 
     final db = ref.watch(tabDatabaseProvider);
 
-    final tabAddedSub = eventSerivce.tabAddedStream.listen((tabId) async {
-      final containerId = ref.read(selectedContainerProvider);
-      await db.tabDao.insertTab(
-        tabId,
-        parentId: const Value.absent(),
-        source: TabSource.addedEvent,
-        containerId: Value(containerId),
-        isPrivate: const Value.absent(),
-      );
-    });
+    final tabAddedSub = eventSerivce.tabAddedStream.listen(
+      (tabId) async {
+        final containerId = ref.read(selectedContainerProvider);
+        await db.tabDao.insertTab(
+          tabId,
+          parentId: const Value.absent(),
+          source: TabSource.addedEvent,
+          containerId: Value(containerId),
+          isPrivate: const Value.absent(),
+        );
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        logger.e('Error in tab added stream', error: error, stackTrace: stackTrace);
+      },
+    );
 
     final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen((
       event,
@@ -522,20 +527,27 @@ class TabRepository extends _$TabRepository {
           logger.w('Could not get tab for assignement ${tabState?.url}');
         }
       }
-    });
+    },
+      onError: (Object error, StackTrace stackTrace) {
+        logger.e('Error in container site assignment stream', error: error, stackTrace: stackTrace);
+      },
+    );
 
-    final tabContentSub = tabContentService.tabContentStream.listen((
-      content,
-    ) async {
-      await db.tabDao.updateTabContent(
-        content.tabId,
-        isProbablyReaderable: content.isProbablyReaderable,
-        extractedContentMarkdown: content.extractedContentMarkdown,
-        extractedContentPlain: content.extractedContentPlain,
-        fullContentMarkdown: content.fullContentMarkdown,
-        fullContentPlain: content.fullContentPlain,
-      );
-    });
+    final tabContentSub = tabContentService.tabContentStream.listen(
+      (content) async {
+        await db.tabDao.updateTabContent(
+          content.tabId,
+          isProbablyReaderable: content.isProbablyReaderable,
+          extractedContentMarkdown: content.extractedContentMarkdown,
+          extractedContentPlain: content.extractedContentPlain,
+          fullContentMarkdown: content.fullContentMarkdown,
+          fullContentPlain: content.fullContentPlain,
+        );
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        logger.e('Error in tab content stream', error: error, stackTrace: stackTrace);
+      },
+    );
 
     ref.listen(
       fireImmediately: true,
@@ -545,7 +557,7 @@ class TabRepository extends _$TabRepository {
           await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
         }
       },
-      onError: (error, stackTrace) {
+      onError: (Object error, StackTrace stackTrace) {
         logger.e(
           'Error listening to selectedTabProvider',
           error: error,
@@ -565,7 +577,7 @@ class TabRepository extends _$TabRepository {
           await db.tabDao.syncTabs(retainTabIds: next.value);
         }
       },
-      onError: (error, stackTrace) {
+      onError: (Object error, StackTrace stackTrace) {
         logger.e(
           'Error listening to tabListProvider',
           error: error,
@@ -591,7 +603,7 @@ class TabRepository extends _$TabRepository {
           await db.tabDao.updateTabs(debounceStartValue, next);
         });
       },
-      onError: (error, stackTrace) {
+      onError: (Object error, StackTrace stackTrace) {
         logger.e(
           'Error listening to tabStatesProvider',
           error: error,

@@ -83,7 +83,7 @@ class _TabDraggable extends HookConsumerWidget {
               sourceSearchQuery: switch (entity) {
                 DefaultTabEntity _ => null,
                 final SearchResultTabEntity entity => entity.searchQuery,
-                TabTreeEntity _ => throw UnimplementedError(),
+                TabTreeEntity _ => throw UnimplementedError('TabTreeEntity not implemented in tab list view'),
               },
             );
     }, [entity.tabId, activeTab, suggestedContainerId]);

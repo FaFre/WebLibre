@@ -48,13 +48,18 @@ class TabList extends _$TabList {
       },
     );
 
-    final tabListSub = eventService.tabListEvents.listen((tabs) {
-      final equatableTabs = EquatableValue(tabs);
+    final tabListSub = eventService.tabListEvents.listen(
+      (tabs) {
+        final equatableTabs = EquatableValue(tabs);
 
-      if (equatableTabs != state) {
-        state = equatableTabs;
-      }
-    });
+        if (equatableTabs != state) {
+          state = equatableTabs;
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        logger.e('Error in tab list events', error: error, stackTrace: stackTrace);
+      },
+    );
 
     ref.onDispose(() async {
       await tabListSub.cancel();

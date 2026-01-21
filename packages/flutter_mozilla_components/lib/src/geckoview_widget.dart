@@ -5,6 +5,7 @@
  */
 
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -66,7 +67,7 @@ class _GeckoViewState extends State<GeckoView> {
       final result = await browserService.showNativeFragment();
 
       if (result) {
-        debugPrint('Fragment ATTACHED after $attempt tries');
+        developer.log('Fragment ATTACHED after $attempt tries', name: 'GeckoView');
         return true;
       }
 
@@ -75,7 +76,7 @@ class _GeckoViewState extends State<GeckoView> {
       }
     }
 
-    debugPrint('Fragment FAILED after $maxRetries tries');
+    developer.log('Fragment FAILED after $maxRetries tries', name: 'GeckoView', level: 900);
     return false;
   }
 

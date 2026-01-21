@@ -47,9 +47,14 @@ class SelectedTab extends _$SelectedTab {
       },
     );
 
-    final selectedTabSub = eventSerivce.selectedTabEvents.listen((tabId) {
-      state = tabId;
-    });
+    final selectedTabSub = eventSerivce.selectedTabEvents.listen(
+      (tabId) {
+        state = tabId;
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        logger.e('Error in selected tab events', error: error, stackTrace: stackTrace);
+      },
+    );
 
     ref.onDispose(() async {
       await selectedTabSub.cancel();

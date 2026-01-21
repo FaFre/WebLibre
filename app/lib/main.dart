@@ -24,6 +24,7 @@ import 'package:country_codes/country_codes.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService, GeckoLoggingService, LogLevel;
@@ -101,12 +102,20 @@ class _MainWidget extends HookConsumerWidget {
           .read(engineSettingsRepositoryProvider.notifier)
           .fetchSettings();
 
-      await GeckoBrowserService().initialize(
-        filesystem.relativeProfilePath,
-        kDebugMode ? LogLevel.debug : LogLevel.warn,
-        engineSettings.contentBlocking,
-        engineSettings.addonCollection,
-      );
+      try {
+        await GeckoBrowserService().initialize(
+          filesystem.relativeProfilePath,
+          kDebugMode ? LogLevel.debug : LogLevel.warn,
+          engineSettings.contentBlocking,
+          engineSettings.addonCollection,
+        );
+      } on PlatformException catch (e, s) {
+        logger.e('Platform exception during Gecko initialization', error: e, stackTrace: s);
+        rethrow;
+      } catch (e, s) {
+        logger.e('Failed to initialize Gecko browser service', error: e, stackTrace: s);
+        rethrow;
+      }
 
       await ref.read(appInitializationServiceProvider.notifier).initialize();
 

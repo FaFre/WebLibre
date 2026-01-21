@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
 /// Creates a floating snackbar.
@@ -160,7 +161,8 @@ Future<void> launchUrlFeedback(
           showErrorMessage(context, 'Could not launch URL ($url)');
         }
       }
-    } catch (e) {
+    } catch (e, s) {
+      logger.e('Failed to launch URL: $url', error: e, stackTrace: s);
       if (context.mounted) {
         showErrorMessage(context, 'Could not launch URL ($url)');
       }

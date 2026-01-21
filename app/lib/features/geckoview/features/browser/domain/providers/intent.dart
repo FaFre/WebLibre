@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
@@ -67,7 +68,10 @@ class EngineBoundIntentStream extends _$EngineBoundIntentStream {
           appWidgetLaunchStream.transform(_contentParserTransformer),
         ]).listen(
           controller.add,
-          onError: controller.addError,
+          onError: (Object error, StackTrace stackTrace) {
+            logger.e('Intent stream error', error: error, stackTrace: stackTrace);
+            controller.addError(error, stackTrace);
+          },
           onDone: controller.close,
         );
 

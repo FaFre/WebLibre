@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
@@ -102,7 +103,8 @@ class _TrackingProtectionTile extends ConsumerWidget {
 
       // Reload tab to apply changes
       await ref.read(selectedTabSessionProvider).reload();
-    } catch (e) {
+    } catch (e, s) {
+      logger.e('Failed to toggle tracking protection', error: e, stackTrace: s);
       if (context.mounted) {
         showErrorMessage(context, 'Failed to toggle tracking protection: $e');
       }

@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/delete_all_exceptions_dialog.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -99,7 +100,8 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
         await ref
             .read(trackingProtectionRepositoryProvider.notifier)
             .removeAllExceptions();
-      } catch (e) {
+      } catch (e, s) {
+        logger.e('Failed to delete tracking protection exceptions', error: e, stackTrace: s);
         if (context.mounted) {
           showErrorMessage(context, 'Failed to delete exceptions: $e');
         }
@@ -116,7 +118,8 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
       await ref
           .read(trackingProtectionRepositoryProvider.notifier)
           .removeExceptionByUrl(exception.url);
-    } catch (e) {
+    } catch (e, s) {
+      logger.e('Failed to remove tracking protection exception', error: e, stackTrace: s);
       if (context.mounted) {
         showErrorMessage(context, 'Failed to remove exception: $e');
       }

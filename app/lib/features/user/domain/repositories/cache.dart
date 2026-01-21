@@ -20,6 +20,7 @@
 import 'dart:typed_data';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
@@ -49,11 +50,16 @@ class CacheRepository extends _$CacheRepository {
 
     final db = ref.watch(userDatabaseProvider);
 
-    final sub = eventService.iconUpdateEvents.listen((event) async {
-      if (Uri.tryParse(event.url) case final Uri url) {
-        await db.cacheDao.cacheIcon(url.origin, event.bytes);
-      }
-    });
+    final sub = eventService.iconUpdateEvents.listen(
+      (event) async {
+        if (Uri.tryParse(event.url) case final Uri url) {
+          await db.cacheDao.cacheIcon(url.origin, event.bytes);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        logger.e('Error in icon update events', error: error, stackTrace: stackTrace);
+      },
+    );
 
     ref.onDispose(() async {
       await sub.cancel();

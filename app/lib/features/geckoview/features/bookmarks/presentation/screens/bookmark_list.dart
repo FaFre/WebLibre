@@ -29,6 +29,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
@@ -405,7 +406,8 @@ class BookmarkListScreen extends HookConsumerWidget {
       if (context.mounted) {
         showInfoMessage(context, 'Imported $count bookmarks successfully');
       }
-    } catch (e) {
+    } catch (e, s) {
+      logger.e('Bookmark import failed', error: e, stackTrace: s);
       if (context.mounted) {
         showErrorMessage(context, 'Import failed: $e');
       }
@@ -454,7 +456,8 @@ class BookmarkListScreen extends HookConsumerWidget {
       if (context.mounted) {
         showInfoMessage(context, 'Bookmarks exported successfully');
       }
-    } catch (e) {
+    } catch (e, s) {
+      logger.e('Bookmark export failed', error: e, stackTrace: s);
       if (context.mounted) {
         showErrorMessage(context, 'Export failed: $e');
       }
