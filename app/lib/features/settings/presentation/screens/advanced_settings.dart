@@ -27,8 +27,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
@@ -272,7 +272,7 @@ class _ErrorLogsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomListTile(
       title: 'Error Logs',
-      subtitle: 'Copy logs for issue reporting',
+      subtitle: 'View and copy logs for issue reporting',
       prefix: Padding(
         padding: const EdgeInsets.only(right: 16.0),
         child: Icon(
@@ -283,20 +283,10 @@ class _ErrorLogsTile extends StatelessWidget {
       ),
       suffix: FilledButton.icon(
         onPressed: () async {
-          await Clipboard.setData(
-            ClipboardData(
-              text: loggerMemory.buffer
-                  .map((e) => e.lines.join('\n'))
-                  .join('\n\n'),
-            ),
-          );
-
-          if (context.mounted) {
-            showInfoMessage(context, 'Logs copied');
-          }
+          await ErrorLogsRoute().push(context);
         },
-        icon: const Icon(Icons.copy),
-        label: const Text('Copy'),
+        icon: const Icon(Icons.open_in_new),
+        label: const Text('View'),
       ),
     );
   }

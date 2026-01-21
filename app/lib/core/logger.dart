@@ -31,4 +31,8 @@ final loggerMemory = MemoryOutput(
   bufferSize: 255,
   secondOutput: ConsoleOutput(),
 );
-final logger = Logger(filter: _DebugLogFilter(), output: loggerMemory);
+final logger = Logger(
+  filter: _DebugLogFilter(),
+  printer: PrettyPrinter(dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart),
+  output: loggerMemory,
+);

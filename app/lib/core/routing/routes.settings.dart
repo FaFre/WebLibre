@@ -75,6 +75,7 @@ part of 'routes.dart';
       name: 'TrackingProtectionExceptionsRoute',
       path: 'tracking_protection_exceptions',
     ),
+    TypedGoRoute<ErrorLogsRoute>(name: 'ErrorLogsRoute', path: 'error_logs'),
   ],
 )
 class SettingsRoute extends GoRouteData with $SettingsRoute {
@@ -192,5 +193,12 @@ class TrackingProtectionExceptionsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const TrackingProtectionExceptionsScreen();
+  }
+}
+
+class ErrorLogsRoute extends GoRouteData with $ErrorLogsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ErrorLogsScreen();
   }
 }
