@@ -11,6 +11,7 @@ class AppColors extends ThemeExtension<AppColors> {
     this.torPurple = const Color(0xFF7D4698),
     this.torActiveGreen = const Color(0xFF68B030),
     this.torBackgroundGrey = const Color(0xFF333A41),
+    this.warningAmber = const Color(0xFFFFA000),
   });
 
   final Color seedColor;
@@ -21,6 +22,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color torPurple;
   final Color torActiveGreen;
   final Color torBackgroundGrey;
+  final Color warningAmber;
 
   static const light = AppColors._();
   static const dark = AppColors._();
@@ -35,6 +37,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? torPurple,
     Color? torActiveGreen,
     Color? torBackgroundGrey,
+    Color? warningAmber,
   }) {
     return AppColors._(
       seedColor: seedColor ?? this.seedColor,
@@ -46,6 +49,7 @@ class AppColors extends ThemeExtension<AppColors> {
       torPurple: torPurple ?? this.torPurple,
       torActiveGreen: torActiveGreen ?? this.torActiveGreen,
       torBackgroundGrey: torBackgroundGrey ?? this.torBackgroundGrey,
+      warningAmber: warningAmber ?? this.warningAmber,
     );
   }
 
@@ -84,6 +88,7 @@ class AppColors extends ThemeExtension<AppColors> {
         other.torBackgroundGrey,
         t,
       )!,
+      warningAmber: Color.lerp(warningAmber, other.warningAmber, t)!,
     );
   }
 

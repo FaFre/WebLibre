@@ -77,9 +77,7 @@ class _PermissionsList extends HookConsumerWidget {
     final showAll = useState(false);
 
     // Memoize the update callback to avoid recreating closures
-    final updatePermission = useCallback((
-      SitePermissions Function(SitePermissionsWrapper) updater,
-    ) async {
+    Future<void> updatePermission(PermissionUpdater updater) async {
       await ref
           .read(
             sitePermissionsRepositoryProvider(
@@ -89,7 +87,7 @@ class _PermissionsList extends HookConsumerWidget {
           )
           .updatePermission(updater);
       await ref.read(selectedTabSessionProvider).reload();
-    }, [origin, isPrivate]);
+    }
 
     // Build permission entries - only recalculates when permissions change
     final allPermissions = useMemoized(
@@ -104,7 +102,7 @@ class _PermissionsList extends HookConsumerWidget {
             ),
           )
           .toList(),
-      [permissions, updatePermission],
+      [permissions],
     );
 
     // Filter to only show permissions that have been explicitly set (not noDecision)

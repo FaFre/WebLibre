@@ -4,6 +4,8 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/sit
 
 part 'site_permissions.g.dart';
 
+typedef PermissionUpdater = SitePermissions Function(SitePermissionsWrapper);
+
 @Riverpod(keepAlive: true)
 class SitePermissionsRepository extends _$SitePermissionsRepository {
   final _api = GeckoSitePermissionsApi();
@@ -15,9 +17,7 @@ class SitePermissionsRepository extends _$SitePermissionsRepository {
     return permissions;
   }
 
-  Future<void> updatePermission(
-    SitePermissions Function(SitePermissionsWrapper) updater,
-  ) async {
+  Future<void> updatePermission(PermissionUpdater updater) async {
     final currentPermissions =
         await getPermissions() ??
         SitePermissions(
@@ -48,7 +48,8 @@ class SitePermissionsRepository extends _$SitePermissionsRepository {
   Future<SitePermissions?> build({
     required String origin,
     required bool isPrivate,
-  }) {
-    return _api.getSitePermissions(origin, isPrivate);
+  }) async {
+    final permissions = await _api.getSitePermissions(origin, isPrivate);
+    return permissions;
   }
 }

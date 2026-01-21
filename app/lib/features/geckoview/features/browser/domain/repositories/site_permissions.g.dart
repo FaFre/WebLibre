@@ -53,7 +53,7 @@ final class SitePermissionsRepositoryProvider
 }
 
 String _$sitePermissionsRepositoryHash() =>
-    r'83033a26cd7c9473a7ac9a23f91787af8ed4ce86';
+    r'b821fbd3a457f5b9cfc6c9d398c93f09c6b30b0b';
 
 final class SitePermissionsRepositoryFamily extends $Family
     with

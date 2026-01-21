@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -42,6 +43,9 @@ class AppBarTitle extends HookConsumerWidget {
 
     final tabState = ref.watch(selectedTabStateProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
+    final showSiteSettingsBadge = ref.watch(
+      showSiteSettingsBadgeProvider.select((value) => value.value == true),
+    );
 
     if (tabState == null) {
       return const SizedBox.shrink();
@@ -77,7 +81,25 @@ class AppBarTitle extends HookConsumerWidget {
                 .read(bottomSheetControllerProvider.notifier)
                 .show(SiteSettingsSheet(tabState: tabState));
           },
-          child: TabIcon(tabState: tabState, iconSize: 24),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                TabIcon(tabState: tabState, iconSize: 24),
+                if (showSiteSettingsBadge)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Icon(
+                      MdiIcons.shieldHalfFull,
+                      size: 10,
+                      color: appColors.warningAmber,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
         // Title/URL tap → opens search screen
         Expanded(
