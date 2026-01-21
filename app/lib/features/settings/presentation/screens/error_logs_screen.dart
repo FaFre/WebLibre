@@ -23,10 +23,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/settings/domain/providers/log_filter.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
@@ -77,7 +79,7 @@ Color _levelBackgroundColor(Level level, BuildContext context) {
   };
 }
 
-class ErrorLogsScreen extends HookWidget {
+class ErrorLogsScreen extends HookConsumerWidget {
   const ErrorLogsScreen({super.key});
 
   String _logsText() {
@@ -93,13 +95,14 @@ class ErrorLogsScreen extends HookWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final minLogLevel = useState(Level.all);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final minLogLevel = ref.watch(logFilterProvider);
+
     final allLogs = useMemoized(() => loggerMemory.buffer.toList());
 
     final sortedLogs = useMemoized(
       () => allLogs.reversed
-          .where((e) => e.level.value >= minLogLevel.value.value)
+          .where((e) => e.level.value >= minLogLevel.value)
           .toList(),
       [allLogs, minLogLevel.value],
     );
@@ -113,17 +116,22 @@ class ErrorLogsScreen extends HookWidget {
               return TextButton.icon(
                 onPressed: controller.open,
                 icon: const Icon(Icons.filter_list),
-                label: Text(minLogLevel.value.name.toUpperCase()),
+                label: Text(minLogLevel.name.toUpperCase()),
               );
             },
             menuChildren: [
               const Divider(height: 0),
-              _buildLevelFilterMenuItem(context, minLogLevel, Level.trace),
-              _buildLevelFilterMenuItem(context, minLogLevel, Level.debug),
-              _buildLevelFilterMenuItem(context, minLogLevel, Level.info),
-              _buildLevelFilterMenuItem(context, minLogLevel, Level.warning),
-              _buildLevelFilterMenuItem(context, minLogLevel, Level.error),
-              _buildLevelFilterMenuItem(context, minLogLevel, Level.fatal),
+              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.trace),
+              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.debug),
+              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.info),
+              _buildLevelFilterMenuItem(
+                context,
+                ref,
+                minLogLevel,
+                Level.warning,
+              ),
+              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.error),
+              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.fatal),
             ],
           ),
           IconButton(
@@ -150,10 +158,11 @@ class ErrorLogsScreen extends HookWidget {
 
   Widget _buildLevelFilterMenuItem(
     BuildContext context,
-    ValueNotifier<Level> minLogLevel,
+    WidgetRef ref,
+    Level minLogLevel,
     Level level,
   ) {
-    final isSelected = level.value == minLogLevel.value.value;
+    final isSelected = level.value == minLogLevel.value;
     final levelColor = _levelColor(level);
 
     return CheckboxMenuButton(
@@ -161,7 +170,7 @@ class ErrorLogsScreen extends HookWidget {
       value: isSelected,
       onChanged: (value) {
         if (value == true) {
-          minLogLevel.value = level;
+          ref.read(logFilterProvider.notifier).setFilter(level);
         }
       },
       child: Text(level.name.toUpperCase()),
