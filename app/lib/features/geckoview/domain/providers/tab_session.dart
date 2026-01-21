@@ -56,6 +56,10 @@ class TabSession extends _$TabSession {
     return _sessionService.goForward();
   }
 
+  Future<void> goToHistoryIndex({required int index}) {
+    return _sessionService.goToHistoryIndex(index: index);
+  }
+
   Future<void> exitFullscreen() {
     return _sessionService.exitFullscreen();
   }

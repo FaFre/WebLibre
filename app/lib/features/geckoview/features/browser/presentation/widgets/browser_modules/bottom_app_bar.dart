@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
@@ -924,18 +925,32 @@ class NavigateForwardButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      onPressed: canGoForward
-          ? () async {
-              final controller = ref.read(
-                tabSessionProvider(tabId: selectedTabId).notifier,
-              );
+    final historyMenuController = useMenuController();
 
-              await controller.goForward();
-              menuControllerToClose?.close();
-            }
-          : null,
-      icon: const Icon(Icons.arrow_forward),
+    return HistoryMenu(
+      selectedTabId: selectedTabId,
+      controller: historyMenuController,
+      direction: HistoryMenuDirection.forward,
+      child: IconButton(
+        onPressed: canGoForward
+            ? () async {
+                final controller = ref.read(
+                  tabSessionProvider(tabId: selectedTabId).notifier,
+                );
+
+                await controller.goForward();
+                menuControllerToClose?.close();
+              }
+            : null,
+        onLongPress: canGoForward
+            ? () {
+                if (!historyMenuController.isOpen) {
+                  historyMenuController.open();
+                }
+              }
+            : null,
+        icon: const Icon(Icons.arrow_forward),
+      ),
     );
   }
 }
@@ -956,33 +971,47 @@ class NavigateBackButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      onPressed: (canGoBack || isLoading)
-          ? () async {
-              final controller = ref.read(
-                tabSessionProvider(tabId: selectedTabId).notifier,
-              );
+    final historyMenuController = useMenuController();
 
-              final isReaderActive = ref.read(
-                selectedTabStateProvider.select(
-                  (state) => state?.readerableState.active ?? false,
-                ),
-              );
+    return HistoryMenu(
+      selectedTabId: selectedTabId,
+      controller: historyMenuController,
+      direction: HistoryMenuDirection.back,
+      child: IconButton(
+        onPressed: (canGoBack || isLoading)
+            ? () async {
+                final controller = ref.read(
+                  tabSessionProvider(tabId: selectedTabId).notifier,
+                );
 
-              if (isLoading) {
-                await controller.stopLoading();
-              } else if (isReaderActive) {
-                await ref
-                    .read(readerableScreenControllerProvider.notifier)
-                    .toggleReaderView(false);
-              } else {
-                await controller.goBack();
+                final isReaderActive = ref.read(
+                  selectedTabStateProvider.select(
+                    (state) => state?.readerableState.active ?? false,
+                  ),
+                );
+
+                if (isLoading) {
+                  await controller.stopLoading();
+                } else if (isReaderActive) {
+                  await ref
+                      .read(readerableScreenControllerProvider.notifier)
+                      .toggleReaderView(false);
+                } else {
+                  await controller.goBack();
+                }
+
+                menuControllerToClose?.close();
               }
-
-              menuControllerToClose?.close();
-            }
-          : null,
-      icon: isLoading ? const Icon(Icons.close) : const Icon(Icons.arrow_back),
+            : null,
+        onLongPress: (canGoBack && !isLoading)
+            ? () {
+                if (!historyMenuController.isOpen) {
+                  historyMenuController.open();
+                }
+              }
+            : null,
+        icon: isLoading ? const Icon(Icons.close) : const Icon(Icons.arrow_back),
+      ),
     );
   }
 }
