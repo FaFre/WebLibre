@@ -57,7 +57,11 @@ class TabList extends _$TabList {
         }
       },
       onError: (Object error, StackTrace stackTrace) {
-        logger.e('Error in tab list events', error: error, stackTrace: stackTrace);
+        logger.e(
+          'Error in tab list events',
+          error: error,
+          stackTrace: stackTrace,
+        );
       },
     );
 

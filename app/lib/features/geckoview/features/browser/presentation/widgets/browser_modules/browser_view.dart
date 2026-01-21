@@ -302,7 +302,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
                       await router.push(route.location);
                     } else {
-                      throw UnimplementedError('Unknown quick action shortcut type');
+                      throw UnimplementedError(
+                        'Unknown quick action shortcut type',
+                      );
                     }
                   }
                 });

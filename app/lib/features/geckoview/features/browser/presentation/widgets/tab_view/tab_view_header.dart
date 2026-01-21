@@ -486,7 +486,11 @@ class TabViewHeader extends HookConsumerWidget {
                                           );
                                         }
                                       } catch (e, s) {
-                                        logger.e('Failed to clear container data', error: e, stackTrace: s);
+                                        logger.e(
+                                          'Failed to clear container data',
+                                          error: e,
+                                          stackTrace: s,
+                                        );
                                         if (context.mounted) {
                                           ui_helper.showErrorMessage(
                                             context,

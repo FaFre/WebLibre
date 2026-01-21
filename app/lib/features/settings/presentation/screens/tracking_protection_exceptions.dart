@@ -101,7 +101,11 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
             .read(trackingProtectionRepositoryProvider.notifier)
             .removeAllExceptions();
       } catch (e, s) {
-        logger.e('Failed to delete tracking protection exceptions', error: e, stackTrace: s);
+        logger.e(
+          'Failed to delete tracking protection exceptions',
+          error: e,
+          stackTrace: s,
+        );
         if (context.mounted) {
           showErrorMessage(context, 'Failed to delete exceptions: $e');
         }
@@ -119,7 +123,11 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
           .read(trackingProtectionRepositoryProvider.notifier)
           .removeExceptionByUrl(exception.url);
     } catch (e, s) {
-      logger.e('Failed to remove tracking protection exception', error: e, stackTrace: s);
+      logger.e(
+        'Failed to remove tracking protection exception',
+        error: e,
+        stackTrace: s,
+      );
       if (context.mounted) {
         showErrorMessage(context, 'Failed to remove exception: $e');
       }

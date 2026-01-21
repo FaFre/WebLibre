@@ -52,7 +52,11 @@ class SelectedTab extends _$SelectedTab {
         state = tabId;
       },
       onError: (Object error, StackTrace stackTrace) {
-        logger.e('Error in selected tab events', error: error, stackTrace: stackTrace);
+        logger.e(
+          'Error in selected tab events',
+          error: error,
+          stackTrace: stackTrace,
+        );
       },
     );
 

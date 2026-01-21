@@ -223,7 +223,11 @@ class TabStates extends _$TabStates {
           await _onTabContentStateChange(event);
         },
         onError: (Object error, StackTrace stackTrace) {
-          logger.e('Error in tab content events', error: error, stackTrace: stackTrace);
+          logger.e(
+            'Error in tab content events',
+            error: error,
+            stackTrace: stackTrace,
+          );
         },
       ),
       eventService.iconChangeEvents.listen(
@@ -231,7 +235,11 @@ class TabStates extends _$TabStates {
           await _onIconChange(event);
         },
         onError: (Object error, StackTrace stackTrace) {
-          logger.e('Error in icon change events', error: error, stackTrace: stackTrace);
+          logger.e(
+            'Error in icon change events',
+            error: error,
+            stackTrace: stackTrace,
+          );
         },
       ),
       eventService.thumbnailEvents.listen(
@@ -239,7 +247,11 @@ class TabStates extends _$TabStates {
           await _onThumbnailChange(event);
         },
         onError: (Object error, StackTrace stackTrace) {
-          logger.e('Error in thumbnail events', error: error, stackTrace: stackTrace);
+          logger.e(
+            'Error in thumbnail events',
+            error: error,
+            stackTrace: stackTrace,
+          );
         },
       ),
       eventService.securityInfoEvents.listen(
@@ -247,7 +259,11 @@ class TabStates extends _$TabStates {
           _onSecurityInfoStateChange(event);
         },
         onError: (Object error, StackTrace stackTrace) {
-          logger.e('Error in security info events', error: error, stackTrace: stackTrace);
+          logger.e(
+            'Error in security info events',
+            error: error,
+            stackTrace: stackTrace,
+          );
         },
       ),
       eventService.historyEvents.listen(
@@ -255,7 +271,11 @@ class TabStates extends _$TabStates {
           _onHistoryStateChange(event);
         },
         onError: (Object error, StackTrace stackTrace) {
-          logger.e('Error in history events', error: error, stackTrace: stackTrace);
+          logger.e(
+            'Error in history events',
+            error: error,
+            stackTrace: stackTrace,
+          );
         },
       ),
       eventService.readerableEvents.listen(
@@ -263,7 +283,11 @@ class TabStates extends _$TabStates {
           _onReaderableStateChange(event);
         },
         onError: (Object error, StackTrace stackTrace) {
-          logger.e('Error in readerable events', error: error, stackTrace: stackTrace);
+          logger.e(
+            'Error in readerable events',
+            error: error,
+            stackTrace: stackTrace,
+          );
         },
       ),
       eventService.findResultsEvent
@@ -273,7 +297,11 @@ class TabStates extends _$TabStates {
               _onFindResultsChange(event);
             },
             onError: (Object error, StackTrace stackTrace) {
-              logger.e('Error in find results events', error: error, stackTrace: stackTrace);
+              logger.e(
+                'Error in find results events',
+                error: error,
+                stackTrace: stackTrace,
+              );
             },
           ),
     ];

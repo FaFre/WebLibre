@@ -57,7 +57,11 @@ class CacheRepository extends _$CacheRepository {
         }
       },
       onError: (Object error, StackTrace stackTrace) {
-        logger.e('Error in icon update events', error: error, stackTrace: stackTrace);
+        logger.e(
+          'Error in icon update events',
+          error: error,
+          stackTrace: stackTrace,
+        );
       },
     );
 

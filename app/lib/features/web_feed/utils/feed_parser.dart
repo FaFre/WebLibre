@@ -92,7 +92,9 @@ class FeedParser {
           tags: tags,
         );
       default:
-        throw Exception('Unknown feed type in readGeneralData: ${_feed.runtimeType}');
+        throw Exception(
+          'Unknown feed type in readGeneralData: ${_feed.runtimeType}',
+        );
     }
   }
 
@@ -209,7 +211,9 @@ class FeedParser {
           );
         }).toList();
       default:
-        throw Exception('Unknown feed type in readArticles: ${_feed.runtimeType}');
+        throw Exception(
+          'Unknown feed type in readArticles: ${_feed.runtimeType}',
+        );
     }
   }
 }

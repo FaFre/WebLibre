@@ -67,7 +67,10 @@ class _GeckoViewState extends State<GeckoView> {
       final result = await browserService.showNativeFragment();
 
       if (result) {
-        developer.log('Fragment ATTACHED after $attempt tries', name: 'GeckoView');
+        developer.log(
+          'Fragment ATTACHED after $attempt tries',
+          name: 'GeckoView',
+        );
         return true;
       }
 
@@ -76,7 +79,11 @@ class _GeckoViewState extends State<GeckoView> {
       }
     }
 
-    developer.log('Fragment FAILED after $maxRetries tries', name: 'GeckoView', level: 900);
+    developer.log(
+      'Fragment FAILED after $maxRetries tries',
+      name: 'GeckoView',
+      level: 900,
+    );
     return false;
   }
 

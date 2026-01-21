@@ -171,7 +171,9 @@ class Section extends MultiSliver {
                              VisitType.download => const Text('Download'),
                              VisitType.framedLink => const Text('Frame'),
                              VisitType.reload => const Text('Page Reload'),
-                             VisitType.bookmark => throw UnimplementedError('VisitType.bookmark chip display not implemented'),
+                             VisitType.bookmark => throw UnimplementedError(
+                               'VisitType.bookmark chip display not implemented',
+                             ),
                            },
                          ),
                          Chip(
@@ -374,7 +376,9 @@ class HistoryScreen extends HookConsumerWidget {
                     VisitType.download => const Text('Downloads'),
                     VisitType.framedLink => const Text('Frames'),
                     VisitType.reload => const Text('Page Reloads'),
-                    VisitType.bookmark => throw UnimplementedError('VisitType.bookmark filter not implemented'),
+                    VisitType.bookmark => throw UnimplementedError(
+                      'VisitType.bookmark filter not implemented',
+                    ),
                   },
                 ),
               ),

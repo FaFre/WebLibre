@@ -52,7 +52,11 @@ class BangKey {
         trigger: trigger,
       );
     } catch (e, s) {
-      logger.w('Failed to parse BangKey from string: "$key"', error: e, stackTrace: s);
+      logger.w(
+        'Failed to parse BangKey from string: "$key"',
+        error: e,
+        stackTrace: s,
+      );
       return null;
     }
   }

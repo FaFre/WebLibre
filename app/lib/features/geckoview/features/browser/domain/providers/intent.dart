@@ -69,7 +69,11 @@ class EngineBoundIntentStream extends _$EngineBoundIntentStream {
         ]).listen(
           controller.add,
           onError: (Object error, StackTrace stackTrace) {
-            logger.e('Intent stream error', error: error, stackTrace: stackTrace);
+            logger.e(
+              'Intent stream error',
+              error: error,
+              stackTrace: stackTrace,
+            );
             controller.addError(error, stackTrace);
           },
           onDone: controller.close,

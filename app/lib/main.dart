@@ -110,10 +110,18 @@ class _MainWidget extends HookConsumerWidget {
           engineSettings.addonCollection,
         );
       } on PlatformException catch (e, s) {
-        logger.e('Platform exception during Gecko initialization', error: e, stackTrace: s);
+        logger.e(
+          'Platform exception during Gecko initialization',
+          error: e,
+          stackTrace: s,
+        );
         rethrow;
       } catch (e, s) {
-        logger.e('Failed to initialize Gecko browser service', error: e, stackTrace: s);
+        logger.e(
+          'Failed to initialize Gecko browser service',
+          error: e,
+          stackTrace: s,
+        );
         rethrow;
       }
 

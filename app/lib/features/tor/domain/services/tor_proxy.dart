@@ -111,8 +111,12 @@ class TorProxyService extends _$TorProxyService {
               (setting) =>
                   setting.bridge.type ==
                   switch (torSettings.config) {
-                    TorConnectionConfig.auto => throw UnimplementedError('TorConnectionConfig.auto bridge type not supported'),
-                    TorConnectionConfig.direct => throw UnimplementedError('TorConnectionConfig.direct does not use bridges'),
+                    TorConnectionConfig.auto => throw UnimplementedError(
+                      'TorConnectionConfig.auto bridge type not supported',
+                    ),
+                    TorConnectionConfig.direct => throw UnimplementedError(
+                      'TorConnectionConfig.direct does not use bridges',
+                    ),
                     TorConnectionConfig.obfs4 => MoatTransportType.obfs4,
                     TorConnectionConfig.snowflake =>
                       MoatTransportType.snowflake,

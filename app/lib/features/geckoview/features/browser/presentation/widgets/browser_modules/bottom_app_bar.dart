@@ -1010,7 +1010,9 @@ class NavigateBackButton extends HookConsumerWidget {
                 }
               }
             : null,
-        icon: isLoading ? const Icon(Icons.close) : const Icon(Icons.arrow_back),
+        icon: isLoading
+            ? const Icon(Icons.close)
+            : const Icon(Icons.arrow_back),
       ),
     );
   }

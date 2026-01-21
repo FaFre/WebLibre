@@ -106,7 +106,11 @@ class WebExtensionsState extends _$WebExtensionsState {
             _onExtensionUpdate(event);
           },
           onError: (Object error, StackTrace stackTrace) {
-            logger.e('Error in browser extension stream', error: error, stackTrace: stackTrace);
+            logger.e(
+              'Error in browser extension stream',
+              error: error,
+              stackTrace: stackTrace,
+            );
           },
         ),
         addonService.browserIconStream.listen(
@@ -114,7 +118,11 @@ class WebExtensionsState extends _$WebExtensionsState {
             await _onIconChange(event);
           },
           onError: (Object error, StackTrace stackTrace) {
-            logger.e('Error in browser icon stream', error: error, stackTrace: stackTrace);
+            logger.e(
+              'Error in browser icon stream',
+              error: error,
+              stackTrace: stackTrace,
+            );
           },
         ),
       ],
@@ -124,7 +132,11 @@ class WebExtensionsState extends _$WebExtensionsState {
             _onExtensionUpdate(event);
           },
           onError: (Object error, StackTrace stackTrace) {
-            logger.e('Error in page extension stream', error: error, stackTrace: stackTrace);
+            logger.e(
+              'Error in page extension stream',
+              error: error,
+              stackTrace: stackTrace,
+            );
           },
         ),
         addonService.pageIconStream.listen(
@@ -132,7 +144,11 @@ class WebExtensionsState extends _$WebExtensionsState {
             await _onIconChange(event);
           },
           onError: (Object error, StackTrace stackTrace) {
-            logger.e('Error in page icon stream', error: error, stackTrace: stackTrace);
+            logger.e(
+              'Error in page icon stream',
+              error: error,
+              stackTrace: stackTrace,
+            );
           },
         ),
       ],
