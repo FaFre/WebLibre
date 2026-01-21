@@ -169,8 +169,8 @@ class _TabbedBangSelector extends HookConsumerWidget {
             controller: tabController,
             dividerColor: Colors.transparent,
             tabs: const [
-              Tab(text: 'Site'),
-              Tab(text: 'All'),
+              Tab(text: 'Search On This Site'),
+              Tab(text: 'All Providers'),
             ],
           ),
         ),

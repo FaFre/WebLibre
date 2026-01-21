@@ -151,10 +151,11 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Search Provider',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
+                if (domain == null)
+                  Text(
+                    'Search Provider',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
                 SmartBangSelector(
                   domain: domain,
                   searchTextController: searchTextController,
