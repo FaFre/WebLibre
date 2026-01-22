@@ -87,16 +87,17 @@ class AppBarTitle extends HookConsumerWidget {
               clipBehavior: Clip.none,
               children: [
                 TabIcon(tabState: tabState, iconSize: 24),
-                if (showSiteSettingsBadge)
-                  Positioned(
-                    top: -4,
-                    right: -4,
-                    child: Icon(
-                      MdiIcons.shieldHalfFull,
-                      size: 10,
-                      color: appColors.warningAmber,
-                    ),
+                Positioned(
+                  top: -4,
+                  right: -4,
+                  child: Icon(
+                    MdiIcons.shieldHalfFull,
+                    size: 10,
+                    color: showSiteSettingsBadge
+                        ? appColors.warningAmber
+                        : Colors.green,
                   ),
+                ),
               ],
             ),
           ),
