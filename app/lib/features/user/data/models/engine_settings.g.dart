@@ -69,6 +69,32 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings locales(List<String>? locales);
 
+  EngineSettings blockCookies(bool? blockCookies);
+
+  EngineSettings customCookiePolicy(CustomCookiePolicy? customCookiePolicy);
+
+  EngineSettings blockTrackingContent(bool? blockTrackingContent);
+
+  EngineSettings trackingContentScope(TrackingScope? trackingContentScope);
+
+  EngineSettings blockCryptominers(bool? blockCryptominers);
+
+  EngineSettings blockFingerprinters(bool? blockFingerprinters);
+
+  EngineSettings blockRedirectTrackers(bool? blockRedirectTrackers);
+
+  EngineSettings blockSuspectedFingerprinters(
+    bool? blockSuspectedFingerprinters,
+  );
+
+  EngineSettings suspectedFingerprintersScope(
+    TrackingScope? suspectedFingerprintersScope,
+  );
+
+  EngineSettings allowListBaseline(bool? allowListBaseline);
+
+  EngineSettings allowListConvenience(bool? allowListConvenience);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -99,6 +125,17 @@ abstract class _$EngineSettingsCWProxy {
     String? fingerprintingProtectionOverrides,
     bool enablePdfJs,
     List<String>? locales,
+    bool? blockCookies,
+    CustomCookiePolicy? customCookiePolicy,
+    bool? blockTrackingContent,
+    TrackingScope? trackingContentScope,
+    bool? blockCryptominers,
+    bool? blockFingerprinters,
+    bool? blockRedirectTrackers,
+    bool? blockSuspectedFingerprinters,
+    TrackingScope? suspectedFingerprintersScope,
+    bool? allowListBaseline,
+    bool? allowListConvenience,
   });
 }
 
@@ -214,6 +251,52 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   EngineSettings locales(List<String>? locales) => call(locales: locales);
 
   @override
+  EngineSettings blockCookies(bool? blockCookies) =>
+      call(blockCookies: blockCookies);
+
+  @override
+  EngineSettings customCookiePolicy(CustomCookiePolicy? customCookiePolicy) =>
+      call(customCookiePolicy: customCookiePolicy);
+
+  @override
+  EngineSettings blockTrackingContent(bool? blockTrackingContent) =>
+      call(blockTrackingContent: blockTrackingContent);
+
+  @override
+  EngineSettings trackingContentScope(TrackingScope? trackingContentScope) =>
+      call(trackingContentScope: trackingContentScope);
+
+  @override
+  EngineSettings blockCryptominers(bool? blockCryptominers) =>
+      call(blockCryptominers: blockCryptominers);
+
+  @override
+  EngineSettings blockFingerprinters(bool? blockFingerprinters) =>
+      call(blockFingerprinters: blockFingerprinters);
+
+  @override
+  EngineSettings blockRedirectTrackers(bool? blockRedirectTrackers) =>
+      call(blockRedirectTrackers: blockRedirectTrackers);
+
+  @override
+  EngineSettings blockSuspectedFingerprinters(
+    bool? blockSuspectedFingerprinters,
+  ) => call(blockSuspectedFingerprinters: blockSuspectedFingerprinters);
+
+  @override
+  EngineSettings suspectedFingerprintersScope(
+    TrackingScope? suspectedFingerprintersScope,
+  ) => call(suspectedFingerprintersScope: suspectedFingerprintersScope);
+
+  @override
+  EngineSettings allowListBaseline(bool? allowListBaseline) =>
+      call(allowListBaseline: allowListBaseline);
+
+  @override
+  EngineSettings allowListConvenience(bool? allowListConvenience) =>
+      call(allowListConvenience: allowListConvenience);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -246,6 +329,17 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? fingerprintingProtectionOverrides = const $CopyWithPlaceholder(),
     Object? enablePdfJs = const $CopyWithPlaceholder(),
     Object? locales = const $CopyWithPlaceholder(),
+    Object? blockCookies = const $CopyWithPlaceholder(),
+    Object? customCookiePolicy = const $CopyWithPlaceholder(),
+    Object? blockTrackingContent = const $CopyWithPlaceholder(),
+    Object? trackingContentScope = const $CopyWithPlaceholder(),
+    Object? blockCryptominers = const $CopyWithPlaceholder(),
+    Object? blockFingerprinters = const $CopyWithPlaceholder(),
+    Object? blockRedirectTrackers = const $CopyWithPlaceholder(),
+    Object? blockSuspectedFingerprinters = const $CopyWithPlaceholder(),
+    Object? suspectedFingerprintersScope = const $CopyWithPlaceholder(),
+    Object? allowListBaseline = const $CopyWithPlaceholder(),
+    Object? allowListConvenience = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -361,6 +455,53 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.locales
           // ignore: cast_nullable_to_non_nullable
           : locales as List<String>?,
+      blockCookies: blockCookies == const $CopyWithPlaceholder()
+          ? _value.blockCookies
+          // ignore: cast_nullable_to_non_nullable
+          : blockCookies as bool?,
+      customCookiePolicy: customCookiePolicy == const $CopyWithPlaceholder()
+          ? _value.customCookiePolicy
+          // ignore: cast_nullable_to_non_nullable
+          : customCookiePolicy as CustomCookiePolicy?,
+      blockTrackingContent: blockTrackingContent == const $CopyWithPlaceholder()
+          ? _value.blockTrackingContent
+          // ignore: cast_nullable_to_non_nullable
+          : blockTrackingContent as bool?,
+      trackingContentScope: trackingContentScope == const $CopyWithPlaceholder()
+          ? _value.trackingContentScope
+          // ignore: cast_nullable_to_non_nullable
+          : trackingContentScope as TrackingScope?,
+      blockCryptominers: blockCryptominers == const $CopyWithPlaceholder()
+          ? _value.blockCryptominers
+          // ignore: cast_nullable_to_non_nullable
+          : blockCryptominers as bool?,
+      blockFingerprinters: blockFingerprinters == const $CopyWithPlaceholder()
+          ? _value.blockFingerprinters
+          // ignore: cast_nullable_to_non_nullable
+          : blockFingerprinters as bool?,
+      blockRedirectTrackers:
+          blockRedirectTrackers == const $CopyWithPlaceholder()
+          ? _value.blockRedirectTrackers
+          // ignore: cast_nullable_to_non_nullable
+          : blockRedirectTrackers as bool?,
+      blockSuspectedFingerprinters:
+          blockSuspectedFingerprinters == const $CopyWithPlaceholder()
+          ? _value.blockSuspectedFingerprinters
+          // ignore: cast_nullable_to_non_nullable
+          : blockSuspectedFingerprinters as bool?,
+      suspectedFingerprintersScope:
+          suspectedFingerprintersScope == const $CopyWithPlaceholder()
+          ? _value.suspectedFingerprintersScope
+          // ignore: cast_nullable_to_non_nullable
+          : suspectedFingerprintersScope as TrackingScope?,
+      allowListBaseline: allowListBaseline == const $CopyWithPlaceholder()
+          ? _value.allowListBaseline
+          // ignore: cast_nullable_to_non_nullable
+          : allowListBaseline as bool?,
+      allowListConvenience: allowListConvenience == const $CopyWithPlaceholder()
+          ? _value.allowListConvenience
+          // ignore: cast_nullable_to_non_nullable
+          : allowListConvenience as bool?,
     );
   }
 }
@@ -436,6 +577,27 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
       locales: (json['locales'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      blockCookies: json['blockCookies'] as bool?,
+      customCookiePolicy: $enumDecodeNullable(
+        _$CustomCookiePolicyEnumMap,
+        json['customCookiePolicy'],
+      ),
+      blockTrackingContent: json['blockTrackingContent'] as bool?,
+      trackingContentScope: $enumDecodeNullable(
+        _$TrackingScopeEnumMap,
+        json['trackingContentScope'],
+      ),
+      blockCryptominers: json['blockCryptominers'] as bool?,
+      blockFingerprinters: json['blockFingerprinters'] as bool?,
+      blockRedirectTrackers: json['blockRedirectTrackers'] as bool?,
+      blockSuspectedFingerprinters:
+          json['blockSuspectedFingerprinters'] as bool?,
+      suspectedFingerprintersScope: $enumDecodeNullable(
+        _$TrackingScopeEnumMap,
+        json['suspectedFingerprintersScope'],
+      ),
+      allowListBaseline: json['allowListBaseline'] as bool?,
+      allowListConvenience: json['allowListConvenience'] as bool?,
     );
 
 Map<String, dynamic> _$EngineSettingsToJson(
@@ -463,6 +625,20 @@ Map<String, dynamic> _$EngineSettingsToJson(
           .webContentIsolationStrategy]!,
   'enterpriseRootsEnabled': instance.enterpriseRootsEnabled,
   'locales': instance.locales,
+  'blockCookies': instance.blockCookies,
+  'customCookiePolicy':
+      _$CustomCookiePolicyEnumMap[instance.customCookiePolicy]!,
+  'blockTrackingContent': instance.blockTrackingContent,
+  'trackingContentScope':
+      _$TrackingScopeEnumMap[instance.trackingContentScope]!,
+  'blockCryptominers': instance.blockCryptominers,
+  'blockFingerprinters': instance.blockFingerprinters,
+  'blockRedirectTrackers': instance.blockRedirectTrackers,
+  'blockSuspectedFingerprinters': instance.blockSuspectedFingerprinters,
+  'suspectedFingerprintersScope':
+      _$TrackingScopeEnumMap[instance.suspectedFingerprintersScope]!,
+  'allowListBaseline': instance.allowListBaseline,
+  'allowListConvenience': instance.allowListConvenience,
   'queryParameterStripping':
       _$QueryParameterStrippingEnumMap[instance.queryParameterStripping]!,
   'bounceTrackingProtectionMode':
@@ -527,4 +703,17 @@ const _$DohSettingsModeEnumMap = {
   DohSettingsMode.increased: 'increased',
   DohSettingsMode.max: 'max',
   DohSettingsMode.off: 'off',
+};
+
+const _$CustomCookiePolicyEnumMap = {
+  CustomCookiePolicy.totalProtection: 'totalProtection',
+  CustomCookiePolicy.crossSiteTrackers: 'crossSiteTrackers',
+  CustomCookiePolicy.unvisited: 'unvisited',
+  CustomCookiePolicy.thirdParty: 'thirdParty',
+  CustomCookiePolicy.allCookies: 'allCookies',
+};
+
+const _$TrackingScopeEnumMap = {
+  TrackingScope.all: 'all',
+  TrackingScope.privateOnly: 'privateOnly',
 };

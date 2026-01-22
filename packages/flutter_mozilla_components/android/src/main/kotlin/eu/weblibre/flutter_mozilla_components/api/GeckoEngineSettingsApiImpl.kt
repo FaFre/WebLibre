@@ -9,15 +9,19 @@ package eu.weblibre.flutter_mozilla_components.api
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
+import eu.weblibre.flutter_mozilla_components.pigeons.CustomCookiePolicy
 import eu.weblibre.flutter_mozilla_components.pigeons.DohSettingsMode
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
+import eu.weblibre.flutter_mozilla_components.pigeons.TrackingScope
 import eu.weblibre.flutter_mozilla_components.pigeons.WebContentIsolationStrategy
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
+import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy.TrackingCategory
+import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy.CookiePolicy
 import mozilla.components.concept.engine.mediaquery.PreferredColorScheme
 import mozilla.components.feature.addons.logger
 import mozilla.components.feature.session.SettingsUseCases
@@ -35,7 +39,14 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    private fun updateFingerprintingProtection(trackingProtectionPolicy: eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy) {
+    /**
+     * Updates fingerprinting protection settings based on the tracking protection policy.
+     * For CUSTOM mode, uses the settings from GeckoEngineSettings to determine the behavior.
+     */
+    private fun updateFingerprintingProtection(
+        trackingProtectionPolicy: eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy,
+        settings: GeckoEngineSettings? = null
+    ) {
         when(trackingProtectionPolicy) {
             eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> {
                 components.core.engineSettings.fingerprintingProtection = true
@@ -45,11 +56,87 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
                 components.core.engineSettings.fingerprintingProtection = false
                 components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
             }
-            eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> TODO()
+            eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> {
+                // Handle suspected fingerprinters (separate from FINGERPRINTING category)
+                if (settings?.blockSuspectedFingerprinters == true) {
+                    when (settings.suspectedFingerprintersScope) {
+                        TrackingScope.ALL -> {
+                            components.core.engineSettings.fingerprintingProtection = true
+                            components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
+                        }
+                        TrackingScope.PRIVATE_ONLY, null -> {
+                            components.core.engineSettings.fingerprintingProtection = false
+                            components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
+                        }
+                    }
+                } else {
+                    components.core.engineSettings.fingerprintingProtection = false
+                    components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = false
+                }
+            }
             eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.NONE -> {
                 components.core.engineSettings.fingerprintingProtection = false
-                components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
+                components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = false
             }
+        }
+    }
+
+    /**
+     * Creates a custom tracking protection policy based on user settings.
+     * Matches Fenix's implementation where AD, ANALYTICS, SOCIAL, and MOZILLA_SOCIAL
+     * are always blocked, while other categories are configurable.
+     */
+    private fun createCustomTrackingProtectionPolicy(settings: GeckoEngineSettings): TrackingProtectionPolicy {
+        // Always include these categories (not user-configurable, matches Fenix)
+        val categories = mutableListOf(
+            TrackingCategory.AD,
+            TrackingCategory.ANALYTICS,
+            TrackingCategory.SOCIAL,
+            TrackingCategory.MOZILLA_SOCIAL,
+        )
+
+        // Add configurable categories
+        if (settings.blockTrackingContent == true) {
+            categories.add(TrackingCategory.SCRIPTS_AND_SUB_RESOURCES)
+        }
+
+        if (settings.blockFingerprinters == true) {
+            categories.add(TrackingCategory.FINGERPRINTING)
+        }
+
+        if (settings.blockCryptominers == true) {
+            categories.add(TrackingCategory.CRYPTOMINING)
+        }
+
+        // Determine cookie policy
+        val cookiePolicy = if (settings.blockCookies != true) {
+            CookiePolicy.ACCEPT_ALL
+        } else {
+            when (settings.customCookiePolicy) {
+                CustomCookiePolicy.TOTAL_PROTECTION -> CookiePolicy.ACCEPT_FIRST_PARTY_AND_ISOLATE_OTHERS
+                CustomCookiePolicy.CROSS_SITE_TRACKERS -> CookiePolicy.ACCEPT_NON_TRACKERS
+                CustomCookiePolicy.UNVISITED -> CookiePolicy.ACCEPT_VISITED
+                CustomCookiePolicy.THIRD_PARTY -> CookiePolicy.ACCEPT_ONLY_FIRST_PARTY
+                CustomCookiePolicy.ALL_COOKIES -> CookiePolicy.ACCEPT_NONE
+                null -> CookiePolicy.ACCEPT_FIRST_PARTY_AND_ISOLATE_OTHERS // default
+            }
+        }
+
+        // Build policy
+        val policy = TrackingProtectionPolicy.select(
+            trackingCategories = categories.toTypedArray(),
+            cookiePolicy = cookiePolicy,
+            cookiePurging = settings.blockRedirectTrackers ?: true,
+            strictSocialTrackingProtection = settings.blockTrackingContent ?: true,
+            allowListBaselineTrackingProtection = settings.allowListBaseline ?: true,
+            allowListConvenienceTrackingProtection = settings.allowListConvenience ?: false,
+        )
+
+        // Apply scope for tracking content
+        return if (settings.trackingContentScope == TrackingScope.PRIVATE_ONLY) {
+            policy.forPrivateSessionsOnly()
+        } else {
+            policy
         }
     }
 
@@ -62,10 +149,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
                 eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.NONE -> TrackingProtectionPolicy.none()
                 eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.RECOMMENDED -> TrackingProtectionPolicy.recommended()
                 eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> TrackingProtectionPolicy.strict()
-                eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> TODO()
+                eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> createCustomTrackingProtectionPolicy(settings)
             }
 
-            updateFingerprintingProtection(settings.trackingProtectionPolicy)
+            updateFingerprintingProtection(settings.trackingProtectionPolicy, settings)
         }
         if(settings.httpsOnlyMode != null) {
             components.core.engineSettings.httpsOnlyMode = when(settings.httpsOnlyMode) {
@@ -202,21 +289,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             reloadSession = true
         }
         if(settings.contentBlocking != null) {
-            components.core.engine.settings.queryParameterStripping = when(settings.contentBlocking.queryParameterStripping) {
-                QueryParameterStripping.ENABLED -> true
-                QueryParameterStripping.DISABLED -> false
-                QueryParameterStripping.PRIVATE_ONLY -> false
-            }
-            components.core.engine.settings.queryParameterStrippingPrivateBrowsing = when(settings.contentBlocking.queryParameterStripping) {
-                QueryParameterStripping.ENABLED -> true
-                QueryParameterStripping.DISABLED -> false
-                QueryParameterStripping.PRIVATE_ONLY -> true
-            }
-            components.core.engine.settings.queryParameterStrippingAllowList = settings.contentBlocking.queryParameterStrippingAllowList
-            components.core.engine.settings.queryParameterStrippingStripList = settings.contentBlocking.queryParameterStrippingStripList
-
-            components.core.engine.settings
-
+            components.core.engine.settings.queryParameterStripping = components.core.engineSettings.queryParameterStripping
+            components.core.engine.settings.queryParameterStrippingPrivateBrowsing = components.core.engineSettings.queryParameterStrippingPrivateBrowsing
+            components.core.engine.settings.queryParameterStrippingAllowList = components.core.engineSettings.queryParameterStrippingAllowList
+            components.core.engine.settings.queryParameterStrippingStripList = components.core.engineSettings.queryParameterStrippingStripList
             reloadSession = true
         }
         if(settings.enterpriseRootsEnabled != null) {
@@ -224,18 +300,13 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             reloadSession = true
         }
         if(settings.dohSettings != null) {
-            components.core.engine.settings.dohSettingsMode = when(settings.dohSettings.dohSettingsMode) {
-                DohSettingsMode.GECKO_DEFAULT -> Engine.DohSettingsMode.DEFAULT
-                DohSettingsMode.INCREASED -> Engine.DohSettingsMode.INCREASED
-                DohSettingsMode.MAX -> Engine.DohSettingsMode.MAX
-                DohSettingsMode.OFF -> Engine.DohSettingsMode.OFF
-            }
-            components.core.engine.settings.dohProviderUrl = settings.dohSettings.dohProviderUrl
-            components.core.engine.settings.dohDefaultProviderUrl = settings.dohSettings.dohDefaultProviderUrl
-            components.core.engine.settings.dohExceptionsList = settings.dohSettings.dohExceptionsList
+            components.core.engine.settings.dohSettingsMode = components.core.engineSettings.dohSettingsMode
+            components.core.engine.settings.dohProviderUrl = components.core.engineSettings.dohProviderUrl
+            components.core.engine.settings.dohDefaultProviderUrl = components.core.engineSettings.dohDefaultProviderUrl
+            components.core.engine.settings.dohExceptionsList = components.core.engineSettings.dohExceptionsList
         }
         if(settings.fingerprintingProtectionOverrides != null) {
-            components.core.engine.settings.fingerprintingProtectionOverrides = settings.fingerprintingProtectionOverrides
+            components.core.engine.settings.fingerprintingProtectionOverrides = components.core.engineSettings.fingerprintingProtectionOverrides
         }
 
         if(reloadSession) {

@@ -127,6 +127,47 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
       'locales': settings['locales']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
+      // Custom Tracking Protection
+      'blockCookies': settings['blockCookies']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'customCookiePolicy': settings['customCookiePolicy']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'blockTrackingContent': settings['blockTrackingContent']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'trackingContentScope': settings['trackingContentScope']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'blockCryptominers': settings['blockCryptominers']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'blockFingerprinters': settings['blockFingerprinters']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'blockRedirectTrackers': settings['blockRedirectTrackers']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'blockSuspectedFingerprinters': settings['blockSuspectedFingerprinters']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'suspectedFingerprintersScope': settings['suspectedFingerprintersScope']
+          ?.readAs(DriftSqlType.string, db.typeMapping),
+      'allowListBaseline': settings['allowListBaseline']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'allowListConvenience': settings['allowListConvenience']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 
