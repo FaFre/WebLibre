@@ -646,6 +646,38 @@ enum WebContentIsolationStrategy {
   isolateHighValue,
 }
 
+/// Cookie blocking policy for Custom tracking protection mode.
+/// Note: These only apply when blockCookies is true.
+enum CustomCookiePolicy {
+  /// Total Cookie Protection - Dynamic First-Party Isolation (dFPI)
+  /// Most private option, isolates cookies per site
+  totalProtection,
+
+  /// Block cross-site and social media tracker cookies
+  /// Allows most cookies but blocks tracking cookies
+  crossSiteTrackers,
+
+  /// Block cookies from sites you haven't visited
+  /// Balances privacy with functionality
+  unvisited,
+
+  /// Block all third-party cookies
+  /// Only allows first-party cookies
+  thirdParty,
+
+  /// Block all cookies (may break many sites)
+  allCookies,
+}
+
+/// Scope for applying tracking protection features
+enum TrackingScope {
+  /// Apply to all browsing (normal + private)
+  all,
+
+  /// Apply only to private browsing tabs
+  privateOnly,
+}
+
 class ContentBlocking {
   QueryParameterStripping queryParameterStripping;
   String queryParameterStrippingAllowList;
@@ -694,6 +726,41 @@ class GeckoEngineSettings {
   final String? fingerprintingProtectionOverrides;
   final List<String>? locales;
 
+  // Custom Tracking Protection Settings
+  /// Master toggle for cookie blocking in Custom mode
+  final bool? blockCookies;
+
+  /// Cookie policy selection (only applies when blockCookies is true)
+  final CustomCookiePolicy? customCookiePolicy;
+
+  /// Block tracking scripts and content
+  final bool? blockTrackingContent;
+
+  /// Scope for tracking content blocking
+  final TrackingScope? trackingContentScope;
+
+  /// Block cryptomining scripts
+  final bool? blockCryptominers;
+
+  /// Block known fingerprinters (FINGERPRINTING tracking category)
+  final bool? blockFingerprinters;
+
+  /// Block redirect trackers via cookie purging
+  final bool? blockRedirectTrackers;
+
+  /// Block suspected fingerprinters (separate from FINGERPRINTING category)
+  /// Controls GeckoView's fingerprintingProtection settings
+  final bool? blockSuspectedFingerprinters;
+
+  /// Scope for suspected fingerprinters blocking
+  final TrackingScope? suspectedFingerprintersScope;
+
+  /// Allow baseline tracking protection exceptions (prevents major site breakage)
+  final bool? allowListBaseline;
+
+  /// Allow convenience tracking protection exceptions (fixes minor issues)
+  final bool? allowListConvenience;
+
   GeckoEngineSettings(
     this.javascriptEnabled,
     this.trackingProtectionPolicy,
@@ -711,6 +778,17 @@ class GeckoEngineSettings {
     this.dohSettings,
     this.fingerprintingProtectionOverrides,
     this.locales,
+    this.blockCookies,
+    this.customCookiePolicy,
+    this.blockTrackingContent,
+    this.trackingContentScope,
+    this.blockCryptominers,
+    this.blockFingerprinters,
+    this.blockRedirectTrackers,
+    this.blockSuspectedFingerprinters,
+    this.suspectedFingerprintersScope,
+    this.allowListBaseline,
+    this.allowListConvenience,
   );
 }
 

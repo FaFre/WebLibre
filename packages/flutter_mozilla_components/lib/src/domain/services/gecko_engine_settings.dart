@@ -35,6 +35,40 @@ class GeckoEngineSettingsService {
     );
   }
 
+  /// Updates tracking protection policy with all custom settings.
+  /// Use this when in CUSTOM mode and any custom setting changes.
+  Future<void> customTrackingProtectionPolicy({
+    required TrackingProtectionPolicy trackingProtectionPolicy,
+    bool? blockCookies,
+    CustomCookiePolicy? customCookiePolicy,
+    bool? blockTrackingContent,
+    TrackingScope? trackingContentScope,
+    bool? blockCryptominers,
+    bool? blockFingerprinters,
+    bool? blockRedirectTrackers,
+    bool? blockSuspectedFingerprinters,
+    TrackingScope? suspectedFingerprintersScope,
+    bool? allowListBaseline,
+    bool? allowListConvenience,
+  }) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(
+        trackingProtectionPolicy: trackingProtectionPolicy,
+        blockCookies: blockCookies,
+        customCookiePolicy: customCookiePolicy,
+        blockTrackingContent: blockTrackingContent,
+        trackingContentScope: trackingContentScope,
+        blockCryptominers: blockCryptominers,
+        blockFingerprinters: blockFingerprinters,
+        blockRedirectTrackers: blockRedirectTrackers,
+        blockSuspectedFingerprinters: blockSuspectedFingerprinters,
+        suspectedFingerprintersScope: suspectedFingerprintersScope,
+        allowListBaseline: allowListBaseline,
+        allowListConvenience: allowListConvenience,
+      ),
+    );
+  }
+
   Future<void> httpsOnlyMode(HttpsOnlyMode state) {
     return _api.updateRuntimeSettings(
       GeckoEngineSettings(httpsOnlyMode: state),

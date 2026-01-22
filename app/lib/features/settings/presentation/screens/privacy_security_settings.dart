@@ -512,12 +512,25 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
           RadioGroup(
             groupValue: trackingProtectionPolicy,
             onChanged: (value) async {
-              await ref
-                  .read(saveEngineSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .trackingProtectionPolicy(value),
-                  );
+              if (value != null) {
+                // Save the policy change
+                await ref
+                    .read(saveEngineSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .trackingProtectionPolicy(value),
+                    );
+              }
+
+              // Navigate to custom settings screen when Custom is selected
+              if (value == TrackingProtectionPolicy.custom ||
+                  (value == null &&
+                      trackingProtectionPolicy ==
+                          TrackingProtectionPolicy.custom)) {
+                if (context.mounted) {
+                  await CustomTrackingProtectionRoute().push(context);
+                }
+              }
             },
             child: const Column(
               children: [
@@ -541,8 +554,10 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
                 ),
                 RadioListTile<TrackingProtectionPolicy>.adaptive(
                   value: TrackingProtectionPolicy.custom,
+                  toggleable: true,
                   title: Text('Custom'),
                   subtitle: Text('Choose which trackers and scripts to block.'),
+                  secondary: Icon(Icons.chevron_right),
                 ),
               ],
             ),

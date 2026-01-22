@@ -79,6 +79,31 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @override
   List<String> get locales => super.locales!;
 
+  // Custom Tracking Protection overrides
+  @override
+  bool get blockCookies => super.blockCookies!;
+  @override
+  CustomCookiePolicy get customCookiePolicy => super.customCookiePolicy!;
+  @override
+  bool get blockTrackingContent => super.blockTrackingContent!;
+  @override
+  TrackingScope get trackingContentScope => super.trackingContentScope!;
+  @override
+  bool get blockCryptominers => super.blockCryptominers!;
+  @override
+  bool get blockFingerprinters => super.blockFingerprinters!;
+  @override
+  bool get blockRedirectTrackers => super.blockRedirectTrackers!;
+  @override
+  bool get blockSuspectedFingerprinters => super.blockSuspectedFingerprinters!;
+  @override
+  TrackingScope get suspectedFingerprintersScope =>
+      super.suspectedFingerprintersScope!;
+  @override
+  bool get allowListBaseline => super.allowListBaseline!;
+  @override
+  bool get allowListConvenience => super.allowListConvenience!;
+
   final QueryParameterStripping queryParameterStripping;
 
   final BounceTrackingProtectionMode bounceTrackingProtectionMode;
@@ -135,6 +160,17 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.fingerprintingProtectionOverrides,
     required this.enablePdfJs,
     required super.locales,
+    required super.blockCookies,
+    required super.customCookiePolicy,
+    required super.blockTrackingContent,
+    required super.trackingContentScope,
+    required super.blockCryptominers,
+    required super.blockFingerprinters,
+    required super.blockRedirectTrackers,
+    required super.blockSuspectedFingerprinters,
+    required super.suspectedFingerprintersScope,
+    required super.allowListBaseline,
+    required super.allowListConvenience,
   });
 
   EngineSettings.withDefaults({
@@ -160,6 +196,17 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     String? fingerprintingProtectionOverrides,
     bool? enablePdfJs,
     List<String>? locales,
+    bool? blockCookies,
+    CustomCookiePolicy? customCookiePolicy,
+    bool? blockTrackingContent,
+    TrackingScope? trackingContentScope,
+    bool? blockCryptominers,
+    bool? blockFingerprinters,
+    bool? blockRedirectTrackers,
+    bool? blockSuspectedFingerprinters,
+    TrackingScope? suspectedFingerprintersScope,
+    bool? allowListBaseline,
+    bool? allowListConvenience,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
@@ -199,6 +246,19 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
              WidgetsBinding.instance.platformDispatcher.locales
                  .map((x) => x.toLanguageTag())
                  .toList(),
+         blockCookies: blockCookies ?? true,
+         customCookiePolicy:
+             customCookiePolicy ?? CustomCookiePolicy.totalProtection,
+         blockTrackingContent: blockTrackingContent ?? true,
+         trackingContentScope: trackingContentScope ?? TrackingScope.all,
+         blockCryptominers: blockCryptominers ?? true,
+         blockFingerprinters: blockFingerprinters ?? true,
+         blockRedirectTrackers: blockRedirectTrackers ?? true,
+         blockSuspectedFingerprinters: blockSuspectedFingerprinters ?? true,
+         suspectedFingerprintersScope:
+             suspectedFingerprintersScope ?? TrackingScope.all,
+         allowListBaseline: allowListBaseline ?? true,
+         allowListConvenience: allowListConvenience ?? false,
        );
 
   static AddonCollection? _addonCollectionFromJson(String? json) =>
@@ -238,5 +298,16 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     fingerprintingProtectionOverrides,
     enablePdfJs,
     locales,
+    blockCookies,
+    customCookiePolicy,
+    blockTrackingContent,
+    trackingContentScope,
+    blockCryptominers,
+    blockFingerprinters,
+    blockRedirectTrackers,
+    blockSuspectedFingerprinters,
+    suspectedFingerprintersScope,
+    allowListBaseline,
+    allowListConvenience,
   ];
 }

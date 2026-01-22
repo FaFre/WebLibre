@@ -29,6 +29,22 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 
 part 'engine_settings_replication.g.dart';
 
+/// Checks if any Custom ETP setting changed between two EngineSettings instances.
+bool _customEtpSettingsChanged(GeckoEngineSettings? previous, GeckoEngineSettings current) {
+  if (previous == null) return true;
+  return previous.blockCookies != current.blockCookies ||
+      previous.customCookiePolicy != current.customCookiePolicy ||
+      previous.blockTrackingContent != current.blockTrackingContent ||
+      previous.trackingContentScope != current.trackingContentScope ||
+      previous.blockCryptominers != current.blockCryptominers ||
+      previous.blockFingerprinters != current.blockFingerprinters ||
+      previous.blockRedirectTrackers != current.blockRedirectTrackers ||
+      previous.blockSuspectedFingerprinters != current.blockSuspectedFingerprinters ||
+      previous.suspectedFingerprintersScope != current.suspectedFingerprintersScope ||
+      previous.allowListBaseline != current.allowListBaseline ||
+      previous.allowListConvenience != current.allowListConvenience;
+}
+
 @Riverpod(keepAlive: true)
 class EngineSettingsReplicationService
     extends _$EngineSettingsReplicationService {
@@ -90,11 +106,34 @@ class EngineSettingsReplicationService
                 settings.javascriptEnabled) {
               await _service.javascriptEnabled(settings.javascriptEnabled);
             }
-            if (previous.value?.trackingProtectionPolicy !=
-                settings.trackingProtectionPolicy) {
-              await _service.trackingProtectionPolicy(
-                settings.trackingProtectionPolicy,
-              );
+            // Check if tracking protection policy mode changed OR any custom ETP setting changed
+            final policyModeChanged = previous.value?.trackingProtectionPolicy !=
+                settings.trackingProtectionPolicy;
+            final customSettingsChanged = settings.trackingProtectionPolicy == TrackingProtectionPolicy.custom &&
+                _customEtpSettingsChanged(previous.value, settings);
+
+            if (policyModeChanged || customSettingsChanged) {
+              // Always send full custom settings when in CUSTOM mode
+              if (settings.trackingProtectionPolicy == TrackingProtectionPolicy.custom) {
+                await _service.customTrackingProtectionPolicy(
+                  trackingProtectionPolicy: settings.trackingProtectionPolicy,
+                  blockCookies: settings.blockCookies,
+                  customCookiePolicy: settings.customCookiePolicy,
+                  blockTrackingContent: settings.blockTrackingContent,
+                  trackingContentScope: settings.trackingContentScope,
+                  blockCryptominers: settings.blockCryptominers,
+                  blockFingerprinters: settings.blockFingerprinters,
+                  blockRedirectTrackers: settings.blockRedirectTrackers,
+                  blockSuspectedFingerprinters: settings.blockSuspectedFingerprinters,
+                  suspectedFingerprintersScope: settings.suspectedFingerprintersScope,
+                  allowListBaseline: settings.allowListBaseline,
+                  allowListConvenience: settings.allowListConvenience,
+                );
+              } else {
+                await _service.trackingProtectionPolicy(
+                  settings.trackingProtectionPolicy,
+                );
+              }
             }
             if (previous.value?.httpsOnlyMode != settings.httpsOnlyMode) {
               await _service.httpsOnlyMode(settings.httpsOnlyMode);

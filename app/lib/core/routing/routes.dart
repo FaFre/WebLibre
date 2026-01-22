@@ -56,6 +56,7 @@ import 'package:weblibre/features/settings/presentation/screens/addon_collection
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/appearance_display_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/custom_tracking_protection.dart';
 import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/error_logs_screen.dart';
 import 'package:weblibre/features/settings/presentation/screens/fingerprint_settings.dart';
@@ -82,11 +83,11 @@ import 'package:weblibre/features/web_feed/presentation/screens/feed_edit.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_list.dart';
 import 'package:weblibre/features/web_feed/presentation/select_feed_dialog.dart';
 
+part 'routes.bangs.dart';
+part 'routes.browser.dart';
+part 'routes.feeds.dart';
 part 'routes.g.dart';
 part 'routes.settings.dart';
-part 'routes.browser.dart';
-part 'routes.bangs.dart';
-part 'routes.feeds.dart';
 
 @TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
 class AboutRoute extends GoRouteData with $AboutRoute {
