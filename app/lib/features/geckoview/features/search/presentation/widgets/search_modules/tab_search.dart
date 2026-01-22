@@ -205,6 +205,8 @@ class TabSearch extends HookConsumerWidget {
                     _matchPrefix,
                     _matchSuffix,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               subtitle: (bodyHasMatch || (urlHasMatch && !titleHasMatch))
@@ -222,6 +224,8 @@ class TabSearch extends HookConsumerWidget {
                         _matchSuffix,
                         normalizeWhitespaces: true,
                       ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     )
                   : UriBreadcrumb(uri: result.url),
               onTap: () async {

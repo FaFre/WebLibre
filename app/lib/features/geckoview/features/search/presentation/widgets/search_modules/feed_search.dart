@@ -129,6 +129,8 @@ class FeedSearch extends HookConsumerWidget {
                             _matchPrefix,
                             _matchSuffix,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         )
                       : Text(
                           article.displayTitle,
@@ -158,6 +160,8 @@ class FeedSearch extends HookConsumerWidget {
                             _matchSuffix,
                             normalizeWhitespaces: true,
                           ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         )
                       else
                         (article.summaryPlain != null)
@@ -178,6 +182,8 @@ class FeedSearch extends HookConsumerWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontStyle: FontStyle.italic,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                     ],
