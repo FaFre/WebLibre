@@ -25,6 +25,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 
 part 'site_settings_badge_provider.g.dart';
 
+const _supportedSchemes = {'http', 'https'};
+
 /// Provider that determines whether to show the site settings badge on the tab icon.
 /// Returns true if any site-specific setting has been altered from defaults.
 @Riverpod()
@@ -38,6 +40,11 @@ Future<bool> showSiteSettingsBadge(Ref ref) async {
   final hasTrackingException = await ref.watch(
     hasTrackingProtectionExceptionProvider(tabState.id).future,
   );
+
+  if (!tabState.url.hasScheme ||
+      !_supportedSchemes.contains(tabState.url.scheme)) {
+    return false;
+  }
 
   // Watch site permissions
   final permissions = await ref.watch(
