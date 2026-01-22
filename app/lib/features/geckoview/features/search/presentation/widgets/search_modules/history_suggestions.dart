@@ -25,9 +25,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
@@ -35,12 +32,12 @@ import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class HistorySuggestions extends HookConsumerWidget {
-  final bool isPrivate;
   final ValueListenable<TextEditingValue> searchTextListenable;
+  final void Function(Uri uri) onUriSelected;
 
   const HistorySuggestions({
     super.key,
-    required this.isPrivate,
+    required this.onUriSelected,
     required this.searchTextListenable,
   });
 
@@ -121,23 +118,9 @@ class HistorySuggestions extends HookConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                        onTap: () async {
+                        onTap: () {
                           if (uri != null) {
-                            await ref
-                                .read(tabRepositoryProvider.notifier)
-                                .addTab(
-                                  url: uri,
-                                  private: isPrivate,
-                                  selectTab: true,
-                                );
-
-                            if (context.mounted) {
-                              ref
-                                  .read(bottomSheetControllerProvider.notifier)
-                                  .requestDismiss();
-
-                              const BrowserRoute().go(context);
-                            }
+                            onUriSelected(uri);
                           }
                         },
                       );

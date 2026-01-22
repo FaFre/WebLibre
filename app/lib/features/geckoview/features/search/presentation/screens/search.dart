@@ -426,8 +426,36 @@ class SearchScreen extends HookConsumerWidget {
                   TabSearch(searchTextListenable: sampledSearchText),
                   FeedSearch(searchTextNotifier: sampledSearchText),
                   HistorySuggestions(
-                    isPrivate: privateTabMode,
                     searchTextListenable: sampledSearchText,
+                    onUriSelected: (uri) async {
+                      if (isEditMode) {
+                        // Load into existing tab
+                        await ref
+                            .read(tabSessionProvider(tabId: tabId).notifier)
+                            .loadUrl(url: uri);
+                      } else {
+                        // Create new tab
+                        await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .addTab(
+                              url: uri,
+                              private: privateTabMode,
+                              parentId: (selectedTabType.value == TabType.child)
+                                  ? ref.read(selectedTabProvider)
+                                  : null,
+                              launchedFromIntent: launchedFromIntent,
+                              selectTab: true,
+                            );
+                      }
+
+                      if (context.mounted) {
+                        ref
+                            .read(bottomSheetControllerProvider.notifier)
+                            .requestDismiss();
+
+                        const BrowserRoute().go(context);
+                      }
+                    },
                   ),
                 ],
               );
