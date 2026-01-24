@@ -19,6 +19,7 @@
  */
 import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -374,4 +375,19 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
         .whereType<TabPreview>()
         .toList(),
   );
+}
+
+@Riverpod()
+class AppLinksModeNotifier extends _$AppLinksModeNotifier {
+  final _service = GeckoEngineSettingsService();
+
+  Future<void> setMode(AppLinksMode mode) async {
+    await _service.setAppLinksMode(mode);
+    ref.invalidateSelf();
+  }
+
+  @override
+  Future<AppLinksMode> build() {
+    return _service.getAppLinksMode();
+  }
 }

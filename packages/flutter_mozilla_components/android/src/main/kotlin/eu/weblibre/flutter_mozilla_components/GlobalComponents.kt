@@ -17,6 +17,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
+import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -52,6 +53,25 @@ object GlobalComponents {
 
     // Viewport API for applying pending settings when engineView becomes available
     var viewportApi: GeckoViewportApiImpl? = null
+
+    // Engine settings API for managing engine-specific settings
+    var engineSettingsApi: GeckoEngineSettingsApiImpl? = null
+
+    fun shouldOpenLinksInApp(): Boolean {
+        return when (engineSettingsApi!!.getAppLinksMode()) {
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS -> true
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ASK -> true
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> false
+        }
+    }
+
+    fun shouldPromptOpenLinksInApp(): Boolean {
+        return when (engineSettingsApi!!.getAppLinksMode()) {
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS -> false
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ASK -> true
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> false
+        }
+    }
 
     @DelicateCoroutinesApi
     private fun restoreBrowserState(newComponents: Components) =

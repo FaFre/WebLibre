@@ -138,4 +138,14 @@ class GeckoEngineSettingsService {
   Future<void> setPullToRefreshEnabled(bool enabled) {
     return _api.setPullToRefreshEnabled(enabled);
   }
+
+  /// Sets the app links mode preference.
+  /// Controls how external app links are handled in browser.
+  Future<void> setAppLinksMode(AppLinksMode mode) {
+    return _api.setAppLinksMode(mode);
+  }
+
+  Future<AppLinksMode> getAppLinksMode() {
+    return _api.getAppLinksMode();
+  }
 }

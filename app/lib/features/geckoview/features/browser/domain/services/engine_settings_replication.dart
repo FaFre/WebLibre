@@ -30,7 +30,10 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 part 'engine_settings_replication.g.dart';
 
 /// Checks if any Custom ETP setting changed between two EngineSettings instances.
-bool _customEtpSettingsChanged(GeckoEngineSettings? previous, GeckoEngineSettings current) {
+bool _customEtpSettingsChanged(
+  GeckoEngineSettings? previous,
+  GeckoEngineSettings current,
+) {
   if (previous == null) return true;
   return previous.blockCookies != current.blockCookies ||
       previous.customCookiePolicy != current.customCookiePolicy ||
@@ -39,8 +42,10 @@ bool _customEtpSettingsChanged(GeckoEngineSettings? previous, GeckoEngineSetting
       previous.blockCryptominers != current.blockCryptominers ||
       previous.blockFingerprinters != current.blockFingerprinters ||
       previous.blockRedirectTrackers != current.blockRedirectTrackers ||
-      previous.blockSuspectedFingerprinters != current.blockSuspectedFingerprinters ||
-      previous.suspectedFingerprintersScope != current.suspectedFingerprintersScope ||
+      previous.blockSuspectedFingerprinters !=
+          current.blockSuspectedFingerprinters ||
+      previous.suspectedFingerprintersScope !=
+          current.suspectedFingerprintersScope ||
       previous.allowListBaseline != current.allowListBaseline ||
       previous.allowListConvenience != current.allowListConvenience;
 }
@@ -107,14 +112,18 @@ class EngineSettingsReplicationService
               await _service.javascriptEnabled(settings.javascriptEnabled);
             }
             // Check if tracking protection policy mode changed OR any custom ETP setting changed
-            final policyModeChanged = previous.value?.trackingProtectionPolicy !=
+            final policyModeChanged =
+                previous.value?.trackingProtectionPolicy !=
                 settings.trackingProtectionPolicy;
-            final customSettingsChanged = settings.trackingProtectionPolicy == TrackingProtectionPolicy.custom &&
+            final customSettingsChanged =
+                settings.trackingProtectionPolicy ==
+                    TrackingProtectionPolicy.custom &&
                 _customEtpSettingsChanged(previous.value, settings);
 
             if (policyModeChanged || customSettingsChanged) {
               // Always send full custom settings when in CUSTOM mode
-              if (settings.trackingProtectionPolicy == TrackingProtectionPolicy.custom) {
+              if (settings.trackingProtectionPolicy ==
+                  TrackingProtectionPolicy.custom) {
                 await _service.customTrackingProtectionPolicy(
                   trackingProtectionPolicy: settings.trackingProtectionPolicy,
                   blockCookies: settings.blockCookies,
@@ -124,8 +133,10 @@ class EngineSettingsReplicationService
                   blockCryptominers: settings.blockCryptominers,
                   blockFingerprinters: settings.blockFingerprinters,
                   blockRedirectTrackers: settings.blockRedirectTrackers,
-                  blockSuspectedFingerprinters: settings.blockSuspectedFingerprinters,
-                  suspectedFingerprintersScope: settings.suspectedFingerprintersScope,
+                  blockSuspectedFingerprinters:
+                      settings.blockSuspectedFingerprinters,
+                  suspectedFingerprintersScope:
+                      settings.suspectedFingerprintersScope,
                   allowListBaseline: settings.allowListBaseline,
                   allowListConvenience: settings.allowListConvenience,
                 );

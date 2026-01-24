@@ -231,10 +231,12 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             addonCollection
         )
 
+        val engineSettingsApiImpl = GeckoEngineSettingsApiImpl()
         GeckoEngineSettingsApi.setUp(
             _flutterPluginBinding.binaryMessenger,
-            GeckoEngineSettingsApiImpl()
+            engineSettingsApiImpl
         )
+        GlobalComponents.engineSettingsApi = engineSettingsApiImpl
         GeckoAddonsApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             GeckoAddonsApiImpl(profileApplicationContext)

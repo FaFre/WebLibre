@@ -20,9 +20,11 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -65,6 +67,7 @@ class _TabCreationSection extends StatelessWidget {
         SettingSection(name: 'Tab Creation'),
         _NewTabDefaultSection(),
         _ExternalLinkHandlingSection(),
+        _AppLinksModeSection(),
       ],
     );
   }
@@ -330,6 +333,66 @@ class _TabBarSwipeBehaviorSection extends HookConsumerWidget {
                   title: Text('Navigate Sequential Tabs'),
                   subtitle: Text(
                     'Swipe left/right to move through tabs in order',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppLinksModeSection extends HookConsumerWidget {
+  const _AppLinksModeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLinksMode = ref.watch(
+      appLinksModeProvider.select((value) => value.value),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Open Links in Apps'),
+            subtitle: Text(
+              'Choose how links that can be opened in other apps are handled',
+            ),
+            leading: Icon(MdiIcons.openInApp),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: appLinksMode,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref.read(appLinksModeProvider.notifier).setMode(value);
+              }
+            },
+            child: const Column(
+              children: [
+                RadioListTile.adaptive(
+                  value: AppLinksMode.always,
+                  title: Text('Always'),
+                  subtitle: Text(
+                    'Always open links in their native apps without asking',
+                  ),
+                ),
+                RadioListTile.adaptive(
+                  value: AppLinksMode.ask,
+                  title: Text('Ask before opening'),
+                  subtitle: Text('Show a prompt before opening links in apps'),
+                ),
+                RadioListTile.adaptive(
+                  value: AppLinksMode.never,
+                  title: Text('Never'),
+                  subtitle: Text(
+                    'Always open links in the browser instead of apps',
                   ),
                 ),
               ],

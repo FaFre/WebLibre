@@ -791,3 +791,48 @@ final class FilteredTabPreviewsFamily extends $Family
   @override
   String toString() => r'filteredTabPreviewsProvider';
 }
+
+@ProviderFor(AppLinksModeNotifier)
+final appLinksModeProvider = AppLinksModeNotifierProvider._();
+
+final class AppLinksModeNotifierProvider
+    extends $AsyncNotifierProvider<AppLinksModeNotifier, AppLinksMode> {
+  AppLinksModeNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appLinksModeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appLinksModeNotifierHash();
+
+  @$internal
+  @override
+  AppLinksModeNotifier create() => AppLinksModeNotifier();
+}
+
+String _$appLinksModeNotifierHash() =>
+    r'2643b7d2799870fd444f7db204ea452d975368a3';
+
+abstract class _$AppLinksModeNotifier extends $AsyncNotifier<AppLinksMode> {
+  FutureOr<AppLinksMode> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<AppLinksMode>, AppLinksMode>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<AppLinksMode>, AppLinksMode>,
+              AsyncValue<AppLinksMode>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

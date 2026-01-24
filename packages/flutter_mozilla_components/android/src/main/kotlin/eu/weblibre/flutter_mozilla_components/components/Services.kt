@@ -6,6 +6,7 @@ package eu.weblibre.flutter_mozilla_components.components
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import mozilla.components.browser.state.store.BrowserStore
@@ -25,7 +26,7 @@ class Services(
     val appLinksInterceptor by lazy {
         AppLinksInterceptor(
             context = context,
-            launchInApp = { true },
+            launchInApp = { GlobalComponents.shouldOpenLinksInApp() },
             store = store,
         )
     }

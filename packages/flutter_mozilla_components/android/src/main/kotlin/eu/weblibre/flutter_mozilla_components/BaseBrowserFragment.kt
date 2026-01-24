@@ -19,7 +19,9 @@ import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
@@ -297,8 +299,13 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     sessionId = sessionId,
                     fragmentManager = parentFragmentManager,
                     loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
-                    launchInApp = { true },
-                    shouldPrompt = { true },
+                    launchInApp = { GlobalComponents.shouldOpenLinksInApp() },
+                    shouldPrompt = { GlobalComponents.shouldPromptOpenLinksInApp() },
+                    alwaysOpenCheckboxAction = {
+                        GlobalComponents.engineSettingsApi?.setAppLinksMode(
+                            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS
+                        )
+                    },
                     failedToLaunchAction = { fallbackUrl ->
                         fallbackUrl?.let {
                             val appLinksUseCases = components.useCases.appLinksUseCases

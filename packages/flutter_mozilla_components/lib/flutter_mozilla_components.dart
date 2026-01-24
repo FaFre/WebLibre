@@ -36,6 +36,7 @@ export 'src/pigeons/gecko.g.dart'
     show
         AddTabParams,
         AddonCollection,
+        AppLinksMode,
         AudioHitResult,
         AutoplayStatus,
         BookmarkInfo,

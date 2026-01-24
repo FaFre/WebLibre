@@ -640,6 +640,18 @@ enum ColorScheme { system, light, dark }
 
 enum CookieBannerHandlingMode { disabled, rejectAll, rejectOrAcceptAll }
 
+/// App links behavior mode - controls how external app links are handled
+enum AppLinksMode {
+  /// Always open links in their native apps without prompting
+  always,
+
+  /// Prompt user before opening in app (with "Always open" checkbox)
+  ask,
+
+  /// Never open links in external apps, always use browser
+  never,
+}
+
 enum WebContentIsolationStrategy {
   isolateNothing,
   isolateEverything,
@@ -994,6 +1006,12 @@ abstract class GeckoEngineSettingsApi {
   void setDefaultSettings(GeckoEngineSettings settings);
   void updateRuntimeSettings(GeckoEngineSettings settings);
   void setPullToRefreshEnabled(bool enabled);
+
+  /// Sets the app links mode preference (stored in SharedPreferences).
+  /// Controls how external app links are handled in the browser.
+  void setAppLinksMode(AppLinksMode mode);
+
+  AppLinksMode getAppLinksMode();
 }
 
 @HostApi()

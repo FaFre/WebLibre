@@ -6,7 +6,11 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.R
+import eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
 import eu.weblibre.flutter_mozilla_components.pigeons.CustomCookiePolicy
@@ -316,5 +320,34 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
 
     override fun setPullToRefreshEnabled(enabled: Boolean) {
         GlobalComponents.pullToRefreshEnabled = enabled
+    }
+
+    override fun setAppLinksMode(mode: AppLinksMode) {
+        val context = components.profileApplicationContext
+        val prefKey = context.getString(R.string.pref_key_open_links_in_apps)
+        val modeValue = when (mode) {
+            AppLinksMode.ALWAYS -> context.getString(R.string.pref_key_open_links_in_apps_always)
+            AppLinksMode.ASK -> context.getString(R.string.pref_key_open_links_in_apps_ask)
+            AppLinksMode.NEVER -> context.getString(R.string.pref_key_open_links_in_apps_never)
+        }
+
+        PreferenceManager.getDefaultSharedPreferences(context).edit {
+            putString(prefKey, modeValue)
+        }
+    }
+
+    override fun getAppLinksMode(): AppLinksMode {
+        val context = components.profileApplicationContext
+        val prefKey = context.getString(R.string.pref_key_open_links_in_apps)
+        val defaultValue = context.getString(R.string.pref_key_open_links_in_apps_ask)
+        val modeValue = PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(prefKey, defaultValue) ?: defaultValue
+
+        return when (modeValue) {
+            context.getString(R.string.pref_key_open_links_in_apps_always) -> AppLinksMode.ALWAYS
+            context.getString(R.string.pref_key_open_links_in_apps_ask) -> AppLinksMode.ASK
+            context.getString(R.string.pref_key_open_links_in_apps_never) -> AppLinksMode.NEVER
+            else -> AppLinksMode.ASK
+        }
     }
 }
