@@ -18,13 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 
 part 'browser_addon.g.dart';
+
+const _signatureRequiredPref = 'xpinstall.signatures.required';
 
 @Riverpod(keepAlive: true)
 class BrowserAddonService extends _$BrowserAddonService {
@@ -61,6 +65,49 @@ class BrowserAddonService extends _$BrowserAddonService {
       logger.e('Failed installing $addonGuid', error: e, stackTrace: s);
 
       return false;
+    }
+  }
+
+  Future<bool> installFromFile(
+    String filePath, {
+    bool allowUnsigned = false,
+  }) async {
+    final prefService = GeckoPrefService();
+
+    try {
+      // Validate file exists and has .xpi extension
+      final file = File(filePath);
+      if (!file.existsSync()) {
+        throw Exception('File does not exist: $filePath');
+      }
+
+      final extension = filePath.toLowerCase();
+      if (!extension.endsWith('.xpi')) {
+        throw Exception('Invalid file type. Expected .xpi file');
+      }
+
+      // Temporarily disable signature requirement if user allows unsigned
+      if (allowUnsigned) {
+        await prefService.applyPrefs({_signatureRequiredPref: false});
+      }
+
+      try {
+        // Create file:// URI and install
+        final fileUri = Uri.file(filePath);
+        if (!ref.mounted) return false;
+
+        await ref.read(addonServiceProvider).installAddon(fileUri);
+
+        return true;
+      } finally {
+        // Always restore signature requirement
+        if (allowUnsigned) {
+          await prefService.applyPrefs({_signatureRequiredPref: true});
+        }
+      }
+    } catch (e, s) {
+      logger.e('Failed installing from file: $filePath', error: e, stackTrace: s);
+      rethrow;
     }
   }
 

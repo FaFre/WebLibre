@@ -12,6 +12,7 @@ import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.addons.AddonsActivity
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
+import mozilla.components.concept.engine.webextension.InstallationMethod
 
 class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
     private val components by lazy {
@@ -32,8 +33,15 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
     }
 
     override fun installAddon(url: String, callback: (Result<Unit>) -> Unit) {
+        val installMethod = if (url.startsWith("file://")) {
+            InstallationMethod.FROM_FILE
+        } else {
+            null
+        }
+
         components.core.addonManager.installAddon(
             url = url,
+            installationMethod = installMethod,
             onSuccess = { _ ->
                 callback(Result.success(Unit))
             },

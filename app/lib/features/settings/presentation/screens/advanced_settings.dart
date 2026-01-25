@@ -29,6 +29,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/install_local_addon_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
@@ -56,6 +57,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
                 _ContentBehaviorSection(),
+                _ExtensionsSection(),
                 _StorageDebuggingSection(),
                 _ResetSection(),
               ],
@@ -79,6 +81,75 @@ class _ContentBehaviorSection extends StatelessWidget {
         _UserAgentTile(),
         _EnterpriseRootsTile(),
       ],
+    );
+  }
+}
+
+class _ExtensionsSection extends StatelessWidget {
+  const _ExtensionsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Extensions'),
+        _InstallLocalAddonTile(),
+        _AddonCollectionTile(),
+      ],
+    );
+  }
+}
+
+class _InstallLocalAddonTile extends StatelessWidget {
+  const _InstallLocalAddonTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomListTile(
+      title: 'Install from File',
+      subtitle: 'Install an extension from a local .xpi file',
+      prefix: Padding(
+        padding: const EdgeInsets.only(right: 16.0),
+        child: Icon(
+          MdiIcons.puzzle,
+          size: 24,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+      suffix: FilledButton.icon(
+        onPressed: () async {
+          await showInstallLocalAddonDialog(context);
+        },
+        icon: const Icon(Icons.file_open),
+        label: const Text('Install'),
+      ),
+    );
+  }
+}
+
+class _AddonCollectionTile extends StatelessWidget {
+  const _AddonCollectionTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomListTile(
+      title: 'Custom Collection',
+      subtitle: 'Use a custom Mozilla addon collection',
+      prefix: Padding(
+        padding: const EdgeInsets.only(right: 16.0),
+        child: Icon(
+          MdiIcons.folderMultiple,
+          size: 24,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+      suffix: FilledButton.icon(
+        onPressed: () async {
+          await AddonCollectionRoute().push(context);
+        },
+        icon: const Icon(Icons.settings),
+        label: const Text('Configure'),
+      ),
     );
   }
 }
