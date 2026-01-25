@@ -7112,3 +7112,85 @@ interface GeckoTrackingProtectionApi {
     }
   }
 }
+/**
+ * API for detecting and launching external applications that can handle URLs.
+ *
+ * This API wraps Mozilla Android Components' AppLinksUseCases to allow Flutter
+ * code to check if native apps can handle URLs and launch them directly.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoAppLinksApi {
+  /**
+   * Checks if an external application is available to handle the given URL.
+   *
+   * This method uses mozilla-components AppLinksUseCases to determine if
+   * a native app can handle the URL (e.g., YouTube app for youtube.com links).
+   *
+   * Returns true if an external app is available, false otherwise.
+   */
+  fun hasExternalApp(url: String, callback: (Result<Boolean>) -> Unit)
+  /**
+   * Opens the URL in an external application if available.
+   *
+   * This method will:
+   * 1. Check if an external app can handle the URL
+   * 2. If available, launch the app directly with Intent.FLAG_ACTIVITY_NEW_TASK
+   * 3. Return true if successfully launched, false otherwise
+   *
+   * Returns true if URL was opened in external app, false if no app available.
+   */
+  fun openAppLink(url: String, callback: (Result<Boolean>) -> Unit)
+
+  companion object {
+    /** The codec used by GeckoAppLinksApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoAppLinksApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoAppLinksApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoAppLinksApi.hasExternalApp$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val urlArg = args[0] as String
+            api.hasExternalApp(urlArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoAppLinksApi.openAppLink$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val urlArg = args[0] as String
+            api.openAppLink(urlArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}

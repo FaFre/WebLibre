@@ -74,6 +74,7 @@ class ContextMenuDialog extends HookConsumerWidget {
             final isSupported = useCachedFuture(
               // ignore: discarded_futures useFuture
               () => LaunchExternal.isSupported(hitResult),
+              [hitResult],
             );
 
             if (isSupported.data == false) {

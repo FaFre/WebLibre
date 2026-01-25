@@ -21,6 +21,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinksApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
@@ -272,6 +273,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoSitePermissionsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoSitePermissionsApiImpl())
         GeckoPublicSuffixListApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPublicSuffixListApiImpl(profileApplicationContext))
         GeckoTrackingProtectionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTrackingProtectionApiImpl())
+        GeckoAppLinksApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoAppLinksApiImpl(profileApplicationContext))
 
         // Viewport API for dynamic toolbar and keyboard handling
         val viewportEvents = GeckoViewportEvents(_flutterPluginBinding.binaryMessenger)

@@ -1977,3 +1977,34 @@ abstract class GeckoTrackingProtectionApi {
   @async
   void removeAllExceptions();
 }
+
+// =============================================================================
+// App Links API
+// =============================================================================
+
+/// API for detecting and launching external applications that can handle URLs.
+///
+/// This API wraps Mozilla Android Components' AppLinksUseCases to allow Flutter
+/// code to check if native apps can handle URLs and launch them directly.
+@HostApi()
+abstract class GeckoAppLinksApi {
+  /// Checks if an external application is available to handle the given URL.
+  ///
+  /// This method uses mozilla-components AppLinksUseCases to determine if
+  /// a native app can handle the URL (e.g., YouTube app for youtube.com links).
+  ///
+  /// Returns true if an external app is available, false otherwise.
+  @async
+  bool hasExternalApp(String url);
+
+  /// Opens the URL in an external application if available.
+  ///
+  /// This method will:
+  /// 1. Check if an external app can handle the URL
+  /// 2. If available, launch the app directly with Intent.FLAG_ACTIVITY_NEW_TASK
+  /// 3. Return true if successfully launched, false otherwise
+  ///
+  /// Returns true if URL was opened in external app, false if no app available.
+  @async
+  bool openAppLink(String url);
+}

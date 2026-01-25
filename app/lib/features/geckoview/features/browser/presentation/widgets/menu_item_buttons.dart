@@ -22,6 +22,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
@@ -31,7 +32,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/dialog
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class ShareMenuItemButton extends HookConsumerWidget {
   const ShareMenuItemButton({super.key, required this.selectedTabId});
@@ -225,23 +226,37 @@ class ShareScreenshotMenuItemButton extends HookConsumerWidget {
   }
 }
 
-class LaunchExternalMenuItemButton extends HookConsumerWidget {
-  const LaunchExternalMenuItemButton({super.key, required this.selectedTabId});
+class OpenInAppMenuItemButton extends HookConsumerWidget {
+  const OpenInAppMenuItemButton({super.key, required this.selectedTabId});
+
+  static final _service = GeckoAppLinksService();
 
   final String? selectedTabId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tabState = ref.watch(tabStateProvider(selectedTabId));
+    final url = tabState?.url;
+    final hasExternalApp = useCachedFuture(
+      // ignore: discarded_futures useFuture
+      () => url != null ? _service.hasExternalApp(url) : Future.value(false),
+      [url],
+    );
+
+    if (hasExternalApp.data != true) {
+      return const SizedBox.shrink();
+    }
+
     return MenuItemButton(
-      leadingIcon: const Icon(Icons.open_in_browser),
+      leadingIcon: const Icon(Icons.open_in_new),
       closeOnActivate: false,
-      child: const Text('Launch External'),
+      child: const Text('Open in App'),
       onPressed: () async {
-        final tabState = ref.read(tabStateProvider(selectedTabId))!;
+        if (url == null) return;
 
-        await ui_helper.launchUrlFeedback(context, tabState.url);
+        final success = await _service.openAppLink(url);
 
-        if (context.mounted) {
+        if (success && context.mounted) {
           MenuController.maybeOf(context)?.close();
         }
       },

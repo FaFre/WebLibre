@@ -600,7 +600,7 @@ class ShareMenuButton extends HookConsumerWidget {
       controller: menuController,
       menuChildren: [
         CopyAddressMenuItemButton(selectedTabId: selectedTabId),
-        LaunchExternalMenuItemButton(selectedTabId: selectedTabId),
+        OpenInAppMenuItemButton(selectedTabId: selectedTabId),
         ShareScreenshotMenuItemButton(selectedTabId: selectedTabId),
         ShareMenuItemButton(selectedTabId: selectedTabId),
         ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
