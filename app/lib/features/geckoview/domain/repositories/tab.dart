@@ -46,11 +46,6 @@ class TabRepository extends _$TabRepository {
 
   final _tabFromIntent = <String>{};
 
-  /// Tracks tabs currently being processed for container assignment to prevent
-  /// concurrent processing of the same tab (race condition protection)
-  /// See: https://github.com/FaFre/WebLibre/issues/139
-  final _tabsBeingProcessedForAssignment = <String>{};
-
   bool hasLaunchedFromIntent(String? tabId) {
     if (tabId == null) {
       return false;
@@ -447,16 +442,6 @@ class TabRepository extends _$TabRepository {
     final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen(
       (event) async {
         if (event.tabId != null) {
-          // Prevent concurrent processing of the same tab (race condition protection)
-          if (_tabsBeingProcessedForAssignment.contains(event.tabId)) {
-            logger.d(
-              'Skipping container assignment for tab ${event.tabId} - already being processed',
-            );
-            return;
-          }
-
-          _tabsBeingProcessedForAssignment.add(event.tabId!);
-
           // ignore: only_use_keep_alive_inside_keep_alive
           final tabState = ref.read(tabStateProvider(event.tabId));
           if (tabState != null) {
@@ -497,7 +482,7 @@ class TabRepository extends _$TabRepository {
                   selectTab: true,
                 );
 
-                if (tabIsEmpty) {
+                if (tabState.historyState.items.isEmpty) {
                   await closeTab(tabState.id);
                 }
               } else {
