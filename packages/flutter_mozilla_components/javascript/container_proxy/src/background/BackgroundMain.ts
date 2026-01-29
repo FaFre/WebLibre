@@ -148,7 +148,7 @@ export default class BackgroundMain {
         cookieStoreId = 'general'
       }
 
-      if (this.store.isSiteOriginInSameContext(url, cookieStoreId)) {
+      if (cookieStoreId == 'private' || this.store.isSiteOriginInSameContext(url, cookieStoreId)) {
         if (tab.highlighted) {
           port.postMessage({
             "type": "assignedSiteRequested",
