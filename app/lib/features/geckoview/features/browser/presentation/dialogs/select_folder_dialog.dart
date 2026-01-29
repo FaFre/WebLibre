@@ -21,46 +21,68 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
 
-/// Dialog to select a bookmark folder.
+/// Bottom sheet to select a bookmark folder.
 /// Returns the selected folder GUID or null if cancelled.
 Future<String?> showSelectFolderDialog(BuildContext context) {
-  return showDialog<String>(
+  return showModalBottomSheet<String>(
     context: context,
-    builder: (context) => const _SelectFolderDialog(),
+    isScrollControlled: true,
+    builder: (context) => const _SelectFolderSheet(),
   );
 }
 
-class _SelectFolderDialog extends HookConsumerWidget {
-  const _SelectFolderDialog();
+class _SelectFolderSheet extends HookConsumerWidget {
+  const _SelectFolderSheet();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedFolderGuid = useState(BookmarkRoot.mobile.id);
 
-    return AlertDialog(
-      title: const Text('Select folder'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: FolderTreePicker(
-            selectedFolderGuid: selectedFolderGuid,
-            entryGuid: BookmarkRoot.root.id,
-          ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Select folder',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: SingleChildScrollView(
+                child: FolderTreePicker(
+                  selectedFolderGuid: selectedFolderGuid,
+                  entryGuid: BookmarkRoot.root.id,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: () => context.pop(selectedFolderGuid.value),
+                  child: const Text('Select'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(selectedFolderGuid.value),
-          child: const Text('Select'),
-        ),
-      ],
     );
   }
 }

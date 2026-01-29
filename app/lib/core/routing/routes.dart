@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/routing/widgets/bottom_sheet_page.dart';
 import 'package:weblibre/core/routing/widgets/dialog_page.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/about/presentation/screens/about.dart';

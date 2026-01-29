@@ -74,7 +74,7 @@ class SelectFeedDialogRoute extends GoRouteData with $SelectFeedDialogRoute {
       ),
     );
 
-    return DialogPage(builder: (_) => SelectFeedDialog(feedUris: feedUris));
+    return BottomSheetPage(builder: (_) => SelectFeedDialog(feedUris: feedUris));
   }
 }
 

@@ -28,6 +28,7 @@ import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
+/// Bottom sheet widget to select a user profile.
 class SelectProfileDialog extends HookConsumerWidget {
   const SelectProfileDialog();
 
@@ -35,58 +36,76 @@ class SelectProfileDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final usersAsync = ref.watch(profileRepositoryProvider);
 
-    return AlertDialog(
-      title: const Text('Users'),
-      scrollable: true,
-      content: usersAsync.when(
-        skipLoadingOnReload: true,
-        data: (profiles) => Column(
-          children: profiles.map((profile) {
-            final isSelected = filesystem.selectedProfile == profile.uuidValue;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Users',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            usersAsync.when(
+              skipLoadingOnReload: true,
+              data: (profiles) => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: profiles.map((profile) {
+                  final isSelected =
+                      filesystem.selectedProfile == profile.uuidValue;
 
-            return ListTile(
-              key: ValueKey(profile.id),
-              enabled: !isSelected,
-              trailing: !isSelected ? const Icon(MdiIcons.accountSwitch) : null,
-              title: Text(profile.name),
-              subtitle: isSelected ? const Text('Active') : null,
-              onTap: () async {
-                await handleSwitchProfile(context, ref, profile);
-              },
-            );
-          }).toList(),
+                  return ListTile(
+                    key: ValueKey(profile.id),
+                    enabled: !isSelected,
+                    trailing:
+                        !isSelected ? const Icon(MdiIcons.accountSwitch) : null,
+                    title: Text(profile.name),
+                    subtitle: isSelected ? const Text('Active') : null,
+                    onTap: () async {
+                      await handleSwitchProfile(context, ref, profile);
+                    },
+                  );
+                }).toList(),
+              ),
+              error: (error, stackTrace) => Center(
+                child: FailureWidget(
+                  title: 'Failed to load Profiles',
+                  exception: error,
+                ),
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton.icon(
+                  icon: const Icon(MdiIcons.power),
+                  iconAlignment: IconAlignment.start,
+                  label: const Text('Quit Browser'),
+                  onPressed: () async {
+                    final result = await showQuitBrowserDialog(context);
+
+                    if (result == true) {
+                      await exitApp(ref.container);
+                    }
+                  },
+                ),
+                TextButton.icon(
+                  icon: const Icon(MdiIcons.accountGroup),
+                  iconAlignment: IconAlignment.end,
+                  label: const Text('Manage'),
+                  onPressed: () async {
+                    await ProfileListRoute().push(context);
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
-        error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Failed to load Profiles',
-            exception: error,
-          ),
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
       ),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actions: [
-        TextButton.icon(
-          icon: const Icon(MdiIcons.power),
-          iconAlignment: IconAlignment.start,
-          label: const Text('Quit Browser'),
-          onPressed: () async {
-            final result = await showQuitBrowserDialog(context);
-
-            if (result == true) {
-              await exitApp(ref.container);
-            }
-          },
-        ),
-        TextButton.icon(
-          icon: const Icon(MdiIcons.accountGroup),
-          iconAlignment: IconAlignment.end,
-          label: const Text('Manage'),
-          onPressed: () async {
-            await ProfileListRoute().push(context);
-          },
-        ),
-      ],
     );
   }
 }

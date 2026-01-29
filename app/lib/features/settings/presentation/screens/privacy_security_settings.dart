@@ -254,12 +254,7 @@ class _DeleteBrowsingDataTile extends StatelessWidget {
       leading: const Icon(MdiIcons.databaseRemove),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
-        await showDialog(
-          context: context,
-          builder: (context) {
-            return const DeleteDataDialog(initialSettings: {});
-          },
-        );
+        await showDeleteDataDialog(context);
       },
     );
   }

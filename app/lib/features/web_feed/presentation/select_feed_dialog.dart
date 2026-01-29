@@ -25,6 +25,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
+/// Bottom sheet widget to select a feed from discovered feeds.
 class SelectFeedDialog extends HookConsumerWidget {
   final Set<Uri> feedUris;
 
@@ -32,47 +33,58 @@ class SelectFeedDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SimpleDialog(
-      title: const Text('Add Feed'),
-      children: feedUris
-          .map(
-            (uri) => HookConsumer(
-              builder: (context, ref, child) {
-                final feedAsync = ref.watch(fetchWebFeedProvider(uri));
-
-                return feedAsync.when(
-                  skipLoadingOnReload: true,
-                  data: (data) {
-                    return ListTile(
-                      title: Text(
-                        data.feedData.title.whenNotEmpty ?? 'Unnamed Feed',
-                      ),
-                      subtitle: Text(uri.toString()),
-                      trailing: const Icon(Icons.add),
-                      onTap: () {
-                        FeedCreateRoute(feedId: uri).pushReplacement(context);
-                      },
-                    );
-                  },
-                  error: (error, stackTrace) => FailureWidget(
-                    title: 'Failed to fetch Feed',
-                    exception: error,
-                    onRetry: () {
-                      // ignore: unused_result
-                      ref.refresh(fetchWebFeedProvider(uri));
-                    },
-                  ),
-                  loading: () => Skeletonizer(
-                    child: ListTile(
-                      title: Text(BoneMock.title),
-                      subtitle: Skeleton.keep(child: Text(uri.toString())),
-                    ),
-                  ),
-                );
-              },
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Add Feed',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          )
-          .toList(),
+            const SizedBox(height: 16),
+            ...feedUris.map(
+              (uri) => HookConsumer(
+                builder: (context, ref, child) {
+                  final feedAsync = ref.watch(fetchWebFeedProvider(uri));
+
+                  return feedAsync.when(
+                    skipLoadingOnReload: true,
+                    data: (data) {
+                      return ListTile(
+                        title: Text(
+                          data.feedData.title.whenNotEmpty ?? 'Unnamed Feed',
+                        ),
+                        subtitle: Text(uri.toString()),
+                        trailing: const Icon(Icons.add),
+                        onTap: () {
+                          FeedCreateRoute(feedId: uri).pushReplacement(context);
+                        },
+                      );
+                    },
+                    error: (error, stackTrace) => FailureWidget(
+                      title: 'Failed to fetch Feed',
+                      exception: error,
+                      onRetry: () {
+                        // ignore: unused_result
+                        ref.refresh(fetchWebFeedProvider(uri));
+                      },
+                    ),
+                    loading: () => Skeletonizer(
+                      child: ListTile(
+                        title: Text(BoneMock.title),
+                        subtitle: Skeleton.keep(child: Text(uri.toString())),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

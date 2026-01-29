@@ -280,13 +280,9 @@ class HistoryScreen extends HookConsumerWidget {
           else
             IconButton(
               onPressed: () async {
-                await showDialog(
-                  context: context,
-                  builder: (context) {
-                    return const DeleteDataDialog(
-                      initialSettings: {DeleteBrowsingDataType.history},
-                    );
-                  },
+                await showDeleteDataDialog(
+                  context,
+                  initialSettings: {DeleteBrowsingDataType.history},
                 );
 
                 // ignore: unused_result

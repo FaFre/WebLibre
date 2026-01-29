@@ -25,55 +25,78 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
-class DeleteDataDialog extends HookConsumerWidget {
+/// Shows a bottom sheet to select and delete browsing data.
+Future<void> showDeleteDataDialog(
+  BuildContext context, {
+  Set<DeleteBrowsingDataType> initialSettings = const {},
+}) {
+  return showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => _DeleteDataSheet(initialSettings: initialSettings),
+  );
+}
+
+class _DeleteDataSheet extends HookConsumerWidget {
   final Set<DeleteBrowsingDataType> initialSettings;
 
-  const DeleteDataDialog({required this.initialSettings});
+  const _DeleteDataSheet({required this.initialSettings});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selections = useState(initialSettings);
 
-    return SimpleDialog(
-      title: const Text('Delete Browsing Data'),
-      children: [
-        for (final type in DeleteBrowsingDataType.values)
-          CheckboxListTile.adaptive(
-            value: selections.value.contains(type),
-            controlAffinity: ListTileControlAffinity.leading,
-            title: Text(type.title),
-            subtitle: type.description.mapNotNull(
-              (description) => Text(description),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Delete Browsing Data',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            onChanged: (value) {
-              if (value == true) {
-                selections.value = {...selections.value, type};
-              } else {
-                selections.value = {...selections.value}..remove(type);
-              }
-            },
-          ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: FilledButton.icon(
-            onPressed: () async {
-              await ref
-                  .read(browserDataServiceProvider.notifier)
-                  .deleteData(selections.value);
+            const SizedBox(height: 16),
+            for (final type in DeleteBrowsingDataType.values)
+              CheckboxListTile.adaptive(
+                value: selections.value.contains(type),
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text(type.title),
+                subtitle: type.description.mapNotNull(
+                  (description) => Text(description),
+                ),
+                onChanged: (value) {
+                  if (value == true) {
+                    selections.value = {...selections.value, type};
+                  } else {
+                    selections.value = {...selections.value}..remove(type);
+                  }
+                },
+              ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: selections.value.isEmpty
+                  ? null
+                  : () async {
+                      await ref
+                          .read(browserDataServiceProvider.notifier)
+                          .deleteData(selections.value);
 
-              if (context.mounted) {
-                context.pop();
-              }
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
+                      if (context.mounted) {
+                        context.pop();
+                      }
+                    },
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Theme.of(context).colorScheme.onError,
+              ),
+              label: const Text('Delete'),
+              icon: const Icon(Icons.delete_forever),
             ),
-            label: const Text('Delete'),
-            icon: const Icon(Icons.delete_forever),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
