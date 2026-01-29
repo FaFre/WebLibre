@@ -564,8 +564,6 @@ class _SheetContainer extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    // Memoize maxChildSize to prevent keyboard from affecting sheet size
-    final stableMaxChildSize = useMemoized(() => relativeSafeArea, []);
 
     bool dismissOnThreshold(DraggableScrollableNotification notification) {
       if (notification.extent <= 0.1) {
@@ -591,14 +589,14 @@ class _SheetContainer extends HookConsumerWidget {
               ViewTabsSheet() =>
                 NotificationListener<DraggableScrollableNotification>(
                   onNotification: dismissOnThreshold,
-                  child: _ViewTabsSheet(maxChildSize: stableMaxChildSize),
+                  child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
                 ),
               final SiteSettingsSheet parameter =>
                 NotificationListener<DraggableScrollableNotification>(
                   onNotification: dismissOnThreshold,
                   child: _SiteSettingsSheet(
                     initialTabState: parameter.tabState,
-                    maxChildSize: stableMaxChildSize,
+                    maxChildSize: relativeSafeArea,
                     bottomAppBarHeight: bottomAppBarHeight,
                   ),
                 ),
