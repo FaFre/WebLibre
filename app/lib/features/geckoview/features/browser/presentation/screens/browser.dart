@@ -412,7 +412,9 @@ class BrowserScreen extends HookConsumerWidget {
         insetPadding: EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: bottomToolbarVisible ? bottomAppBarTotalHeight + 8 : 16,
+          bottom: bottomToolbarVisible
+              ? bottomAppBarContentSize.height + 8
+              : 16,
         ),
       ),
     );
