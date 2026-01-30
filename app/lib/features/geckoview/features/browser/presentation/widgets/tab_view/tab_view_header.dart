@@ -272,63 +272,6 @@ class TabViewHeader extends HookConsumerWidget {
                       controller: tabsActionMenuController,
                       menuChildren: [
                         MenuItemButton(
-                          leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
-                          child: const Text('Bookmark all'),
-                          onPressed: () async {
-                            final choice = await showBookmarkAllDialog(context);
-                            if (choice == null || !context.mounted) return;
-
-                            final containerId = ref.read(
-                              selectedContainerProvider,
-                            );
-
-                            final tabData = await ref
-                                .read(tabDataRepositoryProvider.notifier)
-                                .getContainerTabsData(containerId);
-
-                            if (choice == BookmarkAllChoice.fast) {
-                              if (!context.mounted) return;
-                              final folderGuid = await showSelectFolderDialog(
-                                context,
-                              );
-                              if (folderGuid == null) return;
-
-                              final repo = ref.read(
-                                bookmarksRepositoryProvider.notifier,
-                              );
-                              for (final tab in tabData) {
-                                if (tab.url != null) {
-                                  await repo.addBookmark(
-                                    parentGuid: folderGuid,
-                                    url: tab.url!,
-                                    title: tab.title ?? tab.url.toString(),
-                                  );
-                                }
-                              }
-
-                              if (context.mounted) {
-                                ui_helper.showInfoMessage(
-                                  context,
-                                  '${tabData.length} bookmark(s) added',
-                                );
-                              }
-                            } else {
-                              for (final tab in tabData) {
-                                if (context.mounted) {
-                                  await BookmarkEntryAddRoute(
-                                    bookmarkInfo: jsonEncode(
-                                      BookmarkInfo(
-                                        title: tab.title,
-                                        url: tab.url.toString(),
-                                      ).encode(),
-                                    ),
-                                  ).push(context);
-                                }
-                              }
-                            }
-                          },
-                        ),
-                        MenuItemButton(
                           leadingIcon: const Icon(MdiIcons.closeCircle),
                           child: const Text('Close All Tabs'),
                           onPressed: () async {
@@ -385,6 +328,64 @@ class TabViewHeader extends HookConsumerWidget {
                                       .undoClose,
                                   count: count.length,
                                 );
+                              }
+                            }
+                          },
+                        ),
+                        const Divider(),
+                        MenuItemButton(
+                          leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
+                          child: const Text('Bookmark all'),
+                          onPressed: () async {
+                            final choice = await showBookmarkAllDialog(context);
+                            if (choice == null || !context.mounted) return;
+
+                            final containerId = ref.read(
+                              selectedContainerProvider,
+                            );
+
+                            final tabData = await ref
+                                .read(tabDataRepositoryProvider.notifier)
+                                .getContainerTabsData(containerId);
+
+                            if (choice == BookmarkAllChoice.fast) {
+                              if (!context.mounted) return;
+                              final folderGuid = await showSelectFolderDialog(
+                                context,
+                              );
+                              if (folderGuid == null) return;
+
+                              final repo = ref.read(
+                                bookmarksRepositoryProvider.notifier,
+                              );
+                              for (final tab in tabData) {
+                                if (tab.url != null) {
+                                  await repo.addBookmark(
+                                    parentGuid: folderGuid,
+                                    url: tab.url!,
+                                    title: tab.title ?? tab.url.toString(),
+                                  );
+                                }
+                              }
+
+                              if (context.mounted) {
+                                ui_helper.showInfoMessage(
+                                  context,
+                                  '${tabData.length} bookmark(s) added',
+                                );
+                              }
+                            } else {
+                              for (final tab in tabData) {
+                                if (context.mounted) {
+                                  await BookmarkEntryAddRoute(
+                                    bookmarkInfo: jsonEncode(
+                                      BookmarkInfo(
+                                        title: tab.title,
+                                        url: tab.url.toString(),
+                                      ).encode(),
+                                    ),
+                                  ).push(context);
+                                }
                               }
                             }
                           },

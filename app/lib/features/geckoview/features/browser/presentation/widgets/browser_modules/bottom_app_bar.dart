@@ -868,8 +868,8 @@ class NavigationMenuButton extends HookConsumerWidget {
             leadingIcon: const Icon(Icons.refresh),
             child: const Text('Reload'),
           ),
-        if (selectedTabId != null) const Divider(),
-        if (selectedTabId != null && showNavigationButtons)
+        if (selectedTabId != null && showNavigationButtons) ...[
+          const Divider(),
           Consumer(
             builder: (context, ref, child) {
               final history = ref.watch(
@@ -906,6 +906,7 @@ class NavigationMenuButton extends HookConsumerWidget {
               );
             },
           ),
+        ],
       ],
     );
   }
