@@ -179,6 +179,7 @@ class AppBarTitle extends HookConsumerWidget {
             ),
           ),
         ),
+        const SizedBox(width: 8.0),
       ],
     );
   }

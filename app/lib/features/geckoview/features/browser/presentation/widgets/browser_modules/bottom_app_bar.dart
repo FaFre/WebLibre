@@ -18,27 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_bar_dismissable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
@@ -51,17 +46,12 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/con
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
-import 'package:weblibre/utils/exit_app.dart';
 
 class BrowserTopAppBar extends HookConsumerWidget {
   final bool showMainToolbar;
@@ -286,10 +276,14 @@ class BrowserTabBar extends HookConsumerWidget {
                 primary: false,
                 automaticallyImplyLeading: false,
                 titleSpacing: 0.0,
+                leadingWidth: 40.0,
                 toolbarHeight: kToolbarHeight,
                 backgroundColor:
                     (containerColor != null && displayedSheet is! ViewTabsSheet)
                     ? ContainerColors.forAppBar(containerColor)
+                    : null,
+                leading: showMainToolbarNavigationButton
+                    ? NavigationMenuButton(selectedTabId: selectedTabId)
                     : null,
                 title:
                     (selectedTabId != null && displayedSheet is! ViewTabsSheet)
@@ -349,6 +343,12 @@ class BrowserTabBar extends HookConsumerWidget {
                         child: const Icon(MdiIcons.puzzle),
                       ),
                     ),
+                  if (showMainToolbarTabsCount)
+                    TabsCountButton(
+                      selectedTabId: selectedTabId,
+                      displayedSheet: displayedSheet,
+                      showLongPressMenu: true,
+                    ),
                   if (selectedTabId != null)
                     TabMenu(
                       controller: trippleDotMenuController,
@@ -366,14 +366,6 @@ class BrowserTabBar extends HookConsumerWidget {
                         );
                       },
                     ),
-                  if (showMainToolbarTabsCount)
-                    TabsCountButton(
-                      selectedTabId: selectedTabId,
-                      displayedSheet: displayedSheet,
-                      showLongPressMenu: true,
-                    ),
-                  if (showMainToolbarNavigationButton)
-                    NavigationMenuButton(selectedTabId: selectedTabId),
                 ],
               ),
             ),
@@ -414,6 +406,7 @@ class ContextualToolbar extends HookConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
+        NavigationMenuButton(selectedTabId: selectedTabId),
         if (tabState?.historyState.canGoBack == true ||
             tabState?.isLoading == true)
           NavigateBackButton(
@@ -439,7 +432,23 @@ class ContextualToolbar extends HookConsumerWidget {
           displayedSheet: displayedSheet,
           showLongPressMenu: false,
         ),
-        NavigationMenuButton(selectedTabId: selectedTabId),
+        if (selectedTabId != null)
+          TabMenu(
+            controller: useMenuController(),
+            selectedTabId: selectedTabId!,
+            builder: (context, controller, child) {
+              return ToolbarButton(
+                onTap: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: const Icon(MdiIcons.dotsVertical),
+              );
+            },
+          ),
       ],
     );
   }
@@ -616,246 +625,18 @@ class ShareMenuButton extends HookConsumerWidget {
   }
 }
 
-class NavigationMenuButton extends HookConsumerWidget {
+class NavigationMenuButton extends StatelessWidget {
   final String? selectedTabId;
 
   const NavigationMenuButton({super.key, required this.selectedTabId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final addonService = ref.watch(addonServiceProvider);
-
-    final hamburgerMenuController = useMenuController();
-
-    return MenuAnchor(
-      controller: hamburgerMenuController,
-      builder: (context, controller, child) {
-        return Padding(
-          padding: const EdgeInsets.only(right: 4.0),
-          child: InkWell(
-            onTap: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 8.0),
-              child: Icon(Icons.menu),
-            ),
-          ),
-        );
+  Widget build(BuildContext context) {
+    return ToolbarButton(
+      onTap: () {
+        Scaffold.of(context).openDrawer();
       },
-      menuChildren: [
-        MenuItemButton(
-          onPressed: () async {
-            await const SelectProfileRoute().push(context);
-          },
-          leadingIcon: const Icon(Icons.person),
-          child: Consumer(
-            builder: (context, ref, child) {
-              final profile = ref.watch(selectedProfileProvider);
-              return Text(profile.value?.name ?? 'User');
-            },
-          ),
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            final result = await showQuitBrowserDialog(context);
-
-            if (result == true && context.mounted) {
-              await exitApp(ProviderScope.containerOf(context));
-            }
-          },
-          leadingIcon: const Icon(MdiIcons.power),
-          child: const Text('Quit Browser'),
-        ),
-        const Divider(),
-        Consumer(
-          builder: (context, childRef, child) {
-            final pageExtensions = childRef.watch(
-              webExtensionsStateProvider(
-                WebExtensionActionType.page,
-              ).select((value) => value.values.toList()),
-            );
-
-            return Wrap(
-              alignment: WrapAlignment.center,
-              children: [
-                ...pageExtensions.map(
-                  (extension) => IconButton(
-                    onPressed: () async {
-                      //Use parents .ref because after onPressed this consumer gets disposed already
-                      await addonService.invokeAddonAction(
-                        extension.extensionId,
-                        WebExtensionActionType.page,
-                      );
-                    },
-                    icon: Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: ExtensionBadgeIcon(extension),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            await AboutRoute().push(context);
-          },
-          leadingIcon: const Icon(Icons.info),
-          child: const Text('About'),
-        ),
-        // MenuItemButton(
-        //   onPressed: () async {
-        //     final isPrivate =
-        //         ref
-        //             .read(generalSettingsWithDefaultsProvider)
-        //             .defaultCreateTabType ==
-        //         TabType.private;
-
-        //     await ref
-        //         .read(tabRepositoryProvider.notifier)
-        //         .addTab(
-        //           url: ref.read(docsUriProvider),
-        //           private: isPrivate,
-        //           container: const Value(null),
-        //         );
-        //   },
-        //   leadingIcon: const Icon(Icons.help),
-        //   child: const Text('Help and feedback'),
-        // ),
-        const Divider(),
-        MenuItemButton(
-          onPressed: () async {
-            await SettingsRoute().push(context);
-          },
-          leadingIcon: const Icon(Icons.settings),
-          child: const Text('Settings'),
-        ),
-        Consumer(
-          builder: (context, childRef, child) {
-            final browserExtensions = childRef.watch(
-              webExtensionsStateProvider(
-                WebExtensionActionType.browser,
-              ).select((value) => value.values.toList()),
-            );
-
-            return SubmenuButton(
-              menuChildren: [
-                ...browserExtensions.map(
-                  (extension) => MenuItemButton(
-                    onPressed: () async {
-                      //Use parents .ref because after onPressed this consumer gets disposed already
-                      await addonService.invokeAddonAction(
-                        extension.extensionId,
-                        WebExtensionActionType.browser,
-                      );
-                    },
-                    leadingIcon: Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: ExtensionBadgeIcon(extension),
-                    ),
-                    child: Text(extension.title ?? ''),
-                  ),
-                ),
-                MenuItemButton(
-                  onPressed: () async {
-                    await addonService.startAddonManagerActivity();
-                  },
-                  leadingIcon: const Icon(MdiIcons.puzzleEdit),
-                  child: const Text('Manage Extension'),
-                ),
-                MenuItemButton(
-                  onPressed: () async {
-                    final isPrivate =
-                        ref
-                            .read(generalSettingsWithDefaultsProvider)
-                            .defaultCreateTabType ==
-                        TabType.private;
-
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: Uri.parse('https://addons.mozilla.org'),
-                          private: isPrivate,
-                          container: const Value(null),
-                          selectTab: true,
-                        );
-                  },
-                  leadingIcon: const Icon(MdiIcons.puzzlePlus),
-                  child: const Text('Get Extensions'),
-                ),
-              ],
-              leadingIcon: const Icon(MdiIcons.puzzle),
-              child: const Text('Extensions'),
-            );
-          },
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            await const TorProxyRoute().push(context);
-          },
-          leadingIcon: const Icon(TorIcons.onionAlt),
-          child: Consumer(
-            child: const Text('Tor™ Proxy'),
-            builder: (context, ref, child) {
-              final torConnected = ref.watch(
-                torProxyServiceProvider.select(
-                  (value) => value.value?.isRunning == true,
-                ),
-              );
-
-              return Badge(
-                isLabelVisible: torConnected,
-                backgroundColor: AppColors.of(context).torActiveGreen,
-                child: child,
-              );
-            },
-          ),
-        ),
-        const Divider(),
-        MenuItemButton(
-          onPressed: () async {
-            await const HistoryRoute().push(context);
-          },
-          leadingIcon: const Icon(Icons.history),
-          child: const Text('History'),
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            await BookmarkListRoute(
-              entryGuid: BookmarkRoot.root.id,
-            ).push(context);
-          },
-          leadingIcon: const Icon(MdiIcons.bookmarkMultiple),
-          child: const Text('Bookmarks'),
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            await const BangMenuRoute().push(context);
-          },
-          leadingIcon: const Icon(MdiIcons.exclamationThick),
-          child: const Text('Bangs'),
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            await const ContainerListRoute().push(context);
-          },
-          leadingIcon: const Icon(MdiIcons.folder),
-          child: const Text('Containers'),
-        ),
-        MenuItemButton(
-          onPressed: () async {
-            await context.push(FeedListRoute().location);
-          },
-          leadingIcon: const Icon(Icons.rss_feed),
-          child: const Text('Feeds'),
-        ),
-      ],
+      child: const Icon(Icons.menu),
     );
   }
 }

@@ -46,6 +46,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/navigation_drawer.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
@@ -428,6 +429,7 @@ class BrowserScreen extends HookConsumerWidget {
         child: Scaffold(
           // Minimal scaffold - only for Material overlay support (SnackBars)
           resizeToAvoidBottomInset: false,
+          drawer: const BrowserNavigationDrawer(),
           body: Stack(
             children: [
               // Layer 0: Browser content
