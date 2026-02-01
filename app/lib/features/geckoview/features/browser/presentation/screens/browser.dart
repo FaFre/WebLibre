@@ -522,7 +522,16 @@ class BrowserScreen extends HookConsumerWidget {
                 curve: Curves.easeInOutQuart,
                 left: 0,
                 right: 0,
-                bottom: bottomToolbarVisible ? bottomAppBarTotalHeight : 0,
+                top: tabBarPosition == TabBarPosition.top && topToolbarVisible
+                    ? topAppBarTotalHeight
+                    : null,
+                bottom:
+                    tabBarPosition == TabBarPosition.bottom &&
+                        bottomToolbarVisible
+                    ? bottomAppBarTotalHeight
+                    : tabBarPosition == TabBarPosition.bottom
+                    ? 0
+                    : null,
                 child: Consumer(
                   builder: (context, ref, child) {
                     final value = ref.watch(
