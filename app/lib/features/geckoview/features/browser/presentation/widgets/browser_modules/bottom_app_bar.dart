@@ -349,7 +349,7 @@ class BrowserTabBar extends HookConsumerWidget {
                       displayedSheet: displayedSheet,
                       showLongPressMenu: true,
                     ),
-                  if (selectedTabId != null)
+                  if (selectedTabId != null && !showContextualToolbar)
                     TabMenu(
                       controller: trippleDotMenuController,
                       selectedTabId: selectedTabId,
