@@ -175,37 +175,53 @@ class _TabListView extends HookConsumerWidget {
 
     final activeTab = ref.watch(selectedTabProvider);
 
-    final lastScroll = useRef<String?>(null);
+    final didInitialScroll = useRef(false);
 
     useEffect(() {
+      if (didInitialScroll.value) return null;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          if (lastScroll.value != activeTab) {
-            final index = filteredTabEntities.value.indexWhere(
-              (entity) => entity.tabId == activeTab,
-            );
+        if (scrollController.hasClients && activeTab != null) {
+          final index = filteredTabEntities.value.indexWhere(
+            (entity) => entity.tabId == activeTab,
+          );
 
-            if (index > -1) {
-              final offset = index * _itemHeight;
+          if (index > -1) {
+            final viewportStart = scrollController.offset;
+            final viewportEnd =
+                viewportStart + scrollController.position.viewportDimension;
+            final tabStart = index * _itemHeight;
+            final tabEnd = tabStart + _itemHeight;
 
-              if (offset != scrollController.offset) {
-                lastScroll.value = activeTab;
+            final isVisible =
+                tabStart >= viewportStart && tabEnd <= viewportEnd;
 
-                unawaited(
-                  scrollController.animateTo(
-                    offset,
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                  ),
-                );
-              }
+            if (!isVisible) {
+              final targetOffset = (tabStart - _itemHeight).clamp(
+                0.0,
+                scrollController.position.maxScrollExtent,
+              );
+
+              unawaited(
+                scrollController.animateTo(
+                  targetOffset,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                ),
+              );
+
+              didInitialScroll.value = true;
+            } else {
+              didInitialScroll.value = true;
             }
+          } else {
+            didInitialScroll.value = true;
           }
         }
       });
 
       return null;
-    }, [filteredTabEntities, activeTab]);
+    }, [activeTab]);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),

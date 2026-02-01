@@ -187,37 +187,49 @@ class _TabGridView extends HookConsumerWidget {
       [screenWidth, crossAxisCount],
     );
 
-    final lastScroll = useRef<String?>(null);
+    final didInitialScroll = useRef(false);
 
     useEffect(() {
+      if (didInitialScroll.value) return null;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          if (lastScroll.value != activeTab) {
-            final index = filteredTabEntities.value.indexWhere(
-              (entity) => entity.tabId == activeTab,
-            );
+        if (scrollController.hasClients && activeTab != null) {
+          final index = filteredTabEntities.value.indexWhere(
+            (entity) => entity.tabId == activeTab,
+          );
 
-            if (index > -1) {
-              final offset = (index ~/ 2) * itemSize.height;
+          if (index > -1) {
+            final row = index ~/ crossAxisCount;
+            final viewportStart = scrollController.offset;
+            final viewportEnd =
+                viewportStart + scrollController.position.viewportDimension;
+            final tabStart = row * itemSize.height;
+            final tabEnd = tabStart + itemSize.height;
 
-              if (offset != scrollController.offset) {
-                lastScroll.value = activeTab;
+            final isVisible =
+                tabStart >= viewportStart && tabEnd <= viewportEnd;
 
-                unawaited(
-                  scrollController.animateTo(
-                    offset,
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                  ),
-                );
-              }
+            if (!isVisible) {
+              unawaited(
+                scrollController.animateTo(
+                  tabStart,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                ),
+              );
+
+              didInitialScroll.value = true;
+            } else {
+              didInitialScroll.value = true;
             }
+          } else {
+            didInitialScroll.value = true;
           }
         }
       });
 
       return null;
-    }, [filteredTabEntities, activeTab]);
+    }, [activeTab]);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
