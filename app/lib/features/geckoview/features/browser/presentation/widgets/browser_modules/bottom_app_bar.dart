@@ -439,6 +439,7 @@ class ContextualToolbar extends HookConsumerWidget {
           TabMenu(
             controller: useMenuController(),
             selectedTabId: selectedTabId!,
+            enableNavigationButtons: false,
             builder: (context, controller, child) {
               return ToolbarButton(
                 onTap: () {
@@ -555,6 +556,8 @@ class QuickTabSwitcher extends HookConsumerWidget {
               enableFetchFeeds: false,
               enableDesktopMode: false,
               enableReaderMode: false,
+              enableReloadButton: false,
+              enableNavigationButtons: false,
               builder: (context, controller, _) {
                 return InkWell(
                   onLongPress: () {
@@ -645,7 +648,7 @@ class NavigationMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolbarButton(
       onTap: () {
-        Scaffold.of(context).openDrawer();
+        Scaffold.of(context).openEndDrawer();
       },
       child: const Icon(Icons.menu),
     );

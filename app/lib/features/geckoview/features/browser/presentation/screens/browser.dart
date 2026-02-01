@@ -456,7 +456,7 @@ class BrowserScreen extends HookConsumerWidget {
         child: Scaffold(
           // Minimal scaffold - only for Material overlay support (SnackBars)
           resizeToAvoidBottomInset: false,
-          drawer: const BrowserNavigationDrawer(),
+          endDrawer: const BrowserNavigationDrawer(),
           body: Stack(
             children: [
               // Layer 0: Browser content

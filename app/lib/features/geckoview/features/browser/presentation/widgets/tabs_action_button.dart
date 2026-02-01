@@ -57,18 +57,17 @@ class TabsActionButton extends HookConsumerWidget {
             selectedContainerDataProvider.select((value) => value.value?.color),
           );
 
+    final iconColor = isActive
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurfaceVariant;
+
     return ToolbarButton(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(
-            width: 2.0,
-            color: isActive
-                ? theme.colorScheme.primary
-                : DefaultTextStyle.of(context).style.color!,
-          ),
+          border: Border.all(width: 2.0, color: iconColor),
           borderRadius: BorderRadius.circular(5.0),
           color: containerColor.mapNotNull(ContainerColors.forAppBar),
         ),
@@ -82,7 +81,7 @@ class TabsActionButton extends HookConsumerWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14.0,
-                  color: isActive ? theme.colorScheme.primary : null,
+                  color: iconColor,
                 ),
               );
             },
@@ -92,10 +91,19 @@ class TabsActionButton extends HookConsumerWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14.0,
-                      color: isActive ? theme.colorScheme.primary : null,
+                      color: iconColor,
                     ),
                   )
-                : const Skeletonizer(child: Text('00')),
+                : Skeletonizer(
+                    child: Text(
+                      '0',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                        color: iconColor,
+                      ),
+                    ),
+                  ),
             error: (error, stackTrace) {
               logger.e(
                 'Could not determine tab count',
@@ -108,7 +116,7 @@ class TabsActionButton extends HookConsumerWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14.0,
-                  color: isActive ? theme.colorScheme.primary : null,
+                  color: iconColor,
                 ),
               );
             },

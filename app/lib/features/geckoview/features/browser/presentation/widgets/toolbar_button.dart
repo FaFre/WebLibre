@@ -35,13 +35,19 @@ class ToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor = theme.colorScheme.onSurfaceVariant;
+
     return InkWell(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
-        child: child,
+        child: IconTheme(
+          data: IconThemeData(color: iconColor),
+          child: child,
+        ),
       ),
     );
   }

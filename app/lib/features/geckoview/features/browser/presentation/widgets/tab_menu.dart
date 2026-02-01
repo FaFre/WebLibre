@@ -61,6 +61,8 @@ class TabMenu extends HookConsumerWidget {
   final bool enableShare;
   final bool enableExport;
   final bool enableCloseTab;
+  final bool enableReloadButton;
+  final bool enableNavigationButtons;
 
   const TabMenu({
     super.key,
@@ -77,6 +79,8 @@ class TabMenu extends HookConsumerWidget {
     this.enableShare = true,
     this.enableExport = true,
     this.enableCloseTab = true,
+    this.enableReloadButton = true,
+    this.enableNavigationButtons = true,
   });
 
   @override
@@ -453,55 +457,57 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.tabMinus),
             child: const Text('Close Tab'),
           ),
-        const Divider(),
-        MenuItemButton(
-          onPressed: () async {
-            final sessionController = ref.read(
-              tabSessionProvider(tabId: selectedTabId).notifier,
-            );
+        if (enableReloadButton || enableNavigationButtons) const Divider(),
+        if (enableReloadButton)
+          MenuItemButton(
+            onPressed: () async {
+              final sessionController = ref.read(
+                tabSessionProvider(tabId: selectedTabId).notifier,
+              );
 
-            await sessionController.reload();
-            controller.close();
-          },
-          leadingIcon: const Icon(Icons.refresh),
-          child: const Text('Reload'),
-        ),
-        Consumer(
-          builder: (context, ref, child) {
-            final history = ref.watch(
-              tabStateProvider(
-                selectedTabId,
-              ).select((value) => value?.historyState),
-            );
+              await sessionController.reload();
+              controller.close();
+            },
+            leadingIcon: const Icon(Icons.refresh),
+            child: const Text('Reload'),
+          ),
+        if (enableNavigationButtons)
+          Consumer(
+            builder: (context, ref, child) {
+              final history = ref.watch(
+                tabStateProvider(
+                  selectedTabId,
+                ).select((value) => value?.historyState),
+              );
 
-            final isLoading = ref.watch(
-              selectedTabStateProvider.select(
-                (state) => state?.isLoading ?? false,
-              ),
-            );
-
-            return Row(
-              children: [
-                Expanded(
-                  child: NavigateBackButton(
-                    selectedTabId: selectedTabId,
-                    isLoading: isLoading,
-                    menuControllerToClose: controller,
-                    canGoBack: history?.canGoBack == true,
-                  ),
+              final isLoading = ref.watch(
+                selectedTabStateProvider.select(
+                  (state) => state?.isLoading ?? false,
                 ),
-                const SizedBox(height: 48, child: VerticalDivider()),
-                Expanded(
-                  child: NavigateForwardButton(
-                    selectedTabId: selectedTabId,
-                    menuControllerToClose: controller,
-                    canGoForward: history?.canGoForward == true,
+              );
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: NavigateBackButton(
+                      selectedTabId: selectedTabId,
+                      isLoading: isLoading,
+                      menuControllerToClose: controller,
+                      canGoBack: history?.canGoBack == true,
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
+                  const SizedBox(height: 48, child: VerticalDivider()),
+                  Expanded(
+                    child: NavigateForwardButton(
+                      selectedTabId: selectedTabId,
+                      menuControllerToClose: controller,
+                      canGoForward: history?.canGoForward == true,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
       ],
     );
   }
