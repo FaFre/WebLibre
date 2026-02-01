@@ -52,6 +52,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -367,22 +368,40 @@ class BrowserScreen extends HookConsumerWidget {
     // Get pixel ratio for converting logical pixels to physical pixels
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
 
+    // Watch find-in-page visibility for the selected tab
+    final selectedTabId = ref.watch(selectedTabProvider);
+    final findInPageVisible =
+        selectedTabId != null &&
+        ref.watch(
+          findInPageControllerProvider(
+            selectedTabId,
+          ).select((state) => state.visible),
+        );
+
+    // Find in page widget height from the widget constant
+    final findInPageHeight = findInPageVisible
+        ? FindInPageWidget.findInPageHeight
+        : 0.0;
+
     // Set up GeckoView dynamic toolbar height
     // This tells GeckoView the maximum toolbar space so it can adjust viewport
-    final bottomToolbarHeightPx = bottomToolbarVisible
-        ? (bottomAppBarTotalHeight * pixelRatio).round()
-        : 0;
+    final baseToolbarHeight = bottomToolbarVisible
+        ? bottomAppBarTotalHeight
+        : 0.0;
+    final totalToolbarHeight = findInPageVisible
+        ? baseToolbarHeight + findInPageHeight
+        : baseToolbarHeight;
+    final toolbarHeightPx = (totalToolbarHeight * pixelRatio).round();
+
     useEffect(() {
       final lastKeyboardEvent = viewportService.keyboardEvents.valueOrNull;
 
       if (lastKeyboardEvent == null || !lastKeyboardEvent.isVisible) {
-        unawaited(
-          viewportService.setDynamicToolbarMaxHeight(bottomToolbarHeightPx),
-        );
+        unawaited(viewportService.setDynamicToolbarMaxHeight(toolbarHeightPx));
       }
 
       return null;
-    }, [bottomToolbarHeightPx]);
+    }, [toolbarHeightPx]);
 
     // Listen to keyboard visibility changes from native
     useOnStreamChange(
@@ -391,7 +410,15 @@ class BrowserScreen extends HookConsumerWidget {
         if (event.isVisible && event.heightPx > 0) {
           // When keyboard is visible, notify GeckoView to adjust viewport
           // This uses the native API to handle keyboard without Flutter resize
-          unawaited(viewportService.setDynamicToolbarMaxHeight(event.heightPx));
+          // If find-in-page is also visible, add its height to the keyboard height
+          final findInPageHeightPx = findInPageVisible
+              ? (FindInPageWidget.findInPageHeight * pixelRatio).round()
+              : 0;
+          unawaited(
+            viewportService.setDynamicToolbarMaxHeight(
+              event.heightPx + findInPageHeightPx,
+            ),
+          );
         }
       },
     );
@@ -549,6 +576,29 @@ class BrowserScreen extends HookConsumerWidget {
                       visible: value < 100,
                       child: LinearProgressIndicator(value: value / 100),
                     );
+                  },
+                ),
+              ),
+
+              // Layer 6: Find in Page widget (above toolbar or keyboard, whichever is higher)
+              AnimatedPositioned(
+                duration: _AnimatedToolbar._kAnimationDuration,
+                curve: Curves.easeInOutQuart,
+                left: 0,
+                right: 0,
+                bottom: math.max(
+                  bottomToolbarVisible
+                      ? bottomAppBarTotalHeight
+                      : bottomSafeArea,
+                  MediaQuery.viewInsetsOf(context).bottom,
+                ),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final tabId = ref.watch(selectedTabProvider);
+                    if (tabId == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return FindInPageWidget(tabId: tabId);
                   },
                 ),
               ),
@@ -830,37 +880,7 @@ class _BrowserView extends StatelessWidget {
       bottom: false,
       left: !isFullscreen,
       child: Stack(
-        children: [
-          BrowserView(pointerMoveEventSink: pointerMoveEventSink),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Consumer(
-              builder: (context, ref, child) {
-                final value = ref.watch(
-                  selectedTabStateProvider.select(
-                    (state) => EdgeInsets.only(
-                      bottom:
-                          (state?.isLoading == true &&
-                              state?.progress != null &&
-                              state!.progress < 100)
-                          ? 4.0
-                          : 0.0,
-                    ),
-                  ),
-                );
-
-                final tabId = ref.watch(selectedTabProvider);
-                if (tabId == null) {
-                  return const SizedBox.shrink();
-                }
-
-                return FindInPageWidget(tabId: tabId, padding: value);
-              },
-            ),
-          ),
-        ],
+        children: [BrowserView(pointerMoveEventSink: pointerMoveEventSink)],
       ),
     );
   }

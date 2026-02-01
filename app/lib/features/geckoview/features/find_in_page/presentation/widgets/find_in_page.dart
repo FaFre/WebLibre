@@ -22,10 +22,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/presentation/hooks/debouncer.dart';
 
 class FindInPageWidget extends HookConsumerWidget {
   final String tabId;
   final EdgeInsetsGeometry padding;
+
+  /// The height of the find-in-page widget.
+  static const findInPageHeight = 56.0;
 
   const FindInPageWidget({required this.tabId, this.padding = EdgeInsets.zero});
 
@@ -39,76 +43,113 @@ class FindInPageWidget extends HookConsumerWidget {
     final focusNode = useFocusNode();
     final textController = useTextEditingController(
       text: searchResult?.lastSearchText ?? findInPageState.lastSearchText,
-      keys: [searchResult?.lastSearchText, findInPageState.lastSearchText],
     );
+
+    // Update controller text when search result changes from external sources
+    // (e.g., when navigating between matches)
+    useEffect(() {
+      final currentText = textController.text;
+      final newText =
+          searchResult?.lastSearchText ?? findInPageState.lastSearchText ?? '';
+
+      if (currentText != newText) {
+        textController.text = newText;
+      }
+      return null;
+    }, [searchResult?.lastSearchText, findInPageState.lastSearchText]);
+
+    // Create debouncer with automatic disposal
+    final debouncer = useDebouncer(const Duration(milliseconds: 300));
+
+    // Search function that handles debouncing
+    Future<void> onSearchTextChanged(String value) async {
+      if (value.isEmpty) {
+        debouncer.dispose();
+        await ref
+            .read(findInPageControllerProvider(tabId).notifier)
+            .clearMatches();
+      } else {
+        debouncer.eventOccured(() async {
+          await ref
+              .read(findInPageControllerProvider(tabId).notifier)
+              .findAll(text: value);
+        });
+      }
+    }
 
     return Visibility(
       visible: findInPageState.visible || searchResult?.hasMatches == true,
       child: Padding(
         padding: padding,
         child: Material(
-          child: Row(
-            children: [
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  focusNode: focusNode,
-                  controller: textController,
-                  autofocus: true,
-                  autocorrect: false,
-                  decoration: const InputDecoration.collapsed(
-                    hintText: 'Find in page',
+          child: SizedBox(
+            height: findInPageHeight,
+            child: Row(
+              children: [
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    focusNode: focusNode,
+                    controller: textController,
+                    autofocus: true,
+                    autocorrect: false,
+                    decoration: const InputDecoration.collapsed(
+                      hintText: 'Find in page',
+                    ),
+                    keyboardType: TextInputType.text,
+                    onChanged: onSearchTextChanged,
+                    onSubmitted: (value) async {
+                      // Cancel pending debounce and execute immediately
+                      debouncer.dispose();
+                      if (value.isEmpty) {
+                        await ref
+                            .read(findInPageControllerProvider(tabId).notifier)
+                            .clearMatches();
+                      } else {
+                        await ref
+                            .read(findInPageControllerProvider(tabId).notifier)
+                            .findAll(text: value);
+                      }
+                    },
                   ),
-                  keyboardType: TextInputType.text,
-                  onSubmitted: (value) async {
-                    if (value == '') {
-                      await ref
-                          .read(findInPageControllerProvider(tabId).notifier)
-                          .clearMatches();
-                    } else {
-                      await ref
-                          .read(findInPageControllerProvider(tabId).notifier)
-                          .findAll(text: value);
-                    }
+                ),
+                Text(
+                  (searchResult != null && searchResult.hasMatches)
+                      ? '${searchResult.activeMatchOrdinal + 1} of ${searchResult.numberOfMatches}'
+                      : 'Not found',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_upward),
+                  onPressed: () async {
+                    await ref
+                        .read(findInPageControllerProvider(tabId).notifier)
+                        .findNext(
+                          forward: false,
+                          fallbackText: textController.text,
+                        );
                   },
                 ),
-              ),
-              Text(
-                (searchResult != null && searchResult.hasMatches)
-                    ? '${searchResult.activeMatchOrdinal + 1} of ${searchResult.numberOfMatches}'
-                    : 'Not found',
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_upward),
-                onPressed: () async {
-                  await ref
-                      .read(findInPageControllerProvider(tabId).notifier)
-                      .findNext(
-                        forward: false,
-                        fallbackText: textController.text,
-                      );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_downward),
-                onPressed: () async {
-                  await ref
-                      .read(findInPageControllerProvider(tabId).notifier)
-                      .findNext(fallbackText: textController.text);
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () async {
-                  await ref
-                      .read(findInPageControllerProvider(tabId).notifier)
-                      .hide();
+                IconButton(
+                  icon: const Icon(Icons.arrow_downward),
+                  onPressed: () async {
+                    await ref
+                        .read(findInPageControllerProvider(tabId).notifier)
+                        .findNext(fallbackText: textController.text);
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () async {
+                    await ref
+                        .read(findInPageControllerProvider(tabId).notifier)
+                        .hide();
 
-                  textController.clear();
-                  focusNode.requestFocus();
-                },
-              ),
-            ],
+                    textController.clear();
+                    focusNode.requestFocus();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
