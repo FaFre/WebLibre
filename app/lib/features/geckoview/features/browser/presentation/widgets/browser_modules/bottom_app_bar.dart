@@ -31,7 +31,6 @@ import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -41,8 +40,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
@@ -54,6 +53,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
@@ -61,6 +61,7 @@ import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/exit_app.dart';
 
 class BrowserTopAppBar extends HookConsumerWidget {
   final bool showMainToolbar;
@@ -372,10 +373,7 @@ class BrowserTabBar extends HookConsumerWidget {
                       showLongPressMenu: true,
                     ),
                   if (showMainToolbarNavigationButton)
-                    NavigationMenuButton(
-                      selectedTabId: selectedTabId,
-                      showNavigationButtons: true,
-                    ),
+                    NavigationMenuButton(selectedTabId: selectedTabId),
                 ],
               ),
             ),
@@ -441,10 +439,7 @@ class ContextualToolbar extends HookConsumerWidget {
           displayedSheet: displayedSheet,
           showLongPressMenu: false,
         ),
-        NavigationMenuButton(
-          selectedTabId: selectedTabId,
-          showNavigationButtons: false,
-        ),
+        NavigationMenuButton(selectedTabId: selectedTabId),
       ],
     );
   }
@@ -623,13 +618,8 @@ class ShareMenuButton extends HookConsumerWidget {
 
 class NavigationMenuButton extends HookConsumerWidget {
   final String? selectedTabId;
-  final bool showNavigationButtons;
 
-  const NavigationMenuButton({
-    super.key,
-    required this.selectedTabId,
-    required this.showNavigationButtons,
-  });
+  const NavigationMenuButton({super.key, required this.selectedTabId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -669,6 +659,17 @@ class NavigationMenuButton extends HookConsumerWidget {
               return Text(profile.value?.name ?? 'User');
             },
           ),
+        ),
+        MenuItemButton(
+          onPressed: () async {
+            final result = await showQuitBrowserDialog(context);
+
+            if (result == true && context.mounted) {
+              await exitApp(ProviderScope.containerOf(context));
+            }
+          },
+          leadingIcon: const Icon(MdiIcons.power),
+          child: const Text('Quit Browser'),
         ),
         const Divider(),
         Consumer(
@@ -854,167 +855,7 @@ class NavigationMenuButton extends HookConsumerWidget {
           leadingIcon: const Icon(Icons.rss_feed),
           child: const Text('Feeds'),
         ),
-        const Divider(),
-        if (selectedTabId != null)
-          MenuItemButton(
-            onPressed: () async {
-              final controller = ref.read(
-                tabSessionProvider(tabId: selectedTabId).notifier,
-              );
-
-              await controller.reload();
-              hamburgerMenuController.close();
-            },
-            leadingIcon: const Icon(Icons.refresh),
-            child: const Text('Reload'),
-          ),
-        if (selectedTabId != null && showNavigationButtons) ...[
-          const Divider(),
-          Consumer(
-            builder: (context, ref, child) {
-              final history = ref.watch(
-                tabStateProvider(
-                  selectedTabId,
-                ).select((value) => value?.historyState),
-              );
-
-              final isLoading = ref.watch(
-                selectedTabStateProvider.select(
-                  (state) => state?.isLoading ?? false,
-                ),
-              );
-
-              return Row(
-                children: [
-                  Expanded(
-                    child: NavigateBackButton(
-                      selectedTabId: selectedTabId,
-                      isLoading: isLoading,
-                      menuControllerToClose: hamburgerMenuController,
-                      canGoBack: history?.canGoBack == true,
-                    ),
-                  ),
-                  const SizedBox(height: 48, child: VerticalDivider()),
-                  Expanded(
-                    child: NavigateForwardButton(
-                      selectedTabId: selectedTabId,
-                      menuControllerToClose: hamburgerMenuController,
-                      canGoForward: history?.canGoForward == true,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
       ],
-    );
-  }
-}
-
-class NavigateForwardButton extends HookConsumerWidget {
-  const NavigateForwardButton({
-    super.key,
-    required this.selectedTabId,
-    this.menuControllerToClose,
-    this.canGoForward = true,
-  });
-
-  final String? selectedTabId;
-  final MenuController? menuControllerToClose;
-  final bool canGoForward;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final historyMenuController = useMenuController();
-
-    return HistoryMenu(
-      selectedTabId: selectedTabId,
-      controller: historyMenuController,
-      direction: HistoryMenuDirection.forward,
-      child: IconButton(
-        onPressed: canGoForward
-            ? () async {
-                final controller = ref.read(
-                  tabSessionProvider(tabId: selectedTabId).notifier,
-                );
-
-                await controller.goForward();
-                menuControllerToClose?.close();
-              }
-            : null,
-        onLongPress: canGoForward
-            ? () {
-                if (!historyMenuController.isOpen) {
-                  historyMenuController.open();
-                }
-              }
-            : null,
-        icon: const Icon(Icons.arrow_forward),
-      ),
-    );
-  }
-}
-
-class NavigateBackButton extends HookConsumerWidget {
-  const NavigateBackButton({
-    super.key,
-    required this.selectedTabId,
-    required this.isLoading,
-    this.menuControllerToClose,
-    this.canGoBack = true,
-  });
-
-  final String? selectedTabId;
-  final bool isLoading;
-  final MenuController? menuControllerToClose;
-  final bool canGoBack;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final historyMenuController = useMenuController();
-
-    return HistoryMenu(
-      selectedTabId: selectedTabId,
-      controller: historyMenuController,
-      direction: HistoryMenuDirection.back,
-      child: IconButton(
-        onPressed: (canGoBack || isLoading)
-            ? () async {
-                final controller = ref.read(
-                  tabSessionProvider(tabId: selectedTabId).notifier,
-                );
-
-                final isReaderActive = ref.read(
-                  selectedTabStateProvider.select(
-                    (state) => state?.readerableState.active ?? false,
-                  ),
-                );
-
-                if (isLoading) {
-                  await controller.stopLoading();
-                } else if (isReaderActive) {
-                  await ref
-                      .read(readerableScreenControllerProvider.notifier)
-                      .toggleReaderView(false);
-                } else {
-                  await controller.goBack();
-                }
-
-                menuControllerToClose?.close();
-              }
-            : null,
-        onLongPress: (canGoBack && !isLoading)
-            ? () {
-                if (!historyMenuController.isOpen) {
-                  historyMenuController.open();
-                }
-              }
-            : null,
-        icon: isLoading
-            ? const Icon(Icons.close)
-            : const Icon(Icons.arrow_back),
-      ),
     );
   }
 }

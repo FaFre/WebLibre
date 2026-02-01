@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
+import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/utils/exit_app.dart';
 
 /// Bottom sheet widget to select a user profile.
 class SelectProfileDialog extends HookConsumerWidget {
@@ -44,30 +45,38 @@ class SelectProfileDialog extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Users',
+              'Select user',
               style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             usersAsync.when(
               skipLoadingOnReload: true,
-              data: (profiles) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: profiles.map((profile) {
-                  final isSelected =
-                      filesystem.selectedProfile == profile.uuidValue;
-
-                  return ListTile(
-                    key: ValueKey(profile.id),
-                    enabled: !isSelected,
-                    trailing:
-                        !isSelected ? const Icon(MdiIcons.accountSwitch) : null,
-                    title: Text(profile.name),
-                    subtitle: isSelected ? const Text('Active') : null,
+              data: (profiles) => Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 24,
+                runSpacing: 16,
+                children: [
+                  ...profiles.map(
+                    (profile) => _ProfileAvatar(
+                      profile: profile,
+                      isActive: filesystem.selectedProfile == profile.uuidValue,
+                      onTap: () async {
+                        await handleSwitchProfile(context, ref, profile);
+                      },
+                      onLongPress: () async {
+                        await EditProfileRoute(
+                          profile: jsonEncode(profile.toJson()),
+                        ).push(context);
+                      },
+                    ),
+                  ),
+                  _AddProfileAvatar(
                     onTap: () async {
-                      await handleSwitchProfile(context, ref, profile);
+                      await CreateProfileRoute().push(context);
                     },
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
               error: (error, stackTrace) => Center(
                 child: FailureWidget(
@@ -77,34 +86,118 @@ class SelectProfileDialog extends HookConsumerWidget {
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton.icon(
-                  icon: const Icon(MdiIcons.power),
-                  iconAlignment: IconAlignment.start,
-                  label: const Text('Quit Browser'),
-                  onPressed: () async {
-                    final result = await showQuitBrowserDialog(context);
-
-                    if (result == true) {
-                      await exitApp(ref.container);
-                    }
-                  },
-                ),
-                TextButton.icon(
-                  icon: const Icon(MdiIcons.accountGroup),
-                  iconAlignment: IconAlignment.end,
-                  label: const Text('Manage'),
-                  onPressed: () async {
-                    await ProfileListRoute().push(context);
-                  },
-                ),
-              ],
+            const SizedBox(height: 24),
+            TextButton.icon(
+              onPressed: () async {
+                await ProfileListRoute().push(context);
+              },
+              icon: const Icon(MdiIcons.accountGroup),
+              label: const Text('Manage Profiles'),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  final Profile profile;
+  final bool isActive;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+
+  const _ProfileAvatar({
+    required this.profile,
+    required this.isActive,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: isActive
+                ? colorScheme.primary
+                : colorScheme.surfaceContainerHighest,
+            child: Icon(
+              Icons.person,
+              size: 24,
+              color: isActive
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 72,
+            child: Text(
+              profile.name,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AddProfileAvatar extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _AddProfileAvatar({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: Colors.transparent,
+            foregroundColor: colorScheme.onSurfaceVariant,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: colorScheme.outline),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.add,
+                  size: 24,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 72,
+            child: Text(
+              'Add user',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }

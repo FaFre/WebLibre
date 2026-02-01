@@ -31,9 +31,11 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
@@ -451,6 +453,55 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.tabMinus),
             child: const Text('Close Tab'),
           ),
+        const Divider(),
+        MenuItemButton(
+          onPressed: () async {
+            final sessionController = ref.read(
+              tabSessionProvider(tabId: selectedTabId).notifier,
+            );
+
+            await sessionController.reload();
+            controller.close();
+          },
+          leadingIcon: const Icon(Icons.refresh),
+          child: const Text('Reload'),
+        ),
+        Consumer(
+          builder: (context, ref, child) {
+            final history = ref.watch(
+              tabStateProvider(
+                selectedTabId,
+              ).select((value) => value?.historyState),
+            );
+
+            final isLoading = ref.watch(
+              selectedTabStateProvider.select(
+                (state) => state?.isLoading ?? false,
+              ),
+            );
+
+            return Row(
+              children: [
+                Expanded(
+                  child: NavigateBackButton(
+                    selectedTabId: selectedTabId,
+                    isLoading: isLoading,
+                    menuControllerToClose: controller,
+                    canGoBack: history?.canGoBack == true,
+                  ),
+                ),
+                const SizedBox(height: 48, child: VerticalDivider()),
+                Expanded(
+                  child: NavigateForwardButton(
+                    selectedTabId: selectedTabId,
+                    menuControllerToClose: controller,
+                    canGoForward: history?.canGoForward == true,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
