@@ -23,10 +23,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -387,6 +389,7 @@ typedef _QuickTabItem = ({
   bool isHistory,
   String title,
   Uri url,
+  TabState? tabState,
 });
 
 class ContextualToolbar extends HookConsumerWidget {
@@ -517,7 +520,13 @@ class QuickTabSwitcher extends HookConsumerWidget {
               ],
             );
           },
-          itemAvatar: (item) => UrlIcon([item.url], iconSize: 16),
+          itemAvatar: (item) =>
+              item.tabState?.icon.mapNotNull(
+                (icon) => icon.value.mapNotNull(
+                  (image) => RawImage(image: image, height: 24, width: 24),
+                ),
+              ) ??
+              UrlIcon([item.url], iconSize: 16),
           itemBackgroundColor: (item) =>
               item.color != null ? ContainerColors.forChip(item.color!) : null,
           onSelected: (item) async {
@@ -561,7 +570,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
             );
           },
           availableItems: tabStates
-              .map(
+              .map<_QuickTabItem>(
                 (state) => (
                   id: state.$1.id,
                   title: state.$1.titleOrAuthority,
@@ -569,10 +578,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   isHistory: false,
                   url: state.$1.url,
                   color: state.$2?.color,
+                  tabState: state.$1,
                 ),
               )
               .followedBy(
-                (historyAsync.data ?? []).map((state) {
+                (historyAsync.data ?? []).map<_QuickTabItem>((state) {
                   final url = Uri.parse(state.url);
 
                   return (
@@ -582,6 +592,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
                     isHistory: true,
                     url: url,
                     color: null,
+                    tabState: null,
                   );
                 }),
               ),

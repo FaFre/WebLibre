@@ -360,12 +360,14 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
     tabSearchResults.results
         .where((tab) => availableTabStates.value.containsKey(tab.id))
         .map((tab) {
+          final tabState = availableTabStates.value[tab.id]!;
+
           return TabPreview(
             id: tab.id,
             containerId: tab.containerId,
-            title: tab.title ?? availableTabStates.value[tab.id]!.title,
-            icon: null,
-            url: tab.cleanUrl ?? availableTabStates.value[tab.id]!.url,
+            title: tab.title ?? tabState.title,
+            icon: tabState.icon,
+            url: tab.cleanUrl ?? tabState.url,
             highlightedUrl: tab.url,
             extractedContent: tab.extractedContent,
             fullContent: tab.fullContent,
