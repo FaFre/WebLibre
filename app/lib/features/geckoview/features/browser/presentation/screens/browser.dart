@@ -598,7 +598,7 @@ class BrowserScreen extends HookConsumerWidget {
                     if (tabId == null) {
                       return const SizedBox.shrink();
                     }
-                    return FindInPageWidget(tabId: tabId);
+                    return FindInPageWidget(key: ValueKey(tabId), tabId: tabId);
                   },
                 ),
               ),

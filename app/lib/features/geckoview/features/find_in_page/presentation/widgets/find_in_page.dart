@@ -31,7 +31,11 @@ class FindInPageWidget extends HookConsumerWidget {
   /// The height of the find-in-page widget.
   static const findInPageHeight = 56.0;
 
-  const FindInPageWidget({required this.tabId, this.padding = EdgeInsets.zero});
+  const FindInPageWidget({
+    required this.tabId,
+    this.padding = EdgeInsets.zero,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,19 +48,6 @@ class FindInPageWidget extends HookConsumerWidget {
     final textController = useTextEditingController(
       text: searchResult?.lastSearchText ?? findInPageState.lastSearchText,
     );
-
-    // Update controller text when search result changes from external sources
-    // (e.g., when navigating between matches)
-    useEffect(() {
-      final currentText = textController.text;
-      final newText =
-          searchResult?.lastSearchText ?? findInPageState.lastSearchText ?? '';
-
-      if (currentText != newText) {
-        textController.text = newText;
-      }
-      return null;
-    }, [searchResult?.lastSearchText, findInPageState.lastSearchText]);
 
     // Create debouncer with automatic disposal
     final debouncer = useDebouncer(const Duration(milliseconds: 300));
