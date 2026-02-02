@@ -85,10 +85,14 @@ import 'package:weblibre/features/web_feed/presentation/screens/feed_list.dart';
 import 'package:weblibre/features/web_feed/presentation/select_feed_dialog.dart';
 
 part 'routes.bangs.dart';
+part 'routes.bookmarks.dart';
 part 'routes.browser.dart';
 part 'routes.feeds.dart';
 part 'routes.g.dart';
+part 'routes.history.dart';
+part 'routes.profiles.dart';
 part 'routes.settings.dart';
+part 'routes.tor.dart';
 
 @TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
 class AboutRoute extends GoRouteData with $AboutRoute {
