@@ -28,6 +28,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
@@ -248,6 +249,26 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       },
     );
 
+    final topRoute = ref.watch(currentTopRouteProvider);
+    final androidInfoAsync = ref.watch(androidDeviceInfoProvider);
+
+    final isGeckoViewVisible = androidInfoAsync.when(
+      data: (androidInfo) {
+        if (androidInfo == null) {
+          // Not Android, always show GeckoView based on route
+          return topRoute is GoRoute && topRoute.name == BrowserRoute.name;
+        }
+        // Android: only apply visibility fix on Android 12 and lower (API <= 31)
+        if (androidInfo.sdkInt <= 31) {
+          return topRoute is GoRoute && topRoute.name == BrowserRoute.name;
+        }
+        // Android 13+: always show GeckoView
+        return true;
+      },
+      loading: () => true, // Show by default while loading
+      error: (_, _) => true, // Show by default on error
+    );
+
     return Listener(
       behavior: HitTestBehavior.translucent,
       onPointerMove: (widget.pointerMoveEventSink != null)
@@ -259,71 +280,74 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           : null,
       child: Stack(
         children: [
-          GeckoView(
-            preInitializationStep: () async {
-              await ref
-                  .read(eventServiceProvider)
-                  .viewReadyStateEvents
-                  .firstWhere((state) => state == true)
-                  .timeout(
-                    const Duration(seconds: 3),
-                    onTimeout: () {
-                      logger.e(
-                        'Browser fragement not reported ready, trying to intitialize anyways',
-                      );
-                      return true;
-                    },
-                  );
-            },
-            postInitializationStep: () async {
-              await widget.postInitializationStep?.call();
+          Visibility(
+            visible: isGeckoViewVisible,
+            child: GeckoView(
+              preInitializationStep: () async {
+                await ref
+                    .read(eventServiceProvider)
+                    .viewReadyStateEvents
+                    .firstWhere((state) => state == true)
+                    .timeout(
+                      const Duration(seconds: 3),
+                      onTimeout: () {
+                        logger.e(
+                          'Browser fragement not reported ready, trying to intitialize anyways',
+                        );
+                        return true;
+                      },
+                    );
+              },
+              postInitializationStep: () async {
+                await widget.postInitializationStep?.call();
 
-              if (!initializationCompleter.isCompleted) {
-                const quickActions = QuickActions();
+                if (!initializationCompleter.isCompleted) {
+                  const quickActions = QuickActions();
 
-                //Debounce: https://github.com/flutter/flutter/issues/131121
-                DateTime? lastAction;
-                await quickActions.initialize((type) async {
-                  if (lastAction == null ||
-                      DateTime.now().difference(lastAction!) >
-                          const Duration(seconds: 5)) {
-                    if (type == 'new_tab') {
-                      lastAction = DateTime.now();
+                  //Debounce: https://github.com/flutter/flutter/issues/131121
+                  DateTime? lastAction;
+                  await quickActions.initialize((type) async {
+                    if (lastAction == null ||
+                        DateTime.now().difference(lastAction!) >
+                            const Duration(seconds: 5)) {
+                      if (type == 'new_tab') {
+                        lastAction = DateTime.now();
 
-                      final router = await ref.read(routerProvider.future);
-                      const route = SearchRoute(tabType: TabType.regular);
+                        final router = await ref.read(routerProvider.future);
+                        const route = SearchRoute(tabType: TabType.regular);
 
-                      await router.push(route.location);
-                    } else if (type == 'new_private_tab') {
-                      lastAction = DateTime.now();
+                        await router.push(route.location);
+                      } else if (type == 'new_private_tab') {
+                        lastAction = DateTime.now();
 
-                      final router = await ref.read(routerProvider.future);
-                      const route = SearchRoute(tabType: TabType.private);
+                        final router = await ref.read(routerProvider.future);
+                        const route = SearchRoute(tabType: TabType.private);
 
-                      await router.push(route.location);
-                    } else {
-                      throw UnimplementedError(
-                        'Unknown quick action shortcut type',
-                      );
+                        await router.push(route.location);
+                      } else {
+                        throw UnimplementedError(
+                          'Unknown quick action shortcut type',
+                        );
+                      }
                     }
-                  }
-                });
+                  });
 
-                await quickActions.setShortcutItems([
-                  //TODO: add icons
-                  const ShortcutItem(
-                    type: 'new_tab',
-                    localizedTitle: 'New Tab',
-                  ),
-                  const ShortcutItem(
-                    type: 'new_private_tab',
-                    localizedTitle: 'New Private Tab',
-                  ),
-                ]);
+                  await quickActions.setShortcutItems([
+                    //TODO: add icons
+                    const ShortcutItem(
+                      type: 'new_tab',
+                      localizedTitle: 'New Tab',
+                    ),
+                    const ShortcutItem(
+                      type: 'new_private_tab',
+                      localizedTitle: 'New Private Tab',
+                    ),
+                  ]);
 
-                initializationCompleter.complete();
-              }
-            },
+                  initializationCompleter.complete();
+                }
+              },
+            ),
           ),
           if (!hasTab)
             Positioned.fill(

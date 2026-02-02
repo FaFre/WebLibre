@@ -16,6 +16,7 @@ dependencies:
   country_codes: ^3.3.0
   country_flags: ^4.1.1
   cryptography_flutter: ^2.3.4
+  device_info_plus: ^12.3.0
   drift: ^2.30.1
   drift_dev: ^2.30.1
   dynamic_color: ^1.8.1

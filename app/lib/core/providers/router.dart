@@ -52,3 +52,26 @@ Future<GoRouter> router(Ref ref) async {
     initialLocation: initialLocation ?? const BrowserRoute().location,
   );
 }
+
+@Riverpod(keepAlive: true)
+class CurrentTopRoute extends _$CurrentTopRoute {
+  @override
+  RouteBase? build() {
+    final router = ref.watch(routerProvider).value;
+    if (router == null) return null;
+
+    void update() {
+      final config = router.routerDelegate.currentConfiguration;
+      final match = config.last;
+
+      state = match.route;
+    }
+
+    router.routerDelegate.addListener(update);
+    ref.onDispose(() => router.routerDelegate.removeListener(update));
+
+    update();
+
+    return state;
+  }
+}

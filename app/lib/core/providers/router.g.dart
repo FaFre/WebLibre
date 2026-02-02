@@ -42,3 +42,55 @@ final class RouterProvider
 }
 
 String _$routerHash() => r'cbaa7e982114942303574f9573f4a75b79955583';
+
+@ProviderFor(CurrentTopRoute)
+final currentTopRouteProvider = CurrentTopRouteProvider._();
+
+final class CurrentTopRouteProvider
+    extends $NotifierProvider<CurrentTopRoute, RouteBase?> {
+  CurrentTopRouteProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentTopRouteProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentTopRouteHash();
+
+  @$internal
+  @override
+  CurrentTopRoute create() => CurrentTopRoute();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RouteBase? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RouteBase?>(value),
+    );
+  }
+}
+
+String _$currentTopRouteHash() => r'71a66713adafb5f64359eec88a69344167aae64f';
+
+abstract class _$CurrentTopRoute extends $Notifier<RouteBase?> {
+  RouteBase? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<RouteBase?, RouteBase?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<RouteBase?, RouteBase?>,
+              RouteBase?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
