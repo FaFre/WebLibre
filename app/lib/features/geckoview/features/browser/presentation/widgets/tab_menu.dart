@@ -364,6 +364,57 @@ class TabMenu extends HookConsumerWidget {
               ),
               Consumer(
                 child: MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.webMinus),
+                  child: const Text('Unassign URL relation'),
+                  onPressed: () async {
+                    final tabState = ref.read(tabStateProvider(selectedTabId));
+                    final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+
+                    if (origin != null) {
+                      final containerId = await ref
+                          .read(containerRepositoryProvider.notifier)
+                          .siteAssignedContainerId(origin);
+
+                      if (containerId != null) {
+                        final containerData = await ref
+                            .read(containerRepositoryProvider.notifier)
+                            .getContainerData(containerId);
+
+                        if (containerData != null) {
+                          final updatedSites = containerData
+                              .metadata
+                              .assignedSites
+                              ?.where((site) => site != origin)
+                              .toList();
+
+                          await ref
+                              .read(containerRepositoryProvider.notifier)
+                              .replaceContainer(
+                                containerData.copyWith.metadata(
+                                  containerData.metadata.copyWith.assignedSites(
+                                    updatedSites,
+                                  ),
+                                ),
+                              );
+                        }
+                      }
+                    }
+                  },
+                ),
+                builder: (context, ref, child) {
+                  final isSiteAssigned = ref.watch(
+                    watchIsCurrentSiteAssignedToContainerProvider,
+                  );
+
+                  return Visibility(
+                    visible:
+                        isSiteAssigned.hasValue && isSiteAssigned.requireValue,
+                    child: child!,
+                  );
+                },
+              ),
+              Consumer(
+                child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.folderCancelOutline),
                   child: const Text('Unassign Container'),
                   onPressed: () async {
