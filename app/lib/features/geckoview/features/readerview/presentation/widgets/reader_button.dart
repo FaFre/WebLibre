@@ -60,7 +60,7 @@ class ReaderButton extends HookConsumerWidget {
         ? Icon(MdiIcons.bookOpen, color: Theme.of(context).colorScheme.primary)
         : Icon(
             MdiIcons.bookOpenOutline,
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           );
 
     return Visibility(
