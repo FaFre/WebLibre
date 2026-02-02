@@ -44,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -237,7 +238,7 @@ class TabMenu extends HookConsumerWidget {
                 },
               ),
               MenuItemButton(
-                leadingIcon: const Icon(MdiIcons.tabUnselected),
+                leadingIcon: const Icon(WebLibreIcons.privateTab),
                 child: const Text('Private'),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;

@@ -52,6 +52,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -364,7 +365,7 @@ class BrowserTabBar extends HookConsumerWidget {
                               controller.open();
                             }
                           },
-                          child: const Icon(MdiIcons.dotsVertical),
+                          child: const Icon(WebLibreIcons.tabOptions),
                         );
                       },
                     ),
@@ -449,7 +450,7 @@ class ContextualToolbar extends HookConsumerWidget {
                     controller.open();
                   }
                 },
-                child: const Icon(MdiIcons.dotsVertical),
+                child: const Icon(WebLibreIcons.tabOptions),
               );
             },
           ),

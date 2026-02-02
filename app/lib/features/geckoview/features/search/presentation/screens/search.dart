@@ -43,6 +43,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
+import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/utils/text_field_line_count.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -280,7 +281,7 @@ class SearchScreen extends HookConsumerWidget {
                                   const ButtonSegment(
                                     value: TabType.private,
                                     label: Text('Private'),
-                                    icon: Icon(MdiIcons.tabUnselected),
+                                    icon: Icon(WebLibreIcons.privateTab),
                                   ),
                                   if (createChildTabsOption)
                                     const ButtonSegment(

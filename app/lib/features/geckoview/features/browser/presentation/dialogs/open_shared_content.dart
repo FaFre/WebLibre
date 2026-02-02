@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
 class OpenSharedContent extends HookConsumerWidget {
@@ -109,7 +110,7 @@ class OpenSharedContent extends HookConsumerWidget {
           ),
           ListTile(
             title: const Text('Open Private Tab'),
-            leading: const Icon(MdiIcons.tabUnselected),
+            leading: const Icon(WebLibreIcons.privateTab),
             onTap: () async {
               await openTab(true);
             },

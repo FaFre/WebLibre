@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 
 class TabCreationMenu extends HookConsumerWidget {
   final Widget child;
@@ -58,7 +59,7 @@ class TabCreationMenu extends HookConsumerWidget {
           onPressed: () async {
             await const SearchRoute(tabType: TabType.private).push(context);
           },
-          leadingIcon: const Icon(MdiIcons.tabUnselected),
+          leadingIcon: const Icon(WebLibreIcons.privateTab),
           child: const Text('Add Private Tab'),
         ),
         if (createChildTabsOption)

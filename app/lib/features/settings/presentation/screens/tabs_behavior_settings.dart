@@ -29,6 +29,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 
 class TabsBehaviorSettingsScreen extends StatelessWidget {
   const TabsBehaviorSettingsScreen({super.key});
@@ -136,7 +137,7 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                 ButtonSegment(
                   value: TabType.private,
                   label: Text('Private'),
-                  icon: Icon(MdiIcons.tabUnselected),
+                  icon: Icon(WebLibreIcons.privateTab),
                 ),
               ],
               selected: {defaultCreateTabType},
@@ -202,7 +203,7 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
                 ButtonSegment(
                   value: TabIntentOpenSetting.private,
                   label: Text('Private'),
-                  icon: Icon(MdiIcons.tabUnselected),
+                  icon: Icon(WebLibreIcons.privateTab),
                 ),
               ],
               selected: {tabIntentOpenSetting},
