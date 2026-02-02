@@ -40,7 +40,7 @@ class EquatableImage {
     if (_isDisposed) return;
     _isDisposed = true;
     // Delay disposal to allow widgets to finish rendering
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(seconds: 3), () {
       _value?.dispose();
       _value = null;
     });
