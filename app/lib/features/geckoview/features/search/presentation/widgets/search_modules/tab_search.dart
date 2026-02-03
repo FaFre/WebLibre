@@ -53,9 +53,12 @@ class TabSearch extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedContainer = useState<ContainerData?>(
-      ref.read(selectedContainerDataProvider.select((value) => value.value)),
-    );
+    final selectedContainer = useState<ContainerData?>(null);
+    ref.listen(selectedContainerDataProvider, (previous, next) {
+      next.whenData((container) {
+        selectedContainer.value = container;
+      });
+    });
 
     final tabSearchResults = ref.watch(
       filteredTabPreviewsProvider(
