@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:drift/drift.dart' hide Column;
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -40,6 +41,9 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/full_search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
@@ -76,6 +80,13 @@ class SearchScreen extends HookConsumerWidget {
 
     final selectedTabType = useState(tabType);
     final currentTabTabType = ref.watch(selectedTabTypeProvider);
+
+    final selectedContainer = useState<ContainerData?>(null);
+    ref.listen(selectedContainerDataProvider, (previous, next) {
+      next.whenData((container) {
+        selectedContainer.value = container;
+      });
+    });
 
     // When editing an existing tab, get its state
     // If tab no longer exists (null), fall back to new tab mode
@@ -240,6 +251,7 @@ class SearchScreen extends HookConsumerWidget {
                     : null,
                 launchedFromIntent: launchedFromIntent,
                 selectTab: true,
+                container: Value(selectedContainer.value),
               );
         }
 
@@ -264,58 +276,84 @@ class SearchScreen extends HookConsumerWidget {
                     floating: true,
                     pinned: true,
                     automaticallyImplyLeading: false,
-                    toolbarHeight: isEditMode ? 0 : kToolbarHeight,
+                    toolbarHeight: isEditMode ? 0 : kToolbarHeight + 56,
                     title: isEditMode
                         ? null
-                        : Align(
-                            child: Focus(
-                              canRequestFocus: false,
-                              child: SegmentedButton(
-                                showSelectedIcon: false,
-                                segments: [
-                                  const ButtonSegment(
-                                    value: TabType.regular,
-                                    label: Text('Regular'),
-                                    icon: Icon(MdiIcons.tab),
-                                  ),
-                                  const ButtonSegment(
-                                    value: TabType.private,
-                                    label: Text('Private'),
-                                    icon: Icon(WebLibreIcons.privateTab),
-                                  ),
-                                  if (createChildTabsOption)
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Focus(
+                                canRequestFocus: false,
+                                child: SegmentedButton(
+                                  showSelectedIcon: false,
+                                  segments: [
                                     const ButtonSegment(
-                                      value: TabType.child,
-                                      label: Text('Child'),
-                                      icon: Icon(MdiIcons.fileTree),
+                                      value: TabType.regular,
+                                      label: Text('Regular'),
+                                      icon: Icon(MdiIcons.tab),
                                     ),
-                                ],
-                                selected: {selectedTabType.value},
-                                onSelectionChanged: (value) {
-                                  selectedTabType.value = value.first;
-                                  // Restore focus to search field after segment change
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) {
-                                    searchFocusNode.requestFocus();
-                                  });
-                                },
-                                style: switch (selectedTabType.value) {
-                                  TabType.regular => null,
-                                  TabType.private => SegmentedButton.styleFrom(
-                                    selectedBackgroundColor:
-                                        appColors.privateSelectionOverlay,
-                                  ),
-                                  TabType.child =>
-                                    (currentTabTabType == TabType.private)
-                                        ? SegmentedButton.styleFrom(
-                                            selectedBackgroundColor: appColors
-                                                .privateSelectionOverlay,
-                                          )
-                                        : null,
-                                },
+                                    const ButtonSegment(
+                                      value: TabType.private,
+                                      label: Text('Private'),
+                                      icon: Icon(WebLibreIcons.privateTab),
+                                    ),
+                                    if (createChildTabsOption)
+                                      const ButtonSegment(
+                                        value: TabType.child,
+                                        label: Text('Child'),
+                                        icon: Icon(MdiIcons.fileTree),
+                                      ),
+                                  ],
+                                  selected: {selectedTabType.value},
+                                  onSelectionChanged: (value) {
+                                    selectedTabType.value = value.first;
+                                    // Restore focus to search field after segment change
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          searchFocusNode.requestFocus();
+                                        });
+                                  },
+                                  style: switch (selectedTabType.value) {
+                                    TabType.regular => null,
+                                    TabType.private =>
+                                      SegmentedButton.styleFrom(
+                                        selectedBackgroundColor:
+                                            appColors.privateSelectionOverlay,
+                                      ),
+                                    TabType.child =>
+                                      (currentTabTabType == TabType.private)
+                                          ? SegmentedButton.styleFrom(
+                                              selectedBackgroundColor: appColors
+                                                  .privateSelectionOverlay,
+                                            )
+                                          : null,
+                                  },
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                height: 48,
+                                child: ContainerChips(
+                                  selectedContainer: selectedContainer.value,
+                                  onSelected: (container) async {
+                                    if (container != null) {
+                                      if (await ref
+                                          .read(
+                                            selectedContainerProvider.notifier,
+                                          )
+                                          .authenticateContainer(container)) {
+                                        selectedContainer.value = container;
+                                      }
+                                    } else {
+                                      selectedContainer.value = container;
+                                    }
+                                  },
+                                  onDeleted: (container) {
+                                    selectedContainer.value = null;
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                     bottom: PreferredSize(
                       preferredSize: Size.fromHeight(preferredHeight.value),
@@ -393,6 +431,9 @@ class SearchScreen extends HookConsumerWidget {
                                             : null,
                                         launchedFromIntent: launchedFromIntent,
                                         selectTab: true,
+                                        container: Value(
+                                          selectedContainer.value,
+                                        ),
                                       );
                                 }
 
@@ -446,6 +487,7 @@ class SearchScreen extends HookConsumerWidget {
                                   : null,
                               launchedFromIntent: launchedFromIntent,
                               selectTab: true,
+                              container: Value(selectedContainer.value),
                             );
                       }
 
