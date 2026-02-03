@@ -19,14 +19,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 
 class TabsActionButton extends HookConsumerWidget {
   final bool isActive;
@@ -51,12 +49,6 @@ class TabsActionButton extends HookConsumerWidget {
         ? ref.watch(containerTabCountProvider(ContainerFilterDisabled()))
         : ref.watch(selectedContainerTabCountProvider);
 
-    final containerColor = isActive
-        ? null
-        : ref.watch(
-            selectedContainerDataProvider.select((value) => value.value?.color),
-          );
-
     final iconColor = isActive
         ? theme.colorScheme.primary
         : theme.colorScheme.onSurfaceVariant;
@@ -69,7 +61,6 @@ class TabsActionButton extends HookConsumerWidget {
         decoration: BoxDecoration(
           border: Border.all(width: 2.0, color: iconColor),
           borderRadius: BorderRadius.circular(5.0),
-          color: containerColor.mapNotNull(ContainerColors.forAppBar),
         ),
         constraints: const BoxConstraints(minWidth: 25.0),
         child: Center(
