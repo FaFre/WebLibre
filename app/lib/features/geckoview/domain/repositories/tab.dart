@@ -293,6 +293,14 @@ class TabRepository extends _$TabRepository {
 
     if (!ref.mounted) return;
 
+    // Priority 1: Check for parent tab first (if exists and in same container)
+    if (tabState?.parentId != null) {
+      if (sameContainerTabs.any((tab) => tab == tabState?.parentId)) {
+        return _tabsService.selectTab(tabId: tabState!.parentId!);
+      }
+    }
+
+    // Priority 2: Check for previous tab by timestamp
     final previousTabId = await ref
         .read(tabDatabaseProvider)
         .definitionsDrift
@@ -302,12 +310,6 @@ class TabRepository extends _$TabRepository {
     if (previousTabId != null) {
       if (sameContainerTabs.any((tab) => tab == previousTabId)) {
         return _tabsService.selectTab(tabId: previousTabId);
-      }
-    }
-
-    if (tabState?.parentId != null) {
-      if (sameContainerTabs.any((tab) => tab == tabState?.parentId)) {
-        return _tabsService.selectTab(tabId: tabState!.parentId!);
       }
     }
 
