@@ -17,7 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
@@ -38,7 +41,6 @@ class SearchField extends HookConsumerWidget {
   final bool showSuggestions;
   final int? maxLines;
   final int? minLines;
-  final VoidCallback? onTap;
   final bool unfocusOnTapOutside;
   final GlobalKey? textFieldKey;
 
@@ -55,7 +57,6 @@ class SearchField extends HookConsumerWidget {
     this.focusNode,
     this.maxLines = 1,
     this.minLines = 1,
-    this.onTap,
     this.unfocusOnTapOutside = true,
     this.showBangIcon = true,
     this.autofocus = false,
@@ -152,7 +153,18 @@ class SearchField extends HookConsumerWidget {
             }
           : null,
       onSubmitted: onSubmitted,
-      onTap: onTap,
+      onTap: () {
+        if (suggestion.value != null) {
+          unawaited(HapticFeedback.lightImpact());
+
+          textEditingController.text = suggestion.value!;
+          textEditingController.selection = TextSelection.collapsed(
+            offset: suggestion.value!.length,
+          );
+
+          suggestion.value = null;
+        }
+      },
     );
   }
 }
