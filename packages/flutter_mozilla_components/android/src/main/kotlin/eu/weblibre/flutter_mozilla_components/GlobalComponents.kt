@@ -57,6 +57,9 @@ object GlobalComponents {
     // Engine settings API for managing engine-specific settings
     var engineSettingsApi: GeckoEngineSettingsApiImpl? = null
 
+    // External download manager setting
+    var useExternalDownloadManager: Boolean = false
+
     fun shouldOpenLinksInApp(): Boolean {
         return when (engineSettingsApi!!.getAppLinksMode()) {
             eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS -> true

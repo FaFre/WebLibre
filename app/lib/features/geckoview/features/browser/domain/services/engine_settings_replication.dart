@@ -101,6 +101,23 @@ class EngineSettingsReplicationService
 
     ref.listen(
       fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.useExternalDownloadManager,
+      ),
+      (previous, next) async {
+        await _service.setUseExternalDownloadManager(next);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to useExternalDownloadManager',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
       engineSettingsRepositoryProvider,
       (previous, next) async {
         final settings = next.value;

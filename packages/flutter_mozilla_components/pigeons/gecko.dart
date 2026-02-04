@@ -1012,6 +1012,12 @@ abstract class GeckoEngineSettingsApi {
   void setAppLinksMode(AppLinksMode mode);
 
   AppLinksMode getAppLinksMode();
+
+  /// Sets whether to use external download managers for downloads.
+  /// When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
+  void setUseExternalDownloadManager(bool enabled);
+
+  bool getUseExternalDownloadManager();
 }
 
 @HostApi()

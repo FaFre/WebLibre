@@ -49,6 +49,7 @@ class TabsBehaviorSettingsScreen extends StatelessWidget {
                 _TabCreationSection(),
                 _TabOrganizationSection(),
                 _TabInteractionSection(),
+                _DownloadsSection(),
               ],
             );
           },
@@ -401,6 +402,48 @@ class _AppLinksModeSection extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DownloadsSection extends StatelessWidget {
+  const _DownloadsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Downloads'),
+        _ExternalDownloadManagerTile(),
+      ],
+    );
+  }
+}
+
+class _ExternalDownloadManagerTile extends HookConsumerWidget {
+  const _ExternalDownloadManagerTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final useExternalDownloadManager = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.useExternalDownloadManager,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Use external download manager'),
+      subtitle: const Text('Manage downloads with another app'),
+      secondary: const Icon(MdiIcons.download),
+      value: useExternalDownloadManager,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.useExternalDownloadManager(value),
+            );
+      },
     );
   }
 }

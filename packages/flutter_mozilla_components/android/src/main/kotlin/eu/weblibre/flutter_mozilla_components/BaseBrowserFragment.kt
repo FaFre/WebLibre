@@ -287,6 +287,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     onNeedToRequestPermissions = { permissions ->
                         requestDownloadPermissionsLauncher.launch(permissions)
                     },
+                    shouldForwardToThirdParties = {
+                        GlobalComponents.useExternalDownloadManager
+                    },
                 ),
                 owner = this,
                 view = view,

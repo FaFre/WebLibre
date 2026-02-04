@@ -59,6 +59,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
 
+  GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager);
+
   GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab);
 
   GeneralSettings unassignedTabsAutoCleanInterval(
@@ -96,6 +98,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarPosition tabBarPosition,
     QuickTabSwitcherMode quickTabSwitcherMode,
     bool pullToRefreshEnabled,
+    bool useExternalDownloadManager,
     bool doubleBackCloseTab,
     Duration unassignedTabsAutoCleanInterval,
     int maxSearchHistoryEntries,
@@ -198,6 +201,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(pullToRefreshEnabled: pullToRefreshEnabled);
 
   @override
+  GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager) =>
+      call(useExternalDownloadManager: useExternalDownloadManager);
+
+  @override
   GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab) =>
       call(doubleBackCloseTab: doubleBackCloseTab);
 
@@ -240,6 +247,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
+    Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
@@ -367,6 +375,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.pullToRefreshEnabled
           // ignore: cast_nullable_to_non_nullable
           : pullToRefreshEnabled as bool,
+      useExternalDownloadManager:
+          useExternalDownloadManager == const $CopyWithPlaceholder() ||
+              useExternalDownloadManager == null
+          ? _value.useExternalDownloadManager
+          // ignore: cast_nullable_to_non_nullable
+          : useExternalDownloadManager as bool,
       doubleBackCloseTab:
           doubleBackCloseTab == const $CopyWithPlaceholder() ||
               doubleBackCloseTab == null
@@ -450,6 +464,7 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['quickTabSwitcherMode'],
   ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
+  useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
   doubleBackCloseTab: json['doubleBackCloseTab'] as bool?,
   unassignedTabsAutoCleanInterval:
       json['unassignedTabsAutoCleanInterval'] == null
@@ -493,6 +508,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherMode':
       _$QuickTabSwitcherModeEnumMap[instance.quickTabSwitcherMode]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
+  'useExternalDownloadManager': instance.useExternalDownloadManager,
   'doubleBackCloseTab': instance.doubleBackCloseTab,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,

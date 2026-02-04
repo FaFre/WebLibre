@@ -3850,6 +3850,12 @@ interface GeckoEngineSettingsApi {
    */
   fun setAppLinksMode(mode: AppLinksMode)
   fun getAppLinksMode(): AppLinksMode
+  /**
+   * Sets whether to use external download managers for downloads.
+   * When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
+   */
+  fun setUseExternalDownloadManager(enabled: Boolean)
+  fun getUseExternalDownloadManager(): Boolean
 
   companion object {
     /** The codec used by GeckoEngineSettingsApi. */
@@ -3938,6 +3944,39 @@ interface GeckoEngineSettingsApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.getAppLinksMode())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setUseExternalDownloadManager$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val enabledArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setUseExternalDownloadManager(enabledArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.getUseExternalDownloadManager$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getUseExternalDownloadManager())
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }

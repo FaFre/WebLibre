@@ -350,4 +350,12 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             else -> AppLinksMode.ASK
         }
     }
+
+    override fun setUseExternalDownloadManager(enabled: Boolean) {
+        GlobalComponents.useExternalDownloadManager = enabled
+    }
+
+    override fun getUseExternalDownloadManager(): Boolean {
+        return GlobalComponents.useExternalDownloadManager
+    }
 }

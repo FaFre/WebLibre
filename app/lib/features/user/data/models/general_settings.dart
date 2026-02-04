@@ -81,6 +81,7 @@ class GeneralSettings with FastEquatable {
   final TabBarPosition tabBarPosition;
   final QuickTabSwitcherMode quickTabSwitcherMode;
   final bool pullToRefreshEnabled;
+  final bool useExternalDownloadManager;
   final bool doubleBackCloseTab;
   final Duration unassignedTabsAutoCleanInterval;
   final int maxSearchHistoryEntries;
@@ -107,6 +108,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarPosition,
     required this.quickTabSwitcherMode,
     required this.pullToRefreshEnabled,
+    required this.useExternalDownloadManager,
     required this.doubleBackCloseTab,
     required this.unassignedTabsAutoCleanInterval,
     required this.maxSearchHistoryEntries,
@@ -134,6 +136,7 @@ class GeneralSettings with FastEquatable {
     TabBarPosition? tabBarPosition,
     QuickTabSwitcherMode? quickTabSwitcherMode,
     bool? pullToRefreshEnabled,
+    bool? useExternalDownloadManager,
     bool? doubleBackCloseTab,
     Duration? unassignedTabsAutoCleanInterval,
     int? maxSearchHistoryEntries,
@@ -161,6 +164,7 @@ class GeneralSettings with FastEquatable {
        quickTabSwitcherMode =
            quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
+       useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
        unassignedTabsAutoCleanInterval =
            unassignedTabsAutoCleanInterval ?? Duration.zero,
@@ -194,6 +198,7 @@ class GeneralSettings with FastEquatable {
     tabBarPosition,
     quickTabSwitcherMode,
     pullToRefreshEnabled,
+    useExternalDownloadManager,
     doubleBackCloseTab,
     unassignedTabsAutoCleanInterval,
     maxSearchHistoryEntries,

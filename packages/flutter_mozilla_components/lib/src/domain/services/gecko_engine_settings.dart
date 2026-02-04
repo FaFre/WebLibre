@@ -148,4 +148,14 @@ class GeckoEngineSettingsService {
   Future<AppLinksMode> getAppLinksMode() {
     return _api.getAppLinksMode();
   }
+
+  /// Sets whether to use external download managers for downloads.
+  /// When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
+  Future<void> setUseExternalDownloadManager(bool enabled) {
+    return _api.setUseExternalDownloadManager(enabled);
+  }
+
+  Future<bool> getUseExternalDownloadManager() {
+    return _api.getUseExternalDownloadManager();
+  }
 }
