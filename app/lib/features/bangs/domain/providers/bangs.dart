@@ -81,7 +81,12 @@ Stream<List<BangData>> frequentBangList(Ref ref) {
 @Riverpod()
 Stream<List<SearchHistoryEntry>> searchHistory(Ref ref) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
-  return repository.watchSearchHistory(limit: 3); //TODO: make count dynamic
+  final maxSearchHistoryEntries = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (s) => s.maxSearchHistoryEntries,
+    ),
+  );
+  return repository.watchSearchHistory(limit: maxSearchHistoryEntries);
 }
 
 @Riverpod()

@@ -354,7 +354,7 @@ final class SearchHistoryProvider
   }
 }
 
-String _$searchHistoryHash() => r'7b97798729643de8e44fd8024cdc02f35124b08b';
+String _$searchHistoryHash() => r'5f9508a6b286bfcd1b641bd429de46ad052a3dfe';
 
 @ProviderFor(lastSyncOfGroup)
 final lastSyncOfGroupProvider = LastSyncOfGroupFamily._();

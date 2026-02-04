@@ -115,7 +115,12 @@ class BangDataRepository extends _$BangDataRepository {
     String trigger,
     String searchQuery, {
     required int maxEntryCount,
-  }) {
+  }) async {
+    // Skip capturing history if maxEntryCount is 0
+    if (maxEntryCount <= 0) {
+      return;
+    }
+
     final db = ref.read(bangDatabaseProvider);
     //Pack in a transaction to bundle rebuilds of watch() queries
     return db.transaction(() async {

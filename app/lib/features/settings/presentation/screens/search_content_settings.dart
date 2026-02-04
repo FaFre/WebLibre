@@ -19,6 +19,7 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
@@ -72,6 +73,7 @@ class _SearchSection extends StatelessWidget {
         _DefaultSearchProviderSection(),
         _BangsTile(),
         _AutocompleteProviderSection(),
+        _MaxSearchHistoryEntriesSection(),
       ],
     );
   }
@@ -230,6 +232,72 @@ class _BangsTile extends StatelessWidget {
       onTap: () async {
         await BangSettingsRoute().push(context);
       },
+    );
+  }
+}
+
+class _MaxSearchHistoryEntriesSection extends HookConsumerWidget {
+  const _MaxSearchHistoryEntriesSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formKey = useMemoized(() => GlobalKey<FormState>());
+
+    final maxSearchHistoryEntries = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.maxSearchHistoryEntries,
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Search History Limit'),
+            subtitle: Text('Maximum number of recent searches to remember'),
+            leading: Icon(MdiIcons.history),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40.0),
+            child: Form(
+              key: formKey,
+              child: TextFormField(
+                initialValue: maxSearchHistoryEntries.toString(),
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(suffixText: 'entries'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  }
+                  final parsedValue = int.tryParse(value);
+                  if (parsedValue == null) {
+                    return 'Please enter a valid number';
+                  }
+                  if (parsedValue < 0 || parsedValue > 100) {
+                    return 'Value must be between 0 and 100';
+                  }
+                  return null;
+                },
+                onFieldSubmitted: (value) async {
+                  if (formKey.currentState?.validate() ?? false) {
+                    final parsedValue = int.parse(value);
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (currentSettings) => currentSettings.copyWith
+                              .maxSearchHistoryEntries(parsedValue),
+                        );
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -135,6 +135,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
             DriftSqlType.int,
             db.typeMapping,
           ),
+      'maxSearchHistoryEntries': settings['maxSearchHistoryEntries']?.readAs(
+        DriftSqlType.int,
+        db.typeMapping,
+      ),
     });
   }
 

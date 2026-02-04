@@ -65,6 +65,8 @@ abstract class _$GeneralSettingsCWProxy {
     Duration unassignedTabsAutoCleanInterval,
   );
 
+  GeneralSettings maxSearchHistoryEntries(int maxSearchHistoryEntries);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -96,6 +98,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool pullToRefreshEnabled,
     bool doubleBackCloseTab,
     Duration unassignedTabsAutoCleanInterval,
+    int maxSearchHistoryEntries,
   });
 }
 
@@ -204,6 +207,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(unassignedTabsAutoCleanInterval: unassignedTabsAutoCleanInterval);
 
   @override
+  GeneralSettings maxSearchHistoryEntries(int maxSearchHistoryEntries) =>
+      call(maxSearchHistoryEntries: maxSearchHistoryEntries);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -235,6 +242,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
+    Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -371,6 +379,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.unassignedTabsAutoCleanInterval
           // ignore: cast_nullable_to_non_nullable
           : unassignedTabsAutoCleanInterval as Duration,
+      maxSearchHistoryEntries:
+          maxSearchHistoryEntries == const $CopyWithPlaceholder() ||
+              maxSearchHistoryEntries == null
+          ? _value.maxSearchHistoryEntries
+          // ignore: cast_nullable_to_non_nullable
+          : maxSearchHistoryEntries as int,
     );
   }
 }
@@ -444,6 +458,7 @@ GeneralSettings _$GeneralSettingsFromJson(
           microseconds: (json['unassignedTabsAutoCleanInterval'] as num)
               .toInt(),
         ),
+  maxSearchHistoryEntries: (json['maxSearchHistoryEntries'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -481,6 +496,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'doubleBackCloseTab': instance.doubleBackCloseTab,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
+  'maxSearchHistoryEntries': instance.maxSearchHistoryEntries,
 };
 
 const _$ThemeModeEnumMap = {

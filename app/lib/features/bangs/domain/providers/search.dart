@@ -24,6 +24,7 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/providers.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'search.g.dart';
 
@@ -33,14 +34,15 @@ class BangSearch extends _$BangSearch {
 
   Future<Uri> triggerBangSearch(BangData bang, String searchQuery) async {
     final bangDataNotifier = ref.read(bangDataRepositoryProvider.notifier);
+    final settings = ref.read(generalSettingsWithDefaultsProvider);
 
     await bangDataNotifier.increaseFrequency(bang.toKey());
     await bangDataNotifier.addSearchEntry(
       bang.group,
       bang.trigger,
       searchQuery,
-      maxEntryCount: 3,
-    ); //TODO: make count dynamic
+      maxEntryCount: settings.maxSearchHistoryEntries,
+    );
 
     return bang.getTemplateUrl(searchQuery);
   }

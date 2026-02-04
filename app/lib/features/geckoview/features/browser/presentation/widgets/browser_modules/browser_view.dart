@@ -32,6 +32,7 @@ import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/browser_extension.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -445,6 +446,19 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to engineSettingsReplicationServiceProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listenManual(
+      fireImmediately: true,
+      searchHistoryCleanupServiceProvider,
+      (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to searchHistoryCleanupServiceProvider',
           error: error,
           stackTrace: stackTrace,
         );

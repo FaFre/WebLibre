@@ -83,6 +83,7 @@ class GeneralSettings with FastEquatable {
   final bool pullToRefreshEnabled;
   final bool doubleBackCloseTab;
   final Duration unassignedTabsAutoCleanInterval;
+  final int maxSearchHistoryEntries;
 
   GeneralSettings({
     required this.themeMode,
@@ -108,6 +109,7 @@ class GeneralSettings with FastEquatable {
     required this.pullToRefreshEnabled,
     required this.doubleBackCloseTab,
     required this.unassignedTabsAutoCleanInterval,
+    required this.maxSearchHistoryEntries,
   });
 
   GeneralSettings.withDefaults({
@@ -134,6 +136,7 @@ class GeneralSettings with FastEquatable {
     bool? pullToRefreshEnabled,
     bool? doubleBackCloseTab,
     Duration? unassignedTabsAutoCleanInterval,
+    int? maxSearchHistoryEntries,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -160,7 +163,8 @@ class GeneralSettings with FastEquatable {
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
        unassignedTabsAutoCleanInterval =
-           unassignedTabsAutoCleanInterval ?? Duration.zero;
+           unassignedTabsAutoCleanInterval ?? Duration.zero,
+       maxSearchHistoryEntries = maxSearchHistoryEntries ?? 5;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -192,5 +196,6 @@ class GeneralSettings with FastEquatable {
     pullToRefreshEnabled,
     doubleBackCloseTab,
     unassignedTabsAutoCleanInterval,
+    maxSearchHistoryEntries,
   ];
 }
