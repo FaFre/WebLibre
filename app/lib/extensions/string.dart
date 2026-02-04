@@ -20,4 +20,7 @@
 extension StringExtension on String {
   String toCapitalized() =>
       isEmpty ? this : '${this[0].toUpperCase()}${substring(1)}';
+
+  bool startsWithIgnoreCase(String prefix) =>
+      toLowerCase().startsWith(prefix.toLowerCase());
 }

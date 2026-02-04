@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/extensions/string.dart';
 import 'package:weblibre/utils/text_field_line_count.dart';
 
 class AutoSuggestTextField extends HookWidget {
@@ -86,26 +87,25 @@ class AutoSuggestTextField extends HookWidget {
   bool _suggestionHasMatch() =>
       suggestion != null &&
       controller.text.isNotEmpty &&
-      suggestion!.startsWith(controller.text);
+      suggestion!.startsWithIgnoreCase(controller.text);
 
   @override
   Widget build(BuildContext context) {
     final textFieldKey =
         this.textFieldKey ?? useMemoized<GlobalKey>(() => GlobalKey());
 
+    final effectiveStyle = style ?? Theme.of(context).textTheme.bodyLarge!;
+
     final showSuggestion = useListenableSelector(controller, () {
       if (maxLines != 1) {
         final lines = getTextFieldLineCount(
           textFieldKey,
           controller.text,
-          style ?? Theme.of(context).textTheme.bodyLarge!,
+          effectiveStyle,
         );
         final suggestionLines = suggestion.mapNotNull(
-          (suggestion) => getTextFieldLineCount(
-            textFieldKey,
-            suggestion,
-            style ?? Theme.of(context).textTheme.bodyLarge!,
-          ),
+          (suggestion) =>
+              getTextFieldLineCount(textFieldKey, suggestion, effectiveStyle),
         );
 
         return lines == 1 && suggestionLines == 1;
@@ -173,13 +173,13 @@ class AutoSuggestTextField extends HookWidget {
                       maxLines: maxLines,
                       text: TextSpan(
                         text: text,
-                        style: (style ?? Theme.of(context).textTheme.bodyLarge)
-                            ?.copyWith(color: Colors.transparent),
+                        style: effectiveStyle.copyWith(
+                          color: Colors.transparent,
+                        ),
                         children: <TextSpan>[
                           TextSpan(
                             text: suggestion!.substring(text.length),
-                            style: TextStyle(
-                              height: 1.2,
+                            style: effectiveStyle.copyWith(
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurfaceVariant,
@@ -209,7 +209,7 @@ class AutoSuggestTextField extends HookWidget {
                 baseDecoration.floatingLabelBehavior ??
                 FloatingLabelBehavior.never,
           ),
-          style: style,
+          style: effectiveStyle,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           textCapitalization: textCapitalization,
