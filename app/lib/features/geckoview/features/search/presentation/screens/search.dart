@@ -277,6 +277,7 @@ class SearchScreen extends HookConsumerWidget {
                     pinned: true,
                     automaticallyImplyLeading: false,
                     toolbarHeight: isEditMode ? 0 : kToolbarHeight + 56,
+                    titleSpacing: 0.0,
                     title: isEditMode
                         ? null
                         : Column(
@@ -331,26 +332,30 @@ class SearchScreen extends HookConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              SizedBox(
-                                height: 48,
-                                child: ContainerChips(
-                                  selectedContainer: selectedContainer.value,
-                                  onSelected: (container) async {
-                                    if (container != null) {
-                                      if (await ref
-                                          .read(
-                                            selectedContainerProvider.notifier,
-                                          )
-                                          .authenticateContainer(container)) {
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
+                                child: SizedBox(
+                                  height: 48,
+                                  child: ContainerChips(
+                                    selectedContainer: selectedContainer.value,
+                                    onSelected: (container) async {
+                                      if (container != null) {
+                                        if (await ref
+                                            .read(
+                                              selectedContainerProvider
+                                                  .notifier,
+                                            )
+                                            .authenticateContainer(container)) {
+                                          selectedContainer.value = container;
+                                        }
+                                      } else {
                                         selectedContainer.value = container;
                                       }
-                                    } else {
-                                      selectedContainer.value = container;
-                                    }
-                                  },
-                                  onDeleted: (container) {
-                                    selectedContainer.value = null;
-                                  },
+                                    },
+                                    onDeleted: (container) {
+                                      selectedContainer.value = null;
+                                    },
+                                  ),
                                 ),
                               ),
                             ],
