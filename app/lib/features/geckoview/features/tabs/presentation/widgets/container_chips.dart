@@ -256,7 +256,17 @@ class ContainerChips extends HookConsumerWidget {
           ),
         );
       },
-      error: (error, stackTrace) => const SizedBox.shrink(),
+      error: (error, stackTrace) => SizedBox(
+        height: 48,
+        width: double.infinity,
+        child: Center(
+          child: Icon(
+            Icons.error_outline,
+            size: 20,
+            color: Theme.of(context).colorScheme.error,
+          ),
+        ),
+      ),
       loading: () => const SizedBox(height: 48, width: double.infinity),
     );
   }

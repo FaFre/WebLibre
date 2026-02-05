@@ -93,7 +93,7 @@ class FeedListScreen extends HookConsumerWidget {
             },
           ),
         ),
-        loading: () => const SizedBox.shrink(),
+        loading: () => const Center(child: CircularProgressIndicator()),
       ),
       floatingActionButton: FloatingActionButton.extended(
         label: const Text('Feed'),

@@ -190,7 +190,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
               exception: error,
             ),
           ),
-          loading: () => const SizedBox.shrink(),
+          loading: () => const Center(child: CircularProgressIndicator()),
         ),
       ),
     );

@@ -75,7 +75,8 @@ class ReaderButton extends HookConsumerWidget {
           readerabilityState.active,
           icon,
         ),
-        error: (error, stackTrace) => SizedBox.shrink(),
+        error: (error, stackTrace) =>
+            Center(child: Icon(Icons.error_outline, color: colorScheme.error)),
         loading: () => AnimateGradientShader(
           duration: const Duration(milliseconds: 500),
           primaryEnd: Alignment.bottomLeft,

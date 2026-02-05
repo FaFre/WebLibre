@@ -99,7 +99,7 @@ class BangSearchScreen extends HookConsumerWidget {
         error: (error, stackTrace) => Center(
           child: FailureWidget(title: 'Bang Search failed', exception: error),
         ),
-        loading: () => const SizedBox.shrink(),
+        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }

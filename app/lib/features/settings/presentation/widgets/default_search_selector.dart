@@ -83,7 +83,9 @@ class DefaultSearchSelector extends HookConsumerWidget {
           ),
         );
       },
-      error: (error, stackTrace) => const SizedBox.shrink(),
+      error: (error, stackTrace) => Center(
+        child: Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+      ),
       loading: () => const SizedBox(height: 48, width: double.infinity),
     );
   }

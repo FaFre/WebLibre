@@ -146,7 +146,13 @@ class FeedCard extends HookConsumerWidget {
                           );
                         },
                         error: (error, stackTrace) => const Text('N/A'),
-                        loading: () => const SizedBox.shrink(),
+                        loading: () => const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
                       );
                     },
                   ),

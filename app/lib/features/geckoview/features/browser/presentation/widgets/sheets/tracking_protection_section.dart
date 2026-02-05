@@ -52,7 +52,14 @@ class TrackingProtectionSection extends HookConsumerWidget {
           secondary: const Icon(Icons.shield_outlined),
         ),
       ),
-      error: (error, stack) => const SizedBox.shrink(),
+      error: (error, stack) {
+        final colorScheme = Theme.of(context).colorScheme;
+
+        return ListTile(
+          title: const Text('Failed to load tracking protection'),
+          leading: Icon(Icons.error_outline, color: colorScheme.error),
+        );
+      },
     );
   }
 }

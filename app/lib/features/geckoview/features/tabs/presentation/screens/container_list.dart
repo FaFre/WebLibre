@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
   const ContainerListScreen();
@@ -136,7 +137,13 @@ class ContainerListScreen extends HookConsumerWidget {
               );
             },
           ),
-          error: (error, stackTrace) => SizedBox.shrink(),
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Failed to load containers',
+              exception: error,
+              onRetry: () => ref.invalidate(watchContainersWithCountProvider),
+            ),
+          ),
           loading: () => ListView.builder(
             itemCount: 3,
             itemBuilder: (context, index) => ContainerListTile(

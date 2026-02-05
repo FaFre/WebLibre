@@ -29,6 +29,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 const defaultBangs = ['ddg', 'brave', 'startpage', 'qwant'];
@@ -161,7 +162,14 @@ class DefaultSearchPage extends HookConsumerWidget {
             ],
           );
         },
-        error: (error, stackTrace) => const SizedBox.shrink(),
+        error: (error, stackTrace) => Center(
+          child: FailureWidget(
+            title: 'Could not load search engines',
+            exception: error,
+            onRetry: () =>
+                ref.refresh(bangListProvider(triggers: defaultBangs)),
+          ),
+        ),
         loading: () => const SizedBox(height: 48, width: double.infinity),
       ),
     );

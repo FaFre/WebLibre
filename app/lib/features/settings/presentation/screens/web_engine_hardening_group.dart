@@ -198,7 +198,7 @@ class WebEngineHardeningGroupScreen extends HookConsumerWidget {
             ),
           ),
         ),
-        loading: () => const SizedBox.shrink(),
+        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }
