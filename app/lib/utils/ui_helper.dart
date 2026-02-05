@@ -103,7 +103,7 @@ void showTabOpenedMessage(
 Future<void> showSuggestNewTabMessage(
   BuildContext context, {
   required void Function(String? searchText) onAdd,
-  Duration duration = const Duration(seconds: 2),
+  Duration duration = const Duration(seconds: 3),
 }) async {
   final clipboardUrl = await tryGetUriFromClipboard();
 
@@ -178,7 +178,7 @@ void showTabUndoClose(
   BuildContext context,
   VoidCallback onUndo, {
   int count = 1,
-  Duration duration = const Duration(seconds: 2),
+  Duration duration = const Duration(seconds: 3),
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
