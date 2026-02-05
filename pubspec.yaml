@@ -15,7 +15,7 @@ workspace:
   - packages/speech_to_text_dialog
   - packages/speech_to_text_dialog/example
 dev_dependencies:
-  melos: ^7.3.0
+  melos: ^7.4.0
 
 melos:
   name: weblibre_project
