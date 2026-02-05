@@ -69,6 +69,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings maxSearchHistoryEntries(int maxSearchHistoryEntries);
 
+  GeneralSettings allowClipboardAccess(bool allowClipboardAccess);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -102,6 +104,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool doubleBackCloseTab,
     Duration unassignedTabsAutoCleanInterval,
     int maxSearchHistoryEntries,
+    bool allowClipboardAccess,
   });
 }
 
@@ -218,6 +221,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(maxSearchHistoryEntries: maxSearchHistoryEntries);
 
   @override
+  GeneralSettings allowClipboardAccess(bool allowClipboardAccess) =>
+      call(allowClipboardAccess: allowClipboardAccess);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -251,6 +258,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
+    Object? allowClipboardAccess = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -399,6 +407,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.maxSearchHistoryEntries
           // ignore: cast_nullable_to_non_nullable
           : maxSearchHistoryEntries as int,
+      allowClipboardAccess:
+          allowClipboardAccess == const $CopyWithPlaceholder() ||
+              allowClipboardAccess == null
+          ? _value.allowClipboardAccess
+          // ignore: cast_nullable_to_non_nullable
+          : allowClipboardAccess as bool,
     );
   }
 }
@@ -474,6 +488,7 @@ GeneralSettings _$GeneralSettingsFromJson(
               .toInt(),
         ),
   maxSearchHistoryEntries: (json['maxSearchHistoryEntries'] as num?)?.toInt(),
+  allowClipboardAccess: json['allowClipboardAccess'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -513,6 +528,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
   'maxSearchHistoryEntries': instance.maxSearchHistoryEntries,
+  'allowClipboardAccess': instance.allowClipboardAccess,
 };
 
 const _$ThemeModeEnumMap = {

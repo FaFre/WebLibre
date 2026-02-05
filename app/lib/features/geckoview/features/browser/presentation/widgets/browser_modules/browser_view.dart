@@ -541,23 +541,27 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         if (_suggestionCountTime != null &&
             DateTime.now().difference(_suggestionCountTime!) >
                 widget.suggestionTimeout) {
+          final topRoute = ref.read(currentTopRouteProvider);
+
           //Don't do anything if a child route is active
-          if (GoRouterState.of(context).topRoute?.name == BrowserRoute.name) {
+          if (topRoute is GoRoute && topRoute.name == BrowserRoute.name) {
             final settings = ref.read(generalSettingsWithDefaultsProvider);
 
-            unawaited(
-              showSuggestNewTabMessage(
-                context,
-                onAdd: (searchText) async {
-                  await SearchRoute(
-                    tabType:
-                        ref.read(selectedTabTypeProvider) ??
-                        settings.defaultCreateTabType,
-                    searchText: searchText ?? SearchRoute.emptySearchText,
-                  ).push(context);
-                },
-              ),
-            );
+            if (settings.allowClipboardAccess) {
+              unawaited(
+                showSuggestNewTabMessage(
+                  context,
+                  onAdd: (searchText) async {
+                    await SearchRoute(
+                      tabType:
+                          ref.read(selectedTabTypeProvider) ??
+                          settings.defaultCreateTabType,
+                      searchText: searchText ?? SearchRoute.emptySearchText,
+                    ).push(context);
+                  },
+                ),
+              );
+            }
           }
         }
 

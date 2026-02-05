@@ -74,6 +74,7 @@ class _SearchSection extends StatelessWidget {
         _BangsTile(),
         _AutocompleteProviderSection(),
         _MaxSearchHistoryEntriesSection(),
+        _AllowClipboardAccessTile(),
       ],
     );
   }
@@ -466,6 +467,32 @@ class _AddonCollectionTile extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await AddonCollectionRoute().push(context);
+      },
+    );
+  }
+}
+
+class _AllowClipboardAccessTile extends HookConsumerWidget {
+  const _AllowClipboardAccessTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allowClipboardAccess = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.allowClipboardAccess),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Allow clipboard access for suggestions'),
+      subtitle: const Text('Browser can read clipboard to suggest URLs'),
+      secondary: const Icon(MdiIcons.clipboardTextOutline),
+      value: allowClipboardAccess,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.allowClipboardAccess(value),
+            );
       },
     );
   }

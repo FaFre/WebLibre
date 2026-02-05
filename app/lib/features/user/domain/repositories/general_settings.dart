@@ -141,6 +141,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.int,
         db.typeMapping,
       ),
+      'allowClipboardAccess': settings['allowClipboardAccess']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

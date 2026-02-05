@@ -39,8 +39,13 @@ class GeckoSuggestionsService extends GeckoSuggestionEvents {
       GeckoSuggestionType.clipboard,
       GeckoSuggestionType.history,
     ],
+    bool allowClipboard = true,
   }) {
-    return _api.querySuggestions(text, providers);
+    final effectiveProviders = allowClipboard
+        ? providers
+        : providers.where((p) => p != GeckoSuggestionType.clipboard).toList();
+
+    return _api.querySuggestions(text, effectiveProviders);
   }
 
   Future<AutocompleteResult?> getAutocompleteSuggestion(String query) {
