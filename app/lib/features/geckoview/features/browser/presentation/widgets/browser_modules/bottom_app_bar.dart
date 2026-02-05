@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -211,8 +214,6 @@ class BrowserTabBar extends HookConsumerWidget {
 
     final dragStartPosition = useRef(Offset.zero);
 
-    final toolbarHeight = useMemoized(() => getToolbarHeight());
-
     return GestureDetector(
       // Tap handling moved to AppBarTitle for split icon/title behavior
       onHorizontalDragStart: (details) {
@@ -245,19 +246,27 @@ class BrowserTabBar extends HookConsumerWidget {
                 }
             }
           }
-        } else if (distance.dx.abs() < 15) {
-          // Swipe direction for dismiss depends on toolbar position:
-          // - Bottom bar: swipe down to dismiss (distance.dy negative or small positive)
-          // - Top bar: swipe up to dismiss (distance.dy positive or small negative)
-          final dismissThreshold = toolbarHeight * 0.75;
-          final shouldDismiss = switch (tabBarPosition) {
-            TabBarPosition.bottom => distance.dy < dismissThreshold,
-            TabBarPosition.top => distance.dy > -dismissThreshold,
-          };
-          if (shouldDismiss &&
-              ref.read(bottomSheetControllerProvider) == null) {
-            ref.read(tabBarDismissableControllerProvider.notifier).dismiss();
-          }
+        }
+      },
+      onVerticalDragStart: (details) {
+        dragStartPosition.value = details.globalPosition;
+      },
+      onVerticalDragEnd: (details) {
+        final distance = dragStartPosition.value - details.globalPosition;
+
+        // Swipe direction for dismiss depends on toolbar position:
+        // - Bottom bar: swipe down to dismiss (positive distance.dy)
+        // - Top bar: swipe up to dismiss (negative distance.dy)
+        const dismissThreshold = kToolbarHeight * 0.5;
+        final shouldDismiss = switch (tabBarPosition) {
+          TabBarPosition.bottom =>
+            distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
+          TabBarPosition.top =>
+            !distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
+        };
+        if (shouldDismiss && ref.read(bottomSheetControllerProvider) == null) {
+          unawaited(HapticFeedback.lightImpact());
+          ref.read(tabBarDismissableControllerProvider.notifier).dismiss();
         }
       },
       child: Column(

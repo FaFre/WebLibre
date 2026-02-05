@@ -21,7 +21,7 @@ final class TabBarDismissableControllerProvider
         argument: null,
         retry: null,
         name: r'tabBarDismissableControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -43,7 +43,7 @@ final class TabBarDismissableControllerProvider
 }
 
 String _$tabBarDismissableControllerHash() =>
-    r'2bb0055f5525a21982ba3d7cb6443bcad823b64f';
+    r'e0c2f700ccebc35bc8029370cdebd63e98bf95e1';
 
 abstract class _$TabBarDismissableController extends $Notifier<bool> {
   bool build();

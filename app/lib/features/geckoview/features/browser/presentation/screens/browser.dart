@@ -211,6 +211,11 @@ class _TabBar extends HookConsumerWidget {
         if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) {
           return;
         }
+        // Don't apply auto-hide when toolbar is manually dismissed
+        if (ref.read(tabBarDismissableControllerProvider)) {
+          return;
+        }
+
         final diff = event.dy;
         if (diff < 0) {
           if (diffAcc.value > 0) {

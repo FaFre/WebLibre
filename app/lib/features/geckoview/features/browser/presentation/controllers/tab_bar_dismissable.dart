@@ -21,7 +21,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'tab_bar_dismissable.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class TabBarDismissableController extends _$TabBarDismissableController {
   void show() {
     state = false;
