@@ -1,3 +1,132 @@
+## 0.9.31
+### GeckoView 147.0.2
+
+**New Features**
+- Added per-site tracking protection controls
+  - Site-specific tracking protection exceptions
+  - New tracking protection exceptions management screen
+  - Per-site permissions management (location, camera, microphone, notifications, autoplay, etc.)
+- Added clear browsing data per domain
+- Added custom tracking protection policies
+  - Granular tracking protection configuration
+  - Configurable blocking categories and levels
+  - Custom tracking protection settings screen
+- Added external download manager support
+  - Option to use external download managers instead of built-in handler
+  - Configurable in tabs behavior settings
+- Added extension installation from local XPI files
+  - Install browser extensions from local .xpi files
+- Added QR code scanner
+  - Built-in QR code scanning integrated into search field
+  - Quick access for scanning URLs
+- Added Tor entry/exit country selection
+  - Configure specific countries for Tor entry and exit nodes
+  - Enhanced Tor settings UI with country picker
+- Added "Open in App" feature
+  - Native app link handling for compatible apps
+  - Configurable app links behavior
+
+**Major UI/UX Improvements**
+- Complete browser UI scaffold replacement
+  - Better keyboard handling with bottom sheets
+  - Improved content overlay management
+  - Top bar now hides on scroll
+- Navigation drawer reorganization
+  - New dedicated navigation drawer
+  - Reorganized button placements
+  - Unified toolbar icon colors
+  - Improved profile selector bottom sheet
+- Converted dialogs to bottom sheets for better mobile UX
+  - Delete data, folder selection, profile selection, and feed selection
+- Address bar merged into search screen
+  - Unified search and URL input experience
+  - Tab editing integrated into search interface
+- App color system reorganization
+  - Consistent color scheme across entire app
+  - Improved visual hierarchy
+- Movable tab bar restore button
+  - FAB can be repositioned by user
+  - Drag to preferred location
+
+**New Settings**
+- Settings reorganization with new categories:
+  - General Settings
+  - Privacy & Security Settings
+  - Search & Content Settings
+  - Tabs & Behavior Settings
+  - Appearance & Display Settings
+  - Fingerprinting Settings
+  - Advanced Settings (renamed from Developer Settings)
+- Disable automatic clipboard access for improved privacy
+- Auto-clear unassigned tabs after configurable duration
+- Configurable search history entry count with automatic cleanup
+- Control swipe-to-refresh gesture
+- Disable double back to close tab gesture
+- External download manager toggle
+- App links handling control
+
+**Container & Tab Management**
+- Container assignment improvements
+  - Fixed container assignment for private tabs
+  - Container selection in new tab screen
+  - Better container data synchronization
+- Tab closing logic improvements
+  - Check for parent tab first when closing (fixes #155)
+  - Close assigned tab when history is empty
+  - Improved tab bar dismiss logic (fixes #157)
+- Tab view enhancements
+  - Improved initial scroll position
+  - Hide "Add New Tab" button on scroll
+  - Better grid/list scroll behavior
+
+**Bookmarks & History**
+- Bookmark all tabs dialog with fast/detailed options
+- Hide empty root folders by default
+- Long press for history navigation
+- Edit mode respected in history search
+
+**Search Enhancements**
+- Configurable search history entry count
+- Automatic search history cleanup
+- Case-insensitive suggestion matching
+- Autocomplete suggestions on tap
+
+**Tor Improvements**
+- Migrated from Arti to libtor implementation
+- Country selection for entry/exit nodes
+- Improved Tor UI and notifications
+- Custom onion icon in notifications
+
+**Developer & Debugging**
+- New dedicated error logs screen
+- Improved error logging and handling
+- Log filtering capabilities
+
+**Performance & Resource Management**
+- Improved image caching and disposal
+  - Better widget icon caching
+  - Proper image disposal to prevent memory leaks
+- Screenshot timer management improvements
+- Better database provider lifecycle management
+- Longer disposal timeout for improved resource cleanup
+
+**Visual Improvements**
+- Permission badge indicator in address bar
+- Better find-in-page widget with debouncing
+- Progress bar positioning based on toolbar location
+- Fixed PlatformView overlap issues on affected devices running old Android versions
+- Improved keyboard visibility handling
+
+**Bug Fixes**
+- Fixed container assignment issue for private tabs
+- Fixed tab bar dismiss logic (fixes #157)
+- Fixed parent tab check when closing tabs (fixes #155)
+- Fixed provider access errors on dispose
+- Fixed loading progress visibility issues
+- Fixed color issues with new app colors
+- Fixed PlatformView overlap issues
+- Fixed content overlay issues
+
 ## 0.9.30
 ### GeckoView 146.0.1
 
