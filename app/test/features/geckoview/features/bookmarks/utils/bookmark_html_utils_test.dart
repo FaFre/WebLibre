@@ -1,7 +1,5 @@
-// ignore_for_file: avoid_redundant_argument_values
-
 /*
- * Copyright (c) 2024-2025 Fabian Freund.
+ * Copyright (c) 2024-2026 Fabian Freund.
  *
  * This file is part of WebLibre
  * (see https://weblibre.eu).
@@ -19,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+// ignore_for_file: avoid_redundant_argument_values
 
 import 'dart:io';
 

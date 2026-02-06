@@ -1,7 +1,5 @@
-// ignore_for_file: deprecated_member_use
-
 /*
- * Copyright (c) 2024-2025 Fabian Freund.
+ * Copyright (c) 2024-2026 Fabian Freund.
  *
  * This file is part of WebLibre
  * (see https://weblibre.eu).
@@ -19,6 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
