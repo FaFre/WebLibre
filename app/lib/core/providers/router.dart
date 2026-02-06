@@ -62,8 +62,13 @@ class CurrentTopRoute extends _$CurrentTopRoute {
 
     void update() {
       final config = router.routerDelegate.currentConfiguration;
-      final match = config.last;
 
+      if (config.isEmpty) {
+        state = null;
+        return;
+      }
+
+      final match = config.last;
       state = match.route;
     }
 
