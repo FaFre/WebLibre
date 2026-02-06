@@ -2,7 +2,7 @@ group = "eu.weblibre.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "2.1.20"
+    ext.kotlin_version = "2.2.20"
     ext.mozillaComponentsVersion = '147.0.2'
 
     repositories {
@@ -135,8 +135,8 @@ dependencies {
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'com.google.android.material:material:1.13.0'
     //https://stackoverflow.com/questions/73782320/onbackinvokedcallback-is-not-enabled-for-the-application-in-set-androidenableo
-    implementation 'androidx.activity:activity-ktx:1.12.2'
-    implementation 'androidx.paging:paging-runtime-ktx:3.3.6'
+    implementation 'androidx.activity:activity-ktx:1.12.3'
+    implementation 'androidx.paging:paging-runtime-ktx:3.4.0'
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.15.2")

@@ -5,7 +5,7 @@ ext {
 }
 
 buildscript {
-    ext.kotlin_version = '2.1.20'
+    ext.kotlin_version = '2.2.20'
 }
 
 allprojects {
@@ -20,6 +20,13 @@ allprojects {
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+    afterEvaluate {
+        if (it.hasProperty("android")) {
+            android {
+                compileSdkVersion 36
+            }
+        }
+    }
 }
 subprojects {
     project.evaluationDependsOn(":app")
