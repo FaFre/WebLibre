@@ -19,7 +19,6 @@ allprojects {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://raw.githubusercontent.com/guardianproject/gpmaven/master") }
     }
 }
 
@@ -51,7 +50,7 @@ android {
 
     dependencies {
         // Tor core libraries
-        implementation("info.guardianproject:tor-android:0.4.8.21.1")
+        implementation("info.guardianproject:tor-android:0.4.8.22")
         implementation("info.guardianproject:jtorctl:0.4.5.7")
 
         // Pluggable transports
