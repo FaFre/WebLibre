@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Fabian Freund.
+ * Copyright (c) 2024-2026 Fabian Freund.
  *
  * This file is part of WebLibre
  * (see https://weblibre.eu).
