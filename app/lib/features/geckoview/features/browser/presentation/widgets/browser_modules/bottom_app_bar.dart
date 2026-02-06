@@ -79,6 +79,7 @@ class BrowserTopAppBar extends HookConsumerWidget {
       showQuickTabSwitcherBar: false,
       showMainToolbarNavigationButton: !showContextualToolbar,
       showMainToolbarTabsCount: !showContextualToolbar,
+      showMainToolbarTabActionButton: !showContextualToolbar,
     );
   }
 
@@ -114,6 +115,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
       showMainToolbarNavigationButton: !showContextualToolbar,
       showMainToolbarTabsCount: !showContextualToolbar,
+      showMainToolbarTabActionButton: !showContextualToolbar,
     );
   }
 
@@ -143,6 +145,7 @@ class BrowserTabBar extends HookConsumerWidget {
 
   final bool showMainToolbarTabsCount;
   final bool showMainToolbarNavigationButton;
+  final bool showMainToolbarTabActionButton;
 
   const BrowserTabBar({
     required this.showMainToolbar,
@@ -151,6 +154,7 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.showQuickTabSwitcherBar,
     required this.showMainToolbarTabsCount,
     required this.showMainToolbarNavigationButton,
+    required this.showMainToolbarTabActionButton,
   });
 
   static const contextualToolabarHeight = 54.0;
@@ -361,7 +365,7 @@ class BrowserTabBar extends HookConsumerWidget {
                       displayedSheet: displayedSheet,
                       showLongPressMenu: true,
                     ),
-                  if (selectedTabId != null && !showContextualToolbar)
+                  if (selectedTabId != null && showMainToolbarTabActionButton)
                     TabMenu(
                       controller: trippleDotMenuController,
                       selectedTabId: selectedTabId,
