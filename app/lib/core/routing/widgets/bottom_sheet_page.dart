@@ -44,18 +44,18 @@ class BottomSheetPage<T> extends Page<T> {
 
   @override
   Route<T> createRoute(BuildContext context) => ModalBottomSheetRoute<T>(
-        settings: this,
-        builder: builder,
-        barrierLabel: barrierLabel ??
-            MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        backgroundColor:
-            Theme.of(context).bottomSheetTheme.modalBackgroundColor,
-        elevation: Theme.of(context).bottomSheetTheme.modalElevation,
-        shape: Theme.of(context).bottomSheetTheme.shape,
-        clipBehavior: Clip.antiAlias,
-        constraints: Theme.of(context).bottomSheetTheme.constraints,
-        isScrollControlled: isScrollControlled,
-        isDismissible: barrierDismissible,
-        useSafeArea: useSafeArea,
-      );
+    settings: this,
+    builder: builder,
+    barrierLabel:
+        barrierLabel ??
+        MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    backgroundColor: Theme.of(context).bottomSheetTheme.modalBackgroundColor,
+    elevation: Theme.of(context).bottomSheetTheme.modalElevation,
+    shape: Theme.of(context).bottomSheetTheme.shape,
+    clipBehavior: Clip.antiAlias,
+    constraints: Theme.of(context).bottomSheetTheme.constraints,
+    isScrollControlled: isScrollControlled,
+    isDismissible: barrierDismissible,
+    useSafeArea: useSafeArea,
+  );
 }

@@ -106,7 +106,11 @@ class BrowserAddonService extends _$BrowserAddonService {
         }
       }
     } catch (e, s) {
-      logger.e('Failed installing from file: $filePath', error: e, stackTrace: s);
+      logger.e(
+        'Failed installing from file: $filePath',
+        error: e,
+        stackTrace: s,
+      );
       rethrow;
     }
   }

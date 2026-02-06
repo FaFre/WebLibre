@@ -40,10 +40,7 @@ class SelectFeedDialog extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Add Feed',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('Add Feed', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             ...feedUris.map(
               (uri) => HookConsumer(
