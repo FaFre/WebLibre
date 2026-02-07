@@ -1,3 +1,9 @@
+## 0.9.32
+### GeckoView 147.0.2
+
+**Bug Fixes**
+- Fixed bookmarks routing issue
+
 ## 0.9.31
 ### GeckoView 147.0.2
 

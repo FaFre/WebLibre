@@ -1,0 +1,4 @@
+GeckoView 147.0.2
+
+**Bug Fixes**
+- Fixed bookmarks routing issue
