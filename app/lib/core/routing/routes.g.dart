@@ -10,11 +10,7 @@ List<RouteBase> get $appRoutes => [
   $aboutRoute,
   $onboardingRoute,
   $bangMenuRoute,
-  $bookmarkListRoute,
-  $bookmarkFolderAddRoute,
-  $bookmarkFolderEditRoute,
-  $bookmarkEntryAddRoute,
-  $bookmarkEntryEditRoute,
+  $bookmarksRoute,
   $browserRoute,
   $feedListRoute,
   $historyRoute,
@@ -321,22 +317,44 @@ mixin $BangSubCategoryRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $bookmarkListRoute => GoRouteData.$route(
-  path: '/bookmarks/:entryGuid',
-  name: 'BookmarkListRoute',
-  factory: $BookmarkListRoute._fromState,
+RouteBase get $bookmarksRoute => GoRouteData.$route(
+  path: '/bookmarks',
+  name: 'BookmarksRoute',
+  factory: $BookmarksRoute._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: 'list/:entryGuid',
+      name: 'BookmarkListRoute',
+      factory: $BookmarkListRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'createFolder',
+      name: 'BookmarkFolderAddRoute',
+      factory: $BookmarkFolderAddRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'editFolder',
+      name: 'BookmarkFolderEditRoute',
+      factory: $BookmarkFolderEditRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'createEntry',
+      name: 'BookmarkEntryAddRoute',
+      factory: $BookmarkEntryAddRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'editEntry',
+      name: 'BookmarkEntryEditRoute',
+      factory: $BookmarkEntryEditRoute._fromState,
+    ),
+  ],
 );
 
-mixin $BookmarkListRoute on GoRouteData {
-  static BookmarkListRoute _fromState(GoRouterState state) =>
-      BookmarkListRoute(entryGuid: state.pathParameters['entryGuid']!);
-
-  BookmarkListRoute get _self => this as BookmarkListRoute;
+mixin $BookmarksRoute on GoRouteData {
+  static BookmarksRoute _fromState(GoRouterState state) => BookmarksRoute();
 
   @override
-  String get location => GoRouteData.$location(
-    '/bookmarks/${Uri.encodeComponent(_self.entryGuid)}',
-  );
+  String get location => GoRouteData.$location('/bookmarks');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -352,11 +370,30 @@ mixin $BookmarkListRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $bookmarkFolderAddRoute => GoRouteData.$route(
-  path: '/bookmarks/createFolder',
-  name: 'BookmarkFolderAddRoute',
-  factory: $BookmarkFolderAddRoute._fromState,
-);
+mixin $BookmarkListRoute on GoRouteData {
+  static BookmarkListRoute _fromState(GoRouterState state) =>
+      BookmarkListRoute(entryGuid: state.pathParameters['entryGuid']!);
+
+  BookmarkListRoute get _self => this as BookmarkListRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/bookmarks/list/${Uri.encodeComponent(_self.entryGuid)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
 
 mixin $BookmarkFolderAddRoute on GoRouteData {
   static BookmarkFolderAddRoute _fromState(GoRouterState state) =>
@@ -388,12 +425,6 @@ mixin $BookmarkFolderAddRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $bookmarkFolderEditRoute => GoRouteData.$route(
-  path: '/bookmarks/editFolder',
-  name: 'BookmarkFolderEditRoute',
-  factory: $BookmarkFolderEditRoute._fromState,
-);
-
 mixin $BookmarkFolderEditRoute on GoRouteData {
   static BookmarkFolderEditRoute _fromState(GoRouterState state) =>
       BookmarkFolderEditRoute(folder: state.uri.queryParameters['folder']!);
@@ -419,12 +450,6 @@ mixin $BookmarkFolderEditRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $bookmarkEntryAddRoute => GoRouteData.$route(
-  path: '/bookmarks/createEntry',
-  name: 'BookmarkEntryAddRoute',
-  factory: $BookmarkEntryAddRoute._fromState,
-);
 
 mixin $BookmarkEntryAddRoute on GoRouteData {
   static BookmarkEntryAddRoute _fromState(GoRouterState state) =>
@@ -453,12 +478,6 @@ mixin $BookmarkEntryAddRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $bookmarkEntryEditRoute => GoRouteData.$route(
-  path: '/bookmarks/editEntry',
-  name: 'BookmarkEntryEditRoute',
-  factory: $BookmarkEntryEditRoute._fromState,
-);
 
 mixin $BookmarkEntryEditRoute on GoRouteData {
   static BookmarkEntryEditRoute _fromState(GoRouterState state) =>

@@ -19,10 +19,39 @@
  */
 part of 'routes.dart';
 
-@TypedGoRoute<BookmarkListRoute>(
-  name: 'BookmarkListRoute',
-  path: '/bookmarks/:entryGuid',
+@TypedGoRoute<BookmarksRoute>(
+  name: 'BookmarksRoute',
+  path: '/bookmarks',
+  routes: [
+    TypedGoRoute<BookmarkListRoute>(
+      name: 'BookmarkListRoute',
+      path: 'list/:entryGuid',
+    ),
+    TypedGoRoute<BookmarkFolderAddRoute>(
+      name: 'BookmarkFolderAddRoute',
+      path: 'createFolder',
+    ),
+    TypedGoRoute<BookmarkFolderEditRoute>(
+      name: 'BookmarkFolderEditRoute',
+      path: 'editFolder',
+    ),
+    TypedGoRoute<BookmarkEntryAddRoute>(
+      name: 'BookmarkEntryAddRoute',
+      path: 'createEntry',
+    ),
+    TypedGoRoute<BookmarkEntryEditRoute>(
+      name: 'BookmarkEntryEditRoute',
+      path: 'editEntry',
+    ),
+  ],
 )
+class BookmarksRoute extends GoRouteData with $BookmarksRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SizedBox.shrink();
+  }
+}
+
 class BookmarkListRoute extends GoRouteData with $BookmarkListRoute {
   final String entryGuid;
 
@@ -34,10 +63,6 @@ class BookmarkListRoute extends GoRouteData with $BookmarkListRoute {
   }
 }
 
-@TypedGoRoute<BookmarkFolderAddRoute>(
-  name: 'BookmarkFolderAddRoute',
-  path: '/bookmarks/createFolder',
-)
 class BookmarkFolderAddRoute extends GoRouteData with $BookmarkFolderAddRoute {
   final String? parentGuid;
 
@@ -49,10 +74,6 @@ class BookmarkFolderAddRoute extends GoRouteData with $BookmarkFolderAddRoute {
   }
 }
 
-@TypedGoRoute<BookmarkFolderEditRoute>(
-  name: 'BookmarkFolderEditRoute',
-  path: '/bookmarks/editFolder',
-)
 class BookmarkFolderEditRoute extends GoRouteData
     with $BookmarkFolderEditRoute {
   final String folder;
@@ -69,10 +90,6 @@ class BookmarkFolderEditRoute extends GoRouteData
   }
 }
 
-@TypedGoRoute<BookmarkEntryAddRoute>(
-  name: 'BookmarkEntryAddRoute',
-  path: '/bookmarks/createEntry',
-)
 class BookmarkEntryAddRoute extends GoRouteData with $BookmarkEntryAddRoute {
   final String bookmarkInfo;
 
@@ -87,10 +104,6 @@ class BookmarkEntryAddRoute extends GoRouteData with $BookmarkEntryAddRoute {
   }
 }
 
-@TypedGoRoute<BookmarkEntryEditRoute>(
-  name: 'BookmarkEntryEditRoute',
-  path: '/bookmarks/editEntry',
-)
 class BookmarkEntryEditRoute extends GoRouteData with $BookmarkEntryEditRoute {
   final String bookmarkEntry;
 
