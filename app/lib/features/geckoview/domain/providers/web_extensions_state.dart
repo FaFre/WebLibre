@@ -71,8 +71,8 @@ class WebExtensionsState extends _$WebExtensionsState {
     } else {
       if (state.containsKey(extensionId)) {
         state = {...state}..remove(extensionId);
-        // Dispose the cached image when extension is removed
-        _imageCache.remove(extensionId)?.dispose();
+        // remove() triggers onEvict which handles disposal
+        _imageCache.remove(extensionId);
       }
     }
   }
@@ -83,9 +83,7 @@ class WebExtensionsState extends _$WebExtensionsState {
     final image = await tryDecodeImage(bytes);
 
     if (image != null) {
-      // Dispose old image only after successfully creating new one
-      _imageCache.get(extensionId)?.dispose();
-
+      // set() will evict the old entry via onEvict callback, which handles disposal
       _imageCache.set(extensionId, image);
 
       if (state.containsKey(extensionId)) {

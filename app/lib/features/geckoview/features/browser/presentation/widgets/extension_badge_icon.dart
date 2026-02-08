@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/web_extension.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
 class ExtensionBadgeIcon extends StatelessWidget {
   final WebExtensionState state;
@@ -36,11 +37,11 @@ class ExtensionBadgeIcon extends StatelessWidget {
       textColor: state.badgeTextColor,
       backgroundColor: state.badgeBackgroundColor,
       child: RepaintBoundary(
-        child:
-            state.icon?.value.mapNotNull(
-              (image) => RawImage(image: image, width: 24, height: 24),
-            ) ??
-            const SizedBox(width: 24, height: 24),
+        child: SafeRawImage(
+          image: state.icon,
+          width: 24,
+          height: 24,
+        ),
       ),
     );
   }

@@ -39,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/text_highlight.dart';
@@ -187,9 +188,11 @@ class TabSearch extends HookConsumerWidget {
               leading: RepaintBoundary(
                 child:
                     result.icon.mapNotNull(
-                      (icon) => icon.value.mapNotNull(
-                        (image) =>
-                            RawImage(image: image, height: 24, width: 24),
+                      (icon) => SafeRawImage(
+                        image: icon,
+                        height: 24,
+                        width: 24,
+                        fallback: UrlIcon([result.url], iconSize: 24),
                       ),
                     ) ??
                     UrlIcon([result.url], iconSize: 24),

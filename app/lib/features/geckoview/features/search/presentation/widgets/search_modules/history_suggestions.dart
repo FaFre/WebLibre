@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/eng
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class HistorySuggestions extends HookConsumerWidget {
@@ -92,15 +93,12 @@ class HistorySuggestions extends HookConsumerWidget {
 
                       return ListTile(
                         leading: RepaintBoundary(
-                          child:
-                              icon.data?.value.mapNotNull(
-                                (image) => RawImage(
-                                  image: image,
-                                  height: 24,
-                                  width: 24,
-                                ),
-                              ) ??
-                              const Icon(MdiIcons.web, size: 24),
+                          child: SafeRawImage(
+                            image: icon.data,
+                            height: 24,
+                            width: 24,
+                            fallback: const Icon(MdiIcons.web, size: 24),
+                          ),
                         ),
                         title: suggestion.title.mapNotNull(
                           (title) => Text(

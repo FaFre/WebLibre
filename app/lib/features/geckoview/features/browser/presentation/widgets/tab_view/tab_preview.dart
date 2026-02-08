@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/domain/entitie
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -210,7 +211,7 @@ class GridTabPreview extends HookConsumerWidget {
               ],
             ),
             const SizedBox(height: 6),
-            if (tabState.thumbnail?.value != null)
+            if (tabState.thumbnail != null && !tabState.thumbnail!.isDisposed)
               Expanded(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(
@@ -220,8 +221,8 @@ class GridTabPreview extends HookConsumerWidget {
                   child: SizedBox(
                     width: double.infinity,
                     child: RepaintBoundary(
-                      child: RawImage(
-                        image: tabState.thumbnail!.value,
+                      child: SafeRawImage(
+                        image: tabState.thumbnail,
                         fit: BoxFit.fitWidth,
                       ),
                     ),
@@ -290,10 +291,10 @@ class ListTabPreview extends HookConsumerWidget {
               onTap: onTap,
               onLongPress: onLongPress,
               contentPadding: const EdgeInsets.only(left: 4),
-              leading: (tabState.thumbnail?.value != null)
+              leading: (tabState.thumbnail != null && !tabState.thumbnail!.isDisposed)
                   ? RepaintBoundary(
-                      child: RawImage(
-                        image: tabState.thumbnail!.value,
+                      child: SafeRawImage(
+                        image: tabState.thumbnail,
                         fit: BoxFit.fitHeight,
                       ),
                     )

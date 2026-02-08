@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
 class UrlIcon extends HookConsumerWidget {
   final double iconSize;
@@ -46,11 +47,12 @@ class UrlIcon extends HookConsumerWidget {
         dimension: iconSize,
         child: (icon.data != null)
             ? RepaintBoundary(
-                child: RawImage(
-                  image: icon.data?.image.value,
+                child: SafeRawImage(
+                  image: icon.data?.image,
                   height: iconSize,
                   width: iconSize,
                   fit: BoxFit.fill,
+                  fallback: Icon(MdiIcons.web, size: iconSize),
                 ),
               )
             : Icon(MdiIcons.web, size: iconSize),

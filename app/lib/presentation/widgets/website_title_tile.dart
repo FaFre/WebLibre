@@ -25,6 +25,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class WebsiteTitleTile extends HookConsumerWidget {
@@ -45,10 +46,11 @@ class WebsiteTitleTile extends HookConsumerWidget {
             leading: RepaintBoundary(
               child:
                   info.favicon.mapNotNull(
-                    (favicon) => RawImage(
-                      image: favicon.image.value,
+                    (favicon) => SafeRawImage(
+                      image: favicon.image,
                       height: 24,
                       width: 24,
+                      fallback: const Icon(MdiIcons.web, size: 24),
                     ),
                   ) ??
                   const Icon(MdiIcons.web, size: 24),
@@ -71,8 +73,8 @@ class WebsiteTitleTile extends HookConsumerWidget {
           );
         },
         loading: () => ListTile(
-          leading: RawImage(
-            image: initialTabState.favicon?.image.value,
+          leading: SafeRawImage(
+            image: initialTabState.favicon?.image,
             height: 24,
             width: 24,
           ),

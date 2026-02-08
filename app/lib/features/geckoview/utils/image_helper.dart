@@ -25,12 +25,9 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 
-final _cache = LRUCache<int, EquatableImage>(
-  100,
-  onEvict: (image) => image.dispose(),
-);
+final _cache = LRUCache<int, EquatableImage>(100);
 
-/// Clears the global image cache, disposing all cached images.
+/// Clears the global image decode cache.
 void clearImageCache() {
   _cache.clear();
 }

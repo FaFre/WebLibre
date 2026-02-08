@@ -331,6 +331,11 @@ class TabStates extends _$TabStates {
     );
 
     ref.onDispose(() async {
+      // Dispose all remaining tab images
+      for (final tab in state.values) {
+        _disposeTabImages(tab);
+      }
+
       // Cancel all stream subscriptions
       for (final sub in subscriptions) {
         await sub.cancel();

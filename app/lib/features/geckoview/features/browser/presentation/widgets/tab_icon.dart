@@ -22,9 +22,11 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
 class TabIcon extends HookConsumerWidget {
   final TabState tabState;
@@ -36,17 +38,16 @@ class TabIcon extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final icon = useCachedFuture(() async {
-      final faviconIcon = tabState.icon?.value;
-
-      if (faviconIcon != null) {
-        return faviconIcon;
+      if (tabState.icon case final EquatableImage tabIcon
+          when !tabIcon.isDisposed) {
+        return tabIcon;
       }
 
-      final icon = await ref
+      final cachedIcon = await ref
           .read(genericWebsiteServiceProvider.notifier)
           .getCachedIcon(tabState.url);
 
-      return icon?.image.value;
+      return cachedIcon?.image;
     }, [tabState.icon, tabState.url]);
 
     return Skeletonizer(
@@ -56,8 +57,12 @@ class TabIcon extends HookConsumerWidget {
         child: RepaintBoundary(
           child:
               icon.data.mapNotNull(
-                (icon) =>
-                    RawImage(image: icon, height: iconSize, width: iconSize),
+                (image) => SafeRawImage(
+                  image: image,
+                  height: iconSize,
+                  width: iconSize,
+                  fallback: Icon(MdiIcons.web, size: iconSize),
+                ),
               ) ??
               Icon(MdiIcons.web, size: iconSize),
         ),

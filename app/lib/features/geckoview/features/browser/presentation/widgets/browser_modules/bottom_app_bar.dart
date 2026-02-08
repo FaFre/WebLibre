@@ -56,6 +56,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/weblibre_icons.dart';
+import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -537,8 +538,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
           },
           itemAvatar: (item) =>
               item.tabState?.icon.mapNotNull(
-                (icon) => icon.value.mapNotNull(
-                  (image) => RawImage(image: image, height: 24, width: 24),
+                (icon) => SafeRawImage(
+                  image: icon,
+                  height: 24,
+                  width: 24,
+                  fallback: UrlIcon([item.url], iconSize: 24),
                 ),
               ) ??
               UrlIcon([item.url], iconSize: 16),
