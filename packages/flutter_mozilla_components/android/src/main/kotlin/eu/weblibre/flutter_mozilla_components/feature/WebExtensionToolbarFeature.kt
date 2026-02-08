@@ -62,19 +62,25 @@ class WebExtensionToolbarFeature(
         // The feature could start with an existing view and toolbar so
         // we have to check if any stale actions (from uninstalled or
         // disabled extensions) are being displayed and remove them.
-        webExtensionBrowserActions
-            .filterKeys { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
-            .forEach { (extensionId, action) ->
-//                toolbar.removeBrowserAction(action)
-//                toolbar.invalidateActions()
+        webExtensionBrowserActions.keys.toList()
+            .filter { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
+            .forEach { extensionId ->
+                addonEvents.onRemoveWebExtensionAction(
+                    timestampArg = System.currentTimeMillis(),
+                    extensionIdArg = extensionId,
+                    actionTypeArg = WebExtensionActionType.BROWSER,
+                ) {}
                 webExtensionBrowserActions.remove(extensionId)
             }
 
-        webExtensionPageActions
-            .filterKeys { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
-            .forEach { (extensionId, action) ->
-//                toolbar.removePageAction(action)
-//                toolbar.invalidateActions()
+        webExtensionPageActions.keys.toList()
+            .filter { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
+            .forEach { extensionId ->
+                addonEvents.onRemoveWebExtensionAction(
+                    timestampArg = System.currentTimeMillis(),
+                    extensionIdArg = extensionId,
+                    actionTypeArg = WebExtensionActionType.PAGE,
+                ) {}
                 webExtensionPageActions.remove(extensionId)
             }
 
@@ -94,6 +100,31 @@ class WebExtensionToolbarFeature(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun renderWebExtensionActions(state: BrowserState, tab: SessionState? = null) {
+        // Remove actions for extensions that were uninstalled or disabled
+        val enabledExtensionIds = state.extensions.filter { it.value.enabled }.keys
+
+        webExtensionBrowserActions.keys.toList().forEach { extensionId ->
+            if (extensionId !in enabledExtensionIds) {
+                addonEvents.onRemoveWebExtensionAction(
+                    timestampArg = System.currentTimeMillis(),
+                    extensionIdArg = extensionId,
+                    actionTypeArg = WebExtensionActionType.BROWSER,
+                ) {}
+                webExtensionBrowserActions.remove(extensionId)
+            }
+        }
+
+        webExtensionPageActions.keys.toList().forEach { extensionId ->
+            if (extensionId !in enabledExtensionIds) {
+                addonEvents.onRemoveWebExtensionAction(
+                    timestampArg = System.currentTimeMillis(),
+                    extensionIdArg = extensionId,
+                    actionTypeArg = WebExtensionActionType.PAGE,
+                ) {}
+                webExtensionPageActions.remove(extensionId)
+            }
+        }
+
         val extensions = state.extensions.values.toList()
         extensions.filter { it.enabled }.sortedBy { it.name }.forEach { extension ->
             if (extensionNotAllowedInTab(extension, tab)) {
@@ -161,37 +192,20 @@ class WebExtensionToolbarFeature(
         isPageAction: Boolean = false,
     ) {
         val actionMap = if (isPageAction) webExtensionPageActions else webExtensionBrowserActions
-        // Add the global page/browser action if it doesn't exist
-        var toolbarAction = actionMap.getOrPut(extension.id) {
-            CoroutineScope(iconJobDispatcher).launch {
-                try {
-                    //TODO: make variable size
-                    val icon = globalAction.loadIcon?.invoke(128)
-                    icon?.let {
-                        val imageBytes = icon.toWebPBytes()
-                        runOnUiThread {
-                            addonEvents.onUpdateWebExtensionIcon(
-                                timestampArg = System.currentTimeMillis(),
-                                extensionIdArg = extension.id,
-                                actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
-                                iconArg = imageBytes
-                            ) { }
-                        }
-                    }
-                } catch (throwable: Throwable) {
-                    Log.log(
-                        Log.Priority.ERROR,
-                        "mozac-webextensions",
-                        throwable,
-                        "Failed to load browser action icon, falling back to default.",
-                    )
-                }
-            }
+        val existingAction = actionMap[extension.id]
 
-            globalAction
+        if (existingAction == null) {
+            // First time — load icon
+            loadIcon(extension.id, globalAction, isPageAction)
+        } else if (existingAction.loadIcon != globalAction.loadIcon) {
+            // Icon source changed — reload
+            loadIcon(extension.id, globalAction, isPageAction)
         }
 
+        actionMap[extension.id] = globalAction
+
         // Apply tab-specific override of browser/page action
+        var toolbarAction = globalAction
         tabAction?.let {
             toolbarAction = toolbarAction.copyWithOverride(it)
         }
@@ -208,8 +222,34 @@ class WebExtensionToolbarFeature(
         addonEvents.onUpsertWebExtensionAction(
             timestampArg = System.currentTimeMillis(),
             extensionIdArg = extension.id,
-            actionTypeArg = if (isPageAction)  WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
+            actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
             extensionDataArg = data
         ) { }
+    }
+
+    private fun loadIcon(extensionId: String, action: Action, isPageAction: Boolean) {
+        CoroutineScope(iconJobDispatcher).launch {
+            try {
+                val icon = action.loadIcon?.invoke(128)
+                icon?.let {
+                    val imageBytes = icon.toWebPBytes()
+                    runOnUiThread {
+                        addonEvents.onUpdateWebExtensionIcon(
+                            timestampArg = System.currentTimeMillis(),
+                            extensionIdArg = extensionId,
+                            actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
+                            iconArg = imageBytes
+                        ) { }
+                    }
+                }
+            } catch (throwable: Throwable) {
+                Log.log(
+                    Log.Priority.ERROR,
+                    "mozac-webextensions",
+                    throwable,
+                    "Failed to load browser action icon, falling back to default.",
+                )
+            }
+        }
     }
 }
