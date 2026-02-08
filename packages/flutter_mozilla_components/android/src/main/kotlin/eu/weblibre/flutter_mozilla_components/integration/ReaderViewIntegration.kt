@@ -27,7 +27,7 @@ class ReaderViewIntegration(
     engine: Engine,
     store: BrowserStore,
     view: ReaderViewControlsView,
-    readerViewEvents: ReaderViewEventsImpl,
+    private val readerViewEvents: ReaderViewEventsImpl,
     readerViewController: ReaderViewController
 ) : LifecycleAwareFeature, UserInteractionHandler {
 
@@ -69,6 +69,7 @@ class ReaderViewIntegration(
     }
 
     override fun stop() {
+        readerViewEvents.removeListener(controllerListener)
         feature.stop()
     }
 
