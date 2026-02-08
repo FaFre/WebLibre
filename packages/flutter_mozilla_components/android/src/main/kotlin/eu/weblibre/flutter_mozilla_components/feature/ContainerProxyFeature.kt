@@ -97,10 +97,11 @@ object ContainerProxyFeature {
                         if (type == "healthcheck") {
                             val requestId = messageJSON.getInt("id")
                             val status = messageJSON.getString("status")
+                            val handler = requestHandlers.remove(requestId)
                             if (status == "success") {
-                                requestHandlers[requestId]?.success(message)
+                                handler?.success(message)
                             } else {
-                                requestHandlers[requestId]?.error(
+                                handler?.error(
                                     "Container Proxy",
                                     "Failed to perform operation",
                                     message.getString("error")

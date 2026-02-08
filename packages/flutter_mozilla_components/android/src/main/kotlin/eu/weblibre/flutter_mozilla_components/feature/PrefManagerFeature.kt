@@ -67,10 +67,11 @@ object PrefManagerFeature {
 
                         val requestId = messageJSON.getInt("id")
                         val status = messageJSON.getString("status")
+                        val handler = requestHandlers.remove(requestId)
                         if (status == "success") {
-                            requestHandlers[requestId]?.success(message)
+                            handler?.success(message)
                         } else {
-                            requestHandlers[requestId]?.error(
+                            handler?.error(
                                 "Pref Manager",
                                 "Failed to perform operation",
                                 message.getString("error")
