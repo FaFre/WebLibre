@@ -136,9 +136,11 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
         view.isVisible = shouldSettingsBeVisible(addon)
         view.isEnabled = shouldSettingsBeVisible(addon)
         view.setOnClickListener {
-            val intent = Intent(this, AddonSettingsActivity::class.java)
-            intent.putExtra("add_on", addon)
-            this.startActivity(intent)
+            val optionsPageUrl = addon.installedState?.optionsPageUrl ?: return@setOnClickListener
+            components.useCases.tabsUseCases.addTab(optionsPageUrl, selectTab = true)
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            startActivity(intent)
         }
     }
 

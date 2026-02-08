@@ -172,17 +172,6 @@
             android:exported="false"
             android:theme="@style/AppTheme" />
 
-        <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonSettingsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-
-        <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:theme="@style/AppTheme"/>
-
         <receiver
             android:name=".SearchBarWidgetReceiver"
             android:exported="true">

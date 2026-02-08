@@ -91,17 +91,6 @@
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light" />
 
-        <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonSettingsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light" />
-
-        <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:theme="@style/Theme.AppCompat.Light"/>
-
         <service
             android:name="eu.weblibre.flutter_mozilla_components.services.DownloadService"
             android:foregroundServiceType="dataSync" />
