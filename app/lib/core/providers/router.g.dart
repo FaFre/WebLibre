@@ -75,7 +75,7 @@ final class CurrentTopRouteProvider
   }
 }
 
-String _$currentTopRouteHash() => r'1d71db42203483c7d919f44879e673f2f36d2e6a';
+String _$currentTopRouteHash() => r'60bc1b11ab636ba250b891eed24f7e7dd8e62d81';
 
 abstract class _$CurrentTopRoute extends $Notifier<RouteBase?> {
   RouteBase? build();

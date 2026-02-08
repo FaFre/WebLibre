@@ -60,23 +60,24 @@ class CurrentTopRoute extends _$CurrentTopRoute {
     final router = ref.watch(routerProvider).value;
     if (router == null) return null;
 
-    void update() {
+    GoRoute? getCurrentRoute() {
       final config = router.routerDelegate.currentConfiguration;
 
       if (config.isEmpty) {
-        state = null;
-        return;
+        return null;
       }
 
       final match = config.last;
-      state = match.route;
+      return match.route;
+    }
+
+    void update() {
+      state = getCurrentRoute();
     }
 
     router.routerDelegate.addListener(update);
     ref.onDispose(() => router.routerDelegate.removeListener(update));
 
-    update();
-
-    return state;
+    return getCurrentRoute();
   }
 }
