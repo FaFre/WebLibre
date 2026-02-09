@@ -25,6 +25,10 @@ class GeckoTabService {
     bool onHistoryStateChange = false,
     bool onFindResults = false,
     bool onThumbnailChange = false,
+    bool onBrowserExtensionsChange = false,
+    bool onPageExtensionsChange = false,
+    bool onBrowserExtensionIcons = false,
+    bool onPageExtensionIcons = false,
   }) {
     return _api.syncEvents(
       onSelectedTabChange: onSelectedTabChange,
@@ -36,6 +40,10 @@ class GeckoTabService {
       onFindResults: onFindResults,
       onThumbnailChange: onThumbnailChange,
       onReaderableStateChange: false,
+      onBrowserExtensionsChange: onBrowserExtensionsChange,
+      onPageExtensionsChange: onPageExtensionsChange,
+      onBrowserExtensionIcons: onBrowserExtensionIcons,
+      onPageExtensionIcons: onPageExtensionIcons,
     );
   }
 

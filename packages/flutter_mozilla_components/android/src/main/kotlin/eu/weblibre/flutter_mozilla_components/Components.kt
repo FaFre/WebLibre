@@ -38,7 +38,7 @@ class Components(val profileApplicationContext: ProfileContext,
                  val logLevel: Log.Priority,
                  val contentBlocking: ContentBlocking,
                  val addonCollection: AddonCollection?,
-                 private val addonEvents: GeckoAddonEvents,
+                 val addonEvents: GeckoAddonEvents,
                  private val tabContentEvents: GeckoTabContentEvents,
                  private val extensionEvents: BrowserExtensionEvents
 ) {

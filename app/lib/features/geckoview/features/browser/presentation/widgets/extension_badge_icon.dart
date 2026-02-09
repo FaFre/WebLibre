@@ -37,11 +37,7 @@ class ExtensionBadgeIcon extends StatelessWidget {
       textColor: state.badgeTextColor,
       backgroundColor: state.badgeBackgroundColor,
       child: RepaintBoundary(
-        child: SafeRawImage(
-          image: state.icon,
-          width: 24,
-          height: 24,
-        ),
+        child: SafeRawImage(image: state.icon, width: 24, height: 24),
       ),
     );
   }

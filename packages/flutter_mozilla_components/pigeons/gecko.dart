@@ -1113,6 +1113,10 @@ abstract class GeckoTabsApi {
     required bool onHistoryStateChange,
     required bool onFindResults,
     required bool onThumbnailChange,
+    required bool onBrowserExtensionsChange,
+    required bool onPageExtensionsChange,
+    required bool onBrowserExtensionIcons,
+    required bool onPageExtensionIcons,
   });
 
   void selectTab({required String tabId});

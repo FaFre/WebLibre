@@ -21,7 +21,6 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
@@ -61,12 +60,12 @@ class WebExtensionsState extends _$WebExtensionsState {
           title: data.title,
           enabled: data.enabled ?? current.enabled,
           badgeText: data.badgeText,
-          badgeTextColor: data.badgeTextColor.mapNotNull(
-            (color) => Color(color),
-          ),
-          badgeBackgroundColor: data.badgeBackgroundColor.mapNotNull(
-            (color) => Color(color),
-          ),
+          badgeTextColor: data.badgeTextColor != null
+              ? Color(data.badgeTextColor!)
+              : null,
+          badgeBackgroundColor: data.badgeBackgroundColor != null
+              ? Color(data.badgeBackgroundColor!)
+              : null,
         );
     } else {
       if (state.containsKey(extensionId)) {
@@ -151,6 +150,40 @@ class WebExtensionsState extends _$WebExtensionsState {
         ),
       ],
     };
+
+    // Sync extension events after engine is ready and listeners are set up
+    // This ensures we get the current state even if we missed initial events
+    ref.listen(
+      fireImmediately: true,
+      engineReadyStateProvider,
+      (previous, next) async {
+        if (next) {
+          try {
+            await GeckoTabService().syncEvents(
+              onBrowserExtensionsChange:
+                  actionType == WebExtensionActionType.browser,
+              onPageExtensionsChange: actionType == WebExtensionActionType.page,
+              onBrowserExtensionIcons:
+                  actionType == WebExtensionActionType.browser,
+              onPageExtensionIcons: actionType == WebExtensionActionType.page,
+            );
+          } catch (e, s) {
+            logger.w(
+              'Failed to sync extension events for $actionType',
+              error: e,
+              stackTrace: s,
+            );
+          }
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to engineReadyStateProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
     ref.onDispose(() async {
       // Dispose all cached images

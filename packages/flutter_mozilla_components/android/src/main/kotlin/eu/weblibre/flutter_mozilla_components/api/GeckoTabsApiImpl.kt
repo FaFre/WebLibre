@@ -14,6 +14,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.RecoverableBrowserState as
 import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation as PigeonRestoreLocation
 import eu.weblibre.flutter_mozilla_components.pigeons.RecoverableTab as PigeonRecoverableTab
 import eu.weblibre.flutter_mozilla_components.pigeons.SourceValue
+import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
+import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionData
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
@@ -178,6 +180,10 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         onHistoryStateChange: Boolean,
         onFindResults: Boolean,
         onThumbnailChange: Boolean,
+        onBrowserExtensionsChange: Boolean,
+        onPageExtensionsChange: Boolean,
+        onBrowserExtensionIcons: Boolean,
+        onPageExtensionIcons: Boolean,
     ) {
         try {
             val tabs = components.core.store.state.tabs.map { it.copy() }
@@ -274,8 +280,119 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     coroutineScope.launch { handleThumbnailChange(tab) }
                 }
             }
+
+            // Sync extension events
+            if (onBrowserExtensionsChange || onPageExtensionsChange ||
+                onBrowserExtensionIcons || onPageExtensionIcons) {
+                syncExtensionEvents(
+                    onBrowserExtensionsChange,
+                    onPageExtensionsChange,
+                    onBrowserExtensionIcons,
+                    onPageExtensionIcons
+                )
+            }
         } catch (e: Exception) {
             logger.error("$TAG: Failed to sync events", e)
+        }
+    }
+
+    private fun syncExtensionEvents(
+        onBrowserExtensionsChange: Boolean,
+        onPageExtensionsChange: Boolean,
+        onBrowserExtensionIcons: Boolean,
+        onPageExtensionIcons: Boolean
+    ) {
+        try {
+            val extensions = components.core.store.state.extensions.values.filter { it.enabled }
+
+            extensions.forEach { extension ->
+                val browserAction = extension.browserAction
+                val pageAction = extension.pageAction
+
+                // Sync browser action
+                if (browserAction != null) {
+                    if (onBrowserExtensionsChange) {
+                        val data = WebExtensionData(
+                            extensionId = extension.id,
+                            title = browserAction.title,
+                            enabled = browserAction.enabled,
+                            badgeText = browserAction.badgeText,
+                            badgeTextColor = browserAction.badgeTextColor?.toLong(),
+                            badgeBackgroundColor = browserAction.badgeBackgroundColor?.toLong(),
+                        )
+                        components.addonEvents.onUpsertWebExtensionAction(
+                            System.currentTimeMillis(),
+                            extension.id,
+                            WebExtensionActionType.BROWSER,
+                            data
+                        ) { }
+                    }
+
+                    if (onBrowserExtensionIcons) {
+                        coroutineScope.launch {
+                            try {
+                                val icon = browserAction.loadIcon?.invoke(128)
+                                icon?.let {
+                                    val imageBytes = icon.toWebPBytes()
+                                    withContext(Dispatchers.Main) {
+                                        components.addonEvents.onUpdateWebExtensionIcon(
+                                            System.currentTimeMillis(),
+                                            extension.id,
+                                            WebExtensionActionType.BROWSER,
+                                            imageBytes
+                                        ) { }
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                logger.error("$TAG: Failed to load browser action icon for ${extension.id}", e)
+                            }
+                        }
+                    }
+                }
+
+                // Sync page action
+                if (pageAction != null && pageAction.enabled == true) {
+                    if (onPageExtensionsChange) {
+                        val data = WebExtensionData(
+                            extensionId = extension.id,
+                            title = pageAction.title,
+                            enabled = pageAction.enabled,
+                            badgeText = pageAction.badgeText,
+                            badgeTextColor = pageAction.badgeTextColor?.toLong(),
+                            badgeBackgroundColor = pageAction.badgeBackgroundColor?.toLong(),
+                        )
+                        components.addonEvents.onUpsertWebExtensionAction(
+                            System.currentTimeMillis(),
+                            extension.id,
+                            WebExtensionActionType.PAGE,
+                            data
+                        ) { }
+                    }
+
+                    if (onPageExtensionIcons) {
+                        coroutineScope.launch {
+                            try {
+                                val icon = pageAction.loadIcon?.invoke(128)
+                                icon?.let {
+                                    val imageBytes = icon.toWebPBytes()
+                                    withContext(Dispatchers.Main) {
+                                        components.addonEvents.onUpdateWebExtensionIcon(
+                                            System.currentTimeMillis(),
+                                            extension.id,
+                                            WebExtensionActionType.PAGE,
+                                            imageBytes
+                                        ) { }
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                logger.error("$TAG: Failed to load page action icon for ${extension.id}", e)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("$TAG: Failed to sync extension events", e)
         }
     }
 

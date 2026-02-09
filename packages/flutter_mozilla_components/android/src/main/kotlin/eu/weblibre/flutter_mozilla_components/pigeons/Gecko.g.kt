@@ -4344,7 +4344,7 @@ interface GeckoSessionApi {
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoTabsApi {
-  fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean)
+  fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean)
   fun selectTab(tabId: String)
   fun removeTab(tabId: String)
   fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?): String
@@ -4390,8 +4390,12 @@ interface GeckoTabsApi {
             val onHistoryStateChangeArg = args[6] as Boolean
             val onFindResultsArg = args[7] as Boolean
             val onThumbnailChangeArg = args[8] as Boolean
+            val onBrowserExtensionsChangeArg = args[9] as Boolean
+            val onPageExtensionsChangeArg = args[10] as Boolean
+            val onBrowserExtensionIconsArg = args[11] as Boolean
+            val onPageExtensionIconsArg = args[12] as Boolean
             val wrapped: List<Any?> = try {
-              api.syncEvents(onSelectedTabChangeArg, onTabListChangeArg, onTabContentStateChangeArg, onIconChangeArg, onSecurityInfoStateChangeArg, onReaderableStateChangeArg, onHistoryStateChangeArg, onFindResultsArg, onThumbnailChangeArg)
+              api.syncEvents(onSelectedTabChangeArg, onTabListChangeArg, onTabContentStateChangeArg, onIconChangeArg, onSecurityInfoStateChangeArg, onReaderableStateChangeArg, onHistoryStateChangeArg, onFindResultsArg, onThumbnailChangeArg, onBrowserExtensionsChangeArg, onPageExtensionsChangeArg, onBrowserExtensionIconsArg, onPageExtensionIconsArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
