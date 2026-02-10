@@ -246,6 +246,7 @@ class IntentReceiverActivity : Activity() {
                     context = this@IntentReceiverActivity,
                     customTabSessionId = sessionId,
                     webAppManifestUrl = url,
+                    pwaShortcutId = intent.getStringExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID),
                 )
                 startActivity(externalIntent)
                 finish()
@@ -311,33 +312,6 @@ class IntentReceiverActivity : Activity() {
     }
 
     /**
-     * Enhances the existing loading screen with actual data once components are initialized.
-     * This updates the placeholder with real manifest/icon data.
-     */
-    private fun enhanceLoadingScreen(intent: Intent) {
-        val components = GlobalComponents.components ?: return
-        val url = intent.dataString ?: return
-
-        loadingScreenManager?.let { manager ->
-            when {
-                // PWA intent - enhance with manifest data
-                LoadingScreenManager.isPwaIntent(intent) -> {
-                    coroutineScope.launch {
-                        val manifest = components.core.webAppManifestStorage.loadManifest(url)
-                        manifest?.let {
-                            manager.enhancePwaLoading(it, components.core.icons, coroutineScope)
-                        }
-                    }
-                }
-                // Custom Tab - enhance with favicon
-                else -> {
-                    manager.enhanceCustomTabLoading(url, components.core.icons, coroutineScope)
-                }
-            }
-        }
-    }
-
-    /**
      * Waits for GlobalComponents to be initialized with a timeout.
      * Once components are ready, shows branded loading screen before routing.
      * Falls back to MainActivity if timeout is reached (10 seconds).
@@ -349,13 +323,7 @@ class IntentReceiverActivity : Activity() {
             while (isActive && elapsedMs < PwaConstants.COMPONENT_INIT_TIMEOUT_MS) {
                 if (GlobalComponents.components != null) {
                     logger.debug("Components initialized after ${elapsedMs}ms")
-                    pendingIntent?.let { intent ->
-                        // Enhance the existing loading screen with actual data
-                        enhanceLoadingScreen(intent)
-                        // Small delay to show the enhanced loading screen (200ms)
-                        delay(200)
-                        routeIntent(intent)
-                    }
+                    pendingIntent?.let { routeIntent(it) }
                     pendingIntent = null
                     return@launch
                 }

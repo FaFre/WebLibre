@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
@@ -25,7 +24,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.log.logger.Logger
@@ -75,20 +73,18 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
     private fun showLoading() {
         val container = findViewById<FrameLayout>(R.id.container)
         loadingScreenManager = LoadingScreenManager.forActivity(this, container)
-        
-        // Show branded placeholder immediately based on available data
-        // If we have a manifest URL, it's likely a PWA
+
         val url = webAppManifestUrl ?: ""
+        val shortcutId = intent?.getStringExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID)
+
         if (url.isNotEmpty()) {
-            // Try to show PWA placeholder
-            loadingScreenManager?.showLoadingForIntent(
-                Intent().apply {
-                    data = android.net.Uri.parse(url)
-                    putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, "placeholder")
-                }
-            )
+            val loadingIntent = Intent().apply {
+                data = android.net.Uri.parse(url)
+                putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, "placeholder")
+                shortcutId?.let { putExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID, it) }
+            }
+            loadingScreenManager?.showLoadingForIntent(loadingIntent)
         } else {
-            // Show Custom Tab placeholder
             loadingScreenManager?.showLoadingForIntent(Intent())
         }
     }
@@ -98,12 +94,7 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
             var elapsedMs = 0L
 
             while (isActive && elapsedMs < PwaConstants.COMPONENT_INIT_TIMEOUT_MS) {
-                val components = GlobalComponents.components
-                if (components != null) {
-                    // Enhance the existing loading screen with actual data
-                    enhanceLoadingScreen(components, sessionId)
-                    // Brief delay to show the enhanced loading screen
-                    delay(200)
+                if (GlobalComponents.components != null) {
                     showFragment(sessionId)
                     return@launch
                 }
@@ -116,39 +107,6 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
             if (isActive) {
                 logger.error("Timeout waiting for components after ${PwaConstants.COMPONENT_INIT_TIMEOUT_MS}ms")
                 finish()
-            }
-        }
-    }
-
-    /**
-     * Enhances the existing loading screen with actual data once components are ready.
-     */
-    private fun enhanceLoadingScreen(components: Components, sessionId: String) {
-        val session = components.core.store.state.findCustomTab(sessionId) ?: return
-        val url = session.content.url
-        val manifestUrl = webAppManifestUrl
-
-        loadingScreenManager?.let { manager ->
-            when (session.config.externalAppType) {
-                mozilla.components.browser.state.state.ExternalAppType.PROGRESSIVE_WEB_APP,
-                mozilla.components.browser.state.state.ExternalAppType.TRUSTED_WEB_ACTIVITY -> {
-                    // Enhance PWA loading with manifest data
-                    coroutineScope.launch(Dispatchers.IO) {
-                        val manifest = manifestUrl?.let { manifestUrl ->
-                            components.core.webAppManifestStorage.loadManifest(manifestUrl)
-                        }
-
-                        withContext(Dispatchers.Main) {
-                            manifest?.let {
-                                manager.enhancePwaLoading(it, components.core.icons, coroutineScope)
-                            } ?: manager.enhanceCustomTabLoading(url, components.core.icons, coroutineScope)
-                        }
-                    }
-                }
-                else -> {
-                    // Enhance Custom Tab loading with favicon
-                    manager.enhanceCustomTabLoading(url, components.core.icons, coroutineScope)
-                }
             }
         }
     }
@@ -241,11 +199,13 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
             context: Context,
             customTabSessionId: String,
             webAppManifestUrl: String? = null,
+            pwaShortcutId: String? = null,
         ): Intent {
             return Intent(context, ExternalAppBrowserActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, customTabSessionId)
                 webAppManifestUrl?.let { putExtra(EXTRA_WEB_APP_MANIFEST_URL, it) }
+                pwaShortcutId?.let { putExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID, it) }
             }
         }
     }

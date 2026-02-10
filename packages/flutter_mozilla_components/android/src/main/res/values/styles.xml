@@ -7,10 +7,4 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
     </style>
-
-    <!-- Shape style for rounded icon backgrounds (PWA loading) -->
-    <style name="RoundedIconShape">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">28%</item>
-    </style>
 </resources>
