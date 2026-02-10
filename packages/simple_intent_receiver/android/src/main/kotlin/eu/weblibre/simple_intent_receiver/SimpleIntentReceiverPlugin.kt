@@ -114,7 +114,7 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     }
 
     val pigeonIntent = convertToPigeonIntent(intent)
-    intentReceiver?.sendIntent(System.currentTimeMillis(), pigeonIntent)
+    intentReceiver?.sendIntent(pigeonIntent)
     return true
   }
 

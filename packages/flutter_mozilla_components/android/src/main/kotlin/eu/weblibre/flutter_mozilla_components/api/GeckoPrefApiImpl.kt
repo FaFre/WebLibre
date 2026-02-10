@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.feature.PrefManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPref
@@ -201,7 +202,7 @@ class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
 
     override fun onPreferenceChange(observedPreference: BrowserPreference<*>) {
         components.flutterEvents.onPreferenceChange(
-            System.currentTimeMillis(), GeckoPref(
+            EventSequence.next(), GeckoPref(
                 name = observedPreference.pref,
                 value = observedPreference.value,
                 defaultValue = observedPreference.defaultValue,

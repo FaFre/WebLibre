@@ -1392,36 +1392,35 @@ class ContainerSiteAssignment {
 
 @FlutterApi()
 abstract class GeckoStateEvents {
-  void onViewReadyStateChange(int timestamp, bool state);
-  void onEngineReadyStateChange(int timestamp, bool state);
-  void onIconUpdate(int timestamp, String url, Uint8List bytes);
+  void onViewReadyStateChange(int sequence, bool state);
+  void onEngineReadyStateChange(int sequence, bool state);
+  void onIconUpdate(int sequence, String url, Uint8List bytes);
 
-  void onTabAdded(int timestamp, String tabId);
+  void onTabAdded(int sequence, String tabId);
 
-  void onTabListChange(int timestamp, List<String> tabIds);
-  void onSelectedTabChange(int timestamp, String? id);
+  void onTabListChange(int sequence, List<String> tabIds);
+  void onSelectedTabChange(int sequence, String? id);
 
-  void onTabContentStateChange(int timestamp, TabContentState state);
-  void onHistoryStateChange(int timestamp, String id, HistoryState state);
-  void onReaderableStateChange(int timestamp, String id, ReaderableState state);
+  void onTabContentStateChange(int sequence, TabContentState state);
+  void onHistoryStateChange(int sequence, String id, HistoryState state);
+  void onReaderableStateChange(int sequence, String id, ReaderableState state);
   void onSecurityInfoStateChange(
-    int timestamp,
+    int sequence,
     String id,
     SecurityInfoState state,
   );
-  void onIconChange(int timestamp, String id, Uint8List? bytes);
-  void onThumbnailChange(int timestamp, String id, Uint8List? bytes);
+  void onIconChange(int sequence, String id, Uint8List? bytes);
+  void onThumbnailChange(int sequence, String id, Uint8List? bytes);
 
-  void onFindResults(int timestamp, String id, List<FindResultState> results);
-  void onLongPress(int timestamp, String id, HitResult hitResult);
+  void onFindResults(int sequence, String id, List<FindResultState> results);
+  void onLongPress(int sequence, String id, HitResult hitResult);
 
-  // void onScrollChange(int timestamp, String tabId, int scrollY);
-  void onPreferenceChange(int timestamp, GeckoPref value);
+  // void onScrollChange(int sequence, String tabId, int scrollY);
+  void onPreferenceChange(int sequence, GeckoPref value);
 
-  void onContainerSiteAssignment(
-    int timestamp,
-    ContainerSiteAssignment details,
-  );
+  void onContainerSiteAssignment(int sequence, ContainerSiteAssignment details);
+
+  void onMlProgress(int sequence, MlProgressData progress);
 
   void onMlProgress(int timestamp, MlProgressData progress);
 }
@@ -1439,7 +1438,7 @@ abstract class ReaderViewEvents {
 
 @FlutterApi()
 abstract class ReaderViewController {
-  void appearanceButtonVisibility(int timestamp, bool visible);
+  void appearanceButtonVisibility(int sequence, bool visible);
 }
 
 @HostApi()
@@ -1465,20 +1464,20 @@ abstract class GeckoAddonsApi {
 @FlutterApi()
 abstract class GeckoAddonEvents {
   void onUpsertWebExtensionAction(
-    int timestamp,
+    int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     WebExtensionData extensionData,
   );
 
   void onRemoveWebExtensionAction(
-    int timestamp,
+    int sequence,
     String extensionId,
     WebExtensionActionType actionType,
   );
 
   void onUpdateWebExtensionIcon(
-    int timestamp,
+    int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     Uint8List icon,
@@ -1495,7 +1494,7 @@ abstract class GeckoSuggestionApi {
 @FlutterApi()
 abstract class GeckoSuggestionEvents {
   void onSuggestionResult(
-    int timestamp,
+    int sequence,
     GeckoSuggestionType suggestionType,
     List<GeckoSuggestion> suggestions,
   );
@@ -1503,7 +1502,7 @@ abstract class GeckoSuggestionEvents {
 
 @FlutterApi()
 abstract class GeckoTabContentEvents {
-  void onContentUpdate(int timestamp, TabContent content);
+  void onContentUpdate(int sequence, TabContent content);
 }
 
 @HostApi()
@@ -1579,7 +1578,7 @@ abstract class GeckoDownloadsApi {
 
 @FlutterApi()
 abstract class BrowserExtensionEvents {
-  void onFeedRequested(int timestamp, String url);
+  void onFeedRequested(int sequence, String url);
 }
 
 class GeckoHeader {
@@ -1737,12 +1736,12 @@ abstract class GeckoViewportEvents {
   /// This is detected natively using WindowInsets API and provides
   /// accurate keyboard height information.
   ///
-  /// [timestamp] Event timestamp for ordering.
+  /// [sequence] Event sequence number for ordering.
   /// [heightPx] Keyboard height in pixels (0 when hidden).
   /// [isVisible] Whether the keyboard is currently visible.
   /// [isAnimating] Whether the keyboard is currently animating.
   void onKeyboardVisibilityChanged(
-    int timestamp,
+    int sequence,
     int heightPx,
     bool isVisible,
     bool isAnimating,

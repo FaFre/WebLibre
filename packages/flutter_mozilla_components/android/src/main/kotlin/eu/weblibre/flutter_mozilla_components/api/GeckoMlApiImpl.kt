@@ -1,5 +1,6 @@
 package eu.weblibre.flutter_mozilla_components.api
 
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
 import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
@@ -68,7 +69,7 @@ class GeckoMlApiImpl(
             )
 
             runOnUiThread {
-                stateEvents.onMlProgress(System.currentTimeMillis(), mlProgress) { result ->
+                stateEvents.onMlProgress(EventSequence.next(), mlProgress) { result ->
                     result.onFailure { error ->
                         android.util.Log.e("GeckoMlApi", "Failed to emit progress event: ${error.message}")
                     }

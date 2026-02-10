@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.feature
 
 import androidx.annotation.VisibleForTesting
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -86,7 +87,7 @@ object BrowserExtensionFeature {
 
                             runOnUiThread {
                                 extensionEvents.onFeedRequested(
-                                    System.currentTimeMillis(),
+                                    EventSequence.next(),
                                     url
                                 ) { _ -> }
                             }

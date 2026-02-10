@@ -51,5 +51,5 @@ class Intent {
 )
 @FlutterApi()
 abstract class IntentEvents {
-  void onIntentReceived(int timestamp, Intent intent);
+  void onIntentReceived(int sequence, Intent intent);
 }

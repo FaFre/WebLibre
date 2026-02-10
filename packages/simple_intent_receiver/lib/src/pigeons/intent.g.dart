@@ -128,7 +128,7 @@ class _PigeonCodec extends StandardMessageCodec {
 abstract class IntentEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onIntentReceived(int timestamp, Intent intent);
+  void onIntentReceived(int sequence, Intent intent);
 
   static void setUp(IntentEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -143,14 +143,14 @@ abstract class IntentEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null, expected non-null int.');
           final Intent? arg_intent = (args[1] as Intent?);
           assert(arg_intent != null,
               'Argument for dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived was null, expected non-null Intent.');
           try {
-            api.onIntentReceived(arg_timestamp!, arg_intent!);
+            api.onIntentReceived(arg_sequence!, arg_intent!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

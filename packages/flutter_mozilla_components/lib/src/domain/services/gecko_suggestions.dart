@@ -54,12 +54,12 @@ class GeckoSuggestionsService extends GeckoSuggestionEvents {
 
   @override
   void onSuggestionResult(
-    int timestamp,
+    int sequence,
     GeckoSuggestionType suggestionType,
     List<GeckoSuggestion> suggestions,
   ) {
     _suggestionsSubject.addWhenMoreRecent(
-      timestamp,
+      sequence,
       suggestionType,
       suggestions,
     );

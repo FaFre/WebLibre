@@ -14,6 +14,7 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import mozilla.components.support.base.log.logger.Logger
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
@@ -185,7 +186,7 @@ class KeyboardVisibilityFeature(
         lastKeyboardHeight = heightPx
         lastKeyboardVisible = isVisible
 
-        val timestamp = System.currentTimeMillis()
+        val timestamp = EventSequence.next()
 
         logger.debug("$TAG: Keyboard change - height=$heightPx, visible=$isVisible, animating=$isAnimating")
 

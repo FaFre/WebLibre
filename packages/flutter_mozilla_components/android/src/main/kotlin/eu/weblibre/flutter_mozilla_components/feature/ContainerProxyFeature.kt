@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.feature
 
 import androidx.annotation.VisibleForTesting
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.ContainerSiteAssignment
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.Dispatchers
@@ -115,7 +116,7 @@ object ContainerProxyFeature {
                             if (status == "success") {
                                 runOnUiThread {
                                     events.onContainerSiteAssignment(
-                                        System.currentTimeMillis(),
+                                        EventSequence.next(),
                                         ContainerSiteAssignment(
                                             requestId = requestId,
                                             tabId = components.core.store.state.selectedTabId,

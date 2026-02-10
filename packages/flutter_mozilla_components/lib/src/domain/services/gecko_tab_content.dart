@@ -28,8 +28,8 @@ class GeckoTabContentService extends GeckoTabContentEvents {
   }
 
   @override
-  void onContentUpdate(int timestamp, TabContent content) {
-    _contentSubject.addWhenMoreRecent(timestamp, content.tabId, content);
+  void onContentUpdate(int sequence, TabContent content) {
+    _contentSubject.addWhenMoreRecent(sequence, content.tabId, content);
   }
 
   Future<void> dispose() async {

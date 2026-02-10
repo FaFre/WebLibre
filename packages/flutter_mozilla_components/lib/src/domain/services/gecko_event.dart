@@ -20,6 +20,7 @@ typedef ThumbnailEvent = ({String tabId, Uint8List? bytes});
 typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
 typedef LongPressEvent = ({String tabId, HitResult hitResult});
 typedef ScrollEvent = ({String tabId, int scrollY});
+typedef ManifestUpdateEvent = ({String tabId, PwaManifest? manifest});
 
 class GeckoEventService extends GeckoStateEvents {
   // Stream controllers
@@ -44,6 +45,7 @@ class GeckoEventService extends GeckoStateEvents {
 
   final _tabAddedSubject = PublishSubject<String>();
   final _mlProgressSubject = PublishSubject<MlProgressData>();
+  final _manifestUpdateSubject = PublishSubject<ManifestUpdateEvent>();
 
   // Event streams
   ValueStream<bool> get viewReadyStateEvents => _viewStateSubject.stream;
@@ -68,52 +70,46 @@ class GeckoEventService extends GeckoStateEvents {
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
   Stream<MlProgressData> get mlProgressEvents => _mlProgressSubject.stream;
+  Stream<ManifestUpdateEvent> get manifestUpdateEvents =>
+      _manifestUpdateSubject.stream;
 
   @override
-  void onViewReadyStateChange(int timestamp, bool state) {
-    _viewStateSubject.addWhenMoreRecent(timestamp, null, state);
+  void onViewReadyStateChange(int sequence, bool state) {
+    _viewStateSubject.addWhenMoreRecent(sequence, null, state);
   }
 
   @override
-  void onEngineReadyStateChange(int timestamp, bool state) {
-    _engineStateSubject.addWhenMoreRecent(timestamp, null, state);
+  void onEngineReadyStateChange(int sequence, bool state) {
+    _engineStateSubject.addWhenMoreRecent(sequence, null, state);
   }
 
   // Overridden methods
   @override
-  void onTabListChange(int timestamp, List<String?> tabIds) {
-    _tabListSubject.addWhenMoreRecent(
-      timestamp,
-      null,
-      tabIds.nonNulls.toList(),
-    );
+  void onTabListChange(int sequence, List<String?> tabIds) {
+    _tabListSubject.addWhenMoreRecent(sequence, null, tabIds.nonNulls.toList());
   }
 
   @override
-  void onSelectedTabChange(int timestamp, String? id) {
-    _selectedTabSubject.addWhenMoreRecent(timestamp, id, id);
+  void onSelectedTabChange(int sequence, String? id) {
+    _selectedTabSubject.addWhenMoreRecent(sequence, id, id);
   }
 
   @override
-  void onTabContentStateChange(int timestamp, TabContentState state) {
-    _tabContentSubject.addWhenMoreRecent(timestamp, state.id, state);
+  void onTabContentStateChange(int sequence, TabContentState state) {
+    _tabContentSubject.addWhenMoreRecent(sequence, state.id, state);
   }
 
   @override
-  void onHistoryStateChange(int timestamp, String id, HistoryState state) {
-    _historySubject.addWhenMoreRecent(timestamp, id, (
+  void onHistoryStateChange(int sequence, String id, HistoryState state) {
+    _historySubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       history: state,
     ));
   }
 
   @override
-  void onReaderableStateChange(
-    int timestamp,
-    String id,
-    ReaderableState state,
-  ) {
-    _readerableSubject.addWhenMoreRecent(timestamp, id, (
+  void onReaderableStateChange(int sequence, String id, ReaderableState state) {
+    _readerableSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       readerable: state,
     ));
@@ -121,87 +117,91 @@ class GeckoEventService extends GeckoStateEvents {
 
   @override
   void onSecurityInfoStateChange(
-    int timestamp,
+    int sequence,
     String id,
     SecurityInfoState state,
   ) {
-    _securityInfoSubject.addWhenMoreRecent(timestamp, id, (
+    _securityInfoSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       securityInfo: state,
     ));
   }
 
   @override
-  void onIconChange(int timestamp, String id, Uint8List? bytes) {
-    _iconChangeSubject.addWhenMoreRecent(timestamp, id, (
+  void onIconChange(int sequence, String id, Uint8List? bytes) {
+    _iconChangeSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       bytes: bytes,
     ));
   }
 
   @override
-  void onIconUpdate(int timestamp, String url, Uint8List bytes) {
-    _iconUpdateSubject.addWhenMoreRecent(timestamp, url, (
+  void onIconUpdate(int sequence, String url, Uint8List bytes) {
+    _iconUpdateSubject.addWhenMoreRecent(sequence, url, (
       url: url,
       bytes: bytes,
     ));
   }
 
   @override
-  void onThumbnailChange(int timestamp, String id, Uint8List? bytes) {
-    _thumbnailSubject.addWhenMoreRecent(timestamp, id, (
+  void onThumbnailChange(int sequence, String id, Uint8List? bytes) {
+    _thumbnailSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       bytes: bytes,
     ));
   }
 
   @override
-  void onFindResults(int timestamp, String id, List<FindResultState?> results) {
-    _findResultsSubject.addWhenMoreRecent(timestamp, id, (
+  void onFindResults(int sequence, String id, List<FindResultState?> results) {
+    _findResultsSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       results: results.nonNulls.toList(),
     ));
   }
 
   @override
-  void onLongPress(int timestamp, String id, HitResult hitResult) {
-    _longPressSubject.addWhenMoreRecent(timestamp, id, (
+  void onLongPress(int sequence, String id, HitResult hitResult) {
+    _longPressSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       hitResult: hitResult,
     ));
   }
 
   @override
-  void onTabAdded(int timestamp, String tabId) {
-    _tabAddedSubject.addWhenMoreRecent(timestamp, null, tabId);
+  void onTabAdded(int sequence, String tabId) {
+    _tabAddedSubject.addWhenMoreRecent(sequence, null, tabId);
   }
 
   // @override
-  // void onScrollChange(int timestamp, String tabId, int scrollY) {
-  //   _scrollEventSubject.addWhenMoreRecent(timestamp, tabId, (
+  // void onScrollChange(int sequence, String tabId, int scrollY) {
+  //   _scrollEventSubject.addWhenMoreRecent(sequence, tabId, (
   //     tabId: tabId,
   //     scrollY: scrollY,
   //   ));
   // }
 
   @override
-  void onPreferenceChange(int timestamp, GeckoPref value) {
-    _prefUpdateSubject.addWhenMoreRecent(timestamp, value.name, value);
+  void onPreferenceChange(int sequence, GeckoPref value) {
+    _prefUpdateSubject.addWhenMoreRecent(sequence, value.name, value);
   }
 
   @override
   void onContainerSiteAssignment(
-    int timestamp,
+    int sequence,
     ContainerSiteAssignment details,
   ) {
     _siteAssignementSubject.addWhenMoreRecent(
-      timestamp,
+      sequence,
       details.requestId,
       details,
     );
   }
 
   @override
+  void onMlProgress(int sequence, MlProgressData progress) {
+    _mlProgressSubject.addWhenMoreRecent(sequence, null, progress);
+  }
+
   void onMlProgress(int timestamp, MlProgressData progress) {
     _mlProgressSubject.addWhenMoreRecent(timestamp, null, progress);
   }
@@ -236,5 +236,6 @@ class GeckoEventService extends GeckoStateEvents {
     await _prefUpdateSubject.close();
     await _siteAssignementSubject.close();
     await _mlProgressSubject.close();
+    await _manifestUpdateSubject.close();
   }
 }

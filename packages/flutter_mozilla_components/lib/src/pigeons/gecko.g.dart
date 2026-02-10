@@ -3762,6 +3762,398 @@ class TrackingProtectionException {
 ;
 }
 
+/// Represents an icon from a PWA manifest.
+class PwaIcon {
+  PwaIcon({
+    required this.src,
+    this.sizes,
+    this.type,
+  });
+
+  String src;
+
+  String? sizes;
+
+  String? type;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      src,
+      sizes,
+      type,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static PwaIcon decode(Object result) {
+    result as List<Object?>;
+    return PwaIcon(
+      src: result[0]! as String,
+      sizes: result[1] as String?,
+      type: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! PwaIcon || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+/// Represents a file entry in share target params.
+class ShareTargetFiles {
+  ShareTargetFiles({
+    required this.name,
+    required this.accept,
+  });
+
+  String name;
+
+  List<String?> accept;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      name,
+      accept,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ShareTargetFiles decode(Object result) {
+    result as List<Object?>;
+    return ShareTargetFiles(
+      name: result[0]! as String,
+      accept: (result[1] as List<Object?>?)!.cast<String?>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ShareTargetFiles || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+/// Represents share target params.
+class ShareTargetParams {
+  ShareTargetParams({
+    this.title,
+    this.text,
+    this.url,
+    required this.files,
+  });
+
+  String? title;
+
+  String? text;
+
+  String? url;
+
+  List<ShareTargetFiles?> files;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      title,
+      text,
+      url,
+      files,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ShareTargetParams decode(Object result) {
+    result as List<Object?>;
+    return ShareTargetParams(
+      title: result[0] as String?,
+      text: result[1] as String?,
+      url: result[2] as String?,
+      files: (result[3] as List<Object?>?)!.cast<ShareTargetFiles?>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ShareTargetParams || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+/// Represents a share target for PWA.
+class ShareTarget {
+  ShareTarget({
+    required this.action,
+    this.method,
+    this.encType,
+    this.params,
+  });
+
+  String action;
+
+  String? method;
+
+  String? encType;
+
+  ShareTargetParams? params;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      action,
+      method,
+      encType,
+      params,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ShareTarget decode(Object result) {
+    result as List<Object?>;
+    return ShareTarget(
+      action: result[0]! as String,
+      method: result[1] as String?,
+      encType: result[2] as String?,
+      params: result[3] as ShareTargetParams?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ShareTarget || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+/// Represents an external application resource.
+class ExternalApplicationResource {
+  ExternalApplicationResource({
+    required this.platform,
+    this.url,
+    this.id,
+    this.minVersion,
+  });
+
+  String platform;
+
+  String? url;
+
+  String? id;
+
+  String? minVersion;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      platform,
+      url,
+      id,
+      minVersion,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ExternalApplicationResource decode(Object result) {
+    result as List<Object?>;
+    return ExternalApplicationResource(
+      platform: result[0]! as String,
+      url: result[1] as String?,
+      id: result[2] as String?,
+      minVersion: result[3] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ExternalApplicationResource || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
+/// Represents a PWA web app manifest.
+///
+/// Mirrors Mozilla Android Components' WebAppManifest structure.
+/// https://firefox-source-docs.mozilla.org/mobile/android/geckoview/api/mozilla.components.concept.engine.manifest.WebAppManifest.html
+class PwaManifest {
+  PwaManifest({
+    required this.startUrl,
+    this.name,
+    this.shortName,
+    this.display,
+    this.themeColor,
+    this.backgroundColor,
+    this.scope,
+    this.description,
+    required this.icons,
+    this.dir,
+    this.lang,
+    this.orientation,
+    required this.relatedApplications,
+    required this.preferRelatedApplications,
+    this.shareTarget,
+    required this.currentUrl,
+  });
+
+  String startUrl;
+
+  String? name;
+
+  String? shortName;
+
+  String? display;
+
+  String? themeColor;
+
+  String? backgroundColor;
+
+  String? scope;
+
+  String? description;
+
+  List<PwaIcon?> icons;
+
+  String? dir;
+
+  String? lang;
+
+  String? orientation;
+
+  List<ExternalApplicationResource?> relatedApplications;
+
+  bool preferRelatedApplications;
+
+  ShareTarget? shareTarget;
+
+  /// The URL of the page when the manifest was detected.
+  /// Used for HTTPS/installability checks.
+  String currentUrl;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      startUrl,
+      name,
+      shortName,
+      display,
+      themeColor,
+      backgroundColor,
+      scope,
+      description,
+      icons,
+      dir,
+      lang,
+      orientation,
+      relatedApplications,
+      preferRelatedApplications,
+      shareTarget,
+      currentUrl,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static PwaManifest decode(Object result) {
+    result as List<Object?>;
+    return PwaManifest(
+      startUrl: result[0]! as String,
+      name: result[1] as String?,
+      shortName: result[2] as String?,
+      display: result[3] as String?,
+      themeColor: result[4] as String?,
+      backgroundColor: result[5] as String?,
+      scope: result[6] as String?,
+      description: result[7] as String?,
+      icons: (result[8] as List<Object?>?)!.cast<PwaIcon?>(),
+      dir: result[9] as String?,
+      lang: result[10] as String?,
+      orientation: result[11] as String?,
+      relatedApplications: (result[12] as List<Object?>?)!.cast<ExternalApplicationResource?>(),
+      preferRelatedApplications: result[13]! as bool,
+      shareTarget: result[14] as ShareTarget?,
+      currentUrl: result[15]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! PwaManifest || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -4025,6 +4417,24 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is TrackingProtectionException) {
       buffer.putUint8(213);
       writeValue(buffer, value.encode());
+    }    else if (value is PwaIcon) {
+      buffer.putUint8(214);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareTargetFiles) {
+      buffer.putUint8(215);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareTargetParams) {
+      buffer.putUint8(216);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareTarget) {
+      buffer.putUint8(217);
+      writeValue(buffer, value.encode());
+    }    else if (value is ExternalApplicationResource) {
+      buffer.putUint8(218);
+      writeValue(buffer, value.encode());
+    }    else if (value is PwaManifest) {
+      buffer.putUint8(219);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -4234,6 +4644,18 @@ class _PigeonCodec extends StandardMessageCodec {
         return SitePermissions.decode(readValue(buffer)!);
       case 213: 
         return TrackingProtectionException.decode(readValue(buffer)!);
+      case 214: 
+        return PwaIcon.decode(readValue(buffer)!);
+      case 215: 
+        return ShareTargetFiles.decode(readValue(buffer)!);
+      case 216: 
+        return ShareTargetParams.decode(readValue(buffer)!);
+      case 217: 
+        return ShareTarget.decode(readValue(buffer)!);
+      case 218: 
+        return ExternalApplicationResource.decode(readValue(buffer)!);
+      case 219: 
+        return PwaManifest.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -6022,39 +6444,41 @@ class GeckoCookieApi {
 abstract class GeckoStateEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onViewReadyStateChange(int timestamp, bool state);
+  void onViewReadyStateChange(int sequence, bool state);
 
-  void onEngineReadyStateChange(int timestamp, bool state);
+  void onEngineReadyStateChange(int sequence, bool state);
 
-  void onIconUpdate(int timestamp, String url, Uint8List bytes);
+  void onIconUpdate(int sequence, String url, Uint8List bytes);
 
-  void onTabAdded(int timestamp, String tabId);
+  void onTabAdded(int sequence, String tabId);
 
-  void onTabListChange(int timestamp, List<String> tabIds);
+  void onTabListChange(int sequence, List<String> tabIds);
 
-  void onSelectedTabChange(int timestamp, String? id);
+  void onSelectedTabChange(int sequence, String? id);
 
-  void onTabContentStateChange(int timestamp, TabContentState state);
+  void onTabContentStateChange(int sequence, TabContentState state);
 
-  void onHistoryStateChange(int timestamp, String id, HistoryState state);
+  void onHistoryStateChange(int sequence, String id, HistoryState state);
 
-  void onReaderableStateChange(int timestamp, String id, ReaderableState state);
+  void onReaderableStateChange(int sequence, String id, ReaderableState state);
 
-  void onSecurityInfoStateChange(int timestamp, String id, SecurityInfoState state);
+  void onSecurityInfoStateChange(int sequence, String id, SecurityInfoState state);
 
-  void onIconChange(int timestamp, String id, Uint8List? bytes);
+  void onIconChange(int sequence, String id, Uint8List? bytes);
 
-  void onThumbnailChange(int timestamp, String id, Uint8List? bytes);
+  void onThumbnailChange(int sequence, String id, Uint8List? bytes);
 
-  void onFindResults(int timestamp, String id, List<FindResultState> results);
+  void onFindResults(int sequence, String id, List<FindResultState> results);
 
-  void onLongPress(int timestamp, String id, HitResult hitResult);
+  void onLongPress(int sequence, String id, HitResult hitResult);
 
-  void onPreferenceChange(int timestamp, GeckoPref value);
+  void onPreferenceChange(int sequence, GeckoPref value);
 
-  void onContainerSiteAssignment(int timestamp, ContainerSiteAssignment details);
+  void onContainerSiteAssignment(int sequence, ContainerSiteAssignment details);
 
-  void onMlProgress(int timestamp, MlProgressData progress);
+  void onMlProgress(int sequence, MlProgressData progress);
+
+  void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest);
 
   static void setUp(GeckoStateEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -6069,14 +6493,14 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null, expected non-null int.');
           final bool? arg_state = (args[1] as bool?);
           assert(arg_state != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange was null, expected non-null bool.');
           try {
-            api.onViewReadyStateChange(arg_timestamp!, arg_state!);
+            api.onViewReadyStateChange(arg_sequence!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6097,14 +6521,14 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null, expected non-null int.');
           final bool? arg_state = (args[1] as bool?);
           assert(arg_state != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange was null, expected non-null bool.');
           try {
-            api.onEngineReadyStateChange(arg_timestamp!, arg_state!);
+            api.onEngineReadyStateChange(arg_sequence!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6125,8 +6549,8 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null int.');
           final String? arg_url = (args[1] as String?);
           assert(arg_url != null,
@@ -6135,7 +6559,7 @@ abstract class GeckoStateEvents {
           assert(arg_bytes != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate was null, expected non-null Uint8List.');
           try {
-            api.onIconUpdate(arg_timestamp!, arg_url!, arg_bytes!);
+            api.onIconUpdate(arg_sequence!, arg_url!, arg_bytes!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6156,14 +6580,14 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null, expected non-null int.');
           final String? arg_tabId = (args[1] as String?);
           assert(arg_tabId != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded was null, expected non-null String.');
           try {
-            api.onTabAdded(arg_timestamp!, arg_tabId!);
+            api.onTabAdded(arg_sequence!, arg_tabId!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6184,14 +6608,14 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null, expected non-null int.');
           final List<String>? arg_tabIds = (args[1] as List<Object?>?)?.cast<String>();
           assert(arg_tabIds != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange was null, expected non-null List<String>.');
           try {
-            api.onTabListChange(arg_timestamp!, arg_tabIds!);
+            api.onTabListChange(arg_sequence!, arg_tabIds!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6212,12 +6636,12 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           try {
-            api.onSelectedTabChange(arg_timestamp!, arg_id);
+            api.onSelectedTabChange(arg_sequence!, arg_id);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6238,14 +6662,14 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null, expected non-null int.');
           final TabContentState? arg_state = (args[1] as TabContentState?);
           assert(arg_state != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange was null, expected non-null TabContentState.');
           try {
-            api.onTabContentStateChange(arg_timestamp!, arg_state!);
+            api.onTabContentStateChange(arg_sequence!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6266,8 +6690,8 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           assert(arg_id != null,
@@ -6276,7 +6700,7 @@ abstract class GeckoStateEvents {
           assert(arg_state != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange was null, expected non-null HistoryState.');
           try {
-            api.onHistoryStateChange(arg_timestamp!, arg_id!, arg_state!);
+            api.onHistoryStateChange(arg_sequence!, arg_id!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6297,8 +6721,8 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           assert(arg_id != null,
@@ -6307,7 +6731,7 @@ abstract class GeckoStateEvents {
           assert(arg_state != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange was null, expected non-null ReaderableState.');
           try {
-            api.onReaderableStateChange(arg_timestamp!, arg_id!, arg_state!);
+            api.onReaderableStateChange(arg_sequence!, arg_id!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6328,8 +6752,8 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           assert(arg_id != null,
@@ -6338,7 +6762,7 @@ abstract class GeckoStateEvents {
           assert(arg_state != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange was null, expected non-null SecurityInfoState.');
           try {
-            api.onSecurityInfoStateChange(arg_timestamp!, arg_id!, arg_state!);
+            api.onSecurityInfoStateChange(arg_sequence!, arg_id!, arg_state!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6359,15 +6783,15 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           assert(arg_id != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange was null, expected non-null String.');
           final Uint8List? arg_bytes = (args[2] as Uint8List?);
           try {
-            api.onIconChange(arg_timestamp!, arg_id!, arg_bytes);
+            api.onIconChange(arg_sequence!, arg_id!, arg_bytes);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6388,15 +6812,15 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           assert(arg_id != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange was null, expected non-null String.');
           final Uint8List? arg_bytes = (args[2] as Uint8List?);
           try {
-            api.onThumbnailChange(arg_timestamp!, arg_id!, arg_bytes);
+            api.onThumbnailChange(arg_sequence!, arg_id!, arg_bytes);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6417,8 +6841,8 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           assert(arg_id != null,
@@ -6427,7 +6851,7 @@ abstract class GeckoStateEvents {
           assert(arg_results != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults was null, expected non-null List<FindResultState>.');
           try {
-            api.onFindResults(arg_timestamp!, arg_id!, arg_results!);
+            api.onFindResults(arg_sequence!, arg_id!, arg_results!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6448,8 +6872,8 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null int.');
           final String? arg_id = (args[1] as String?);
           assert(arg_id != null,
@@ -6458,7 +6882,7 @@ abstract class GeckoStateEvents {
           assert(arg_hitResult != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress was null, expected non-null HitResult.');
           try {
-            api.onLongPress(arg_timestamp!, arg_id!, arg_hitResult!);
+            api.onLongPress(arg_sequence!, arg_id!, arg_hitResult!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6479,14 +6903,14 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange was null, expected non-null int.');
           final GeckoPref? arg_value = (args[1] as GeckoPref?);
           assert(arg_value != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange was null, expected non-null GeckoPref.');
           try {
-            api.onPreferenceChange(arg_timestamp!, arg_value!);
+            api.onPreferenceChange(arg_sequence!, arg_value!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6507,14 +6931,14 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment was null, expected non-null int.');
           final ContainerSiteAssignment? arg_details = (args[1] as ContainerSiteAssignment?);
           assert(arg_details != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment was null, expected non-null ContainerSiteAssignment.');
           try {
-            api.onContainerSiteAssignment(arg_timestamp!, arg_details!);
+            api.onContainerSiteAssignment(arg_sequence!, arg_details!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6535,14 +6959,43 @@ abstract class GeckoStateEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress was null, expected non-null int.');
           final MlProgressData? arg_progress = (args[1] as MlProgressData?);
           assert(arg_progress != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress was null, expected non-null MlProgressData.');
           try {
-            api.onMlProgress(arg_timestamp!, arg_progress!);
+            api.onMlProgress(arg_sequence!, arg_progress!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onManifestUpdate$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onManifestUpdate was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onManifestUpdate was null, expected non-null int.');
+          final String? arg_tabId = (args[1] as String?);
+          assert(arg_tabId != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onManifestUpdate was null, expected non-null String.');
+          final PwaManifest? arg_manifest = (args[2] as PwaManifest?);
+          try {
+            api.onManifestUpdate(arg_sequence!, arg_tabId!, arg_manifest);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6654,7 +7107,7 @@ class ReaderViewEvents {
 abstract class ReaderViewController {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void appearanceButtonVisibility(int timestamp, bool visible);
+  void appearanceButtonVisibility(int sequence, bool visible);
 
   static void setUp(ReaderViewController? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -6669,14 +7122,14 @@ abstract class ReaderViewController {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null, expected non-null int.');
           final bool? arg_visible = (args[1] as bool?);
           assert(arg_visible != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility was null, expected non-null bool.');
           try {
-            api.appearanceButtonVisibility(arg_timestamp!, arg_visible!);
+            api.appearanceButtonVisibility(arg_sequence!, arg_visible!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6846,11 +7299,11 @@ class GeckoAddonsApi {
 abstract class GeckoAddonEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onUpsertWebExtensionAction(int timestamp, String extensionId, WebExtensionActionType actionType, WebExtensionData extensionData);
+  void onUpsertWebExtensionAction(int sequence, String extensionId, WebExtensionActionType actionType, WebExtensionData extensionData);
 
-  void onRemoveWebExtensionAction(int timestamp, String extensionId, WebExtensionActionType actionType);
+  void onRemoveWebExtensionAction(int sequence, String extensionId, WebExtensionActionType actionType);
 
-  void onUpdateWebExtensionIcon(int timestamp, String extensionId, WebExtensionActionType actionType, Uint8List icon);
+  void onUpdateWebExtensionIcon(int sequence, String extensionId, WebExtensionActionType actionType, Uint8List icon);
 
   static void setUp(GeckoAddonEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -6865,8 +7318,8 @@ abstract class GeckoAddonEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null int.');
           final String? arg_extensionId = (args[1] as String?);
           assert(arg_extensionId != null,
@@ -6878,7 +7331,7 @@ abstract class GeckoAddonEvents {
           assert(arg_extensionData != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction was null, expected non-null WebExtensionData.');
           try {
-            api.onUpsertWebExtensionAction(arg_timestamp!, arg_extensionId!, arg_actionType!, arg_extensionData!);
+            api.onUpsertWebExtensionAction(arg_sequence!, arg_extensionId!, arg_actionType!, arg_extensionData!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6899,8 +7352,8 @@ abstract class GeckoAddonEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null int.');
           final String? arg_extensionId = (args[1] as String?);
           assert(arg_extensionId != null,
@@ -6909,7 +7362,7 @@ abstract class GeckoAddonEvents {
           assert(arg_actionType != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction was null, expected non-null WebExtensionActionType.');
           try {
-            api.onRemoveWebExtensionAction(arg_timestamp!, arg_extensionId!, arg_actionType!);
+            api.onRemoveWebExtensionAction(arg_sequence!, arg_extensionId!, arg_actionType!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -6930,8 +7383,8 @@ abstract class GeckoAddonEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null int.');
           final String? arg_extensionId = (args[1] as String?);
           assert(arg_extensionId != null,
@@ -6943,7 +7396,7 @@ abstract class GeckoAddonEvents {
           assert(arg_icon != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon was null, expected non-null Uint8List.');
           try {
-            api.onUpdateWebExtensionIcon(arg_timestamp!, arg_extensionId!, arg_actionType!, arg_icon!);
+            api.onUpdateWebExtensionIcon(arg_sequence!, arg_extensionId!, arg_actionType!, arg_icon!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -7017,7 +7470,7 @@ class GeckoSuggestionApi {
 abstract class GeckoSuggestionEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onSuggestionResult(int timestamp, GeckoSuggestionType suggestionType, List<GeckoSuggestion> suggestions);
+  void onSuggestionResult(int sequence, GeckoSuggestionType suggestionType, List<GeckoSuggestion> suggestions);
 
   static void setUp(GeckoSuggestionEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -7032,8 +7485,8 @@ abstract class GeckoSuggestionEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null int.');
           final GeckoSuggestionType? arg_suggestionType = (args[1] as GeckoSuggestionType?);
           assert(arg_suggestionType != null,
@@ -7042,7 +7495,7 @@ abstract class GeckoSuggestionEvents {
           assert(arg_suggestions != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult was null, expected non-null List<GeckoSuggestion>.');
           try {
-            api.onSuggestionResult(arg_timestamp!, arg_suggestionType!, arg_suggestions!);
+            api.onSuggestionResult(arg_sequence!, arg_suggestionType!, arg_suggestions!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -7058,7 +7511,7 @@ abstract class GeckoSuggestionEvents {
 abstract class GeckoTabContentEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onContentUpdate(int timestamp, TabContent content);
+  void onContentUpdate(int sequence, TabContent content);
 
   static void setUp(GeckoTabContentEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -7073,14 +7526,14 @@ abstract class GeckoTabContentEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null, expected non-null int.');
           final TabContent? arg_content = (args[1] as TabContent?);
           assert(arg_content != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate was null, expected non-null TabContent.');
           try {
-            api.onContentUpdate(arg_timestamp!, arg_content!);
+            api.onContentUpdate(arg_sequence!, arg_content!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -7501,7 +7954,7 @@ class GeckoDownloadsApi {
 abstract class BrowserExtensionEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onFeedRequested(int timestamp, String url);
+  void onFeedRequested(int sequence, String url);
 
   static void setUp(BrowserExtensionEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -7516,14 +7969,14 @@ abstract class BrowserExtensionEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null int.');
           final String? arg_url = (args[1] as String?);
           assert(arg_url != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested was null, expected non-null String.');
           try {
-            api.onFeedRequested(arg_timestamp!, arg_url!);
+            api.onFeedRequested(arg_sequence!, arg_url!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -7674,11 +8127,11 @@ abstract class GeckoViewportEvents {
   /// This is detected natively using WindowInsets API and provides
   /// accurate keyboard height information.
   ///
-  /// [timestamp] Event timestamp for ordering.
+  /// [sequence] Event sequence number for ordering.
   /// [heightPx] Keyboard height in pixels (0 when hidden).
   /// [isVisible] Whether the keyboard is currently visible.
   /// [isAnimating] Whether the keyboard is currently animating.
-  void onKeyboardVisibilityChanged(int timestamp, int heightPx, bool isVisible, bool isAnimating);
+  void onKeyboardVisibilityChanged(int sequence, int heightPx, bool isVisible, bool isAnimating);
 
   static void setUp(GeckoViewportEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
@@ -7693,8 +8146,8 @@ abstract class GeckoViewportEvents {
           assert(message != null,
           'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null.');
           final List<Object?> args = (message as List<Object?>?)!;
-          final int? arg_timestamp = (args[0] as int?);
-          assert(arg_timestamp != null,
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null, expected non-null int.');
           final int? arg_heightPx = (args[1] as int?);
           assert(arg_heightPx != null,
@@ -7706,7 +8159,7 @@ abstract class GeckoViewportEvents {
           assert(arg_isAnimating != null,
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null, expected non-null bool.');
           try {
-            api.onKeyboardVisibilityChanged(arg_timestamp!, arg_heightPx!, arg_isVisible!, arg_isAnimating!);
+            api.onKeyboardVisibilityChanged(arg_sequence!, arg_heightPx!, arg_isVisible!, arg_isAnimating!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -8406,6 +8859,89 @@ class GeckoAppLinksApi {
       );
     } else {
       return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+}
+
+/// API for PWA (Progressive Web App) installation and management.
+///
+/// Wraps Mozilla Android Components' WebAppUseCases and ManifestStorage
+/// to provide PWA install and query functionality to Flutter.
+class GeckoPwaApi {
+  /// Constructor for [GeckoPwaApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoPwaApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// Installs the current page as a PWA (adds to home screen).
+  ///
+  /// Creates an Android shortcut with profile and container metadata embedded
+  /// in the intent extras. This ensures the PWA opens with the same profile
+  /// and container context that was active during installation.
+  ///
+  /// The [tabId] identifies which tab to install from. If null, uses the selected tab.
+  /// The [profileUuid] is the UUID of the current user profile.
+  /// The [contextId] is the container's contextual identity (optional, null for default container).
+  /// Returns true if installation was successful.
+  Future<bool> installWebApp(String? tabId, String profileUuid, String? contextId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPwaApi.installWebApp$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, profileUuid, contextId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+
+  /// Returns a list of all installed PWA manifests.
+  Future<List<PwaManifest>> getInstalledWebApps() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPwaApi.getInstalledWebApps$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as List<Object?>?)!.cast<PwaManifest>();
     }
   }
 }

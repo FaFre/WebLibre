@@ -10,6 +10,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.api.ReaderViewEventsImpl
 import eu.weblibre.flutter_mozilla_components.api.ReaderViewControllerListener
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
@@ -36,12 +37,12 @@ class ReaderViewIntegration(
             if (enabled) {
                 feature.showReaderView()
 
-                readerViewController.appearanceButtonVisibility(System.currentTimeMillis(),true) { _ -> };
+                readerViewController.appearanceButtonVisibility(EventSequence.next(),true) { _ -> };
             } else {
                 feature.hideReaderView()
                 feature.hideControls()
 
-                readerViewController.appearanceButtonVisibility(System.currentTimeMillis(),false) { _ -> };
+                readerViewController.appearanceButtonVisibility(EventSequence.next(),false) { _ -> };
             }
         }
 

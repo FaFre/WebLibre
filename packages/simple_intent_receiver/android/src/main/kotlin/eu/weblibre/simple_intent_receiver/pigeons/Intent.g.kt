@@ -133,12 +133,12 @@ class IntentEvents(private val binaryMessenger: BinaryMessenger, private val mes
       IntentPigeonCodec()
     }
   }
-  fun onIntentReceived(timestampArg: Long, intentArg: Intent, callback: (Result<Unit>) -> Unit)
+  fun onIntentReceived(sequenceArg: Long, intentArg: Intent, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.simple_intent_receiver.IntentEvents.onIntentReceived$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, intentArg)) {
+    channel.send(listOf(sequenceArg, intentArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

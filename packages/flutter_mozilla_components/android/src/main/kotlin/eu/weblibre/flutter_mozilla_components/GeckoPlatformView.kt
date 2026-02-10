@@ -11,6 +11,7 @@ import android.app.Activity
 import android.content.Context
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
@@ -58,7 +59,7 @@ private class NativeFragmentView(
         super.onFlutterViewAttached(flutterView)
 
         components.engineReportedInitialized = false
-        flutterEvents.onViewReadyStateChange(System.currentTimeMillis(), true) { _ -> }
+        flutterEvents.onViewReadyStateChange(EventSequence.next(), true) { _ -> }
     }
 
     override fun getView(): View {

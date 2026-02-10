@@ -29,8 +29,8 @@ class IntentReceiver extends IntentEvents {
   Stream<Intent> get events => _controller.stream;
 
   @override
-  void onIntentReceived(int timestamp, Intent intent) {
-    if (_lastAdded == null || timestamp > _lastAdded!) {
+  void onIntentReceived(int sequence, Intent intent) {
+    if (_lastAdded == null || sequence > _lastAdded!) {
       _controller.add(intent);
     }
   }

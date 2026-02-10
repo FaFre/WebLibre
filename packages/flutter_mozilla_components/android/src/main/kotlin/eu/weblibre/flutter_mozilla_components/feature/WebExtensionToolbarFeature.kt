@@ -7,6 +7,7 @@ package eu.weblibre.flutter_mozilla_components.feature
 import android.os.Handler
 import android.os.HandlerThread
 import androidx.annotation.VisibleForTesting
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
@@ -66,7 +67,7 @@ class WebExtensionToolbarFeature(
             .filter { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
             .forEach { extensionId ->
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = System.currentTimeMillis(),
+                    timestampArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.BROWSER,
                 ) {}
@@ -77,7 +78,7 @@ class WebExtensionToolbarFeature(
             .filter { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
             .forEach { extensionId ->
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = System.currentTimeMillis(),
+                    timestampArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.PAGE,
                 ) {}
@@ -106,7 +107,7 @@ class WebExtensionToolbarFeature(
         webExtensionBrowserActions.keys.toList().forEach { extensionId ->
             if (extensionId !in enabledExtensionIds) {
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = System.currentTimeMillis(),
+                    timestampArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.BROWSER,
                 ) {}
@@ -117,7 +118,7 @@ class WebExtensionToolbarFeature(
         webExtensionPageActions.keys.toList().forEach { extensionId ->
             if (extensionId !in enabledExtensionIds) {
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = System.currentTimeMillis(),
+                    timestampArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.PAGE,
                 ) {}
@@ -130,7 +131,7 @@ class WebExtensionToolbarFeature(
             if (extensionNotAllowedInTab(extension, tab)) {
                 webExtensionPageActions[extension.id]?.let {
                     addonEvents.onRemoveWebExtensionAction(
-                        timestampArg = System.currentTimeMillis(),
+                        timestampArg = EventSequence.next(),
                         extensionIdArg = extension.id,
                         actionTypeArg = WebExtensionActionType.PAGE,
                     ) {}
@@ -138,7 +139,7 @@ class WebExtensionToolbarFeature(
                 }
                 webExtensionBrowserActions[extension.id]?.let {
                     addonEvents.onRemoveWebExtensionAction(
-                        timestampArg = System.currentTimeMillis(),
+                        timestampArg = EventSequence.next(),
                         extensionIdArg = extension.id,
                         actionTypeArg = WebExtensionActionType.BROWSER,
                     ) {}
@@ -220,7 +221,7 @@ class WebExtensionToolbarFeature(
         )
 
         addonEvents.onUpsertWebExtensionAction(
-            timestampArg = System.currentTimeMillis(),
+            timestampArg = EventSequence.next(),
             extensionIdArg = extension.id,
             actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
             extensionDataArg = data
@@ -235,7 +236,7 @@ class WebExtensionToolbarFeature(
                     val imageBytes = icon.toWebPBytes()
                     runOnUiThread {
                         addonEvents.onUpdateWebExtensionIcon(
-                            timestampArg = System.currentTimeMillis(),
+                            timestampArg = EventSequence.next(),
                             extensionIdArg = extensionId,
                             actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
                             iconArg = imageBytes

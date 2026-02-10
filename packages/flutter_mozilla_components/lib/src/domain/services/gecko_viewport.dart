@@ -101,12 +101,12 @@ class GeckoViewportService extends GeckoViewportEvents {
 
   @override
   void onKeyboardVisibilityChanged(
-    int timestamp,
+    int sequence,
     int heightPx,
     bool isVisible,
     bool isAnimating,
   ) {
-    _keyboardSubject.addWhenMoreRecent(timestamp, null, (
+    _keyboardSubject.addWhenMoreRecent(sequence, null, (
       heightPx: heightPx,
       isVisible: isVisible,
       isAnimating: isAnimating,

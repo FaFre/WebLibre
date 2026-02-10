@@ -17,6 +17,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.SourceValue
 import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
 import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionData
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
@@ -135,7 +136,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
 
             withContext(Dispatchers.Main) {
                 components.flutterEvents.onIconChange(
-                    System.currentTimeMillis(),
+                    EventSequence.next(),
                     tab.id,
                     iconBytes
                 ) { }
@@ -159,7 +160,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 val bytes = it.toWebPBytes()
                 withContext(Dispatchers.Main) {
                     components.flutterEvents.onThumbnailChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         bytes
                     ) { }
@@ -191,21 +192,21 @@ class GeckoTabsApiImpl : GeckoTabsApi {
 
             if (onSelectedTabChange) {
                 components.flutterEvents.onSelectedTabChange(
-                    System.currentTimeMillis(),
+                    EventSequence.next(),
                     selectedTab
                 ) { }
             }
 
             if (onTabListChange) {
                 components.flutterEvents.onTabListChange(
-                    System.currentTimeMillis(),
+                    EventSequence.next(),
                     tabs.map { it.id }) { }
             }
 
             tabs.forEach { tab ->
                 if (onTabContentStateChange) {
                     components.flutterEvents.onTabContentStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         TabContentState(
                             id = tab.id,
                             parentId = tab.parentId,
@@ -226,7 +227,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
 
                 if (onSecurityInfoStateChange) {
                     components.flutterEvents.onSecurityInfoStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         SecurityInfoState(
                             tab.content.securityInfo.isSecure,
@@ -238,7 +239,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
 
                 if (onReaderableStateChange) {
                     components.flutterEvents.onReaderableStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         ReaderableState(
                             tab.readerState.readerable,
@@ -249,7 +250,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
 
                 if (onHistoryStateChange) {
                     components.flutterEvents.onHistoryStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         HistoryState(
                             items = tab.content.history.items.map { item ->
@@ -264,7 +265,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
 
                 if (onFindResults) {
                     components.flutterEvents.onFindResults(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         tab.content.findResults.map { result ->
                             FindResultState(
@@ -321,7 +322,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                             badgeBackgroundColor = browserAction.badgeBackgroundColor?.toLong(),
                         )
                         components.addonEvents.onUpsertWebExtensionAction(
-                            System.currentTimeMillis(),
+                            EventSequence.next(),
                             extension.id,
                             WebExtensionActionType.BROWSER,
                             data
@@ -336,7 +337,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                                     val imageBytes = icon.toWebPBytes()
                                     withContext(Dispatchers.Main) {
                                         components.addonEvents.onUpdateWebExtensionIcon(
-                                            System.currentTimeMillis(),
+                                            EventSequence.next(),
                                             extension.id,
                                             WebExtensionActionType.BROWSER,
                                             imageBytes
@@ -362,7 +363,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                             badgeBackgroundColor = pageAction.badgeBackgroundColor?.toLong(),
                         )
                         components.addonEvents.onUpsertWebExtensionAction(
-                            System.currentTimeMillis(),
+                            EventSequence.next(),
                             extension.id,
                             WebExtensionActionType.PAGE,
                             data
@@ -377,7 +378,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                                     val imageBytes = icon.toWebPBytes()
                                     withContext(Dispatchers.Main) {
                                         components.addonEvents.onUpdateWebExtensionIcon(
-                                            System.currentTimeMillis(),
+                                            EventSequence.next(),
                                             extension.id,
                                             WebExtensionActionType.PAGE,
                                             imageBytes

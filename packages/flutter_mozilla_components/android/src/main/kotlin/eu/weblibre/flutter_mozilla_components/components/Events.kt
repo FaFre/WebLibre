@@ -6,7 +6,9 @@
 
 package eu.weblibre.flutter_mozilla_components.components
 
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.api.ReaderViewEventsImpl
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
@@ -44,7 +46,7 @@ class Events(
                 .debounce { 50 }
                 .collect { tabId ->
                     flutterEvents.onSelectedTabChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tabId
                     ) { _ -> }
                 }
@@ -70,7 +72,7 @@ class Events(
                 .collect { tab ->
                     val iconBytes = tab.content.icon?.toWebPBytes()
                     flutterEvents.onIconChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         iconBytes
                     ) { _ -> }
@@ -85,7 +87,7 @@ class Events(
                 .debounce(15)
                 .collect { tab ->
                     flutterEvents.onSecurityInfoStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         SecurityInfoState(
                             tab.content.securityInfo.isSecure,
@@ -110,7 +112,7 @@ class Events(
                 .debounce(25)
                 .collect { tab ->
                     flutterEvents.onReaderableStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         ReaderableState(
                             tab.readerState.readerable,
@@ -135,7 +137,7 @@ class Events(
                 .debounce(15)
                 .collect { tab ->
                     flutterEvents.onHistoryStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         tab.id,
                         HistoryState(
                             items = tab.content.history.items.map { item ->
@@ -170,7 +172,7 @@ class Events(
                 .debounce(15)
                 .collect { tab ->
                     flutterEvents.onTabContentStateChange(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         TabContentState(
                             id = tab.id,
                             parentId = tab.parentId,

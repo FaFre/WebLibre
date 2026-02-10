@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.feature
 
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.TabContent
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +51,7 @@ class ReadabilityExtractFeature(
         override fun onPortMessage(message: Any, port: Port) {
             if (message is JSONObject) {
                 tabContentEvents.onContentUpdate(
-                    System.currentTimeMillis(),
+                    EventSequence.next(),
                     contentArg = TabContent(
                         tabId = tabId,
                         fullContentMarkdown = message.tryGetString("fullContentMarkdown"),

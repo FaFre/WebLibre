@@ -9,17 +9,29 @@ import 'package:rxdart/rxdart.dart';
 final _lastEventTimes = <Subject, Map<dynamic, int>>{};
 
 extension SubjectAddRecent<T> on Subject<T> {
-  void addWhenMoreRecent(int timestamp, dynamic identifier, T value) {
+  /// Adds [value] to this Subject only if [sequence] is greater than
+  /// the last sequence number for this [identifier].
+  ///
+  /// Uses atomic event sequence numbers (from native EventSequence) to ensure
+  /// events are processed in order and prevent out-of-order updates.
+  /// Sequence numbers are monotonically increasing integers (0, 1, 2, ...).
+  void addWhenMoreRecent(int sequence, dynamic identifier, T value) {
     _lastEventTimes[this] ??= {};
 
-    if ((_lastEventTimes[this]?[identifier] ?? 0) < timestamp) {
-      _lastEventTimes[this]![identifier] = timestamp;
+    if ((_lastEventTimes[this]?[identifier] ?? 0) < sequence) {
+      _lastEventTimes[this]![identifier] = sequence;
       add(value);
     }
   }
 
+  /// Updates this BehaviorSubject only if [sequence] is greater than
+  /// the last sequence number for this [identifier].
+  ///
+  /// Uses atomic event sequence numbers (from native EventSequence) to ensure
+  /// events are processed in order and prevent out-of-order updates.
+  /// Sequence numbers are monotonically increasing integers (0, 1, 2, ...).
   void updateWhenMoreRecent(
-    int timestamp,
+    int sequence,
     dynamic identifier,
     T Function(T? currentValue) update,
   ) {
@@ -27,8 +39,8 @@ extension SubjectAddRecent<T> on Subject<T> {
 
     _lastEventTimes[this] ??= {};
 
-    if ((_lastEventTimes[this]?[identifier] ?? 0) < timestamp) {
-      _lastEventTimes[this]![identifier] = timestamp;
+    if ((_lastEventTimes[this]?[identifier] ?? 0) < sequence) {
+      _lastEventTimes[this]![identifier] = sequence;
       add(update((this as BehaviorSubject<T>).valueOrNull));
     }
   }

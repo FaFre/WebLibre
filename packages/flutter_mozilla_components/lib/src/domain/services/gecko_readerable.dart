@@ -27,8 +27,8 @@ class GeckoReaderableService extends ReaderViewController {
   }
 
   @override
-  void appearanceButtonVisibility(int timestamp, bool visible) {
-    _appearanceVisibility.addWhenMoreRecent(timestamp, null, visible);
+  void appearanceButtonVisibility(int sequence, bool visible) {
+    _appearanceVisibility.addWhenMoreRecent(sequence, null, visible);
   }
 
   GeckoReaderableService.setUp({

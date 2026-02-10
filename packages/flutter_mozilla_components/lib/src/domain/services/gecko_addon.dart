@@ -51,18 +51,18 @@ class GeckoAddonService extends GeckoAddonEvents {
 
   @override
   void onRemoveWebExtensionAction(
-    int timestamp,
+    int sequence,
     String extensionId,
     WebExtensionActionType actionType,
   ) {
     switch (actionType) {
       case WebExtensionActionType.browser:
-        _browserExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+        _browserExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
           extensionId: extensionId,
           data: null,
         ));
       case WebExtensionActionType.page:
-        _pageExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+        _pageExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
           extensionId: extensionId,
           data: null,
         ));
@@ -71,19 +71,19 @@ class GeckoAddonService extends GeckoAddonEvents {
 
   @override
   void onUpdateWebExtensionIcon(
-    int timestamp,
+    int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     Uint8List icon,
   ) {
     switch (actionType) {
       case WebExtensionActionType.browser:
-        _browserIconSubject.addWhenMoreRecent(timestamp, extensionId, (
+        _browserIconSubject.addWhenMoreRecent(sequence, extensionId, (
           extensionId: extensionId,
           bytes: icon,
         ));
       case WebExtensionActionType.page:
-        _pageIconSubject.addWhenMoreRecent(timestamp, extensionId, (
+        _pageIconSubject.addWhenMoreRecent(sequence, extensionId, (
           extensionId: extensionId,
           bytes: icon,
         ));
@@ -92,19 +92,19 @@ class GeckoAddonService extends GeckoAddonEvents {
 
   @override
   void onUpsertWebExtensionAction(
-    int timestamp,
+    int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     WebExtensionData extensionData,
   ) {
     switch (actionType) {
       case WebExtensionActionType.browser:
-        _browserExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+        _browserExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
           extensionId: extensionId,
           data: extensionData,
         ));
       case WebExtensionActionType.page:
-        _pageExtensionSubject.addWhenMoreRecent(timestamp, extensionId, (
+        _pageExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
           extensionId: extensionId,
           data: extensionData,
         ));

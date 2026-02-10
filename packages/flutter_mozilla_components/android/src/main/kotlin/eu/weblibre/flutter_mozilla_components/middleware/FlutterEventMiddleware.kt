@@ -6,6 +6,7 @@ package eu.weblibre.flutter_mozilla_components.middleware
 import android.graphics.Bitmap
 import android.util.Log
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.resize
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.AudioHitResult
@@ -55,7 +56,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                 val bytes = resized.toWebPBytes()
 
                 runOnUiThread {
-                    flutterEvents.onThumbnailChange(System.currentTimeMillis(), action.sessionId, bytes) { _ -> }
+                    flutterEvents.onThumbnailChange(EventSequence.next(), action.sessionId, bytes) { _ -> }
                 }
             }
             //UpdateReaderConnectRequiredAction seems to be the only event that is called predictable
@@ -64,7 +65,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                 if(!components.engineReportedInitialized) {
                     runOnUiThread {
                         flutterEvents.onEngineReadyStateChange(
-                            System.currentTimeMillis(),
+                            EventSequence.next(),
                             true
                         ) { _ -> }
                     }
@@ -75,7 +76,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
             is TabListAction.AddTabAction -> {
                 runOnUiThread {
                     flutterEvents.onTabAdded(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         action.tab.id
                     ) { _ -> }
                 }
@@ -85,7 +86,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
 
                 runOnUiThread {
                     flutterEvents.onIconUpdate(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         action.pageUrl,
                         bytes
                     ) { _ -> }
@@ -94,7 +95,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
             is ContentAction.UpdateHitResultAction -> {
                 runOnUiThread {
                     flutterEvents.onLongPress(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         action.sessionId,
                         when(val result = action.hitResult) {
                             is HitResult.AUDIO -> AudioHitResult(result.src, result.title)
@@ -112,7 +113,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
             is ContentAction.AddFindResultAction -> {
                 runOnUiThread {
                     flutterEvents.onFindResults(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         action.sessionId,
                         listOf(
                             FindResultState(
@@ -127,7 +128,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
             is ContentAction.ClearFindResultsAction -> {
                 runOnUiThread {
                     flutterEvents.onFindResults(
-                        System.currentTimeMillis(),
+                        EventSequence.next(),
                         action.sessionId,
                         listOf()
                     ) { _ -> }
@@ -136,7 +137,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
 //            is ReaderAction.UpdateReaderScrollYAction -> {
 //                runOnUiThread {
 //                    flutterEvents.onScrollChange(
-//                        System.currentTimeMillis(),
+//                        EventSequence.next(),
 //                        action.tabId,
 //                        action.scrollY.toLong()
 //                    ) { _ -> }
