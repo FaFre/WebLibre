@@ -1422,7 +1422,7 @@ abstract class GeckoStateEvents {
 
   void onMlProgress(int sequence, MlProgressData progress);
 
-  void onMlProgress(int timestamp, MlProgressData progress);
+  void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest);
 }
 
 @FlutterApi()
@@ -2016,4 +2016,139 @@ abstract class GeckoAppLinksApi {
   /// Returns true if URL was opened in external app, false if no app available.
   @async
   bool openAppLink(String url);
+}
+
+// =============================================================================
+// PWA API
+// =============================================================================
+
+/// Represents an icon from a PWA manifest.
+class PwaIcon {
+  final String src;
+  final String? sizes;
+  final String? type;
+
+  const PwaIcon({required this.src, this.sizes, this.type});
+}
+
+/// Represents a file entry in share target params.
+class ShareTargetFiles {
+  final String name;
+  final List<String?> accept;
+
+  const ShareTargetFiles({required this.name, required this.accept});
+}
+
+/// Represents share target params.
+class ShareTargetParams {
+  final String? title;
+  final String? text;
+  final String? url;
+  final List<ShareTargetFiles?> files;
+
+  const ShareTargetParams({
+    this.title,
+    this.text,
+    this.url,
+    this.files = const [],
+  });
+}
+
+/// Represents a share target for PWA.
+class ShareTarget {
+  final String action;
+  final String? method;
+  final String? encType;
+  final ShareTargetParams? params;
+
+  const ShareTarget({
+    required this.action,
+    this.method,
+    this.encType,
+    this.params,
+  });
+}
+
+/// Represents an external application resource.
+class ExternalApplicationResource {
+  final String platform;
+  final String? url;
+  final String? id;
+  final String? minVersion;
+
+  const ExternalApplicationResource({
+    required this.platform,
+    this.url,
+    this.id,
+    this.minVersion,
+  });
+}
+
+/// Represents a PWA web app manifest.
+///
+/// Mirrors Mozilla Android Components' WebAppManifest structure.
+/// https://firefox-source-docs.mozilla.org/mobile/android/geckoview/api/mozilla.components.concept.engine.manifest.WebAppManifest.html
+class PwaManifest {
+  final String startUrl;
+  final String? name;
+  final String? shortName;
+  final String? display;
+  final String? themeColor;
+  final String? backgroundColor;
+  final String? scope;
+  final String? description;
+  final List<PwaIcon?> icons;
+  final String? dir;
+  final String? lang;
+  final String? orientation;
+  final List<ExternalApplicationResource?> relatedApplications;
+  final bool preferRelatedApplications;
+  final ShareTarget? shareTarget;
+
+  /// The URL of the page when the manifest was detected.
+  /// Used for HTTPS/installability checks.
+  final String currentUrl;
+
+  const PwaManifest({
+    required this.startUrl,
+    required this.currentUrl,
+    this.name,
+    this.shortName,
+    this.display,
+    this.themeColor,
+    this.backgroundColor,
+    this.scope,
+    this.description,
+    this.icons = const [],
+    this.dir,
+    this.lang,
+    this.orientation,
+    this.relatedApplications = const [],
+    this.preferRelatedApplications = false,
+    this.shareTarget,
+  });
+}
+
+/// API for PWA (Progressive Web App) installation and management.
+///
+/// Wraps Mozilla Android Components' WebAppUseCases and ManifestStorage
+/// to provide PWA install and query functionality to Flutter.
+@HostApi()
+abstract class GeckoPwaApi {
+  /// Installs the current page as a PWA (adds to home screen).
+  ///
+  /// Creates an Android shortcut with profile and container metadata embedded
+  /// in the intent extras. This ensures the PWA opens with the same profile
+  /// and container context that was active during installation.
+  ///
+  /// The [tabId] identifies which tab to install from. If null, uses the selected tab.
+  /// The [profileUuid] is the UUID of the current user profile.
+  /// The [contextId] is the container's contextual identity (optional, null for default container).
+  /// Returns true if installation was successful.
+  @async
+  bool installWebApp(String? tabId, String profileUuid, String? contextId);
+
+  /// Returns a list of all installed PWA manifests.
+  @async
+  List<PwaManifest> getInstalledWebApps();
 }

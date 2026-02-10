@@ -73,7 +73,7 @@ import mozilla.components.support.webextensions.WebExtensionPopupObserver
  */
 @SuppressWarnings("LargeClass")
 abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, ActivityResultHandler {
-    private val sessionFeature = ViewBoundFeatureWrapper<SessionFeature>()
+    protected val sessionFeature = ViewBoundFeatureWrapper<SessionFeature>()
     private val shareResourceFeature = ViewBoundFeatureWrapper<ShareResourceFeature>()
     private val downloadsFeature = ViewBoundFeatureWrapper<DownloadsFeature>()
     private val appLinksFeature = ViewBoundFeatureWrapper<AppLinksFeature>()
@@ -135,6 +135,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     )
 
     protected abstract fun createEngine(components: Components): EngineView
+
+    // Track this fragment's EngineView instance to reassign singleton when fragment becomes active
+    private var fragmentEngineView: EngineView? = null
 
     private lateinit var requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>>
@@ -219,6 +222,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 ProfileContext(requireContext(), components.profileApplicationContext.relativePath)
 
             val engineView = createEngine(components)
+            fragmentEngineView = engineView  // Track for lifecycle management
             val originalContext = ActivityContextWrapper.getOriginalContext(requireActivity())
                 ?.let { ProfileContext(it, components.profileApplicationContext.relativePath) }
             val engineNativeView = engineView.asView()
@@ -228,17 +232,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             binding.swipeToRefresh.addView(engineNativeView)
 
-            components.engineView = engineView
-
-            // Apply any pending viewport settings that were set before engineView was ready
-            GlobalComponents.viewportApi?.applyPendingSettings()
+            components.activeEngineView = engineView
 
             sessionFeature.set(
                 feature = SessionFeature(
                     components.core.store,
                     components.useCases.sessionUseCases.goBack,
                     components.useCases.sessionUseCases.goForward,
-                    components.engineView!!,
+                    engineView,
                     sessionId,
                 ),
                 owner = this,
@@ -468,7 +469,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             thumbnailsFeature.set(
                 feature = BrowserThumbnails(
                     profileContext,
-                    components.engineView!!,
+                    engineView,
                     components.core.store
                 ),
                 owner = this,
@@ -496,11 +497,19 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 }
             }
 
+            onEngineSetupComplete()
+
         } catch (e: Exception) {
             Log.e("EngineCreation", "Failed to create engine: ${e.message}", e)
             context?.let { restartApp(it) }
         }
     }
+
+    /**
+     * Called after the engine view is fully set up and added to the view hierarchy.
+     * Subclasses can override to perform additional setup that requires an attached engine view.
+     */
+    protected open fun onEngineSetupComplete() {}
 
     private fun openPopup(webExtensionState: WebExtensionState) {
         val store = components.core.store
@@ -587,6 +596,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Reassign active engine view to this fragment's EngineView when fragment becomes active
+        fragmentEngineView?.let {
+            components.activeEngineView = it
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
 
@@ -595,7 +612,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         keyboardVisibilityFeature = null
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
-        components.engineView?.setActivityContext(null)
+        val engineView = fragmentEngineView
+        engineView?.setActivityContext(null)
+        if (components.activeEngineView == engineView) {
+            components.activeEngineView = null
+        }
         _binding = null
+        fragmentEngineView = null
     }
 }

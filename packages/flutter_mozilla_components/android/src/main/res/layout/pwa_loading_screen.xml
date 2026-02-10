@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/pwa_loading_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp">
+
+        <!-- App Icon Container with subtle shadow/elevation -->
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginBottom="24dp">
+
+            <!-- Icon background for maskable icons -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/pwa_icon_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                app:shapeAppearanceOverlay="@style/RoundedIconShape" />
+
+            <!-- App Icon -->
+            <ImageView
+                android:id="@+id/pwa_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/pwa_icon_description"
+                android:src="@drawable/ic_launcher_foreground" />
+
+            <!-- Pulsing animation overlay -->
+            <View
+                android:id="@+id/pwa_icon_pulse"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/pulse_ripple"
+                android:alpha="0.0" />
+
+        </FrameLayout>
+
+        <!-- App Name -->
+        <TextView
+            android:id="@+id/pwa_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            android:textColor="?android:attr/textColorPrimary"
+            android:gravity="center"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Subtitle/Status -->
+        <TextView
+            android:id="@+id/pwa_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:gravity="center"
+            android:text="@string/pwa_loading" />
+
+        <!-- Progress indicator at bottom -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/pwa_progress"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="32dp"
+            android:indeterminate="true"
+            app:indicatorSize="32dp"
+            app:trackThickness="3dp" />
+
+    </LinearLayout>
+
+</FrameLayout>

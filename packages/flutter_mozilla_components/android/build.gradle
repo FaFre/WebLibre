@@ -127,6 +127,8 @@ dependencies {
     implementation "org.mozilla.components:feature-webcompat:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-webnotifications:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-webauthn:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-pwa:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-intent:$mozillaComponentsVersion"
     implementation "org.mozilla.components:ui-widgets:$mozillaComponentsVersion"
     implementation "org.mozilla.components:lib-publicsuffixlist:$mozillaComponentsVersion"
 
@@ -134,6 +136,8 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'com.google.android.material:material:1.13.0'
+    implementation 'com.mikepenz:iconics-core:5.4.0'
+    implementation 'com.mikepenz:community-material-typeface:7.0.96.1-kotlin@aar'
     //https://stackoverflow.com/questions/73782320/onbackinvokedcallback-is-not-enabled-for-the-application-in-set-androidenableo
     implementation 'androidx.activity:activity-ktx:1.12.3'
     implementation 'androidx.paging:paging-runtime-ktx:3.4.0'

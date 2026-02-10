@@ -37,6 +37,8 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -195,6 +197,27 @@ class TabMenu extends HookConsumerWidget {
               ).push(context);
             },
           ),
+        Consumer(
+          builder: (context, ref, child) {
+            final isInstallable = ref.watch(isCurrentTabInstallableProvider);
+
+            return Visibility(
+              visible: isInstallable,
+              child: MenuItemButton(
+                closeOnActivate: false,
+                leadingIcon: const Icon(Icons.add_to_home_screen),
+                child: const Text('Add to Home Screen'),
+                onPressed: () async {
+                  await showPwaInstallDialog(context, ref);
+
+                  if (context.mounted) {
+                    MenuController.maybeOf(context)?.close();
+                  }
+                },
+              ),
+            );
+          },
+        ),
         if (enableCloneTab)
           SubmenuButton(
             menuChildren: [

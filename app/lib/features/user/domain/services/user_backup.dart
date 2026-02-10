@@ -51,6 +51,8 @@ class UserBackupService extends _$UserBackupService {
   Stream<File> getBackupListStream() async* {
     final backupDirectory = await getBackupDirectory();
 
+    if (!await backupDirectory.exists()) return;
+
     await for (final entity in backupDirectory.list(recursive: true)) {
       if (entity is File) {
         yield entity;
@@ -144,32 +146,49 @@ class UserBackupService extends _$UserBackupService {
         final existingProfile = await filesystem.readProfileMetadata(
           outputDirectory,
         );
-        if (existingProfile != null) {
-          if (existingProfile.uuidValue == filesystem.selectedProfile) {
-            throw Exception(
-              'Unable to override active User, please switch to another User and try again',
-            );
-          }
-
-          final profileDir = filesystem.getProfileDir(
-            existingProfile.uuidValue,
+        if (existingProfile == null) {
+          throw Exception(
+            'Backup does not contain valid profile metadata',
           );
+        }
 
-          if (await profileDir.exists()) {
-            final result = await confirmOverrideCallback();
+        if (existingProfile.uuidValue == filesystem.selectedProfile) {
+          throw Exception(
+            'Unable to override active User, please switch to another User and try again',
+          );
+        }
 
-            if (result == true) {
-              await profileDir.delete(recursive: true);
-              await outputDirectory.rename(profileDir.path);
-            }
+        final profileDir = filesystem.getProfileDir(
+          existingProfile.uuidValue,
+        );
+
+        if (await profileDir.exists()) {
+          final result = await confirmOverrideCallback();
+
+          if (result == true) {
+            await profileDir.delete(recursive: true);
+            await outputDirectory.rename(profileDir.path);
           }
+        } else {
+          // Profile doesn't exist yet, just move the restored data into place
+          await outputDirectory.rename(profileDir.path);
         }
       });
 
       ref.invalidate(profileRepositoryProvider);
       return true;
     } finally {
-      await outputDirectory.delete(recursive: true);
+      try {
+        if (await outputDirectory.exists()) {
+          await outputDirectory.delete(recursive: true);
+        }
+      } catch (e, s) {
+        logger.w(
+          'Failed to cleanup temporary backup directory: ${outputDirectory.path}',
+          error: e,
+          stackTrace: s,
+        );
+      }
     }
   }
 

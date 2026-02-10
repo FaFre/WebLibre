@@ -12,6 +12,8 @@ import mozilla.components.feature.downloads.DownloadsUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.session.SettingsUseCases
 import mozilla.components.feature.session.TrackingProtectionUseCases
+import mozilla.components.feature.pwa.WebAppShortcutManager
+import mozilla.components.feature.pwa.WebAppUseCases
 import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 
@@ -23,6 +25,7 @@ class UseCases(
     private val context: Context,
     private val engine: Engine,
     private val store: BrowserStore,
+    private val shortcutManager: WebAppShortcutManager? = null,
 ) {
     /**
      * Use cases that provide engine interactions for a given browser session.
@@ -52,4 +55,8 @@ class UseCases(
     val appLinksUseCases by lazy { AppLinksUseCases(context) }
 
     val trackingProtectionUseCases by lazy { TrackingProtectionUseCases(store, engine) }
+
+    val webAppUseCases by lazy {
+        WebAppUseCases(context, store, shortcutManager ?: throw IllegalStateException("WebAppShortcutManager not provided"))
+    }
 }

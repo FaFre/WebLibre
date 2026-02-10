@@ -2,6 +2,7 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -12,6 +13,8 @@ class ProfileContext(private val base: Context, val relativePath: String) :
 
     private val subfolderRoot =
         File(base.filesDir, relativePath) // /data/user/0/com.app/profiles/default
+
+    private val profilePrefix = File(relativePath).name
 
     private var customFilesDir: File = File(subfolderRoot, "files")
     private var customNoBackupFilesDir: File = File(subfolderRoot, "no_backup")
@@ -123,5 +126,9 @@ class ProfileContext(private val base: Context, val relativePath: String) :
         return File(File(customDataDir, "databases"), name).apply {
             parentFile?.mkdirs()
         }
+    }
+
+    override fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
+        return base.getSharedPreferences("${profilePrefix}_$name", mode)
     }
 }

@@ -14,8 +14,12 @@ import mozilla.components.support.base.log.logger.Logger
  * Implementation of GeckoViewportApi that controls GeckoView's viewport behavior
  * for dynamic toolbar and keyboard handling.
  *
- * This allows Flutter to control how GeckoView adjusts its internal viewport
- * without resizing the platform view itself, avoiding visual flickering.
+ * Toolbar height and vertical clipping target the main browser's EngineView specifically,
+ * not the active/foreground EngineView. This prevents toolbar settings from leaking
+ * to PWA/Custom Tab EngineViews.
+ *
+ * If the main browser EngineView is not yet available when setDynamicToolbarMaxHeight
+ * is called, the value is stored and applied when the EngineView becomes available.
  */
 class GeckoViewportApiImpl : GeckoViewportApi {
     companion object {
@@ -28,66 +32,57 @@ class GeckoViewportApiImpl : GeckoViewportApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    // Store the current dynamic toolbar max height
-    private var currentDynamicToolbarMaxHeight: Int = 0
+    private var pendingToolbarHeight: Int? = null
 
     /**
      * Sets the maximum height that dynamic toolbars (top + bottom) can occupy.
      *
-     * GeckoView will adjust its internal viewport calculations to account for
-     * this space. The website will receive proper viewport dimensions through
-     * standard web APIs (CSS viewport units, window.innerHeight).
+     * Targets the main browser EngineView specifically. If the main browser
+     * EngineView is not yet available, the height is stored and applied when
+     * it becomes available via [applyPendingToolbarHeight].
      */
     override fun setDynamicToolbarMaxHeight(heightPx: Long) {
         val height = heightPx.toInt()
-        currentDynamicToolbarMaxHeight = height
 
-        val engineView = components.engineView
+        val engineView = components.mainBrowserEngineView
         if (engineView == null) {
-            logger.warn("$TAG: setDynamicToolbarMaxHeight called but engineView is null")
+            logger.debug("$TAG: setDynamicToolbarMaxHeight($height) - mainBrowserEngineView not ready, storing as pending")
+            pendingToolbarHeight = height
             return
         }
 
+        pendingToolbarHeight = null
         logger.debug("$TAG: setDynamicToolbarMaxHeight($height)")
         engineView.setDynamicToolbarMaxHeight(height)
     }
 
     /**
+     * Applies any pending toolbar height to the main browser EngineView.
+     * Called when mainBrowserEngineView becomes available.
+     */
+    fun applyPendingToolbarHeight() {
+        val pending = pendingToolbarHeight ?: return
+        val engineView = components.mainBrowserEngineView ?: return
+        pendingToolbarHeight = null
+        logger.debug("$TAG: Applying pending toolbar height: $pending")
+        engineView.setDynamicToolbarMaxHeight(pending)
+    }
+
+    /**
      * Sets the vertical clipping offset for the GeckoView content.
      *
-     * Use this as the toolbar animates to clip content at the bottom.
-     * Negative values clip from the bottom (for bottom toolbar sliding up).
-     * Positive values clip from the top (for top toolbar sliding down).
+     * Targets the main browser EngineView specifically.
      */
     override fun setVerticalClipping(clippingPx: Long) {
         val clipping = clippingPx.toInt()
 
-        val engineView = components.engineView
+        val engineView = components.mainBrowserEngineView
         if (engineView == null) {
-            logger.warn("$TAG: setVerticalClipping called but engineView is null")
+            logger.warn("$TAG: setVerticalClipping called but mainBrowserEngineView is null")
             return
         }
 
         logger.debug("$TAG: setVerticalClipping($clipping)")
         engineView.setVerticalClipping(clipping)
-    }
-
-    /**
-     * Applies any pending viewport settings that were set before engineView was available.
-     *
-     * Call this method after setting components.engineView to ensure that any
-     * setDynamicToolbarMaxHeight calls made during startup are properly applied.
-     */
-    fun applyPendingSettings() {
-        val engineView = components.engineView
-        if (engineView == null) {
-            logger.warn("$TAG: applyPendingSettings called but engineView is still null")
-            return
-        }
-
-        if (currentDynamicToolbarMaxHeight > 0) {
-            logger.debug("$TAG: Applying pending dynamicToolbarMaxHeight: $currentDynamicToolbarMaxHeight")
-            engineView.setDynamicToolbarMaxHeight(currentDynamicToolbarMaxHeight)
-        }
     }
 }

@@ -48,6 +48,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/eng
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
+import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
@@ -498,6 +499,20 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to articleContentProcessorServiceProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    // Ensure PWA manifest state is collected and stays alive
+    ref.listenManual(
+      fireImmediately: true,
+      pwaManifestStateProvider,
+      (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to pwaManifestStateProvider',
           error: error,
           stackTrace: stackTrace,
         );

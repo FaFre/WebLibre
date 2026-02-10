@@ -70,6 +70,10 @@ class _Filesystem {
     return fs.clearMozillaProfileCache(profileId);
   }
 
+  List<String> getMozillaProfileIds(UuidValue uuid) {
+    return fs.getMozillaProfileIds(getProfileDir(uuid));
+  }
+
   Future<String?> checkForDuplicateMozillaProfile(UuidValue profile) async {
     final duplicates = await fs
         .getProfilesWithDuplicateMozillaProfiles(profilesDir)

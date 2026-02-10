@@ -16,4 +16,19 @@
     <string name="mozac_feature_addons_failed_to_uninstall">Failed to uninstall %1$s</string>
     <!-- Error shown when something unexpected happened while trying to get the extension list from the server -->
     <string name="mozac_feature_addons_failed_to_query_extensions">Failed to query extensions!</string>
+    <!-- Custom tab menu items -->
+    <string name="custom_tab_share">Share</string>
+    <string name="custom_tab_desktop_site">Desktop site</string>
+    <string name="custom_tab_open_in_browser">Open in browser</string>
+    <string name="custom_tab_navigate_back">Back</string>
+    <string name="custom_tab_navigate_forward">Forward</string>
+    <string name="custom_tab_refresh">Refresh</string>
+    <string name="mozac_feature_customtabs_exit_button">Close</string>
+    <string name="mozac_feature_customtabs_menu_button">Menu</string>
+    <string name="mozac_feature_customtabs_security_indicator">Security</string>
+
+    <!-- Loading screen strings -->
+    <string name="pwa_loading">Opening…</string>
+    <string name="pwa_icon_description">App icon</string>
+    <string name="website_icon_description">Website icon</string>
 </resources>

@@ -202,8 +202,12 @@ class GeckoEventService extends GeckoStateEvents {
     _mlProgressSubject.addWhenMoreRecent(sequence, null, progress);
   }
 
-  void onMlProgress(int timestamp, MlProgressData progress) {
-    _mlProgressSubject.addWhenMoreRecent(timestamp, null, progress);
+  @override
+  void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest) {
+    _manifestUpdateSubject.addWhenMoreRecent(sequence, tabId, (
+      tabId: tabId,
+      manifest: manifest,
+    ));
   }
 
   GeckoEventService.setUp({

@@ -40,6 +40,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSessionApi
@@ -274,6 +275,9 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoPublicSuffixListApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPublicSuffixListApiImpl(profileApplicationContext))
         GeckoTrackingProtectionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTrackingProtectionApiImpl())
         GeckoAppLinksApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoAppLinksApiImpl(profileApplicationContext))
+
+        // PWA API for web app installation and management
+        GeckoPwaApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPwaApiImpl(profileApplicationContext))
 
         // Viewport API for dynamic toolbar and keyboard handling
         val viewportEvents = GeckoViewportEvents(_flutterPluginBinding.binaryMessenger)

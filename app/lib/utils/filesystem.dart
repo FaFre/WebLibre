@@ -75,6 +75,20 @@ Future<void> clearMozillaProfileCache(String profileId) async {
   }
 }
 
+/// Returns the list of Mozilla profile IDs (`.default` directory names)
+/// inside the given profile directory's `mozilla/` subdirectory.
+List<String> getMozillaProfileIds(Directory profileDir) {
+  final mozillaDir = Directory(p.join(profileDir.path, 'mozilla'));
+  if (!mozillaDir.existsSync()) return [];
+
+  return mozillaDir
+      .listSync()
+      .whereType<Directory>()
+      .map((dir) => p.basename(dir.path))
+      .where((name) => name.endsWith('.default'))
+      .toList();
+}
+
 Future<List<Directory>> getProfilesWithDuplicateMozillaProfiles(
   Directory profilesDir,
 ) async {
@@ -121,6 +135,16 @@ Future<void> writeStartupProfile(
 Future<UuidValue?> selectStartupProfile(Directory profilesDir) async {
   var startupProfile = await readStartupProfile(profilesDir);
   final availableProfiles = await getAvailableProfileDirectories(profilesDir);
+
+  // Verify the startup profile directory actually exists
+  if (startupProfile != null) {
+    final profileDir = getProfileDir(profilesDir, startupProfile);
+    final exists = availableProfiles.any((dir) => dir.path == profileDir.path);
+    if (!exists) {
+      logger.w('Startup profile directory missing, selecting fallback');
+      startupProfile = null;
+    }
+  }
 
   if (startupProfile == null) {
     final sortedDirs = await sortByAccessTime(availableProfiles);

@@ -2972,6 +2972,286 @@ data class TrackingProtectionException (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/**
+ * Represents an icon from a PWA manifest.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class PwaIcon (
+  val src: String,
+  val sizes: String? = null,
+  val type: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PwaIcon {
+      val src = pigeonVar_list[0] as String
+      val sizes = pigeonVar_list[1] as String?
+      val type = pigeonVar_list[2] as String?
+      return PwaIcon(src, sizes, type)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      src,
+      sizes,
+      type,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is PwaIcon) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/**
+ * Represents a file entry in share target params.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ShareTargetFiles (
+  val name: String,
+  val accept: List<String?>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ShareTargetFiles {
+      val name = pigeonVar_list[0] as String
+      val accept = pigeonVar_list[1] as List<String?>
+      return ShareTargetFiles(name, accept)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      name,
+      accept,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ShareTargetFiles) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/**
+ * Represents share target params.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ShareTargetParams (
+  val title: String? = null,
+  val text: String? = null,
+  val url: String? = null,
+  val files: List<ShareTargetFiles?>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ShareTargetParams {
+      val title = pigeonVar_list[0] as String?
+      val text = pigeonVar_list[1] as String?
+      val url = pigeonVar_list[2] as String?
+      val files = pigeonVar_list[3] as List<ShareTargetFiles?>
+      return ShareTargetParams(title, text, url, files)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      title,
+      text,
+      url,
+      files,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ShareTargetParams) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/**
+ * Represents a share target for PWA.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ShareTarget (
+  val action: String,
+  val method: String? = null,
+  val encType: String? = null,
+  val params: ShareTargetParams? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ShareTarget {
+      val action = pigeonVar_list[0] as String
+      val method = pigeonVar_list[1] as String?
+      val encType = pigeonVar_list[2] as String?
+      val params = pigeonVar_list[3] as ShareTargetParams?
+      return ShareTarget(action, method, encType, params)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      action,
+      method,
+      encType,
+      params,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ShareTarget) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/**
+ * Represents an external application resource.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ExternalApplicationResource (
+  val platform: String,
+  val url: String? = null,
+  val id: String? = null,
+  val minVersion: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ExternalApplicationResource {
+      val platform = pigeonVar_list[0] as String
+      val url = pigeonVar_list[1] as String?
+      val id = pigeonVar_list[2] as String?
+      val minVersion = pigeonVar_list[3] as String?
+      return ExternalApplicationResource(platform, url, id, minVersion)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      platform,
+      url,
+      id,
+      minVersion,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ExternalApplicationResource) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/**
+ * Represents a PWA web app manifest.
+ *
+ * Mirrors Mozilla Android Components' WebAppManifest structure.
+ * https://firefox-source-docs.mozilla.org/mobile/android/geckoview/api/mozilla.components.concept.engine.manifest.WebAppManifest.html
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class PwaManifest (
+  val startUrl: String,
+  val name: String? = null,
+  val shortName: String? = null,
+  val display: String? = null,
+  val themeColor: String? = null,
+  val backgroundColor: String? = null,
+  val scope: String? = null,
+  val description: String? = null,
+  val icons: List<PwaIcon?>,
+  val dir: String? = null,
+  val lang: String? = null,
+  val orientation: String? = null,
+  val relatedApplications: List<ExternalApplicationResource?>,
+  val preferRelatedApplications: Boolean,
+  val shareTarget: ShareTarget? = null,
+  /**
+   * The URL of the page when the manifest was detected.
+   * Used for HTTPS/installability checks.
+   */
+  val currentUrl: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PwaManifest {
+      val startUrl = pigeonVar_list[0] as String
+      val name = pigeonVar_list[1] as String?
+      val shortName = pigeonVar_list[2] as String?
+      val display = pigeonVar_list[3] as String?
+      val themeColor = pigeonVar_list[4] as String?
+      val backgroundColor = pigeonVar_list[5] as String?
+      val scope = pigeonVar_list[6] as String?
+      val description = pigeonVar_list[7] as String?
+      val icons = pigeonVar_list[8] as List<PwaIcon?>
+      val dir = pigeonVar_list[9] as String?
+      val lang = pigeonVar_list[10] as String?
+      val orientation = pigeonVar_list[11] as String?
+      val relatedApplications = pigeonVar_list[12] as List<ExternalApplicationResource?>
+      val preferRelatedApplications = pigeonVar_list[13] as Boolean
+      val shareTarget = pigeonVar_list[14] as ShareTarget?
+      val currentUrl = pigeonVar_list[15] as String
+      return PwaManifest(startUrl, name, shortName, display, themeColor, backgroundColor, scope, description, icons, dir, lang, orientation, relatedApplications, preferRelatedApplications, shareTarget, currentUrl)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      startUrl,
+      name,
+      shortName,
+      display,
+      themeColor,
+      backgroundColor,
+      scope,
+      description,
+      icons,
+      dir,
+      lang,
+      orientation,
+      relatedApplications,
+      preferRelatedApplications,
+      shareTarget,
+      currentUrl,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is PwaManifest) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class GeckoPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -3400,6 +3680,36 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
           TrackingProtectionException.fromList(it)
         }
       }
+      214.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PwaIcon.fromList(it)
+        }
+      }
+      215.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ShareTargetFiles.fromList(it)
+        }
+      }
+      216.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ShareTargetParams.fromList(it)
+        }
+      }
+      217.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ShareTarget.fromList(it)
+        }
+      }
+      218.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ExternalApplicationResource.fromList(it)
+        }
+      }
+      219.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PwaManifest.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -3743,6 +4053,30 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       is TrackingProtectionException -> {
         stream.write(213)
+        writeValue(stream, value.toList())
+      }
+      is PwaIcon -> {
+        stream.write(214)
+        writeValue(stream, value.toList())
+      }
+      is ShareTargetFiles -> {
+        stream.write(215)
+        writeValue(stream, value.toList())
+      }
+      is ShareTargetParams -> {
+        stream.write(216)
+        writeValue(stream, value.toList())
+      }
+      is ShareTarget -> {
+        stream.write(217)
+        writeValue(stream, value.toList())
+      }
+      is ExternalApplicationResource -> {
+        stream.write(218)
+        writeValue(stream, value.toList())
+      }
+      is PwaManifest -> {
+        stream.write(219)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -5320,12 +5654,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       GeckoPigeonCodec()
     }
   }
-  fun onViewReadyStateChange(timestampArg: Long, stateArg: Boolean, callback: (Result<Unit>) -> Unit)
+  fun onViewReadyStateChange(sequenceArg: Long, stateArg: Boolean, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onViewReadyStateChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, stateArg)) {
+    channel.send(listOf(sequenceArg, stateArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5337,12 +5671,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onEngineReadyStateChange(timestampArg: Long, stateArg: Boolean, callback: (Result<Unit>) -> Unit)
+  fun onEngineReadyStateChange(sequenceArg: Long, stateArg: Boolean, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onEngineReadyStateChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, stateArg)) {
+    channel.send(listOf(sequenceArg, stateArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5354,12 +5688,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onIconUpdate(timestampArg: Long, urlArg: String, bytesArg: ByteArray, callback: (Result<Unit>) -> Unit)
+  fun onIconUpdate(sequenceArg: Long, urlArg: String, bytesArg: ByteArray, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconUpdate$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, urlArg, bytesArg)) {
+    channel.send(listOf(sequenceArg, urlArg, bytesArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5371,12 +5705,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onTabAdded(timestampArg: Long, tabIdArg: String, callback: (Result<Unit>) -> Unit)
+  fun onTabAdded(sequenceArg: Long, tabIdArg: String, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, tabIdArg)) {
+    channel.send(listOf(sequenceArg, tabIdArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5388,12 +5722,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onTabListChange(timestampArg: Long, tabIdsArg: List<String>, callback: (Result<Unit>) -> Unit)
+  fun onTabListChange(sequenceArg: Long, tabIdsArg: List<String>, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabListChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, tabIdsArg)) {
+    channel.send(listOf(sequenceArg, tabIdsArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5405,12 +5739,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onSelectedTabChange(timestampArg: Long, idArg: String?, callback: (Result<Unit>) -> Unit)
+  fun onSelectedTabChange(sequenceArg: Long, idArg: String?, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg)) {
+    channel.send(listOf(sequenceArg, idArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5422,12 +5756,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onTabContentStateChange(timestampArg: Long, stateArg: TabContentState, callback: (Result<Unit>) -> Unit)
+  fun onTabContentStateChange(sequenceArg: Long, stateArg: TabContentState, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabContentStateChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, stateArg)) {
+    channel.send(listOf(sequenceArg, stateArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5439,12 +5773,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onHistoryStateChange(timestampArg: Long, idArg: String, stateArg: HistoryState, callback: (Result<Unit>) -> Unit)
+  fun onHistoryStateChange(sequenceArg: Long, idArg: String, stateArg: HistoryState, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onHistoryStateChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg, stateArg)) {
+    channel.send(listOf(sequenceArg, idArg, stateArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5456,12 +5790,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onReaderableStateChange(timestampArg: Long, idArg: String, stateArg: ReaderableState, callback: (Result<Unit>) -> Unit)
+  fun onReaderableStateChange(sequenceArg: Long, idArg: String, stateArg: ReaderableState, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg, stateArg)) {
+    channel.send(listOf(sequenceArg, idArg, stateArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5473,12 +5807,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onSecurityInfoStateChange(timestampArg: Long, idArg: String, stateArg: SecurityInfoState, callback: (Result<Unit>) -> Unit)
+  fun onSecurityInfoStateChange(sequenceArg: Long, idArg: String, stateArg: SecurityInfoState, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSecurityInfoStateChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg, stateArg)) {
+    channel.send(listOf(sequenceArg, idArg, stateArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5490,12 +5824,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onIconChange(timestampArg: Long, idArg: String, bytesArg: ByteArray?, callback: (Result<Unit>) -> Unit)
+  fun onIconChange(sequenceArg: Long, idArg: String, bytesArg: ByteArray?, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onIconChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg, bytesArg)) {
+    channel.send(listOf(sequenceArg, idArg, bytesArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5507,12 +5841,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onThumbnailChange(timestampArg: Long, idArg: String, bytesArg: ByteArray?, callback: (Result<Unit>) -> Unit)
+  fun onThumbnailChange(sequenceArg: Long, idArg: String, bytesArg: ByteArray?, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onThumbnailChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg, bytesArg)) {
+    channel.send(listOf(sequenceArg, idArg, bytesArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5524,12 +5858,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onFindResults(timestampArg: Long, idArg: String, resultsArg: List<FindResultState>, callback: (Result<Unit>) -> Unit)
+  fun onFindResults(sequenceArg: Long, idArg: String, resultsArg: List<FindResultState>, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onFindResults$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg, resultsArg)) {
+    channel.send(listOf(sequenceArg, idArg, resultsArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5541,12 +5875,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onLongPress(timestampArg: Long, idArg: String, hitResultArg: HitResult, callback: (Result<Unit>) -> Unit)
+  fun onLongPress(sequenceArg: Long, idArg: String, hitResultArg: HitResult, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onLongPress$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, idArg, hitResultArg)) {
+    channel.send(listOf(sequenceArg, idArg, hitResultArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5558,12 +5892,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onPreferenceChange(timestampArg: Long, valueArg: GeckoPref, callback: (Result<Unit>) -> Unit)
+  fun onPreferenceChange(sequenceArg: Long, valueArg: GeckoPref, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onPreferenceChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, valueArg)) {
+    channel.send(listOf(sequenceArg, valueArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5575,12 +5909,12 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onContainerSiteAssignment(timestampArg: Long, detailsArg: ContainerSiteAssignment, callback: (Result<Unit>) -> Unit)
+  fun onContainerSiteAssignment(sequenceArg: Long, detailsArg: ContainerSiteAssignment, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, detailsArg)) {
+    channel.send(listOf(sequenceArg, detailsArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5592,12 +5926,29 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onMlProgress(timestampArg: Long, progressArg: MlProgressData, callback: (Result<Unit>) -> Unit)
+  fun onMlProgress(sequenceArg: Long, progressArg: MlProgressData, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onMlProgress$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, progressArg)) {
+    channel.send(listOf(sequenceArg, progressArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onManifestUpdate(sequenceArg: Long, tabIdArg: String, manifestArg: PwaManifest?, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onManifestUpdate$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, tabIdArg, manifestArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5695,12 +6046,12 @@ class ReaderViewController(private val binaryMessenger: BinaryMessenger, private
       GeckoPigeonCodec()
     }
   }
-  fun appearanceButtonVisibility(timestampArg: Long, visibleArg: Boolean, callback: (Result<Unit>) -> Unit)
+  fun appearanceButtonVisibility(sequenceArg: Long, visibleArg: Boolean, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, visibleArg)) {
+    channel.send(listOf(sequenceArg, visibleArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5853,12 +6204,12 @@ class GeckoAddonEvents(private val binaryMessenger: BinaryMessenger, private val
       GeckoPigeonCodec()
     }
   }
-  fun onUpsertWebExtensionAction(timestampArg: Long, extensionIdArg: String, actionTypeArg: WebExtensionActionType, extensionDataArg: WebExtensionData, callback: (Result<Unit>) -> Unit)
+  fun onUpsertWebExtensionAction(sequenceArg: Long, extensionIdArg: String, actionTypeArg: WebExtensionActionType, extensionDataArg: WebExtensionData, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpsertWebExtensionAction$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, extensionIdArg, actionTypeArg, extensionDataArg)) {
+    channel.send(listOf(sequenceArg, extensionIdArg, actionTypeArg, extensionDataArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5870,12 +6221,12 @@ class GeckoAddonEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onRemoveWebExtensionAction(timestampArg: Long, extensionIdArg: String, actionTypeArg: WebExtensionActionType, callback: (Result<Unit>) -> Unit)
+  fun onRemoveWebExtensionAction(sequenceArg: Long, extensionIdArg: String, actionTypeArg: WebExtensionActionType, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onRemoveWebExtensionAction$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, extensionIdArg, actionTypeArg)) {
+    channel.send(listOf(sequenceArg, extensionIdArg, actionTypeArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5887,12 +6238,12 @@ class GeckoAddonEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onUpdateWebExtensionIcon(timestampArg: Long, extensionIdArg: String, actionTypeArg: WebExtensionActionType, iconArg: ByteArray, callback: (Result<Unit>) -> Unit)
+  fun onUpdateWebExtensionIcon(sequenceArg: Long, extensionIdArg: String, actionTypeArg: WebExtensionActionType, iconArg: ByteArray, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonEvents.onUpdateWebExtensionIcon$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, extensionIdArg, actionTypeArg, iconArg)) {
+    channel.send(listOf(sequenceArg, extensionIdArg, actionTypeArg, iconArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5969,12 +6320,12 @@ class GeckoSuggestionEvents(private val binaryMessenger: BinaryMessenger, privat
       GeckoPigeonCodec()
     }
   }
-  fun onSuggestionResult(timestampArg: Long, suggestionTypeArg: GeckoSuggestionType, suggestionsArg: List<GeckoSuggestion>, callback: (Result<Unit>) -> Unit)
+  fun onSuggestionResult(sequenceArg: Long, suggestionTypeArg: GeckoSuggestionType, suggestionsArg: List<GeckoSuggestion>, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSuggestionEvents.onSuggestionResult$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, suggestionTypeArg, suggestionsArg)) {
+    channel.send(listOf(sequenceArg, suggestionTypeArg, suggestionsArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -5995,12 +6346,12 @@ class GeckoTabContentEvents(private val binaryMessenger: BinaryMessenger, privat
       GeckoPigeonCodec()
     }
   }
-  fun onContentUpdate(timestampArg: Long, contentArg: TabContent, callback: (Result<Unit>) -> Unit)
+  fun onContentUpdate(sequenceArg: Long, contentArg: TabContent, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabContentEvents.onContentUpdate$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, contentArg)) {
+    channel.send(listOf(sequenceArg, contentArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -6384,12 +6735,12 @@ class BrowserExtensionEvents(private val binaryMessenger: BinaryMessenger, priva
       GeckoPigeonCodec()
     }
   }
-  fun onFeedRequested(timestampArg: Long, urlArg: String, callback: (Result<Unit>) -> Unit)
+  fun onFeedRequested(sequenceArg: Long, urlArg: String, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, urlArg)) {
+    channel.send(listOf(sequenceArg, urlArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -6546,17 +6897,17 @@ class GeckoViewportEvents(private val binaryMessenger: BinaryMessenger, private 
    * This is detected natively using WindowInsets API and provides
    * accurate keyboard height information.
    *
-   * [timestamp] Event timestamp for ordering.
+   * [sequence] Event sequence number for ordering.
    * [heightPx] Keyboard height in pixels (0 when hidden).
    * [isVisible] Whether the keyboard is currently visible.
    * [isAnimating] Whether the keyboard is currently animating.
    */
-  fun onKeyboardVisibilityChanged(timestampArg: Long, heightPxArg: Long, isVisibleArg: Boolean, isAnimatingArg: Boolean, callback: (Result<Unit>) -> Unit)
+  fun onKeyboardVisibilityChanged(sequenceArg: Long, heightPxArg: Long, isVisibleArg: Boolean, isAnimatingArg: Boolean, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(timestampArg, heightPxArg, isVisibleArg, isAnimatingArg)) {
+    channel.send(listOf(sequenceArg, heightPxArg, isVisibleArg, isAnimatingArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
@@ -7221,6 +7572,83 @@ interface GeckoAppLinksApi {
             val args = message as List<Any?>
             val urlArg = args[0] as String
             api.openAppLink(urlArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * API for PWA (Progressive Web App) installation and management.
+ *
+ * Wraps Mozilla Android Components' WebAppUseCases and ManifestStorage
+ * to provide PWA install and query functionality to Flutter.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoPwaApi {
+  /**
+   * Installs the current page as a PWA (adds to home screen).
+   *
+   * Creates an Android shortcut with profile and container metadata embedded
+   * in the intent extras. This ensures the PWA opens with the same profile
+   * and container context that was active during installation.
+   *
+   * The [tabId] identifies which tab to install from. If null, uses the selected tab.
+   * The [profileUuid] is the UUID of the current user profile.
+   * The [contextId] is the container's contextual identity (optional, null for default container).
+   * Returns true if installation was successful.
+   */
+  fun installWebApp(tabId: String?, profileUuid: String, contextId: String?, callback: (Result<Boolean>) -> Unit)
+  /** Returns a list of all installed PWA manifests. */
+  fun getInstalledWebApps(callback: (Result<List<PwaManifest>>) -> Unit)
+
+  companion object {
+    /** The codec used by GeckoPwaApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoPwaApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoPwaApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPwaApi.installWebApp$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String?
+            val profileUuidArg = args[1] as String
+            val contextIdArg = args[2] as String?
+            api.installWebApp(tabIdArg, profileUuidArg, contextIdArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPwaApi.getInstalledWebApps$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.getInstalledWebApps{ result: Result<List<PwaManifest>> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

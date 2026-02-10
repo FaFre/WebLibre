@@ -254,7 +254,7 @@ class GeckoSessionApiImpl : GeckoSessionApi {
                 return
             }
 
-            components.engineView?.captureThumbnail { bitmap ->
+            components.mainBrowserEngineView?.captureThumbnail { bitmap ->
                 try {
                     if (bitmap != null) {
                         components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))

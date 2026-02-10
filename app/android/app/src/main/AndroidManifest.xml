@@ -100,12 +100,35 @@
                 <data android:mimeType="text/*" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.WEB_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Intent router: receives all VIEW intents and routes Custom Tab / PWA to
+             ExternalAppBrowserActivity, regular VIEW intents to MainActivity -->
+        <activity
+            android:name="eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity"
+            android:theme="@style/Theme.AppCompat.Translucent"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:relinquishTaskIdentity="true"
+            android:taskAffinity="">
+
             <!-- Required exactly like this to appear in both default app choosers and when explicitly browsing -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="mozilla.components.pwa.category.SHORTCUT" />
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
@@ -123,7 +146,7 @@
                 <data android:mimeType="text/plain" />
                 <data android:mimeType="application/xhtml+xml" />
             </intent-filter>
-            
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -133,18 +156,28 @@
                 <data android:mimeType="application/pdf" />
             </intent-filter>
 
+            <!-- PWA launch from home screen shortcut -->
             <intent-filter>
-                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <action android:name="mozilla.components.feature.pwa.VIEW_PWA" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.WEB_SEARCH" />
-
-                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="https" />
             </intent-filter>
         </activity>
+
+        <!-- Native activity for Custom Tabs and PWA browsing (non-Flutter) -->
+        <activity
+            android:name="eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity"
+            android:exported="false"
+            android:taskAffinity=""
+            android:documentLaunchMode="always"
+            android:autoRemoveFromRecents="false"
+            android:theme="@style/ExternalAppBrowserTheme"
+            android:supportsPictureInPicture="true"
+            android:resizeableActivity="true"
+            android:persistableMode="persistNever"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
 
         <activity
             android:theme="@style/AddonsActivityTheme"

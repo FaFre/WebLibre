@@ -30,6 +30,11 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
+    <style name="ExternalAppBrowserTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
     <style name="AddonsActivityTheme" parent="AppTheme">
         <item name="mozac_primary_text_color">@color/photonDarkGrey90</item>
     </style>

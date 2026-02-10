@@ -21,6 +21,8 @@ class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
         //We cannot introduce here our wrapped context since a activity type is required to make features work correctly like context menu
         return components.core.engine.createView(requireContext()).apply {
            selectionActionDelegate = components.selectionAction
+        }.also { engineView ->
+            components.mainBrowserEngineView = engineView
         }
     }
 
@@ -35,8 +37,17 @@ class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
         super.onViewCreated(view, savedInstanceState)
     }
 
+    override fun onEngineSetupComplete() {
+        GlobalComponents.viewportApi?.applyPendingToolbarHeight()
+    }
+
     override fun onBackPressed(): Boolean =
         super.readerViewFeature.onBackPressed() || super.onBackPressed()
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        components.mainBrowserEngineView = null
+    }
 
     companion object {
         fun create(sessionId: String? = null) = BrowserFragment().apply {
