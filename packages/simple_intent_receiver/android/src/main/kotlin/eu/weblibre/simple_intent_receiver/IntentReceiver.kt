@@ -22,7 +22,7 @@ package eu.weblibre.simple_intent_receiver
 import io.flutter.plugin.common.BinaryMessenger
 import eu.weblibre.simple_intent_receiver.pigeons.IntentEvents
 import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
+import eu.weblibre.simple_intent_receiver.ext.EventSequence
 
 class IntentReceiver(messenger: BinaryMessenger) {
     private val intentEvents: IntentEvents = IntentEvents(messenger)
@@ -30,5 +30,4 @@ class IntentReceiver(messenger: BinaryMessenger) {
     fun sendIntent(intent: PigeonIntent) {
         intentEvents.onIntentReceived(EventSequence.next(), intent) { }
     }
-}
 }

@@ -67,7 +67,7 @@ class WebExtensionToolbarFeature(
             .filter { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
             .forEach { extensionId ->
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = EventSequence.next(),
+                    sequenceArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.BROWSER,
                 ) {}
@@ -78,7 +78,7 @@ class WebExtensionToolbarFeature(
             .filter { !store.state.extensions.containsKey(it) || store.state.extensions[it]?.enabled == false }
             .forEach { extensionId ->
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = EventSequence.next(),
+                    sequenceArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.PAGE,
                 ) {}
@@ -107,7 +107,7 @@ class WebExtensionToolbarFeature(
         webExtensionBrowserActions.keys.toList().forEach { extensionId ->
             if (extensionId !in enabledExtensionIds) {
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = EventSequence.next(),
+                    sequenceArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.BROWSER,
                 ) {}
@@ -118,7 +118,7 @@ class WebExtensionToolbarFeature(
         webExtensionPageActions.keys.toList().forEach { extensionId ->
             if (extensionId !in enabledExtensionIds) {
                 addonEvents.onRemoveWebExtensionAction(
-                    timestampArg = EventSequence.next(),
+                    sequenceArg = EventSequence.next(),
                     extensionIdArg = extensionId,
                     actionTypeArg = WebExtensionActionType.PAGE,
                 ) {}
@@ -131,7 +131,7 @@ class WebExtensionToolbarFeature(
             if (extensionNotAllowedInTab(extension, tab)) {
                 webExtensionPageActions[extension.id]?.let {
                     addonEvents.onRemoveWebExtensionAction(
-                        timestampArg = EventSequence.next(),
+                        sequenceArg = EventSequence.next(),
                         extensionIdArg = extension.id,
                         actionTypeArg = WebExtensionActionType.PAGE,
                     ) {}
@@ -139,7 +139,7 @@ class WebExtensionToolbarFeature(
                 }
                 webExtensionBrowserActions[extension.id]?.let {
                     addonEvents.onRemoveWebExtensionAction(
-                        timestampArg = EventSequence.next(),
+                        sequenceArg = EventSequence.next(),
                         extensionIdArg = extension.id,
                         actionTypeArg = WebExtensionActionType.BROWSER,
                     ) {}
@@ -221,7 +221,7 @@ class WebExtensionToolbarFeature(
         )
 
         addonEvents.onUpsertWebExtensionAction(
-            timestampArg = EventSequence.next(),
+            sequenceArg = EventSequence.next(),
             extensionIdArg = extension.id,
             actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
             extensionDataArg = data
@@ -236,7 +236,7 @@ class WebExtensionToolbarFeature(
                     val imageBytes = icon.toWebPBytes()
                     runOnUiThread {
                         addonEvents.onUpdateWebExtensionIcon(
-                            timestampArg = EventSequence.next(),
+                            sequenceArg = EventSequence.next(),
                             extensionIdArg = extensionId,
                             actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
                             iconArg = imageBytes

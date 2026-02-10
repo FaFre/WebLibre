@@ -186,13 +186,13 @@ class KeyboardVisibilityFeature(
         lastKeyboardHeight = heightPx
         lastKeyboardVisible = isVisible
 
-        val timestamp = EventSequence.next()
+        val sequence = EventSequence.next()
 
         logger.debug("$TAG: Keyboard change - height=$heightPx, visible=$isVisible, animating=$isAnimating")
 
         runOnUiThread {
             flutterEvents.onKeyboardVisibilityChanged(
-                timestamp,
+                sequence,
                 heightPx.toLong(),
                 isVisible,
                 isAnimating
