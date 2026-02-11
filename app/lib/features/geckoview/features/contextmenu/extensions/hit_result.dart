@@ -37,6 +37,26 @@ extension HitResultJson on HitResult {
 
 extension HitResultX on HitResult {
   Uri? tryGetLink() {
+    const maxTitleLength = 2500;
+
+    final uri = switch (this) {
+      UnknownHitResult(src: final src) => src,
+      ImageHitResult(src: final src, title: final title) =>
+        title.isEmpty ? (src.length > maxTitleLength ? 'image' : src) : title!,
+      VideoHitResult(src: final src, title: final title) =>
+        title.isEmpty ? src : title!,
+      AudioHitResult(src: final src, title: final title) =>
+        title.isEmpty ? src : title!,
+      ImageSrcHitResult(uri: final uri) => uri,
+      PhoneHitResult() => 'about:blank',
+      EmailHitResult() => 'about:blank',
+      GeoHitResult() => 'about:blank',
+    };
+
+    return Uri.tryParse(uri);
+  }
+
+  Uri? tryGetSource() {
     final uri = switch (this) {
       UnknownHitResult(src: final src) => src,
       ImageHitResult(src: final src) => src,
@@ -67,7 +87,9 @@ extension HitResultX on HitResult {
     };
   }
 
-  bool get hasSrc => tryGetLink() != null;
+  bool get hasSrc => tryGetSource() != null;
+
+  bool get hasLink => tryGetLink() != null;
 
   bool isImage() {
     return (this is ImageHitResult || this is ImageSrcHitResult) && hasSrc;
@@ -82,7 +104,8 @@ extension HitResultX on HitResult {
   }
 
   bool isUri() {
-    return (this is UnknownHitResult && hasSrc) || this is ImageSrcHitResult;
+    return (this is UnknownHitResult && hasLink) ||
+        (this is ImageSrcHitResult && hasLink);
   }
 
   bool isHttpLink() {
@@ -96,13 +119,13 @@ extension HitResultX on HitResult {
 
   bool isIntent() {
     return this is UnknownHitResult &&
-        hasSrc &&
+        hasLink &&
         tryGetLink()?.scheme == 'intent';
   }
 
   bool isMailto() {
     return this is UnknownHitResult &&
-        hasSrc &&
+        hasLink &&
         tryGetLink()?.scheme == 'mailto';
   }
 }

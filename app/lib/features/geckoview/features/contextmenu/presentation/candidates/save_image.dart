@@ -41,7 +41,7 @@ class SaveImage extends HookConsumerWidget {
       title: const Text('Save image'),
       onTap: () async {
         final currentTab = ref.read(selectedTabStateProvider);
-        final url = hitResult.tryGetLink();
+        final url = hitResult.tryGetSource();
 
         if (currentTab != null && url != null) {
           await GeckoDownloadsService().requestDownload(

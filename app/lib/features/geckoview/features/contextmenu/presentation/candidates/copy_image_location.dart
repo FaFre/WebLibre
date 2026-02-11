@@ -41,7 +41,7 @@ class CopyImageLocation extends HookConsumerWidget {
       leading: const Icon(MdiIcons.imageMarker),
       title: const Text('Copy image location'),
       onTap: () async {
-        await hitResult.tryGetLink().mapNotNull((link) async {
+        await hitResult.tryGetSource().mapNotNull((link) async {
           await Clipboard.setData(ClipboardData(text: link.toString()));
 
           if (context.mounted) {

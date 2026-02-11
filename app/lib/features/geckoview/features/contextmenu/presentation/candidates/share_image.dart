@@ -41,7 +41,7 @@ class ShareImage extends HookConsumerWidget {
       title: const Text('Share image'),
       onTap: () async {
         final currentTab = ref.read(selectedTabStateProvider);
-        final url = hitResult.tryGetLink();
+        final url = hitResult.tryGetSource();
 
         if (currentTab != null && url != null) {
           await GeckoDownloadsService().shareInternetResource(

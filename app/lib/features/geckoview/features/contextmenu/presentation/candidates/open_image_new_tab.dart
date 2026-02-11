@@ -55,7 +55,7 @@ class OpenImageInNewTab extends HookConsumerWidget {
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
-              url: hitResult.tryGetLink(),
+              url: hitResult.tryGetSource(),
               parentId: currentTab?.id,
               selectTab: false,
               private: isPrivate,
