@@ -71,6 +71,7 @@ class _SearchSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Search'),
         _DefaultSearchProviderSection(),
+        _CustomSearchEnginesTile(),
         _BangsTile(),
         _AutocompleteProviderSection(),
         _MaxSearchHistoryEntriesSection(),
@@ -212,6 +213,27 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CustomSearchEnginesTile extends StatelessWidget {
+  const _CustomSearchEnginesTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('Custom Search Engines'),
+      subtitle: const Text('Add and manage your own search providers'),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
+      ),
+      leading: const Icon(MdiIcons.searchWeb),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await const UserBangsRoute().push(context);
+      },
     );
   }
 }
