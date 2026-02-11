@@ -73,19 +73,19 @@ object GlobalComponents {
     // External download manager setting
     var useExternalDownloadManager: Boolean = false
 
-    fun shouldOpenLinksInApp(): Boolean {
+    fun shouldOpenLinksInApp(isExternalSession: Boolean = false): Boolean {
         return when (engineSettingsApi!!.getAppLinksMode()) {
             eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS -> true
             eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ASK -> true
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> false
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> isExternalSession
         }
     }
 
-    fun shouldPromptOpenLinksInApp(): Boolean {
+    fun shouldPromptOpenLinksInApp(isExternalSession: Boolean = false): Boolean {
         return when (engineSettingsApi!!.getAppLinksMode()) {
             eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS -> false
             eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ASK -> true
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> false
+            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> isExternalSession
         }
     }
 

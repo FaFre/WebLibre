@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
@@ -64,6 +65,17 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        onBackPressedDispatcher.addCallback(this) {
+            val fragment = supportFragmentManager.findFragmentById(R.id.container)
+            if (fragment is UserInteractionHandler && fragment.onBackPressed()) {
+                return@addCallback
+            }
+
+            isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
+            isEnabled = true
+        }
 
         val sessionId = customTabSessionId
         if (sessionId == null) {
@@ -185,15 +197,6 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val fragment = supportFragmentManager.findFragmentById(R.id.container)
-        if (fragment is UserInteractionHandler && fragment.onBackPressed()) {
-            return
-        }
-        super.onBackPressed()
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {

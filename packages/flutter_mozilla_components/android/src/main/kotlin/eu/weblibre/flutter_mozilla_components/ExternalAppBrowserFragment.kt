@@ -333,16 +333,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
     }
 
     override fun onBackPressed(): Boolean {
-        val sessionId = customTabSessionId ?: return super.onBackPressed()
-
-        val tab = components.core.store.state.findCustomTab(sessionId)
-        if (tab?.content?.canGoBack == true) {
-            components.useCases.sessionUseCases.goBack(sessionId)
-            return true
-        }
-
-        requireActivity().finishAndRemoveTask()
-        return true
+        return super.onBackPressed()
     }
 
     override fun onDestroyView() {

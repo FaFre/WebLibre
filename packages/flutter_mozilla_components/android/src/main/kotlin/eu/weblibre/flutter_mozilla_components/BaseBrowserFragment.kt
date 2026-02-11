@@ -29,6 +29,7 @@ import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
+import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
 import mozilla.components.browser.state.action.TabListAction
@@ -307,8 +308,16 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     sessionId = sessionId,
                     fragmentManager = parentFragmentManager,
                     loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
-                    launchInApp = { GlobalComponents.shouldOpenLinksInApp() },
-                    shouldPrompt = { GlobalComponents.shouldPromptOpenLinksInApp() },
+                    launchInApp = {
+                        GlobalComponents.shouldOpenLinksInApp(
+                            requireActivity() is ExternalAppBrowserActivity
+                        )
+                    },
+                    shouldPrompt = {
+                        GlobalComponents.shouldPromptOpenLinksInApp(
+                            requireActivity() is ExternalAppBrowserActivity
+                        )
+                    },
                     alwaysOpenCheckboxAction = {
                         GlobalComponents.engineSettingsApi?.setAppLinksMode(
                             eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS
