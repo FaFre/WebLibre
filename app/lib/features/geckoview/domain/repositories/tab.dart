@@ -293,11 +293,9 @@ class TabRepository extends _$TabRepository {
 
     if (!ref.mounted) return;
 
-    // Priority 1: Check for parent tab first (if exists and in same container)
+    // Priority 1: Check for parent tab first
     if (tabState?.parentId != null) {
-      if (sameContainerTabs.any((tab) => tab == tabState?.parentId)) {
-        return _tabsService.selectTab(tabId: tabState!.parentId!);
-      }
+      return _tabsService.selectTab(tabId: tabState!.parentId!);
     }
 
     // Priority 2: Check for previous tab by timestamp
