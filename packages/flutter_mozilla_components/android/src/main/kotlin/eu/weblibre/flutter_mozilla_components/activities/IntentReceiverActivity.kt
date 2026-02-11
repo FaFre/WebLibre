@@ -10,10 +10,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.widget.FrameLayout
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.ui.LoadingScreenManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,7 +41,6 @@ class IntentReceiverActivity : Activity() {
     private val logger = Logger("IntentReceiverActivity")
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var pendingIntent: Intent? = null
-    private var loadingScreenManager: LoadingScreenManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,16 +59,17 @@ class IntentReceiverActivity : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         coroutineScope.cancel()
-        loadingScreenManager?.cleanup()
-        loadingScreenManager = null
     }
 
     private fun processIntent(intent: Intent) {
-        val components = GlobalComponents.components
-        if (components == null) {
+        if (GlobalComponents.components == null) {
+            if (GlobalComponents.ensureExternalComponents(applicationContext)) {
+                routeIntent(intent)
+                return
+            }
+
             logger.warn("Components not initialized, waiting for initialization...")
             pendingIntent = intent
-            showLoadingIndicator(intent)
             waitForComponentsWithTimeout()
             return
         }
@@ -246,7 +244,6 @@ class IntentReceiverActivity : Activity() {
                     context = this@IntentReceiverActivity,
                     customTabSessionId = sessionId,
                     webAppManifestUrl = url,
-                    pwaShortcutId = intent.getStringExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID),
                 )
                 startActivity(externalIntent)
                 finish()
@@ -289,26 +286,6 @@ class IntentReceiverActivity : Activity() {
         components.useCases.sessionUseCases.loadUrl(url, tab.id, loadUrlFlags)
 
         return tab.id
-    }
-
-    /**
-     * Shows a branded loading screen immediately based on intent type.
-     * This avoids showing a minimal spinner and shows proper placeholders right away.
-     */
-    private fun showLoadingIndicator(intent: Intent) {
-        // Create a container layout
-        val container = FrameLayout(this).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        }
-        setContentView(container)
-
-        // Initialize loading screen manager and show branded screen immediately
-        loadingScreenManager = LoadingScreenManager.forActivity(this, container)
-        loadingScreenManager?.showLoadingForIntent(intent)
     }
 
     /**

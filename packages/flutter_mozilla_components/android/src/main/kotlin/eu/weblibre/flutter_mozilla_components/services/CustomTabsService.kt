@@ -13,6 +13,9 @@ import mozilla.components.feature.customtabs.store.CustomTabsServiceStore
 
 class CustomTabsService : AbstractCustomTabsService() {
     private val components by lazy {
+        if (GlobalComponents.components == null) {
+            GlobalComponents.ensureExternalComponents(applicationContext)
+        }
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 

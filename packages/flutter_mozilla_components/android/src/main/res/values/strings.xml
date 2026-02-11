@@ -27,8 +27,4 @@
     <string name="mozac_feature_customtabs_menu_button">Menu</string>
     <string name="mozac_feature_customtabs_security_indicator">Security</string>
 
-    <!-- Loading screen strings -->
-    <string name="pwa_loading">Opening…</string>
-    <string name="pwa_icon_description">App icon</string>
-    <string name="website_icon_description">Website icon</string>
 </resources>

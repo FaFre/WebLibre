@@ -9,14 +9,12 @@ package eu.weblibre.flutter_mozilla_components.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.R
-import eu.weblibre.flutter_mozilla_components.ui.LoadingScreenManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -38,7 +36,6 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
     private val logger = Logger("ExternalAppBrowserActivity")
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var loadingScreenManager: LoadingScreenManager? = null
 
     private val customTabSessionId: String?
         get() = intent?.getStringExtra(EXTRA_CUSTOM_TAB_SESSION_ID)
@@ -61,32 +58,17 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
         val components = GlobalComponents.components
         if (components == null) {
+            if (GlobalComponents.ensureExternalComponents(applicationContext)) {
+                showFragment(sessionId)
+                return
+            }
+
             logger.debug("Components not yet initialized, waiting...")
-            showLoading()
             waitForComponents(sessionId)
             return
         }
 
         showFragment(sessionId)
-    }
-
-    private fun showLoading() {
-        val container = findViewById<FrameLayout>(R.id.container)
-        loadingScreenManager = LoadingScreenManager.forActivity(this, container)
-
-        val url = webAppManifestUrl ?: ""
-        val shortcutId = intent?.getStringExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID)
-
-        if (url.isNotEmpty()) {
-            val loadingIntent = Intent().apply {
-                data = android.net.Uri.parse(url)
-                putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, "placeholder")
-                shortcutId?.let { putExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID, it) }
-            }
-            loadingScreenManager?.showLoadingForIntent(loadingIntent)
-        } else {
-            loadingScreenManager?.showLoadingForIntent(Intent())
-        }
     }
 
     private fun waitForComponents(sessionId: String) {
@@ -132,7 +114,6 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.container, fragment)
-            .runOnCommit { loadingScreenManager?.hideLoading() }
             .commit()
     }
 
@@ -153,10 +134,6 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
         // Cancel any pending coroutines
         coroutineScope.cancel()
-
-        // Clean up loading screen manager
-        loadingScreenManager?.cleanup()
-        loadingScreenManager = null
 
         // Only clean up when the activity is actually finishing (user closed it),
         // not when the system temporarily destroys it (e.g. switching to main app).
@@ -199,13 +176,11 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
             context: Context,
             customTabSessionId: String,
             webAppManifestUrl: String? = null,
-            pwaShortcutId: String? = null,
         ): Intent {
             return Intent(context, ExternalAppBrowserActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, customTabSessionId)
                 webAppManifestUrl?.let { putExtra(EXTRA_WEB_APP_MANIFEST_URL, it) }
-                pwaShortcutId?.let { putExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID, it) }
             }
         }
     }

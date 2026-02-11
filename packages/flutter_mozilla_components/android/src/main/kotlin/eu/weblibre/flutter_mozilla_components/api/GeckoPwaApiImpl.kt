@@ -17,7 +17,6 @@ import android.os.Build
 import androidx.core.content.getSystemService
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.PwaSplashCache
 import eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity
 import eu.weblibre.flutter_mozilla_components.pigeons.ExternalApplicationResource
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
@@ -140,9 +139,6 @@ class GeckoPwaApiImpl(
 
             val shortcutId = generateShortcutId(manifest.startUrl)
 
-            // Cache manifest + icon to disk for instant branded splash at launch
-            PwaSplashCache.save(context, shortcutId, manifest, iconBitmap)
-
             val appName = manifest.shortName ?: manifest.name ?: "Web App"
 
             val shortcutIntent = Intent(context, IntentReceiverActivity::class.java).apply {
@@ -150,7 +146,6 @@ class GeckoPwaApiImpl(
                 data = Uri.parse(manifest.startUrl)
                 putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, profileUuid)
                 putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, contextId)
-                putExtra(PwaConstants.EXTRA_PWA_SHORTCUT_ID, shortcutId)
             }
 
             val shortcut = ShortcutInfo.Builder(context, shortcutId).apply {

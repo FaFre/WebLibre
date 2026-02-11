@@ -20,10 +20,10 @@
 package eu.weblibre.gecko
 
 import android.content.Context
-import android.os.Bundle
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterFragmentActivity() {
@@ -41,8 +41,21 @@ class MainActivity: FlutterFragmentActivity() {
         channel.invokeMethod("onTrimMemory", level)
     }
 
-    override fun getCachedEngineId(): String {
-        return "engine_id"
+    override fun provideFlutterEngine(context: Context): FlutterEngine {
+        val cache = FlutterEngineCache.getInstance()
+        val cachedEngine = cache.get("engine_id")
+        if (cachedEngine != null) {
+            return cachedEngine
+        }
+
+        val flutterEngine = FlutterEngine(context.applicationContext)
+        flutterEngine.navigationChannel.setInitialRoute("/")
+        flutterEngine.dartExecutor.executeDartEntrypoint(
+            DartExecutor.DartEntrypoint.createDefault()
+        )
+        cache.put("engine_id", flutterEngine)
+
+        return flutterEngine
     }
 
     override fun shouldDestroyEngineWithHost(): Boolean {
