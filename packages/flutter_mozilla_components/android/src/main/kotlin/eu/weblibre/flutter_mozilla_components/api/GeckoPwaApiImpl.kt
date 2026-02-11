@@ -37,6 +37,7 @@ import mozilla.components.concept.engine.manifest.WebAppManifest
 import mozilla.components.support.base.log.logger.Logger
 import java.io.File
 import java.security.MessageDigest
+import java.util.UUID
 
 /**
  * Implementation of GeckoPwaApi that provides PWA install and query functionality.
@@ -52,6 +53,12 @@ class GeckoPwaApiImpl(
     }
 
     private val logger = Logger("GeckoPwaApiImpl")
+    private val appPrefs by lazy {
+        context.applicationContext.getSharedPreferences(
+            PwaConstants.PROFILE_MAPPING_PREFS,
+            Context.MODE_PRIVATE,
+        )
+    }
 
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
@@ -138,6 +145,7 @@ class GeckoPwaApiImpl(
             val (iconBitmap, isMaskable) = loadPwaIcon(manifest)
 
             val shortcutId = generateShortcutId(manifest.startUrl)
+            val launchToken = generateAndStoreLaunchToken(manifest.startUrl, profileUuid)
 
             val appName = manifest.shortName ?: manifest.name ?: "Web App"
 
@@ -146,6 +154,7 @@ class GeckoPwaApiImpl(
                 data = Uri.parse(manifest.startUrl)
                 putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, profileUuid)
                 putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, contextId)
+                putExtra(PwaConstants.EXTRA_PWA_TOKEN, launchToken)
             }
 
             val shortcut = ShortcutInfo.Builder(context, shortcutId).apply {
@@ -247,15 +256,25 @@ class GeckoPwaApiImpl(
     }
 
     private fun storeProfileMapping(startUrl: String, profileUuid: String) {
-        context.getSharedPreferences(PwaConstants.PROFILE_MAPPING_PREFS, Context.MODE_PRIVATE)
-            .edit()
+        appPrefs.edit()
             .putString(startUrl, profileUuid)
             .apply()
     }
 
+    private fun generateAndStoreLaunchToken(startUrl: String, profileUuid: String): String {
+        val token = UUID.randomUUID().toString()
+        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}"
+        val committed = appPrefs.edit()
+            .putString(tokenKey, token)
+            .commit()
+        if (!committed) {
+            logger.warn("Failed to persist PWA launch token for $startUrl")
+        }
+        return token
+    }
+
     private fun getProfileMapping(startUrl: String): String? {
-        return context.getSharedPreferences(PwaConstants.PROFILE_MAPPING_PREFS, Context.MODE_PRIVATE)
-            .getString(startUrl, null)
+        return appPrefs.getString(startUrl, null)
     }
 
     private fun getCurrentProfileUuid(): String? {

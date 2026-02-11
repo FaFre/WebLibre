@@ -8,22 +8,23 @@ package eu.weblibre.flutter_mozilla_components.activities
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mozilla.components.feature.customtabs.CustomTabIntentProcessor
 import mozilla.components.feature.intent.ext.getSessionId
 import mozilla.components.feature.pwa.intent.WebAppIntentProcessor
-import mozilla.components.support.base.log.logger.Logger
+import mozilla.components.browser.state.state.ExternalAppType
 import java.io.File
 
 /**
@@ -37,17 +38,18 @@ import java.io.File
  * if the current profile differs from the installation profile.
  */
 class IntentReceiverActivity : Activity() {
+    companion object {
+        private const val TAG = "IntentReceiverActivity"
+    }
 
-    private val logger = Logger("IntentReceiverActivity")
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var pendingIntent: Intent? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val intent = intent?.let { Intent(it) } ?: Intent()
 
-        logger.debug("onCreate: action=${intent.action} data=${intent.dataString}")
+        Log.d(TAG, "onCreate: action=${intent.action} data=${intent.dataString}")
 
         // Strip flags that could interfere with task management
         intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
@@ -68,9 +70,8 @@ class IntentReceiverActivity : Activity() {
                 return
             }
 
-            logger.warn("Components not initialized, waiting for initialization...")
-            pendingIntent = intent
-            waitForComponentsWithTimeout()
+            Log.w(TAG, "Components not initialized, routing directly to MainActivity")
+            handleRegularIntent(intent)
             return
         }
 
@@ -81,16 +82,21 @@ class IntentReceiverActivity : Activity() {
         // Check if this is our custom PWA intent with profile metadata
         val profileUuid = intent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)
         val contextId = intent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID)
+        val token = intent.getStringExtra(PwaConstants.EXTRA_PWA_TOKEN)
         if (profileUuid != null) {
-            logger.debug("PWA intent with profile metadata: profileUuid=$profileUuid, contextId=$contextId")
-            handlePwaIntent(intent, profileUuid, contextId)
-            return
+            if (isTrustedPwaLaunch(intent, profileUuid, token)) {
+                Log.d(TAG, "Trusted PWA intent with profile metadata: profileUuid=$profileUuid, contextId=$contextId")
+                handlePwaIntent(intent, profileUuid, contextId)
+                return
+            }
+
+            Log.w(TAG, "Ignoring untrusted PWA profile metadata on VIEW intent")
         }
 
         // Fall back to standard intent processors for Custom Tabs and legacy PWAs
         val components = GlobalComponents.components
             ?: run {
-                logger.error("Components became null during routing")
+                Log.e(TAG, "Components became null during routing")
                 handleRegularIntent(intent)
                 return
             }
@@ -110,13 +116,14 @@ class IntentReceiverActivity : Activity() {
         )
 
         for ((name, processor) in processors) {
-            logger.debug("Trying $name processor...")
+            Log.d(TAG, "Trying $name processor...")
             try {
                 val result = processor.process(intent)
-                logger.debug("$name processor result: $result")
+                Log.d(TAG, "$name processor result: $result")
                 if (result) {
                     val sessionId = intent.getSessionId()
-                    logger.debug("$name session ID from intent: $sessionId")
+                        ?: resolveSessionIdFromStore(name, intent, components)
+                    Log.d(TAG, "$name session ID from intent: $sessionId")
                     if (sessionId != null) {
                         val externalIntent = ExternalAppBrowserActivity.createIntent(
                             context = this,
@@ -127,16 +134,77 @@ class IntentReceiverActivity : Activity() {
                         finish()
                         return
                     } else {
-                        logger.warn("$name processor succeeded but no session ID in intent!")
+                        Log.w(TAG, "$name processor succeeded but no session ID in intent!")
                     }
                 }
             } catch (e: Exception) {
-                logger.error("Error in $name processor", e)
+                Log.e(TAG, "Error in $name processor", e)
             }
         }
 
-        logger.debug("No processor matched, routing to MainActivity")
+        Log.d(TAG, "No processor matched, routing to MainActivity")
         handleRegularIntent(intent)
+    }
+
+    private fun isTrustedPwaLaunch(intent: Intent, profileUuid: String, token: String?): Boolean {
+        val url = intent.dataString ?: return false
+        val action = intent.action
+        val hasTrustedAction = action == Intent.ACTION_VIEW || action == "mozilla.components.feature.pwa.VIEW_PWA"
+        if (!hasTrustedAction || token.isNullOrEmpty()) {
+            return false
+        }
+
+        val prefs = applicationContext.getSharedPreferences(
+            PwaConstants.PROFILE_MAPPING_PREFS,
+            Context.MODE_PRIVATE,
+        )
+        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${url}::${profileUuid}"
+        val storedToken = prefs.getString(tokenKey, null)
+        if (storedToken == null || storedToken != token) {
+            Log.w(TAG, "PWA token mismatch for $url")
+            return false
+        }
+
+        return true
+    }
+
+    private fun resolveSessionIdFromStore(
+        processorName: String,
+        intent: Intent,
+        components: Components,
+    ): String? {
+        val customTabs = components.core.store.state.customTabs
+        if (customTabs.isEmpty()) {
+            return null
+        }
+
+        return when (processorName) {
+            "PWA" -> {
+                val targetUrl = intent.dataString
+                val pwaTab = customTabs.lastOrNull { tab ->
+                    val appType = tab.config.externalAppType
+                    val isPwa = appType == ExternalAppType.PROGRESSIVE_WEB_APP ||
+                        appType == ExternalAppType.TRUSTED_WEB_ACTIVITY
+                    if (!isPwa) {
+                        return@lastOrNull false
+                    }
+
+                    if (targetUrl == null) {
+                        true
+                    } else {
+                        tab.content.url == targetUrl || tab.content.webAppManifest?.startUrl == targetUrl
+                    }
+                } ?: customTabs.lastOrNull { tab ->
+                    val appType = tab.config.externalAppType
+                    appType == ExternalAppType.PROGRESSIVE_WEB_APP ||
+                        appType == ExternalAppType.TRUSTED_WEB_ACTIVITY
+                }
+
+                pwaTab?.id
+            }
+
+            else -> customTabs.lastOrNull()?.id
+        }
     }
 
     /**
@@ -150,7 +218,7 @@ class IntentReceiverActivity : Activity() {
     ) {
         val url = intent.dataString
         if (url == null) {
-            logger.error("PWA intent has no URL")
+            Log.e(TAG, "PWA intent has no URL")
             handleRegularIntent(intent)
             return
         }
@@ -158,10 +226,10 @@ class IntentReceiverActivity : Activity() {
         val currentProfileUuid = getCurrentProfileUuid()
 
         if (currentProfileUuid != null && currentProfileUuid != profileUuid) {
-            logger.debug("Profile mismatch: current=$currentProfileUuid, expected=$profileUuid")
+            Log.d(TAG, "Profile mismatch: current=$currentProfileUuid, expected=$profileUuid")
             showProfileMismatchDialog(url, contextId)
         } else {
-            logger.debug("Profile match or indeterminate, launching PWA with contextId=$contextId")
+            Log.d(TAG, "Profile match or indeterminate, launching PWA with contextId=$contextId")
             launchPwaWithContext(url, contextId)
         }
     }
@@ -180,7 +248,7 @@ class IntentReceiverActivity : Activity() {
                 null
             }
         } catch (e: Exception) {
-            logger.error("Failed to read current profile UUID", e)
+            Log.e(TAG, "Failed to read current profile UUID", e)
             null
         }
     }
@@ -202,11 +270,11 @@ class IntentReceiverActivity : Activity() {
             .setTitle("PWA Profile Mismatch")
             .setMessage(message)
             .setPositiveButton("Open Anyway") { _, _ ->
-                logger.debug("User chose to open PWA despite profile mismatch")
+                Log.d(TAG, "User chose to open PWA despite profile mismatch")
                 launchPwaWithContext(url, contextId)
             }
             .setNegativeButton("Cancel") { _, _ ->
-                logger.debug("User cancelled PWA launch due to profile mismatch")
+                Log.d(TAG, "User cancelled PWA launch due to profile mismatch")
                 finish()
             }
             .setOnCancelListener {
@@ -221,7 +289,7 @@ class IntentReceiverActivity : Activity() {
     private fun launchPwaWithContext(url: String, contextId: String?) {
         val components = GlobalComponents.components
             ?: run {
-                logger.error("Components not available for PWA launch")
+                Log.e(TAG, "Components not available for PWA launch")
                 handleRegularIntent(intent)
                 return
             }
@@ -238,7 +306,7 @@ class IntentReceiverActivity : Activity() {
                     manifest = manifest
                 )
 
-                logger.debug("Created PWA session: contextId=$contextId, sessionId=$sessionId")
+                Log.d(TAG, "Created PWA session: contextId=$contextId, sessionId=$sessionId")
 
                 val externalIntent = ExternalAppBrowserActivity.createIntent(
                     context = this@IntentReceiverActivity,
@@ -248,7 +316,7 @@ class IntentReceiverActivity : Activity() {
                 startActivity(externalIntent)
                 finish()
             } catch (e: Exception) {
-                logger.error("Failed to launch PWA with context", e)
+                Log.e(TAG, "Failed to launch PWA with context", e)
                 handleRegularIntent(intent)
             }
         }
@@ -286,37 +354,6 @@ class IntentReceiverActivity : Activity() {
         components.useCases.sessionUseCases.loadUrl(url, tab.id, loadUrlFlags)
 
         return tab.id
-    }
-
-    /**
-     * Waits for GlobalComponents to be initialized with a timeout.
-     * Once components are ready, shows branded loading screen before routing.
-     * Falls back to MainActivity if timeout is reached (10 seconds).
-     */
-    private fun waitForComponentsWithTimeout() {
-        coroutineScope.launch {
-            var elapsedMs = 0L
-
-            while (isActive && elapsedMs < PwaConstants.COMPONENT_INIT_TIMEOUT_MS) {
-                if (GlobalComponents.components != null) {
-                    logger.debug("Components initialized after ${elapsedMs}ms")
-                    pendingIntent?.let { routeIntent(it) }
-                    pendingIntent = null
-                    return@launch
-                }
-
-                delay(PwaConstants.COMPONENT_INIT_CHECK_INTERVAL_MS)
-                elapsedMs += PwaConstants.COMPONENT_INIT_CHECK_INTERVAL_MS
-            }
-
-            if (isActive) {
-                logger.warn("Timeout waiting for components after ${PwaConstants.COMPONENT_INIT_TIMEOUT_MS}ms, falling back to MainActivity")
-                pendingIntent?.let { intent ->
-                    handleRegularIntent(intent)
-                }
-                pendingIntent = null
-            }
-        }
     }
 
     private fun handleRegularIntent(intent: Intent) {

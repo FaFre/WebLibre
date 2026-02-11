@@ -13,10 +13,12 @@ object PwaConstants {
     // Intent extras keys for PWA metadata
     const val EXTRA_PWA_PROFILE_UUID = "pwa_profile_uuid"
     const val EXTRA_PWA_CONTEXT_ID = "pwa_context_id"
+    const val EXTRA_PWA_TOKEN = "pwa_token"
 
     // Profile and file paths
     const val CURRENT_PROFILE_FILE = "weblibre_profiles/current_profile"
     const val PROFILE_MAPPING_PREFS = "pwa_profile_mapping"
+    const val PROFILE_MAPPING_TOKEN_PREFIX = "token_"
 
     // Component initialization timeouts
     const val COMPONENT_INIT_TIMEOUT_MS = 10000L

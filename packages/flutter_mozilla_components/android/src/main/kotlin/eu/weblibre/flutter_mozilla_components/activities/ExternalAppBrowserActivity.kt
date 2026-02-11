@@ -9,6 +9,7 @@ package eu.weblibre.flutter_mozilla_components.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
@@ -33,6 +34,24 @@ import mozilla.components.support.base.log.logger.Logger
  * Uses an empty taskAffinity so Custom Tabs appear as a separate task from the main app.
  */
 class ExternalAppBrowserActivity : AppCompatActivity() {
+    companion object {
+        private const val TAG = "ExternalAppBrowserActivity"
+
+        const val EXTRA_CUSTOM_TAB_SESSION_ID = "custom_tab_session_id"
+        const val EXTRA_WEB_APP_MANIFEST_URL = "web_app_manifest_url"
+
+        fun createIntent(
+            context: Context,
+            customTabSessionId: String,
+            webAppManifestUrl: String? = null,
+        ): Intent {
+            return Intent(context, ExternalAppBrowserActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, customTabSessionId)
+                webAppManifestUrl?.let { putExtra(EXTRA_WEB_APP_MANIFEST_URL, it) }
+            }
+        }
+    }
 
     private val logger = Logger("ExternalAppBrowserActivity")
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -48,8 +67,9 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
         val sessionId = customTabSessionId
         if (sessionId == null) {
+            Log.e(TAG, "No custom tab session ID provided")
             logger.error("No custom tab session ID provided, finishing.")
-            finish()
+            fallbackToMainActivity()
             return
         }
 
@@ -87,8 +107,9 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
             // Timeout reached
             if (isActive) {
+                Log.e(TAG, "Timeout waiting for components")
                 logger.error("Timeout waiting for components after ${PwaConstants.COMPONENT_INIT_TIMEOUT_MS}ms")
-                finish()
+                fallbackToMainActivity()
             }
         }
     }
@@ -102,8 +123,9 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
 
         // Verify session exists
         if (components.core.store.state.findCustomTab(sessionId) == null) {
+            Log.e(TAG, "Custom tab session $sessionId not found in store")
             logger.error("Custom tab session $sessionId not found in store, finishing.")
-            finish()
+            fallbackToMainActivity()
             return
         }
 
@@ -124,9 +146,23 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
         val sessionId = customTabSessionId ?: return
         val components = GlobalComponents.components ?: return
         if (components.core.store.state.findCustomTab(sessionId) == null) {
+            Log.w(TAG, "Custom tab session $sessionId gone on resume")
             logger.debug("Custom tab session $sessionId gone, finishing activity.")
-            finish()
+            fallbackToMainActivity()
         }
+    }
+
+    private fun fallbackToMainActivity() {
+        val mainIntent = Intent().apply {
+            setClassName(this@ExternalAppBrowserActivity, "eu.weblibre.gecko.MainActivity")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            webAppManifestUrl?.let {
+                action = Intent.ACTION_VIEW
+                data = android.net.Uri.parse(it)
+            }
+        }
+        startActivity(mainIntent)
+        finish()
     }
 
     override fun onDestroy() {
@@ -168,20 +204,4 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        const val EXTRA_CUSTOM_TAB_SESSION_ID = "custom_tab_session_id"
-        const val EXTRA_WEB_APP_MANIFEST_URL = "web_app_manifest_url"
-
-        fun createIntent(
-            context: Context,
-            customTabSessionId: String,
-            webAppManifestUrl: String? = null,
-        ): Intent {
-            return Intent(context, ExternalAppBrowserActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, customTabSessionId)
-                webAppManifestUrl?.let { putExtra(EXTRA_WEB_APP_MANIFEST_URL, it) }
-            }
-        }
-    }
 }

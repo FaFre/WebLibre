@@ -152,7 +152,8 @@ object GlobalComponents {
 
         newComponents.core.engine.warmUp()
 
-        if (previousCustomTabs.isNotEmpty()) {
+        fun restorePreviousCustomTabs() {
+            if (previousCustomTabs.isEmpty()) return
             for (tab in previousCustomTabs) {
                 val existing = newComponents.core.store.state.findCustomTab(tab.id)
                 if (existing == null) {
@@ -164,7 +165,14 @@ object GlobalComponents {
         }
 
         if (mode == ComponentsMode.FULL) {
-            restoreBrowserState(newComponents)
+            val restoreJob = restoreBrowserState(newComponents)
+            if (previousCustomTabs.isNotEmpty()) {
+                restoreJob.invokeOnCompletion {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        restorePreviousCustomTabs()
+                    }
+                }
+            }
             restoreDownloads(newComponents)
 
             try {
@@ -205,6 +213,8 @@ object GlobalComponents {
             GlobalScope.launch(Dispatchers.IO) {
                 newComponents.core.fileUploadsDirCleaner.cleanUploadsDirectory()
             }
+        } else {
+            restorePreviousCustomTabs()
         }
     }
 
