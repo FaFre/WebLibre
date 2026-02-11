@@ -54,6 +54,25 @@ class TabRepository extends _$TabRepository {
     return _tabFromIntent.contains(tabId);
   }
 
+  Future<String?> _resolveParentIdForContext({
+    required String? parentId,
+    required String? targetContextId,
+  }) async {
+    if (parentId == null) {
+      return null;
+    }
+
+    final parentContainerData = await ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getTabContainerData(parentId)
+        .getSingleOrNull();
+
+    final parentContextId = parentContainerData?.metadata.contextualIdentity;
+
+    return (parentContextId == targetContextId) ? parentId : null;
+  }
+
   Future<String> addTab({
     Uri? url,
     required bool selectTab,
@@ -76,13 +95,18 @@ class TabRepository extends _$TabRepository {
           await ref.read(selectedContainerProvider.notifier).fetchData(),
         );
 
+    final validatedParentId = await _resolveParentIdForContext(
+      parentId: parentId,
+      targetContextId: assingedContainer.value?.metadata.contextualIdentity,
+    );
+
     final newTabId = await tabDao.upsertTabTransactional(
       () {
         return _tabsService.addTab(
           url: url,
           selectTab: selectTab,
           startLoading: startLoading,
-          parentId: parentId,
+          parentId: validatedParentId,
           flags: flags,
           contextId: assingedContainer.value?.metadata.contextualIdentity,
           source: source,
@@ -91,7 +115,7 @@ class TabRepository extends _$TabRepository {
           additionalHeaders: additionalHeaders,
         );
       },
-      parentId: Value(parentId),
+      parentId: Value(validatedParentId),
       containerId: Value(assingedContainer.value?.id),
       isPrivate: Value(private),
       url: Value(url),
@@ -463,22 +487,11 @@ class TabRepository extends _$TabRepository {
                   tabState.historyState.items.isEmpty;
 
               if (event.blocked || tabIsEmpty) {
-                // Check if contextual identity is changing
-                final currentContainerData = await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .getTabContainerData(tabState.id);
-
-                final contextChanging =
-                    containerData.metadata.contextualIdentity !=
-                    currentContainerData?.metadata.contextualIdentity;
-
                 await addTab(
                   url: uri,
                   private: tabState.isPrivate,
                   container: Value(containerData),
-                  parentId: contextChanging
-                      ? null
-                      : tabState.id, // Break parent chain if context changes
+                  parentId: tabState.id,
                   selectTab: true,
                 );
 
