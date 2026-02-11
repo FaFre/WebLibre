@@ -71,6 +71,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings allowClipboardAccess(bool allowClipboardAccess);
 
+  GeneralSettings tabListShowFavicons(bool tabListShowFavicons);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -105,6 +107,7 @@ abstract class _$GeneralSettingsCWProxy {
     Duration unassignedTabsAutoCleanInterval,
     int maxSearchHistoryEntries,
     bool allowClipboardAccess,
+    bool tabListShowFavicons,
   });
 }
 
@@ -225,6 +228,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(allowClipboardAccess: allowClipboardAccess);
 
   @override
+  GeneralSettings tabListShowFavicons(bool tabListShowFavicons) =>
+      call(tabListShowFavicons: tabListShowFavicons);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -259,6 +266,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
     Object? allowClipboardAccess = const $CopyWithPlaceholder(),
+    Object? tabListShowFavicons = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -413,6 +421,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.allowClipboardAccess
           // ignore: cast_nullable_to_non_nullable
           : allowClipboardAccess as bool,
+      tabListShowFavicons:
+          tabListShowFavicons == const $CopyWithPlaceholder() ||
+              tabListShowFavicons == null
+          ? _value.tabListShowFavicons
+          // ignore: cast_nullable_to_non_nullable
+          : tabListShowFavicons as bool,
     );
   }
 }
@@ -489,6 +503,7 @@ GeneralSettings _$GeneralSettingsFromJson(
         ),
   maxSearchHistoryEntries: (json['maxSearchHistoryEntries'] as num?)?.toInt(),
   allowClipboardAccess: json['allowClipboardAccess'] as bool?,
+  tabListShowFavicons: json['tabListShowFavicons'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -529,6 +544,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
   'maxSearchHistoryEntries': instance.maxSearchHistoryEntries,
   'allowClipboardAccess': instance.allowClipboardAccess,
+  'tabListShowFavicons': instance.tabListShowFavicons,
 };
 
 const _$ThemeModeEnumMap = {

@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -275,7 +276,18 @@ class ListTabPreview extends HookConsumerWidget {
         ) ??
         TabState.$default(tabId);
 
+    final tabListShowFavicons = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),
+    );
+
     final extendedDeleteMenuController = useMenuController();
+
+    final leadingWidget = switch ((tabListShowFavicons, tabState.thumbnail)) {
+      (false, final thumbnail?) when !thumbnail.isDisposed => RepaintBoundary(
+        child: SafeRawImage(image: thumbnail, fit: BoxFit.fitHeight),
+      ),
+      _ => TabIcon(tabState: tabState, iconSize: 32),
+    };
 
     return Container(
       decoration: BoxDecoration(
@@ -291,14 +303,7 @@ class ListTabPreview extends HookConsumerWidget {
               onTap: onTap,
               onLongPress: onLongPress,
               contentPadding: const EdgeInsets.only(left: 4),
-              leading: (tabState.thumbnail != null && !tabState.thumbnail!.isDisposed)
-                  ? RepaintBoundary(
-                      child: SafeRawImage(
-                        image: tabState.thumbnail,
-                        fit: BoxFit.fitHeight,
-                      ),
-                    )
-                  : TabIcon(tabState: tabState, iconSize: 32),
+              leading: leadingWidget,
               title: Text(
                 overflow: TextOverflow.ellipsis,
                 tabState.titleOrAuthority,

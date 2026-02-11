@@ -86,6 +86,7 @@ class GeneralSettings with FastEquatable {
   final Duration unassignedTabsAutoCleanInterval;
   final int maxSearchHistoryEntries;
   final bool allowClipboardAccess;
+  final bool tabListShowFavicons;
 
   GeneralSettings({
     required this.themeMode,
@@ -114,6 +115,7 @@ class GeneralSettings with FastEquatable {
     required this.unassignedTabsAutoCleanInterval,
     required this.maxSearchHistoryEntries,
     required this.allowClipboardAccess,
+    required this.tabListShowFavicons,
   });
 
   GeneralSettings.withDefaults({
@@ -143,6 +145,7 @@ class GeneralSettings with FastEquatable {
     Duration? unassignedTabsAutoCleanInterval,
     int? maxSearchHistoryEntries,
     bool? allowClipboardAccess,
+    bool? tabListShowFavicons,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -172,7 +175,8 @@ class GeneralSettings with FastEquatable {
        unassignedTabsAutoCleanInterval =
            unassignedTabsAutoCleanInterval ?? Duration.zero,
        maxSearchHistoryEntries = maxSearchHistoryEntries ?? 5,
-       allowClipboardAccess = allowClipboardAccess ?? true;
+       allowClipboardAccess = allowClipboardAccess ?? true,
+       tabListShowFavicons = tabListShowFavicons ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -207,5 +211,6 @@ class GeneralSettings with FastEquatable {
     unassignedTabsAutoCleanInterval,
     maxSearchHistoryEntries,
     allowClipboardAccess,
+    tabListShowFavicons,
   ];
 }

@@ -79,6 +79,7 @@ class _TabBarLayoutSection extends StatelessWidget {
         _ShowContextualTabBarTile(),
         _AutoHideTabBarTile(),
         _BottomSheetTabViewTile(),
+        _TabListShowFaviconsTile(),
         _ShowQuickTabSwitcherBarTile(),
         _QuickTabSwitcherModeSection(),
       ],
@@ -371,6 +372,34 @@ class _BottomSheetTabViewTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.tabViewBottomSheet(value),
+            );
+      },
+    );
+  }
+}
+
+class _TabListShowFaviconsTile extends HookConsumerWidget {
+  const _TabListShowFaviconsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabListShowFavicons = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Favicons in List View'),
+      subtitle: const Text(
+        'Display website icons instead of page thumbnails in tab list view',
+      ),
+      secondary: const Icon(MdiIcons.web),
+      value: tabListShowFavicons,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.tabListShowFavicons(value),
             );
       },
     );
