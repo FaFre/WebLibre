@@ -13,8 +13,8 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/toolbarCard"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        app:cardCornerRadius="28dp"
+        android:layout_height="64dp"
+        app:cardCornerRadius="32dp"
         app:cardElevation="3dp"
         app:strokeWidth="0dp"
         app:cardBackgroundColor="?attr/colorSurface">
@@ -35,31 +35,50 @@
                 android:scaleType="center"
                 android:contentDescription="@string/mozac_feature_customtabs_exit_button" />
 
-            <!-- URL Section with Security Indicator -->
+            <!-- Leading security icon + title/hostname section -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="8dp">
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="6dp">
 
                 <ImageView
                     android:id="@+id/securityIcon"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="8dp"
                     android:contentDescription="@string/mozac_feature_customtabs_security_indicator" />
 
-                <TextView
-                    android:id="@+id/urlText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="14sp" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/titleText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/urlText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Action Buttons -->
@@ -76,7 +95,8 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:scaleType="center"
+                android:padding="8dp"
+                android:scaleType="centerInside"
                 android:contentDescription="@string/custom_tab_open_in_browser" />
 
             <ImageButton

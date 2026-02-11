@@ -148,13 +148,13 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
             android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
             true
         ).apply {
-            elevation = 8f
+            elevation = 10f
             isOutsideTouchable = true
         }
         activePopup = popup
 
-        val iconColor = MaterialColors.getColor(anchorView, com.google.android.material.R.attr.colorOnSurface)
-        val disabledColor = MaterialColors.getColor(anchorView, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        val iconColor = MaterialColors.getColor(anchorView, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        val disabledColor = MaterialColors.getColor(anchorView, com.google.android.material.R.attr.colorOutline)
 
         // Navigation row icons
         val canGoBack = customTab.content.canGoBack
@@ -163,7 +163,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         val backBtn = menuView.findViewById<ImageButton>(R.id.menuBack)
         val forwardBtn = menuView.findViewById<ImageButton>(R.id.menuForward)
 
-        backBtn.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_arrow_left, 20, if (canGoBack) iconColor else disabledColor))
+        backBtn.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_arrow_left, 22, if (canGoBack) iconColor else disabledColor))
         backBtn.isEnabled = canGoBack
         backBtn.alpha = if (canGoBack) 1.0f else 0.38f
         backBtn.setOnClickListener {
@@ -171,7 +171,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
             popup.dismiss()
         }
 
-        forwardBtn.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_arrow_right, 20, if (canGoForward) iconColor else disabledColor))
+        forwardBtn.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_arrow_right, 22, if (canGoForward) iconColor else disabledColor))
         forwardBtn.isEnabled = canGoForward
         forwardBtn.alpha = if (canGoForward) 1.0f else 0.38f
         forwardBtn.setOnClickListener {
@@ -181,13 +181,13 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
 
         // Menu item icons
         menuView.findViewById<ImageView>(R.id.menuRefreshIcon)
-            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_refresh, 20, iconColor))
+            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_refresh, 24, iconColor))
         menuView.findViewById<ImageView>(R.id.menuShareIcon)
-            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_share_variant, 20, iconColor))
+            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_share_variant, 24, iconColor))
         menuView.findViewById<ImageView>(R.id.menuDesktopIcon)
-            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_monitor, 20, iconColor))
+            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_monitor, 24, iconColor))
         menuView.findViewById<ImageView>(R.id.menuOpenInBrowserIcon)
-            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_open_in_new, 20, iconColor))
+            .setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_open_in_new, 24, iconColor))
 
         // Refresh
         menuView.findViewById<View>(R.id.menuRefresh).setOnClickListener {

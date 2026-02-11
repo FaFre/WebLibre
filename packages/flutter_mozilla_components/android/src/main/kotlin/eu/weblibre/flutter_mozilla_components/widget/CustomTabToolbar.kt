@@ -7,12 +7,15 @@
 package eu.weblibre.flutter_mozilla_components.widget
 
 import android.content.Context
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
 import com.mikepenz.iconics.IconicsDrawable
@@ -44,6 +47,7 @@ class CustomTabToolbar @JvmOverloads constructor(
     private val toolbarCard: MaterialCardView
     private val closeButton: ImageButton
     private val securityIcon: ImageView
+    private val titleText: TextView
     private val urlText: TextView
     private val shareButton: ImageButton
     private val openInBrowserButton: ImageButton
@@ -52,6 +56,7 @@ class CustomTabToolbar @JvmOverloads constructor(
     private var sessionId: String? = null
     private var store: BrowserStore? = null
     private var urlScope: CoroutineScope? = null
+    private var titleScope: CoroutineScope? = null
     private var securityScope: CoroutineScope? = null
 
     var onCloseListener: (() -> Unit)? = null
@@ -65,6 +70,7 @@ class CustomTabToolbar @JvmOverloads constructor(
         toolbarCard = findViewById(R.id.toolbarCard)
         closeButton = findViewById(R.id.closeButton)
         securityIcon = findViewById(R.id.securityIcon)
+        titleText = findViewById(R.id.titleText)
         urlText = findViewById(R.id.urlText)
         shareButton = findViewById(R.id.shareButton)
         openInBrowserButton = findViewById(R.id.openInBrowserButton)
@@ -86,17 +92,21 @@ class CustomTabToolbar @JvmOverloads constructor(
         toolbarColor?.let { applyCustomColors(it) }
 
         store.state.findCustomTab(sessionId)?.let { tab ->
+            updateTitle(tab)
             updateUrl(tab)
             updateSecurityIcon(tab)
         }
 
         observeUrlChanges()
+        observeTitleChanges()
         observeSecurityChanges()
     }
 
     fun unbind() {
         urlScope?.cancel()
         urlScope = null
+        titleScope?.cancel()
+        titleScope = null
         securityScope?.cancel()
         securityScope = null
     }
@@ -109,6 +119,7 @@ class CustomTabToolbar @JvmOverloads constructor(
         val surfaceColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurface)
         val onSurfaceColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
         toolbarCard.setCardBackgroundColor(surfaceColor)
+        titleText.setTextColor(onSurfaceColor)
         urlText.setTextColor(onSurfaceColor)
     }
 
@@ -117,7 +128,10 @@ class CustomTabToolbar @JvmOverloads constructor(
 
         closeButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_close, 20, iconColor))
         shareButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_share_variant, 18, iconColor))
-        openInBrowserButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_open_in_new, 18, iconColor))
+        openInBrowserButton.setImageDrawable(
+            weblibreLogoIcon()
+                ?: mdiIcon(CommunityMaterial.Icon3.cmd_open_in_new, 18, iconColor)
+        )
         menuButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_dots_vertical, 18, iconColor))
     }
 
@@ -128,13 +142,30 @@ class CustomTabToolbar @JvmOverloads constructor(
         } else {
             android.graphics.Color.BLACK
         }
+        titleText.setTextColor(textColor)
         urlText.setTextColor(textColor)
 
         closeButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_close, 20, textColor))
         shareButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_share_variant, 18, textColor))
-        openInBrowserButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_open_in_new, 18, textColor))
+        openInBrowserButton.setImageDrawable(
+            weblibreLogoIcon()
+                ?: mdiIcon(CommunityMaterial.Icon3.cmd_open_in_new, 18, textColor)
+        )
         menuButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_dots_vertical, 18, textColor))
     }
+
+    private fun weblibreLogoIcon(): Drawable? = runCatching {
+        val resId = context.resources.getIdentifier(
+            "ic_launcher_foreground",
+            "drawable",
+            context.packageName,
+        )
+        if (resId == 0) {
+            null
+        } else {
+            AppCompatResources.getDrawable(context, resId)
+        }
+    }.getOrNull()?.mutate()
 
     private fun isDarkColor(color: Int): Boolean {
         val darkness = 1 - (0.299 * android.graphics.Color.red(color) +
@@ -151,7 +182,22 @@ class CustomTabToolbar @JvmOverloads constructor(
             flow
                 .mapNotNull { state -> state.findCustomTab(sessionId) }
                 .ifAnyChanged { tab -> arrayOf(tab.content.url) }
-                .collect { tab -> updateUrl(tab) }
+                .collect { tab ->
+                    updateUrl(tab)
+                    updateTitle(tab)
+                }
+        }
+    }
+
+    private fun observeTitleChanges() {
+        val sessionId = this.sessionId ?: return
+        val store = this.store ?: return
+
+        titleScope = store.flowScoped { flow ->
+            flow
+                .mapNotNull { state -> state.findCustomTab(sessionId) }
+                .ifAnyChanged { tab -> arrayOf(tab.content.title) }
+                .collect { tab -> updateTitle(tab) }
         }
     }
 
@@ -162,22 +208,51 @@ class CustomTabToolbar @JvmOverloads constructor(
         securityScope = store.flowScoped { flow ->
             flow
                 .mapNotNull { state -> state.findCustomTab(sessionId) }
-                .ifAnyChanged { tab -> arrayOf(tab.content.securityInfo.isSecure) }
+                .ifAnyChanged {
+                    tab -> arrayOf(
+                        tab.content.securityInfo.isSecure,
+                        tab.content.securityInfo.host,
+                        tab.content.loading
+                    )
+                }
                 .collect { tab -> updateSecurityIcon(tab) }
         }
     }
 
+    private fun updateTitle(tab: CustomTabSessionState) {
+        val title = tab.content.title
+        titleText.text = if (title.isBlank()) {
+            displayHost(tab.content.url)
+        } else {
+            title
+        }
+    }
+
     private fun updateUrl(tab: CustomTabSessionState) {
-        urlText.text = URLStringUtils.toDisplayUrl(tab.content.url)
+        urlText.text = displayHost(tab.content.url)
+    }
+
+    private fun displayHost(url: String): String {
+        val host = Uri.parse(url).host
+        return if (!host.isNullOrBlank()) {
+            host
+        } else {
+            URLStringUtils.toDisplayUrl(url).toString()
+        }
     }
 
     private fun updateSecurityIcon(tab: CustomTabSessionState) {
-        if (tab.content.securityInfo.isSecure) {
+        val securityInfoKnown = tab.content.securityInfo.host.isNotBlank()
+
+        if (tab.content.loading || !securityInfoKnown) {
+            val color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
+            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock_open_outline, 16, color))
+        } else if (tab.content.securityInfo.isSecure) {
             val color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
             securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock, 16, color))
         } else {
             val color = MaterialColors.getColor(this, android.R.attr.colorError)
-            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_web, 16, color))
+            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock_open_outline, 16, color))
         }
     }
 
