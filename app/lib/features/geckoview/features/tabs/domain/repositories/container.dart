@@ -22,6 +22,7 @@ import 'dart:ui';
 import 'package:collection/collection.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -141,6 +142,12 @@ class ContainerRepository extends _$ContainerRepository {
     } while (usedColors.contains(randomColor));
 
     return randomColor;
+  }
+
+  Future<ContainerData> createNewContainer() async {
+    final initialColor = await unusedRandomContainerColor();
+
+    return ContainerData(id: uuid.v7(), color: initialColor);
   }
 
   Future<bool> isSiteAssignedToContainer(Uri uri) {

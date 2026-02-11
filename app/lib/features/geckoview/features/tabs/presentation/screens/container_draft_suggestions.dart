@@ -29,7 +29,6 @@ import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -196,13 +195,11 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
           ? FloatingActionButton(
               child: const Icon(MdiIcons.folderPlus),
               onPressed: () async {
-                final initialColor = await ref
+                final initialContainer = await ref
                     .read(containerRepositoryProvider.notifier)
-                    .unusedRandomContainerColor();
+                    .createNewContainer();
 
-                final initialContainer = ContainerData(
-                  id: uuid.v7(),
-                  color: initialColor,
+                final namedContainer = initialContainer.copyWith(
                   name:
                       (ref.exists(
                         tabsTopicProvider(EquatableValue(selectedTabs!)),
@@ -218,21 +215,21 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                       : selectedContainer.value?.topic,
                 );
 
-                if (context.mounted) {
-                  final result = await ContainerCreateRoute(
-                    containerData: jsonEncode(initialContainer.toJson()),
-                  ).push<ContainerData?>(context);
+                if (!context.mounted) return;
 
-                  if (result != null) {
-                    for (final tab in selectedTabs) {
-                      await ref
-                          .read(tabDataRepositoryProvider.notifier)
-                          .assignContainer(tab, result);
-                    }
+                final result = await ContainerCreateRoute(
+                  containerData: jsonEncode(namedContainer.toJson()),
+                ).push<ContainerData?>(context);
 
-                    selectedContainerTabs.value = {};
-                    selectedContainer.value = null;
+                if (result != null) {
+                  for (final tab in selectedTabs) {
+                    await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .assignContainer(tab, result);
                   }
+
+                  selectedContainerTabs.value = {};
+                  selectedContainer.value = null;
                 }
               },
             )

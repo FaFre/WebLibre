@@ -24,8 +24,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:uuid/enums.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -73,7 +73,7 @@ class ContainerSelectionScreen extends HookConsumerWidget {
           loading: () => ListView.builder(
             itemCount: 3,
             itemBuilder: (context, index) => ContainerListTile(
-              ContainerData(id: 'null', color: Colors.transparent),
+              ContainerData(id: Namespace.nil.value, color: Colors.transparent),
               isSelected: false,
               onTap: null,
             ),
@@ -82,17 +82,15 @@ class ContainerSelectionScreen extends HookConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final initialColor = await ref
+          final newContainer = await ref
               .read(containerRepositoryProvider.notifier)
-              .unusedRandomContainerColor();
+              .createNewContainer();
 
-          if (context.mounted) {
-            await ContainerCreateRoute(
-              containerData: jsonEncode(
-                ContainerData(id: uuid.v7(), color: initialColor).toJson(),
-              ),
-            ).push(context);
-          }
+          if (!context.mounted) return;
+
+          await ContainerCreateRoute(
+            containerData: jsonEncode(newContainer.toJson()),
+          ).push(context);
         },
         label: const Text('Container'),
         icon: const Icon(Icons.add),

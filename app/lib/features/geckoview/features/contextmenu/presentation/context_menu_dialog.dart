@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/presentation/ca
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_link.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/launch_external.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_image_new_tab.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_in_container.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_new_tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/save_file.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/save_image.dart';
@@ -57,6 +58,8 @@ class ContextMenuDialog extends HookConsumerWidget {
       children: [
         if (OpenInNewTab.isSupported(hitResult))
           OpenInNewTab(hitResult: hitResult),
+        if (OpenInContainer.isSupported(hitResult))
+          OpenInContainer(hitResult: hitResult),
         if (CopyLink.isSupported(hitResult)) CopyLink(hitResult: hitResult),
         if (SaveFile.isSupported(hitResult)) SaveFile(hitResult: hitResult),
         if (ShareLink.isSupported(hitResult)) ShareLink(hitResult: hitResult),

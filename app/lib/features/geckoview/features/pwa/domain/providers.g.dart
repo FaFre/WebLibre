@@ -92,7 +92,7 @@ final class PwaManifestStateProvider
   }
 }
 
-String _$pwaManifestStateHash() => r'e5237d2aae5dce9cb805484eb2a09cc3f6aceda1';
+String _$pwaManifestStateHash() => r'1d173b69e96ab71b117e82b9a4134c6732a73343';
 
 /// Manages PWA manifest state with a long-running subscription.
 
