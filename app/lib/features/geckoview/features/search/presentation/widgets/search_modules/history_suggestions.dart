@@ -87,8 +87,7 @@ class HistorySuggestions extends HookConsumerWidget {
                     builder: (context) {
                       final icon = useCachedFuture(
                         () async => suggestion.icon.mapNotNull(tryDecodeImage),
-                        //URL as key
-                        [suggestion.description],
+                        [suggestion.description, suggestion.icon],
                       );
 
                       return ListTile(
