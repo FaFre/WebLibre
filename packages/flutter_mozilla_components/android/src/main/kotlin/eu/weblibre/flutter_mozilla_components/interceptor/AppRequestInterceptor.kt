@@ -10,6 +10,9 @@ import android.content.Context
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
+import mozilla.components.browser.state.selector.findTabOrCustomTab
+import mozilla.components.browser.state.state.CustomTabSessionState
+import mozilla.components.browser.state.state.ExternalAppType
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
 
@@ -28,6 +31,17 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
+        // PWAs/TWAs should never trigger external app link interception —
+        // they should behave as self-contained apps and load all URLs internally.
+        val customTab = components.core.store.state.findTabOrCustomTab(engineSession)
+        val externalAppType = (customTab as? CustomTabSessionState)
+            ?.config?.externalAppType
+        if (externalAppType == ExternalAppType.PROGRESSIVE_WEB_APP ||
+            externalAppType == ExternalAppType.TRUSTED_WEB_ACTIVITY
+        ) {
+            return null
+        }
+
         return components.services.appLinksInterceptor.onLoadRequest(
             engineSession,
             uri,
