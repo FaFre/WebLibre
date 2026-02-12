@@ -157,17 +157,15 @@ export default class BackgroundMain {
             "result": {
               "originUrl": options.originUrl,
               "url": options.url,
+              "tabId": options.tabId,
               "blocked": false
             }
           });
-
-          return {};
-        } else {
-          //When tab not selected, block the request
-          return {
-            cancel: true,
-          };
         }
+
+        // Allow requests when the assigned site already matches the current context,
+        // even if the tab is not highlighted.
+        return {};
       } else {
         //Only send events when tab is selected
         if (tab.highlighted) {
@@ -178,6 +176,7 @@ export default class BackgroundMain {
             "result": {
               "originUrl": options.originUrl,
               "url": options.url,
+              "tabId": options.tabId,
               "blocked": true
             }
           });
