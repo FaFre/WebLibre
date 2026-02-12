@@ -145,7 +145,12 @@ class GeckoPwaApiImpl(
             val (iconBitmap, isMaskable) = loadPwaIcon(manifest)
 
             val shortcutId = generateShortcutId(manifest.startUrl)
-            val launchToken = generateAndStoreLaunchToken(manifest.startUrl, profileUuid)
+            val launchToken = resolveLaunchToken(
+                shortcutManager = shortcutManager,
+                shortcutId = shortcutId,
+                startUrl = manifest.startUrl,
+                profileUuid = profileUuid,
+            )
 
             val appName = manifest.shortName ?: manifest.name ?: "Web App"
 
@@ -155,6 +160,7 @@ class GeckoPwaApiImpl(
                 putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, profileUuid)
                 putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, contextId)
                 putExtra(PwaConstants.EXTRA_PWA_TOKEN, launchToken)
+                putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, manifest.startUrl)
             }
 
             val shortcut = ShortcutInfo.Builder(context, shortcutId).apply {
@@ -261,16 +267,55 @@ class GeckoPwaApiImpl(
             .apply()
     }
 
-    private fun generateAndStoreLaunchToken(startUrl: String, profileUuid: String): String {
-        val token = UUID.randomUUID().toString()
-        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}"
-        val committed = appPrefs.edit()
-            .putString(tokenKey, token)
-            .commit()
+    private fun resolveLaunchToken(
+        shortcutManager: ShortcutManager,
+        shortcutId: String,
+        startUrl: String,
+        profileUuid: String,
+    ): String {
+        val storedToken = getStoredLaunchToken(startUrl, profileUuid)
+        val existingShortcutToken = shortcutManager.pinnedShortcuts
+            .firstOrNull { shortcut -> shortcut.id == shortcutId }
+            ?.intent
+            ?.takeIf { shortcutIntent ->
+                shortcutIntent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID) == profileUuid
+            }
+            ?.getStringExtra(PwaConstants.EXTRA_PWA_TOKEN)
+
+        if (!existingShortcutToken.isNullOrEmpty()) {
+            val committed = storeLaunchToken(startUrl, profileUuid, existingShortcutToken)
+            if (!committed) {
+                logger.warn("Failed to persist pinned shortcut PWA token for $startUrl")
+            }
+            return existingShortcutToken
+        }
+
+        if (!storedToken.isNullOrEmpty()) {
+            val committed = storeLaunchToken(startUrl, profileUuid, storedToken)
+            if (!committed) {
+                logger.warn("Failed to refresh stored PWA launch token index for $startUrl")
+            }
+            return storedToken
+        }
+
+        val generatedToken = UUID.randomUUID().toString()
+        val committed = storeLaunchToken(startUrl, profileUuid, generatedToken)
         if (!committed) {
             logger.warn("Failed to persist PWA launch token for $startUrl")
         }
-        return token
+        return generatedToken
+    }
+
+    private fun getStoredLaunchToken(startUrl: String, profileUuid: String): String? {
+        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}"
+        return appPrefs.getString(tokenKey, null)
+    }
+
+    private fun storeLaunchToken(startUrl: String, profileUuid: String, token: String): Boolean {
+        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}"
+        return appPrefs.edit()
+            .putString(tokenKey, token)
+            .commit()
     }
 
     private fun getProfileMapping(startUrl: String): String? {

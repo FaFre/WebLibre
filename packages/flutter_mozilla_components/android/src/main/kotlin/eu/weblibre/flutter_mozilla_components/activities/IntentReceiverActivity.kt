@@ -10,6 +10,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ShortcutManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import eu.weblibre.flutter_mozilla_components.Components
@@ -147,7 +149,8 @@ class IntentReceiverActivity : Activity() {
     }
 
     private fun isTrustedPwaLaunch(intent: Intent, profileUuid: String, token: String?): Boolean {
-        val url = intent.dataString ?: return false
+        val intentUrl = intent.dataString ?: return false
+        val installStartUrl = intent.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL)
         val action = intent.action
         val hasTrustedAction = action == Intent.ACTION_VIEW || action == "mozilla.components.feature.pwa.VIEW_PWA"
         if (!hasTrustedAction || token.isNullOrEmpty()) {
@@ -158,14 +161,53 @@ class IntentReceiverActivity : Activity() {
             PwaConstants.PROFILE_MAPPING_PREFS,
             Context.MODE_PRIVATE,
         )
-        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${url}::${profileUuid}"
-        val storedToken = prefs.getString(tokenKey, null)
-        if (storedToken == null || storedToken != token) {
-            Log.w(TAG, "PWA token mismatch for $url")
+        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${intentUrl}::${profileUuid}"
+        if (prefs.getString(tokenKey, null) == token) {
+            return true
+        }
+
+        if (!installStartUrl.isNullOrEmpty() && installStartUrl != intentUrl) {
+            val installTokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${installStartUrl}::${profileUuid}"
+            if (prefs.getString(installTokenKey, null) == token) {
+                return true
+            }
+        }
+
+        if (isPinnedShortcutTokenMatch(intentUrl, profileUuid, token, installStartUrl)) {
+            return true
+        }
+
+        Log.w(TAG, "PWA token mismatch for $intentUrl")
+        return false
+    }
+
+    private fun isPinnedShortcutTokenMatch(
+        intentUrl: String,
+        profileUuid: String,
+        token: String,
+        installStartUrl: String?,
+    ): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return false
         }
 
-        return true
+        val shortcutManager = getSystemService(ShortcutManager::class.java) ?: return false
+        return shortcutManager.pinnedShortcuts.any { shortcut ->
+            val shortcutIntent = shortcut.intent ?: return@any false
+            if (shortcutIntent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID) != profileUuid) {
+                return@any false
+            }
+
+            if (shortcutIntent.getStringExtra(PwaConstants.EXTRA_PWA_TOKEN) != token) {
+                return@any false
+            }
+
+            val shortcutUrl = shortcutIntent.dataString
+            val shortcutInstallUrl = shortcutIntent.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL)
+            shortcutUrl == intentUrl ||
+                (shortcutInstallUrl != null && shortcutInstallUrl == intentUrl) ||
+                (!installStartUrl.isNullOrEmpty() && shortcutInstallUrl == installStartUrl && (shortcutUrl == intentUrl || shortcutUrl == installStartUrl))
+        }
     }
 
     private fun resolveSessionIdFromStore(
