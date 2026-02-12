@@ -62,7 +62,7 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
   pretty_qr_code: ^3.6.0
-  qr_code_scanner_plus: ^2.0.14
+  qr_code_scanner_plus: ^2.1.1
   quick_actions: ^1.1.0
   riverpod: ^3.1.0
   riverpod_annotation: ^4.0.0
@@ -93,7 +93,7 @@ dependencies:
   uuid: ^4.5.2
 
 dev_dependencies:
-  build_runner: ^2.11.0
+  build_runner: ^2.11.1
   copy_with_extension_gen: ^10.0.1
   custom_lint: ^0.8.1
   fast_equatable_lint: ^0.5.0
