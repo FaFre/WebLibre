@@ -72,9 +72,7 @@ class ExternalAppBrowserActivity : AppCompatActivity() {
                 return@addCallback
             }
 
-            isEnabled = false
-            onBackPressedDispatcher.onBackPressed()
-            isEnabled = true
+            finishAndRemoveTask()
         }
 
         val sessionId = customTabSessionId
