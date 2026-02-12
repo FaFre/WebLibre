@@ -9,6 +9,7 @@ part of 'routes.dart';
 List<RouteBase> get $appRoutes => [
   $aboutRoute,
   $onboardingRoute,
+  $lockRoute,
   $bangMenuRoute,
   $bookmarksRoute,
   $browserRoute,
@@ -63,6 +64,32 @@ mixin $OnboardingRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/onboarding/${Uri.encodeComponent(_self.currentRevision.toString())}/${Uri.encodeComponent(_self.targetRevision.toString())}',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $lockRoute => GoRouteData.$route(
+  path: '/lock',
+  name: 'LockRoute',
+  factory: $LockRoute._fromState,
+);
+
+mixin $LockRoute on GoRouteData {
+  static LockRoute _fromState(GoRouterState state) => const LockRoute();
+
+  @override
+  String get location => GoRouteData.$location('/lock');
 
   @override
   void go(BuildContext context) => context.go(location);

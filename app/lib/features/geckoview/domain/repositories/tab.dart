@@ -273,16 +273,6 @@ class TabRepository extends _$TabRepository {
     if (!ref.mounted) return false;
 
     if (containerData != null) {
-      if (containerData.metadata.authSettings.authenticationRequired) {
-        // ignore: only_use_keep_alive_inside_keep_alive
-        if (containerData.id != ref.read(selectedContainerProvider)) {
-          logger.w(
-            'Tried to open authenticated tab $tabId but container not selected',
-          );
-          return false;
-        }
-      }
-
       if (containerData.metadata.useProxy) {
         final proxyPluginHealthy = await GeckoContainerProxyService()
             .healthcheck();
@@ -380,20 +370,15 @@ class TabRepository extends _$TabRepository {
 
     if (!ref.mounted) return;
 
-    //We only take containers without authentication!
     final availableContainers = await ref
         .read(containerRepositoryProvider.notifier)
         .getAllContainersWithCount();
 
-    final nextAvailableContainerUnauthenticated = availableContainers
-        .firstWhereOrNull(
-          (container) =>
-              container.metadata.authSettings.authenticationRequired == false,
-        );
+    final nextAvailableContainer = availableContainers.firstOrNull;
 
     if (!ref.mounted) return;
 
-    final nextContainerTabs = await nextAvailableContainerUnauthenticated
+    final nextContainerTabs = await nextAvailableContainer
         .mapNotNull(
           (container) => ref
               .read(containerRepositoryProvider.notifier)
@@ -403,15 +388,6 @@ class TabRepository extends _$TabRepository {
 
     if (nextContainerTabs.isNotEmpty) {
       return _tabsService.selectTab(tabId: nextContainerTabs!.first);
-    }
-
-    if (ref.mounted &&
-        availableContainers.any(
-          (container) => container.metadata.authSettings.authenticationRequired,
-        )) {
-      //Last resort push new tab to avoid any authenticated tab is selected
-      // ignore: avoid_redundant_argument_values
-      await addTab(selectTab: true, private: false);
     }
   }
 

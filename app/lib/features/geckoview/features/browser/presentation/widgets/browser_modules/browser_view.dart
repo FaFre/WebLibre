@@ -53,6 +53,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
@@ -552,6 +553,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           );
           _timerPaused = false;
         }
+
+        unawaited(
+          ref.read(profileAuthStateProvider.notifier).revalidateAfterResume(),
+        );
 
         if (_suggestionCountTime != null &&
             DateTime.now().difference(_suggestionCountTime!) >

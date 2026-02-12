@@ -27,7 +27,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 
 part 'selected_container.g.dart';
 
@@ -45,48 +44,23 @@ class SelectedContainer extends _$SelectedContainer {
     return null;
   }
 
-  Future<bool> authenticateContainer(ContainerData container) async {
-    var passAuth = false;
-    if (container.metadata.authSettings.authenticationRequired) {
-      final authResult = await ref
-          .read(localAuthenticationServiceProvider.notifier)
-          .authenticate(
-            authKey: 'container_access::${container.id}',
-            localizedReason: 'Require authentication for container',
-            settings: container.metadata.authSettings,
-            useAuthCache: true,
-          );
-
-      if (authResult) {
-        passAuth = true;
-      }
-    } else {
-      passAuth = true;
-    }
-
-    return passAuth;
-  }
-
   Future<SetContainerResult> setContainerId(String id) async {
     final container = await ref
         .read(containerRepositoryProvider.notifier)
         .getContainerData(id);
 
     if (ref.mounted && container != null) {
-      final passAuth = await authenticateContainer(container);
-      if (passAuth) {
-        if (container.metadata.useProxy) {
-          final proxyPluginHealthy = await GeckoContainerProxyService()
-              .healthcheck();
+      if (container.metadata.useProxy) {
+        final proxyPluginHealthy = await GeckoContainerProxyService()
+            .healthcheck();
 
-          if (proxyPluginHealthy) {
-            state = id;
-            return SetContainerResult.successHasProxy;
-          }
-        } else {
+        if (proxyPluginHealthy) {
           state = id;
-          return SetContainerResult.success;
+          return SetContainerResult.successHasProxy;
         }
+      } else {
+        state = id;
+        return SetContainerResult.success;
       }
     }
 

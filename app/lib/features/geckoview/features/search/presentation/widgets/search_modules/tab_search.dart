@@ -101,7 +101,6 @@ class TabSearch extends HookConsumerWidget {
               .then((containers) {
                 return containers.firstWhereOrNull(
                   (container) =>
-                      !container.metadata.authSettings.authenticationRequired &&
                       containerIdsWithResults.value.containsKey(container.id),
                 );
               });
@@ -145,16 +144,8 @@ class TabSearch extends HookConsumerWidget {
                   showUnassignedChip: containerIdsWithResults.value.containsKey(
                     null,
                   ),
-                  onSelected: (container) async {
-                    if (container != null) {
-                      if (await ref
-                          .read(selectedContainerProvider.notifier)
-                          .authenticateContainer(container)) {
-                        selectedContainer.value = container;
-                      }
-                    } else {
-                      selectedContainer.value = container;
-                    }
+                  onSelected: (container) {
+                    selectedContainer.value = container;
                   },
                   onDeleted: (container) {
                     selectedContainer.value = null;

@@ -22,6 +22,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid_value.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/user/data/models/auth_settings.dart';
 
 part 'profile.g.dart';
 
@@ -31,19 +32,31 @@ class Profile with FastEquatable {
   @CopyWithField(immutable: true)
   final String id;
   final String name;
+  final AuthSettings authSettings;
 
   late final uuidValue = UuidValue.fromString(id);
 
   static String getNewProfileId() => uuid.v7();
 
-  Profile({required this.id, required this.name});
+  Profile({
+    required this.id,
+    required this.name,
+    AuthSettings? authSettings,
+  }) : authSettings = authSettings ?? AuthSettings.withDefaults();
 
-  factory Profile.create({required String name}) {
-    return Profile(id: getNewProfileId(), name: name);
+  factory Profile.create({
+    required String name,
+    AuthSettings? authSettings,
+  }) {
+    return Profile(
+      id: getNewProfileId(),
+      name: name,
+      authSettings: authSettings,
+    );
   }
 
   @override
-  List<Object?> get hashParameters => [id, name];
+  List<Object?> get hashParameters => [id, name, authSettings];
 
   factory Profile.fromJson(Map<String, dynamic> json) =>
       _$ProfileFromJson(json);

@@ -77,6 +77,7 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_backu
 import 'package:weblibre/features/user/domain/presentation/screens/profile_edit.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_list.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
+import 'package:weblibre/features/user/domain/presentation/widgets/auth_gate.dart';
 import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article_list.dart';
@@ -103,10 +104,13 @@ class AboutRoute extends GoRouteData with $AboutRoute {
 }
 
 @TypedGoRoute<OnboardingRoute>(
-  name: 'OnboardingRoute',
-  path: '/onboarding/:currentRevision/:targetRevision',
+  name: OnboardingRoute.name,
+  path: '${OnboardingRoute.pathPrefix}/:currentRevision/:targetRevision',
 )
 class OnboardingRoute extends GoRouteData with $OnboardingRoute {
+  static const name = 'OnboardingRoute';
+  static const pathPrefix = '/onboarding';
+
   final int currentRevision;
   final int targetRevision;
 
@@ -121,5 +125,18 @@ class OnboardingRoute extends GoRouteData with $OnboardingRoute {
       currentRevision: currentRevision,
       targetRevision: targetRevision,
     );
+  }
+}
+
+@TypedGoRoute<LockRoute>(name: LockRoute.name, path: LockRoute.path)
+class LockRoute extends GoRouteData with $LockRoute {
+  static const name = 'LockRoute';
+  static const path = '/lock';
+
+  const LockRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const LockScreen();
   }
 }

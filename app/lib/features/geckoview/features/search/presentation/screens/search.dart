@@ -338,19 +338,8 @@ class SearchScreen extends HookConsumerWidget {
                                   height: 48,
                                   child: ContainerChips(
                                     selectedContainer: selectedContainer.value,
-                                    onSelected: (container) async {
-                                      if (container != null) {
-                                        if (await ref
-                                            .read(
-                                              selectedContainerProvider
-                                                  .notifier,
-                                            )
-                                            .authenticateContainer(container)) {
-                                          selectedContainer.value = container;
-                                        }
-                                      } else {
-                                        selectedContainer.value = container;
-                                      }
+                                    onSelected: (container) {
+                                      selectedContainer.value = container;
                                     },
                                     onDeleted: (container) {
                                       selectedContainer.value = null;

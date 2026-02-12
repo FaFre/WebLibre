@@ -32,18 +32,9 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/d
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 enum _DialogMode { create, edit }
-
-const _timeoutOptions = <DropdownMenuItem<Duration?>>[
-  DropdownMenuItem(child: Text('Immediately')),
-  DropdownMenuItem(value: Duration(minutes: 1), child: Text('1 minute')),
-  DropdownMenuItem(value: Duration(minutes: 5), child: Text('5 minutes')),
-  DropdownMenuItem(value: Duration(minutes: 15), child: Text('15 minutes')),
-  DropdownMenuItem(value: Duration(hours: 1), child: Text('1 hour')),
-];
 
 class ContainerEditScreen extends HookConsumerWidget {
   final _DialogMode _mode;
@@ -77,7 +68,6 @@ class ContainerEditScreen extends HookConsumerWidget {
     final contextualIdentity = useState(
       initialContainer.metadata.contextualIdentity,
     );
-    final authSettings = useState(initialContainer.metadata.authSettings);
     final useProxy = useState(initialContainer.metadata.useProxy);
     final clearDataOnExit = useState(initialContainer.metadata.clearDataOnExit);
     final assignedSites = useState(initialContainer.metadata.assignedSites);
@@ -106,31 +96,12 @@ class ContainerEditScreen extends HookConsumerWidget {
                 color: selectedColor.value,
                 metadata: initialContainer.metadata.copyWith(
                   contextualIdentity: contextualIdentity.value,
-                  authSettings: authSettings.value,
                   useProxy: useProxy.value && contextualIdentity.value != null,
                   clearDataOnExit:
                       clearDataOnExit.value && contextualIdentity.value != null,
                   assignedSites: assignedSites.value,
                 ),
               );
-
-              //Check for permissions, when auth is set or getting set
-              if (initialContainer
-                      .metadata
-                      .authSettings
-                      .authenticationRequired ||
-                  container.metadata.authSettings.authenticationRequired) {
-                final authResult = await ref
-                    .read(localAuthenticationServiceProvider.notifier)
-                    .authenticate(
-                      authKey: 'container_access::${container.id}',
-                      localizedReason: 'Require authentication for container',
-                    );
-
-                if (!authResult) {
-                  return;
-                }
-              }
 
               switch (_mode) {
                 case _DialogMode.create:
@@ -283,48 +254,6 @@ class ContainerEditScreen extends HookConsumerWidget {
                             }
                           : null,
                     ),
-                    SwitchListTile.adaptive(
-                      value: authSettings.value.authenticationRequired,
-                      title: const Text('Require Authentication'),
-                      secondary: const Icon(MdiIcons.fingerprint),
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (value) {
-                        authSettings.value = authSettings.value.copyWith
-                            .authenticationRequired(value);
-                      },
-                    ),
-                    if (authSettings.value.authenticationRequired)
-                      CheckboxListTile.adaptive(
-                        value: authSettings.value.lockOnAppBackground,
-                        title: const Text('Auto-lock on background'),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        onChanged: (value) {
-                          authSettings.value = authSettings.value.copyWith
-                              .lockOnAppBackground(value!);
-                        },
-                      ),
-                    if (authSettings.value.authenticationRequired)
-                      CheckboxListTile.adaptive(
-                        value: authSettings.value.lockTimeout != null,
-                        title: const Text('Timeout'),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        onChanged: (value) {
-                          final newValue = value!
-                              ? _timeoutOptions[1].value
-                              : null;
-
-                          authSettings.value = authSettings.value.copyWith
-                              .lockTimeout(newValue);
-                        },
-                        secondary: DropdownButton(
-                          value: authSettings.value.lockTimeout,
-                          items: _timeoutOptions,
-                          onChanged: (value) {
-                            authSettings.value = authSettings.value.copyWith
-                                .lockTimeout(value);
-                          },
-                        ),
-                      ),
                     ListTile(
                       leading: const Icon(Icons.web),
                       title: const Text('Assigned Sites'),

@@ -27,48 +27,11 @@ import 'package:weblibre/data/database/converters/icon_data.dart';
 part 'container_data.g.dart';
 
 @CopyWith()
-@JsonSerializable()
-class ContainerAuthSettings with FastEquatable {
-  final bool authenticationRequired;
-  final bool lockOnAppBackground;
-  final Duration? lockTimeout;
-
-  ContainerAuthSettings({
-    required this.authenticationRequired,
-    required this.lockOnAppBackground,
-    required this.lockTimeout,
-  });
-
-  ContainerAuthSettings.withDefaults({
-    bool? authenticationRequired,
-    bool? lockOnAppBackground,
-    Duration? lockTimeout,
-  }) : this(
-         authenticationRequired: authenticationRequired ?? false,
-         lockOnAppBackground: lockOnAppBackground ?? false,
-         lockTimeout: lockTimeout,
-       );
-
-  factory ContainerAuthSettings.fromJson(Map<String, dynamic> json) =>
-      _$ContainerAuthSettingsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ContainerAuthSettingsToJson(this);
-
-  @override
-  List<Object?> get hashParameters => [
-    authenticationRequired,
-    lockOnAppBackground,
-    lockTimeout,
-  ];
-}
-
-@CopyWith()
 @JsonSerializable(constructor: 'withDefaults')
 class ContainerMetadata with FastEquatable {
   @IconDataJsonConverter()
   final IconData? iconData;
   final String? contextualIdentity;
-  final ContainerAuthSettings authSettings;
 
   @JsonKey(defaultValue: false)
   final bool useProxy;
@@ -81,7 +44,6 @@ class ContainerMetadata with FastEquatable {
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
-    required this.authSettings,
     required this.useProxy,
     required this.clearDataOnExit,
     required this.assignedSites,
@@ -90,14 +52,12 @@ class ContainerMetadata with FastEquatable {
   ContainerMetadata.withDefaults({
     IconData? iconData,
     String? contextualIdentity,
-    ContainerAuthSettings? authSettings,
     bool? useProxy,
     bool? clearDataOnExit,
     List<Uri>? assignedSites,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
-         authSettings: authSettings ?? ContainerAuthSettings.withDefaults(),
          useProxy: useProxy ?? false,
          clearDataOnExit: clearDataOnExit ?? false,
          assignedSites: assignedSites,
@@ -112,7 +72,6 @@ class ContainerMetadata with FastEquatable {
   List<Object?> get hashParameters => [
     iconData,
     contextualIdentity,
-    authSettings,
     useProxy,
     clearDataOnExit,
     assignedSites,

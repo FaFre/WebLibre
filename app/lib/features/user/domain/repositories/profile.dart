@@ -20,8 +20,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:weblibre/core/filesystem.dart';
-
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/data/models/auth_settings.dart';
 
 part 'profile.g.dart';
 
@@ -40,8 +40,11 @@ class ProfileRepository extends _$ProfileRepository {
     await filesystem.setStartupProfile(UuidValue.withValidation(id));
   }
 
-  Future<Profile> createProfile({required String name}) async {
-    final profile = Profile.create(name: name);
+  Future<Profile> createProfile({
+    required String name,
+    AuthSettings? authSettings,
+  }) async {
+    final profile = Profile.create(name: name, authSettings: authSettings);
     if (!await filesystem.createNewProfile(profile)) {
       throw Exception('Could not create profile');
     }

@@ -6,95 +6,10 @@ part of 'container_data.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-abstract class _$ContainerAuthSettingsCWProxy {
-  ContainerAuthSettings authenticationRequired(bool authenticationRequired);
-
-  ContainerAuthSettings lockOnAppBackground(bool lockOnAppBackground);
-
-  ContainerAuthSettings lockTimeout(Duration? lockTimeout);
-
-  /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerAuthSettings(...).copyWith.fieldName(value)`.
-  ///
-  /// Example:
-  /// ```dart
-  /// ContainerAuthSettings(...).copyWith(id: 12, name: "My name")
-  /// ```
-  ContainerAuthSettings call({
-    bool authenticationRequired,
-    bool lockOnAppBackground,
-    Duration? lockTimeout,
-  });
-}
-
-/// Callable proxy for `copyWith` functionality.
-/// Use as `instanceOfContainerAuthSettings.copyWith(...)` or call `instanceOfContainerAuthSettings.copyWith.fieldName(value)` for a single field.
-class _$ContainerAuthSettingsCWProxyImpl
-    implements _$ContainerAuthSettingsCWProxy {
-  const _$ContainerAuthSettingsCWProxyImpl(this._value);
-
-  final ContainerAuthSettings _value;
-
-  @override
-  ContainerAuthSettings authenticationRequired(bool authenticationRequired) =>
-      call(authenticationRequired: authenticationRequired);
-
-  @override
-  ContainerAuthSettings lockOnAppBackground(bool lockOnAppBackground) =>
-      call(lockOnAppBackground: lockOnAppBackground);
-
-  @override
-  ContainerAuthSettings lockTimeout(Duration? lockTimeout) =>
-      call(lockTimeout: lockTimeout);
-
-  @override
-  /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerAuthSettings(...).copyWith.fieldName(value)`.
-  ///
-  /// Example:
-  /// ```dart
-  /// ContainerAuthSettings(...).copyWith(id: 12, name: "My name")
-  /// ```
-  ContainerAuthSettings call({
-    Object? authenticationRequired = const $CopyWithPlaceholder(),
-    Object? lockOnAppBackground = const $CopyWithPlaceholder(),
-    Object? lockTimeout = const $CopyWithPlaceholder(),
-  }) {
-    return ContainerAuthSettings(
-      authenticationRequired:
-          authenticationRequired == const $CopyWithPlaceholder() ||
-              authenticationRequired == null
-          ? _value.authenticationRequired
-          // ignore: cast_nullable_to_non_nullable
-          : authenticationRequired as bool,
-      lockOnAppBackground:
-          lockOnAppBackground == const $CopyWithPlaceholder() ||
-              lockOnAppBackground == null
-          ? _value.lockOnAppBackground
-          // ignore: cast_nullable_to_non_nullable
-          : lockOnAppBackground as bool,
-      lockTimeout: lockTimeout == const $CopyWithPlaceholder()
-          ? _value.lockTimeout
-          // ignore: cast_nullable_to_non_nullable
-          : lockTimeout as Duration?,
-    );
-  }
-}
-
-extension $ContainerAuthSettingsCopyWith on ContainerAuthSettings {
-  /// Returns a callable class used to build a new instance with modified fields.
-  /// Example: `instanceOfContainerAuthSettings.copyWith(...)` or `instanceOfContainerAuthSettings.copyWith.fieldName(...)`.
-  // ignore: library_private_types_in_public_api
-  _$ContainerAuthSettingsCWProxy get copyWith =>
-      _$ContainerAuthSettingsCWProxyImpl(this);
-}
-
 abstract class _$ContainerMetadataCWProxy {
   ContainerMetadata iconData(IconData? iconData);
 
   ContainerMetadata contextualIdentity(String? contextualIdentity);
-
-  ContainerMetadata authSettings(ContainerAuthSettings authSettings);
 
   ContainerMetadata useProxy(bool useProxy);
 
@@ -112,7 +27,6 @@ abstract class _$ContainerMetadataCWProxy {
   ContainerMetadata call({
     IconData? iconData,
     String? contextualIdentity,
-    ContainerAuthSettings authSettings,
     bool useProxy,
     bool clearDataOnExit,
     List<Uri>? assignedSites,
@@ -132,10 +46,6 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   @override
   ContainerMetadata contextualIdentity(String? contextualIdentity) =>
       call(contextualIdentity: contextualIdentity);
-
-  @override
-  ContainerMetadata authSettings(ContainerAuthSettings authSettings) =>
-      call(authSettings: authSettings);
 
   @override
   ContainerMetadata useProxy(bool useProxy) => call(useProxy: useProxy);
@@ -159,7 +69,6 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata call({
     Object? iconData = const $CopyWithPlaceholder(),
     Object? contextualIdentity = const $CopyWithPlaceholder(),
-    Object? authSettings = const $CopyWithPlaceholder(),
     Object? useProxy = const $CopyWithPlaceholder(),
     Object? clearDataOnExit = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
@@ -173,11 +82,6 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.contextualIdentity
           // ignore: cast_nullable_to_non_nullable
           : contextualIdentity as String?,
-      authSettings:
-          authSettings == const $CopyWithPlaceholder() || authSettings == null
-          ? _value.authSettings
-          // ignore: cast_nullable_to_non_nullable
-          : authSettings as ContainerAuthSettings,
       useProxy: useProxy == const $CopyWithPlaceholder() || useProxy == null
           ? _value.useProxy
           // ignore: cast_nullable_to_non_nullable
@@ -294,24 +198,6 @@ extension $ContainerDataCopyWith on ContainerData {
 // JsonSerializableGenerator
 // **************************************************************************
 
-ContainerAuthSettings _$ContainerAuthSettingsFromJson(
-  Map<String, dynamic> json,
-) => ContainerAuthSettings(
-  authenticationRequired: json['authenticationRequired'] as bool,
-  lockOnAppBackground: json['lockOnAppBackground'] as bool,
-  lockTimeout: json['lockTimeout'] == null
-      ? null
-      : Duration(microseconds: (json['lockTimeout'] as num).toInt()),
-);
-
-Map<String, dynamic> _$ContainerAuthSettingsToJson(
-  ContainerAuthSettings instance,
-) => <String, dynamic>{
-  'authenticationRequired': instance.authenticationRequired,
-  'lockOnAppBackground': instance.lockOnAppBackground,
-  'lockTimeout': instance.lockTimeout?.inMicroseconds,
-};
-
 ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
     ContainerMetadata.withDefaults(
       iconData: _$JsonConverterFromJson<Map<String, dynamic>, IconData>(
@@ -319,11 +205,6 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
         const IconDataJsonConverter().fromJson,
       ),
       contextualIdentity: json['contextualIdentity'] as String?,
-      authSettings: json['authSettings'] == null
-          ? null
-          : ContainerAuthSettings.fromJson(
-              json['authSettings'] as Map<String, dynamic>,
-            ),
       useProxy: json['useProxy'] as bool? ?? false,
       clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
       assignedSites: (json['assignedSites'] as List<dynamic>?)
@@ -339,7 +220,6 @@ Map<String, dynamic> _$ContainerMetadataToJson(
     const IconDataJsonConverter().toJson,
   ),
   'contextualIdentity': instance.contextualIdentity,
-  'authSettings': instance.authSettings.toJson(),
   'useProxy': instance.useProxy,
   'clearDataOnExit': instance.clearDataOnExit,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),

@@ -22,46 +22,50 @@ import 'dart:async';
 import 'package:local_auth/local_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/user/data/models/auth_settings.dart';
 
 part 'local_authentication.g.dart';
 
 @Riverpod(keepAlive: true)
 class LocalAuthenticationService extends _$LocalAuthenticationService {
   final _auth = LocalAuthentication();
-  final _cache = <String, (DateTime, ContainerAuthSettings)>{};
-
-  bool _cacheAuth(String authKey) {
-    final auth = _cache[authKey];
-    if (auth != null && auth.$2.lockTimeout != null) {
-      return DateTime.now().difference(auth.$1) < auth.$2.lockTimeout!;
-    }
-
-    return false;
-  }
+  final _cache = <String, (DateTime, AuthSettings)>{};
 
   void evictCacheOnBackground() {
-    _cache.removeWhere((key, value) => value.$2.lockOnAppBackground);
+    _cache.removeWhere(
+      (key, value) => value.$2.autoLockMode == AutoLockMode.background,
+    );
+  }
+
+  bool isCached(String authKey) {
+    final auth = _cache[authKey];
+
+    if (auth == null) return false;
+    if (auth.$2.autoLockMode == AutoLockMode.timeout) {
+      return DateTime.now().difference(auth.$1) < auth.$2.timeout;
+    }
+
+    // Background mode cache stays valid until app background eviction.
+    return true;
   }
 
   Future<bool> authenticate({
     required String authKey,
     required String localizedReason,
-    ContainerAuthSettings? settings,
+    AuthSettings? settings,
     bool useAuthCache = false,
   }) async {
     try {
-      var result = useAuthCache && _cacheAuth(authKey);
+      final useCache = useAuthCache && isCached(authKey);
+      final success =
+          useCache ||
+          await _auth.authenticate(localizedReason: localizedReason);
 
-      if (!result) {
-        result = await _auth.authenticate(localizedReason: localizedReason);
-      }
-
-      if (result && settings != null) {
+      if (success && settings != null) {
         _cache[authKey] = (DateTime.now(), settings);
       }
 
-      return result;
+      return success;
     } on LocalAuthException catch (e, s) {
       logger.e('Could not authenticate', error: e, stackTrace: s);
       return false;

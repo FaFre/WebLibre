@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 
 part 'router.g.dart';
@@ -30,6 +33,7 @@ Future<GoRouter> router(Ref ref) async {
   ref.watch(appStateKeyProvider); //Rebuild router on key changes
 
   final onboardingRepository = ref.read(onboardingRepositoryProvider.notifier);
+  unawaited(ref.read(profileAuthStateProvider.notifier).bootstrapFromProfile());
 
   String? initialLocation;
 
@@ -46,10 +50,32 @@ Future<GoRouter> router(Ref ref) async {
     initialLocation = route.location;
   }
 
+  final profileAuthRefreshListenable = ref.watch(profileAuthProvider);
+
   return GoRouter(
     debugLogDiagnostics: true,
     routes: $appRoutes,
-    initialLocation: initialLocation ?? const BrowserRoute().location,
+    initialLocation: initialLocation ?? const LockRoute().location,
+    refreshListenable: profileAuthRefreshListenable,
+    redirect: (context, state) {
+      final authenticated = ref.read(profileAuthStateProvider);
+      final currentTopRouteName = state.topRoute?.name;
+      final isOnLockRoute = currentTopRouteName == LockRoute.name;
+      final isOnOnboarding = currentTopRouteName == OnboardingRoute.name;
+
+      // Don't redirect during onboarding
+      if (isOnOnboarding) return null;
+
+      if (!authenticated && !isOnLockRoute) {
+        return const LockRoute().location;
+      }
+
+      if (authenticated && isOnLockRoute) {
+        return const BrowserRoute().location;
+      }
+
+      return null;
+    },
   );
 }
 
