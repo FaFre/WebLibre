@@ -41,7 +41,6 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/full_search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -81,12 +80,9 @@ class SearchScreen extends HookConsumerWidget {
     final selectedTabType = useState(tabType);
     final currentTabTabType = ref.watch(selectedTabTypeProvider);
 
-    final selectedContainer = useState<ContainerData?>(null);
-    ref.listen(selectedContainerDataProvider, (previous, next) {
-      next.whenData((container) {
-        selectedContainer.value = container;
-      });
-    });
+    final selectedContainer = ref.watch(
+      selectedContainerDataProvider.select((value) => value.value),
+    );
 
     // When editing an existing tab, get its state
     // If tab no longer exists (null), fall back to new tab mode
@@ -251,7 +247,7 @@ class SearchScreen extends HookConsumerWidget {
                     : null,
                 launchedFromIntent: launchedFromIntent,
                 selectTab: true,
-                container: Value(selectedContainer.value),
+                container: Value(selectedContainer),
               );
         }
 
@@ -337,12 +333,30 @@ class SearchScreen extends HookConsumerWidget {
                                 child: SizedBox(
                                   height: 48,
                                   child: ContainerChips(
-                                    selectedContainer: selectedContainer.value,
-                                    onSelected: (container) {
-                                      selectedContainer.value = container;
+                                    selectedContainer: selectedContainer,
+                                    onSelected: (container) async {
+                                      if (container != null) {
+                                        await ref
+                                            .read(
+                                              selectedContainerProvider
+                                                  .notifier,
+                                            )
+                                            .setContainerId(container.id);
+                                      } else {
+                                        ref
+                                            .read(
+                                              selectedContainerProvider
+                                                  .notifier,
+                                            )
+                                            .clearContainer();
+                                      }
                                     },
                                     onDeleted: (container) {
-                                      selectedContainer.value = null;
+                                      ref
+                                          .read(
+                                            selectedContainerProvider.notifier,
+                                          )
+                                          .clearContainer();
                                     },
                                   ),
                                 ),
@@ -425,9 +439,7 @@ class SearchScreen extends HookConsumerWidget {
                                             : null,
                                         launchedFromIntent: launchedFromIntent,
                                         selectTab: true,
-                                        container: Value(
-                                          selectedContainer.value,
-                                        ),
+                                        container: Value(selectedContainer),
                                       );
                                 }
 
@@ -481,7 +493,7 @@ class SearchScreen extends HookConsumerWidget {
                                   : null,
                               launchedFromIntent: launchedFromIntent,
                               selectTab: true,
-                              container: Value(selectedContainer.value),
+                              container: Value(selectedContainer),
                             );
                       }
 
