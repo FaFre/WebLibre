@@ -28,7 +28,8 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
-    private lateinit var channel: MethodChannel
+    private val ENGINE_ID = "engine_id"
+    private var channel: MethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -38,14 +39,19 @@ class MainActivity: FlutterFragmentActivity() {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        channel.invokeMethod("onTrimMemory", level)
+        channel?.invokeMethod("onTrimMemory", level)
     }
 
     override fun provideFlutterEngine(context: Context): FlutterEngine {
         val cache = FlutterEngineCache.getInstance()
-        val cachedEngine = cache.get("engine_id")
-        if (cachedEngine != null) {
+        val cachedEngine = cache.get(ENGINE_ID)
+        if (cachedEngine != null && cachedEngine.dartExecutor.isExecutingDart) {
             return cachedEngine
+        }
+
+        if (cachedEngine != null) {
+            cache.remove(ENGINE_ID)
+            cachedEngine.destroy()
         }
 
         val flutterEngine = FlutterEngine(context.applicationContext)
@@ -53,7 +59,7 @@ class MainActivity: FlutterFragmentActivity() {
         flutterEngine.dartExecutor.executeDartEntrypoint(
             DartExecutor.DartEntrypoint.createDefault()
         )
-        cache.put("engine_id", flutterEngine)
+        cache.put(ENGINE_ID, flutterEngine)
 
         return flutterEngine
     }
