@@ -330,19 +330,17 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     }
 
                     if (onBrowserExtensionIcons) {
-                        coroutineScope.launch {
+                        coroutineScope.launch(Dispatchers.Main) {
                             try {
                                 val icon = browserAction.loadIcon?.invoke(128)
                                 icon?.let {
                                     val imageBytes = icon.toWebPBytes()
-                                    withContext(Dispatchers.Main) {
-                                        components.addonEvents.onUpdateWebExtensionIcon(
-                                            EventSequence.next(),
-                                            extension.id,
-                                            WebExtensionActionType.BROWSER,
-                                            imageBytes
-                                        ) { }
-                                    }
+                                    components.addonEvents.onUpdateWebExtensionIcon(
+                                        EventSequence.next(),
+                                        extension.id,
+                                        WebExtensionActionType.BROWSER,
+                                        imageBytes
+                                    ) { }
                                 }
                             } catch (e: Exception) {
                                 logger.error("$TAG: Failed to load browser action icon for ${extension.id}", e)
@@ -371,19 +369,17 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     }
 
                     if (onPageExtensionIcons) {
-                        coroutineScope.launch {
+                        coroutineScope.launch(Dispatchers.Main) {
                             try {
                                 val icon = pageAction.loadIcon?.invoke(128)
                                 icon?.let {
                                     val imageBytes = icon.toWebPBytes()
-                                    withContext(Dispatchers.Main) {
-                                        components.addonEvents.onUpdateWebExtensionIcon(
-                                            EventSequence.next(),
-                                            extension.id,
-                                            WebExtensionActionType.PAGE,
-                                            imageBytes
-                                        ) { }
-                                    }
+                                    components.addonEvents.onUpdateWebExtensionIcon(
+                                        EventSequence.next(),
+                                        extension.id,
+                                        WebExtensionActionType.PAGE,
+                                        imageBytes
+                                    ) { }
                                 }
                             } catch (e: Exception) {
                                 logger.error("$TAG: Failed to load page action icon for ${extension.id}", e)
