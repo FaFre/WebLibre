@@ -758,6 +758,7 @@ mixin $ContainerCreateRoute on GoRouteData {
   static ContainerCreateRoute _fromState(GoRouterState state) =>
       ContainerCreateRoute(
         containerData: state.pathParameters['containerData']!,
+        tabIds: state.uri.queryParameters['tab-ids'] ?? '[]',
       );
 
   ContainerCreateRoute get _self => this as ContainerCreateRoute;
@@ -765,6 +766,7 @@ mixin $ContainerCreateRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/browser/containers/create/${Uri.encodeComponent(_self.containerData)}',
+    queryParams: {if (_self.tabIds != '[]') 'tab-ids': _self.tabIds},
   );
 
   @override

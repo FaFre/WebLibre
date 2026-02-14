@@ -40,22 +40,28 @@ class ContainerEditScreen extends HookConsumerWidget {
   final _DialogMode _mode;
 
   final ContainerData initialContainer;
+  final Set<String>? tabIds;
 
   const ContainerEditScreen._({
     required _DialogMode mode,
     required this.initialContainer,
+    this.tabIds,
   }) : _mode = mode;
 
   factory ContainerEditScreen.create({
     required ContainerData initialContainer,
+    Set<String>? tabIds,
   }) {
     return ContainerEditScreen._(
       mode: _DialogMode.create,
       initialContainer: initialContainer,
+      tabIds: tabIds,
     );
   }
 
-  factory ContainerEditScreen.edit({required ContainerData initialContainer}) {
+  factory ContainerEditScreen.edit({
+    required ContainerDataWithCount initialContainer,
+  }) {
     return ContainerEditScreen._(
       mode: _DialogMode.edit,
       initialContainer: initialContainer,
@@ -75,11 +81,6 @@ class ContainerEditScreen extends HookConsumerWidget {
     final textController = useTextEditingController(
       text: initialContainer.name,
     );
-
-    final containerHasTabs = switch (initialContainer) {
-      ContainerDataWithCount(:final tabCount?) when tabCount > 0 => true,
-      _ => false,
-    };
 
     return Scaffold(
       appBar: AppBar(
@@ -147,38 +148,11 @@ class ContainerEditScreen extends HookConsumerWidget {
                           ),
                         ),
                         label: const Text('Name'),
-                        suffixIcon:
-                            (_mode == _DialogMode.edit && containerHasTabs)
-                            ? Consumer(
-                                builder: (context, ref, child) {
-                                  final isLoading = ref.watch(
-                                    containerTopicControllerProvider.select(
-                                      (value) => value.isLoading,
-                                    ),
-                                  );
-
-                                  return IconButton(
-                                    onPressed: isLoading
-                                        ? null
-                                        : () async {
-                                            final topic = await ref
-                                                .read(
-                                                  containerTopicControllerProvider
-                                                      .notifier,
-                                                )
-                                                .predictDocumentTopic(
-                                                  initialContainer.id,
-                                                );
-
-                                            if (topic != null) {
-                                              textController.text = topic;
-                                            }
-                                          },
-                                    icon: const Icon(MdiIcons.creation),
-                                  );
-                                },
-                              )
-                            : null,
+                        suffixIcon: _buildMagicWandButton(
+                          context,
+                          ref,
+                          textController,
+                        ),
                       ),
                       controller: textController,
                     ),
@@ -309,6 +283,51 @@ class ContainerEditScreen extends HookConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget? _buildMagicWandButton(
+    BuildContext context,
+    WidgetRef ref,
+    TextEditingController textController,
+  ) {
+    final predict = switch (_mode) {
+      _DialogMode.edit => switch (initialContainer) {
+        ContainerDataWithCount(:final tabCount?) when tabCount > 0 =>
+          (WidgetRef ref) => ref
+              .read(containerTopicControllerProvider.notifier)
+              .predictDocumentTopic(initialContainer.id),
+        _ => null,
+      },
+      _DialogMode.create => switch (tabIds) {
+        final ids? when ids.isNotEmpty =>
+          (WidgetRef ref) => ref
+              .read(containerTopicControllerProvider.notifier)
+              .predictTopicFromTabIds(ids),
+        _ => null,
+      },
+    };
+
+    if (predict == null) return null;
+
+    return Consumer(
+      builder: (context, ref, child) {
+        final isLoading = ref.watch(
+          containerTopicControllerProvider.select((value) => value.isLoading),
+        );
+
+        return IconButton(
+          onPressed: isLoading
+              ? null
+              : () async {
+                  final topic = await predict(ref);
+                  if (topic != null) {
+                    textController.text = topic;
+                  }
+                },
+          icon: const Icon(MdiIcons.creation),
+        );
+      },
     );
   }
 }

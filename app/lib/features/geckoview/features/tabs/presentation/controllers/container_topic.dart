@@ -18,19 +18,51 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 
 part 'container_topic.g.dart';
 
 @Riverpod()
 class ContainerTopicController extends _$ContainerTopicController {
   Future<String?> predictDocumentTopic(String containerId) async {
+    final tabData = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .getContainerTabsData(containerId);
+
+    if (tabData.isEmpty) return null;
+
+    final titles = tabData.map((t) => t.title).nonNulls.toSet();
+    return _predictFromTitles(titles);
+  }
+
+  Future<String?> predictTopicFromTabIds(Set<String> tabIds) async {
+    final tabStates = ref.read(tabStatesProvider);
+    final titles = tabIds
+        .map((tabId) => tabStates[tabId]?.title)
+        .nonNulls
+        .toSet();
+
+    return _predictFromTitles(titles);
+  }
+
+  Future<String?> _predictFromTitles(Set<String> titles) async {
+    if (titles.isEmpty) return null;
+
     state = const AsyncLoading();
 
     final result = await AsyncValue.guard(() async {
-      return await ref.read(containerTopicProvider(containerId).future);
+      final topicResult = await ref
+          .read(geckoInferenceRepositoryProvider.notifier)
+          .predictDocumentTopic(titles);
+
+      return topicResult.fold((topic) => topic, onFailure: (_) => null);
     });
-    state = result;
+
+    if (ref.mounted) {
+      state = result;
+    }
 
     return result.value;
   }

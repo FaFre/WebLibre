@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -236,51 +237,56 @@ class _TabListView extends HookConsumerWidget {
                   itemCount: itemCount,
                   itemExtent: _itemHeight,
                   itemBuilder: (context, index) {
-                    final CustomDraggable tab;
+                    final TabEntity entity;
+                    final String? suggestedId;
 
                     if (index < filteredTabEntities.value.length) {
-                      final entity = filteredTabEntities.value[index];
-                      tab = CustomDraggable(
-                        key: Key(entity.tabId),
-                        data: TabDragData(entity.tabId),
-                        child: _TabDraggable(
-                          entity: entity,
-                          onClose: onClose,
-                          height: _itemHeight,
-                        ),
-                      );
+                      entity = filteredTabEntities.value[index];
+                      suggestedId = null;
                     } else {
                       final suggestedIndex =
                           index - filteredTabEntities.value.length;
-                      final entity = suggestedTabEntities.value[suggestedIndex];
-
-                      tab = CustomDraggable(
-                        key: Key('suggested_${entity.tabId}'),
-                        child: _TabDraggable(
-                          entity: entity,
-                          onClose: onClose,
-                          suggestedContainerId: containerId,
-                          height: _itemHeight,
-                        ),
-                      );
+                      entity = suggestedTabEntities.value[suggestedIndex];
+                      suggestedId = containerId;
                     }
 
-                    return LongPressDraggable(
-                      feedback: Material(
-                        color: Colors
-                            .transparent, // removes white corners when having shadow
-                        child: Transform.scale(
-                          scale: 1.05,
-                          child: SizedBox(
-                            height: _itemHeight,
-                            width: MediaQuery.of(context).size.width,
-                            child: tab.child,
+                    final tab = CustomDraggable(
+                      key: Key(
+                        suggestedId != null
+                            ? 'suggested_${entity.tabId}'
+                            : entity.tabId,
+                      ),
+                      data: suggestedId != null
+                          ? null
+                          : TabDragData(entity.tabId),
+                      child: _TabDraggable(
+                        entity: entity,
+                        onClose: onClose,
+                        suggestedContainerId: suggestedId,
+                        height: _itemHeight,
+                      ),
+                    );
+
+                    return TabDropTarget(
+                      targetTabId: entity.tabId,
+                      enabled: suggestedId == null,
+                      child: LongPressDraggable(
+                        feedback: Material(
+                          color: Colors
+                              .transparent, // removes white corners when having shadow
+                          child: Transform.scale(
+                            scale: 1.05,
+                            child: SizedBox(
+                              height: _itemHeight,
+                              width: MediaQuery.of(context).size.width,
+                              child: tab.child,
+                            ),
                           ),
                         ),
+                        data: tab.data,
+                        childWhenDragging: const SizedBox(height: _itemHeight),
+                        child: tab.child,
                       ),
-                      data: tab.data,
-                      childWhenDragging: const SizedBox(height: _itemHeight),
-                      child: tab.child,
                     );
                   },
                 )

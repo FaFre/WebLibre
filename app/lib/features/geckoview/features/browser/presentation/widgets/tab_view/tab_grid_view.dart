@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
@@ -388,26 +389,33 @@ class _TabGrid extends StatelessWidget {
       ),
       itemCount: itemCount,
       itemBuilder: (context, index) {
-        final Widget tab;
+        final TabEntity entity;
+        final String? suggestedId;
+
         if (index < filteredTabEntities.value.length) {
-          final entity = filteredTabEntities.value[index];
-          tab = CustomDraggable(
-            key: Key(entity.tabId),
-            data: TabDragData(entity.tabId),
-            child: _TabDraggable(entity: entity, onClose: onClose),
-          );
+          entity = filteredTabEntities.value[index];
+          suggestedId = null;
         } else {
           final suggestedIndex = index - filteredTabEntities.value.length;
-          final entity = suggestedTabEntities.value[suggestedIndex];
+          entity = suggestedTabEntities.value[suggestedIndex];
+          suggestedId = suggestedContainerId;
+        }
 
-          tab = CustomDraggable(
-            key: Key('suggested_${entity.tabId}'),
-            child: _TabDraggable(
-              entity: entity,
-              onClose: onClose,
-              suggestedContainerId: suggestedContainerId,
-            ),
-          );
+        final tab = CustomDraggable(
+          key: Key(
+            suggestedId != null ? 'suggested_${entity.tabId}' : entity.tabId,
+          ),
+          data: suggestedId != null ? null : TabDragData(entity.tabId),
+          child: _TabDraggable(
+            entity: entity,
+            onClose: onClose,
+            suggestedContainerId: suggestedId,
+          ),
+        );
+
+        // Only add DragTarget for non-suggested tabs in non-reorder mode
+        if (suggestedId == null && itemBuilder == null) {
+          return TabDropTarget(targetTabId: entity.tabId, child: tab);
         }
 
         return (itemBuilder != null) ? itemBuilder!(tab, index) : tab;

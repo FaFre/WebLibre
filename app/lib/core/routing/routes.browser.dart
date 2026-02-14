@@ -152,7 +152,7 @@ class ContainerEditRoute extends GoRouteData with $ContainerEditRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return ContainerEditScreen.edit(
-      initialContainer: ContainerData.fromJson(
+      initialContainer: ContainerDataWithCount.fromJson(
         jsonDecode(containerData) as Map<String, dynamic>,
       ),
     );
@@ -161,15 +161,20 @@ class ContainerEditRoute extends GoRouteData with $ContainerEditRoute {
 
 class ContainerCreateRoute extends GoRouteData with $ContainerCreateRoute {
   final String containerData;
+  final String tabIds;
 
-  ContainerCreateRoute({required this.containerData});
+  ContainerCreateRoute({required this.containerData, this.tabIds = '[]'});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
+    final tabIdsList = jsonDecode(tabIds) as List;
+    final tabIdsSet = tabIdsList.cast<String>().toSet();
+
     return ContainerEditScreen.create(
       initialContainer: ContainerData.fromJson(
         jsonDecode(containerData) as Map<String, dynamic>,
       ),
+      tabIds: tabIdsSet.isNotEmpty ? tabIdsSet : null,
     );
   }
 }
