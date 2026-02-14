@@ -149,6 +149,8 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'quickTabSwitcherShowTitles': settings['quickTabSwitcherShowTitles']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
     });
   }
 

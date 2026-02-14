@@ -82,7 +82,45 @@ class _TabBarLayoutSection extends StatelessWidget {
         _TabListShowFaviconsTile(),
         _ShowQuickTabSwitcherBarTile(),
         _QuickTabSwitcherModeSection(),
+        _QuickTabSwitcherShowTitlesTile(),
       ],
+    );
+  }
+}
+
+class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
+  const _QuickTabSwitcherShowTitlesTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final quickTabSwitcherShowTitles = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherShowTitles,
+      ),
+    );
+    final tabBarShowQuickTabSwitcherBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarShowQuickTabSwitcherBar,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Titles in Quick Tab Switcher'),
+      subtitle: const Text(
+        'Display tab titles alongside icons in the quick tab switcher bar',
+      ),
+      secondary: const Icon(MdiIcons.textRecognition),
+      value: quickTabSwitcherShowTitles,
+      onChanged: tabBarShowQuickTabSwitcherBar
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings.copyWith
+                        .quickTabSwitcherShowTitles(value),
+                  );
+            }
+          : null,
     );
   }
 }

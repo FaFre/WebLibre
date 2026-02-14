@@ -73,6 +73,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabListShowFavicons(bool tabListShowFavicons);
 
+  GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -108,6 +110,7 @@ abstract class _$GeneralSettingsCWProxy {
     int maxSearchHistoryEntries,
     bool allowClipboardAccess,
     bool tabListShowFavicons,
+    bool quickTabSwitcherShowTitles,
   });
 }
 
@@ -232,6 +235,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabListShowFavicons: tabListShowFavicons);
 
   @override
+  GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles) =>
+      call(quickTabSwitcherShowTitles: quickTabSwitcherShowTitles);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -267,6 +274,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
     Object? allowClipboardAccess = const $CopyWithPlaceholder(),
     Object? tabListShowFavicons = const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -427,6 +435,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabListShowFavicons
           // ignore: cast_nullable_to_non_nullable
           : tabListShowFavicons as bool,
+      quickTabSwitcherShowTitles:
+          quickTabSwitcherShowTitles == const $CopyWithPlaceholder() ||
+              quickTabSwitcherShowTitles == null
+          ? _value.quickTabSwitcherShowTitles
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherShowTitles as bool,
     );
   }
 }
@@ -504,6 +518,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   maxSearchHistoryEntries: (json['maxSearchHistoryEntries'] as num?)?.toInt(),
   allowClipboardAccess: json['allowClipboardAccess'] as bool?,
   tabListShowFavicons: json['tabListShowFavicons'] as bool?,
+  quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -545,6 +560,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'maxSearchHistoryEntries': instance.maxSearchHistoryEntries,
   'allowClipboardAccess': instance.allowClipboardAccess,
   'tabListShowFavicons': instance.tabListShowFavicons,
+  'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
 };
 
 const _$ThemeModeEnumMap = {

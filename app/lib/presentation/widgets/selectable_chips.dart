@@ -71,6 +71,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final int? Function(T item)? itemBadgeCount;
   final Color? Function(T item)? itemBackgroundColor;
   final Color? selectedBorderColor;
+  final EdgeInsetsGeometry? Function(T item)? labelPadding;
 
   final Widget Function(Widget child, S item)? itemWrap;
 
@@ -97,6 +98,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.onLongPress,
     this.sortSelectedFirst = true,
     this.scrollController,
+    this.labelPadding,
     super.key,
   });
 
@@ -150,6 +152,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                   child: FilterChip(
                     selected: selectedBorderColor == null && isSelected,
                     showCheckmark: false,
+                    labelPadding: labelPadding?.call(item),
                     onSelected: (value) {
                       if (value) {
                         onSelected?.call(item);

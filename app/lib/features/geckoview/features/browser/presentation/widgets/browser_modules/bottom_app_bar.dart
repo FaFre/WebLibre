@@ -482,6 +482,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
     final selectedTabId = ref.watch(selectedTabProvider);
+    final showTitles = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherShowTitles,
+      ),
+    );
 
     final tabStates = (switch (quickTabSwitcherMode) {
       QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider),
@@ -511,14 +516,19 @@ class QuickTabSwitcher extends HookConsumerWidget {
           enableDelete: false,
           scrollController: chipScrollController,
           itemId: (item) => item.id,
+          labelPadding: (item) =>
+              (!showTitles && !item.isHistory && !item.isPrivate)
+              ? EdgeInsets.zero
+              : null,
           itemLabel: (item) {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 64),
-                  child: Text(item.title),
-                ),
+                if (item.isHistory || showTitles)
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 64),
+                    child: Text(item.title),
+                  ),
                 if (item.isPrivate)
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
