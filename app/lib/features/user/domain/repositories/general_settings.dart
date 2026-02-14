@@ -151,6 +151,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
       ),
       'quickTabSwitcherShowTitles': settings['quickTabSwitcherShowTitles']
           ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'drawerGestureEnabled': settings['drawerGestureEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

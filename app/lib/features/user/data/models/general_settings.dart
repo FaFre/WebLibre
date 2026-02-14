@@ -88,6 +88,7 @@ class GeneralSettings with FastEquatable {
   final bool allowClipboardAccess;
   final bool tabListShowFavicons;
   final bool quickTabSwitcherShowTitles;
+  final bool drawerGestureEnabled;
 
   GeneralSettings({
     required this.themeMode,
@@ -118,6 +119,7 @@ class GeneralSettings with FastEquatable {
     required this.allowClipboardAccess,
     required this.tabListShowFavicons,
     required this.quickTabSwitcherShowTitles,
+    required this.drawerGestureEnabled,
   });
 
   GeneralSettings.withDefaults({
@@ -149,6 +151,7 @@ class GeneralSettings with FastEquatable {
     bool? allowClipboardAccess,
     bool? tabListShowFavicons,
     bool? quickTabSwitcherShowTitles,
+    bool? drawerGestureEnabled,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -180,7 +183,8 @@ class GeneralSettings with FastEquatable {
        maxSearchHistoryEntries = maxSearchHistoryEntries ?? 5,
        allowClipboardAccess = allowClipboardAccess ?? true,
        tabListShowFavicons = tabListShowFavicons ?? false,
-       quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true;
+       quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
+       drawerGestureEnabled = drawerGestureEnabled ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -217,5 +221,6 @@ class GeneralSettings with FastEquatable {
     allowClipboardAccess,
     tabListShowFavicons,
     quickTabSwitcherShowTitles,
+    drawerGestureEnabled,
   ];
 }

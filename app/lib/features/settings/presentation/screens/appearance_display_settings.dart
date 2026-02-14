@@ -134,6 +134,7 @@ class _GesturesSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Gestures'),
         _PullToRefreshTile(),
+        _DrawerGestureTile(),
         _DoubleBackCloseTabTile(),
       ],
     );
@@ -464,6 +465,32 @@ class _PullToRefreshTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.pullToRefreshEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _DrawerGestureTile extends HookConsumerWidget {
+  const _DrawerGestureTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final drawerGestureEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.drawerGestureEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Drawer Swipe Gesture'),
+      subtitle: const Text('Swipe from screen edge to open navigation drawer'),
+      secondary: const Icon(MdiIcons.gestureSwipe),
+      value: drawerGestureEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.drawerGestureEnabled(value),
             );
       },
     );

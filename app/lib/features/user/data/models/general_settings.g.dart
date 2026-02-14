@@ -75,6 +75,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles);
 
+  GeneralSettings drawerGestureEnabled(bool drawerGestureEnabled);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -111,6 +113,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowClipboardAccess,
     bool tabListShowFavicons,
     bool quickTabSwitcherShowTitles,
+    bool drawerGestureEnabled,
   });
 }
 
@@ -239,6 +242,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(quickTabSwitcherShowTitles: quickTabSwitcherShowTitles);
 
   @override
+  GeneralSettings drawerGestureEnabled(bool drawerGestureEnabled) =>
+      call(drawerGestureEnabled: drawerGestureEnabled);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -275,6 +282,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowClipboardAccess = const $CopyWithPlaceholder(),
     Object? tabListShowFavicons = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
+    Object? drawerGestureEnabled = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -441,6 +449,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherShowTitles
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherShowTitles as bool,
+      drawerGestureEnabled:
+          drawerGestureEnabled == const $CopyWithPlaceholder() ||
+              drawerGestureEnabled == null
+          ? _value.drawerGestureEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : drawerGestureEnabled as bool,
     );
   }
 }
@@ -519,6 +533,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   allowClipboardAccess: json['allowClipboardAccess'] as bool?,
   tabListShowFavicons: json['tabListShowFavicons'] as bool?,
   quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
+  drawerGestureEnabled: json['drawerGestureEnabled'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -561,6 +576,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'allowClipboardAccess': instance.allowClipboardAccess,
   'tabListShowFavicons': instance.tabListShowFavicons,
   'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
+  'drawerGestureEnabled': instance.drawerGestureEnabled,
 };
 
 const _$ThemeModeEnumMap = {

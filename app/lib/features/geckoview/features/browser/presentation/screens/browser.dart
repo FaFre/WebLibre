@@ -292,6 +292,12 @@ class BrowserScreen extends HookConsumerWidget {
       ),
     );
 
+    final drawerGestureEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.drawerGestureEnabled,
+      ),
+    );
+
     final displayAppBar = useValueNotifier(true);
 
     ref.listen(tabBarDismissableControllerProvider, (previous, next) {
@@ -462,7 +468,7 @@ class BrowserScreen extends HookConsumerWidget {
           // Minimal scaffold - only for Material overlay support (SnackBars)
           resizeToAvoidBottomInset: false,
           endDrawer: const BrowserNavigationDrawer(),
-          endDrawerEnableOpenDragGesture: false,
+          endDrawerEnableOpenDragGesture: drawerGestureEnabled,
           body: Stack(
             children: [
               // Layer 0: Browser content
