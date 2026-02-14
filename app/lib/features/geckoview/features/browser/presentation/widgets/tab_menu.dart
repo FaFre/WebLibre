@@ -59,6 +59,7 @@ class TabMenu extends HookConsumerWidget {
   final bool enableDesktopMode;
   final bool enableFetchFeeds;
   final bool enableAddBookmark;
+  final bool enableAddToHomeScreen;
   final bool enableCloneTab;
   final bool enableContainer;
   final bool enableShare;
@@ -77,6 +78,7 @@ class TabMenu extends HookConsumerWidget {
     this.enableDesktopMode = true,
     this.enableFetchFeeds = true,
     this.enableAddBookmark = true,
+    this.enableAddToHomeScreen = true,
     this.enableCloneTab = true,
     this.enableContainer = true,
     this.enableShare = true,
@@ -197,27 +199,28 @@ class TabMenu extends HookConsumerWidget {
               ).push(context);
             },
           ),
-        Consumer(
-          builder: (context, ref, child) {
-            final isInstallable = ref.watch(isCurrentTabInstallableProvider);
+        if (enableAddToHomeScreen)
+          Consumer(
+            builder: (context, ref, child) {
+              final isInstallable = ref.watch(isCurrentTabInstallableProvider);
 
-            return Visibility(
-              visible: isInstallable,
-              child: MenuItemButton(
-                closeOnActivate: false,
-                leadingIcon: const Icon(Icons.add_to_home_screen),
-                child: const Text('Add to Home Screen'),
-                onPressed: () async {
-                  await showPwaInstallDialog(context, ref);
+              return Visibility(
+                visible: isInstallable,
+                child: MenuItemButton(
+                  closeOnActivate: false,
+                  leadingIcon: const Icon(Icons.add_to_home_screen),
+                  child: const Text('Add to Home Screen'),
+                  onPressed: () async {
+                    await showPwaInstallDialog(context, ref);
 
-                  if (context.mounted) {
-                    MenuController.maybeOf(context)?.close();
-                  }
-                },
-              ),
-            );
-          },
-        ),
+                    if (context.mounted) {
+                      MenuController.maybeOf(context)?.close();
+                    }
+                  },
+                ),
+              );
+            },
+          ),
         if (enableCloneTab)
           SubmenuButton(
             menuChildren: [

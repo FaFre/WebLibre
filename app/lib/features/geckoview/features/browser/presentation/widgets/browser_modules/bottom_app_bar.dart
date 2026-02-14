@@ -586,6 +586,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
               enableReaderMode: false,
               enableReloadButton: false,
               enableNavigationButtons: false,
+              enableAddToHomeScreen: false,
               builder: (context, controller, _) {
                 return InkWell(
                   onLongPress: () {
