@@ -24,6 +24,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 Future<bool?> showInstallLocalAddonDialog(BuildContext context) {
   return showModalBottomSheet<bool?>(
@@ -79,9 +80,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
             );
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Extension installed successfully')),
-          );
+          showInfoMessage(context, 'Extension installed successfully');
           context.pop(true);
         }
       } catch (e) {
