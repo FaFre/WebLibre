@@ -418,19 +418,15 @@ class BrowserScreen extends HookConsumerWidget {
     useOnStreamChange(
       viewportService.keyboardEvents,
       onData: (event) {
-        if (event.isVisible && event.heightPx > 0) {
-          // When keyboard is visible, notify GeckoView to adjust viewport
-          // This uses the native API to handle keyboard without Flutter resize
-          // If find-in-page is also visible, add its height to the keyboard height
-          final findInPageHeightPx = findInPageVisible
-              ? (FindInPageWidget.findInPageHeight * pixelRatio).round()
-              : 0;
-          unawaited(
-            viewportService.setDynamicToolbarMaxHeight(
-              event.heightPx + findInPageHeightPx,
-            ),
-          );
-        }
+        // When keyboard is visible, use keyboard height for viewport adjustment.
+        // When hidden, restore normal toolbar height to avoid stale viewport size.
+        final findInPageHeightPx = findInPageVisible
+            ? (FindInPageWidget.findInPageHeight * pixelRatio).round()
+            : 0;
+        final targetHeightPx = event.isVisible && event.heightPx > 0
+            ? event.heightPx + findInPageHeightPx
+            : toolbarHeightPx;
+        unawaited(viewportService.setDynamicToolbarMaxHeight(targetHeightPx));
       },
     );
 
