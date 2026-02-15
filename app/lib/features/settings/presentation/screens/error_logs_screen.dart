@@ -25,11 +25,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/settings/domain/providers/log_filter.dart';
+import 'package:weblibre/features/settings/presentation/dialogs/log_details_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
@@ -203,15 +203,13 @@ class _LogEntryTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
       child: InkWell(
         onTap: () async {
-          await showDialog(
-            context: context,
-            builder: (context) => _LogDetailsDialog(
-              level: level,
-              message: message,
-              error: error,
-              stackTrace: stackTrace,
-              time: time,
-            ),
+          await showLogDetailsDialog(
+            context,
+            level: level,
+            message: message,
+            error: error,
+            stackTrace: stackTrace,
+            time: time,
           );
         },
         child: ListTile(
@@ -238,136 +236,6 @@ class _LogEntryTile extends StatelessWidget {
         fontStyle: FontStyle.italic,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
-    );
-  }
-}
-
-class _LogDetailsDialog extends StatelessWidget {
-  const _LogDetailsDialog({
-    required this.level,
-    required this.message,
-    this.error,
-    this.stackTrace,
-    required this.time,
-  });
-
-  final Level level;
-  final String message;
-  final String? error;
-  final String? stackTrace;
-  final DateTime time;
-
-  String _formatTime(DateTime time) {
-    return DateFormat('HH:mm:ss.SSS').format(time);
-  }
-
-  Future<void> _copyEntryToClipboard(BuildContext context) async {
-    final text = StringBuffer();
-
-    text.writeln(
-      '[${_formatTime(time)}] ${level.name.toUpperCase()}: $message',
-    );
-    if (error != null) {
-      text.writeln('Error: $error');
-    }
-    if (stackTrace != null) {
-      text.writeln('Stack Trace:');
-      text.writeln(stackTrace);
-    }
-
-    await Clipboard.setData(ClipboardData(text: text.toString()));
-
-    if (context.mounted) {
-      showInfoMessage(context, 'Entry copied');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(_levelIcon(level), color: _levelColor(level)),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(level.name.toUpperCase()),
-              Text(
-                _formatTime(time),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ],
-      ),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (message.isNotEmpty) ...[
-                Text(
-                  'Message:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  message,
-                  style: GoogleFonts.robotoMono(fontSize: 12),
-                ),
-                const SizedBox(height: 16),
-              ],
-              if (error != null) ...[
-                Text(
-                  'Error:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: _levelColor(level),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  error!,
-                  style: GoogleFonts.robotoMono(fontSize: 11),
-                ),
-                const SizedBox(height: 16),
-              ],
-              if (stackTrace != null) ...[
-                Text(
-                  'Stack Trace:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  stackTrace!,
-                  style: GoogleFonts.robotoMono(fontSize: 9),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
-        ),
-        TextButton.icon(
-          onPressed: () => _copyEntryToClipboard(context),
-          icon: const Icon(Icons.copy),
-          label: const Text('Copy'),
-        ),
-      ],
     );
   }
 }

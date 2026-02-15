@@ -22,29 +22,14 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/pwa/presentation/dialogs/pwa_install_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
   final manifest = ref.read(currentTabManifestProvider);
   final name = manifest?.name ?? manifest?.shortName ?? 'this web app';
 
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Add to Home Screen'),
-      content: Text('Add "$name" to your home screen?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Add'),
-        ),
-      ],
-    ),
-  );
+  final confirmed = await showPwaInstallConfirmDialog(context, name);
 
   if (confirmed == true) {
     try {
