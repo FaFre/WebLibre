@@ -21,7 +21,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -42,6 +41,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_bar_dismissable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
@@ -57,6 +57,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/w
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Callback for toolbar animation progress updates.
@@ -810,9 +811,26 @@ class _Browser extends HookConsumerWidget {
                 if (ref
                     .read(tabRepositoryProvider.notifier)
                     .hasLaunchedFromIntent(tabState?.id)) {
-                  //Mark back as unhandled and navigator will pop
-                  await SystemNavigator.pop();
-                  return false;
+                  if (!context.mounted) return false;
+
+                  final keep = await showKeepTabDialog(context);
+                  if (keep == true) {
+                    ref
+                        .read(tabRepositoryProvider.notifier)
+                        .clearLaunchedFromIntent(tabState!.id);
+
+                    await moveToBackground();
+                    return true;
+                  }
+
+                  if (tabState != null) {
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .closeTab(tabState.id);
+                  }
+
+                  await moveToBackground();
+                  return true;
                 }
 
                 // Handle double back to close (if enabled)
@@ -836,9 +854,8 @@ class _Browser extends HookConsumerWidget {
 
                       return true;
                     } else {
-                      //Mark back as unhandled and navigator will pop
-                      await SystemNavigator.pop();
-                      return false;
+                      await moveToBackground();
+                      return true;
                     }
                   } else {
                     lastBackButtonPress.value = DateTime.now();

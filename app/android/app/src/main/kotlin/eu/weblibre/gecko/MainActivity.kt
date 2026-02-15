@@ -27,19 +27,30 @@ import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterFragmentActivity() {
-    private val CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
+    private val TRIM_MEMORY_CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
+    private val ACTIVITY_CHANNEL = "eu.weblibre.gecko/activity"
     private val ENGINE_ID = "engine_id"
-    private var channel: MethodChannel? = null
+    private var trimMemoryChannel: MethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        trimMemoryChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, TRIM_MEMORY_CHANNEL)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ACTIVITY_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "moveTaskToBack" -> {
+                    moveTaskToBack(true)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        channel?.invokeMethod("onTrimMemory", level)
+        trimMemoryChannel?.invokeMethod("onTrimMemory", level)
     }
 
     override fun provideFlutterEngine(context: Context): FlutterEngine {

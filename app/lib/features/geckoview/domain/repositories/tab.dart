@@ -54,6 +54,10 @@ class TabRepository extends _$TabRepository {
     return _tabFromIntent.contains(tabId);
   }
 
+  void clearLaunchedFromIntent(String tabId) {
+    _tabFromIntent.remove(tabId);
+  }
+
   Future<String?> _resolveParentIdForContext({
     required String? parentId,
     required String? targetContextId,
