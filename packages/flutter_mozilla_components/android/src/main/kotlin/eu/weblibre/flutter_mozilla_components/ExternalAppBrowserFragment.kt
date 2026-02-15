@@ -234,13 +234,20 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
 
     private fun openInBrowser(sessionId: String) {
         val activity = requireActivity()
+        val store = components.core.store
+        val url = store.state.findCustomTab(sessionId)?.content?.url ?: return
 
         sessionFeature?.get()?.release()
-        components.useCases.customTabsUseCases.migrate(sessionId, select = true)
 
-        val mainIntent = activity.packageManager.getLaunchIntentForPackage(activity.packageName)
-        mainIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        mainIntent?.let { activity.startActivity(it) }
+        // Send ACTION_VIEW intent with URL to MainActivity so Flutter shows the Open URL dialog
+        val mainIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).apply {
+            setClassName(activity, "eu.weblibre.gecko.MainActivity")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        activity.startActivity(mainIntent)
+
+        // Remove the custom tab session (don't migrate it)
+        components.useCases.customTabsUseCases.remove(sessionId)
 
         activity.finishAndRemoveTask()
     }
