@@ -98,7 +98,11 @@ class CurrentTopRoute extends _$CurrentTopRoute {
     }
 
     void update() {
-      state = getCurrentRoute();
+      unawaited(
+        Future(() {
+          state = getCurrentRoute();
+        }),
+      );
     }
 
     router.routerDelegate.addListener(update);
