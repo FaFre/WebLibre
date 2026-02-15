@@ -103,6 +103,7 @@ class _AnimatedToolbar extends HookWidget {
       }
 
       controller.addListener(listener);
+      listener();
       return () => controller.removeListener(listener);
     }, [onAnimationProgress, toolbarHeight]);
 
@@ -394,42 +395,85 @@ class BrowserScreen extends HookConsumerWidget {
     final findInPageHeight = findInPageVisible
         ? FindInPageWidget.findInPageHeight
         : 0.0;
+    final findInPageHeightPx = (findInPageHeight * pixelRatio).round();
 
-    // Set up GeckoView dynamic toolbar height
-    // This tells GeckoView the maximum toolbar space so it can adjust viewport
-    final baseToolbarHeight = bottomToolbarVisible
-        ? bottomAppBarTotalHeight
-        : 0.0;
-    final totalToolbarHeight = findInPageVisible
-        ? baseToolbarHeight + findInPageHeight
-        : baseToolbarHeight;
-    final toolbarHeightPx = (totalToolbarHeight * pixelRatio).round();
+    final stableToolbarHeight = autoHideTabBar ? bottomAppBarTotalHeight : 0.0;
+    final stableToolbarHeightPx = (stableToolbarHeight * pixelRatio).round();
 
-    useEffect(() {
-      final lastKeyboardEvent = viewportService.keyboardEvents.valueOrNull;
+    final keyboardHeightPx = useState<int?>(null);
 
-      if (lastKeyboardEvent == null || !lastKeyboardEvent.isVisible) {
-        unawaited(viewportService.setDynamicToolbarMaxHeight(toolbarHeightPx));
-      }
-
-      return null;
-    }, [toolbarHeightPx]);
-
-    // Listen to keyboard visibility changes from native
     useOnStreamChange(
       viewportService.keyboardEvents,
       onData: (event) {
-        // When keyboard is visible, use keyboard height for viewport adjustment.
-        // When hidden, restore normal toolbar height to avoid stale viewport size.
-        final findInPageHeightPx = findInPageVisible
-            ? (FindInPageWidget.findInPageHeight * pixelRatio).round()
-            : 0;
-        final targetHeightPx = event.isVisible && event.heightPx > 0
-            ? event.heightPx + findInPageHeightPx
-            : toolbarHeightPx;
-        unawaited(viewportService.setDynamicToolbarMaxHeight(targetHeightPx));
+        if (!event.isAnimating) {
+          final nextKeyboardHeight = event.isVisible ? event.heightPx : null;
+          if (keyboardHeightPx.value != nextKeyboardHeight) {
+            keyboardHeightPx.value = nextKeyboardHeight;
+          }
+        }
       },
     );
+
+    final keyboardVisible = keyboardHeightPx.value != null;
+
+    final bottomLayoutReservedPx = (!autoHideTabBar && bottomToolbarVisible)
+        ? (bottomAppBarTotalHeight * pixelRatio).round()
+        : 0;
+    final keyboardViewportHeightPx = keyboardVisible
+        ? math.max(0, keyboardHeightPx.value! - bottomLayoutReservedPx)
+        : 0;
+
+    final effectiveToolbarHeightPx = keyboardVisible
+        ? keyboardViewportHeightPx + findInPageHeightPx
+        : stableToolbarHeightPx;
+
+    final lastToolbarMaxHeightPx = useRef<int?>(null);
+
+    useEffect(() {
+      if (lastToolbarMaxHeightPx.value != effectiveToolbarHeightPx) {
+        lastToolbarMaxHeightPx.value = effectiveToolbarHeightPx;
+        unawaited(
+          viewportService.setDynamicToolbarMaxHeight(effectiveToolbarHeightPx),
+        );
+      }
+      return null;
+    }, [effectiveToolbarHeightPx]);
+
+    // Track last clipping value to avoid redundant platform channel calls
+    final lastClippingPx = useRef(0);
+    final desiredToolbarClippingPx = useRef(0);
+
+    // Keep clipping state in sync with keyboard and auto-hide states.
+    // While keyboard is visible, do not apply toolbar clipping.
+    useEffect(() {
+      final targetClippingPx = autoHideTabBar && !keyboardVisible
+          ? desiredToolbarClippingPx.value
+          : 0;
+
+      if (targetClippingPx != lastClippingPx.value) {
+        lastClippingPx.value = targetClippingPx;
+        unawaited(viewportService.setVerticalClipping(targetClippingPx));
+      }
+
+      return null;
+    }, [autoHideTabBar, keyboardVisible]);
+
+    final animationProgressCallback = useCallback((
+      double progress,
+      double heightPx,
+    ) {
+      // Clip content from bottom as toolbar hides.
+      // Negative clipping = clip from bottom.
+      final clippingPx = -((1.0 - progress) * heightPx * pixelRatio).round();
+      desiredToolbarClippingPx.value = clippingPx;
+
+      final targetClippingPx = keyboardVisible ? 0 : clippingPx;
+
+      if (targetClippingPx != lastClippingPx.value) {
+        lastClippingPx.value = targetClippingPx;
+        unawaited(viewportService.setVerticalClipping(targetClippingPx));
+      }
+    }, [keyboardVisible, pixelRatio]);
 
     // Theme with dynamic snackbar margin to position above bottom toolbar
     final themeData = Theme.of(context).copyWith(
@@ -509,6 +553,9 @@ class BrowserScreen extends HookConsumerWidget {
                   position: TabBarPosition.bottom,
                   visible: bottomToolbarVisible,
                   toolbarHeight: bottomAppBarTotalHeight,
+                  onAnimationProgress: autoHideTabBar
+                      ? animationProgressCallback
+                      : null,
                   child: _TabBar(
                     tabBarPosition: TabBarPosition.bottom,
                     displayAppBar: displayAppBar,
