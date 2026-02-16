@@ -11,14 +11,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.R
 import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineView
-import mozilla.components.concept.engine.window.WindowRequest
 import mozilla.components.lib.state.ext.consumeFrom
-import eu.weblibre.flutter_mozilla_components.R
 
 /**
  * An activity to show the pop up action of a web extension.
@@ -53,21 +51,31 @@ class WebExtensionActionPopupActivity : AppCompatActivity() {
 
     /**
      * A fragment to show the web extension action popup with [EngineView].
+     *
+     * Extends [AddonPopupBaseFragment] to get proper session lifecycle management,
+     * prompt handling, and download support.
      */
-    class WebExtensionActionPopupFragment : Fragment(), EngineSession.Observer {
-        private val components by lazy {
-            requireNotNull(GlobalComponents.components) { "Components not initialized" }
-        }
+    class WebExtensionActionPopupFragment : AddonPopupBaseFragment(), EngineSession.Observer {
 
-        private var engineSession: EngineSession? = null
         private lateinit var webExtensionId: String
+
+        private val safeArguments get() = requireNotNull(arguments)
+        private var sessionConsumed
+            get() = safeArguments.getBoolean("isSessionConsumed", false)
+            set(value) {
+                safeArguments.putBoolean("isSessionConsumed", value)
+            }
 
         private val addonSettingsEngineView: EngineView
             get() = requireView().findViewById<View>(R.id.addonSettingsEngineView) as EngineView
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             webExtensionId = requireNotNull(arguments?.getString("web_extension_id"))
-            engineSession = components.core.store.state.extensions[webExtensionId]?.popupSession
+
+            // Grab the popup session from the store if available and register it as a custom tab.
+            components.core.store.state.extensions[webExtensionId]?.popupSession?.let {
+                initializeSession(it)
+            }
 
             return inflater.inflate(R.layout.fragment_add_on_settings, container, false)
         }
@@ -82,38 +90,31 @@ class WebExtensionActionPopupActivity : AppCompatActivity() {
             } else {
                 consumeFrom(components.core.store) { state ->
                     state.extensions[webExtensionId]?.let { extState ->
-                        extState.popupSession?.let {
-                            if (engineSession == null) {
-                                addonSettingsEngineView.render(it)
-                                consumePopupSession()
-                                engineSession = it
-                            }
+                        val popupSession = extState.popupSession
+                        if (popupSession != null) {
+                            initializeSession(popupSession)
+                            addonSettingsEngineView.render(popupSession)
+                            popupSession.register(this)
+                            consumePopupSession()
+                            engineSession = popupSession
+                        } else if (sessionConsumed) {
+                            // Session was consumed but lost (e.g. Android recreated the activity).
+                            activity?.finish()
                         }
                     }
                 }
             }
         }
 
-        override fun onStart() {
-            super.onStart()
-            engineSession?.register(this)
-        }
-
-        override fun onStop() {
-            super.onStop()
-            engineSession?.unregister(this)
-        }
-
-        override fun onWindowRequest(windowRequest: WindowRequest) {
-            if (windowRequest.type == WindowRequest.Type.CLOSE) {
-                activity?.onBackPressedDispatcher?.onBackPressed()
-            }
+        override fun onDestroyView() {
+            super.onDestroyView()
         }
 
         private fun consumePopupSession() {
             components.core.store.dispatch(
                 WebExtensionAction.UpdatePopupSessionAction(webExtensionId, popupSession = null),
             )
+            sessionConsumed = true
         }
 
         companion object {
