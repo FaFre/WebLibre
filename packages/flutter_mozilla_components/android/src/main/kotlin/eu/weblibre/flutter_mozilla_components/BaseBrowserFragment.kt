@@ -22,6 +22,7 @@ import androidx.annotation.CallSuper
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
@@ -32,12 +33,7 @@ import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
-import mozilla.components.browser.state.action.TabListAction
-import mozilla.components.browser.state.action.WebExtensionAction
-import mozilla.components.browser.state.state.EngineState
-import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.WebExtensionState
-import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.app.links.AppLinksFeature
@@ -521,16 +517,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     protected open fun onEngineSetupComplete() {}
 
     private fun openPopup(webExtensionState: WebExtensionState) {
-        val store = components.core.store
-        val popupSession = store.state.extensions[webExtensionState.id]?.popupSession ?: return
-
-        val tab = createTab(url = "", source = SessionState.Source.Internal.None)
-            .copy(engineState = EngineState(popupSession))
-        store.dispatch(TabListAction.AddTabAction(tab, select = true))
-
-        store.dispatch(
-            WebExtensionAction.UpdatePopupSessionAction(webExtensionState.id, popupSession = null)
+        val intent = Intent(
+            components.profileApplicationContext,
+            WebExtensionActionPopupActivity::class.java
         )
+        intent.putExtra("web_extension_id", webExtensionState.id)
+        intent.putExtra("web_extension_name", webExtensionState.name)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 
     @CallSuper
