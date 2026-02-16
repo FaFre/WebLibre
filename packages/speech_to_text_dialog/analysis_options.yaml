@@ -1,4 +1,4 @@
-include: package:flutter_lints/flutter.yaml
+# Analysis options for speech_to_text_dialog package
+# Includes root configuration from monorepo
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+include: ../../analysis_options.yaml
