@@ -23,8 +23,6 @@ linter:
 analyzer:
   errors:
     overridden_fields: ignore
-  plugins:
-    - custom_lint
   exclude:
     - "**.drift"
     - "**.drift.dart"
