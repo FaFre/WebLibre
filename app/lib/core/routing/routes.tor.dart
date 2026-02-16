@@ -19,12 +19,36 @@
  */
 part of 'routes.dart';
 
-@TypedGoRoute<TorProxyRoute>(name: 'TorProxyRoute', path: '/tor')
+@TypedGoRoute<TorProxyRoute>(
+  name: 'TorProxyRoute',
+  path: '/tor',
+  routes: [
+    TypedGoRoute<TorCountryPickerRoute>(
+      name: 'TorCountryPickerRoute',
+      path: 'country_picker',
+    ),
+  ],
+)
 class TorProxyRoute extends GoRouteData with $TorProxyRoute {
   const TorProxyRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const TorProxyScreen();
+  }
+}
+
+class TorCountryPickerRoute extends GoRouteData with $TorCountryPickerRoute {
+  final String title;
+  final String? $extra;
+
+  const TorCountryPickerRoute({required this.title, this.$extra});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return CountryPickerScreen(
+      title: title,
+      selectedCountryCode: $extra,
+    );
   }
 }

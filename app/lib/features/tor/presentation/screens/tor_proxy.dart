@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:country_codes/country_codes.dart';
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -27,6 +26,8 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/tor/presentation/screens/country_picker.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
@@ -91,29 +92,6 @@ class TorProxyScreen extends HookConsumerWidget {
         await torService.startOrReconfigure(reconfigureIfRunning: true);
       }
     });
-
-    final countryDropdownEntries = useMemoized(
-      () => [
-        const DropdownMenuEntry(value: null, label: 'Automatic'),
-        ...CountryCodes.countryCodes().map((country) {
-          final label =
-              country.localizedName ??
-              country.name ??
-              country.alpha2Code ??
-              country.countryCode ??
-              'Unnamed Country';
-
-          return DropdownMenuEntry(
-            value: country.alpha2Code,
-            label: label,
-            labelWidget: Text(
-              label,
-              style: const TextStyle(color: Colors.white),
-            ),
-          );
-        }),
-      ],
-    );
 
     return Scaffold(
       body: Theme(
@@ -485,111 +463,71 @@ class TorProxyScreen extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16.0,
-                        right: 24.0,
-                        top: 8.0,
-                      ),
-                      child: DropdownMenu(
-                        enabled: !torIsBusy,
-                        initialSelection: torSettings.entryNodeCountry,
-                        menuHeight: 400,
-                        requestFocusOnTap: true,
-                        label: const Text('Entry Country'),
-                        textStyle: const TextStyle(color: Colors.white),
-                        leadingIcon: torSettings.entryNodeCountry.mapNotNull(
-                          (code) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CountryFlag.fromCountryCode(
+                    ListTile(
+                      enabled: !torIsBusy,
+                      leading: torSettings.entryNodeCountry.mapNotNull(
+                            (code) => CountryFlag.fromCountryCode(
                               code,
                               theme: const EmojiTheme(size: 28),
                             ),
-                          ),
-                        ),
-                        trailingIcon: const Icon(
-                          MdiIcons.chevronDown,
-                          color: Colors.white,
-                        ),
-                        inputDecorationTheme: const InputDecorationTheme(
-                          labelStyle: TextStyle(color: Colors.white),
-                          iconColor: Colors.white,
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                        ),
-                        // menuStyle: MenuStyle(
-                        //   backgroundColor:
-                        //       WidgetStateProperty.all<Color>(
-                        //         AppColors.torPurple,
-                        //       ),
-                        // ),
-                        dropdownMenuEntries: countryDropdownEntries,
-                        onSelected: (value) async {
-                          await ref
-                              .read(saveTorSettingsControllerProvider.notifier)
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .entryNodeCountry(value),
-                              );
-                        },
+                          ) ??
+                          const Icon(Icons.public, color: Colors.white),
+                      title: const Text('Entry Country'),
+                      subtitle: Text(
+                        torSettings.entryNodeCountry ?? 'Automatic',
                       ),
+                      trailing: const Icon(
+                        MdiIcons.chevronRight,
+                        color: Colors.white,
+                      ),
+                      onTap: () async {
+                        final result = await TorCountryPickerRoute(
+                          title: 'Entry Country',
+                          $extra: torSettings.entryNodeCountry,
+                        ).push<String>(context);
+                        if (result == null) return;
+                        final value =
+                            result == automaticCountry ? null : result;
+                        await ref
+                            .read(saveTorSettingsControllerProvider.notifier)
+                            .save(
+                              (currentSettings) => currentSettings.copyWith
+                                  .entryNodeCountry(value),
+                            );
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 16.0,
-                        right: 24.0,
-                        top: 8.0,
-                      ),
-                      child: DropdownMenu(
-                        enabled: !torIsBusy,
-                        initialSelection: torSettings.exitNodeCountry,
-                        menuHeight: 400,
-                        requestFocusOnTap: true,
-                        label: const Text('Exit Country'),
-                        textStyle: const TextStyle(color: Colors.white),
-                        leadingIcon: torSettings.exitNodeCountry.mapNotNull(
-                          (code) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CountryFlag.fromCountryCode(
+                    ListTile(
+                      enabled: !torIsBusy,
+                      leading: torSettings.exitNodeCountry.mapNotNull(
+                            (code) => CountryFlag.fromCountryCode(
                               code,
                               theme: const EmojiTheme(size: 28),
                             ),
-                          ),
-                        ),
-                        trailingIcon: const Icon(
-                          MdiIcons.chevronDown,
-                          color: Colors.white,
-                        ),
-                        inputDecorationTheme: const InputDecorationTheme(
-                          labelStyle: TextStyle(color: Colors.white),
-                          iconColor: Colors.white,
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                        ),
-                        // menuStyle: MenuStyle(
-                        //   backgroundColor:
-                        //       WidgetStateProperty.all<Color>(
-                        //         AppColors.torPurple,
-                        //       ),
-                        // ),
-                        dropdownMenuEntries: countryDropdownEntries,
-                        onSelected: (value) async {
-                          await ref
-                              .read(saveTorSettingsControllerProvider.notifier)
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .exitNodeCountry(value),
-                              );
-                        },
+                          ) ??
+                          const Icon(Icons.public, color: Colors.white),
+                      title: const Text('Exit Country'),
+                      subtitle: Text(
+                        torSettings.exitNodeCountry ?? 'Automatic',
                       ),
+                      trailing: const Icon(
+                        MdiIcons.chevronRight,
+                        color: Colors.white,
+                      ),
+                      onTap: () async {
+                        final result = await TorCountryPickerRoute(
+                          title: 'Exit Country',
+                          $extra: torSettings.exitNodeCountry,
+                        ).push<String>(context);
+                        if (result == null) return;
+                        final value =
+                            result == automaticCountry ? null : result;
+                        await ref
+                            .read(saveTorSettingsControllerProvider.notifier)
+                            .save(
+                              (currentSettings) => currentSettings.copyWith
+                                  .exitNodeCountry(value),
+                            );
+                      },
                     ),
                   ],
                 ),

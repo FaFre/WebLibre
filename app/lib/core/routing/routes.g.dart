@@ -1795,6 +1795,13 @@ RouteBase get $torProxyRoute => GoRouteData.$route(
   path: '/tor',
   name: 'TorProxyRoute',
   factory: $TorProxyRoute._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: 'country_picker',
+      name: 'TorCountryPickerRoute',
+      factory: $TorCountryPickerRoute._fromState,
+    ),
+  ],
 );
 
 mixin $TorProxyRoute on GoRouteData {
@@ -1815,4 +1822,35 @@ mixin $TorProxyRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TorCountryPickerRoute on GoRouteData {
+  static TorCountryPickerRoute _fromState(GoRouterState state) =>
+      TorCountryPickerRoute(
+        title: state.uri.queryParameters['title']!,
+        $extra: state.extra as String?,
+      );
+
+  TorCountryPickerRoute get _self => this as TorCountryPickerRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/tor/country_picker',
+    queryParams: {'title': _self.title},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
