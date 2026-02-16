@@ -10,6 +10,8 @@ linter:
     collection_methods_unrelated_type: true
 
 analyzer:
+  errors:
+    experimental_member_use: ignore
   exclude:
     - "**.g.dart"
     - "**.drift"
