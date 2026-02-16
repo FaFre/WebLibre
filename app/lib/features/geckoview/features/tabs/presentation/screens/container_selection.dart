@@ -33,7 +33,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerSelectionScreen extends HookConsumerWidget {
-  const ContainerSelectionScreen();
+  const ContainerSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

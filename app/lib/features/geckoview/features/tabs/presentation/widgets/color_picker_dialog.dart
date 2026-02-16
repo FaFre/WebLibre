@@ -25,7 +25,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 class ColorPickerDialog extends HookWidget {
   final Color initialColor;
 
-  const ColorPickerDialog(this.initialColor);
+  const ColorPickerDialog(this.initialColor, {super.key});
 
   @override
   Widget build(BuildContext context) {

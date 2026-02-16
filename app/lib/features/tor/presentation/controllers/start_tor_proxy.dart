@@ -17,51 +17,49 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_notification.dart';
 
 part 'start_tor_proxy.g.dart';
 
 @Riverpod(keepAlive: true)
 class StartProxyController extends _$StartProxyController {
-  // ignore: document_ignores is used for dialog
-  // ignore: avoid_build_context_in_providers
-  Future<void> maybeStartProxy(BuildContext context) async {
+  Future<bool> shouldPromptProxyStart() async {
     final currentStatus = await ref
         .read(torProxyServiceProvider.notifier)
         .requestSync();
 
-    if (!currentStatus.isRunning) {
-      if (context.mounted) {
-        final result = await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return const TorDialog();
-          },
-        );
+    return !currentStatus.isRunning;
+  }
 
-        if (result == true) {
-          final connection = ref
-              .read(torProxyServiceProvider.notifier)
-              .startOrReconfigure(reconfigureIfRunning: false);
+  Future<void> startProxy() async {
+    if (state) return;
 
-          ref
-              .read(overlayControllerProvider.notifier)
-              .show(
-                (context) =>
-                    Positioned(top: 0, left: 0, child: TorNotification()),
-              );
+    state = true;
 
-          await connection;
-        }
-      }
+    try {
+      final connection = ref
+          .read(torProxyServiceProvider.notifier)
+          .startOrReconfigure(reconfigureIfRunning: false);
+
+      ref
+          .read(overlayControllerProvider.notifier)
+          .show(
+            (context) =>
+                const Positioned(top: 0, left: 0, child: TorNotification()),
+          );
+
+      await connection;
+    } finally {
+      state = false;
     }
   }
 
   @override
-  void build() {}
+  bool build() {
+    return false;
+  }
 }

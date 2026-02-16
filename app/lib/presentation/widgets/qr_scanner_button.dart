@@ -26,7 +26,7 @@ import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dia
 class QrScannerButton extends HookConsumerWidget {
   final void Function(Barcode? scanResult) onScanResult;
 
-  const QrScannerButton({required this.onScanResult});
+  const QrScannerButton({super.key, required this.onScanResult});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,7 +35,7 @@ class QrScannerButton extends HookConsumerWidget {
         final result = await showDialog<Barcode>(
           context: context,
           builder: (context) {
-            return QrScannerDialog();
+            return const QrScannerDialog();
           },
         );
 

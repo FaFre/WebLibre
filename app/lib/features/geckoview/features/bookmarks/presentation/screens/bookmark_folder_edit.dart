@@ -32,7 +32,11 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
   final String? parentGuid;
   final BookmarkFolder? folder;
 
-  const BookmarkFolderEditScreen({required this.folder, this.parentGuid});
+  const BookmarkFolderEditScreen({
+    super.key,
+    required this.folder,
+    this.parentGuid,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -31,7 +31,7 @@ final _filenamePattern = RegExp(
 );
 
 class ProfileBackupListScreen extends HookConsumerWidget {
-  const ProfileBackupListScreen();
+  const ProfileBackupListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

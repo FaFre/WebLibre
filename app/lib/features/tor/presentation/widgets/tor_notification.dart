@@ -26,6 +26,8 @@ import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/presentation/widgets/animate_gradient_shader.dart';
 
 class TorNotification extends HookConsumerWidget {
+  const TorNotification({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);

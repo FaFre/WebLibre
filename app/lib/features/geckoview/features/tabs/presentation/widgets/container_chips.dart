@@ -145,7 +145,7 @@ class ContainerChips extends HookConsumerWidget {
 
   final ValueListenable<TextEditingValue>? searchTextListenable;
 
-  const ContainerChips({
+  const ContainerChips({super.key, 
     required this.selectedContainer,
     required this.onSelected,
     required this.onDeleted,

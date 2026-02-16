@@ -28,7 +28,7 @@ import 'package:weblibre/features/web_feed/presentation/widgets/feed_card.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class FeedListScreen extends HookConsumerWidget {
-  const FeedListScreen();
+  const FeedListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

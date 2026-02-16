@@ -17,7 +17,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  logger: ^2.6.2
   simple_intent_receiver:
     # When depending on this package from a real application you should use:
     #   simple_intent_receiver: ^x.y.z
@@ -26,15 +26,10 @@ dependencies:
     # the parent directory to use the current plugin's version.
     path: ../
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
-  logger: ^2.6.2
-
 dev_dependencies:
-  integration_test:
-    sdk: flutter
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to

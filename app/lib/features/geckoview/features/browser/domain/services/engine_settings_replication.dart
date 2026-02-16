@@ -221,7 +221,6 @@ class EngineSettingsReplicationService
               );
             }
             if (previous.value?.enablePdfJs != settings.enablePdfJs) {
-              // ignore: only_use_keep_alive_inside_keep_alive
               await ref
                   .read(preferenceFixatorProvider.notifier)
                   .register('pdfjs.disabled', !settings.enablePdfJs);
@@ -230,7 +229,6 @@ class EngineSettingsReplicationService
               previous.value?.locales,
               settings.locales,
             )) {
-              // ignore: only_use_keep_alive_inside_keep_alive
               await ref
                   .read(preferenceFixatorProvider.notifier)
                   .register(
@@ -240,13 +238,9 @@ class EngineSettingsReplicationService
             }
           } else {
             await _service.setDefaultSettings(settings);
-
-            // ignore: only_use_keep_alive_inside_keep_alive
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('pdfjs.disabled', !settings.enablePdfJs);
-
-            // ignore: only_use_keep_alive_inside_keep_alive
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('intl.accept_languages', settings.locales.join(','));

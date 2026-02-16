@@ -52,7 +52,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
   final double bottomAppBarHeight;
   final ValueChanged<bool>? onClearSiteDataExpandedChanged;
 
-  const ViewTabSheetWidget({
+  const ViewTabSheetWidget({super.key, 
     required this.initialTabState,
     required this.sheetScrollController,
     required this.draggableScrollableController,

@@ -31,10 +31,11 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
+import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
-  const ContainerListScreen();
+  const ContainerListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,9 +71,28 @@ class ContainerListScreen extends HookConsumerWidget {
                               if (context.mounted &&
                                   result ==
                                       SetContainerResult.successHasProxy) {
-                                await ref
+                                final shouldStartProxy = await ref
                                     .read(startProxyControllerProvider.notifier)
-                                    .maybeStartProxy(context);
+                                    .shouldPromptProxyStart();
+
+                                if (!context.mounted || !shouldStartProxy) {
+                                  return;
+                                }
+
+                                final dialogResult = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) {
+                                    return const TorDialog();
+                                  },
+                                );
+
+                                if (dialogResult == true) {
+                                  await ref
+                                      .read(
+                                        startProxyControllerProvider.notifier,
+                                      )
+                                      .startProxy();
+                                }
                               }
                             },
                             foregroundColor: Theme.of(

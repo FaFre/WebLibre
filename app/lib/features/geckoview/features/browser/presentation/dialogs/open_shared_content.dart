@@ -32,7 +32,7 @@ import 'package:weblibre/utils/form_validators.dart';
 class OpenSharedContent extends HookConsumerWidget {
   final Uri sharedUrl;
 
-  const OpenSharedContent({required this.sharedUrl});
+  const OpenSharedContent({super.key, required this.sharedUrl});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -28,7 +28,7 @@ import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class DefaultSearchSelector extends HookConsumerWidget {
-  const DefaultSearchSelector();
+  const DefaultSearchSelector({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

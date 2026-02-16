@@ -46,7 +46,7 @@ class TabDataRepository extends _$TabDataRepository {
           .tabDao
           .assignContainer(tabId, containerId: targetContainer.id);
     } else {
-      final tabState = ref.read(tabStateProvider(tabId));
+      final tabState = ref.read(tabStatesProvider)[tabId];
       if (tabState != null) {
         if (closeOldTab) {
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
@@ -76,7 +76,7 @@ class TabDataRepository extends _$TabDataRepository {
           .tabDao
           .assignContainer(tabId, containerId: null);
     } else {
-      final tabState = ref.read(tabStateProvider(tabId));
+      final tabState = ref.read(tabStatesProvider)[tabId];
       if (tabState != null) {
         await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 

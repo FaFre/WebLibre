@@ -25,7 +25,7 @@ class SyncDetailsTable extends StatelessWidget {
   final int? count;
   final DateTime? lastSync;
 
-  const SyncDetailsTable(this.count, this.lastSync);
+  const SyncDetailsTable(this.count, this.lastSync, {super.key});
 
   @override
   Widget build(BuildContext context) {

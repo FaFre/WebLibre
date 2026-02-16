@@ -23,7 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 
 class BangMenuScreen extends HookConsumerWidget {
-  const BangMenuScreen();
+  const BangMenuScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

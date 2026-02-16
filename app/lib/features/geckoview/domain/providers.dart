@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,7 +31,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
@@ -46,11 +47,17 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
           final router = await ref.read(routerProvider.future);
           if (ref.mounted) {
             final settings = ref.read(generalSettingsWithDefaultsProvider);
+            final selectedTabState = ref.read(
+              tabStatesProvider,
+            )[ref.read(selectedTabProvider)];
+
+            final isPrivate = selectedTabState?.isPrivate.mapNotNull(
+              (isCurrentPrivate) =>
+                  isCurrentPrivate ? TabType.private : TabType.regular,
+            );
+
             final route = SearchRoute(
-              tabType:
-                  // ignore: only_use_keep_alive_inside_keep_alive
-                  ref.read(selectedTabTypeProvider) ??
-                  settings.defaultCreateTabType,
+              tabType: isPrivate ?? settings.defaultCreateTabType,
               searchText: text,
             );
 
@@ -65,8 +72,10 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
           );
 
           if (ref.mounted && defaultSearchBang != null) {
-            // ignore: only_use_keep_alive_inside_keep_alive
-            final currentTab = ref.read(selectedTabStateProvider);
+            final currentTab = ref.read(
+              tabStatesProvider,
+            )[ref.read(selectedTabProvider)];
+
             final isPrivate =
                 currentTab?.isPrivate ??
                 ref
@@ -91,10 +100,9 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         if (ref.mounted) {
           final tabId = ref.read(selectedTabProvider);
           if (tabId != null) {
-            // ignore: only_use_keep_alive_inside_keep_alive
             await ref
-                .read(findInPageControllerProvider(tabId).notifier)
-                .findAll(text: text);
+                .read(findInPageRepositoryProvider(tabId).notifier)
+                .findAll(text);
           }
         }
       }),

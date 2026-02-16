@@ -848,7 +848,7 @@ final class WatchAllAssignedSitesProvider
         argument: null,
         retry: null,
         name: r'watchAllAssignedSitesProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -869,7 +869,7 @@ final class WatchAllAssignedSitesProvider
 }
 
 String _$watchAllAssignedSitesHash() =>
-    r'0e06caeb4a53b5cf976b3f47d328ea238243438b';
+    r'5f658b5733ee20192eb86d3aeb79aa9678dafba8';
 
 @ProviderFor(watchIsCurrentSiteAssignedToContainer)
 final watchIsCurrentSiteAssignedToContainerProvider =

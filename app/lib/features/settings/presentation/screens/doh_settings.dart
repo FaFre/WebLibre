@@ -28,7 +28,7 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/utils/form_validators.dart';
 
 class DohSettingsScreen extends HookConsumerWidget {
-  const DohSettingsScreen();
+  const DohSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

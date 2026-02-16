@@ -29,7 +29,7 @@ import 'package:weblibre/features/user/domain/services/fingerprinting.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class FingerprintSettingsScreen extends HookConsumerWidget {
-  const FingerprintSettingsScreen();
+  const FingerprintSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

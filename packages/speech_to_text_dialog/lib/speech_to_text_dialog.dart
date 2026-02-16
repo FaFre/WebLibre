@@ -20,7 +20,7 @@
 
 import 'dart:async';
 import 'package:flutter/services.dart' show BinaryMessenger;
-import 'src/pigeons/speech_to_text.g.dart';
+import 'package:speech_to_text_dialog/src/pigeons/speech_to_text.g.dart';
 
 /// Speech recognition dialog using Android's RecognizerIntent.
 ///
@@ -82,7 +82,7 @@ class SpeechToTextDialog implements SpeechToTextEvents {
   ///   print('Speech recognition not available');
   /// }
   /// ```
-  Future<bool> showDialog({String? locale}) async {
+  Future<bool> showDialog({String? locale}) {
     return _api.showDialog(locale: locale);
   }
 
@@ -101,7 +101,7 @@ class SpeechToTextDialog implements SpeechToTextEvents {
     if (!_disposed) {
       _disposed = true;
       SpeechToTextEvents.setUp(null, binaryMessenger: _binaryMessenger);
-      _textStreamController.close();
+      unawaited(_textStreamController.close());
     }
   }
 }

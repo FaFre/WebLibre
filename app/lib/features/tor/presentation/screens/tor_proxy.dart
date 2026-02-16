@@ -24,9 +24,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/tor/presentation/screens/country_picker.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
@@ -34,7 +34,7 @@ import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class TorProxyScreen extends HookConsumerWidget {
-  const TorProxyScreen();
+  const TorProxyScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -465,7 +465,8 @@ class TorProxyScreen extends HookConsumerWidget {
                     ),
                     ListTile(
                       enabled: !torIsBusy,
-                      leading: torSettings.entryNodeCountry.mapNotNull(
+                      leading:
+                          torSettings.entryNodeCountry.mapNotNull(
                             (code) => CountryFlag.fromCountryCode(
                               code,
                               theme: const EmojiTheme(size: 28),
@@ -486,8 +487,9 @@ class TorProxyScreen extends HookConsumerWidget {
                           $extra: torSettings.entryNodeCountry,
                         ).push<String>(context);
                         if (result == null) return;
-                        final value =
-                            result == automaticCountry ? null : result;
+                        final value = result == automaticCountry
+                            ? null
+                            : result;
                         await ref
                             .read(saveTorSettingsControllerProvider.notifier)
                             .save(
@@ -498,7 +500,8 @@ class TorProxyScreen extends HookConsumerWidget {
                     ),
                     ListTile(
                       enabled: !torIsBusy,
-                      leading: torSettings.exitNodeCountry.mapNotNull(
+                      leading:
+                          torSettings.exitNodeCountry.mapNotNull(
                             (code) => CountryFlag.fromCountryCode(
                               code,
                               theme: const EmojiTheme(size: 28),
@@ -519,8 +522,9 @@ class TorProxyScreen extends HookConsumerWidget {
                           $extra: torSettings.exitNodeCountry,
                         ).push<String>(context);
                         if (result == null) return;
-                        final value =
-                            result == automaticCountry ? null : result;
+                        final value = result == automaticCountry
+                            ? null
+                            : result;
                         await ref
                             .read(saveTorSettingsControllerProvider.notifier)
                             .save(

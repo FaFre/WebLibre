@@ -31,7 +31,6 @@ Future<bool> widgetPinnable(Ref ref) async {
 
 @Riverpod()
 Raw<Stream<ReceivedIntentParameter>> appWidgetLaunchStream(Ref ref) {
-  // ignore: discarded_futures is used as stream
   final initialStream = HomeWidget.initiallyLaunchedFromHomeWidget().asStream();
 
   return ConcatStream([

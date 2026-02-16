@@ -25,7 +25,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 
 part 'preference_observer.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class PreferenceChangeListener extends _$PreferenceChangeListener {
   @override
   Stream<GeckoPref> build() async* {
@@ -41,7 +41,7 @@ class PreferenceChangeListener extends _$PreferenceChangeListener {
   }
 }
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class PreferenceFixator extends _$PreferenceFixator {
   Future<void> register(String name, Object value) async {
     state = {...state}

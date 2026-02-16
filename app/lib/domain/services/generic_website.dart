@@ -37,7 +37,6 @@ import 'package:weblibre/extensions/http_encoding.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/web_feed/utils/feed_finder.dart';
-import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 
 part 'generic_website.g.dart';
@@ -87,6 +86,8 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   late CacheRepository _cacheRepository;
   //Local decoded icon cache
   late final LRUCache<String, BrowserIcon> _browserIconCache;
+  //In-flight fetch deduplication
+  final _inFlightFetches = <Uri, Future<Result<WebPageInfo>>>{};
 
   GenericWebsiteService()
     : _iconsService = GeckoIconService(),
@@ -344,6 +345,13 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     );
   }
 
+  Future<Result<WebPageInfo>> _deduplicatedFetchPageInfo(Uri url) {
+    return _inFlightFetches.putIfAbsent(url, () {
+      return fetchPageInfo(url: url, isImageRequest: true, proxyPort: null)
+          .whenComplete(() => _inFlightFetches.remove(url));
+    });
+  }
+
   Future<BrowserIcon?> getUrlIcon(List<Uri> urlList) async {
     for (final url in urlList) {
       final cachedIcon = await getCachedIcon(url);
@@ -353,18 +361,17 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       }
 
       if (ref.mounted) {
-        // ignore: only_use_keep_alive_inside_keep_alive
-        final result = await ref.read(
-          pageInfoProvider(url, isImageRequest: true).future,
-        );
+        final result = await _deduplicatedFetchPageInfo(url);
 
-        if (result.favicon case final BrowserIcon favicon) {
-          //If it was a `isImageRequest` hit, we need to cache it at this point
-          if (!_browserIconCache.contains(url.origin)) {
-            _browserIconCache.set(url.origin, favicon);
+        if (result.isSuccess) {
+          if (result.value.favicon case final BrowserIcon favicon) {
+            //If it was a `isImageRequest` hit, we need to cache it at this point
+            if (!_browserIconCache.contains(url.origin)) {
+              _browserIconCache.set(url.origin, favicon);
+            }
+
+            return favicon;
           }
-
-          return favicon;
         }
       }
     }

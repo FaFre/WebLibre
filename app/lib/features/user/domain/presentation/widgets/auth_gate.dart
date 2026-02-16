@@ -27,7 +27,7 @@ import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 
 class LockScreen extends HookConsumerWidget {
-  const LockScreen();
+  const LockScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

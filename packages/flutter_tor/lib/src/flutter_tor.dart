@@ -57,9 +57,9 @@ class FlutterTor {
     // Unregister the Flutter API handler
     TorLogApi.setUp(null);
 
-    _logController.close();
-    _statusController.close();
-    _bootstrapController.close();
+    unawaited(_logController.close());
+    unawaited(_statusController.close());
+    unawaited(_bootstrapController.close());
   }
 }
 

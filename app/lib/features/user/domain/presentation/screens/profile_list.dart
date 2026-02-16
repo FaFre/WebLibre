@@ -28,7 +28,7 @@ import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ProfileListScreen extends HookConsumerWidget {
-  const ProfileListScreen();
+  const ProfileListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

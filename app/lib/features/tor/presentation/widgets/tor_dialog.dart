@@ -23,7 +23,7 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 class TorDialog extends StatelessWidget {
-  const TorDialog();
+  const TorDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

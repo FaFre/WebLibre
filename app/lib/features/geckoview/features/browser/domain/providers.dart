@@ -175,7 +175,7 @@ EquatableValue<List<TabStateWirthContainer>> fifoTabStates(Ref ref) {
   ]);
 }
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 EquatableValue<List<TabStateWirthContainer>>
 selectedContainerTabStatesWithContainer(Ref ref) {
   final filter = ref.watch(

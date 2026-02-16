@@ -29,7 +29,7 @@ import 'package:weblibre/features/settings/presentation/widgets/hardening_group_
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class WebEngineHardeningScreen extends HookConsumerWidget {
-  const WebEngineHardeningScreen();
+  const WebEngineHardeningScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

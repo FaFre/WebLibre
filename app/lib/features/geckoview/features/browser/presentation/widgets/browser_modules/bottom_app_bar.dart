@@ -68,7 +68,7 @@ class BrowserTopAppBar extends HookConsumerWidget {
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
 
-  BrowserTopAppBar({
+  BrowserTopAppBar({super.key, 
     required this.showMainToolbar,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
@@ -103,7 +103,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
 
-  BrowserBottomAppBar({
+  BrowserBottomAppBar({super.key, 
     required this.showMainToolbar,
     required this.displayedSheet,
     required this.showContextualToolbar,
@@ -148,7 +148,7 @@ class BrowserTabBar extends HookConsumerWidget {
   final bool showMainToolbarNavigationButton;
   final bool showMainToolbarTabActionButton;
 
-  const BrowserTabBar({
+  const BrowserTabBar({super.key, 
     required this.showMainToolbar,
     required this.displayedSheet,
     required this.showContextualToolbar,
@@ -476,7 +476,7 @@ class ContextualToolbar extends HookConsumerWidget {
 class QuickTabSwitcher extends HookConsumerWidget {
   final QuickTabSwitcherMode quickTabSwitcherMode;
 
-  const QuickTabSwitcher({required this.quickTabSwitcherMode});
+  const QuickTabSwitcher({super.key, required this.quickTabSwitcherMode});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -685,7 +685,7 @@ class NavigationMenuButton extends StatelessWidget {
 }
 
 class AddTabButton extends HookConsumerWidget {
-  const AddTabButton();
+  const AddTabButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

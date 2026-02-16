@@ -29,7 +29,7 @@ import 'package:weblibre/presentation/widgets/failure_widget.dart';
 class SelectFeedDialog extends HookConsumerWidget {
   final Set<Uri> feedUris;
 
-  const SelectFeedDialog({required this.feedUris});
+  const SelectFeedDialog({super.key, required this.feedUris});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

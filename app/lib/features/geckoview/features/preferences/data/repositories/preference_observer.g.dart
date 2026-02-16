@@ -20,7 +20,7 @@ final class PreferenceChangeListenerProvider
         argument: null,
         retry: null,
         name: r'preferenceChangeListenerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -34,7 +34,7 @@ final class PreferenceChangeListenerProvider
 }
 
 String _$preferenceChangeListenerHash() =>
-    r'668c1bcd0636ec515a5e92ee5ba4ea7a67fa7a6d';
+    r'de9759b32a6a6b9bab5656137a365da78633f866';
 
 abstract class _$PreferenceChangeListener extends $StreamNotifier<GeckoPref> {
   Stream<GeckoPref> build();
@@ -65,7 +65,7 @@ final class PreferenceFixatorProvider
         argument: null,
         retry: null,
         name: r'preferenceFixatorProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -86,7 +86,7 @@ final class PreferenceFixatorProvider
   }
 }
 
-String _$preferenceFixatorHash() => r'c76245d5c420e2e3f6c026f23c017c939b69ef59';
+String _$preferenceFixatorHash() => r'c8d71966faf6b2feb9ac4e770297cd298edf5211';
 
 abstract class _$PreferenceFixator extends $Notifier<Map<String, Object>> {
   Map<String, Object> build();

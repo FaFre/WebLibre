@@ -452,7 +452,7 @@ final class SelectedContainerTabStatesWithContainerProvider
         argument: null,
         retry: null,
         name: r'selectedContainerTabStatesWithContainerProvider',
-        isAutoDispose: false,
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -487,7 +487,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'd22d16eba89040fbcf7932e5334155f00312957f';
+    r'2fd5e12595b3aced1e235c9626073c34655d57fa';
 
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();

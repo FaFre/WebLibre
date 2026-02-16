@@ -30,6 +30,7 @@ const automaticCountry = '';
 
 class CountryPickerScreen extends HookWidget {
   const CountryPickerScreen({
+    super.key,
     required this.title,
     this.selectedCountryCode,
   });
@@ -51,20 +52,16 @@ class CountryPickerScreen extends HookWidget {
             country.countryCode ??
             'Unnamed Country';
         return (alpha2Code: country.alpha2Code, label: label);
-      }).toList()
-        ..sort((a, b) => a.label.compareTo(b.label));
+      }).toList()..sort((a, b) => a.label.compareTo(b.label));
     });
 
-    final filteredCountries = useMemoized(
-      () {
-        if (searchQuery.value.isEmpty) return countries;
-        final query = searchQuery.value.toLowerCase();
-        return countries
-            .where((c) => c.label.toLowerCase().contains(query))
-            .toList();
-      },
-      [searchQuery.value, countries],
-    );
+    final filteredCountries = useMemoized(() {
+      if (searchQuery.value.isEmpty) return countries;
+      final query = searchQuery.value.toLowerCase();
+      return countries
+          .where((c) => c.label.toLowerCase().contains(query))
+          .toList();
+    }, [searchQuery.value, countries]);
 
     return Scaffold(
       appBar: AppBar(
@@ -95,7 +92,7 @@ class CountryPickerScreen extends HookWidget {
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                contentPadding: EdgeInsets.zero,
               ),
               onChanged: (value) => searchQuery.value = value,
             ),

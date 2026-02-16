@@ -50,7 +50,7 @@ class TabSearch extends HookConsumerWidget {
 
   final ValueListenable<TextEditingValue> searchTextListenable;
 
-  const TabSearch({required this.searchTextListenable});
+  const TabSearch({super.key, required this.searchTextListenable});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,7 +76,7 @@ class TabSearch extends HookConsumerWidget {
             .fold(
               <String?, int>{},
               (map, id) =>
-                  map..update(id, (value) => ++value, ifAbsent: () => 1),
+                  map..update(id, (value) => value + 1, ifAbsent: () => 1),
             ),
       ),
       [tabSearchResults],

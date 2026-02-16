@@ -25,7 +25,7 @@ import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 class ExtensionBadgeIcon extends StatelessWidget {
   final WebExtensionState state;
 
-  const ExtensionBadgeIcon(this.state);
+  const ExtensionBadgeIcon(this.state, {super.key});
 
   @override
   Widget build(BuildContext context) {

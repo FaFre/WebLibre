@@ -30,7 +30,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
 
 class TabViewScreen extends HookConsumerWidget {
-  const TabViewScreen();
+  const TabViewScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -59,7 +59,7 @@ class SearchScreen extends HookConsumerWidget {
   /// When null, a new tab will be created.
   final String? tabId;
 
-  const SearchScreen({
+  const SearchScreen({super.key, 
     required this.initialSearchText,
     required this.tabType,
     this.launchedFromIntent = false,

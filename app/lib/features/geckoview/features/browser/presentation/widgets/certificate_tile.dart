@@ -25,7 +25,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 
 class CertificateTile extends HookConsumerWidget {
-  const CertificateTile();
+  const CertificateTile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 class ErrorContainer extends StatelessWidget {
   final Widget content;
 
-  const ErrorContainer({required this.content});
+  const ErrorContainer({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {

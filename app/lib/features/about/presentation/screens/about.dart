@@ -26,7 +26,7 @@ import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 
 class AboutDialogScreen extends HookConsumerWidget {
-  const AboutDialogScreen();
+  const AboutDialogScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

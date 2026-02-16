@@ -95,7 +95,6 @@ class TabRepository extends _$TabRepository {
     final assingedContainer =
         container ??
         Value<ContainerData?>(
-          // ignore: only_use_keep_alive_inside_keep_alive
           await ref.read(selectedContainerProvider.notifier).fetchData(),
         );
 
@@ -295,8 +294,7 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<void> _selectNextTab(String tabId) async {
-    // ignore: only_use_keep_alive_inside_keep_alive
-    final tabState = ref.read(tabStateProvider(tabId));
+    final tabState = ref.read(tabStatesProvider)[tabId];
 
     final currentContainerId = await ref
         .read(tabDataRepositoryProvider.notifier)
@@ -382,13 +380,12 @@ class TabRepository extends _$TabRepository {
 
     if (!ref.mounted) return;
 
-    final nextContainerTabs = await nextAvailableContainer
-        .mapNotNull(
-          (container) => ref
-              .read(containerRepositoryProvider.notifier)
-              .getContainerTabIds(container.id)
-              .then((tabs) => tabs.where((tab) => tab != tabId).toList()),
-        );
+    final nextContainerTabs = await nextAvailableContainer.mapNotNull(
+      (container) => ref
+          .read(containerRepositoryProvider.notifier)
+          .getContainerTabIds(container.id)
+          .then((tabs) => tabs.where((tab) => tab != tabId).toList()),
+    );
 
     if (nextContainerTabs.isNotEmpty) {
       return _tabsService.selectTab(tabId: nextContainerTabs!.first);
@@ -446,8 +443,7 @@ class TabRepository extends _$TabRepository {
     final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen(
       (event) async {
         if (event.tabId != null) {
-          // ignore: only_use_keep_alive_inside_keep_alive
-          final tabState = ref.read(tabStateProvider(event.tabId));
+          final tabState = ref.read(tabStatesProvider)[event.tabId];
           if (tabState != null) {
             final uri = Uri.parse(event.url);
             final originUri = event.originUrl.mapNotNull(Uri.parse);

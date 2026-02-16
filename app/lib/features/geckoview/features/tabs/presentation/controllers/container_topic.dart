@@ -37,7 +37,7 @@ class ContainerTopicController extends _$ContainerTopicController {
     return _predictFromTitles(titles);
   }
 
-  Future<String?> predictTopicFromTabIds(Set<String> tabIds) async {
+  Future<String?> predictTopicFromTabIds(Set<String> tabIds) {
     final tabStates = ref.read(tabStatesProvider);
     final titles = tabIds
         .map((tabId) => tabStates[tabId]?.title)

@@ -25,7 +25,7 @@ import 'package:weblibre/features/web_feed/data/models/feed_author.dart';
 class AuthorsHorizontalList extends StatelessWidget {
   late final List<Widget> _authors;
 
-  AuthorsHorizontalList({
+  AuthorsHorizontalList({super.key, 
     required List<FeedAuthor> authors,
     Set<String> selectedTags = const {},
     void Function(String tagId, bool value)? onTagSelected,

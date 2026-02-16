@@ -33,7 +33,7 @@ import 'package:weblibre/presentation/widgets/failure_widget.dart';
 class UserBangs extends HookConsumerWidget {
   static const _userGroupFilter = [BangGroup.user];
 
-  const UserBangs();
+  const UserBangs({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

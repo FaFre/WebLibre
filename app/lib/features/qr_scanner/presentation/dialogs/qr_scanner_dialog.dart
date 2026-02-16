@@ -25,6 +25,8 @@ import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class QrScannerDialog extends HookWidget {
+  const QrScannerDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     final qrKey = useMemoized(() => GlobalKey(debugLabel: 'qr_scanner'));

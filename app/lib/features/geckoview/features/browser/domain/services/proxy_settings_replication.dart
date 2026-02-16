@@ -135,7 +135,6 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       },
     );
 
-    // ignore: only_use_keep_alive_inside_keep_alive
     ref.listen(watchAllAssignedSitesProvider, (previous, next) async {
       if (next.hasValue) {
         await ref

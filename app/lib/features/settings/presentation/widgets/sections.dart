@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 class SettingSection extends StatelessWidget {
   final String name;
 
-  const SettingSection({required this.name});
+  const SettingSection({super.key, required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class SettingSection extends StatelessWidget {
 class SettingSubSection extends StatelessWidget {
   final String name;
 
-  const SettingSubSection({required this.name});
+  const SettingSubSection({super.key, required this.name});
 
   @override
   Widget build(BuildContext context) {

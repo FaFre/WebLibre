@@ -31,7 +31,7 @@ import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 /// Bottom sheet widget to select a user profile.
 class SelectProfileDialog extends HookConsumerWidget {
-  const SelectProfileDialog();
+  const SelectProfileDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

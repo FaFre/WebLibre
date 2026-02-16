@@ -46,7 +46,7 @@ const _timeoutOptions = <DropdownMenuItem<Duration?>>[
 class ProfileEditScreen extends HookConsumerWidget {
   final Profile? profile;
 
-  const ProfileEditScreen({required this.profile});
+  const ProfileEditScreen({super.key, required this.profile});
 
   Future<void> _handleSave(
     BuildContext context,

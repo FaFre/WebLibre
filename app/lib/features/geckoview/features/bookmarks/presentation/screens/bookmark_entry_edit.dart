@@ -35,6 +35,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
   final BookmarkEntry? exisitingEntry;
 
   const BookmarkEntryEditScreen({
+    super.key,
     required this.exisitingEntry,
     required this.initialInfo,
   });

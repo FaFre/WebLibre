@@ -32,7 +32,7 @@ import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 class FeedArticleListScreen extends HookConsumerWidget {
   final Uri? feedId;
 
-  const FeedArticleListScreen({required this.feedId});
+  const FeedArticleListScreen({super.key, required this.feedId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

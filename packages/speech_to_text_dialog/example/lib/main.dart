@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:speech_to_text_dialog/speech_to_text_dialog.dart';
 
 void main() {
@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    _textSubscription?.cancel();
+    unawaited(_textSubscription?.cancel());
     _speechToTextDialog.dispose();
     super.dispose();
   }

@@ -25,7 +25,7 @@ import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
 class TagsHorizontalList extends StatelessWidget {
   late final List<Widget> _tags;
 
-  TagsHorizontalList({
+  TagsHorizontalList({super.key, 
     required List<FeedCategory> tags,
     Set<String> selectedTags = const {},
     void Function(String tagId, bool value)? onTagSelected,

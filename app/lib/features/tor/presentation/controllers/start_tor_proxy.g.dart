@@ -13,7 +13,7 @@ part of 'start_tor_proxy.dart';
 final startProxyControllerProvider = StartProxyControllerProvider._();
 
 final class StartProxyControllerProvider
-    extends $NotifierProvider<StartProxyController, void> {
+    extends $NotifierProvider<StartProxyController, bool> {
   StartProxyControllerProvider._()
     : super(
         from: null,
@@ -33,28 +33,28 @@ final class StartProxyControllerProvider
   StartProxyController create() => StartProxyController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
+  Override overrideWithValue(bool value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
+      providerOverride: $SyncValueProvider<bool>(value),
     );
   }
 }
 
 String _$startProxyControllerHash() =>
-    r'13c6ad9611a2f9525689d370a0511274aa9c0f03';
+    r'899b585bf7f220251ac92f11c79537cc07723241';
 
-abstract class _$StartProxyController extends $Notifier<void> {
-  void build();
+abstract class _$StartProxyController extends $Notifier<bool> {
+  bool build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<void, void>;
+    final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
+              AnyNotifier<bool, bool>,
+              bool,
               Object?,
               Object?
             >;

@@ -42,7 +42,7 @@ class FeedSearch extends HookConsumerWidget {
 
   final ValueListenable<TextEditingValue> searchTextNotifier;
 
-  const FeedSearch({required this.searchTextNotifier});
+  const FeedSearch({super.key, required this.searchTextNotifier});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

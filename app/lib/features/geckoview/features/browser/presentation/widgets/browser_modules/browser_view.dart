@@ -68,7 +68,7 @@ class BrowserView extends StatefulHookConsumerWidget {
   final Future<void> Function()? postInitializationStep;
   final StreamSink<Offset>? pointerMoveEventSink;
 
-  const BrowserView({
+  const BrowserView({super.key, 
     this.screenshotPeriod = const Duration(seconds: 10),
     this.suggestionTimeout = const Duration(seconds: 30),
     this.postInitializationStep,

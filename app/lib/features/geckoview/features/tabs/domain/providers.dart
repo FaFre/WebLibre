@@ -149,7 +149,7 @@ Stream<Map<String, String?>> watchTabsContainerId(
       .map(Map.fromEntries);
 }
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
   return db.containerDao.allAssignedSites().watch();

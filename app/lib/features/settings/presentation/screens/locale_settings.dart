@@ -31,7 +31,7 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 
 class LocaleSettingsScreen extends HookConsumerWidget {
-  const LocaleSettingsScreen();
+  const LocaleSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

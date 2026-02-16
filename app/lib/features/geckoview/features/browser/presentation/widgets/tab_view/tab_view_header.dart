@@ -44,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
+import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
@@ -55,7 +56,11 @@ class TabViewHeader extends HookConsumerWidget {
   final TabsViewMode tabsViewMode;
   final VoidCallback onClose;
 
-  const TabViewHeader({required this.onClose, required this.tabsViewMode});
+  const TabViewHeader({
+    super.key,
+    required this.onClose,
+    required this.tabsViewMode,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -601,9 +606,24 @@ class TabViewHeader extends HookConsumerWidget {
 
                         if (context.mounted &&
                             result == SetContainerResult.successHasProxy) {
-                          await ref
+                          final shouldStartProxy = await ref
                               .read(startProxyControllerProvider.notifier)
-                              .maybeStartProxy(context);
+                              .shouldPromptProxyStart();
+
+                          if (!context.mounted || !shouldStartProxy) return;
+
+                          final dialogResult = await showDialog<bool>(
+                            context: context,
+                            builder: (context) {
+                              return const TorDialog();
+                            },
+                          );
+
+                          if (dialogResult == true) {
+                            await ref
+                                .read(startProxyControllerProvider.notifier)
+                                .startProxy();
+                          }
                         }
                       } else {
                         ref

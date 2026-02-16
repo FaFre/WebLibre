@@ -1,9 +1,8 @@
+export 'src/flutter_tor.dart';
 export 'src/tor_api.g.dart'
     show
-        TransportType,
+        IPtProxyController,
         TorConfiguration,
-        TorStatus,
         TorLogMessage,
-        IPtProxyController;
-
-export 'src/flutter_tor.dart';
+        TorStatus,
+        TransportType;

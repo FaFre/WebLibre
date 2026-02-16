@@ -31,7 +31,7 @@ import 'package:weblibre/utils/ui_helper.dart';
 class ProfileBackupScreen extends HookConsumerWidget {
   final Profile profile;
 
-  const ProfileBackupScreen({required this.profile});
+  const ProfileBackupScreen({super.key, required this.profile});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
