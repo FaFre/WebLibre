@@ -87,14 +87,75 @@ class _Filesystem {
 
   Future<void> _linkMozillaDir(Directory filesDir) async {
     final mozillaDir = Directory(p.join(selectedProfileDir.path, 'mozilla'));
-    await mozillaDir.create();
+    await mozillaDir.create(recursive: true);
 
-    final mozillaLink = Link(p.join(filesDir.path, 'mozilla'));
-    if (await mozillaLink.exists()) {
-      await mozillaLink.delete();
+    final mozillaPath = p.join(filesDir.path, 'mozilla');
+
+    Future<void> moveAside(FileSystemEntityType type) async {
+      final backupPath = p.join(
+        filesDir.path,
+        'mozilla.backup.${DateTime.now().millisecondsSinceEpoch}',
+      );
+
+      if (type == FileSystemEntityType.directory) {
+        await Directory(mozillaPath).rename(backupPath);
+      } else {
+        await File(mozillaPath).rename(backupPath);
+      }
     }
 
-    await mozillaLink.create(mozillaDir.path);
+    Future<void> createLink() async {
+      await Link(mozillaPath).create(mozillaDir.path);
+    }
+
+    final currentType = await FileSystemEntity.type(
+      mozillaPath,
+      followLinks: false,
+    );
+
+    switch (currentType) {
+      case FileSystemEntityType.notFound:
+        break;
+      case FileSystemEntityType.link:
+        final link = Link(mozillaPath);
+        try {
+          if (await link.target() == mozillaDir.path) {
+            return;
+          }
+        } on FileSystemException {
+          // Replace unreadable or broken links.
+        }
+
+        await link.delete();
+      case FileSystemEntityType.directory:
+      case FileSystemEntityType.file:
+      case FileSystemEntityType.unixDomainSock:
+      case FileSystemEntityType.pipe:
+      default:
+        await moveAside(currentType);
+    }
+
+    try {
+      await createLink();
+    } on PathExistsException {
+      final retryType = await FileSystemEntity.type(
+        mozillaPath,
+        followLinks: false,
+      );
+
+      if (retryType == FileSystemEntityType.link) {
+        final link = Link(mozillaPath);
+        if (await link.target() == mozillaDir.path) {
+          return;
+        }
+
+        await link.delete();
+      } else if (retryType != FileSystemEntityType.notFound) {
+        await moveAside(retryType);
+      }
+
+      await createLink();
+    }
   }
 
   Future<void> _setupSqliteCache() async {

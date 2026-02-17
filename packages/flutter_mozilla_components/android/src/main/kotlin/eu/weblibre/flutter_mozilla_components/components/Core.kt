@@ -232,9 +232,7 @@ class Core(
      */
     val customTabsStore by lazy { CustomTabsServiceStore() }
 
-    // Must use the base application context (not ProfileContext) so the database
-    // matches what WebAppLauncherActivity (from the library) uses when loading manifests.
-    val webAppManifestStorage by lazy { ManifestStorage(context.applicationContext) }
+    val webAppManifestStorage by lazy { ManifestStorage(context) }
 
     val webAppShortcutManager by lazy {
         WebAppShortcutManager(context, client, webAppManifestStorage)

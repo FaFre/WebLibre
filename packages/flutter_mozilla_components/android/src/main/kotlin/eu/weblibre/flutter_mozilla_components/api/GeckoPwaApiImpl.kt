@@ -144,7 +144,7 @@ class GeckoPwaApiImpl(
 
             val (iconBitmap, isMaskable) = loadPwaIcon(manifest)
 
-            val shortcutId = generateShortcutId(manifest.startUrl)
+            val shortcutId = generateShortcutId(manifest.startUrl, profileUuid)
             val launchToken = resolveLaunchToken(
                 shortcutManager = shortcutManager,
                 shortcutId = shortcutId,
@@ -189,11 +189,11 @@ class GeckoPwaApiImpl(
     }
 
     /**
-     * Generates a collision-resistant shortcut ID from a URL using SHA-256.
+     * Generates a collision-resistant shortcut ID from URL + profile using SHA-256.
      */
-    private fun generateShortcutId(url: String): String {
+    private fun generateShortcutId(url: String, profileUuid: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
-        val hash = digest.digest(url.toByteArray())
+        val hash = digest.digest("$url::$profileUuid".toByteArray())
         val hex = hash.take(16).joinToString("") { "%02x".format(it) }
         return "pwa_$hex"
     }

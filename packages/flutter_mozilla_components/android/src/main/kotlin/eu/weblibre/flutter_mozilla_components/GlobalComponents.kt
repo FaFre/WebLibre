@@ -150,7 +150,9 @@ object GlobalComponents {
 
         //RustHttpConfig.setClient(lazy { newComponents.core.client })
 
-        newComponents.core.engine.warmUp()
+        if (mode == ComponentsMode.FULL) {
+            newComponents.core.engine.warmUp()
+        }
 
         fun restorePreviousCustomTabs() {
             if (previousCustomTabs.isEmpty()) return

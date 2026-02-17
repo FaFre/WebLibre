@@ -57,6 +57,10 @@ class ProfileContext(private val base: Context, val relativePath: String) :
         return customApplicationInfo
     }
 
+    override fun getApplicationContext(): Context {
+        return this
+    }
+
     override fun getFilesDir(): File {
         return customFilesDir
     }

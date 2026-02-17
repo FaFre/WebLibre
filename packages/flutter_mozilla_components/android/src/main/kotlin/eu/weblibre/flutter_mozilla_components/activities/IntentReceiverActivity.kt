@@ -303,15 +303,14 @@ class IntentReceiverActivity : Activity() {
         contextId: String?,
     ) {
         val message = "This PWA was originally installed in a different profile. " +
-            "Opening it here will use your current profile's data and settings, " +
-            "which means you won't see the same content, preferences, or saved data " +
-            "that you had in the original profile.\n\n" +
+            "Opening it here uses only your current profile's data and settings. " +
+            "The original profile's app state and saved data will not be used.\n\n" +
             "Do you want to proceed anyway?"
 
         AlertDialog.Builder(this)
             .setTitle("PWA Profile Mismatch")
             .setMessage(message)
-            .setPositiveButton("Open Anyway") { _, _ ->
+            .setPositiveButton("Open in Current Profile") { _, _ ->
                 Log.d(TAG, "User chose to open PWA despite profile mismatch")
                 launchPwaWithContext(url, contextId)
             }
