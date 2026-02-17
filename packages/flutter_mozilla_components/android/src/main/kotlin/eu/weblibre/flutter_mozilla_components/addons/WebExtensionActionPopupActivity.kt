@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.R
@@ -37,10 +38,20 @@ class WebExtensionActionPopupActivity : AppCompatActivity() {
             title = it
         }
 
+        val fragment = WebExtensionActionPopupFragment.create(webExtensionId)
+
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.addonSettingsContainer, WebExtensionActionPopupFragment.create(webExtensionId))
+            .replace(R.id.addonSettingsContainer, fragment)
             .commit()
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (!fragment.onBackPressed()) {
+                    finishAndRemoveTask()
+                }
+            }
+        })
     }
 
     override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? =

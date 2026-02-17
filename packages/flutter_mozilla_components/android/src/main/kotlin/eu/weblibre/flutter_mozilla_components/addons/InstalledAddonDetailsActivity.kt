@@ -137,10 +137,21 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
         view.isEnabled = shouldSettingsBeVisible(addon)
         view.setOnClickListener {
             val optionsPageUrl = addon.installedState?.optionsPageUrl ?: return@setOnClickListener
-            components.useCases.tabsUseCases.addTab(optionsPageUrl, selectTab = true)
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-            intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            startActivity(intent)
+            if (addon.installedState?.openOptionsPageInTab == true) {
+                // Open settings in a browser tab, reusing an existing tab if already open.
+                components.useCases.tabsUseCases.selectOrAddTab(
+                    url = optionsPageUrl,
+                    ignoreFragment = true,
+                )
+                val intent = packageManager.getLaunchIntentForPackage(packageName)
+                intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                startActivity(intent)
+            } else {
+                // Open settings in an internal view with proper extension API support.
+                val intent = Intent(this, AddonInternalSettingsActivity::class.java)
+                intent.putExtra("add_on", addon)
+                startActivity(intent)
+            }
         }
     }
 
