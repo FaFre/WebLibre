@@ -18,70 +18,38 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
-
-/// Result of the switch profile dialog.
-/// - `shouldSwitch`: Whether the user confirmed the switch.
-/// - `clearCache`: Whether to clear the shared cache.
-typedef SwitchProfileDialogResult = ({bool shouldSwitch, bool clearCache});
 
 /// Shows a confirmation dialog for switching user profiles.
 ///
-/// Returns a [SwitchProfileDialogResult] if the user confirms, or null if dismissed.
-/// If [duplicateMozillaProfile] is provided, shows an option to clear shared cache.
-Future<SwitchProfileDialogResult?> showSwitchProfileDialog(
+/// Returns `true` if the user confirms the switch, or null if dismissed.
+Future<bool?> showSwitchProfileDialog(
   BuildContext context, {
   required String profileName,
-  String? duplicateMozillaProfile,
 }) {
-  return showDialog<SwitchProfileDialogResult>(
+  return showDialog<bool>(
     context: context,
-    builder: (context) => HookBuilder(
-      builder: (context) {
-        final clearCache = useState(false);
-
-        return AlertDialog(
-          icon: const Icon(Icons.warning),
-          title: const Text('Switch User'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Switching to User '$profileName' will require a restart of the Browser.",
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              if (duplicateMozillaProfile != null)
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: clearCache.value,
-                  title: const Text('Clear Shared Cache'),
-                  subtitle: const Text(
-                    'This User has been created based on an exisiting Mozilla Profile Identifier. Clearing cache will affect all linked accounts.',
-                  ),
-                  onChanged: (value) {
-                    clearCache.value = value;
-                  },
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop((shouldSwitch: false, clearCache: false));
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                context.pop((shouldSwitch: true, clearCache: clearCache.value));
-              },
-              child: const Text('Switch Profile'),
-            ),
-          ],
-        );
-      },
+    builder: (context) => AlertDialog(
+      icon: const Icon(Icons.warning),
+      title: const Text('Switch User'),
+      content: Text(
+        "Switching to User '$profileName' will require a restart of the Browser.",
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            context.pop(false);
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            context.pop(true);
+          },
+          child: const Text('Switch Profile'),
+        ),
+      ],
     ),
   );
 }

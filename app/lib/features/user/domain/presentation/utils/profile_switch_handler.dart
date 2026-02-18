@@ -26,12 +26,11 @@ import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
-/// Handles the profile switching flow with confirmation dialog and cache clearing options.
+/// Handles the profile switching flow with confirmation dialog.
 ///
 /// This function:
 /// - Checks if the profile is already active
 /// - Shows a confirmation dialog with browser restart warning
-/// - Optionally clears shared cache for duplicate Mozilla profiles
 /// - Switches to the selected profile and exits the app
 Future<void> handleSwitchProfile(
   BuildContext context,
@@ -48,22 +47,14 @@ Future<void> handleSwitchProfile(
     return;
   }
 
-  final duplicateMozillaProfile = await filesystem
-      .checkForDuplicateMozillaProfile(profile.uuidValue);
-
   if (!context.mounted) return;
 
-  final result = await showSwitchProfileDialog(
+  final shouldSwitch = await showSwitchProfileDialog(
     context,
     profileName: profile.name,
-    duplicateMozillaProfile: duplicateMozillaProfile,
   );
 
-  if (result?.shouldSwitch == true) {
-    if (duplicateMozillaProfile != null && result?.clearCache == true) {
-      await filesystem.clearMozillaProfileCache(duplicateMozillaProfile);
-    }
-
+  if (shouldSwitch == true) {
     await ref
         .read(profileRepositoryProvider.notifier)
         .switchProfile(profile.id);

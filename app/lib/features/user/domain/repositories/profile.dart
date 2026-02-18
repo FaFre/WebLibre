@@ -65,12 +65,6 @@ class ProfileRepository extends _$ProfileRepository {
       return false;
     }
 
-    // Clean up Mozilla cache directories before deleting the profile
-    final mozillaProfileIds = filesystem.getMozillaProfileIds(uuid);
-    for (final profileId in mozillaProfileIds) {
-      await filesystem.clearMozillaProfileCache(profileId);
-    }
-
     await filesystem.getProfileDir(uuid).delete(recursive: true);
 
     ref.invalidateSelf();

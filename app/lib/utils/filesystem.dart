@@ -22,11 +22,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid_value.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/extensions/iterable.dart';
 
 const profilesDirName = 'weblibre_profiles';
 const profileDirPrefix = 'profile-';
@@ -44,30 +42,15 @@ final profileTransformer =
       },
     );
 
-final profileMozillaDirectoryTransformer =
-    StreamTransformer<Directory, Directory>.fromHandlers(
-      handleData: (entity, sink) {
-        final mozillaDir = Directory(p.join(entity.path, 'mozilla'));
-
-        if (mozillaDir.existsSync()) {
-          for (final entity in mozillaDir.listSync()) {
-            if (entity is Directory) {
-              final profile = p.basename(entity.path);
-              if (profile.endsWith('.default')) {
-                sink.add(entity);
-              }
-            }
-          }
-        }
-      },
-    );
-
 Future<List<Directory>> getAvailableProfileDirectories(Directory profilesDir) {
   return profilesDir.list().transform(profileTransformer).toList();
 }
 
-Future<void> clearMozillaProfileCache(String profileId) async {
-  final cacheDir = await getApplicationCacheDirectory();
+Future<void> clearMozillaProfileCache(
+  Directory profileDir,
+  String profileId,
+) async {
+  final cacheDir = Directory(p.join(profileDir.path, 'cache'));
   final mozillaCacheDir = Directory(p.join(cacheDir.path, profileId));
 
   if (await mozillaCacheDir.exists()) {
@@ -76,9 +59,9 @@ Future<void> clearMozillaProfileCache(String profileId) async {
 }
 
 /// Returns the list of Mozilla profile IDs (`.default` directory names)
-/// inside the given profile directory's `mozilla/` subdirectory.
+/// inside the given profile directory's `files/mozilla/` subdirectory.
 List<String> getMozillaProfileIds(Directory profileDir) {
-  final mozillaDir = Directory(p.join(profileDir.path, 'mozilla'));
+  final mozillaDir = Directory(p.join(profileDir.path, 'files', 'mozilla'));
   if (!mozillaDir.existsSync()) return [];
 
   return mozillaDir
@@ -86,25 +69,6 @@ List<String> getMozillaProfileIds(Directory profileDir) {
       .whereType<Directory>()
       .map((dir) => p.basename(dir.path))
       .where((name) => name.endsWith('.default'))
-      .toList();
-}
-
-Future<List<Directory>> getProfilesWithDuplicateMozillaProfiles(
-  Directory profilesDir,
-) async {
-  final mozillaProfileDirs = await profilesDir
-      .list()
-      .transform(profileTransformer)
-      .transform(profileMozillaDirectoryTransformer)
-      .toList();
-
-  final duplicates = mozillaProfileDirs
-      .map((dir) => p.basename(dir.path))
-      .findDuplicates()
-      .toSet();
-
-  return mozillaProfileDirs
-      .where((dir) => duplicates.contains(p.basename(dir.path)))
       .toList();
 }
 

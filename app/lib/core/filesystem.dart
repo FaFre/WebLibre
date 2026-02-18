@@ -20,13 +20,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:sqlite3/sqlite3.dart';
 
 import 'package:uuid/uuid.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/utils/filesystem.dart' as fs;
 
@@ -67,94 +66,56 @@ class _Filesystem {
   }
 
   Future<void> clearMozillaProfileCache(String profileId) {
-    return fs.clearMozillaProfileCache(profileId);
+    return fs.clearMozillaProfileCache(selectedProfileDir, profileId);
   }
 
   List<String> getMozillaProfileIds(UuidValue uuid) {
     return fs.getMozillaProfileIds(getProfileDir(uuid));
   }
 
-  Future<String?> checkForDuplicateMozillaProfile(UuidValue profile) async {
-    final duplicates = await fs
-        .getProfilesWithDuplicateMozillaProfiles(profilesDir)
-        .then((dirs) => dirs.map((dir) => dir.path).toList());
-    final profileDir = fs.getProfileDir(profilesDir, profile).path;
+  /// If the old canonical location `{profile}/mozilla/` exists as a real
+  /// directory and the new location `{profile}/files/mozilla/` does not,
+  /// rename the former to the latter.
+  Future<void> _migrateMozillaDirToFiles() async {
+    final oldDir = Directory(p.join(selectedProfileDir.path, 'mozilla'));
+    final newDir = Directory(
+      p.join(selectedProfileDir.path, 'files', 'mozilla'),
+    );
 
-    return duplicates
-        .firstWhereOrNull((dir) => p.isWithin(profileDir, dir))
-        .mapNotNull((dir) => p.basename(dir));
-  }
-
-  Future<void> _linkMozillaDir(Directory filesDir) async {
-    final mozillaDir = Directory(p.join(selectedProfileDir.path, 'mozilla'));
-    await mozillaDir.create(recursive: true);
-
-    final mozillaPath = p.join(filesDir.path, 'mozilla');
-
-    Future<void> moveAside(FileSystemEntityType type) async {
-      final backupPath = p.join(
-        filesDir.path,
-        'mozilla.backup.${DateTime.now().millisecondsSinceEpoch}',
-      );
-
-      if (type == FileSystemEntityType.directory) {
-        await Directory(mozillaPath).rename(backupPath);
-      } else {
-        await File(mozillaPath).rename(backupPath);
-      }
-    }
-
-    Future<void> createLink() async {
-      await Link(mozillaPath).create(mozillaDir.path);
-    }
-
-    final currentType = await FileSystemEntity.type(
-      mozillaPath,
+    final oldType = await FileSystemEntity.type(
+      oldDir.path,
       followLinks: false,
     );
 
-    switch (currentType) {
-      case FileSystemEntityType.notFound:
-        break;
-      case FileSystemEntityType.link:
-        final link = Link(mozillaPath);
-        try {
-          if (await link.target() == mozillaDir.path) {
-            return;
-          }
-        } on FileSystemException {
-          // Replace unreadable or broken links.
-        }
-
-        await link.delete();
-      case FileSystemEntityType.directory:
-      case FileSystemEntityType.file:
-      case FileSystemEntityType.unixDomainSock:
-      case FileSystemEntityType.pipe:
-      default:
-        await moveAside(currentType);
+    if (oldType == FileSystemEntityType.directory && !await newDir.exists()) {
+      await Directory(
+        p.join(selectedProfileDir.path, 'files'),
+      ).create(recursive: true);
+      await oldDir.rename(newDir.path);
     }
+  }
 
-    try {
-      await createLink();
-    } on PathExistsException {
-      final retryType = await FileSystemEntity.type(
-        mozillaPath,
-        followLinks: false,
+  Future<void> _migrateGeckoCache() async {
+    final profileIds = fs.getMozillaProfileIds(selectedProfileDir);
+    final globalCacheDir = Directory(p.join(dataDir.path, 'cache'));
+
+    for (final profileId in profileIds) {
+      final oldCache = Directory(p.join(globalCacheDir.path, profileId));
+      final newCache = Directory(
+        p.join(selectedProfileDir.path, 'cache', profileId),
       );
 
-      if (retryType == FileSystemEntityType.link) {
-        final link = Link(mozillaPath);
-        if (await link.target() == mozillaDir.path) {
-          return;
+      if (await oldCache.exists() && !await newCache.exists()) {
+        try {
+          await oldCache.rename(newCache.path);
+        } catch (e, s) {
+          logger.w(
+            'Failed to migrate Gecko cache for $profileId',
+            error: e,
+            stackTrace: s,
+          );
         }
-
-        await link.delete();
-      } else if (retryType != FileSystemEntityType.notFound) {
-        await moveAside(retryType);
       }
-
-      await createLink();
     }
   }
 
@@ -233,7 +194,8 @@ class _Filesystem {
     );
     await profileDatabasesDir.create();
 
-    await _linkMozillaDir(filesDir);
+    await _migrateMozillaDirToFiles();
+    await _migrateGeckoCache();
     await _setupSqliteCache();
   }
 
@@ -244,8 +206,10 @@ class _Filesystem {
   ) async {
     final profileDir = getProfileDir(defaultProfile.uuidValue);
 
-    final newMozillaDir = Directory(p.join(profileDir.path, 'mozilla'));
-    await newMozillaDir.create();
+    final newMozillaDir = Directory(
+      p.join(profileDir.path, 'files', 'mozilla'),
+    );
+    await newMozillaDir.create(recursive: true);
     await mozillaDir.rename(newMozillaDir.path);
 
     await _copyDirectory(
