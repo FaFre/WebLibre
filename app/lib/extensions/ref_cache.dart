@@ -23,16 +23,25 @@ import 'package:hooks_riverpod/misc.dart';
 import 'package:riverpod/riverpod.dart';
 
 extension CacheForExtension on Ref {
-  /// Keeps the provider alive for [duration].
+  /// Keeps the provider alive for [duration] after the last listener is removed.
   KeepAliveLink cacheFor(Duration duration) {
-    // Immediately prevent the state from getting destroyed.
+    Timer? timer;
     final link = keepAlive();
-    // After duration has elapsed, we re-enable automatic disposal.
-    final timer = Timer(duration, link.close);
 
-    // Optional: when the provider is recomputed (such as with ref.watch),
-    // we cancel the pending timer.
-    onDispose(timer.cancel);
+    onCancel(() {
+      // All listeners are gone — start the dispose timer.
+      timer = Timer(duration, link.close);
+    });
+
+    onResume(() {
+      // A new listener was added — cancel the timer.
+      timer?.cancel();
+    });
+
+    onDispose(() {
+      // Provider is being fully disposed — clean up.
+      timer?.cancel();
+    });
 
     return link;
   }
