@@ -216,7 +216,8 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                             progress = tab.content.progress.toLong(),
                             isPrivate = tab.content.private,
                             isFullScreen = tab.content.fullScreen,
-                            isLoading = tab.content.loading
+                            isLoading = tab.content.loading,
+                            showToolbarAsExpanded = tab.content.showToolbarAsExpanded,
                         )
                     ) { }
                 }

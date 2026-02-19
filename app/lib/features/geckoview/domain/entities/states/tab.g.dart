@@ -27,6 +27,8 @@ abstract class _$TabStateCWProxy {
 
   TabState isLoading(bool isLoading);
 
+  TabState showToolbarAsExpanded(bool showToolbarAsExpanded);
+
   TabState securityInfoState(SecurityState securityInfoState);
 
   TabState historyState(HistoryState historyState);
@@ -53,6 +55,7 @@ abstract class _$TabStateCWProxy {
     bool isPrivate,
     bool isFullScreen,
     bool isLoading,
+    bool showToolbarAsExpanded,
     SecurityState securityInfoState,
     HistoryState historyState,
     ReaderableState readerableState,
@@ -98,6 +101,10 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   TabState isLoading(bool isLoading) => call(isLoading: isLoading);
 
   @override
+  TabState showToolbarAsExpanded(bool showToolbarAsExpanded) =>
+      call(showToolbarAsExpanded: showToolbarAsExpanded);
+
+  @override
   TabState securityInfoState(SecurityState securityInfoState) =>
       call(securityInfoState: securityInfoState);
 
@@ -132,6 +139,7 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
     Object? isPrivate = const $CopyWithPlaceholder(),
     Object? isFullScreen = const $CopyWithPlaceholder(),
     Object? isLoading = const $CopyWithPlaceholder(),
+    Object? showToolbarAsExpanded = const $CopyWithPlaceholder(),
     Object? securityInfoState = const $CopyWithPlaceholder(),
     Object? historyState = const $CopyWithPlaceholder(),
     Object? readerableState = const $CopyWithPlaceholder(),
@@ -180,6 +188,12 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
           ? _value.isLoading
           // ignore: cast_nullable_to_non_nullable
           : isLoading as bool,
+      showToolbarAsExpanded:
+          showToolbarAsExpanded == const $CopyWithPlaceholder() ||
+              showToolbarAsExpanded == null
+          ? _value.showToolbarAsExpanded
+          // ignore: cast_nullable_to_non_nullable
+          : showToolbarAsExpanded as bool,
       securityInfoState:
           securityInfoState == const $CopyWithPlaceholder() ||
               securityInfoState == null

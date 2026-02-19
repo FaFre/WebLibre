@@ -21,8 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_bar_dismissable.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/readerview/domain/providers/readerable.dart';
 
 class BrowserFab extends HookConsumerWidget {
@@ -30,7 +31,10 @@ class BrowserFab extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarDismissed = ref.watch(tabBarDismissableControllerProvider);
+    final selectedTabId = ref.watch(selectedTabProvider);
+    final toolbarState = ref.watch(
+      toolbarVisibilityControllerProvider(selectedTabId),
+    );
 
     final appearanceButtonVisible = ref.watch(
       appearanceButtonVisibilityProvider.select(
@@ -54,12 +58,16 @@ class BrowserFab extends HookConsumerWidget {
         },
         child: const Icon(MdiIcons.formatFont),
       );
-    } else if (tabBarDismissed) {
+    } else if (toolbarState == ToolbarVisibility.dismissed) {
       child = FloatingActionButton(
         key: const ValueKey('dock_fab'),
         heroTag: 'dock_fab',
         onPressed: () {
-          ref.read(tabBarDismissableControllerProvider.notifier).show();
+          ref
+              .read(
+                toolbarVisibilityControllerProvider(selectedTabId).notifier,
+              )
+              .forceShow();
         },
         child: const Icon(MdiIcons.dockBottom),
       );

@@ -517,6 +517,7 @@ class TabContentState {
   final bool isPrivate;
   final bool isFullScreen;
   final bool isLoading;
+  final bool showToolbarAsExpanded;
 
   TabContentState(
     this.id,
@@ -528,6 +529,7 @@ class TabContentState {
     this.isPrivate,
     this.isFullScreen,
     this.isLoading,
+    this.showToolbarAsExpanded,
   );
 }
 
@@ -1746,6 +1748,14 @@ abstract class GeckoViewportEvents {
     bool isVisible,
     bool isAnimating,
   );
+
+  /// Called when GeckoView scroll-handling eligibility changes.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  /// [isHandling] True when browser content can consume scrolling for
+  /// dynamic toolbar behavior. False when content is not scrollable or
+  /// the page consumed touch input.
+  void onBrowserHandlingScrollChanged(int sequence, bool isHandling);
 }
 
 // =============================================================================

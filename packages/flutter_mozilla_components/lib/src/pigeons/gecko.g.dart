@@ -1735,6 +1735,7 @@ class TabContentState {
     required this.isPrivate,
     required this.isFullScreen,
     required this.isLoading,
+    required this.showToolbarAsExpanded,
   });
 
   String id;
@@ -1755,6 +1756,8 @@ class TabContentState {
 
   bool isLoading;
 
+  bool showToolbarAsExpanded;
+
   List<Object?> _toList() {
     return <Object?>[
       id,
@@ -1766,6 +1769,7 @@ class TabContentState {
       isPrivate,
       isFullScreen,
       isLoading,
+      showToolbarAsExpanded,
     ];
   }
 
@@ -1784,6 +1788,7 @@ class TabContentState {
       isPrivate: result[6]! as bool,
       isFullScreen: result[7]! as bool,
       isLoading: result[8]! as bool,
+      showToolbarAsExpanded: result[9]! as bool,
     );
   }
 
@@ -8133,6 +8138,14 @@ abstract class GeckoViewportEvents {
   /// [isAnimating] Whether the keyboard is currently animating.
   void onKeyboardVisibilityChanged(int sequence, int heightPx, bool isVisible, bool isAnimating);
 
+  /// Called when GeckoView scroll-handling eligibility changes.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  /// [isHandling] True when browser content can consume scrolling for
+  /// dynamic toolbar behavior. False when content is not scrollable or
+  /// the page consumed touch input.
+  void onBrowserHandlingScrollChanged(int sequence, bool isHandling);
+
   static void setUp(GeckoViewportEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
@@ -8160,6 +8173,34 @@ abstract class GeckoViewportEvents {
               'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged was null, expected non-null bool.');
           try {
             api.onKeyboardVisibilityChanged(arg_sequence!, arg_heightPx!, arg_isVisible!, arg_isAnimating!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onBrowserHandlingScrollChanged$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onBrowserHandlingScrollChanged was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_sequence = (args[0] as int?);
+          assert(arg_sequence != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onBrowserHandlingScrollChanged was null, expected non-null int.');
+          final bool? arg_isHandling = (args[1] as bool?);
+          assert(arg_isHandling != null,
+              'Argument for dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onBrowserHandlingScrollChanged was null, expected non-null bool.');
+          try {
+            api.onBrowserHandlingScrollChanged(arg_sequence!, arg_isHandling!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

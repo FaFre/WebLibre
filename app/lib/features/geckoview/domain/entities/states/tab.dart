@@ -64,6 +64,7 @@ class TabState extends WebPageInfo {
   final bool isPrivate;
   final bool isFullScreen;
   final bool isLoading;
+  final bool showToolbarAsExpanded;
 
   bool get isFinishedLoading => !isLoading && progress == 100;
 
@@ -84,6 +85,7 @@ class TabState extends WebPageInfo {
     required this.isPrivate,
     required this.isFullScreen,
     required this.isLoading,
+    required this.showToolbarAsExpanded,
     required this.securityInfoState,
     required this.historyState,
     required this.readerableState,
@@ -102,6 +104,7 @@ class TabState extends WebPageInfo {
     isPrivate: false,
     isFullScreen: false,
     isLoading: false,
+    showToolbarAsExpanded: false,
     securityInfoState: SecurityState.$default(),
     historyState: HistoryState.$default(),
     readerableState: ReaderableState.$default(),
@@ -120,6 +123,7 @@ class TabState extends WebPageInfo {
     isPrivate,
     isFullScreen,
     isLoading,
+    showToolbarAsExpanded,
     securityInfoState,
     historyState,
     readerableState,

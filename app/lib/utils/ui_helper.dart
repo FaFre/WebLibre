@@ -192,3 +192,19 @@ void showTabUndoClose(
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
+
+void showDismissOverrideMessage(
+  BuildContext context,
+  VoidCallback onDismiss, {
+  Duration duration = const Duration(seconds: 4),
+}) {
+  ScaffoldMessenger.of(context).clearSnackBars();
+
+  final snackBar = _createFloatingSnackBar(
+    content: const Text('Hiding disabled by site'),
+    action: SnackBarAction(label: 'Dismiss', onPressed: onDismiss),
+    duration: duration,
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}

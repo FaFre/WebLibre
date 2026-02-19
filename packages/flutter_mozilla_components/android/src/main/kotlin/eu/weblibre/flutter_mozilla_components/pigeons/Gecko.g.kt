@@ -1597,7 +1597,8 @@ data class TabContentState (
   val progress: Long,
   val isPrivate: Boolean,
   val isFullScreen: Boolean,
-  val isLoading: Boolean
+  val isLoading: Boolean,
+  val showToolbarAsExpanded: Boolean
 )
  {
   companion object {
@@ -1611,7 +1612,8 @@ data class TabContentState (
       val isPrivate = pigeonVar_list[6] as Boolean
       val isFullScreen = pigeonVar_list[7] as Boolean
       val isLoading = pigeonVar_list[8] as Boolean
-      return TabContentState(id, parentId, contextId, url, title, progress, isPrivate, isFullScreen, isLoading)
+      val showToolbarAsExpanded = pigeonVar_list[9] as Boolean
+      return TabContentState(id, parentId, contextId, url, title, progress, isPrivate, isFullScreen, isLoading, showToolbarAsExpanded)
     }
   }
   fun toList(): List<Any?> {
@@ -1625,6 +1627,7 @@ data class TabContentState (
       isPrivate,
       isFullScreen,
       isLoading,
+      showToolbarAsExpanded,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -6908,6 +6911,31 @@ class GeckoViewportEvents(private val binaryMessenger: BinaryMessenger, private 
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onKeyboardVisibilityChanged$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg, heightPxArg, isVisibleArg, isAnimatingArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * Called when GeckoView scroll-handling eligibility changes.
+   *
+   * [sequence] Event sequence number for ordering.
+   * [isHandling] True when browser content can consume scrolling for
+   * dynamic toolbar behavior. False when content is not scrollable or
+   * the page consumed touch input.
+   */
+  fun onBrowserHandlingScrollChanged(sequenceArg: Long, isHandlingArg: Boolean, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onBrowserHandlingScrollChanged$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, isHandlingArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

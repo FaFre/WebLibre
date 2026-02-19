@@ -26,6 +26,7 @@ import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActi
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
+import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
@@ -96,6 +97,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     // Keyboard visibility detection feature
     private var keyboardVisibilityFeature: KeyboardVisibilityFeature? = null
+
+    // Browser scroll-handling detection feature
+    private var browserHandlingScrollFeature: BrowserHandlingScrollFeature? = null
 
     // Registers a photo picker activity launcher in single-select mode.
     private val singleMediaPicker =
@@ -500,6 +504,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 keyboardVisibilityFeature = KeyboardVisibilityFeature(viewportEvents).also {
                     it.start(binding.root)
                 }
+
+                browserHandlingScrollFeature = BrowserHandlingScrollFeature(viewportEvents).also {
+                    it.start()
+                }
             }
 
             onEngineSetupComplete()
@@ -613,6 +621,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         // Stop keyboard visibility detection
         keyboardVisibilityFeature?.stop()
         keyboardVisibilityFeature = null
+
+        // Stop browser scroll-handling detection
+        browserHandlingScrollFeature?.stop()
+        browserHandlingScrollFeature = null
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
         val engineView = fragmentEngineView

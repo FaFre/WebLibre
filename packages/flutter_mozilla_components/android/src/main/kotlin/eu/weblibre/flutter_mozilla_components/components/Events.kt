@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.action.BrowserAction
+import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.feature.addons.logger
@@ -188,7 +189,8 @@ class Events(
                         it.content.private,
                         it.content.fullScreen,
                         it.content.progress,
-                        it.content.loading
+                        it.content.loading,
+                        it.content.showToolbarAsExpanded,
                     )
                 }
                 .debounce(15)
@@ -204,9 +206,19 @@ class Events(
                             progress = tab.content.progress.toLong(),
                             isPrivate = tab.content.private,
                             isFullScreen = tab.content.fullScreen,
-                            isLoading = tab.content.loading
+                            isLoading = tab.content.loading,
+                            showToolbarAsExpanded = tab.content.showToolbarAsExpanded,
                         )
                     ) { _ -> }
+
+                    // Reset showToolbarAsExpanded after forwarding to Flutter,
+                    // mirroring Fenix ToolbarBehaviorController behavior.
+                    // This ensures subsequent expand events trigger a new state change.
+                    if (tab.content.showToolbarAsExpanded) {
+                        stateFlow.dispatch(
+                            ContentAction.UpdateExpandedToolbarStateAction(tab.id, false)
+                        )
+                    }
                 }
         }
 

@@ -87,6 +87,7 @@ class TabStates extends _$TabStates {
       isPrivate: contentState.isPrivate,
       isFullScreen: contentState.isFullScreen,
       isLoading: contentState.isLoading,
+      showToolbarAsExpanded: contentState.showToolbarAsExpanded,
     );
 
     _updateState({...state}..[contentState.id] = newState);

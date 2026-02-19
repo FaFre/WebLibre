@@ -30,6 +30,7 @@ class GeckoViewportService extends GeckoViewportEvents {
     isVisible: false,
     isAnimating: false,
   ));
+  final _browserHandlingScrollSubject = BehaviorSubject<bool>.seeded(false);
 
   /// Stream of keyboard visibility changes.
   ///
@@ -45,6 +46,17 @@ class GeckoViewportService extends GeckoViewportEvents {
 
   /// Whether the keyboard is currently visible.
   bool get isKeyboardVisible => _keyboardSubject.value.isVisible;
+
+  /// Stream of browser scroll-handling eligibility.
+  ///
+  /// Emits true when GeckoView reports that browser content can handle
+  /// scrolling for dynamic toolbar behavior.
+  ValueStream<bool> get browserHandlingScrollEvents =>
+      _browserHandlingScrollSubject.stream;
+
+  /// Current browser scroll-handling eligibility.
+  bool get isBrowserHandlingScrollEnabled =>
+      _browserHandlingScrollSubject.value;
 
   /// Creates a new viewport service.
   ///
@@ -113,8 +125,14 @@ class GeckoViewportService extends GeckoViewportEvents {
     ));
   }
 
+  @override
+  void onBrowserHandlingScrollChanged(int sequence, bool isHandling) {
+    _browserHandlingScrollSubject.addWhenMoreRecent(sequence, null, isHandling);
+  }
+
   /// Disposes the service and closes all streams.
   Future<void> dispose() async {
     await _keyboardSubject.close();
+    await _browserHandlingScrollSubject.close();
   }
 }

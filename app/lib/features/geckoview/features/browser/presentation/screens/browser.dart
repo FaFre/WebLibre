@@ -39,7 +39,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_bar_dismissable.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
@@ -136,7 +136,6 @@ class _TabBar extends HookConsumerWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
-  final ValueNotifier<bool> displayAppBar;
   final Stream<Offset>? pointerMoveEvents;
   final TabBarPosition tabBarPosition;
 
@@ -144,7 +143,6 @@ class _TabBar extends HookConsumerWidget {
     required this.showMainToolbar,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
-    required this.displayAppBar,
     required this.tabBarPosition,
     required this.pointerMoveEvents,
   });
@@ -154,29 +152,33 @@ class _TabBar extends HookConsumerWidget {
     final tabId = ref.watch(selectedTabProvider);
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
 
-    final autoHideTabBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.autoHideTabBar,
-      ),
-    );
-
     // Auto-hide scroll detection hooks (run unconditionally per hook rules)
     final diffAcc = useRef(0.0);
 
-    void resetHiddenState() {
-      if (!ref.read(tabBarDismissableControllerProvider)) {
-        displayAppBar.value = true;
+    // Reset scroll accumulator on tab switch
+    useEffect(() {
+      diffAcc.value = 0.0;
+      return null;
+    }, [tabId]);
+
+    // Reset scroll accumulator when controller shows toolbar
+    // (covers: loading start, navigation, showToolbarAsExpanded, forceShow)
+    ref.listen(toolbarVisibilityControllerProvider(tabId), (previous, next) {
+      if (next == ToolbarVisibility.visible && previous != next) {
+        diffAcc.value = 0.0;
       }
+    });
+
+    void resetHiddenState() {
+      ref
+          .read(
+            toolbarVisibilityControllerProvider(
+              ref.read(selectedTabProvider),
+            ).notifier,
+          )
+          .show();
       diffAcc.value = 0.0;
     }
-
-    useEffect(() {
-      if (!autoHideTabBar) return null;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        resetHiddenState();
-      });
-      return null;
-    }, [tabId, autoHideTabBar]);
 
     useOnAppLifecycleStateChange((previous, current) {
       if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
@@ -185,38 +187,13 @@ class _TabBar extends HookConsumerWidget {
       }
     });
 
-    ref.listen(tabStateProvider(tabId).select((value) => value?.isLoading), (
-      previous,
-      next,
-    ) {
-      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
-      if (next == true) {
-        resetHiddenState();
-      }
-    });
-
-    ref.listen(tabStateProvider(tabId).select((value) => value?.historyState), (
-      previous,
-      next,
-    ) {
-      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
-      if (next != null && previous != null) {
-        if (previous != next) {
-          resetHiddenState();
-        }
-      }
-    });
-
     useOnStreamChange(
       pointerMoveEvents,
       onData: (event) {
-        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) {
-          return;
-        }
-        // Don't apply auto-hide when toolbar is manually dismissed
-        if (ref.read(tabBarDismissableControllerProvider)) {
-          return;
-        }
+        final autoHide = ref
+            .read(generalSettingsWithDefaultsProvider)
+            .autoHideTabBar;
+        if (!autoHide) return;
 
         final diff = event.dy;
         if (diff < 0) {
@@ -225,7 +202,13 @@ class _TabBar extends HookConsumerWidget {
           }
           diffAcc.value += diff;
           if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
-            displayAppBar.value = false;
+            ref
+                .read(
+                  toolbarVisibilityControllerProvider(
+                    ref.read(selectedTabProvider),
+                  ).notifier,
+                )
+                .requestHide();
           }
         } else if (diff > 0) {
           if (diffAcc.value < 0) {
@@ -267,6 +250,9 @@ class BrowserScreen extends HookConsumerWidget {
     final tabInFullScreen = ref.watch(
       selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),
     );
+    final tabIsLoading = ref.watch(
+      selectedTabStateProvider.select((value) => value?.isLoading ?? false),
+    );
 
     final overlayController = useOverlayPortalController();
 
@@ -300,12 +286,6 @@ class BrowserScreen extends HookConsumerWidget {
       ),
     );
 
-    final displayAppBar = useValueNotifier(true);
-
-    ref.listen(tabBarDismissableControllerProvider, (previous, next) {
-      displayAppBar.value = !next;
-    });
-
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
         overlayController.show();
@@ -330,14 +310,19 @@ class BrowserScreen extends HookConsumerWidget {
     final sheetDisplayed = displayedSheet != null;
 
     // Compute visibility states for toolbars
-    final appBarVisible = useValueListenable(displayAppBar);
+    final selectedTabId = ref.watch(selectedTabProvider);
+    final toolbarState = ref.watch(
+      toolbarVisibilityControllerProvider(selectedTabId),
+    );
 
-    // Toolbar is visible when: sheet is shown OR (not fullscreen AND app bar visible)
-    // appBarVisible reflects both scroll-based auto-hide and swipe dismiss state
+    // Toolbar is visible when: sheet is shown OR (not fullscreen AND controller says visible)
+    // The controller handles loading-start show internally via ref.listen on isLoading
+    final effectiveAppBarVisible =
+        toolbarState == ToolbarVisibility.visible;
     final topToolbarVisible =
-        sheetDisplayed || (!tabInFullScreen && appBarVisible);
+        sheetDisplayed || (!tabInFullScreen && effectiveAppBarVisible);
     final bottomToolbarVisible =
-        sheetDisplayed || (!tabInFullScreen && appBarVisible);
+        sheetDisplayed || (!tabInFullScreen && effectiveAppBarVisible);
 
     // Calculate relative safe area for sheet max size
     final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
@@ -382,7 +367,6 @@ class BrowserScreen extends HookConsumerWidget {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
 
     // Watch find-in-page visibility for the selected tab
-    final selectedTabId = ref.watch(selectedTabProvider);
     final findInPageVisible =
         selectedTabId != null &&
         ref.watch(
@@ -446,7 +430,8 @@ class BrowserScreen extends HookConsumerWidget {
     // Keep clipping state in sync with keyboard and auto-hide states.
     // While keyboard is visible, do not apply toolbar clipping.
     useEffect(() {
-      final targetClippingPx = autoHideTabBar && !keyboardVisible
+      final targetClippingPx =
+          autoHideTabBar && !keyboardVisible && !tabIsLoading
           ? desiredToolbarClippingPx.value
           : 0;
 
@@ -456,7 +441,7 @@ class BrowserScreen extends HookConsumerWidget {
       }
 
       return null;
-    }, [autoHideTabBar, keyboardVisible]);
+    }, [autoHideTabBar, keyboardVisible, tabIsLoading]);
 
     final animationProgressCallback = useCallback((
       double progress,
@@ -467,13 +452,15 @@ class BrowserScreen extends HookConsumerWidget {
       final clippingPx = -((1.0 - progress) * heightPx * pixelRatio).round();
       desiredToolbarClippingPx.value = clippingPx;
 
-      final targetClippingPx = keyboardVisible ? 0 : clippingPx;
+      final targetClippingPx = (keyboardVisible || tabIsLoading)
+          ? 0
+          : clippingPx;
 
       if (targetClippingPx != lastClippingPx.value) {
         lastClippingPx.value = targetClippingPx;
         unawaited(viewportService.setVerticalClipping(targetClippingPx));
       }
-    }, [keyboardVisible, pixelRatio]);
+    }, [keyboardVisible, pixelRatio, tabIsLoading]);
 
     // Theme with dynamic snackbar margin to position above bottom toolbar
     final themeData = Theme.of(context).copyWith(
@@ -522,7 +509,6 @@ class BrowserScreen extends HookConsumerWidget {
                 bottom: browserBottomOffset,
                 child: _Browser(
                   overlayController: overlayController,
-                  displayAppBar: displayAppBar,
                   tabInFullScreen: tabInFullScreen,
                   pointerMoveEventSink: pointerMoveEventsController.sink,
                   sheetDisplayed: sheetDisplayed,
@@ -558,7 +544,6 @@ class BrowserScreen extends HookConsumerWidget {
                       : null,
                   child: _TabBar(
                     tabBarPosition: TabBarPosition.bottom,
-                    displayAppBar: displayAppBar,
                     showMainToolbar: tabBarPosition == TabBarPosition.bottom,
                     showContextualToolbar: showContextualToolbar,
                     showQuickTabSwitcherBar: showQuickTabSwitcherBar,
@@ -583,7 +568,6 @@ class BrowserScreen extends HookConsumerWidget {
                     child: _TabBar(
                       tabBarPosition: TabBarPosition.top,
                       showMainToolbar: true,
-                      displayAppBar: displayAppBar,
                       showContextualToolbar: showContextualToolbar,
                       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
                       pointerMoveEvents: pointerMoveEventsController.stream,
@@ -729,7 +713,6 @@ class _Browser extends HookConsumerWidget {
   Duration get _backButtonPressTimeout => const Duration(seconds: 2);
 
   final OverlayPortalController overlayController;
-  final ValueNotifier<bool> displayAppBar;
   final StreamSink<Offset> pointerMoveEventSink;
   final bool tabInFullScreen;
   final bool sheetDisplayed;
@@ -737,7 +720,6 @@ class _Browser extends HookConsumerWidget {
 
   const _Browser({
     required this.overlayController,
-    required this.displayAppBar,
     required this.tabInFullScreen,
     required this.pointerMoveEventSink,
     required this.sheetDisplayed,
@@ -822,9 +804,10 @@ class _Browser extends HookConsumerWidget {
                 }
 
                 //Make sure app bar is visible
-                if (!ref.read(tabBarDismissableControllerProvider)) {
-                  displayAppBar.value = true;
-                }
+                final tabId = ref.read(selectedTabProvider);
+                ref
+                    .read(toolbarVisibilityControllerProvider(tabId).notifier)
+                    .show();
 
                 if (tabState?.isLoading == true) {
                   lastBackButtonPress.value = null;
