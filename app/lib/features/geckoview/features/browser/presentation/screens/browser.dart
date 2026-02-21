@@ -357,6 +357,8 @@ class BrowserScreen extends HookConsumerWidget {
     // Toolbar is visible when: sheet is shown OR (not fullscreen AND controller says visible)
     // The controller handles loading-start show internally via ref.listen on isLoading
     final effectiveAppBarVisible = toolbarState == ToolbarVisibility.visible;
+    final toolbarManuallyDismissed =
+        toolbarState == ToolbarVisibility.dismissed;
     final topToolbarVisible =
         sheetDisplayed || (!tabInFullScreen && effectiveAppBarVisible);
     final bottomToolbarVisible =
@@ -419,7 +421,9 @@ class BrowserScreen extends HookConsumerWidget {
         : 0.0;
     final findInPageHeightPx = (findInPageHeight * pixelRatio).round();
 
-    final stableToolbarHeight = autoHideTabBar ? bottomAppBarTotalHeight : 0.0;
+    final stableToolbarHeight = autoHideTabBar && !toolbarManuallyDismissed
+        ? bottomAppBarTotalHeight
+        : 0.0;
     final stableToolbarHeightPx = (stableToolbarHeight * pixelRatio).round();
 
     final keyboardHeightPx = useState<int?>(null);
@@ -467,24 +471,43 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Keep clipping state in sync with keyboard and auto-hide states.
     // While keyboard is visible, do not apply toolbar clipping.
-    useEffect(() {
-      final targetClippingPx =
-          autoHideTabBar && !keyboardVisible && !tabIsLoading
-          ? desiredToolbarClippingPx.value
-          : 0;
+    useEffect(
+      () {
+        if (toolbarManuallyDismissed) {
+          desiredToolbarClippingPx.value = 0;
+        }
 
-      if (targetClippingPx != lastClippingPx.value) {
-        lastClippingPx.value = targetClippingPx;
-        unawaited(viewportService.setVerticalClipping(targetClippingPx));
-      }
+        final targetClippingPx =
+            autoHideTabBar &&
+                !toolbarManuallyDismissed &&
+                !keyboardVisible &&
+                !tabIsLoading
+            ? desiredToolbarClippingPx.value
+            : 0;
 
-      return null;
-    }, [autoHideTabBar, keyboardVisible, tabIsLoading]);
+        if (targetClippingPx != lastClippingPx.value) {
+          lastClippingPx.value = targetClippingPx;
+          unawaited(viewportService.setVerticalClipping(targetClippingPx));
+        }
+
+        return null;
+      },
+      [autoHideTabBar, toolbarManuallyDismissed, keyboardVisible, tabIsLoading],
+    );
 
     final animationProgressCallback = useCallback((
       double progress,
       double heightPx,
     ) {
+      if (toolbarManuallyDismissed) {
+        desiredToolbarClippingPx.value = 0;
+        if (lastClippingPx.value != 0) {
+          lastClippingPx.value = 0;
+          unawaited(viewportService.setVerticalClipping(0));
+        }
+        return;
+      }
+
       // Clip content from bottom as toolbar hides.
       // Negative clipping = clip from bottom.
       final clippingPx = -((1.0 - progress) * heightPx * pixelRatio).round();
@@ -498,7 +521,7 @@ class BrowserScreen extends HookConsumerWidget {
         lastClippingPx.value = targetClippingPx;
         unawaited(viewportService.setVerticalClipping(targetClippingPx));
       }
-    }, [keyboardVisible, pixelRatio, tabIsLoading]);
+    }, [toolbarManuallyDismissed, keyboardVisible, pixelRatio, tabIsLoading]);
 
     // Theme with dynamic snackbar margin to position above bottom toolbar
     final themeData = Theme.of(context).copyWith(
@@ -577,7 +600,8 @@ class BrowserScreen extends HookConsumerWidget {
                   position: TabBarPosition.bottom,
                   visible: bottomToolbarVisible,
                   toolbarHeight: bottomAppBarTotalHeight,
-                  onAnimationProgress: autoHideTabBar
+                  onAnimationProgress:
+                      autoHideTabBar && !toolbarManuallyDismissed
                       ? animationProgressCallback
                       : null,
                   child: _TabBar(
