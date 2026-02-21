@@ -235,7 +235,9 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
     private fun openInBrowser(sessionId: String) {
         val activity = requireActivity()
         val store = components.core.store
-        val url = store.state.findCustomTab(sessionId)?.content?.url ?: return
+        val customTab = store.state.findCustomTab(sessionId) ?: return
+        val url = customTab.content.url
+        val isPrivateCustomTab = customTab.content.private
 
         sessionFeature?.get()?.release()
 
@@ -243,6 +245,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         val mainIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).apply {
             setClassName(activity, "eu.weblibre.gecko.MainActivity")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra(PRIVATE_BROWSING_MODE, isPrivateCustomTab)
         }
         activity.startActivity(mainIntent)
 
@@ -354,6 +357,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
     companion object {
         private const val CUSTOM_TAB_SESSION_ID_KEY = "custom_tab_session_id"
         private const val WEB_APP_MANIFEST_URL_KEY = "web_app_manifest_url"
+        private const val PRIVATE_BROWSING_MODE = "private_browsing_mode"
 
         fun create(
             customTabSessionId: String,

@@ -46,6 +46,15 @@
                 android:paddingVertical="6dp">
 
                 <ImageView
+                    android:id="@+id/privateMaskIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
+                    android:visibility="gone" />
+
+                <ImageView
                     android:id="@+id/securityIcon"
                     android:layout_width="18dp"
                     android:layout_height="18dp"

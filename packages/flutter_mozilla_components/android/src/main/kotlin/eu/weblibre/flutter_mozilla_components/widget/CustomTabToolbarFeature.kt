@@ -27,7 +27,6 @@ class CustomTabToolbarFeature(
 
     override fun start() {
         val tab = store.state.findCustomTab(sessionId) ?: return
-
         val toolbarColor = tab.config.colorSchemes?.defaultColorSchemeParams?.toolbarColor
 
         toolbar.bind(sessionId, store, toolbarColor)

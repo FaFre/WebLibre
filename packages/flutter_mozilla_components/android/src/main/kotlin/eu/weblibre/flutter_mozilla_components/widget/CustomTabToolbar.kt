@@ -16,6 +16,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.color.MaterialColors
 import com.mikepenz.iconics.IconicsDrawable
@@ -46,6 +47,7 @@ class CustomTabToolbar @JvmOverloads constructor(
 
     private val toolbarCard: MaterialCardView
     private val closeButton: ImageButton
+    private val privateMaskIcon: ImageView
     private val securityIcon: ImageView
     private val titleText: TextView
     private val urlText: TextView
@@ -58,6 +60,7 @@ class CustomTabToolbar @JvmOverloads constructor(
     private var urlScope: CoroutineScope? = null
     private var titleScope: CoroutineScope? = null
     private var securityScope: CoroutineScope? = null
+    private var isPrivateSession: Boolean = false
 
     var onCloseListener: (() -> Unit)? = null
     var onShareListener: (() -> Unit)? = null
@@ -69,6 +72,7 @@ class CustomTabToolbar @JvmOverloads constructor(
 
         toolbarCard = findViewById(R.id.toolbarCard)
         closeButton = findViewById(R.id.closeButton)
+        privateMaskIcon = findViewById(R.id.privateMaskIcon)
         securityIcon = findViewById(R.id.securityIcon)
         titleText = findViewById(R.id.titleText)
         urlText = findViewById(R.id.urlText)
@@ -89,9 +93,17 @@ class CustomTabToolbar @JvmOverloads constructor(
         this.sessionId = sessionId
         this.store = store
 
-        toolbarColor?.let { applyCustomColors(it) }
+        val tab = store.state.findCustomTab(sessionId)
+        isPrivateSession = tab?.content?.private == true
 
-        store.state.findCustomTab(sessionId)?.let { tab ->
+        if (toolbarColor != null) {
+            applyCustomColors(toolbarColor)
+        } else {
+            applyMaterial3Colors()
+            applyIcons()
+        }
+
+        tab?.let {
             updateTitle(tab)
             updateUrl(tab)
             updateSecurityIcon(tab)
@@ -118,14 +130,16 @@ class CustomTabToolbar @JvmOverloads constructor(
     private fun applyMaterial3Colors() {
         val surfaceColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorSurface)
         val onSurfaceColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
+        val onSurfaceVariantColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
         toolbarCard.setCardBackgroundColor(surfaceColor)
         titleText.setTextColor(onSurfaceColor)
-        urlText.setTextColor(onSurfaceColor)
+        urlText.setTextColor(onSurfaceVariantColor)
     }
 
     private fun applyIcons() {
         val iconColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
 
+        updatePrivateMaskIcon()
         closeButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_close, 20, iconColor))
         shareButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_share_variant, 18, iconColor))
         openInBrowserButton.setImageDrawable(
@@ -145,6 +159,7 @@ class CustomTabToolbar @JvmOverloads constructor(
         titleText.setTextColor(textColor)
         urlText.setTextColor(textColor)
 
+        updatePrivateMaskIcon()
         closeButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon.cmd_close, 20, textColor))
         shareButton.setImageDrawable(mdiIcon(CommunityMaterial.Icon3.cmd_share_variant, 18, textColor))
         openInBrowserButton.setImageDrawable(
@@ -242,17 +257,29 @@ class CustomTabToolbar @JvmOverloads constructor(
     }
 
     private fun updateSecurityIcon(tab: CustomTabSessionState) {
+        val neutralIconColor = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        val errorIconColor = MaterialColors.getColor(this, android.R.attr.colorError)
+
         val securityInfoKnown = tab.content.securityInfo.host.isNotBlank()
 
         if (tab.content.loading || !securityInfoKnown) {
-            val color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
-            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock_open_outline, 16, color))
+            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock_open_outline, 16, neutralIconColor))
         } else if (tab.content.securityInfo.isSecure) {
-            val color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant)
-            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock, 16, color))
+            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock, 16, neutralIconColor))
         } else {
-            val color = MaterialColors.getColor(this, android.R.attr.colorError)
-            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock_open_outline, 16, color))
+            securityIcon.setImageDrawable(mdiIcon(CommunityMaterial.Icon2.cmd_lock_open_outline, 16, errorIconColor))
+        }
+    }
+
+    private fun updatePrivateMaskIcon() {
+        privateMaskIcon.visibility = if (isPrivateSession) View.VISIBLE else View.GONE
+        if (isPrivateSession) {
+            val privateMaskColor = ContextCompat.getColor(context, R.color.private_tab_mask_accent)
+            privateMaskIcon.setImageDrawable(
+                mdiIcon(CommunityMaterial.Icon.cmd_domino_mask, 16, privateMaskColor)
+            )
+        } else {
+            privateMaskIcon.setImageDrawable(null)
         }
     }
 

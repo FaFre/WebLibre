@@ -4,4 +4,6 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources xmlns:tools="http://schemas.android.com/tools">
     <color name="icons">#ffffffff</color>
+    <!-- Keep in sync with app/lib/core/design/app_colors.dart privateTabPurple -->
+    <color name="private_tab_mask_accent">#FF8000D7</color>
 </resources>

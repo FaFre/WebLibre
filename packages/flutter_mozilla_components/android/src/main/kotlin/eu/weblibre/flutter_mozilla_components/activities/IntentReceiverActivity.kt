@@ -42,6 +42,7 @@ import java.io.File
 class IntentReceiverActivity : Activity() {
     companion object {
         private const val TAG = "IntentReceiverActivity"
+        private const val PRIVATE_BROWSING_MODE = "private_browsing_mode"
     }
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -81,6 +82,9 @@ class IntentReceiverActivity : Activity() {
     }
 
     private fun routeIntent(intent: Intent) {
+        val privateBrowsingMode = intent.getBooleanExtra(PRIVATE_BROWSING_MODE, false)
+        intent.putExtra(PRIVATE_BROWSING_MODE, privateBrowsingMode)
+
         // Check if this is our custom PWA intent with profile metadata
         val profileUuid = intent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)
         val contextId = intent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID)
@@ -107,7 +111,7 @@ class IntentReceiverActivity : Activity() {
             "CustomTab" to CustomTabIntentProcessor(
                 components.useCases.customTabsUseCases.add,
                 resources,
-                isPrivate = false,
+                isPrivate = privateBrowsingMode,
             ),
             "PWA" to WebAppIntentProcessor(
                 components.core.store,

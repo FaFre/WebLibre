@@ -11,6 +11,7 @@ import eu.weblibre.flutter_mozilla_components.GlobalComponents
 class AuthIntentReceiverActivity : Activity() {
     companion object {
         private const val TAG = "AuthIntentReceiver"
+        private const val PRIVATE_BROWSING_MODE = "private_browsing_mode"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +33,7 @@ class AuthIntentReceiverActivity : Activity() {
         val processed = CustomTabIntentProcessor(
             components.useCases.customTabsUseCases.add,
             resources,
-            isPrivate = false,
+            isPrivate = sourceIntent.getBooleanExtra(PRIVATE_BROWSING_MODE, false),
         ).process(sourceIntent)
 
         if (processed) {
