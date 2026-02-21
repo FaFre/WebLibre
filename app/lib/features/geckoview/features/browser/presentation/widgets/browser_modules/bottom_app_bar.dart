@@ -32,7 +32,6 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -60,7 +59,6 @@ import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 class BrowserTopAppBar extends HookConsumerWidget {
   final bool showMainToolbar;
@@ -275,23 +273,10 @@ class BrowserTabBar extends HookConsumerWidget {
             !distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
         };
         if (shouldDismiss && ref.read(bottomSheetControllerProvider) == null) {
-          final viewportService = ref.read(viewportServiceProvider);
-          if (viewportService.isBrowserHandlingScrollEnabled) {
-            unawaited(HapticFeedback.lightImpact());
-            ref
-                .read(
-                  toolbarVisibilityControllerProvider(selectedTabId).notifier,
-                )
-                .dismiss();
-          } else if (context.mounted) {
-            showDismissOverrideMessage(context, () {
-              ref
-                  .read(
-                    toolbarVisibilityControllerProvider(selectedTabId).notifier,
-                  )
-                  .dismiss();
-            });
-          }
+          unawaited(HapticFeedback.lightImpact());
+          ref
+              .read(toolbarVisibilityControllerProvider(selectedTabId).notifier)
+              .dismiss();
         }
       },
       child: Column(
