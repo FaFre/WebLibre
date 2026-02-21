@@ -54,12 +54,12 @@ class BrowserNavigationDrawer extends HookConsumerWidget {
 
     return NavigationDrawer(
       backgroundColor: colorScheme.surface,
+      header: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [_ProfileHeader(), _SyncTile(), const Divider()],
+      ),
       children: [
-        // Profile Header
-        _ProfileHeader(),
-        _SyncTile(),
-        const Divider(),
-
         // Section 1: Tools & Configuration
         _ExtensionsSection(),
 
@@ -104,6 +104,15 @@ class BrowserNavigationDrawer extends HookConsumerWidget {
           onTap: () async {
             Navigator.of(context).pop();
             await const HistoryRoute().push(context);
+          },
+        ),
+
+        ListTile(
+          leading: const Icon(MdiIcons.fileDownload),
+          title: const Text('Downloads'),
+          onTap: () async {
+            Navigator.of(context).pop();
+            await const HistoryDownloadsRoute().push(context);
           },
         ),
 

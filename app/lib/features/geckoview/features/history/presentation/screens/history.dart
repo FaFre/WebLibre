@@ -57,6 +57,7 @@ class Section extends MultiSliver {
     required Set<VisitInfo> selectedItems,
     required void Function(VisitInfo) onTap,
     required void Function(VisitInfo) onLongPress,
+    required Future<void> Function(VisitInfo) onDelete,
   }) : super(
          pushPinnedChildren: true,
          children: [
@@ -103,37 +104,11 @@ class Section extends MultiSliver {
                        ),
                      ),
                      subtitle: UriBreadcrumb(uri: uri),
-                     trailing: Consumer(
-                       builder: (context, ref, _) {
-                         return IconButton(
-                           onPressed: () async {
-                             await ref
-                                 .read(historyRepositoryProvider.notifier)
-                                 .deleteVisit(item);
-
-                             final downloadedFile = item.title.mapNotNull(
-                               (title) => File(title),
-                             );
-
-                             if (await downloadedFile?.exists() == true) {
-                               if (context.mounted) {
-                                 final delete = await showDeleteFileDialog(
-                                   context,
-                                   downloadedFile.toString(),
-                                 );
-
-                                 if (delete?.delete == true) {
-                                   await downloadedFile!.delete();
-                                 }
-                               }
-                             }
-
-                             // ignore: unused_result
-                             await ref.refresh(browsingHistoryProvider.future);
-                           },
-                           icon: const Icon(MdiIcons.closeCircle),
-                         );
+                     trailing: IconButton(
+                       onPressed: () async {
+                         await onDelete(item);
                        },
+                       icon: const Icon(MdiIcons.closeCircle),
                      ),
                      onTap: () {
                        onTap(item);
@@ -196,21 +171,74 @@ class Section extends MultiSliver {
        );
 }
 
+enum HistoryScreenMode { history, downloads }
+
 class HistoryScreen extends HookConsumerWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({super.key, this.mode = HistoryScreenMode.history});
+
+  final HistoryScreenMode mode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historyFilter = ref.watch(historyFilterProvider);
+    final isDownloadsMode = mode == HistoryScreenMode.downloads;
 
     final textFilterEnabled = useState(false);
     final textFilterController = useTextEditingController();
 
     final menuController = useMenuController();
 
-    final historyEntries = ref.watch(browsingHistoryProvider);
+    final historyFilter = isDownloadsMode
+        ? ref.watch(historyDownloadsFilterProvider)
+        : ref.watch(historyVisitsFilterProvider);
+    final historyEntries = isDownloadsMode
+        ? ref.watch(browsingDownloadsProvider)
+        : ref.watch(browsingHistoryProvider);
 
     final selectedItems = useState(<VisitInfo>{});
+    final defaultDownloadsFilter = HistoryFilterOptions(
+      dateRange: null,
+      visitTypes: const {VisitType.download},
+    );
+    final hasActiveFilter = isDownloadsMode
+        ? historyFilter != defaultDownloadsFilter
+        : historyFilter != HistoryFilterOptions.withDefaults();
+
+    Future<void> refreshHistoryEntries() async {
+      if (isDownloadsMode) {
+        // ignore: unused_result
+        await ref.refresh(browsingDownloadsProvider.future);
+      } else {
+        // ignore: unused_result
+        await ref.refresh(browsingHistoryProvider.future);
+      }
+    }
+
+    void setDateRange(DateTimeRange<DateTime>? range) {
+      if (isDownloadsMode) {
+        ref.read(historyDownloadsFilterProvider.notifier).setDateRange(range);
+      } else {
+        ref.read(historyVisitsFilterProvider.notifier).setDateRange(range);
+      }
+    }
+
+    Future<void> deleteHistoryItem(VisitInfo item) async {
+      await ref.read(historyRepositoryProvider.notifier).deleteVisit(item);
+
+      final downloadedFile = item.title.mapNotNull((title) => File(title));
+
+      if (await downloadedFile?.exists() == true && context.mounted) {
+        final delete = await showDeleteFileDialog(
+          context,
+          downloadedFile.toString(),
+        );
+
+        if (delete?.delete == true) {
+          await downloadedFile!.delete();
+        }
+      }
+
+      await refreshHistoryEntries();
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -220,7 +248,9 @@ class HistoryScreen extends HookConsumerWidget {
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.only(top: 12),
                   border: InputBorder.none,
-                  hintText: 'Filter history...',
+                  hintText: isDownloadsMode
+                      ? 'Filter downloads...'
+                      : 'Filter history...',
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -235,7 +265,7 @@ class HistoryScreen extends HookConsumerWidget {
                 ),
               )
             : selectedItems.value.isEmpty
-            ? const Text('History')
+            ? Text(isDownloadsMode ? 'Downloads' : 'History')
             : Text('${selectedItems.value.length} selected'),
         actions: [
           if (selectedItems.value.isNotEmpty)
@@ -272,8 +302,7 @@ class HistoryScreen extends HookConsumerWidget {
                 }
 
                 selectedItems.value = {};
-                // ignore: unused_result
-                await ref.refresh(browsingHistoryProvider.future);
+                await refreshHistoryEntries();
               },
               icon: const Icon(Icons.delete),
             )
@@ -282,11 +311,15 @@ class HistoryScreen extends HookConsumerWidget {
               onPressed: () async {
                 await showDeleteDataDialog(
                   context,
-                  initialSettings: {DeleteBrowsingDataType.history},
+                  initialSettings: {
+                    if (isDownloadsMode)
+                      DeleteBrowsingDataType.downloads
+                    else
+                      DeleteBrowsingDataType.history,
+                  },
                 );
 
-                // ignore: unused_result
-                await ref.refresh(browsingHistoryProvider.future);
+                await refreshHistoryEntries();
               },
               icon: const Icon(Icons.delete),
             ),
@@ -307,9 +340,7 @@ class HistoryScreen extends HookConsumerWidget {
                 trailingIcon: historyFilter.dateRange.mapNotNull(
                   (_) => IconButton(
                     onPressed: () {
-                      ref
-                          .read(historyFilterProvider.notifier)
-                          .setDateRange(null);
+                      setDateRange(null);
                     },
                     icon: const Icon(Icons.clear),
                   ),
@@ -331,53 +362,52 @@ class HistoryScreen extends HookConsumerWidget {
                     lastDate: DateTime.now(),
                   );
 
-                  ref
-                      .read(historyFilterProvider.notifier)
-                      .setDateRange(
-                        range.mapNotNull(
-                          (range) => DateTimeRange(
-                            start: range.start,
-                            //Make sure to include last day fully
-                            end: range.end.add(
-                              const Duration(days: 1) -
-                                  const Duration(milliseconds: 1),
-                            ),
-                          ),
+                  setDateRange(
+                    range.mapNotNull(
+                      (range) => DateTimeRange(
+                        start: range.start,
+                        // Make sure to include last day fully.
+                        end: range.end.add(
+                          const Duration(days: 1) -
+                              const Duration(milliseconds: 1),
                         ),
-                      );
+                      ),
+                    ),
+                  );
                 },
               ),
-              const Divider(),
-              ...{VisitType.link, VisitType.reload, VisitType.download}.map(
-                (type) => CheckboxMenuButton(
-                  closeOnActivate: false,
-                  value: historyFilter.visitTypes.contains(type),
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref
-                          .read(historyFilterProvider.notifier)
-                          .updateVisitType(type, value);
-                    }
-                  },
-                  child: switch (type) {
-                    VisitType.link => const Text('Followed Links'),
-                    VisitType.typed => const Text('Typed Addresses'),
-                    VisitType.embed => const Text('Embedded Page Elements'),
-                    VisitType.redirectPermanent => const Text(
-                      'Temporary Redirects',
-                    ),
-                    VisitType.redirectTemporary => const Text(
-                      'Permanent Redirects',
-                    ),
-                    VisitType.download => const Text('Downloads'),
-                    VisitType.framedLink => const Text('Frames'),
-                    VisitType.reload => const Text('Page Reloads'),
-                    VisitType.bookmark => throw UnimplementedError(
-                      'VisitType.bookmark filter not implemented',
-                    ),
-                  },
+              if (!isDownloadsMode) const Divider(),
+              if (!isDownloadsMode)
+                ...{VisitType.link, VisitType.reload, VisitType.download}.map(
+                  (type) => CheckboxMenuButton(
+                    closeOnActivate: false,
+                    value: historyFilter.visitTypes.contains(type),
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref
+                            .read(historyVisitsFilterProvider.notifier)
+                            .updateVisitType(type, value);
+                      }
+                    },
+                    child: switch (type) {
+                      VisitType.link => const Text('Followed Links'),
+                      VisitType.typed => const Text('Typed Addresses'),
+                      VisitType.embed => const Text('Embedded Page Elements'),
+                      VisitType.redirectPermanent => const Text(
+                        'Temporary Redirects',
+                      ),
+                      VisitType.redirectTemporary => const Text(
+                        'Permanent Redirects',
+                      ),
+                      VisitType.download => const Text('Downloads'),
+                      VisitType.framedLink => const Text('Frames'),
+                      VisitType.reload => const Text('Page Reloads'),
+                      VisitType.bookmark => throw UnimplementedError(
+                        'VisitType.bookmark filter not implemented',
+                      ),
+                    },
+                  ),
                 ),
-              ),
               const Divider(),
               MenuItemButton(
                 leadingIcon: const Icon(MdiIcons.restore),
@@ -385,8 +415,11 @@ class HistoryScreen extends HookConsumerWidget {
                 onPressed: () {
                   textFilterController.clear();
                   textFilterEnabled.value = false;
-
-                  ref.read(historyFilterProvider.notifier).reset();
+                  if (isDownloadsMode) {
+                    ref.read(historyDownloadsFilterProvider.notifier).reset();
+                  } else {
+                    ref.read(historyVisitsFilterProvider.notifier).reset();
+                  }
                 },
               ),
             ],
@@ -399,8 +432,7 @@ class HistoryScreen extends HookConsumerWidget {
                 }
               },
               icon: Badge(
-                isLabelVisible:
-                    historyFilter != HistoryFilterOptions.withDefaults(),
+                isLabelVisible: hasActiveFilter,
                 child: const Icon(MdiIcons.filter),
               ),
             ),
@@ -413,8 +445,7 @@ class HistoryScreen extends HookConsumerWidget {
           data: (data) {
             return RefreshIndicator(
               onRefresh: () async {
-                // ignore: unused_result
-                await ref.refresh(browsingHistoryProvider.future);
+                await refreshHistoryEntries();
               },
               child: HookBuilder(
                 builder: (context) {
@@ -464,6 +495,7 @@ class HistoryScreen extends HookConsumerWidget {
                               items: value,
                               selectedItems: selectedItems.value,
                               onLongPress: toggleSelected,
+                              onDelete: deleteHistoryItem,
                               onTap: (item) async {
                                 if (selectedItems.value.isNotEmpty) {
                                   toggleSelected(item);
@@ -492,7 +524,9 @@ class HistoryScreen extends HookConsumerWidget {
           },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load History',
+              title: isDownloadsMode
+                  ? 'Failed to load Downloads'
+                  : 'Failed to load History',
               exception: error,
             ),
           ),

@@ -30,7 +30,7 @@ part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 @JsonPersist()
-class HistoryFilter extends _$HistoryFilter {
+class HistoryVisitsFilter extends _$HistoryVisitsFilter {
   void updateVisitType(VisitType type, bool value) {
     if (value) {
       state = state.copyWith.visitTypes({...state.visitTypes, type});
@@ -51,16 +51,54 @@ class HistoryFilter extends _$HistoryFilter {
   HistoryFilterOptions build() {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
-      key: 'HistoryFilterOptions',
+      key: 'HistoryVisitsFilterOptions',
     );
 
     return stateOrNull ?? HistoryFilterOptions.withDefaults();
   }
 }
 
+@Riverpod(keepAlive: true)
+@JsonPersist()
+class HistoryDownloadsFilter extends _$HistoryDownloadsFilter {
+  void reset() {
+    state = HistoryFilterOptions(
+      dateRange: null,
+      visitTypes: const {VisitType.download},
+    );
+  }
+
+  void setDateRange(DateTimeRange<DateTime>? range) {
+    state = state.copyWith.dateRange(range);
+  }
+
+  @override
+  HistoryFilterOptions build() {
+    persist(
+      ref.watch(riverpodDatabaseStorageProvider),
+      key: 'HistoryDownloadsFilterOptions',
+    );
+
+    return stateOrNull ??
+        HistoryFilterOptions(
+          dateRange: null,
+          visitTypes: const {VisitType.download},
+        );
+  }
+}
+
 @Riverpod()
 Future<List<VisitInfo>> browsingHistory(Ref ref) {
-  final options = ref.watch(historyFilterProvider);
+  final options = ref.watch(historyVisitsFilterProvider);
+
+  return ref
+      .read(historyRepositoryProvider.notifier)
+      .getDetailedVisits(options);
+}
+
+@Riverpod()
+Future<List<VisitInfo>> browsingDownloads(Ref ref) {
+  final options = ref.watch(historyDownloadsFilterProvider);
 
   return ref
       .read(historyRepositoryProvider.notifier)

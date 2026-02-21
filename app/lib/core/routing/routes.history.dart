@@ -19,12 +19,30 @@
  */
 part of 'routes.dart';
 
-@TypedGoRoute<HistoryRoute>(name: 'HistoryRoute', path: '/history')
+@TypedGoRoute<HistoryRoute>(
+  name: 'HistoryRoute',
+  path: '/history',
+  routes: [
+    TypedGoRoute<HistoryDownloadsRoute>(
+      name: 'HistoryDownloadsRoute',
+      path: 'downloads',
+    ),
+  ],
+)
 class HistoryRoute extends GoRouteData with $HistoryRoute {
   const HistoryRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const HistoryScreen();
+  }
+}
+
+class HistoryDownloadsRoute extends GoRouteData with $HistoryDownloadsRoute {
+  const HistoryDownloadsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const HistoryScreen(mode: HistoryScreenMode.downloads);
   }
 }

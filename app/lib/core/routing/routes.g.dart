@@ -1143,6 +1143,13 @@ RouteBase get $historyRoute => GoRouteData.$route(
   path: '/history',
   name: 'HistoryRoute',
   factory: $HistoryRoute._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: 'downloads',
+      name: 'HistoryDownloadsRoute',
+      factory: $HistoryDownloadsRoute._fromState,
+    ),
+  ],
 );
 
 mixin $HistoryRoute on GoRouteData {
@@ -1150,6 +1157,27 @@ mixin $HistoryRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/history');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $HistoryDownloadsRoute on GoRouteData {
+  static HistoryDownloadsRoute _fromState(GoRouterState state) =>
+      const HistoryDownloadsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/history/downloads');
 
   @override
   void go(BuildContext context) => context.go(location);
