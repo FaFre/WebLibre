@@ -44,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
@@ -57,7 +58,6 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/weblibre_icons.dart';
-import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -567,15 +567,10 @@ class QuickTabSwitcher extends HookConsumerWidget {
             );
           },
           itemAvatar: (item) =>
-              item.tabState?.icon.mapNotNull(
-                (icon) => SafeRawImage(
-                  image: icon,
-                  height: 24,
-                  width: 24,
-                  fallback: UrlIcon([item.url], iconSize: 24),
-                ),
+              item.tabState.mapNotNull(
+                (tabState) => TabIcon(tabState: tabState, iconSize: 20),
               ) ??
-              UrlIcon([item.url], iconSize: 16),
+              UrlIcon([item.url], iconSize: 20),
           itemBackgroundColor: (item) =>
               item.color != null ? ContainerColors.forChip(item.color!) : null,
           onSelected: (item) async {

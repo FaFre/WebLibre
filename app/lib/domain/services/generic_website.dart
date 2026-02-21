@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -57,6 +56,12 @@ const _typeMap = {
   "msapplication-TileImage": IconType.microsoftTile,
 };
 
+final class _InFlightFetch {
+  final Future<Result<WebPageInfo>> future;
+
+  const _InFlightFetch(this.future);
+}
+
 Iterable<ResourceSize> sizesToList(String? sizes) sync* {
   if (sizes != null) {
     final splitted = sizes
@@ -82,12 +87,9 @@ Iterable<ResourceSize> sizesToList(String? sizes) sync* {
 class GenericWebsiteService extends _$GenericWebsiteService {
   final GeckoIconService _iconsService;
 
-  //Global icon cache
   late CacheRepository _cacheRepository;
-  //Local decoded icon cache
   late final LRUCache<String, BrowserIcon> _browserIconCache;
-  //In-flight fetch deduplication
-  final _inFlightFetches = <Uri, Future<Result<WebPageInfo>>>{};
+  final _inFlightFetches = <Uri, _InFlightFetch>{};
 
   GenericWebsiteService()
     : _iconsService = GeckoIconService(),
@@ -125,6 +127,10 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       return baseUri.resolveUri(uri);
     }
     return uri;
+  }
+
+  static bool _isHttpUrl(Uri url) {
+    return url.scheme.startsWith('https') || url.scheme.startsWith('http');
   }
 
   static List<Resource> _extractIcons(Uri baseUrl, Document document) {
@@ -293,7 +299,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   }
 
   Future<BrowserIcon?> getCachedIcon(Uri url) async {
-    if (url.scheme.startsWith('https') || url.scheme.startsWith('http')) {
+    if (_isHttpUrl(url)) {
       final cachedBrowserIcon = _browserIconCache.get(url.origin);
       if (cachedBrowserIcon?.image.value != null) {
         return cachedBrowserIcon;
@@ -346,14 +352,38 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   }
 
   Future<Result<WebPageInfo>> _deduplicatedFetchPageInfo(Uri url) {
-    return _inFlightFetches.putIfAbsent(url, () {
-      return fetchPageInfo(url: url, isImageRequest: true, proxyPort: null)
-          .whenComplete(() => _inFlightFetches.remove(url));
+    final existing = _inFlightFetches[url];
+    if (existing != null) {
+      return existing.future;
+    }
+
+    late final Future<Result<WebPageInfo>> inFlightFetch;
+    inFlightFetch = fetchPageInfo(
+      url: url,
+      isImageRequest: true,
+      proxyPort: null,
+    ).timeout(
+      const Duration(seconds: 20),
+      onTimeout: () => Result.failure(
+        const ErrorMessage(source: 'icon', message: 'Icon fetch timeout'),
+      ),
+    ).whenComplete(() {
+      // Only clear this entry if it is still the active in-flight request.
+      if (identical(_inFlightFetches[url]?.future, inFlightFetch)) {
+        _inFlightFetches.remove(url);
+      }
     });
+
+    _inFlightFetches[url] = _InFlightFetch(inFlightFetch);
+    return inFlightFetch;
   }
 
   Future<BrowserIcon?> getUrlIcon(List<Uri> urlList) async {
     for (final url in urlList) {
+      if (!_isHttpUrl(url)) {
+        continue;
+      }
+
       final cachedIcon = await getCachedIcon(url);
 
       if (cachedIcon != null) {
@@ -365,7 +395,6 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
         if (result.isSuccess) {
           if (result.value.favicon case final BrowserIcon favicon) {
-            //If it was a `isImageRequest` hit, we need to cache it at this point
             if (!_browserIconCache.contains(url.origin)) {
               _browserIconCache.set(url.origin, favicon);
             }
