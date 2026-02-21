@@ -26,13 +26,16 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class ShareMenuItemButton extends HookConsumerWidget {
   const ShareMenuItemButton({super.key, required this.selectedTabId});
@@ -284,6 +287,100 @@ class CopyAddressMenuItemButton extends HookConsumerWidget {
           MenuController.maybeOf(context)?.close();
         }
       },
+    );
+  }
+}
+
+class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
+  final String? selectedTabId;
+
+  const SendTabToDeviceMenuItemButton({super.key, required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (selectedTabId == null) {
+      return const SizedBox.shrink();
+    }
+
+    final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
+    final devices = ref.watch(syncDevicesProvider);
+
+    if (!isAuthenticated) {
+      return const SizedBox.shrink();
+    }
+
+    return Skeletonizer(
+      enabled: devices.isLoading && devices.value == null,
+      child: SubmenuButton(
+        leadingIcon: const Icon(Icons.send_outlined),
+        menuChildren: devices.when(
+          data: (deviceList) {
+            final targets = deviceList
+                .where((device) => !device.isCurrentDevice && device.canSendTab)
+                .toList(growable: false);
+
+            if (targets.isEmpty) {
+              return const [MenuItemButton(child: Text('No target devices'))];
+            }
+
+            return targets
+                .map((device) {
+                  return MenuItemButton(
+                    closeOnActivate: false,
+                    leadingIcon: const Icon(Icons.devices_other),
+                    child: Text(device.displayName),
+                    onPressed: () async {
+                      final tabState = ref.read(
+                        tabStateProvider(selectedTabId),
+                      );
+                      if (tabState == null) {
+                        return;
+                      }
+
+                      final title = tabState.title.isNotEmpty
+                          ? tabState.title
+                          : tabState.url.toString();
+
+                      final success = await ref
+                          .read(syncRepositoryProvider.notifier)
+                          .sendTabToDevice(
+                            deviceId: device.deviceId,
+                            title: title,
+                            url: tabState.url.toString(),
+                          );
+
+                      if (context.mounted) {
+                        if (success) {
+                          ui_helper.showInfoMessage(
+                            context,
+                            'Sent tab to ${device.displayName}',
+                          );
+                        } else {
+                          ui_helper.showErrorMessage(
+                            context,
+                            'Failed to send tab',
+                          );
+                        }
+
+                        MenuController.maybeOf(context)?.close();
+                      }
+                    },
+                  );
+                })
+                .toList(growable: false);
+          },
+          loading: () => const [
+            MenuItemButton(
+              leadingIcon: Icon(Icons.devices_other),
+              child: Text('Loading devices...'),
+            ),
+          ],
+          error: (_, _) => const [
+            MenuItemButton(child: Text('Failed to load devices')),
+          ],
+        ),
+        child: const Text('Send To Device'),
+      ),
     );
   }
 }

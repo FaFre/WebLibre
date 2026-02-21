@@ -20,9 +20,26 @@
 package eu.weblibre.gecko
 
 import android.app.Application
+import android.content.SharedPreferences
+import eu.weblibre.flutter_mozilla_components.ActiveProfile
+import eu.weblibre.flutter_mozilla_components.MegazordSetup
 
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
+        MegazordSetup.setupEarlyMainProcess()
+
+        // Resolve active profile EARLY so cold-start WorkManager workers
+        // get profile-prefixed SharedPreferences
+        ActiveProfile.resolveFromDisk(this)
+    }
+
+    override fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
+        val pfx = ActiveProfile.prefix
+        if (pfx != null && name in ActiveProfile.FXA_SHARED_PREFERENCE_NAMES) {
+            return super.getSharedPreferences("${pfx}_$name", mode)
+        }
+        return super.getSharedPreferences(name, mode)
     }
 }

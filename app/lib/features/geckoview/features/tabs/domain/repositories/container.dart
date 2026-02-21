@@ -174,7 +174,8 @@ class ContainerRepository extends _$ContainerRepository {
         .read(tabDatabaseProvider)
         .containerDao
         .siteAssignedContainerId(uri)
-        .getSingle();
+        .get()
+        .then((value) => value.firstOrNull);
   }
 
   Future<List<String>> getContainersToClearOnExit() async {

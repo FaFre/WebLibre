@@ -450,6 +450,18 @@ enum class LogLevel(val raw: Int) {
   }
 }
 
+enum class SyncEngineValue(val raw: Int) {
+  HISTORY(0),
+  BOOKMARKS(1),
+  TABS(2);
+
+  companion object {
+    fun ofRaw(raw: Int): SyncEngineValue? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Type of ML model operation */
 enum class MlProgressType(val raw: Int) {
   DOWNLOADING(0),
@@ -2500,6 +2512,231 @@ data class AddonCollection (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class SyncEngineStatus (
+  val engine: SyncEngineValue,
+  val enabled: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SyncEngineStatus {
+      val engine = pigeonVar_list[0] as SyncEngineValue
+      val enabled = pigeonVar_list[1] as Boolean
+      return SyncEngineStatus(engine, enabled)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      engine,
+      enabled,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SyncEngineStatus) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SyncAccountInfo (
+  val authenticated: Boolean,
+  val syncing: Boolean,
+  val needsReauth: Boolean,
+  val email: String? = null,
+  val displayName: String? = null,
+  val lastSyncedAt: Long? = null,
+  val engines: List<SyncEngineStatus>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SyncAccountInfo {
+      val authenticated = pigeonVar_list[0] as Boolean
+      val syncing = pigeonVar_list[1] as Boolean
+      val needsReauth = pigeonVar_list[2] as Boolean
+      val email = pigeonVar_list[3] as String?
+      val displayName = pigeonVar_list[4] as String?
+      val lastSyncedAt = pigeonVar_list[5] as Long?
+      val engines = pigeonVar_list[6] as List<SyncEngineStatus>
+      return SyncAccountInfo(authenticated, syncing, needsReauth, email, displayName, lastSyncedAt, engines)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      authenticated,
+      syncing,
+      needsReauth,
+      email,
+      displayName,
+      lastSyncedAt,
+      engines,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SyncAccountInfo) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SyncDevice (
+  val deviceId: String,
+  val displayName: String,
+  val isCurrentDevice: Boolean,
+  val canSendTab: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SyncDevice {
+      val deviceId = pigeonVar_list[0] as String
+      val displayName = pigeonVar_list[1] as String
+      val isCurrentDevice = pigeonVar_list[2] as Boolean
+      val canSendTab = pigeonVar_list[3] as Boolean
+      return SyncDevice(deviceId, displayName, isCurrentDevice, canSendTab)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      deviceId,
+      displayName,
+      isCurrentDevice,
+      canSendTab,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SyncDevice) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SyncIncomingTab (
+  val title: String,
+  val url: String,
+  val fromDeviceId: String? = null,
+  val fromDeviceName: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SyncIncomingTab {
+      val title = pigeonVar_list[0] as String
+      val url = pigeonVar_list[1] as String
+      val fromDeviceId = pigeonVar_list[2] as String?
+      val fromDeviceName = pigeonVar_list[3] as String?
+      return SyncIncomingTab(title, url, fromDeviceId, fromDeviceName)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      title,
+      url,
+      fromDeviceId,
+      fromDeviceName,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SyncIncomingTab) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SyncRemoteTab (
+  val title: String,
+  val url: String,
+  val iconUrl: String? = null,
+  val lastUsed: Long,
+  val inactive: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SyncRemoteTab {
+      val title = pigeonVar_list[0] as String
+      val url = pigeonVar_list[1] as String
+      val iconUrl = pigeonVar_list[2] as String?
+      val lastUsed = pigeonVar_list[3] as Long
+      val inactive = pigeonVar_list[4] as Boolean
+      return SyncRemoteTab(title, url, iconUrl, lastUsed, inactive)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      title,
+      url,
+      iconUrl,
+      lastUsed,
+      inactive,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SyncRemoteTab) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SyncDeviceTabs (
+  val deviceId: String,
+  val deviceName: String,
+  val tabs: List<SyncRemoteTab>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SyncDeviceTabs {
+      val deviceId = pigeonVar_list[0] as String
+      val deviceName = pigeonVar_list[1] as String
+      val tabs = pigeonVar_list[2] as List<SyncRemoteTab>
+      return SyncDeviceTabs(deviceId, deviceName, tabs)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      deviceId,
+      deviceName,
+      tabs,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SyncDeviceTabs) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return GeckoPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class GeckoPref (
   val name: String,
   val value: Any? = null,
@@ -3370,345 +3607,380 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       151.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          MlProgressType.ofRaw(it.toInt())
+          SyncEngineValue.ofRaw(it.toInt())
         }
       }
       152.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          MlProgressStatus.ofRaw(it.toInt())
+          MlProgressType.ofRaw(it.toInt())
         }
       }
       153.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          ClearDataType.ofRaw(it.toInt())
+          MlProgressStatus.ofRaw(it.toInt())
         }
       }
       154.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          GeckoFetchMethod.ofRaw(it.toInt())
+          ClearDataType.ofRaw(it.toInt())
         }
       }
       155.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          GeckoFetchRedircet.ofRaw(it.toInt())
+          GeckoFetchMethod.ofRaw(it.toInt())
         }
       }
       156.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          GeckoFetchCookiePolicy.ofRaw(it.toInt())
+          GeckoFetchRedircet.ofRaw(it.toInt())
         }
       }
       157.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          BookmarkNodeType.ofRaw(it.toInt())
+          GeckoFetchCookiePolicy.ofRaw(it.toInt())
         }
       }
       158.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          SitePermissionStatus.ofRaw(it.toInt())
+          BookmarkNodeType.ofRaw(it.toInt())
         }
       }
       159.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          AutoplayStatus.ofRaw(it.toInt())
+          SitePermissionStatus.ofRaw(it.toInt())
         }
       }
       160.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationOptions.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          AutoplayStatus.ofRaw(it.toInt())
         }
       }
       161.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ReaderState.fromList(it)
+          TranslationOptions.fromList(it)
         }
       }
       162.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddTabParams.fromList(it)
+          ReaderState.fromList(it)
         }
       }
       163.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          LastMediaAccessState.fromList(it)
+          AddTabParams.fromList(it)
         }
       }
       164.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryMetadataKey.fromList(it)
+          LastMediaAccessState.fromList(it)
         }
       }
       165.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PackageCategoryValue.fromList(it)
+          HistoryMetadataKey.fromList(it)
         }
       }
       166.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ExternalPackage.fromList(it)
+          PackageCategoryValue.fromList(it)
         }
       }
       167.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          LoadUrlFlagsValue.fromList(it)
+          ExternalPackage.fromList(it)
         }
       }
       168.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SourceValue.fromList(it)
+          LoadUrlFlagsValue.fromList(it)
         }
       }
       169.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabState.fromList(it)
+          SourceValue.fromList(it)
         }
       }
       170.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          RecoverableTab.fromList(it)
+          TabState.fromList(it)
         }
       }
       171.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          RecoverableBrowserState.fromList(it)
+          RecoverableTab.fromList(it)
         }
       }
       172.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          IconRequest.fromList(it)
+          RecoverableBrowserState.fromList(it)
         }
       }
       173.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ResourceSize.fromList(it)
+          IconRequest.fromList(it)
         }
       }
       174.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          Resource.fromList(it)
+          ResourceSize.fromList(it)
         }
       }
       175.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          IconResult.fromList(it)
+          Resource.fromList(it)
         }
       }
       176.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CookiePartitionKey.fromList(it)
+          IconResult.fromList(it)
         }
       }
       177.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          Cookie.fromList(it)
+          CookiePartitionKey.fromList(it)
         }
       }
       178.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VisitInfo.fromList(it)
+          Cookie.fromList(it)
         }
       }
       179.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryItem.fromList(it)
+          VisitInfo.fromList(it)
         }
       }
       180.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryState.fromList(it)
+          HistoryItem.fromList(it)
         }
       }
       181.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ReaderableState.fromList(it)
+          HistoryState.fromList(it)
         }
       }
       182.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SecurityInfoState.fromList(it)
+          ReaderableState.fromList(it)
         }
       }
       183.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabContentState.fromList(it)
+          SecurityInfoState.fromList(it)
         }
       }
       184.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          FindResultState.fromList(it)
+          TabContentState.fromList(it)
         }
       }
       185.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CustomSelectionAction.fromList(it)
+          FindResultState.fromList(it)
         }
       }
       186.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          WebExtensionData.fromList(it)
+          CustomSelectionAction.fromList(it)
         }
       }
       187.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoSuggestion.fromList(it)
+          WebExtensionData.fromList(it)
         }
       }
       188.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabContent.fromList(it)
+          GeckoSuggestion.fromList(it)
         }
       }
       189.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContentBlocking.fromList(it)
+          TabContent.fromList(it)
         }
       }
       190.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DohSettings.fromList(it)
+          ContentBlocking.fromList(it)
         }
       }
       191.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoEngineSettings.fromList(it)
+          DohSettings.fromList(it)
         }
       }
       192.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AutocompleteResult.fromList(it)
+          GeckoEngineSettings.fromList(it)
         }
       }
       193.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          UnknownHitResult.fromList(it)
+          AutocompleteResult.fromList(it)
         }
       }
       194.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageHitResult.fromList(it)
+          UnknownHitResult.fromList(it)
         }
       }
       195.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoHitResult.fromList(it)
+          ImageHitResult.fromList(it)
         }
       }
       196.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AudioHitResult.fromList(it)
+          VideoHitResult.fromList(it)
         }
       }
       197.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageSrcHitResult.fromList(it)
+          AudioHitResult.fromList(it)
         }
       }
       198.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PhoneHitResult.fromList(it)
+          ImageSrcHitResult.fromList(it)
         }
       }
       199.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          EmailHitResult.fromList(it)
+          PhoneHitResult.fromList(it)
         }
       }
       200.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeoHitResult.fromList(it)
+          EmailHitResult.fromList(it)
         }
       }
       201.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DownloadState.fromList(it)
+          GeoHitResult.fromList(it)
         }
       }
       202.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareInternetResourceState.fromList(it)
+          DownloadState.fromList(it)
         }
       }
       203.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonCollection.fromList(it)
+          ShareInternetResourceState.fromList(it)
         }
       }
       204.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoPref.fromList(it)
+          AddonCollection.fromList(it)
         }
       }
       205.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MlProgressData.fromList(it)
+          SyncEngineStatus.fromList(it)
         }
       }
       206.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          SyncAccountInfo.fromList(it)
         }
       }
       207.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          SyncDevice.fromList(it)
         }
       }
       208.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          SyncIncomingTab.fromList(it)
         }
       }
       209.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchResponse.fromList(it)
+          SyncRemoteTab.fromList(it)
         }
       }
       210.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkNode.fromList(it)
+          SyncDeviceTabs.fromList(it)
         }
       }
       211.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInfo.fromList(it)
+          GeckoPref.fromList(it)
         }
       }
       212.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SitePermissions.fromList(it)
+          MlProgressData.fromList(it)
         }
       }
       213.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TrackingProtectionException.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       214.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PwaIcon.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       215.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTargetFiles.fromList(it)
+          GeckoFetchRequest.fromList(it)
         }
       }
       216.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTargetParams.fromList(it)
+          GeckoFetchResponse.fromList(it)
         }
       }
       217.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTarget.fromList(it)
+          BookmarkNode.fromList(it)
         }
       }
       218.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ExternalApplicationResource.fromList(it)
+          BookmarkInfo.fromList(it)
         }
       }
       219.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SitePermissions.fromList(it)
+        }
+      }
+      220.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TrackingProtectionException.fromList(it)
+        }
+      }
+      221.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PwaIcon.fromList(it)
+        }
+      }
+      222.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ShareTargetFiles.fromList(it)
+        }
+      }
+      223.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ShareTargetParams.fromList(it)
+        }
+      }
+      224.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ShareTarget.fromList(it)
+        }
+      }
+      225.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ExternalApplicationResource.fromList(it)
+        }
+      }
+      226.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PwaManifest.fromList(it)
         }
@@ -3806,280 +4078,308 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(150)
         writeValue(stream, value.raw.toLong())
       }
-      is MlProgressType -> {
+      is SyncEngineValue -> {
         stream.write(151)
         writeValue(stream, value.raw.toLong())
       }
-      is MlProgressStatus -> {
+      is MlProgressType -> {
         stream.write(152)
         writeValue(stream, value.raw.toLong())
       }
-      is ClearDataType -> {
+      is MlProgressStatus -> {
         stream.write(153)
         writeValue(stream, value.raw.toLong())
       }
-      is GeckoFetchMethod -> {
+      is ClearDataType -> {
         stream.write(154)
         writeValue(stream, value.raw.toLong())
       }
-      is GeckoFetchRedircet -> {
+      is GeckoFetchMethod -> {
         stream.write(155)
         writeValue(stream, value.raw.toLong())
       }
-      is GeckoFetchCookiePolicy -> {
+      is GeckoFetchRedircet -> {
         stream.write(156)
         writeValue(stream, value.raw.toLong())
       }
-      is BookmarkNodeType -> {
+      is GeckoFetchCookiePolicy -> {
         stream.write(157)
         writeValue(stream, value.raw.toLong())
       }
-      is SitePermissionStatus -> {
+      is BookmarkNodeType -> {
         stream.write(158)
         writeValue(stream, value.raw.toLong())
       }
-      is AutoplayStatus -> {
+      is SitePermissionStatus -> {
         stream.write(159)
         writeValue(stream, value.raw.toLong())
       }
-      is TranslationOptions -> {
+      is AutoplayStatus -> {
         stream.write(160)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is ReaderState -> {
+      is TranslationOptions -> {
         stream.write(161)
         writeValue(stream, value.toList())
       }
-      is AddTabParams -> {
+      is ReaderState -> {
         stream.write(162)
         writeValue(stream, value.toList())
       }
-      is LastMediaAccessState -> {
+      is AddTabParams -> {
         stream.write(163)
         writeValue(stream, value.toList())
       }
-      is HistoryMetadataKey -> {
+      is LastMediaAccessState -> {
         stream.write(164)
         writeValue(stream, value.toList())
       }
-      is PackageCategoryValue -> {
+      is HistoryMetadataKey -> {
         stream.write(165)
         writeValue(stream, value.toList())
       }
-      is ExternalPackage -> {
+      is PackageCategoryValue -> {
         stream.write(166)
         writeValue(stream, value.toList())
       }
-      is LoadUrlFlagsValue -> {
+      is ExternalPackage -> {
         stream.write(167)
         writeValue(stream, value.toList())
       }
-      is SourceValue -> {
+      is LoadUrlFlagsValue -> {
         stream.write(168)
         writeValue(stream, value.toList())
       }
-      is TabState -> {
+      is SourceValue -> {
         stream.write(169)
         writeValue(stream, value.toList())
       }
-      is RecoverableTab -> {
+      is TabState -> {
         stream.write(170)
         writeValue(stream, value.toList())
       }
-      is RecoverableBrowserState -> {
+      is RecoverableTab -> {
         stream.write(171)
         writeValue(stream, value.toList())
       }
-      is IconRequest -> {
+      is RecoverableBrowserState -> {
         stream.write(172)
         writeValue(stream, value.toList())
       }
-      is ResourceSize -> {
+      is IconRequest -> {
         stream.write(173)
         writeValue(stream, value.toList())
       }
-      is Resource -> {
+      is ResourceSize -> {
         stream.write(174)
         writeValue(stream, value.toList())
       }
-      is IconResult -> {
+      is Resource -> {
         stream.write(175)
         writeValue(stream, value.toList())
       }
-      is CookiePartitionKey -> {
+      is IconResult -> {
         stream.write(176)
         writeValue(stream, value.toList())
       }
-      is Cookie -> {
+      is CookiePartitionKey -> {
         stream.write(177)
         writeValue(stream, value.toList())
       }
-      is VisitInfo -> {
+      is Cookie -> {
         stream.write(178)
         writeValue(stream, value.toList())
       }
-      is HistoryItem -> {
+      is VisitInfo -> {
         stream.write(179)
         writeValue(stream, value.toList())
       }
-      is HistoryState -> {
+      is HistoryItem -> {
         stream.write(180)
         writeValue(stream, value.toList())
       }
-      is ReaderableState -> {
+      is HistoryState -> {
         stream.write(181)
         writeValue(stream, value.toList())
       }
-      is SecurityInfoState -> {
+      is ReaderableState -> {
         stream.write(182)
         writeValue(stream, value.toList())
       }
-      is TabContentState -> {
+      is SecurityInfoState -> {
         stream.write(183)
         writeValue(stream, value.toList())
       }
-      is FindResultState -> {
+      is TabContentState -> {
         stream.write(184)
         writeValue(stream, value.toList())
       }
-      is CustomSelectionAction -> {
+      is FindResultState -> {
         stream.write(185)
         writeValue(stream, value.toList())
       }
-      is WebExtensionData -> {
+      is CustomSelectionAction -> {
         stream.write(186)
         writeValue(stream, value.toList())
       }
-      is GeckoSuggestion -> {
+      is WebExtensionData -> {
         stream.write(187)
         writeValue(stream, value.toList())
       }
-      is TabContent -> {
+      is GeckoSuggestion -> {
         stream.write(188)
         writeValue(stream, value.toList())
       }
-      is ContentBlocking -> {
+      is TabContent -> {
         stream.write(189)
         writeValue(stream, value.toList())
       }
-      is DohSettings -> {
+      is ContentBlocking -> {
         stream.write(190)
         writeValue(stream, value.toList())
       }
-      is GeckoEngineSettings -> {
+      is DohSettings -> {
         stream.write(191)
         writeValue(stream, value.toList())
       }
-      is AutocompleteResult -> {
+      is GeckoEngineSettings -> {
         stream.write(192)
         writeValue(stream, value.toList())
       }
-      is UnknownHitResult -> {
+      is AutocompleteResult -> {
         stream.write(193)
         writeValue(stream, value.toList())
       }
-      is ImageHitResult -> {
+      is UnknownHitResult -> {
         stream.write(194)
         writeValue(stream, value.toList())
       }
-      is VideoHitResult -> {
+      is ImageHitResult -> {
         stream.write(195)
         writeValue(stream, value.toList())
       }
-      is AudioHitResult -> {
+      is VideoHitResult -> {
         stream.write(196)
         writeValue(stream, value.toList())
       }
-      is ImageSrcHitResult -> {
+      is AudioHitResult -> {
         stream.write(197)
         writeValue(stream, value.toList())
       }
-      is PhoneHitResult -> {
+      is ImageSrcHitResult -> {
         stream.write(198)
         writeValue(stream, value.toList())
       }
-      is EmailHitResult -> {
+      is PhoneHitResult -> {
         stream.write(199)
         writeValue(stream, value.toList())
       }
-      is GeoHitResult -> {
+      is EmailHitResult -> {
         stream.write(200)
         writeValue(stream, value.toList())
       }
-      is DownloadState -> {
+      is GeoHitResult -> {
         stream.write(201)
         writeValue(stream, value.toList())
       }
-      is ShareInternetResourceState -> {
+      is DownloadState -> {
         stream.write(202)
         writeValue(stream, value.toList())
       }
-      is AddonCollection -> {
+      is ShareInternetResourceState -> {
         stream.write(203)
         writeValue(stream, value.toList())
       }
-      is GeckoPref -> {
+      is AddonCollection -> {
         stream.write(204)
         writeValue(stream, value.toList())
       }
-      is MlProgressData -> {
+      is SyncEngineStatus -> {
         stream.write(205)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is SyncAccountInfo -> {
         stream.write(206)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is SyncDevice -> {
         stream.write(207)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is SyncIncomingTab -> {
         stream.write(208)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is SyncRemoteTab -> {
         stream.write(209)
         writeValue(stream, value.toList())
       }
-      is BookmarkNode -> {
+      is SyncDeviceTabs -> {
         stream.write(210)
         writeValue(stream, value.toList())
       }
-      is BookmarkInfo -> {
+      is GeckoPref -> {
         stream.write(211)
         writeValue(stream, value.toList())
       }
-      is SitePermissions -> {
+      is MlProgressData -> {
         stream.write(212)
         writeValue(stream, value.toList())
       }
-      is TrackingProtectionException -> {
+      is ContainerSiteAssignment -> {
         stream.write(213)
         writeValue(stream, value.toList())
       }
-      is PwaIcon -> {
+      is GeckoHeader -> {
         stream.write(214)
         writeValue(stream, value.toList())
       }
-      is ShareTargetFiles -> {
+      is GeckoFetchRequest -> {
         stream.write(215)
         writeValue(stream, value.toList())
       }
-      is ShareTargetParams -> {
+      is GeckoFetchResponse -> {
         stream.write(216)
         writeValue(stream, value.toList())
       }
-      is ShareTarget -> {
+      is BookmarkNode -> {
         stream.write(217)
         writeValue(stream, value.toList())
       }
-      is ExternalApplicationResource -> {
+      is BookmarkInfo -> {
         stream.write(218)
         writeValue(stream, value.toList())
       }
-      is PwaManifest -> {
+      is SitePermissions -> {
         stream.write(219)
+        writeValue(stream, value.toList())
+      }
+      is TrackingProtectionException -> {
+        stream.write(220)
+        writeValue(stream, value.toList())
+      }
+      is PwaIcon -> {
+        stream.write(221)
+        writeValue(stream, value.toList())
+      }
+      is ShareTargetFiles -> {
+        stream.write(222)
+        writeValue(stream, value.toList())
+      }
+      is ShareTargetParams -> {
+        stream.write(223)
+        writeValue(stream, value.toList())
+      }
+      is ShareTarget -> {
+        stream.write(224)
+        writeValue(stream, value.toList())
+      }
+      is ExternalApplicationResource -> {
+        stream.write(225)
+        writeValue(stream, value.toList())
+      }
+      is PwaManifest -> {
+        stream.write(226)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -4091,7 +4391,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
   fun getGeckoVersion(): String
-  fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?)
+  fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?, fxaServerOverride: String?, syncTokenServerOverride: String?)
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
 
@@ -4128,8 +4428,10 @@ interface GeckoBrowserApi {
             val logLevelArg = args[1] as LogLevel
             val contentBlockingArg = args[2] as ContentBlocking
             val addonCollectionArg = args[3] as AddonCollection?
+            val fxaServerOverrideArg = args[4] as String?
+            val syncTokenServerOverrideArg = args[5] as String?
             val wrapped: List<Any?> = try {
-              api.initialize(profileFolderArg, logLevelArg, contentBlockingArg, addonCollectionArg)
+              api.initialize(profileFolderArg, logLevelArg, contentBlockingArg, addonCollectionArg, fxaServerOverrideArg, syncTokenServerOverrideArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
@@ -4168,6 +4470,291 @@ interface GeckoBrowserApi {
               GeckoPigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface GeckoSyncApi {
+  fun getAccountInfo(callback: (Result<SyncAccountInfo>) -> Unit)
+  fun beginAuthentication(callback: (Result<Unit>) -> Unit)
+  fun beginPairingAuthentication(pairingUrl: String, callback: (Result<Unit>) -> Unit)
+  fun logout(callback: (Result<Unit>) -> Unit)
+  fun syncNow(callback: (Result<Unit>) -> Unit)
+  fun setEngineEnabled(engine: SyncEngineValue, enabled: Boolean, callback: (Result<Unit>) -> Unit)
+  fun getSyncedTabs(callback: (Result<List<SyncDeviceTabs>>) -> Unit)
+  fun getDevices(callback: (Result<List<SyncDevice>>) -> Unit)
+  fun sendTabToDevice(deviceId: String, title: String, url: String, callback: (Result<Boolean>) -> Unit)
+  fun refreshDevices(callback: (Result<Unit>) -> Unit)
+  fun pollDeviceCommands(callback: (Result<Unit>) -> Unit)
+  fun drainIncomingTabs(callback: (Result<List<SyncIncomingTab>>) -> Unit)
+  fun getDeviceName(callback: (Result<String?>) -> Unit)
+  fun setDeviceName(newName: String, callback: (Result<Boolean>) -> Unit)
+
+  companion object {
+    /** The codec used by GeckoSyncApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoSyncApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoSyncApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.getAccountInfo$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.getAccountInfo{ result: Result<SyncAccountInfo> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.beginAuthentication$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.beginAuthentication{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.beginPairingAuthentication$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val pairingUrlArg = args[0] as String
+            api.beginPairingAuthentication(pairingUrlArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.logout$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.logout{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.syncNow$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.syncNow{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.setEngineEnabled$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val engineArg = args[0] as SyncEngineValue
+            val enabledArg = args[1] as Boolean
+            api.setEngineEnabled(engineArg, enabledArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.getSyncedTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.getSyncedTabs{ result: Result<List<SyncDeviceTabs>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.getDevices$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.getDevices{ result: Result<List<SyncDevice>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.sendTabToDevice$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val deviceIdArg = args[0] as String
+            val titleArg = args[1] as String
+            val urlArg = args[2] as String
+            api.sendTabToDevice(deviceIdArg, titleArg, urlArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.refreshDevices$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.refreshDevices{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.pollDeviceCommands$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.pollDeviceCommands{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.drainIncomingTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.drainIncomingTabs{ result: Result<List<SyncIncomingTab>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.getDeviceName$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.getDeviceName{ result: Result<String?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.setDeviceName$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val newNameArg = args[0] as String
+            api.setDeviceName(newNameArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
           }
         } else {
           channel.setMessageHandler(null)
@@ -5952,6 +6539,83 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onManifestUpdate$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg, tabIdArg, manifestArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+}
+/** Generated class from Pigeon that represents Flutter messages that can be called from Kotlin. */
+class GeckoSyncStateEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by GeckoSyncStateEvents. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  fun onAuthStateChanged(sequenceArg: Long, accountInfoArg: SyncAccountInfo, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncStateEvents.onAuthStateChanged$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, accountInfoArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onSyncStarted(sequenceArg: Long, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncStateEvents.onSyncStarted$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onSyncCompleted(sequenceArg: Long, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncStateEvents.onSyncCompleted$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onSyncError(sequenceArg: Long, errorMessageArg: String?, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncStateEvents.onSyncError$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, errorMessageArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

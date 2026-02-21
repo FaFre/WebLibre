@@ -39,8 +39,8 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
@@ -55,6 +55,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/move_to_background.dart';
@@ -303,6 +304,44 @@ class BrowserScreen extends HookConsumerWidget {
       },
     );
 
+    useOnAppLifecycleStateChange((previous, current) {
+      switch (current) {
+        case AppLifecycleState.resumed:
+          if (current != AppLifecycleState.resumed) {
+            return;
+          }
+
+          if (!ref.read(syncIsAuthenticatedProvider)) {
+            return;
+          }
+
+          unawaited(() async {
+            try {
+              final openedTabs = await ref
+                  .read(syncRepositoryProvider.notifier)
+                  .pollIncomingTabsAndOpen();
+
+              if (openedTabs > 0 && context.mounted) {
+                ui_helper.showOpenedTabsFromAnotherDeviceMessage(
+                  context,
+                  openedTabs,
+                );
+              }
+            } catch (e, s) {
+              logger.e(
+                'Failed polling incoming sync tabs on resume',
+                error: e,
+                stackTrace: s,
+              );
+            }
+          }());
+        case AppLifecycleState.detached:
+        case AppLifecycleState.inactive:
+        case AppLifecycleState.hidden:
+        case AppLifecycleState.paused:
+      }
+    });
+
     final pointerMoveEventsController = useStreamController<Offset>();
 
     // Watch sheet state for rendering in Stack
@@ -317,8 +356,7 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Toolbar is visible when: sheet is shown OR (not fullscreen AND controller says visible)
     // The controller handles loading-start show internally via ref.listen on isLoading
-    final effectiveAppBarVisible =
-        toolbarState == ToolbarVisibility.visible;
+    final effectiveAppBarVisible = toolbarState == ToolbarVisibility.visible;
     final topToolbarVisible =
         sheetDisplayed || (!tabInFullScreen && effectiveAppBarVisible);
     final bottomToolbarVisible =
@@ -1020,6 +1058,16 @@ class _ViewTabsSheet extends HookConsumerWidget {
     final tabsViewMode = ref.watch(tabsViewModeControllerProvider);
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
+    final isSyncedScope = ref.watch(
+      effectiveTabsTrayScopeProvider.select(
+        (scope) => scope == TabsTrayScope.synced,
+      ),
+    );
+
+    final effectiveTabsViewMode = isSyncedScope
+        ? TabsViewMode.list
+        : tabsViewMode;
+
     final draggableScrollableController = useDraggableScrollableController(
       keys: [tabsReorderable],
     );
@@ -1037,7 +1085,7 @@ class _ViewTabsSheet extends HookConsumerWidget {
             topRight: Radius.circular(28),
           ),
           clipBehavior: Clip.antiAlias,
-          child: switch (tabsViewMode) {
+          child: switch (effectiveTabsViewMode) {
             TabsViewMode.list => ViewTabListWidget(
               scrollController: scrollController,
               showNewTabFab: true,

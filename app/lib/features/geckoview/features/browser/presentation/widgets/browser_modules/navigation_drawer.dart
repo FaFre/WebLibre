@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'dart:async';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -31,12 +33,15 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/utils/exit_app.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Navigation drawer for the browser screen.
 /// Contains all navigation destinations and settings.
@@ -52,7 +57,7 @@ class BrowserNavigationDrawer extends HookConsumerWidget {
       children: [
         // Profile Header
         _ProfileHeader(),
-
+        _SyncTile(),
         const Divider(),
 
         // Section 1: Tools & Configuration
@@ -324,6 +329,79 @@ class _ExtensionsSection extends HookConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Sync tile widget shown in navigation drawer when sync is active.
+/// Displays sync status and allows manual sync trigger.
+class _SyncTile extends HookConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
+
+    // Only show if sync is active
+    if (!isAuthenticated) {
+      return const SizedBox.shrink();
+    }
+
+    final syncInfo = ref.watch(
+      syncRepositoryProvider.select((value) => value.value?.account),
+    );
+
+    final syncStarted = ref.watch(
+      syncEventProvider.select(
+        (value) => value.isLoading || value.value?.$1 == SyncEvent.started,
+      ),
+    );
+    final isSyncing = syncStarted || syncInfo?.syncing == true;
+
+    final controller = useAnimationController(
+      duration: const Duration(seconds: 2),
+    );
+
+    useEffect(() {
+      if (isSyncing) {
+        unawaited(controller.repeat());
+      } else {
+        controller.stop();
+        controller.reset();
+      }
+      return null;
+    }, [isSyncing]);
+
+    return ListTile(
+      leading: RotationTransition(
+        turns: Tween<double>(begin: 0, end: -1).animate(controller),
+        child: const Icon(Icons.sync),
+      ),
+      title: const Text('Sync Now'),
+      onTap: () async {
+        await ref.read(syncRepositoryProvider.notifier).syncNow();
+
+        final openedTabs = await ref
+            .read(syncRepositoryProvider.notifier)
+            .pollIncomingTabsAndOpen();
+
+        if (context.mounted) {
+          if (openedTabs > 0) {
+            ui_helper.showOpenedTabsFromAnotherDeviceMessage(
+              context,
+              openedTabs,
+            );
+          } else {
+            ui_helper.showInfoMessage(
+              context,
+              'Synchronization complete',
+              duration: const Duration(seconds: 2),
+            );
+          }
+        }
+
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
     );
   }
 }

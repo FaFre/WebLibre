@@ -30,8 +30,8 @@ SnackBar _createFloatingSnackBar({
   required Widget content,
   Color? backgroundColor,
   SnackBarAction? action,
-  Duration duration = const Duration(seconds: 4),
-  bool persist = false,
+  required Duration duration,
+  required bool persist,
 }) {
   return SnackBar(
     content: content,
@@ -43,34 +43,69 @@ SnackBar _createFloatingSnackBar({
   );
 }
 
-void showErrorMessage(BuildContext context, String message) {
+void showErrorMessage(
+  BuildContext context,
+  String message, {
+  Duration duration = const Duration(seconds: 4),
+  bool persist = false,
+}) {
   final snackBar = _createFloatingSnackBar(
     content: Text(
       message,
       style: TextStyle(color: Theme.of(context).colorScheme.error),
     ),
     backgroundColor: Theme.of(context).colorScheme.onError,
+    duration: duration,
+    persist: persist,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
-void showInfoMessage(BuildContext context, String message) {
-  final snackBar = _createFloatingSnackBar(content: Text(message));
+void showInfoMessage(
+  BuildContext context,
+  String message, {
+  Duration duration = const Duration(seconds: 4),
+  bool persist = false,
+}) {
+  final snackBar = _createFloatingSnackBar(
+    content: Text(message),
+    duration: duration,
+    persist: persist,
+  );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+void showOpenedTabsFromAnotherDeviceMessage(
+  BuildContext context,
+  int openedTabs, {
+  Duration duration = const Duration(seconds: 4),
+  bool persist = false,
+}) {
+  if (openedTabs <= 0) {
+    return;
+  }
+
+  final message = openedTabs == 1
+      ? 'Opened 1 tab received from another device'
+      : 'Opened $openedTabs tabs received from another device';
+
+  showInfoMessage(context, message, duration: duration, persist: persist);
 }
 
 void showTabBackButtonMessage(
   BuildContext context,
   int tabCount,
-  Duration duration,
-) {
+  Duration duration, {
+  bool persist = false,
+}) {
   final snackbar = _createFloatingSnackBar(
     content: (tabCount > 1)
         ? const Text('Navigate BACK again to close current tab')
         : const Text('Navigate BACK again to exit app'),
     duration: duration,
+    persist: persist,
   );
 
   ScaffoldMessenger.of(context)
@@ -83,6 +118,7 @@ void showTabOpenedMessage(
   String? tabName,
   void Function()? onShow,
   Duration duration = const Duration(seconds: 3),
+  bool persist = false,
 }) {
   final message = switch (tabName.whenNotEmpty) {
     String() => "New tab '$tabName' opened in background",
@@ -95,6 +131,7 @@ void showTabOpenedMessage(
       (onPressed) => SnackBarAction(label: 'Show', onPressed: onPressed),
     ),
     duration: duration,
+    persist: persist,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -104,6 +141,7 @@ Future<void> showSuggestNewTabMessage(
   BuildContext context, {
   required void Function(String? searchText) onAdd,
   Duration duration = const Duration(seconds: 3),
+  bool persist = false,
 }) async {
   final clipboardUrl = await tryGetUriFromClipboard();
 
@@ -117,6 +155,7 @@ Future<void> showSuggestNewTabMessage(
         },
       ),
       duration: duration,
+      persist: persist,
     );
 
     if (context.mounted) {
@@ -130,6 +169,7 @@ void showTabSwitchMessage(
   String? tabName,
   void Function()? onSwitch,
   Duration duration = const Duration(seconds: 3),
+  bool persist = false,
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -144,6 +184,7 @@ void showTabSwitchMessage(
       (onPressed) => SnackBarAction(label: 'Switch', onPressed: onPressed),
     ),
     duration: duration,
+    persist: persist,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -179,6 +220,7 @@ void showTabUndoClose(
   VoidCallback onUndo, {
   int count = 1,
   Duration duration = const Duration(seconds: 3),
+  bool persist = false,
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -188,6 +230,7 @@ void showTabUndoClose(
         : const Text('Tab closed'),
     action: SnackBarAction(label: 'Undo', onPressed: onUndo),
     duration: duration,
+    persist: persist,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -197,6 +240,7 @@ void showDismissOverrideMessage(
   BuildContext context,
   VoidCallback onDismiss, {
   Duration duration = const Duration(seconds: 4),
+  bool persist = false,
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
@@ -204,6 +248,7 @@ void showDismissOverrideMessage(
     content: const Text('Hiding disabled by site'),
     action: SnackBarAction(label: 'Dismiss', onPressed: onDismiss),
     duration: duration,
+    persist: persist,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);

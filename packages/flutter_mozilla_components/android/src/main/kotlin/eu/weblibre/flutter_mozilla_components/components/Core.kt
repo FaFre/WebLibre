@@ -33,6 +33,7 @@ import mozilla.components.browser.state.engine.middleware.SessionPrioritizationM
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.storage.sync.PlacesBookmarksStorage
 import mozilla.components.browser.storage.sync.PlacesHistoryStorage
+import mozilla.components.browser.storage.sync.RemoteTabsStorage
 import mozilla.components.browser.thumbnails.ThumbnailsMiddleware
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.concept.engine.DefaultSettings
@@ -62,8 +63,11 @@ import mozilla.components.feature.session.middleware.LastAccessMiddleware
 import mozilla.components.feature.session.middleware.undo.UndoMiddleware
 import mozilla.components.feature.sitepermissions.OnDiskSitePermissionsStorage
 import mozilla.components.feature.webnotifications.WebNotificationFeature
+import mozilla.components.concept.base.crash.Breadcrumb
+import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.support.base.worker.Frequency
 import org.mozilla.geckoview.GeckoRuntime
+import kotlinx.coroutines.Job
 import java.util.concurrent.TimeUnit
 
 private const val AMO_COLLECTION_MAX_CACHE_AGE = 24 * 60L
@@ -74,6 +78,12 @@ class Core(
     private val flutterEvents: GeckoStateEvents,
     private val extensionEvents: BrowserExtensionEvents
 ) {
+    private val noOpCrashReporter = object : CrashReporting {
+        override fun submitCaughtException(throwable: Throwable): Job = Job()
+
+        override fun recordCrashBreadcrumb(breadcrumb: Breadcrumb) = Unit
+    }
+
     val prefs by lazy {
         PreferenceManager.getDefaultSharedPreferences(context)
     }
@@ -251,12 +261,14 @@ class Core(
      */
     val lazyHistoryStorage = lazy { PlacesHistoryStorage(context) }
     val lazyBookmarksStorage = lazy { PlacesBookmarksStorage(context) }
+    val lazyRemoteTabsStorage = lazy { RemoteTabsStorage(context, noOpCrashReporter) }
 
     /**
      * A convenience accessor to the [PlacesHistoryStorage].
      */
     val historyStorage by lazy { lazyHistoryStorage.value }
     val bookmarksStorage by lazy { lazyBookmarksStorage.value }
+    val remoteTabsStorage by lazy { lazyRemoteTabsStorage.value }
 
     val permissionStorage by lazy { PermissionStorage(geckoSitePermissionsStorage) }
 

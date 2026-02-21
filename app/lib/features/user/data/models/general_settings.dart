@@ -89,6 +89,8 @@ class GeneralSettings with FastEquatable {
   final bool tabListShowFavicons;
   final bool quickTabSwitcherShowTitles;
   final bool drawerGestureEnabled;
+  final String syncServerOverride;
+  final String syncTokenServerOverride;
 
   GeneralSettings({
     required this.themeMode,
@@ -120,6 +122,8 @@ class GeneralSettings with FastEquatable {
     required this.tabListShowFavicons,
     required this.quickTabSwitcherShowTitles,
     required this.drawerGestureEnabled,
+    required this.syncServerOverride,
+    required this.syncTokenServerOverride,
   });
 
   GeneralSettings.withDefaults({
@@ -152,6 +156,8 @@ class GeneralSettings with FastEquatable {
     bool? tabListShowFavicons,
     bool? quickTabSwitcherShowTitles,
     bool? drawerGestureEnabled,
+    String? syncServerOverride,
+    String? syncTokenServerOverride,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -184,7 +190,9 @@ class GeneralSettings with FastEquatable {
        allowClipboardAccess = allowClipboardAccess ?? true,
        tabListShowFavicons = tabListShowFavicons ?? false,
        quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
-       drawerGestureEnabled = drawerGestureEnabled ?? false;
+       drawerGestureEnabled = drawerGestureEnabled ?? false,
+       syncServerOverride = syncServerOverride ?? '',
+       syncTokenServerOverride = syncTokenServerOverride ?? '';
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -222,5 +230,7 @@ class GeneralSettings with FastEquatable {
     tabListShowFavicons,
     quickTabSwitcherShowTitles,
     drawerGestureEnabled,
+    syncServerOverride,
+    syncTokenServerOverride,
   ];
 }

@@ -41,6 +41,7 @@ class SettingsScreen extends HookConsumerWidget {
               _PrivacySecurityTile(),
               _SearchContentTile(),
               _TabsBehaviorTile(),
+              _SyncTile(),
               _FingerprintingTile(),
               _AdvancedTile(),
             ],
@@ -170,6 +171,31 @@ class _FingerprintingTile extends StatelessWidget {
         trailing: const Icon(Icons.chevron_right),
         onTap: () async {
           await FingerprintingSettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _SyncTile extends StatelessWidget {
+  const _SyncTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).highlightColor,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Firefox Sync'),
+        subtitle: const Text('Account, sync now, engine selection'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(Icons.sync),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await SyncSettingsRoute().push(context);
         },
       ),
     );

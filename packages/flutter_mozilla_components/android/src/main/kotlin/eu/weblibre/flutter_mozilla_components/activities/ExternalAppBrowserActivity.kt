@@ -34,7 +34,7 @@ import mozilla.components.support.base.log.logger.Logger
  *
  * Uses an empty taskAffinity so Custom Tabs appear as a separate task from the main app.
  */
-class ExternalAppBrowserActivity : AppCompatActivity() {
+open class ExternalAppBrowserActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "ExternalAppBrowserActivity"
 

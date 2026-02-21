@@ -25,7 +25,7 @@ part 'format.g.dart';
 
 @Riverpod(keepAlive: true)
 class Format extends _$Format {
-  String fullDateTimeWithTimezone(DateTime date) {
+  String fullDateTime(DateTime date) {
     final pattern = DateFormat('yMMMMd').addPattern('Hm');
 
     return pattern.format(date);

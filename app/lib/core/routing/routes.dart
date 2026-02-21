@@ -70,6 +70,7 @@ import 'package:weblibre/features/settings/presentation/screens/tabs_behavior_se
 import 'package:weblibre/features/settings/presentation/screens/tracking_protection_exceptions.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
+import 'package:weblibre/features/sync/presentation/screens/sync_settings.dart';
 import 'package:weblibre/features/tor/presentation/screens/country_picker.dart';
 import 'package:weblibre/features/tor/presentation/screens/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/select_profile.dart';

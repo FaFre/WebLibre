@@ -29,6 +29,7 @@ export 'src/domain/services/gecko_readerable.dart';
 export 'src/domain/services/gecko_selection_action.dart';
 export 'src/domain/services/gecko_session.dart';
 export 'src/domain/services/gecko_suggestions.dart';
+export 'src/domain/services/gecko_sync.dart';
 export 'src/domain/services/gecko_tab.dart';
 export 'src/domain/services/gecko_tab_content.dart';
 export 'src/domain/services/gecko_viewport.dart';
@@ -84,6 +85,13 @@ export 'src/pigeons/gecko.g.dart'
         SecurityInfoState,
         SitePermissionStatus,
         SitePermissions,
+        SyncAccountInfo,
+        SyncDevice,
+        SyncDeviceTabs,
+        SyncEngineStatus,
+        SyncEngineValue,
+        SyncIncomingTab,
+        SyncRemoteTab,
         TabContent,
         TabContentState,
         TrackingProtectionException,

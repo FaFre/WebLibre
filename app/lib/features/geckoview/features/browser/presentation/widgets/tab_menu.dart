@@ -475,6 +475,7 @@ class TabMenu extends HookConsumerWidget {
               OpenInAppMenuItemButton(selectedTabId: selectedTabId),
               ShareScreenshotMenuItemButton(selectedTabId: selectedTabId),
               ShareMenuItemButton(selectedTabId: selectedTabId),
+              SendTabToDeviceMenuItemButton(selectedTabId: selectedTabId),
               ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
             ],
             leadingIcon: const Icon(Icons.share),

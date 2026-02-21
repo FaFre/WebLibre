@@ -80,6 +80,7 @@ part of 'routes.dart';
       path: 'custom_tracking_protection',
     ),
     TypedGoRoute<ErrorLogsRoute>(name: 'ErrorLogsRoute', path: 'error_logs'),
+    TypedGoRoute<SyncSettingsRoute>(name: 'SyncSettingsRoute', path: 'sync'),
   ],
 )
 class SettingsRoute extends GoRouteData with $SettingsRoute {
@@ -212,5 +213,12 @@ class CustomTrackingProtectionRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const CustomTrackingProtectionScreen();
+  }
+}
+
+class SyncSettingsRoute extends GoRouteData with $SyncSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SyncSettingsScreen();
   }
 }

@@ -42,6 +42,19 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
             return null
         }
 
+        components.services.accountsAuthFeature.interceptor.onLoadRequest(
+            engineSession,
+            uri,
+            lastUri,
+            hasUserGesture,
+            isSameDomain,
+            isRedirect,
+            isDirectNavigation,
+            isSubframeRequest,
+        )?.let {
+            return it
+        }
+
         return components.services.appLinksInterceptor.onLoadRequest(
             engineSession,
             uri,

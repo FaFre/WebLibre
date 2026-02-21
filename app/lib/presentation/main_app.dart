@@ -21,7 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
+import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class MainApp extends HookConsumerWidget {
   final ThemeData? theme;
@@ -72,6 +75,9 @@ class MainApp extends HookConsumerWidget {
           darkTheme: darkTheme,
           themeMode: themeMode,
           routerConfig: router.value,
+          builder: (context, child) {
+            return _SyncEventListener(child: child ?? const SizedBox.shrink());
+          },
         );
       },
       onFailure: (errorMessage) {
@@ -97,5 +103,43 @@ class MainApp extends HookConsumerWidget {
         );
       },
     );
+  }
+}
+
+class _SyncEventListener extends ConsumerWidget {
+  final Widget child;
+
+  const _SyncEventListener({required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(syncEventProvider, (previous, next) {
+      if (next.isLoading || !next.hasValue) return;
+
+      final event = next.value;
+      if (event == null) return;
+
+      final (syncEvent, syncError) = event;
+
+      switch (syncEvent) {
+        // case SyncEvent.completed:
+        //   ui_helper.showInfoMessage(
+        //     context,
+        //     'Synchronization complete',
+        //     duration: const Duration(seconds: 2),
+        //   );
+        case SyncEvent.error:
+          ui_helper.showErrorMessage(
+            context,
+            syncError ?? 'Synchronization failed',
+          );
+        case SyncEvent.started:
+        case SyncEvent.completed:
+        case null:
+          break;
+      }
+    });
+
+    return child;
   }
 }

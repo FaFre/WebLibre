@@ -47,6 +47,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSessionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportApi
@@ -155,7 +157,9 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         profileFolder: String,
         logLevel: LogLevel,
         contentBlocking: ContentBlocking,
-        addonCollection: AddonCollection?
+        addonCollection: AddonCollection?,
+        fxaServerOverride: String?,
+        syncTokenServerOverride: String?,
     ) {
         synchronized(this) {
             if (!isGeckoInitialized) {
@@ -170,7 +174,14 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
                 Log.addSink(PriorityAwareLogSink(level, geckoLogging))
 
-                setupGeckoEngine(profileFolder, level, contentBlocking, addonCollection)
+                setupGeckoEngine(
+                    profileFolder,
+                    level,
+                    contentBlocking,
+                    addonCollection,
+                    fxaServerOverride,
+                    syncTokenServerOverride,
+                )
                 isGeckoInitialized = true
             }
         }
@@ -190,7 +201,9 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         profileFolder: String,
         logLevel: Log.Priority,
         contentBlocking: ContentBlocking,
-        addonCollection: AddonCollection?
+        addonCollection: AddonCollection?,
+        fxaServerOverride: String?,
+        syncTokenServerOverride: String?,
     ) {
         val profileApplicationContext = ProfileContext(_flutterPluginBinding.applicationContext, profileFolder)
 
@@ -220,6 +233,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             GeckoSuggestionApiImpl(suggestionEvents)
         )
 
+        val syncStateEvents = GeckoSyncStateEvents(_flutterPluginBinding.binaryMessenger)
+
         GlobalComponents.setUp(
             profileApplicationContext,
             _flutterEvents,
@@ -228,9 +243,12 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             addonEvents,
             tabContentEvents,
             extensionEvents,
+            syncStateEvents,
             logLevel,
             contentBlocking,
-            addonCollection
+            addonCollection,
+            fxaServerOverride,
+            syncTokenServerOverride,
         )
 
         val engineSettingsApiImpl = GeckoEngineSettingsApiImpl()
@@ -275,6 +293,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoPublicSuffixListApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPublicSuffixListApiImpl(profileApplicationContext))
         GeckoTrackingProtectionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTrackingProtectionApiImpl())
         GeckoAppLinksApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoAppLinksApiImpl(profileApplicationContext))
+        GeckoSyncApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoSyncApiImpl())
 
         // PWA API for web app installation and management
         GeckoPwaApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPwaApiImpl(profileApplicationContext))

@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
 
@@ -37,6 +38,16 @@ class TabViewScreen extends HookConsumerWidget {
     final tabsViewMode = ref.watch(tabsViewModeControllerProvider);
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
+    final isSyncedScope = ref.watch(
+      effectiveTabsTrayScopeProvider.select(
+        (scope) => scope == TabsTrayScope.synced,
+      ),
+    );
+
+    final effectiveTabsViewMode = isSyncedScope
+        ? TabsViewMode.list
+        : tabsViewMode;
+
     final scrollController = useScrollController(keys: [tabsReorderable]);
 
     // Track FAB visibility based on scroll direction
@@ -45,7 +56,7 @@ class TabViewScreen extends HookConsumerWidget {
     return Dialog.fullscreen(
       child: Scaffold(
         body: SafeArea(
-          child: switch (tabsViewMode) {
+          child: switch (effectiveTabsViewMode) {
             TabsViewMode.list => ViewTabListWidget(
               key: ValueKey(tabsReorderable),
               scrollController: scrollController,
@@ -73,31 +84,35 @@ class TabViewScreen extends HookConsumerWidget {
             ),
           },
         ),
-        floatingActionButton: AnimatedSlide(
-          duration: const Duration(milliseconds: 200),
-          offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
-          curve: Curves.easeInOut,
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: isFabVisible.value ? 1.0 : 0.0,
-            child: FloatingActionButton(
-              onPressed: () async {
-                final settings = ref.read(generalSettingsWithDefaultsProvider);
+        floatingActionButton: isSyncedScope
+            ? null
+            : AnimatedSlide(
+                duration: const Duration(milliseconds: 200),
+                offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
+                curve: Curves.easeInOut,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isFabVisible.value ? 1.0 : 0.0,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      final settings = ref.read(
+                        generalSettingsWithDefaultsProvider,
+                      );
 
-                await SearchRoute(
-                  tabType:
-                      ref.read(selectedTabTypeProvider) ??
-                      settings.defaultCreateTabType,
-                ).push(context);
+                      await SearchRoute(
+                        tabType:
+                            ref.read(selectedTabTypeProvider) ??
+                            settings.defaultCreateTabType,
+                      ).push(context);
 
-                if (context.mounted) {
-                  const BrowserRoute().go(context);
-                }
-              },
-              child: const Icon(Icons.add),
-            ),
-          ),
-        ),
+                      if (context.mounted) {
+                        const BrowserRoute().go(context);
+                      }
+                    },
+                    child: const Icon(Icons.add),
+                  ),
+                ),
+              ),
       ),
     );
   }

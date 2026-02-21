@@ -82,6 +82,8 @@ android {
 
 configurations.configureEach {
     exclude group: "org.mozilla.telemetry", module: "glean-native"
+    // Exclude standalone tink to avoid duplicate classes with tink-android
+    exclude group: "com.google.crypto.tink", module: "tink"
 }
 
 // Select the Glean from GeckoView.
@@ -114,6 +116,8 @@ dependencies {
     implementation "org.mozilla.components:browser-thumbnails:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-addons:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-app-links:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-accounts:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-accounts-push:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-awesomebar:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-customtabs:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-downloads:$mozillaComponentsVersion"
@@ -122,6 +126,7 @@ dependencies {
     implementation "org.mozilla.components:feature-prompts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-session:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-readerview:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-syncedtabs:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-privatemode:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-sitepermissions:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-webcompat:$mozillaComponentsVersion"
@@ -131,6 +136,8 @@ dependencies {
     implementation "org.mozilla.components:feature-intent:$mozillaComponentsVersion"
     implementation "org.mozilla.components:ui-widgets:$mozillaComponentsVersion"
     implementation "org.mozilla.components:lib-publicsuffixlist:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:service-firefox-accounts:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:support-appservices:$mozillaComponentsVersion"
 
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.3.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'

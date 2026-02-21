@@ -15,6 +15,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
@@ -26,6 +27,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mozilla.components.browser.storage.sync.GlobalPlacesDependencyProvider
 import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.selector.findCustomTab
@@ -114,9 +116,12 @@ object GlobalComponents {
         addonEvents: GeckoAddonEvents,
         tabContentEvents: GeckoTabContentEvents,
         extensionEvents: BrowserExtensionEvents,
+        syncStateEvents: GeckoSyncStateEvents?,
         logLevel: Log.Priority,
         contentBlocking: ContentBlocking,
         addonCollection: AddonCollection?,
+        fxaServerOverride: String?,
+        syncTokenServerOverride: String?,
         mode: ComponentsMode = ComponentsMode.FULL,
     ) {
         Logger.debug("Creating new components")
@@ -137,18 +142,30 @@ object GlobalComponents {
             logLevel,
             contentBlocking,
             addonCollection,
+            fxaServerOverride,
+            syncTokenServerOverride,
             addonEvents,
             tabContentEvents,
             extensionEvents,
+            syncStateEvents,
         )
         _components = newComponents
         currentMode = mode
+
+        previousComponents?.let {
+            runCatching {
+                it.backgroundServices.accountManager.close()
+            }
+        }
 
         //newComponents.crashReporter.install(applicationContext)
 
         //Facts.registerProcessor(LogFactProcessor())
 
-        //RustHttpConfig.setClient(lazy { newComponents.core.client })
+        val megazordNetworkSetup = MegazordSetup.setupMegazordNetwork(
+            context = newComponents.profileApplicationContext,
+            client = lazy { newComponents.core.client },
+        )
 
         if (mode == ComponentsMode.FULL) {
             newComponents.core.engine.warmUp()
@@ -167,6 +184,12 @@ object GlobalComponents {
         }
 
         if (mode == ComponentsMode.FULL) {
+            if (!megazordNetworkSetup.isCompleted) {
+                runBlocking {
+                    megazordNetworkSetup.await()
+                }
+            }
+
             val restoreJob = restoreBrowserState(newComponents)
             if (previousCustomTabs.isNotEmpty()) {
                 restoreJob.invokeOnCompletion {
@@ -215,6 +238,12 @@ object GlobalComponents {
             GlobalScope.launch(Dispatchers.IO) {
                 newComponents.core.fileUploadsDirCleaner.cleanUploadsDirectory()
             }
+
+            // Eagerly initialize account manager so sync starts
+            newComponents.backgroundServices.accountManager
+
+            // Start FxA web channel feature for OAuth redirect handling
+            newComponents.services.fxaWebChannelFeature.start()
         } else {
             restorePreviousCustomTabs()
         }
@@ -256,9 +285,12 @@ object GlobalComponents {
             addonEvents = GeckoAddonEvents(messenger),
             tabContentEvents = GeckoTabContentEvents(messenger),
             extensionEvents = BrowserExtensionEvents(messenger),
+            syncStateEvents = null,
             logLevel = logLevel,
             contentBlocking = contentBlocking,
             addonCollection = null,
+            fxaServerOverride = null,
+            syncTokenServerOverride = null,
             mode = ComponentsMode.EXTERNAL,
         )
 

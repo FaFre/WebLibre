@@ -60,9 +60,7 @@ class ProfileBackupListScreen extends HookConsumerWidget {
                   key: ValueKey(file.path),
                   title: Text(profileName),
                   subtitle: Text(
-                    ref
-                        .read(formatProvider.notifier)
-                        .fullDateTimeWithTimezone(dateTime),
+                    ref.read(formatProvider.notifier).fullDateTime(dateTime),
                   ),
                   onTap: () async {
                     await RestoreProfileRoute(

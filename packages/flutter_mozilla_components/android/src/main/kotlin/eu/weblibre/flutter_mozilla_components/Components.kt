@@ -9,6 +9,7 @@ package eu.weblibre.flutter_mozilla_components
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import eu.weblibre.flutter_mozilla_components.components.Core
+import eu.weblibre.flutter_mozilla_components.components.BackgroundServices
 import eu.weblibre.flutter_mozilla_components.components.Events
 import eu.weblibre.flutter_mozilla_components.components.Features
 import eu.weblibre.flutter_mozilla_components.components.Search
@@ -19,6 +20,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import mozilla.components.concept.engine.EngineView
@@ -38,14 +40,38 @@ class Components(val profileApplicationContext: ProfileContext,
                  val logLevel: Log.Priority,
                  val contentBlocking: ContentBlocking,
                  val addonCollection: AddonCollection?,
+                 val fxaServerOverride: String?,
+                 val syncTokenServerOverride: String?,
                  val addonEvents: GeckoAddonEvents,
                  private val tabContentEvents: GeckoTabContentEvents,
-                 private val extensionEvents: BrowserExtensionEvents
+                 private val extensionEvents: BrowserExtensionEvents,
+                 private val syncStateEvents: GeckoSyncStateEvents?,
 ) {
     val core by lazy { Core(profileApplicationContext, this, flutterEvents, extensionEvents) }
+    val backgroundServices by lazy {
+        BackgroundServices(
+            context = profileApplicationContext,
+            browserStore = lazy { core.store },
+            historyStorage = core.lazyHistoryStorage,
+            bookmarkStorage = core.lazyBookmarksStorage,
+            remoteTabsStorage = core.lazyRemoteTabsStorage,
+            fxaServerOverride = fxaServerOverride,
+            syncTokenServerOverride = syncTokenServerOverride,
+            syncStateEvents = syncStateEvents,
+        )
+    }
     val events by lazy { Events(flutterEvents) }
     val useCases by lazy { UseCases(profileApplicationContext, core.engine, core.store, core.webAppShortcutManager) }
-    val services by lazy { Services(profileApplicationContext, core.store, useCases.tabsUseCases) }
+    val services by lazy {
+        Services(
+            profileApplicationContext,
+            core.store,
+            useCases.tabsUseCases,
+            backgroundServices.accountManager,
+            core.engine,
+            backgroundServices.serverConfig,
+        )
+    }
     val features by lazy { Features(core.engine, core.store, addonEvents, tabContentEvents) }
     val search by lazy { Search(profileApplicationContext, core, useCases) }
 

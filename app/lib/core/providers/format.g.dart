@@ -32,7 +32,7 @@ final class FormatProvider extends $AsyncNotifierProvider<Format, void> {
   Format create() => Format();
 }
 
-String _$formatHash() => r'fe7fcdd19b512784a36f3838c57701030475e429';
+String _$formatHash() => r'f132aabb20bf4df77d771d6c866bc413c00bd9ff';
 
 abstract class _$Format extends $AsyncNotifier<void> {
   FutureOr<void> build();

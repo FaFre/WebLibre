@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:background_fetch/background_fetch.dart';
@@ -101,6 +102,9 @@ class _MainWidget extends HookConsumerWidget {
       final engineSettings = await ref
           .read(engineSettingsRepositoryProvider.notifier)
           .fetchSettings();
+      final generalSettings = await ref
+          .read(generalSettingsRepositoryProvider.notifier)
+          .fetchSettings();
 
       try {
         await GeckoBrowserService().initialize(
@@ -108,6 +112,8 @@ class _MainWidget extends HookConsumerWidget {
           kDebugMode ? LogLevel.debug : LogLevel.warn,
           engineSettings.contentBlocking,
           engineSettings.addonCollection,
+          generalSettings.syncServerOverride,
+          generalSettings.syncTokenServerOverride,
         );
       } on PlatformException catch (e, s) {
         logger.e(

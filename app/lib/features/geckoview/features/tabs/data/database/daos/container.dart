@@ -186,7 +186,7 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
-  SingleSelectable<String> siteAssignedContainerId(Uri uri) {
+  Selectable<String> siteAssignedContainerId(Uri uri) {
     return db.definitionsDrift.siteAssignedContainerId(uri: uri.origin);
   }
 

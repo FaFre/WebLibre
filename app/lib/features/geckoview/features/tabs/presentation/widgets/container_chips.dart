@@ -39,12 +39,12 @@ import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 class _UnassignedContainerChip extends ConsumerWidget {
   final int? Function()? containerBadgeCount;
-  final ContainerData? selectedContainer;
+  final bool selected;
   final void Function(ContainerDataWithCount?)? onSelected;
 
   const _UnassignedContainerChip({
     required this.containerBadgeCount,
-    required this.selectedContainer,
+    required this.selected,
     required this.onSelected,
   });
 
@@ -65,11 +65,39 @@ class _UnassignedContainerChip extends ConsumerWidget {
       label: (tabCount > 0)
           ? Text(tabCount.toString())
           : const SizedBox.shrink(),
-      selected: selectedContainer == null,
+      selected: selected,
       showCheckmark: false,
       onSelected: (value) {
         if (value) {
           onSelected?.call(null);
+        }
+      },
+    );
+  }
+}
+
+class _SyncedTabsChip extends ConsumerWidget {
+  final bool selected;
+  final int count;
+  final VoidCallback onSelected;
+
+  const _SyncedTabsChip({
+    required this.selected,
+    required this.count,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return FilterChip(
+      avatar: const Icon(Icons.devices_other),
+      labelPadding: count > 0 ? null : const EdgeInsets.only(right: 2.0),
+      label: count > 0 ? Text(count.toString()) : const SizedBox.shrink(),
+      selected: selected,
+      showCheckmark: false,
+      onSelected: (value) {
+        if (value) {
+          onSelected();
         }
       },
     );
@@ -135,6 +163,11 @@ class ContainerChips extends HookConsumerWidget {
   final bool showUnassignedChip;
   final bool showGroupSuggestions;
   final bool enableDragAndDrop;
+  final bool showSyncedChip;
+  final bool syncedChipSelected;
+  final bool? unassignedChipSelected;
+  final int syncedTabCount;
+  final VoidCallback? onSyncedChipSelected;
 
   final ContainerData? selectedContainer;
   final bool Function(ContainerDataWithCount)? containerFilter;
@@ -157,6 +190,11 @@ class ContainerChips extends HookConsumerWidget {
     this.showUnassignedChip = true,
     this.showGroupSuggestions = false,
     this.enableDragAndDrop = true,
+    this.showSyncedChip = false,
+    this.syncedChipSelected = false,
+    this.unassignedChipSelected,
+    this.syncedTabCount = 0,
+    this.onSyncedChipSelected,
   });
 
   @override
@@ -217,6 +255,12 @@ class ContainerChips extends HookConsumerWidget {
                             }
                           : null,
                       prefixListItems: [
+                        if (showSyncedChip)
+                          _SyncedTabsChip(
+                            selected: syncedChipSelected,
+                            count: syncedTabCount,
+                            onSelected: onSyncedChipSelected ?? () {},
+                          ),
                         if (showUnassignedChip)
                           enableDragAndDrop
                               ? TabDragContainerTarget(
@@ -224,14 +268,20 @@ class ContainerChips extends HookConsumerWidget {
                                   child: _UnassignedContainerChip(
                                     containerBadgeCount: () =>
                                         containerBadgeCount?.call(null),
-                                    selectedContainer: selectedContainer,
+                                    selected:
+                                        unassignedChipSelected ??
+                                        (selectedContainer == null &&
+                                            !syncedChipSelected),
                                     onSelected: onSelected,
                                   ),
                                 )
                               : _UnassignedContainerChip(
                                   containerBadgeCount: () =>
                                       containerBadgeCount?.call(null),
-                                  selectedContainer: selectedContainer,
+                                  selected:
+                                      unassignedChipSelected ??
+                                      (selectedContainer == null &&
+                                          !syncedChipSelected),
                                   onSelected: onSelected,
                                 ),
                         if (showGroupSuggestions)

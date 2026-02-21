@@ -147,13 +147,13 @@ class FeedArticleScreen extends HookConsumerWidget {
                           children: [
                             const Divider(),
                             Text(
-                              'Published: ${hasArticleCreated ? ref.read(formatProvider.notifier).fullDateTimeWithTimezone(article.created!) : 'N/A'}',
+                              'Published: ${hasArticleCreated ? ref.read(formatProvider.notifier).fullDateTime(article.created!) : 'N/A'}',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(fontStyle: FontStyle.italic),
                             ),
                             if (hasArticleUpdated)
                               Text(
-                                'Updated: ${ref.read(formatProvider.notifier).fullDateTimeWithTimezone(article.updated!)}',
+                                'Updated: ${ref.read(formatProvider.notifier).fullDateTime(article.updated!)}',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(fontStyle: FontStyle.italic),
                               ),

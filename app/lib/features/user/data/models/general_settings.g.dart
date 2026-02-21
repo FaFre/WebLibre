@@ -77,6 +77,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings drawerGestureEnabled(bool drawerGestureEnabled);
 
+  GeneralSettings syncServerOverride(String syncServerOverride);
+
+  GeneralSettings syncTokenServerOverride(String syncTokenServerOverride);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -114,6 +118,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabListShowFavicons,
     bool quickTabSwitcherShowTitles,
     bool drawerGestureEnabled,
+    String syncServerOverride,
+    String syncTokenServerOverride,
   });
 }
 
@@ -246,6 +252,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(drawerGestureEnabled: drawerGestureEnabled);
 
   @override
+  GeneralSettings syncServerOverride(String syncServerOverride) =>
+      call(syncServerOverride: syncServerOverride);
+
+  @override
+  GeneralSettings syncTokenServerOverride(String syncTokenServerOverride) =>
+      call(syncTokenServerOverride: syncTokenServerOverride);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -283,6 +297,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabListShowFavicons = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
     Object? drawerGestureEnabled = const $CopyWithPlaceholder(),
+    Object? syncServerOverride = const $CopyWithPlaceholder(),
+    Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -455,6 +471,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.drawerGestureEnabled
           // ignore: cast_nullable_to_non_nullable
           : drawerGestureEnabled as bool,
+      syncServerOverride:
+          syncServerOverride == const $CopyWithPlaceholder() ||
+              syncServerOverride == null
+          ? _value.syncServerOverride
+          // ignore: cast_nullable_to_non_nullable
+          : syncServerOverride as String,
+      syncTokenServerOverride:
+          syncTokenServerOverride == const $CopyWithPlaceholder() ||
+              syncTokenServerOverride == null
+          ? _value.syncTokenServerOverride
+          // ignore: cast_nullable_to_non_nullable
+          : syncTokenServerOverride as String,
     );
   }
 }
@@ -534,6 +562,8 @@ GeneralSettings _$GeneralSettingsFromJson(
   tabListShowFavicons: json['tabListShowFavicons'] as bool?,
   quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
   drawerGestureEnabled: json['drawerGestureEnabled'] as bool?,
+  syncServerOverride: json['syncServerOverride'] as String?,
+  syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -577,6 +607,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabListShowFavicons': instance.tabListShowFavicons,
   'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
   'drawerGestureEnabled': instance.drawerGestureEnabled,
+  'syncServerOverride': instance.syncServerOverride,
+  'syncTokenServerOverride': instance.syncTokenServerOverride,
 };
 
 const _$ThemeModeEnumMap = {

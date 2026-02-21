@@ -155,6 +155,14 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'syncServerOverride': settings['syncServerOverride']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'syncTokenServerOverride': settings['syncTokenServerOverride']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 

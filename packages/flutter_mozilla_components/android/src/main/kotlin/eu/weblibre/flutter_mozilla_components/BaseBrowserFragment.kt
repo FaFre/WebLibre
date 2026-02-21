@@ -37,6 +37,8 @@ import io.flutter.Log
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
+import mozilla.components.feature.accounts.FxaCapability
+import mozilla.components.feature.accounts.FxaWebChannelFeature
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
@@ -85,6 +87,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         ViewBoundFeatureWrapper<MediaSessionFullscreenFeature>()
 
     private val webAuthnFeature = ViewBoundFeatureWrapper<WebAuthnFeature>()
+    private val fxaWebChannelFeature = ViewBoundFeatureWrapper<FxaWebChannelFeature>()
 
     private var pictureInPictureFeature: PictureInPictureFeature? = null
 
@@ -448,6 +451,19 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 ),
                 owner = this,
                 view = view
+            )
+
+            fxaWebChannelFeature.set(
+                feature = FxaWebChannelFeature(
+                    customTabSessionId = sessionId,
+                    runtime = components.core.engine,
+                    store = components.core.store,
+                    accountManager = components.backgroundServices.accountManager,
+                    serverConfig = components.backgroundServices.serverConfig,
+                    fxaCapabilities = setOf(FxaCapability.CHOOSE_WHAT_TO_SYNC),
+                ),
+                owner = this,
+                view = view,
             )
 
             readerViewFeature.set(

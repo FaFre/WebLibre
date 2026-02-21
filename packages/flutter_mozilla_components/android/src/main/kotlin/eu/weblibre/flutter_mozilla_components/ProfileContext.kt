@@ -43,6 +43,7 @@ class ProfileContext(private val base: Context, val relativePath: String) :
     }
 
     init {
+        ActiveProfile.prefix = profilePrefix
         customFilesDir.mkdirs()
         customNoBackupFilesDir.mkdirs()
         customObbDir.mkdirs()

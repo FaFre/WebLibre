@@ -178,7 +178,7 @@ class FeedSearch extends HookConsumerWidget {
                           child: Text(
                             ref
                                 .read(formatProvider.notifier)
-                                .fullDateTimeWithTimezone(articleDate),
+                                .fullDateTime(articleDate),
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontStyle: FontStyle.italic,
                             ),

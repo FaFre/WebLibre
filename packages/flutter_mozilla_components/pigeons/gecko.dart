@@ -998,9 +998,141 @@ abstract class GeckoBrowserApi {
     LogLevel logLevel,
     ContentBlocking contentBlocking,
     AddonCollection? addonCollection,
+    String? fxaServerOverride,
+    String? syncTokenServerOverride,
   );
   bool showNativeFragment();
   void onTrimMemory(int level);
+}
+
+enum SyncEngineValue { history, bookmarks, tabs }
+
+class SyncEngineStatus {
+  final SyncEngineValue engine;
+  final bool enabled;
+
+  SyncEngineStatus({required this.engine, required this.enabled});
+}
+
+class SyncAccountInfo {
+  final bool authenticated;
+  final bool syncing;
+  final bool needsReauth;
+  final String? email;
+  final String? displayName;
+  final int? lastSyncedAt;
+  final List<SyncEngineStatus> engines;
+
+  SyncAccountInfo({
+    required this.authenticated,
+    required this.syncing,
+    required this.needsReauth,
+    required this.email,
+    required this.displayName,
+    required this.lastSyncedAt,
+    required this.engines,
+  });
+}
+
+class SyncDevice {
+  final String deviceId;
+  final String displayName;
+  final bool isCurrentDevice;
+  final bool canSendTab;
+
+  SyncDevice({
+    required this.deviceId,
+    required this.displayName,
+    required this.isCurrentDevice,
+    required this.canSendTab,
+  });
+}
+
+class SyncIncomingTab {
+  final String title;
+  final String url;
+  final String? fromDeviceId;
+  final String? fromDeviceName;
+
+  SyncIncomingTab({
+    required this.title,
+    required this.url,
+    required this.fromDeviceId,
+    required this.fromDeviceName,
+  });
+}
+
+class SyncRemoteTab {
+  final String title;
+  final String url;
+  final String? iconUrl;
+  final int lastUsed;
+  final bool inactive;
+
+  SyncRemoteTab({
+    required this.title,
+    required this.url,
+    required this.iconUrl,
+    required this.lastUsed,
+    required this.inactive,
+  });
+}
+
+class SyncDeviceTabs {
+  final String deviceId;
+  final String deviceName;
+  final List<SyncRemoteTab> tabs;
+
+  SyncDeviceTabs({
+    required this.deviceId,
+    required this.deviceName,
+    required this.tabs,
+  });
+}
+
+@HostApi()
+abstract class GeckoSyncApi {
+  @async
+  SyncAccountInfo getAccountInfo();
+
+  @async
+  void beginAuthentication();
+
+  @async
+  void beginPairingAuthentication(String pairingUrl);
+
+  @async
+  void logout();
+
+  @async
+  void syncNow();
+
+  @async
+  void setEngineEnabled(SyncEngineValue engine, bool enabled);
+
+  @async
+  List<SyncDeviceTabs> getSyncedTabs();
+
+  @async
+  List<SyncDevice> getDevices();
+
+  @async
+  bool sendTabToDevice(String deviceId, String title, String url);
+
+  @async
+  void refreshDevices();
+
+  @async
+  void pollDeviceCommands();
+
+  @async
+  List<SyncIncomingTab> drainIncomingTabs();
+
+  @async
+  String? getDeviceName();
+
+  @async
+  bool setDeviceName(String newName);
 }
 
 @HostApi()
@@ -1425,6 +1557,14 @@ abstract class GeckoStateEvents {
   void onMlProgress(int sequence, MlProgressData progress);
 
   void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest);
+}
+
+@FlutterApi()
+abstract class GeckoSyncStateEvents {
+  void onAuthStateChanged(int sequence, SyncAccountInfo accountInfo);
+  void onSyncStarted(int sequence);
+  void onSyncCompleted(int sequence);
+  void onSyncError(int sequence, String? errorMessage);
 }
 
 @FlutterApi()

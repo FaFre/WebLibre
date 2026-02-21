@@ -36,6 +36,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class GridTabItemContainer extends StatelessWidget {
@@ -374,6 +375,51 @@ class ListTabPreview extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class SyncedListTabPreview extends StatelessWidget {
+  const SyncedListTabPreview({
+    super.key,
+    required this.title,
+    required this.url,
+    required this.deviceName,
+    required this.onTap,
+  });
+
+  final String title;
+  final Uri url;
+  final String deviceName;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.only(left: 8, right: 6),
+      leading: UrlIcon([url], iconSize: 20),
+      title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.devices, size: 14),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  deviceName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          UriBreadcrumb(uri: url),
+        ],
+      ),
+      trailing: const Icon(Icons.open_in_new),
     );
   }
 }

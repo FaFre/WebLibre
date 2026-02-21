@@ -43,12 +43,158 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+
+/// Widget for tab filters (container chips with synced option)
+class _TabFilters extends ConsumerWidget {
+  final TabsViewMode tabsViewMode;
+
+  const _TabFilters({required this.tabsViewMode});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSyncedScope = ref.watch(
+      effectiveTabsTrayScopeProvider.select(
+        (scope) => scope == TabsTrayScope.synced,
+      ),
+    );
+
+    final selectedContainer = ref.watch(
+      selectedContainerDataProvider.select((value) => value.value),
+    );
+
+    final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
+    final syncedTabCountAsync = ref.watch(syncedTabsTotalCountProvider);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ContainerChips(
+          showGroupSuggestions: switch (tabsViewMode) {
+            TabsViewMode.list || TabsViewMode.grid => true,
+            TabsViewMode.tree => false,
+          },
+          enableDragAndDrop: switch (tabsViewMode) {
+            TabsViewMode.list || TabsViewMode.grid => true,
+            TabsViewMode.tree => false,
+          },
+          showSyncedChip: isAuthenticated && tabsViewMode != TabsViewMode.tree,
+          syncedChipSelected: isSyncedScope,
+          syncedTabCount: syncedTabCountAsync.when(
+            data: (count) => count,
+            loading: () => 0,
+            error: (_, _) => 0,
+          ),
+          onSyncedChipSelected: () {
+            ref.read(tabsTrayScopeControllerProvider.notifier).showSynced();
+          },
+          selectedContainer: selectedContainer,
+          onSelected: (container) async {
+            ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
+
+            if (container != null) {
+              final result = await ref
+                  .read(selectedContainerProvider.notifier)
+                  .setContainerId(container.id);
+
+              if (context.mounted &&
+                  result == SetContainerResult.successHasProxy) {
+                final shouldStartProxy = await ref
+                    .read(startProxyControllerProvider.notifier)
+                    .shouldPromptProxyStart();
+
+                if (!context.mounted || !shouldStartProxy) return;
+
+                final dialogResult = await showDialog<bool>(
+                  context: context,
+                  builder: (context) {
+                    return const TorDialog();
+                  },
+                );
+
+                if (dialogResult == true) {
+                  await ref
+                      .read(startProxyControllerProvider.notifier)
+                      .startProxy();
+                }
+              }
+            } else {
+              ref.read(selectedContainerProvider.notifier).clearContainer();
+            }
+          },
+          onDeleted: (container) {
+            ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
+            ref.read(selectedContainerProvider.notifier).clearContainer();
+          },
+          onLongPress: (container) async {
+            await ContainerEditRoute(
+              containerData: jsonEncode(container.toJson()),
+            ).push(context);
+          },
+        ),
+        if (isSyncedScope) ...[
+          const SizedBox(height: 8),
+          _SyncedDeviceSelector(),
+        ],
+      ],
+    );
+  }
+}
+
+/// Widget for synced device selector
+class _SyncedDeviceSelector extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remoteDevicesAsync = ref.watch(syncRemoteTabsProvider);
+    final selectedDeviceId = ref.watch(selectedSyncedTabsDeviceIdProvider);
+
+    return remoteDevicesAsync.when(
+      skipLoadingOnReload: true,
+      data: (devices) {
+        if (devices.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final effectiveSelectedDeviceId =
+            selectedDeviceId != null &&
+                devices.any((device) => device.deviceId == selectedDeviceId)
+            ? selectedDeviceId
+            : devices.first.deviceId;
+
+        return SizedBox(
+          height: 36,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: devices
+                .map((device) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: ChoiceChip(
+                      label: Text(device.deviceName),
+                      selected: effectiveSelectedDeviceId == device.deviceId,
+                      onSelected: (_) {
+                        ref
+                            .read(selectedSyncedTabsDeviceIdProvider.notifier)
+                            .selectDevice(device.deviceId);
+                      },
+                    ),
+                  );
+                })
+                .toList(growable: false),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+}
 
 class TabViewHeader extends HookConsumerWidget {
   static const headerSize = 124.0;
@@ -79,6 +225,13 @@ class TabViewHeader extends HookConsumerWidget {
     final enableAiFeatures = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
+      ),
+    );
+
+    final selectedContainerId = ref.watch(selectedContainerProvider);
+    final isSyncedScope = ref.watch(
+      effectiveTabsTrayScopeProvider.select(
+        (scope) => scope == TabsTrayScope.synced,
       ),
     );
 
@@ -153,13 +306,15 @@ class TabViewHeader extends HookConsumerWidget {
                               .toList(),
                           child: IconButton(
                             tooltip: 'Change view mode',
-                            onPressed: () {
-                              if (viewModeMenuController.isOpen) {
-                                viewModeMenuController.close();
-                              } else {
-                                viewModeMenuController.open();
-                              }
-                            },
+                            onPressed: isSyncedScope
+                                ? null
+                                : () {
+                                    if (viewModeMenuController.isOpen) {
+                                      viewModeMenuController.close();
+                                    } else {
+                                      viewModeMenuController.open();
+                                    }
+                                  },
                             icon: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -278,122 +433,133 @@ class TabViewHeader extends HookConsumerWidget {
                       menuChildren: [
                         MenuItemButton(
                           leadingIcon: const Icon(MdiIcons.closeCircle),
+                          onPressed: isSyncedScope
+                              ? null
+                              : () async {
+                                  final result = await showCloseAllTabsDialog(
+                                    context,
+                                  );
+
+                                  if (result == true) {
+                                    final count = await ref
+                                        .read(
+                                          tabDataRepositoryProvider.notifier,
+                                        )
+                                        .closeContainerTabs(
+                                          selectedContainerId,
+                                        );
+
+                                    if (context.mounted) {
+                                      ui_helper.showTabUndoClose(
+                                        context,
+                                        ref
+                                            .read(
+                                              tabRepositoryProvider.notifier,
+                                            )
+                                            .undoClose,
+                                        count: count.length,
+                                      );
+                                    }
+                                  }
+                                },
                           child: const Text('Close All Tabs'),
-                          onPressed: () async {
-                            final result = await showCloseAllTabsDialog(
-                              context,
-                            );
-
-                            if (result == true) {
-                              final container = ref.read(
-                                selectedContainerProvider,
-                              );
-
-                              final count = await ref
-                                  .read(tabDataRepositoryProvider.notifier)
-                                  .closeContainerTabs(container);
-
-                              if (context.mounted) {
-                                ui_helper.showTabUndoClose(
-                                  context,
-                                  ref
-                                      .read(tabRepositoryProvider.notifier)
-                                      .undoClose,
-                                  count: count.length,
-                                );
-                              }
-                            }
-                          },
                         ),
                         MenuItemButton(
                           leadingIcon: const Icon(MdiIcons.incognitoCircleOff),
+                          onPressed: isSyncedScope
+                              ? null
+                              : () async {
+                                  final result =
+                                      await showCloseAllPrivateTabsDialog(
+                                        context,
+                                      );
+
+                                  if (result == true) {
+                                    final count = await ref
+                                        .read(
+                                          tabDataRepositoryProvider.notifier,
+                                        )
+                                        .closeContainerTabs(
+                                          selectedContainerId,
+                                          includeRegular: false,
+                                        );
+
+                                    if (context.mounted) {
+                                      ui_helper.showTabUndoClose(
+                                        context,
+                                        ref
+                                            .read(
+                                              tabRepositoryProvider.notifier,
+                                            )
+                                            .undoClose,
+                                        count: count.length,
+                                      );
+                                    }
+                                  }
+                                },
                           child: const Text('Close Private Tabs'),
-                          onPressed: () async {
-                            final result = await showCloseAllPrivateTabsDialog(
-                              context,
-                            );
-
-                            if (result == true) {
-                              final container = ref.read(
-                                selectedContainerProvider,
-                              );
-
-                              final count = await ref
-                                  .read(tabDataRepositoryProvider.notifier)
-                                  .closeContainerTabs(
-                                    container,
-                                    includeRegular: false,
-                                  );
-
-                              if (context.mounted) {
-                                ui_helper.showTabUndoClose(
-                                  context,
-                                  ref
-                                      .read(tabRepositoryProvider.notifier)
-                                      .undoClose,
-                                  count: count.length,
-                                );
-                              }
-                            }
-                          },
                         ),
                         const Divider(),
                         MenuItemButton(
                           leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
-                          child: const Text('Bookmark all'),
-                          onPressed: () async {
-                            final choice = await showBookmarkAllDialog(context);
-                            if (choice == null || !context.mounted) return;
-
-                            final containerId = ref.read(
-                              selectedContainerProvider,
-                            );
-
-                            final tabData = await ref
-                                .read(tabDataRepositoryProvider.notifier)
-                                .getContainerTabsData(containerId);
-
-                            if (choice == BookmarkAllChoice.fast) {
-                              if (!context.mounted) return;
-                              final folderGuid = await showSelectFolderDialog(
-                                context,
-                              );
-                              if (folderGuid == null) return;
-
-                              final repo = ref.read(
-                                bookmarksRepositoryProvider.notifier,
-                              );
-                              for (final tab in tabData) {
-                                if (tab.url != null) {
-                                  await repo.addBookmark(
-                                    parentGuid: folderGuid,
-                                    url: tab.url!,
-                                    title: tab.title ?? tab.url.toString(),
+                          onPressed: isSyncedScope
+                              ? null
+                              : () async {
+                                  final choice = await showBookmarkAllDialog(
+                                    context,
                                   );
-                                }
-                              }
+                                  if (choice == null || !context.mounted) {
+                                    return;
+                                  }
 
-                              if (context.mounted) {
-                                ui_helper.showInfoMessage(
-                                  context,
-                                  '${tabData.length} bookmark(s) added',
-                                );
-                              }
-                            } else {
-                              for (final tab in tabData) {
-                                if (context.mounted) {
-                                  await BookmarkEntryAddRoute(
-                                    bookmarkInfo: jsonEncode(
-                                      BookmarkInfo(
-                                        title: tab.title,
-                                        url: tab.url.toString(),
-                                      ).encode(),
-                                    ),
-                                  ).push(context);
-                                }
-                              }
-                            }
-                          },
+                                  final tabData = await ref
+                                      .read(tabDataRepositoryProvider.notifier)
+                                      .getContainerTabsData(
+                                        selectedContainerId,
+                                      );
+
+                                  if (choice == BookmarkAllChoice.fast) {
+                                    if (!context.mounted) return;
+                                    final folderGuid =
+                                        await showSelectFolderDialog(context);
+                                    if (folderGuid == null) return;
+
+                                    final repo = ref.read(
+                                      bookmarksRepositoryProvider.notifier,
+                                    );
+                                    for (final tab in tabData) {
+                                      if (tab.url != null) {
+                                        await repo.addBookmark(
+                                          parentGuid: folderGuid,
+                                          url: tab.url!,
+                                          title:
+                                              tab.title ?? tab.url.toString(),
+                                        );
+                                      }
+                                    }
+
+                                    if (context.mounted) {
+                                      ui_helper.showInfoMessage(
+                                        context,
+                                        '${tabData.length} bookmark(s) added',
+                                      );
+                                    }
+                                  } else {
+                                    for (final tab in tabData) {
+                                      if (context.mounted) {
+                                        await BookmarkEntryAddRoute(
+                                          bookmarkInfo: jsonEncode(
+                                            BookmarkInfo(
+                                              title: tab.title,
+                                              url: tab.url.toString(),
+                                            ).encode(),
+                                          ),
+                                        ).push(context);
+                                      }
+                                    }
+                                  }
+                                },
+                          child: const Text('Bookmark all'),
                         ),
                         Consumer(
                           builder: (context, ref, child) {
@@ -582,66 +748,7 @@ class TabViewHeader extends HookConsumerWidget {
                 ),
               Consumer(
                 builder: (context, ref, child) {
-                  final selectedContainer = ref.watch(
-                    selectedContainerDataProvider.select(
-                      (value) => value.value,
-                    ),
-                  );
-
-                  return ContainerChips(
-                    showGroupSuggestions: switch (tabsViewMode) {
-                      TabsViewMode.list || TabsViewMode.grid => true,
-                      TabsViewMode.tree => false,
-                    },
-                    enableDragAndDrop: switch (tabsViewMode) {
-                      TabsViewMode.list || TabsViewMode.grid => true,
-                      TabsViewMode.tree => false,
-                    },
-                    selectedContainer: selectedContainer,
-                    onSelected: (container) async {
-                      if (container != null) {
-                        final result = await ref
-                            .read(selectedContainerProvider.notifier)
-                            .setContainerId(container.id);
-
-                        if (context.mounted &&
-                            result == SetContainerResult.successHasProxy) {
-                          final shouldStartProxy = await ref
-                              .read(startProxyControllerProvider.notifier)
-                              .shouldPromptProxyStart();
-
-                          if (!context.mounted || !shouldStartProxy) return;
-
-                          final dialogResult = await showDialog<bool>(
-                            context: context,
-                            builder: (context) {
-                              return const TorDialog();
-                            },
-                          );
-
-                          if (dialogResult == true) {
-                            await ref
-                                .read(startProxyControllerProvider.notifier)
-                                .startProxy();
-                          }
-                        }
-                      } else {
-                        ref
-                            .read(selectedContainerProvider.notifier)
-                            .clearContainer();
-                      }
-                    },
-                    onDeleted: (container) {
-                      ref
-                          .read(selectedContainerProvider.notifier)
-                          .clearContainer();
-                    },
-                    onLongPress: (container) async {
-                      await ContainerEditRoute(
-                        containerData: jsonEncode(container.toJson()),
-                      ).push(context);
-                    },
-                  );
+                  return _TabFilters(tabsViewMode: tabsViewMode);
                 },
               ),
               const SizedBox(height: 8),

@@ -180,6 +180,19 @@
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
 
         <activity
+            android:name="eu.weblibre.flutter_mozilla_components.activities.AuthCustomTabActivity"
+            android:exported="false"
+            android:taskAffinity=""
+            android:autoRemoveFromRecents="false"
+            android:theme="@style/ExternalAppBrowserTheme"
+            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|layoutDirection|smallestScreenSize|screenLayout"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
+
+        <activity
+            android:name="eu.weblibre.flutter_mozilla_components.activities.AuthIntentReceiverActivity"
+            android:exported="false" />
+
+        <activity
             android:theme="@style/AddonsActivityTheme"
             android:name="eu.weblibre.flutter_mozilla_components.addons.AddonsActivity"
             android:label="@string/mozac_feature_addons_addons"
