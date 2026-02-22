@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
   const ContainerListScreen({super.key});
@@ -53,6 +54,9 @@ class ContainerListScreen extends HookConsumerWidget {
             builder: (context, controller) {
               return ListView.builder(
                 controller: controller,
+                padding: EdgeInsets.only(
+                  bottom: floatingActionButtonBottomInset(context),
+                ),
                 itemCount: containers.length,
                 itemBuilder: (context, index) {
                   final container = containers[index];
@@ -164,6 +168,9 @@ class ContainerListScreen extends HookConsumerWidget {
             ),
           ),
           loading: () => ListView.builder(
+            padding: EdgeInsets.only(
+              bottom: floatingActionButtonBottomInset(context),
+            ),
             itemCount: 3,
             itemBuilder: (context, index) => ContainerListTile(
               ContainerData(id: 'null', color: Colors.transparent),

@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
@@ -55,140 +56,153 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Draft Containers')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: suggestionsAsync.when(
-            skipLoadingOnReload: true,
-            data: (suggestions) {
-              final screenWidth = MediaQuery.of(context).size.width;
+        child: Builder(
+          builder: (safeAreaContext) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: suggestionsAsync.when(
+                skipLoadingOnReload: true,
+                data: (suggestions) {
+                  final screenWidth = MediaQuery.of(context).size.width;
 
-              final crossAxisCount = useMemoized(() {
-                final calculatedCount = calculateCrossAxisItemCount(
-                  screenWidth: screenWidth,
-                  horizontalPadding: 4.0,
-                  crossAxisSpacing: 8.0,
-                );
+                  final crossAxisCount = useMemoized(() {
+                    final calculatedCount = calculateCrossAxisItemCount(
+                      screenWidth: screenWidth,
+                      horizontalPadding: 4.0,
+                      crossAxisSpacing: 8.0,
+                    );
 
-                return math.max(
-                  math.min(
-                    calculatedCount,
-                    selectedContainer.value?.tabIds.length ?? 0,
-                  ),
-                  2,
-                );
-              }, [screenWidth, selectedContainer.value?.tabIds.length]);
+                    return math.max(
+                      math.min(
+                        calculatedCount,
+                        selectedContainer.value?.tabIds.length ?? 0,
+                      ),
+                      2,
+                    );
+                  }, [screenWidth, selectedContainer.value?.tabIds.length]);
 
-              return Column(
-                children: [
-                  SizedBox(
-                    height: 48,
-                    child: SelectableChips(
-                      enableDelete: false,
-                      sortSelectedFirst: false,
-                      itemId: (container) => container,
-                      itemAvatar: (container) =>
-                          const Icon(MdiIcons.creation, size: 20),
-                      itemLabel: (container) => HookConsumer(
-                        builder: (context, ref, child) {
-                          final items = useListenableSelector(
-                            selectedContainerTabs,
-                            () => selectedContainerTabs.value[container],
-                          );
-
-                          final topic = items.isNotEmpty
-                              ? ref.watch(
-                                  tabsTopicProvider(EquatableValue(items!)),
-                                )
-                              : AsyncValue.data(container.topic);
-
-                          return topic.when(
-                            skipLoadingOnReload: true,
-                            data: (topic) => Text(topic ?? 'Untitled'),
-                            error: (error, stackTrace) {
-                              logger.e(
-                                'Failed predicting selected tabs topic',
-                                error: error,
-                                stackTrace: stackTrace,
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 48,
+                        child: SelectableChips(
+                          enableDelete: false,
+                          sortSelectedFirst: false,
+                          itemId: (container) => container,
+                          itemAvatar: (container) =>
+                              const Icon(MdiIcons.creation, size: 20),
+                          itemLabel: (container) => HookConsumer(
+                            builder: (context, ref, child) {
+                              final items = useListenableSelector(
+                                selectedContainerTabs,
+                                () => selectedContainerTabs.value[container],
                               );
 
-                              return Text(container.topic ?? 'Untitled');
-                            },
-                            loading: () =>
-                                const Skeletonizer(child: Text('Untitled')),
-                          );
-                        },
-                      ),
-                      itemBadgeCount: (container) => container.tabIds.length,
-                      availableItems: suggestions!,
-                      selectedItem: selectedContainer.value,
-                      onSelected: (item) {
-                        selectedContainer.value = item;
-                      },
-                    ),
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 4),
-                  if (selectedContainer.value != null)
-                    Expanded(
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          //Sync values for itemHeight calculation _calculateItemHeight
-                          childAspectRatio: 0.75,
-                          mainAxisSpacing: 8.0,
-                          crossAxisSpacing: 8.0,
-                          crossAxisCount: crossAxisCount,
-                        ),
-                        itemCount: selectedContainer.value!.tabIds.length,
-                        itemBuilder: (context, index) {
-                          final tabId = selectedContainer.value!.tabIds[index];
-                          final equatable = selectedContainer.value!;
+                              final topic = items.isNotEmpty
+                                  ? ref.watch(
+                                      tabsTopicProvider(EquatableValue(items!)),
+                                    )
+                                  : AsyncValue.data(container.topic);
 
-                          return (selectedContainerTabs.value[equatable]
-                                      ?.contains(tabId) ==
-                                  true)
-                              ? GridTabPreview(
-                                  tabId: tabId,
-                                  isActive: false,
-                                  onDelete: () {
-                                    selectedContainerTabs.value = {
-                                      ...selectedContainerTabs.value,
-                                      equatable: {
-                                        ...?selectedContainerTabs
-                                            .value[equatable],
-                                      }..remove(tabId),
-                                    };
-                                  },
-                                )
-                              : SuggestedSingleGridTabPreview(
-                                  tabId: tabId,
-                                  activeTabId: null,
-                                  onTap: () {
-                                    selectedContainerTabs.value = {
-                                      ...selectedContainerTabs.value,
-                                      equatable: {
-                                        ...?selectedContainerTabs
-                                            .value[equatable],
-                                        tabId,
-                                      },
-                                    };
-                                  },
-                                );
-                        },
+                              return topic.when(
+                                skipLoadingOnReload: true,
+                                data: (topic) => Text(topic ?? 'Untitled'),
+                                error: (error, stackTrace) {
+                                  logger.e(
+                                    'Failed predicting selected tabs topic',
+                                    error: error,
+                                    stackTrace: stackTrace,
+                                  );
+
+                                  return Text(container.topic ?? 'Untitled');
+                                },
+                                loading: () =>
+                                    const Skeletonizer(child: Text('Untitled')),
+                              );
+                            },
+                          ),
+                          itemBadgeCount: (container) =>
+                              container.tabIds.length,
+                          availableItems: suggestions!,
+                          selectedItem: selectedContainer.value,
+                          onSelected: (item) {
+                            selectedContainer.value = item;
+                          },
+                        ),
                       ),
-                    ),
-                ],
-              );
-            },
-            error: (error, stackTrace) {
-              return FailureWidget(
-                title: 'Failed to create suggestions',
-                onRetry: () {
-                  ref.invalidate(suggestClustersProvider);
+                      const Divider(),
+                      const SizedBox(height: 4),
+                      if (selectedContainer.value != null)
+                        Expanded(
+                          child: GridView.builder(
+                            padding: EdgeInsets.only(
+                              bottom: (selectedTabs?.isNotEmpty ?? false)
+                                  ? floatingActionButtonBottomInset(
+                                      safeAreaContext,
+                                    )
+                                  : 0,
+                            ),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              //Sync values for itemHeight calculation _calculateItemHeight
+                              childAspectRatio: 0.75,
+                              mainAxisSpacing: 8.0,
+                              crossAxisSpacing: 8.0,
+                              crossAxisCount: crossAxisCount,
+                            ),
+                            itemCount: selectedContainer.value!.tabIds.length,
+                            itemBuilder: (context, index) {
+                              final tabId =
+                                  selectedContainer.value!.tabIds[index];
+                              final equatable = selectedContainer.value!;
+
+                              return (selectedContainerTabs.value[equatable]
+                                          ?.contains(tabId) ==
+                                      true)
+                                  ? GridTabPreview(
+                                      tabId: tabId,
+                                      isActive: false,
+                                      onDelete: () {
+                                        selectedContainerTabs.value = {
+                                          ...selectedContainerTabs.value,
+                                          equatable: {
+                                            ...?selectedContainerTabs
+                                                .value[equatable],
+                                          }..remove(tabId),
+                                        };
+                                      },
+                                    )
+                                  : SuggestedSingleGridTabPreview(
+                                      tabId: tabId,
+                                      activeTabId: null,
+                                      onTap: () {
+                                        selectedContainerTabs.value = {
+                                          ...selectedContainerTabs.value,
+                                          equatable: {
+                                            ...?selectedContainerTabs
+                                                .value[equatable],
+                                            tabId,
+                                          },
+                                        };
+                                      },
+                                    );
+                            },
+                          ),
+                        ),
+                    ],
+                  );
                 },
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-          ),
+                error: (error, stackTrace) {
+                  return FailureWidget(
+                    title: 'Failed to create suggestions',
+                    onRetry: () {
+                      ref.invalidate(suggestClustersProvider);
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: (selectedTabs?.isNotEmpty ?? false)

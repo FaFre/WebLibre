@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class _TabTreePreview extends HookConsumerWidget {
@@ -280,7 +281,14 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: GridView.builder(
                       controller: scrollController,
-                      padding: EdgeInsets.zero,
+                      padding: EdgeInsets.only(
+                        bottom: showNewTabFab
+                            ? floatingActionButtonBottomInset(
+                                context,
+                                fabHeight: smallFloatingActionButtonHeight,
+                              )
+                            : 0,
+                      ),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         //Sync values for itemHeight calculation _calculateItemHeight
                         childAspectRatio: 0.75,

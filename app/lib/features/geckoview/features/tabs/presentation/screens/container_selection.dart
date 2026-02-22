@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 
 class ContainerSelectionScreen extends HookConsumerWidget {
   const ContainerSelectionScreen({super.key});
@@ -49,6 +50,9 @@ class ContainerSelectionScreen extends HookConsumerWidget {
             builder: (context, controller) {
               return ListView.builder(
                 controller: controller,
+                padding: EdgeInsets.only(
+                  bottom: floatingActionButtonBottomInset(context),
+                ),
                 itemCount: containers.length,
                 itemBuilder: (context, index) {
                   final container = containers[index];
@@ -71,6 +75,9 @@ class ContainerSelectionScreen extends HookConsumerWidget {
             ),
           ),
           loading: () => ListView.builder(
+            padding: EdgeInsets.only(
+              bottom: floatingActionButtonBottomInset(context),
+            ),
             itemCount: 3,
             itemBuilder: (context, index) => ContainerListTile(
               ContainerData(id: Namespace.nil.value, color: Colors.transparent),

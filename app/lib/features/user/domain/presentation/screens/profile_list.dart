@@ -26,6 +26,7 @@ import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 
 class ProfileListScreen extends HookConsumerWidget {
   const ProfileListScreen({super.key});
@@ -49,6 +50,9 @@ class ProfileListScreen extends HookConsumerWidget {
       body: usersAsync.when(
         skipLoadingOnReload: true,
         data: (profiles) => ListView.builder(
+          padding: EdgeInsets.only(
+            bottom: floatingActionButtonBottomInset(context),
+          ),
           itemCount: profiles.length,
           itemBuilder: (context, index) {
             final profile = profiles[index];
