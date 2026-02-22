@@ -88,7 +88,7 @@ jobs:
 
       - name: Build APK
         working-directory: app
-        run: flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons --no-enable-impeller
+        run: flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons
 
       - name: Build App Bundle
         if: steps.build-type.outputs.is_prerelease == 'false'
