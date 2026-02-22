@@ -1003,6 +1003,11 @@ abstract class GeckoBrowserApi {
   );
   bool showNativeFragment();
   void onTrimMemory(int level);
+  void openInCustomTab({
+    required String url,
+    required bool private,
+    required String? contextId,
+  });
 }
 
 enum SyncEngineValue { history, bookmarks, tabs }

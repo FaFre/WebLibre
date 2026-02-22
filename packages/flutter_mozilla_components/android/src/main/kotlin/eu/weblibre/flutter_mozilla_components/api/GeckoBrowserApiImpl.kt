@@ -14,6 +14,7 @@ import eu.weblibre.flutter_mozilla_components.BrowserFragment
 import eu.weblibre.flutter_mozilla_components.GeckoViewFactory
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
@@ -58,7 +59,11 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewEvents
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
+import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.action.SystemAction
+import mozilla.components.browser.state.state.CustomTabConfig
+import mozilla.components.browser.state.state.SessionState
+import mozilla.components.browser.state.state.createCustomTab
 import mozilla.components.feature.addons.logger
 import mozilla.components.support.base.ext.getStacktraceAsString
 import mozilla.components.support.base.log.Log
@@ -385,5 +390,33 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
                 logger.error("$TAG: Failed to handle memory trim", e)
             }
         }
+    }
+
+    override fun openInCustomTab(url: String, `private`: Boolean, contextId: String?) {
+        val currentActivity = requireNotNull(activity) { "Activity not attached" }
+
+        val customTabConfig = CustomTabConfig()
+
+        val tab = createCustomTab(
+            url = url,
+            contextId = contextId,
+            config = customTabConfig,
+            source = SessionState.Source.Internal.CustomTab,
+            private = `private`,
+        )
+
+        components.core.store.dispatch(
+            CustomTabListAction.AddCustomTabAction(tab)
+        )
+
+        components.useCases.sessionUseCases.loadUrl(url, tab.id)
+
+        val intent = ExternalAppBrowserActivity.createIntent(
+            context = currentActivity,
+            customTabSessionId = tab.id,
+        )
+        currentActivity.startActivity(intent)
+
+        logger.debug("$TAG: Opened custom tab ${tab.id} for $url (private=$`private`)")
     }
 }

@@ -211,7 +211,7 @@ class OpenSharedContentRoute extends GoRouteData with $OpenSharedContentRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(
+    return BottomSheetPage(
       builder: (_) => OpenSharedContent(
         sharedUrl: Uri.tryParse(sharedUrl) ?? Uri.parse('about:blank'),
       ),

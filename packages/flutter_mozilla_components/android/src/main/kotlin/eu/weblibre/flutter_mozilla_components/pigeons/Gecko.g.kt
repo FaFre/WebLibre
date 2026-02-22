@@ -4394,6 +4394,7 @@ interface GeckoBrowserApi {
   fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?, fxaServerOverride: String?, syncTokenServerOverride: String?)
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
+  fun openInCustomTab(url: String, private: Boolean, contextId: String?)
 
   companion object {
     /** The codec used by GeckoBrowserApi. */
@@ -4465,6 +4466,26 @@ interface GeckoBrowserApi {
             val levelArg = args[0] as Long
             val wrapped: List<Any?> = try {
               api.onTrimMemory(levelArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.openInCustomTab$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val urlArg = args[0] as String
+            val privateArg = args[1] as Boolean
+            val contextIdArg = args[2] as String?
+            val wrapped: List<Any?> = try {
+              api.openInCustomTab(urlArg, privateArg, contextIdArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

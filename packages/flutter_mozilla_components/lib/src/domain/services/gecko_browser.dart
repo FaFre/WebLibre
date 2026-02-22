@@ -42,4 +42,16 @@ class GeckoBrowserService {
   Future<void> onTrimMemory(int level) {
     return _api.onTrimMemory(level);
   }
+
+  Future<void> openInCustomTab({
+    required Uri url,
+    required bool private,
+    String? contextId,
+  }) {
+    return _api.openInCustomTab(
+      url: url.toString(),
+      private: private,
+      contextId: contextId,
+    );
+  }
 }
