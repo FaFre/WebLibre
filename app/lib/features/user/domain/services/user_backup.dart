@@ -108,6 +108,7 @@ class UserBackupService extends _$UserBackupService {
 
         await outputDirectory.rename(newPath.path);
         await filesystem.updateProfileMetadata(newProfile);
+        await filesystem.healProfile(newPath);
       });
 
       ref.invalidate(profileRepositoryProvider);
@@ -168,10 +169,12 @@ class UserBackupService extends _$UserBackupService {
           if (result == true) {
             await profileDir.delete(recursive: true);
             await outputDirectory.rename(profileDir.path);
+            await filesystem.healProfile(profileDir);
           }
         } else {
           // Profile doesn't exist yet, just move the restored data into place
           await outputDirectory.rename(profileDir.path);
+          await filesystem.healProfile(profileDir);
         }
       });
 

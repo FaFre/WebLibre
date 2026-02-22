@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -73,13 +74,14 @@ class _Filesystem {
     return fs.getMozillaProfileIds(getProfileDir(uuid));
   }
 
-  /// If the old canonical location `{profile}/mozilla/` exists as a real
-  /// directory and the new location `{profile}/files/mozilla/` does not,
+  /// If the old canonical location `{profileDir}/mozilla/` exists as a real
+  /// directory and the new location `{profileDir}/files/mozilla/` does not,
   /// rename the former to the latter.
-  Future<void> _migrateMozillaDirToFiles() async {
-    final oldDir = Directory(p.join(selectedProfileDir.path, 'mozilla'));
+  /// Returns `true` if a migration was performed.
+  static Future<bool> _migrateMozillaDirToFiles(Directory profileDir) async {
+    final oldDir = Directory(p.join(profileDir.path, 'mozilla'));
     final newDir = Directory(
-      p.join(selectedProfileDir.path, 'files', 'mozilla'),
+      p.join(profileDir.path, 'files', 'mozilla'),
     );
 
     final oldType = await FileSystemEntity.type(
@@ -89,20 +91,22 @@ class _Filesystem {
 
     if (oldType == FileSystemEntityType.directory && !await newDir.exists()) {
       await Directory(
-        p.join(selectedProfileDir.path, 'files'),
+        p.join(profileDir.path, 'files'),
       ).create(recursive: true);
       await oldDir.rename(newDir.path);
+      return true;
     }
+    return false;
   }
 
-  Future<void> _migrateGeckoCache() async {
-    final profileIds = fs.getMozillaProfileIds(selectedProfileDir);
+  Future<void> _migrateGeckoCache(Directory profileDir) async {
+    final profileIds = fs.getMozillaProfileIds(profileDir);
     final globalCacheDir = Directory(p.join(dataDir.path, 'cache'));
 
     for (final profileId in profileIds) {
       final oldCache = Directory(p.join(globalCacheDir.path, profileId));
       final newCache = Directory(
-        p.join(selectedProfileDir.path, 'cache', profileId),
+        p.join(profileDir.path, 'cache', profileId),
       );
 
       if (await oldCache.exists() && !await newCache.exists()) {
@@ -116,6 +120,203 @@ class _Filesystem {
           );
         }
       }
+    }
+  }
+
+  /// Ensure the top-level `{filesDir}/mozilla` symlink points to the given
+  /// profile's `files/mozilla/` directory.  Old versions created this symlink
+  /// targeting `{profile}/mozilla` which no longer exists after the migration
+  /// moved it to `{profile}/files/mozilla`.  GeckoView's `extensions.json`
+  /// stores absolute paths through this symlink, so it must stay valid.
+  static Future<void> _linkMozillaDir(
+    Directory filesDir,
+    Directory profileDir,
+  ) async {
+    final mozillaDir = Directory(
+      p.join(profileDir.path, 'files', 'mozilla'),
+    );
+    await mozillaDir.create(recursive: true);
+
+    final mozillaPath = p.join(filesDir.path, 'mozilla');
+
+    final currentType = await FileSystemEntity.type(
+      mozillaPath,
+      followLinks: false,
+    );
+
+    switch (currentType) {
+      case FileSystemEntityType.notFound:
+        break;
+      case FileSystemEntityType.link:
+        final link = Link(mozillaPath);
+        try {
+          if (await link.target() == mozillaDir.path) {
+            return;
+          }
+        } on FileSystemException {
+          // Replace unreadable or broken links.
+        }
+        await link.delete();
+      default:
+        // Move aside any non-link entity (directory, file, etc.)
+        final backupPath = p.join(
+          filesDir.path,
+          'mozilla.backup.${DateTime.now().millisecondsSinceEpoch}',
+        );
+        if (currentType == FileSystemEntityType.directory) {
+          await Directory(mozillaPath).rename(backupPath);
+        } else {
+          await File(mozillaPath).rename(backupPath);
+        }
+    }
+
+    await Link(mozillaPath).create(mozillaDir.path);
+  }
+
+  /// Remove path-sensitive Gecko caches that may contain stale absolute paths.
+  /// Gecko regenerates these on next startup.
+  static Future<void> _healGeckoStartupCaches(Directory profileDir) async {
+    final profileIds = fs.getMozillaProfileIds(profileDir);
+
+    for (final profileId in profileIds) {
+      final mozProfileDir = Directory(
+        p.join(profileDir.path, 'files', 'mozilla', profileId),
+      );
+      if (!await mozProfileDir.exists()) continue;
+
+      // addonStartup.json.lz4 caches absolute addon paths
+      final addonStartup = File(
+        p.join(mozProfileDir.path, 'addonStartup.json.lz4'),
+      );
+      if (await addonStartup.exists()) {
+        try {
+          await addonStartup.delete();
+          logger.i('Cleared addonStartup.json.lz4 for $profileId');
+        } catch (e, s) {
+          logger.w(
+            'Failed to clear addonStartup.json.lz4 for $profileId',
+            error: e,
+            stackTrace: s,
+          );
+        }
+      }
+
+      // startupCache may contain stale path references
+      final startupCache = Directory(
+        p.join(mozProfileDir.path, 'startupCache'),
+      );
+      if (await startupCache.exists()) {
+        try {
+          await startupCache.delete(recursive: true);
+          logger.i('Cleared startupCache for $profileId');
+        } catch (e, s) {
+          logger.w(
+            'Failed to clear startupCache for $profileId',
+            error: e,
+            stackTrace: s,
+          );
+        }
+      }
+    }
+  }
+
+  /// Rewrite absolute paths in `extensions.json` that still reference the
+  /// old pre-migration layout (`{filesDir}/mozilla/…`).  After migration the
+  /// real location is `{filesDir}/weblibre_profiles/profile-…/files/mozilla/…`
+  /// and the top-level symlink bridges the two, but fixing the stored paths
+  /// removes the permanent dependency on the symlink.
+  /// Returns `true` if any paths were rewritten.
+  static Future<bool> _migrateExtensionPaths(
+    Directory filesDir,
+    Directory profileDir,
+  ) async {
+    final profileIds = fs.getMozillaProfileIds(profileDir);
+    // Pattern: /data/user/0/eu.weblibre.gecko/files/mozilla/
+    // Should become: /data/user/0/eu.weblibre.gecko/files/weblibre_profiles/profile-…/files/mozilla/
+    final oldPrefix = '${filesDir.path}/mozilla/';
+    final newPrefix = '${profileDir.path}/files/mozilla/';
+
+    if (oldPrefix == newPrefix) return false;
+
+    var migrated = false;
+
+    for (final profileId in profileIds) {
+      final extensionsFile = File(
+        p.join(
+          profileDir.path,
+          'files',
+          'mozilla',
+          profileId,
+          'extensions.json',
+        ),
+      );
+
+      if (!await extensionsFile.exists()) continue;
+
+      try {
+        final content = await extensionsFile.readAsString();
+        if (!content.contains(oldPrefix)) continue;
+
+        final json = jsonDecode(content);
+        var changed = false;
+
+        if (json is Map<String, dynamic> && json['addons'] is List) {
+          for (final addon in json['addons'] as List) {
+            if (addon is! Map<String, dynamic>) continue;
+
+            final path = addon['path'];
+            if (path is String && path.startsWith(oldPrefix)) {
+              addon['path'] = path.replaceFirst(oldPrefix, newPrefix);
+              changed = true;
+            }
+
+            final rootURI = addon['rootURI'];
+            if (rootURI is String && rootURI.contains(oldPrefix)) {
+              addon['rootURI'] = rootURI.replaceFirst(oldPrefix, newPrefix);
+              changed = true;
+            }
+          }
+        }
+
+        if (changed) {
+          await extensionsFile.writeAsString(
+            jsonEncode(json),
+            flush: true,
+          );
+          logger.i('Migrated extension paths in $profileId/extensions.json');
+          migrated = true;
+        }
+      } catch (e, s) {
+        logger.w(
+          'Failed to migrate extension paths for $profileId',
+          error: e,
+          stackTrace: s,
+        );
+      }
+    }
+
+    return migrated;
+  }
+
+  /// Run all post-migration healing for a profile directory.
+  /// Called during init for the active profile and after backup restore.
+  Future<void> healProfile(Directory profileDir) async {
+    final filesDir = profilesDir.parent;
+    final dirMigrated = await _migrateMozillaDirToFiles(profileDir);
+    await _migrateGeckoCache(profileDir);
+    final pathsMigrated = await _migrateExtensionPaths(filesDir, profileDir);
+
+    // Only update the global symlink for the currently active profile —
+    // restoring a non-active profile must not repoint it.
+    final isActiveProfile = profileDir.path == selectedProfileDir.path;
+    if (isActiveProfile) {
+      await _linkMozillaDir(filesDir, profileDir);
+    }
+
+    // Only clear Gecko startup caches when a path migration actually happened,
+    // to avoid a recurring startup performance penalty.
+    if (dirMigrated || pathsMigrated) {
+      await _healGeckoStartupCaches(profileDir);
     }
   }
 
@@ -194,8 +395,7 @@ class _Filesystem {
     );
     await profileDatabasesDir.create();
 
-    await _migrateMozillaDirToFiles();
-    await _migrateGeckoCache();
+    await healProfile(selectedProfileDir);
     await _setupSqliteCache();
   }
 
