@@ -80,9 +80,7 @@ class _Filesystem {
   /// Returns `true` if a migration was performed.
   static Future<bool> _migrateMozillaDirToFiles(Directory profileDir) async {
     final oldDir = Directory(p.join(profileDir.path, 'mozilla'));
-    final newDir = Directory(
-      p.join(profileDir.path, 'files', 'mozilla'),
-    );
+    final newDir = Directory(p.join(profileDir.path, 'files', 'mozilla'));
 
     final oldType = await FileSystemEntity.type(
       oldDir.path,
@@ -90,9 +88,7 @@ class _Filesystem {
     );
 
     if (oldType == FileSystemEntityType.directory && !await newDir.exists()) {
-      await Directory(
-        p.join(profileDir.path, 'files'),
-      ).create(recursive: true);
+      await Directory(p.join(profileDir.path, 'files')).create(recursive: true);
       await oldDir.rename(newDir.path);
       return true;
     }
@@ -105,9 +101,7 @@ class _Filesystem {
 
     for (final profileId in profileIds) {
       final oldCache = Directory(p.join(globalCacheDir.path, profileId));
-      final newCache = Directory(
-        p.join(profileDir.path, 'cache', profileId),
-      );
+      final newCache = Directory(p.join(profileDir.path, 'cache', profileId));
 
       if (await oldCache.exists() && !await newCache.exists()) {
         try {
@@ -132,9 +126,7 @@ class _Filesystem {
     Directory filesDir,
     Directory profileDir,
   ) async {
-    final mozillaDir = Directory(
-      p.join(profileDir.path, 'files', 'mozilla'),
-    );
+    final mozillaDir = Directory(p.join(profileDir.path, 'files', 'mozilla'));
     await mozillaDir.create(recursive: true);
 
     final mozillaPath = p.join(filesDir.path, 'mozilla');
@@ -279,10 +271,7 @@ class _Filesystem {
         }
 
         if (changed) {
-          await extensionsFile.writeAsString(
-            jsonEncode(json),
-            flush: true,
-          );
+          await extensionsFile.writeAsString(jsonEncode(json), flush: true);
           logger.i('Migrated extension paths in $profileId/extensions.json');
           migrated = true;
         }

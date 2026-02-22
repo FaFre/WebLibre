@@ -358,21 +358,19 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     }
 
     late final Future<Result<WebPageInfo>> inFlightFetch;
-    inFlightFetch = fetchPageInfo(
-      url: url,
-      isImageRequest: true,
-      proxyPort: null,
-    ).timeout(
-      const Duration(seconds: 20),
-      onTimeout: () => Result.failure(
-        const ErrorMessage(source: 'icon', message: 'Icon fetch timeout'),
-      ),
-    ).whenComplete(() {
-      // Only clear this entry if it is still the active in-flight request.
-      if (identical(_inFlightFetches[url]?.future, inFlightFetch)) {
-        _inFlightFetches.remove(url);
-      }
-    });
+    inFlightFetch = fetchPageInfo(url: url, isImageRequest: true, proxyPort: null)
+        .timeout(
+          const Duration(seconds: 20),
+          onTimeout: () => Result.failure(
+            const ErrorMessage(source: 'icon', message: 'Icon fetch timeout'),
+          ),
+        )
+        .whenComplete(() {
+          // Only clear this entry if it is still the active in-flight request.
+          if (identical(_inFlightFetches[url]?.future, inFlightFetch)) {
+            _inFlightFetches.remove(url);
+          }
+        });
 
     _inFlightFetches[url] = _InFlightFetch(inFlightFetch);
     return inFlightFetch;

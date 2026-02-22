@@ -4,11 +4,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 
 part 'sync_repository_state.g.dart';
 
-enum SyncEvent {
-  started,
-  completed,
-  error;
-}
+enum SyncEvent { started, completed, error }
 
 @CopyWith()
 class SyncRepositoryState with FastEquatable {
@@ -29,6 +25,12 @@ class SyncRepositoryState with FastEquatable {
   });
 
   @override
-  List<Object?> get hashParameters =>
-      [account, remoteTabs, devices, deviceName, lastSyncEvent, lastSyncError];
+  List<Object?> get hashParameters => [
+    account,
+    remoteTabs,
+    devices,
+    deviceName,
+    lastSyncEvent,
+    lastSyncError,
+  ];
 }

@@ -148,9 +148,7 @@ class UserBackupService extends _$UserBackupService {
           outputDirectory,
         );
         if (existingProfile == null) {
-          throw Exception(
-            'Backup does not contain valid profile metadata',
-          );
+          throw Exception('Backup does not contain valid profile metadata');
         }
 
         if (existingProfile.uuidValue == filesystem.selectedProfile) {
@@ -159,9 +157,7 @@ class UserBackupService extends _$UserBackupService {
           );
         }
 
-        final profileDir = filesystem.getProfileDir(
-          existingProfile.uuidValue,
-        );
+        final profileDir = filesystem.getProfileDir(existingProfile.uuidValue);
 
         if (await profileDir.exists()) {
           final result = await confirmOverrideCallback();

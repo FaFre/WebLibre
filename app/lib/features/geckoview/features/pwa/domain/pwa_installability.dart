@@ -70,15 +70,9 @@ bool isManifestInstallable(PwaManifest manifest) {
       _validDisplayModes.contains(manifest.display!.toLowerCase());
 
   // Check that start_url is within scope
-  final isInScope = _isStartUrlInScope(
-    manifest.startUrl,
-    manifest.scope,
-  );
+  final isInScope = _isStartUrlInScope(manifest.startUrl, manifest.scope);
 
-  return hasValidName &&
-      hasValidStartUrl &&
-      hasValidDisplay &&
-      isInScope;
+  return hasValidName && hasValidStartUrl && hasValidDisplay && isInScope;
 }
 
 /// Returns true if two URLs share the same origin (scheme + host + port).
@@ -120,10 +114,12 @@ bool _isStartUrlInScope(String startUrl, String? scope) {
 
     // Path containment: scope path must be a prefix of start_url path
     // on a `/` boundary to avoid "/app" matching "/application"
-    final scopePath =
-        scopeUri.path.endsWith('/') ? scopeUri.path : '${scopeUri.path}/';
-    final startPath =
-        startUri.path.endsWith('/') ? startUri.path : '${startUri.path}/';
+    final scopePath = scopeUri.path.endsWith('/')
+        ? scopeUri.path
+        : '${scopeUri.path}/';
+    final startPath = startUri.path.endsWith('/')
+        ? startUri.path
+        : '${startUri.path}/';
 
     return startPath.startsWith(scopePath) || startUri.path == scopeUri.path;
   } catch (e) {

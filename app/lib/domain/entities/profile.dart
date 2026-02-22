@@ -38,16 +38,10 @@ class Profile with FastEquatable {
 
   static String getNewProfileId() => uuid.v7();
 
-  Profile({
-    required this.id,
-    required this.name,
-    AuthSettings? authSettings,
-  }) : authSettings = authSettings ?? AuthSettings.withDefaults();
+  Profile({required this.id, required this.name, AuthSettings? authSettings})
+    : authSettings = authSettings ?? AuthSettings.withDefaults();
 
-  factory Profile.create({
-    required String name,
-    AuthSettings? authSettings,
-  }) {
+  factory Profile.create({required String name, AuthSettings? authSettings}) {
     return Profile(
       id: getNewProfileId(),
       name: name,

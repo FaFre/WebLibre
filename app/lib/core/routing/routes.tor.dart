@@ -46,9 +46,6 @@ class TorCountryPickerRoute extends GoRouteData with $TorCountryPickerRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return CountryPickerScreen(
-      title: title,
-      selectedCountryCode: $extra,
-    );
+    return CountryPickerScreen(title: title, selectedCountryCode: $extra);
   }
 }

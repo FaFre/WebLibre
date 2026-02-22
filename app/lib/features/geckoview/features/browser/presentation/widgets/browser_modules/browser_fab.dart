@@ -64,9 +64,7 @@ class BrowserFab extends HookConsumerWidget {
         heroTag: 'dock_fab',
         onPressed: () {
           ref
-              .read(
-                toolbarVisibilityControllerProvider(selectedTabId).notifier,
-              )
+              .read(toolbarVisibilityControllerProvider(selectedTabId).notifier)
               .forceShow();
         },
         child: const Icon(MdiIcons.dockBottom),

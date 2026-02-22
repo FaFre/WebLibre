@@ -49,11 +49,6 @@ class SafeRawImage extends StatelessWidget {
       return fallback ?? SizedBox(width: width, height: height);
     }
 
-    return RawImage(
-      image: uiImage,
-      width: width,
-      height: height,
-      fit: fit,
-    );
+    return RawImage(image: uiImage, width: width, height: height, fit: fit);
   }
 }
