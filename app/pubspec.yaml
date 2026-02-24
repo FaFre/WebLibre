@@ -15,6 +15,7 @@ dependencies:
   copy_with_extension: ^11.0.0
   country_codes: ^3.3.0
   country_flags: ^4.1.2
+  crypto: ^3.0.6
   cryptography_flutter: ^2.3.4
   device_info_plus: ^12.3.0
   drift: ^2.31.0

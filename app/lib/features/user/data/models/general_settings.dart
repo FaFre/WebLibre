@@ -91,6 +91,16 @@ class GeneralSettings with FastEquatable {
   final bool drawerGestureEnabled;
   final String syncServerOverride;
   final String syncTokenServerOverride;
+  final bool urlCleanerEnabled;
+  final bool urlCleanerAutoApply;
+  final bool urlCleanerAllowReferralMarketing;
+  final String urlCleanerCatalogUrl;
+  final String urlCleanerHashUrl;
+  final bool urlCleanerAutoUpdate;
+  final int? urlCleanerLastCheckEpochMs;
+  final bool urlCleanerLastUpdateWasAuto;
+  final bool unshortenerEnabled;
+  final String unshortenerToken;
 
   GeneralSettings({
     required this.themeMode,
@@ -124,6 +134,16 @@ class GeneralSettings with FastEquatable {
     required this.drawerGestureEnabled,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
+    required this.urlCleanerEnabled,
+    required this.urlCleanerAutoApply,
+    required this.urlCleanerAllowReferralMarketing,
+    required this.urlCleanerCatalogUrl,
+    required this.urlCleanerHashUrl,
+    required this.urlCleanerAutoUpdate,
+    required this.urlCleanerLastCheckEpochMs,
+    required this.urlCleanerLastUpdateWasAuto,
+    required this.unshortenerEnabled,
+    required this.unshortenerToken,
   });
 
   GeneralSettings.withDefaults({
@@ -158,6 +178,16 @@ class GeneralSettings with FastEquatable {
     bool? drawerGestureEnabled,
     String? syncServerOverride,
     String? syncTokenServerOverride,
+    bool? urlCleanerEnabled,
+    bool? urlCleanerAutoApply,
+    bool? urlCleanerAllowReferralMarketing,
+    String? urlCleanerCatalogUrl,
+    String? urlCleanerHashUrl,
+    bool? urlCleanerAutoUpdate,
+    this.urlCleanerLastCheckEpochMs,
+    bool? urlCleanerLastUpdateWasAuto,
+    bool? unshortenerEnabled,
+    String? unshortenerToken,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -192,7 +222,21 @@ class GeneralSettings with FastEquatable {
        quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
        drawerGestureEnabled = drawerGestureEnabled ?? false,
        syncServerOverride = syncServerOverride ?? '',
-       syncTokenServerOverride = syncTokenServerOverride ?? '';
+       syncTokenServerOverride = syncTokenServerOverride ?? '',
+       urlCleanerEnabled = urlCleanerEnabled ?? true,
+       urlCleanerAutoApply = urlCleanerAutoApply ?? false,
+       urlCleanerAllowReferralMarketing =
+           urlCleanerAllowReferralMarketing ?? false,
+       urlCleanerCatalogUrl =
+           urlCleanerCatalogUrl ??
+           'https://rules2.clearurls.xyz/data.minify.json',
+       urlCleanerHashUrl =
+           urlCleanerHashUrl ??
+           'https://rules2.clearurls.xyz/rules.minify.hash',
+       urlCleanerAutoUpdate = urlCleanerAutoUpdate ?? false,
+       urlCleanerLastUpdateWasAuto = urlCleanerLastUpdateWasAuto ?? false,
+       unshortenerEnabled = unshortenerEnabled ?? false,
+       unshortenerToken = unshortenerToken ?? '';
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -232,5 +276,15 @@ class GeneralSettings with FastEquatable {
     drawerGestureEnabled,
     syncServerOverride,
     syncTokenServerOverride,
+    urlCleanerEnabled,
+    urlCleanerAutoApply,
+    urlCleanerAllowReferralMarketing,
+    urlCleanerCatalogUrl,
+    urlCleanerHashUrl,
+    urlCleanerAutoUpdate,
+    urlCleanerLastCheckEpochMs,
+    urlCleanerLastUpdateWasAuto,
+    unshortenerEnabled,
+    unshortenerToken,
   ];
 }

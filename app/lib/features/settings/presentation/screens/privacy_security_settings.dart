@@ -21,7 +21,6 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -50,6 +49,7 @@ class PrivacySecuritySettingsScreen extends StatelessWidget {
               children: const [
                 _PrivacyModesSection(),
                 _TrackingProtectionSection(),
+                _OpenLinkModulesSection(),
                 _ConnectionSecuritySection(),
                 _DataManagementSection(),
                 _AdvancedSection(),
@@ -104,7 +104,9 @@ class _TrackingProtectionExceptionsTile extends StatelessWidget {
       title: const Text('Tracking Protection Exceptions'),
       subtitle: const Text('Sites where tracking protection is disabled'),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.push('/settings/tracking_protection_exceptions'),
+      onTap: () async {
+        await TrackingProtectionExceptionsRoute().push(context);
+      },
     );
   }
 }
@@ -120,6 +122,55 @@ class _ConnectionSecuritySection extends StatelessWidget {
         _HttpsOnlyModeSection(),
         _DnsTile(),
       ],
+    );
+  }
+}
+
+class _OpenLinkModulesSection extends StatelessWidget {
+  const _OpenLinkModulesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Open Link Modules'),
+        _UrlCleanerSettingsTile(),
+        _UnshortenerSettingsTile(),
+      ],
+    );
+  }
+}
+
+class _UrlCleanerSettingsTile extends StatelessWidget {
+  const _UrlCleanerSettingsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(MdiIcons.broom),
+      title: const Text('URL Cleaner'),
+      subtitle: const Text('Tracking removal rules and catalog updates'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await UrlCleanerSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+class _UnshortenerSettingsTile extends StatelessWidget {
+  const _UnshortenerSettingsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(MdiIcons.linkVariant),
+      title: const Text('Unshortener'),
+      subtitle: const Text('Short link resolver and API token'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await UnshortenerSettingsRoute().push(context);
+      },
     );
   }
 }

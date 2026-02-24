@@ -163,6 +163,43 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'urlCleanerEnabled': settings['urlCleanerEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'urlCleanerAutoApply': settings['urlCleanerAutoApply']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'urlCleanerAllowReferralMarketing':
+          settings['urlCleanerAllowReferralMarketing']?.readAs(
+            DriftSqlType.bool,
+            db.typeMapping,
+          ),
+      'urlCleanerCatalogUrl': settings['urlCleanerCatalogUrl']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'urlCleanerHashUrl': settings['urlCleanerHashUrl']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'urlCleanerAutoUpdate': settings['urlCleanerAutoUpdate']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'urlCleanerLastCheckEpochMs': settings['urlCleanerLastCheckEpochMs']
+          ?.readAs(DriftSqlType.int, db.typeMapping),
+      'urlCleanerLastUpdateWasAuto': settings['urlCleanerLastUpdateWasAuto']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'unshortenerEnabled': settings['unshortenerEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'unshortenerToken': settings['unshortenerToken']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
     });
   }
 

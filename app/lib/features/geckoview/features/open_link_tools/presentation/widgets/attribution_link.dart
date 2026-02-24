@@ -17,26 +17,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'dart:async';
 
-part 'format.g.dart';
+import 'package:flutter/material.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/utils/open_in_custom_tab.dart';
 
-@Riverpod(keepAlive: true)
-class Format extends _$Format {
-  String fullDateTime(DateTime date) {
-    final pattern = DateFormat('yMMMMd').addPattern('Hm');
+class AttributionLink extends StatelessWidget {
+  final String label;
+  final String url;
+  final TextStyle style;
 
-    return pattern.format(date);
-  }
-
-  String shortDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
+  const AttributionLink({
+    super.key,
+    required this.label,
+    required this.url,
+    required this.style,
+  });
 
   @override
-  Future<void> build() async {
-    await initializeDateFormatting();
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        unawaited(openInPrivateCustomTab(context, url));
+      },
+      child: Text(label, style: style),
+    );
   }
 }

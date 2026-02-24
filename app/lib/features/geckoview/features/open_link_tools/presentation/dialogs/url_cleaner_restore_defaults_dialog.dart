@@ -17,26 +17,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/material.dart';
 
-part 'format.g.dart';
-
-@Riverpod(keepAlive: true)
-class Format extends _$Format {
-  String fullDateTime(DateTime date) {
-    final pattern = DateFormat('yMMMMd').addPattern('Hm');
-
-    return pattern.format(date);
-  }
-
-  String shortDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
-
-  @override
-  Future<void> build() async {
-    await initializeDateFormatting();
-  }
+Future<bool?> showUrlCleanerRestoreDefaultsDialog(BuildContext context) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Restore defaults?'),
+      content: const Text(
+        'This will reset URL cleaner settings and remove the locally stored catalog.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Restore'),
+        ),
+      ],
+    ),
+  );
 }

@@ -17,26 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 
-part 'format.g.dart';
+class UnshortenResult with FastEquatable {
+  final bool success;
+  final String? error;
+  final String? finalUrl;
+  final int? remainingCalls;
+  final int? usageCount;
 
-@Riverpod(keepAlive: true)
-class Format extends _$Format {
-  String fullDateTime(DateTime date) {
-    final pattern = DateFormat('yMMMMd').addPattern('Hm');
-
-    return pattern.format(date);
-  }
-
-  String shortDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
+  UnshortenResult({
+    required this.success,
+    this.error,
+    this.finalUrl,
+    this.remainingCalls,
+    this.usageCount,
+  });
 
   @override
-  Future<void> build() async {
-    await initializeDateFormatting();
-  }
+  List<Object?> get hashParameters => [
+    success,
+    error,
+    finalUrl,
+    remainingCalls,
+    usageCount,
+  ];
 }

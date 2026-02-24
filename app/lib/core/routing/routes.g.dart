@@ -1460,6 +1460,16 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       name: 'SyncSettingsRoute',
       factory: $SyncSettingsRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: 'url_cleaner',
+      name: 'UrlCleanerSettingsRoute',
+      factory: $UrlCleanerSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'unshortener',
+      name: 'UnshortenerSettingsRoute',
+      factory: $UnshortenerSettingsRoute._fromState,
+    ),
   ],
 );
 
@@ -1830,6 +1840,48 @@ mixin $SyncSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/sync');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UrlCleanerSettingsRoute on GoRouteData {
+  static UrlCleanerSettingsRoute _fromState(GoRouterState state) =>
+      UrlCleanerSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/url_cleaner');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UnshortenerSettingsRoute on GoRouteData {
+  static UnshortenerSettingsRoute _fromState(GoRouterState state) =>
+      UnshortenerSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/unshortener');
 
   @override
   void go(BuildContext context) => context.go(location);

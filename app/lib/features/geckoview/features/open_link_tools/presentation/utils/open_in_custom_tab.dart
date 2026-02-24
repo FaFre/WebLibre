@@ -17,26 +17,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show GeckoBrowserService;
+import 'package:weblibre/utils/ui_helper.dart';
 
-part 'format.g.dart';
-
-@Riverpod(keepAlive: true)
-class Format extends _$Format {
-  String fullDateTime(DateTime date) {
-    final pattern = DateFormat('yMMMMd').addPattern('Hm');
-
-    return pattern.format(date);
-  }
-
-  String shortDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
-
-  @override
-  Future<void> build() async {
-    await initializeDateFormatting();
+Future<void> openInPrivateCustomTab(BuildContext context, String url) async {
+  try {
+    await GeckoBrowserService().openInCustomTab(
+      url: Uri.parse(url),
+      private: true,
+    );
+  } catch (e) {
+    if (context.mounted) {
+      showErrorMessage(context, 'Could not open link: $url');
+    }
   }
 }

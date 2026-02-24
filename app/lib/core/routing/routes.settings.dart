@@ -81,6 +81,14 @@ part of 'routes.dart';
     ),
     TypedGoRoute<ErrorLogsRoute>(name: 'ErrorLogsRoute', path: 'error_logs'),
     TypedGoRoute<SyncSettingsRoute>(name: 'SyncSettingsRoute', path: 'sync'),
+    TypedGoRoute<UrlCleanerSettingsRoute>(
+      name: 'UrlCleanerSettingsRoute',
+      path: 'url_cleaner',
+    ),
+    TypedGoRoute<UnshortenerSettingsRoute>(
+      name: 'UnshortenerSettingsRoute',
+      path: 'unshortener',
+    ),
   ],
 )
 class SettingsRoute extends GoRouteData with $SettingsRoute {
@@ -220,5 +228,21 @@ class SyncSettingsRoute extends GoRouteData with $SyncSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SyncSettingsScreen();
+  }
+}
+
+class UrlCleanerSettingsRoute extends GoRouteData
+    with $UrlCleanerSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const UrlCleanerSettingsScreen();
+  }
+}
+
+class UnshortenerSettingsRoute extends GoRouteData
+    with $UnshortenerSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const UnshortenerSettingsScreen();
   }
 }
