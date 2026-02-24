@@ -68,13 +68,10 @@ class OpenSharedContent extends HookConsumerWidget {
     // Debounce the URL to avoid running expensive operations on every keystroke.
     final debouncedUrl = useState(currentUrl);
     final debouncer = useDebouncer(const Duration(milliseconds: 300));
-    useEffect(
-      () {
-        debouncer.eventOccured(() => debouncedUrl.value = currentUrl);
-        return null;
-      },
-      [currentUrl],
-    );
+    useEffect(() {
+      debouncer.eventOccured(() => debouncedUrl.value = currentUrl);
+      return null;
+    }, [currentUrl]);
 
     final parsedDebouncedUrl = Uri.tryParse(debouncedUrl.value);
     final hasExternalApp = useCachedFuture(

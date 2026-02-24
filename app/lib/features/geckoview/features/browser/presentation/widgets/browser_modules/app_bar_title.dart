@@ -25,6 +25,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
@@ -52,7 +53,7 @@ class AppBarTitle extends HookConsumerWidget {
     }
 
     final icon = useMemoized(() {
-      if (tabState.url.isScheme('http')) {
+      if (tabState.url.isHttp) {
         return Icon(
           MdiIcons.lockOff,
           color: Theme.of(context).colorScheme.error,

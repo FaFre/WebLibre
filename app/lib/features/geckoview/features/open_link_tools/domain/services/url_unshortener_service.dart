@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/data/models/unshorten_response_data.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/unshorten_result.dart';
 
@@ -136,14 +137,11 @@ class UrlUnshortenerService extends _$UrlUnshortenerService {
     // Reject non-HTTP(S) URLs from the API to prevent scheme-based attacks.
     if (result.success && result.finalUrl != null) {
       final parsed = Uri.tryParse(result.finalUrl!);
-      if (parsed != null && parsed.hasScheme) {
-        final scheme = parsed.scheme.toLowerCase();
-        if (scheme != 'http' && scheme != 'https') {
-          return UnshortenResult(
-            success: false,
-            error: 'Unsupported URL scheme: $scheme',
-          );
-        }
+      if (parsed != null && parsed.hasScheme && !parsed.isHttpOrHttps) {
+        return UnshortenResult(
+          success: false,
+          error: 'Unsupported URL scheme: ${parsed.scheme}',
+        );
       }
     }
 

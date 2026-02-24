@@ -24,4 +24,8 @@ extension UriX on Uri {
   Uri get base => Uri.parse('$scheme://$authority');
 
   bool get hasSupportedScheme => _supportedSchemes.contains(scheme);
+
+  bool get isHttp => isScheme('http');
+  bool get isHttps => isScheme('https');
+  bool get isHttpOrHttps => isHttp || isHttps;
 }

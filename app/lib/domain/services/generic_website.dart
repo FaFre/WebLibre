@@ -33,6 +33,7 @@ import 'package:socks5_proxy/socks_client.dart';
 import 'package:weblibre/core/http_error_handler.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/extensions/http_encoding.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/web_feed/utils/feed_finder.dart';
@@ -129,9 +130,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     return uri;
   }
 
-  static bool _isHttpUrl(Uri url) {
-    return url.scheme.startsWith('https') || url.scheme.startsWith('http');
-  }
+  static bool _isHttpUrl(Uri url) => url.isHttpOrHttps;
 
   static List<Resource> _extractIcons(Uri baseUrl, Document document) {
     final List<Resource> icons = [];

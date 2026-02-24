@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_rule.dart';
 
@@ -243,8 +244,7 @@ List<String> _findQueryParamMatchesWithRegex(String url, RegExp paramRegex) {
 bool _hasSafeScheme(String url) {
   final parsed = Uri.tryParse(url);
   if (parsed == null || !parsed.hasScheme) return true; // schemeless is ok
-  final scheme = parsed.scheme.toLowerCase();
-  return scheme == 'http' || scheme == 'https';
+  return parsed.isHttpOrHttps;
 }
 
 // Pre-compiled regexes for URL normalization — avoids recompiling on every call.

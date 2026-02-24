@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 
 class CertificateTile extends HookConsumerWidget {
@@ -36,7 +37,7 @@ class CertificateTile extends HookConsumerWidget {
     }
 
     final icon = useMemoized(() {
-      if (tabState.url.isScheme('http')) {
+      if (tabState.url.isHttp) {
         return ListTile(
           leading: Icon(
             MdiIcons.lockOff,

@@ -19,13 +19,12 @@
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
 
 part 'site_settings_badge_provider.g.dart';
-
-const _supportedSchemes = {'http', 'https'};
 
 /// Provider that determines whether to show the site settings badge on the tab icon.
 /// Returns true if any site-specific setting has been altered from defaults.
@@ -41,8 +40,7 @@ Future<bool> showSiteSettingsBadge(Ref ref) async {
     hasTrackingProtectionExceptionProvider(tabState.id).future,
   );
 
-  if (!tabState.url.hasScheme ||
-      !_supportedSchemes.contains(tabState.url.scheme)) {
+  if (!tabState.url.hasScheme || !tabState.url.isHttpOrHttps) {
     return false;
   }
 

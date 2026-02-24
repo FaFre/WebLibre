@@ -21,6 +21,7 @@ import 'dart:io';
 
 import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 String? validateUrl(
@@ -41,8 +42,7 @@ String? validateUrl(
   if (uri_parser.tryParseUrl(value, eagerParsing: eagerParsing)
       case final Uri url) {
     if (!requireAuthority || url.authority.isNotEmpty) {
-      if (!onlyHttpProtocol ||
-          (url.isScheme('https') || url.isScheme('http'))) {
+      if (!onlyHttpProtocol || url.isHttpOrHttps) {
         return null;
       }
     }
