@@ -23,10 +23,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article_query_result.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
@@ -49,6 +50,7 @@ class FeedSearch extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     final articlesAsync = ref.watch(articleSearchProvider(null));
+    final totalResults = articlesAsync.value?.length ?? 0;
 
     useOnListenableChange(searchTextNotifier, () async {
       await ref
@@ -66,153 +68,159 @@ class FeedSearch extends HookConsumerWidget {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
-    return MultiSliver(
-      children: [
-        const SliverToBoxAdapter(child: Divider()),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Articles', style: Theme.of(context).textTheme.labelSmall),
-              ],
-            ),
-          ),
-        ),
-        SliverSkeletonizer(
-          enabled: articlesAsync.isLoading,
-          child: articlesAsync.when(
-            skipLoadingOnReload: true,
-            data: (articles) => SliverList.builder(
-              itemCount: articles.length,
-              itemBuilder: (context, index) {
-                final article = articles[index];
+    return SearchModuleSection(
+      title: 'Articles',
+      moduleType: SearchModuleType.articles,
+      totalCount: totalResults,
+      contentSliverBuilder:
+          ({required bool isCollapsed, required int visibleCount}) => [
+            SliverSkeletonizer(
+              enabled: articlesAsync.isLoading,
+              child: articlesAsync.when(
+                skipLoadingOnReload: true,
+                data: (articles) {
+                  return SliverList.builder(
+                    itemCount: visibleCount,
+                    itemBuilder: (context, index) {
+                      final article = articles[index];
 
-                final titleHighlight = switch (article) {
-                  final FeedArticleQueryResult result =>
-                    result.titleHighlight.whenNotEmpty,
-                  _ => null,
-                };
+                      final titleHighlight = switch (article) {
+                        final FeedArticleQueryResult result =>
+                          result.titleHighlight.whenNotEmpty,
+                        _ => null,
+                      };
 
-                final searchSnippet = switch (article) {
-                  final FeedArticleQueryResult result =>
-                    result.summarySnippet.whenNotEmpty ??
-                        result.contentSnippet.whenNotEmpty,
-                  _ => null,
-                };
+                      final searchSnippet = switch (article) {
+                        final FeedArticleQueryResult result =>
+                          result.summarySnippet.whenNotEmpty ??
+                              result.contentSnippet.whenNotEmpty,
+                        _ => null,
+                      };
 
-                final articleDate = article.updated ?? article.created;
+                      final articleDate = article.updated ?? article.created;
 
-                return ListTile(
-                  leading: RepaintBoundary(
-                    child: UrlIcon([
-                      article.icon ??
-                          article.links
-                              ?.getRelation(FeedLinkRelation.alternate)
-                              ?.uri ??
-                          article.siteLink ??
-                          article.feedId.base,
-                    ], iconSize: 24.0),
-                  ),
-                  title: (titleHighlight.isNotEmpty)
-                      ? Text.rich(
-                          buildHighlightedText(
-                            titleHighlight!,
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            _matchPrefix,
-                            _matchSuffix,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : Text(
-                          article.displayTitle,
-                          style: theme.textTheme.titleMedium,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                      return ListTile(
+                        leading: RepaintBoundary(
+                          child: UrlIcon([
+                            article.icon ??
+                                article.links
+                                    ?.getRelation(FeedLinkRelation.alternate)
+                                    ?.uri ??
+                                article.siteLink ??
+                                article.feedId.base,
+                          ], iconSize: 24.0),
                         ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (searchSnippet.isNotEmpty)
-                        Text.rich(
-                          buildHighlightedText(
-                            searchSnippet!,
-                            Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                            Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            _matchPrefix,
-                            _matchSuffix,
-                            normalizeWhitespaces: true,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      else
-                        (article.summaryPlain != null)
-                            ? Text(
-                                article.summaryPlain!,
-                                style: theme.textTheme.bodySmall,
+                        title: (titleHighlight.isNotEmpty)
+                            ? Text.rich(
+                                buildHighlightedText(
+                                  titleHighlight!,
+                                  Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                  ),
+                                  Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  _matchPrefix,
+                                  _matchSuffix,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : Text(
+                                article.displayTitle,
+                                style: theme.textTheme.titleMedium,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (searchSnippet.isNotEmpty)
+                              Text.rich(
+                                buildHighlightedText(
+                                  searchSnippet!,
+                                  Theme.of(
+                                    context,
+                                  ).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                                  Theme.of(
+                                    context,
+                                  ).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  _matchPrefix,
+                                  _matchSuffix,
+                                  normalizeWhitespaces: true,
+                                ),
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               )
-                            : const SizedBox.shrink(),
-                      if (articleDate != null)
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Text(
-                            ref
-                                .read(formatProvider.notifier)
-                                .fullDateTime(articleDate),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontStyle: FontStyle.italic,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                            else
+                              (article.summaryPlain != null)
+                                  ? Text(
+                                      article.summaryPlain!,
+                                      style: theme.textTheme.bodySmall,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    )
+                                  : const SizedBox.shrink(),
+                            if (articleDate != null)
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: Text(
+                                  ref
+                                      .read(formatProvider.notifier)
+                                      .fullDateTime(articleDate),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
                         ),
-                    ],
-                  ),
-                  onTap: () {
-                    FeedArticleRoute(
-                      articleId: article.id,
-                    ).pushReplacement(context);
+                        onTap: () {
+                          FeedArticleRoute(
+                            articleId: article.id,
+                          ).pushReplacement(context);
+                        },
+                      );
+                    },
+                  );
+                },
+                error: (error, stackTrace) {
+                  return SliverToBoxAdapter(
+                    child: FailureWidget(
+                      title: 'Failed searching Articles',
+                      exception: error,
+                    ),
+                  );
+                },
+                loading: () => SliverList.builder(
+                  itemCount: isCollapsed ? 0 : previewItemsPerModule,
+                  itemBuilder: (context, index) {
+                    return const ListTile(title: Bone.text());
                   },
-                );
-              },
-            ),
-            error: (error, stackTrace) {
-              return SliverToBoxAdapter(
-                child: FailureWidget(
-                  title: 'Failed searching Articles',
-                  exception: error,
                 ),
-              );
-            },
-            loading: () => SliverList.builder(
-              itemCount: articlesAsync.value?.length ?? 3,
-              itemBuilder: (context, index) {
-                return const ListTile(title: Bone.text());
-              },
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
     );
   }
 }

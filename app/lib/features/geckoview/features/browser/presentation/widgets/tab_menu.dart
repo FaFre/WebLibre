@@ -19,7 +19,6 @@
  */
 import 'dart:convert';
 
-import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +29,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pw
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -239,7 +240,11 @@ class TabMenu extends HookConsumerWidget {
                             .addTab(
                               url: tabState.url,
                               private: false,
-                              container: Value(containerData),
+                              containerSelection: containerData == null
+                                  ? const TabContainerSelection.unassigned()
+                                  : TabContainerSelection.specific(
+                                      containerData,
+                                    ),
                               selectTab: false,
                             )
                       : await ref
@@ -278,7 +283,11 @@ class TabMenu extends HookConsumerWidget {
                             .addTab(
                               url: tabState.url,
                               private: true,
-                              container: Value(containerData),
+                              containerSelection: containerData == null
+                                  ? const TabContainerSelection.unassigned()
+                                  : TabContainerSelection.specific(
+                                      containerData,
+                                    ),
                               selectTab: false,
                             )
                       : await ref
@@ -313,25 +322,34 @@ class TabMenu extends HookConsumerWidget {
                 leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
                 child: const Text('Assign Container'),
                 onPressed: () async {
-                  final targetContainerId =
-                      await const ContainerSelectionRoute().push<String?>(
-                        context,
-                      );
+                  final selection = await const ContainerSelectionRoute()
+                      .push<ContainerSelectionResult?>(context);
 
-                  if (targetContainerId != null) {
-                    final containerData = await ref
-                        .read(containerRepositoryProvider.notifier)
-                        .getContainerData(targetContainerId);
+                  switch (selection) {
+                    case ContainerSelectionSelected(:final containerId):
+                      final containerData = await ref
+                          .read(containerRepositoryProvider.notifier)
+                          .getContainerData(containerId);
 
-                    if (containerData != null) {
+                      if (containerData != null) {
+                        final tabState = ref.read(
+                          tabStateProvider(selectedTabId),
+                        )!;
+
+                        await ref
+                            .read(tabDataRepositoryProvider.notifier)
+                            .assignContainer(tabState.id, containerData);
+                      }
+                    case ContainerSelectionUnassigned():
                       final tabState = ref.read(
                         tabStateProvider(selectedTabId),
                       )!;
 
                       await ref
                           .read(tabDataRepositoryProvider.notifier)
-                          .assignContainer(tabState.id, containerData);
-                    }
+                          .unassignContainer(tabState.id);
+                    case null:
+                      break;
                   }
                 },
               ),
@@ -340,15 +358,15 @@ class TabMenu extends HookConsumerWidget {
                   leadingIcon: const Icon(MdiIcons.webPlus),
                   child: const Text('URL relation'),
                   onPressed: () async {
-                    final targetContainerId =
-                        await const ContainerSelectionRoute().push<String?>(
-                          context,
-                        );
+                    final selection = await const ContainerSelectionRoute()
+                        .push<ContainerSelectionResult?>(context);
 
-                    if (targetContainerId != null) {
+                    if (selection case ContainerSelectionSelected(
+                      :final containerId,
+                    )) {
                       final containerData = await ref
                           .read(containerRepositoryProvider.notifier)
-                          .getContainerData(targetContainerId);
+                          .getContainerData(containerId);
 
                       if (containerData != null) {
                         final tabState = ref.read(

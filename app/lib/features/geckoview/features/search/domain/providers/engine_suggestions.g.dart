@@ -107,4 +107,4 @@ final class EngineHistorySuggestionsProvider
 }
 
 String _$engineHistorySuggestionsHash() =>
-    r'7e6c17e6a2df98098ca1a683a438d1c261ccabdf';
+    r'e78f87f67da9184115991ee93a25da8039e36293';

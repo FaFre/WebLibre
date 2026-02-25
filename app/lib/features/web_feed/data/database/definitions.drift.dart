@@ -2644,10 +2644,15 @@ class DefinitionsDrift extends i10.ModularAccessor {
   i0.Selectable<i11.FeedArticleQueryResult> queryArticlesBasic({
     required String query,
     String? feedId,
+    required int limit,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 1.0 AS title_weight) SELECT a.*, f.icon,(bm25(article_fts, weights.title_weight))AS weighted_rank FROM article_fts AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" INNER JOIN feed AS f ON f.url = a.feed_id CROSS JOIN weights WHERE fts.title LIKE ?1 AND(?2 IS NULL OR a.feed_id = ?2)ORDER BY weighted_rank ASC, a.created DESC NULLS LAST',
-      variables: [i0.Variable<String>(query), i0.Variable<String>(feedId)],
+      'WITH weights AS (SELECT 1.0 AS title_weight) SELECT a.*, f.icon,(bm25(article_fts, weights.title_weight))AS weighted_rank FROM article_fts AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" INNER JOIN feed AS f ON f.url = a.feed_id CROSS JOIN weights WHERE fts.title LIKE ?1 AND(?2 IS NULL OR a.feed_id = ?2)ORDER BY weighted_rank ASC, a.created DESC NULLS LAST LIMIT ?3',
+      variables: [
+        i0.Variable<String>(query),
+        i0.Variable<String>(feedId),
+        i0.Variable<int>(limit),
+      ],
       readsFrom: {feed, articleFts, article},
     ).map(
       (i0.QueryRow row) => i11.FeedArticleQueryResult(
@@ -2691,9 +2696,10 @@ class DefinitionsDrift extends i10.ModularAccessor {
     required int snippetLength,
     required String query,
     String? feedId,
+    required int limit,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS title_weight, 3.0 AS summary_weight, 1.0 AS content_weight) SELECT a.*, f.icon, highlight(article_fts, 0, ?1, ?2) AS title_highlight, snippet(article_fts, 1, ?1, ?2, ?3, ?4) AS summary_snippet, snippet(article_fts, 2, ?1, ?2, ?3, ?4) AS content_snippet,(bm25(article_fts, weights.title_weight, weights.summary_weight, weights.content_weight))AS weighted_rank FROM article_fts(?5)AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" INNER JOIN feed AS f ON f.url = a.feed_id CROSS JOIN weights WHERE ?6 IS NULL OR a.feed_id = ?6 ORDER BY weighted_rank ASC, a.created DESC NULLS LAST',
+      'WITH weights AS (SELECT 10.0 AS title_weight, 3.0 AS summary_weight, 1.0 AS content_weight) SELECT a.*, f.icon, highlight(article_fts, 0, ?1, ?2) AS title_highlight, snippet(article_fts, 1, ?1, ?2, ?3, ?4) AS summary_snippet, snippet(article_fts, 2, ?1, ?2, ?3, ?4) AS content_snippet,(bm25(article_fts, weights.title_weight, weights.summary_weight, weights.content_weight))AS weighted_rank FROM article_fts(?5)AS fts INNER JOIN article AS a ON a."rowid" = fts."rowid" INNER JOIN feed AS f ON f.url = a.feed_id CROSS JOIN weights WHERE ?6 IS NULL OR a.feed_id = ?6 ORDER BY weighted_rank ASC, a.created DESC NULLS LAST LIMIT ?7',
       variables: [
         i0.Variable<String>(beforeMatch),
         i0.Variable<String>(afterMatch),
@@ -2701,6 +2707,7 @@ class DefinitionsDrift extends i10.ModularAccessor {
         i0.Variable<int>(snippetLength),
         i0.Variable<String>(query),
         i0.Variable<String>(feedId),
+        i0.Variable<int>(limit),
       ],
       readsFrom: {feed, articleFts, article},
     ).map(

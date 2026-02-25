@@ -20,7 +20,6 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -28,6 +27,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
@@ -662,9 +662,10 @@ class TabViewHeader extends HookConsumerWidget {
                                                         .contextualIdentity,
                                                   );
                                                 }).toList(),
-                                                container: Value(
-                                                  selectedContainer,
-                                                ),
+                                                containerSelection:
+                                                    TabContainerSelection.specific(
+                                                      selectedContainer,
+                                                    ),
                                               );
                                         }
 

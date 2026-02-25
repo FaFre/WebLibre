@@ -87,7 +87,7 @@ class FixedSearchTermSuggestions extends HookConsumerWidget {
             searchTextController.text = query;
           },
           child: InputChip(
-            // avatar: const Icon(Icons.search),
+            avatar: const Icon(Icons.search),
             label: Text(query),
             onSelected: (value) async {
               if (value) {

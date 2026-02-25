@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -57,7 +57,9 @@ class TabDataRepository extends _$TabDataRepository {
             .addTab(
               url: tabState.url,
               private: tabState.isPrivate,
-              container: Value(targetContainer),
+              containerSelection: TabContainerSelection.specific(
+                targetContainer,
+              ),
               // parentId defaults to null - breaks parent chain when changing contextual identity
               selectTab: selectedTabId == tabState.id,
             );
@@ -85,7 +87,7 @@ class TabDataRepository extends _$TabDataRepository {
             .addTab(
               url: tabState.url,
               private: tabState.isPrivate,
-              container: const Value(null),
+              containerSelection: const TabContainerSelection.unassigned(),
               // parentId defaults to null - breaks parent chain when removing contextual identity
               selectTab: selectedTabId == tabState.id,
             );

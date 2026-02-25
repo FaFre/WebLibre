@@ -19,22 +19,21 @@
  */
 import 'dart:async';
 
-import 'package:drift/drift.dart' hide Column;
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
@@ -42,11 +41,10 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
-import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/utils/text_field_line_count.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -248,7 +246,9 @@ class SearchScreen extends HookConsumerWidget {
                     : null,
                 launchedFromIntent: launchedFromIntent,
                 selectTab: true,
-                container: Value(selectedContainer),
+                containerSelection: selectedContainer == null
+                    ? const TabContainerSelection.unassigned()
+                    : TabContainerSelection.specific(selectedContainer),
               );
         }
 
@@ -264,252 +264,213 @@ class SearchScreen extends HookConsumerWidget {
       body: SafeArea(
         child: Form(
           key: formKey,
-          child: FadingScroll(
-            builder: (context, controller) {
-              return CustomScrollView(
-                controller: controller,
-                slivers: [
-                  SliverAppBar(
-                    floating: true,
-                    pinned: true,
-                    automaticallyImplyLeading: false,
-                    toolbarHeight: isEditMode ? 0 : kToolbarHeight + 56,
-                    titleSpacing: 0.0,
-                    title: isEditMode
-                        ? null
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Focus(
-                                canRequestFocus: false,
-                                child: SegmentedButton(
-                                  showSelectedIcon: false,
-                                  segments: [
-                                    const ButtonSegment(
-                                      value: TabType.regular,
-                                      label: Text('Regular'),
-                                      icon: Icon(MdiIcons.tab),
-                                    ),
-                                    const ButtonSegment(
-                                      value: TabType.private,
-                                      label: Text('Private'),
-                                      icon: Icon(WebLibreIcons.privateTab),
-                                    ),
-                                    if (createChildTabsOption)
-                                      const ButtonSegment(
-                                        value: TabType.child,
-                                        label: Text('Child'),
-                                        icon: Icon(MdiIcons.fileTree),
-                                      ),
-                                  ],
-                                  selected: {selectedTabType.value},
-                                  onSelectionChanged: (value) {
-                                    selectedTabType.value = value.first;
-                                    // Restore focus to search field after segment change
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                          searchFocusNode.requestFocus();
-                                        });
-                                  },
-                                  style: switch (selectedTabType.value) {
-                                    TabType.regular => null,
-                                    TabType.private =>
-                                      SegmentedButton.styleFrom(
-                                        selectedBackgroundColor:
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                pinned: true,
+                automaticallyImplyLeading: false,
+                toolbarHeight: isEditMode ? 0 : kToolbarHeight,
+                titleSpacing: 0.0,
+                title: isEditMode
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Focus(
+                                  canRequestFocus: false,
+                                  child: AnimatedTabTypeSwitcher(
+                                    selected: selectedTabType.value,
+                                    onChanged: (value) {
+                                      selectedTabType.value = value;
+                                      // Restore focus to search field after segment change
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            searchFocusNode.requestFocus();
+                                          });
+                                    },
+                                    showChildOption: createChildTabsOption,
+                                    selectedBackgroundColor:
+                                        switch (selectedTabType.value) {
+                                          TabType.regular => null,
+                                          TabType.private =>
                                             appColors.privateSelectionOverlay,
-                                      ),
-                                    TabType.child =>
-                                      (currentTabTabType == TabType.private)
-                                          ? SegmentedButton.styleFrom(
-                                              selectedBackgroundColor: appColors
-                                                  .privateSelectionOverlay,
-                                            )
-                                          : null,
-                                  },
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16.0),
-                                child: SizedBox(
-                                  height: 48,
-                                  child: ContainerChips(
-                                    selectedContainer: selectedContainer,
-                                    onSelected: (container) async {
-                                      if (container != null) {
-                                        await ref
-                                            .read(
-                                              selectedContainerProvider
-                                                  .notifier,
-                                            )
-                                            .setContainerId(container.id);
-                                      } else {
-                                        ref
-                                            .read(
-                                              selectedContainerProvider
-                                                  .notifier,
-                                            )
-                                            .clearContainer();
-                                      }
-                                    },
-                                    onDeleted: (container) {
-                                      ref
-                                          .read(
-                                            selectedContainerProvider.notifier,
-                                          )
-                                          .clearContainer();
-                                    },
+                                          TabType.child =>
+                                            (currentTabTabType ==
+                                                    TabType.private)
+                                                ? appColors
+                                                      .privateSelectionOverlay
+                                                : null,
+                                        },
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                    bottom: PreferredSize(
-                      preferredSize: Size.fromHeight(preferredHeight.value),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: SearchField(
-                          textFieldKey: textFieldKey,
-                          showBangIcon: showBangIcon,
-                          textEditingController: searchTextController,
-                          focusNode: searchFocusNode,
-                          maxLines: isEditMode ? 3 : 1,
-                          autofocus: true,
-                          label: (activeBang != null)
-                              ? const Text('Search')
-                              : const Text('Address / Search'),
-                          unfocusOnTapOutside: false,
-                          onSubmitted: (value) async {
-                            if (value.isNotEmpty) {
-                              var newUrl = uri_parser.tryParseUrl(
-                                value,
-                                eagerParsing: true,
-                              );
-
-                              if (newUrl == null) {
-                                // Read from both providers - use site if set, otherwise global
-                                final siteBang = isEditMode
-                                    ? ref.read(
-                                        selectedBangDataProvider(
-                                          domain: existingTabState.url.host,
-                                        ),
-                                      )
-                                    : null;
-                                final globalBang = ref.read(
-                                  selectedBangDataProvider(),
-                                );
-                                final bang =
-                                    siteBang ??
-                                    globalBang ??
-                                    await ref.read(
-                                      defaultSearchBangDataProvider.future,
-                                    );
-
-                                if (bang != null) {
-                                  newUrl = bang.getTemplateUrl(value);
-
-                                  if (!privateTabMode) {
-                                    await ref
-                                        .read(bangSearchProvider.notifier)
-                                        .triggerBangSearch(bang, value);
-                                  }
-                                }
-                              }
-
-                              if (newUrl != null) {
-                                if (isEditMode) {
-                                  // Load into existing tab
-                                  await ref
-                                      .read(
-                                        tabSessionProvider(
-                                          tabId: tabId,
-                                        ).notifier,
-                                      )
-                                      .loadUrl(url: newUrl);
-                                } else {
-                                  // Create new tab
-                                  await ref
-                                      .read(tabRepositoryProvider.notifier)
-                                      .addTab(
-                                        url: newUrl,
-                                        private: privateTabMode,
-                                        parentId:
-                                            (selectedTabType.value ==
-                                                TabType.child)
-                                            ? ref.read(selectedTabProvider)
-                                            : null,
-                                        launchedFromIntent: launchedFromIntent,
-                                        selectTab: true,
-                                        container: Value(selectedContainer),
-                                      );
-                                }
-
-                                if (context.mounted) {
-                                  ref
-                                      .read(
-                                        bottomSheetControllerProvider.notifier,
-                                      )
-                                      .requestDismiss();
-
-                                  const BrowserRoute().go(context);
-                                }
-                              }
-                            }
-                          },
-                          activeBang: activeBang,
-                          showSuggestions: true,
+                            ),
+                            const SizedBox(width: 16),
+                            Flexible(
+                              flex: 2,
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: CompactContainerSelector(
+                                  selectedContainer: selectedContainer,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(preferredHeight.value),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: SearchField(
+                      textFieldKey: textFieldKey,
+                      showBangIcon: showBangIcon,
+                      textEditingController: searchTextController,
+                      focusNode: searchFocusNode,
+                      maxLines: isEditMode ? 3 : 1,
+                      autofocus: true,
+                      label: (activeBang != null)
+                          ? const Text('Search')
+                          : const Text('Address / Search'),
+                      unfocusOnTapOutside: false,
+                      onSubmitted: (value) async {
+                        if (value.isNotEmpty) {
+                          var newUrl = uri_parser.tryParseUrl(
+                            value,
+                            eagerParsing: true,
+                          );
+
+                          if (newUrl == null) {
+                            // Read from both providers - use site if set, otherwise global
+                            final siteBang = isEditMode
+                                ? ref.read(
+                                    selectedBangDataProvider(
+                                      domain: existingTabState.url.host,
+                                    ),
+                                  )
+                                : null;
+                            final globalBang = ref.read(
+                              selectedBangDataProvider(),
+                            );
+                            final bang =
+                                siteBang ??
+                                globalBang ??
+                                await ref.read(
+                                  defaultSearchBangDataProvider.future,
+                                );
+
+                            if (bang != null) {
+                              newUrl = bang.getTemplateUrl(value);
+
+                              if (!privateTabMode) {
+                                await ref
+                                    .read(bangSearchProvider.notifier)
+                                    .triggerBangSearch(bang, value);
+                              }
+                            }
+                          }
+
+                          if (newUrl != null) {
+                            if (isEditMode) {
+                              // Load into existing tab
+                              await ref
+                                  .read(
+                                    tabSessionProvider(tabId: tabId).notifier,
+                                  )
+                                  .loadUrl(url: newUrl);
+                            } else {
+                              // Create new tab
+                              await ref
+                                  .read(tabRepositoryProvider.notifier)
+                                  .addTab(
+                                    url: newUrl,
+                                    private: privateTabMode,
+                                    parentId:
+                                        (selectedTabType.value == TabType.child)
+                                        ? ref.read(selectedTabProvider)
+                                        : null,
+                                    launchedFromIntent: launchedFromIntent,
+                                    selectTab: true,
+                                    containerSelection:
+                                        selectedContainer == null
+                                        ? const TabContainerSelection.unassigned()
+                                        : TabContainerSelection.specific(
+                                            selectedContainer,
+                                          ),
+                                  );
+                            }
+
+                            if (context.mounted) {
+                              ref
+                                  .read(bottomSheetControllerProvider.notifier)
+                                  .requestDismiss();
+
+                              const BrowserRoute().go(context);
+                            }
+                          }
+                        }
+                      },
+                      activeBang: activeBang,
+                      showSuggestions: true,
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: ClipboardFillLink(controller: searchTextController),
-                  ),
-                  const SliverToBoxAdapter(child: Divider()),
-                  FullSearchTermSuggestions(
-                    searchTextController: searchTextController,
-                    activeBang: activeBang,
-                    submitSearch: submitSearch,
-                    domain: isEditMode ? existingTabState.url.host : null,
-                  ),
-                  TabSearch(searchTextListenable: sampledSearchText),
-                  FeedSearch(searchTextNotifier: sampledSearchText),
-                  HistorySuggestions(
-                    searchTextListenable: sampledSearchText,
-                    onUriSelected: (uri) async {
-                      if (isEditMode) {
-                        // Load into existing tab
-                        await ref
-                            .read(tabSessionProvider(tabId: tabId).notifier)
-                            .loadUrl(url: uri);
-                      } else {
-                        // Create new tab
-                        await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .addTab(
-                              url: uri,
-                              private: privateTabMode,
-                              parentId: (selectedTabType.value == TabType.child)
-                                  ? ref.read(selectedTabProvider)
-                                  : null,
-                              launchedFromIntent: launchedFromIntent,
-                              selectTab: true,
-                              container: Value(selectedContainer),
-                            );
-                      }
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: ClipboardFillLink(controller: searchTextController),
+              ),
+              FullSearchTermSuggestions(
+                searchTextController: searchTextController,
+                activeBang: activeBang,
+                submitSearch: submitSearch,
+                domain: isEditMode ? existingTabState.url.host : null,
+              ),
+              TabSearch(searchTextListenable: sampledSearchText),
+              FeedSearch(searchTextNotifier: sampledSearchText),
+              HistorySuggestions(
+                searchTextListenable: sampledSearchText,
+                onUriSelected: (uri) async {
+                  if (isEditMode) {
+                    // Load into existing tab
+                    await ref
+                        .read(tabSessionProvider(tabId: tabId).notifier)
+                        .loadUrl(url: uri);
+                  } else {
+                    // Create new tab
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .addTab(
+                          url: uri,
+                          private: privateTabMode,
+                          parentId: (selectedTabType.value == TabType.child)
+                              ? ref.read(selectedTabProvider)
+                              : null,
+                          launchedFromIntent: launchedFromIntent,
+                          selectTab: true,
+                          containerSelection: selectedContainer == null
+                              ? const TabContainerSelection.unassigned()
+                              : TabContainerSelection.specific(
+                                  selectedContainer,
+                                ),
+                        );
+                  }
 
-                      if (context.mounted) {
-                        ref
-                            .read(bottomSheetControllerProvider.notifier)
-                            .requestDismiss();
+                  if (context.mounted) {
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
 
-                        const BrowserRoute().go(context);
-                      }
-                    },
-                  ),
-                ],
-              );
-            },
+                    const BrowserRoute().go(context);
+                  }
+                },
+              ),
+            ],
           ),
         ),
       ),

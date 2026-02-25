@@ -21,13 +21,16 @@ import 'dart:convert';
 
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:uuid/enums.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -39,6 +42,8 @@ class ContainerSelectionScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final containersAsync = ref.watch(watchContainersWithCountProvider);
+    final selectedContainerId = ref.watch(selectedContainerProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Select Container')),
       body: Skeletonizer(
@@ -53,14 +58,42 @@ class ContainerSelectionScreen extends HookConsumerWidget {
                 padding: EdgeInsets.only(
                   bottom: floatingActionButtonBottomInset(context),
                 ),
-                itemCount: containers.length,
+                itemCount: containers.length + 1,
                 itemBuilder: (context, index) {
-                  final container = containers[index];
+                  if (index == 0) {
+                    return ListTileTheme(
+                      selectedColor: Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer,
+                      selectedTileColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
+                      child: ListTile(
+                        selected: selectedContainerId == null,
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
+                          child: const Icon(MdiIcons.folderHidden),
+                        ),
+                        title: const Text('Unassigned'),
+                        onTap: () {
+                          context.pop<ContainerSelectionResult>(
+                            const ContainerSelectionResult.unassigned(),
+                          );
+                        },
+                      ),
+                    );
+                  }
+
+                  final container = containers[index - 1];
                   return ContainerListTile(
                     container,
-                    isSelected: false,
+                    isSelected: container.id == selectedContainerId,
                     onTap: () {
-                      context.pop<String?>(container.id);
+                      context.pop<ContainerSelectionResult>(
+                        ContainerSelectionResult.selected(container.id),
+                      );
                     },
                   );
                 },

@@ -206,6 +206,35 @@ class _TabbedBangSelector extends HookConsumerWidget {
   }
 }
 
+/// Displays the default search provider as a chip.
+class _DefaultSearchProviderChip extends ConsumerWidget {
+  const _DefaultSearchProviderChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final defaultBang = ref.watch(defaultSearchBangDataProvider);
+
+    return defaultBang.when(
+      data: (bang) {
+        if (bang == null) {
+          return const SizedBox.shrink();
+        }
+
+        return ActionChip(
+          avatar: UrlIcon([bang.getDefaultUrl()], iconSize: 20),
+          label: Text(bang.websiteName),
+          onPressed: () async {
+            // Open bang search when tapped
+            await const BangSearchRoute().push(context);
+          },
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+}
+
 /// The actual chip list with selection handling.
 class _BangChipsList extends HookConsumerWidget {
   /// The domain for this list's selection provider.
@@ -253,17 +282,10 @@ class _BangChipsList extends HookConsumerWidget {
                 onDeleted: (bang) => _handleDeletion(context, ref, bang),
               ),
             )
-          else if (displayMenu)
-            Expanded(
-              child: Text(
-                "Press '>' to search Bangs.",
-                style: TextStyle(
-                  color: Theme.of(context).hintColor,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            )
-          else
+          else if (displayMenu) ...[
+            const _DefaultSearchProviderChip(),
+            const Spacer(),
+          ] else
             const Spacer(),
           if (displayMenu)
             IconButton(

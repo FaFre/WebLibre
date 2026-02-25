@@ -47,7 +47,6 @@ class ContainerListTile extends HookWidget {
         ),
         title: ContainerTitle(container: container),
         onTap: onTap,
-        trailing: const Icon(Icons.chevron_right),
       ),
     );
   }

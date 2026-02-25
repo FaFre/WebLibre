@@ -163,8 +163,9 @@ queryTabsBasic WITH TabQueryResult:
   	fts.title LIKE :query OR
   	fts.url LIKE :query
   ORDER BY 
-  	weighted_rank ASC,
-  	t.timestamp DESC;
+	weighted_rank ASC,
+	t.timestamp DESC
+  LIMIT :limit;
 
 queryTabsFullContent WITH TabQueryResult:
   WITH weights AS (
@@ -194,7 +195,8 @@ queryTabsFullContent WITH TabQueryResult:
     CROSS JOIN weights
     ORDER BY 
       weighted_rank ASC,
-      t.timestamp DESC;
+      t.timestamp DESC
+    LIMIT :limit;
 
 tabTrees:
   WITH RECURSIVE descendants AS (

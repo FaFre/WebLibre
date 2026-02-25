@@ -20,7 +20,6 @@
 
 import 'dart:async';
 
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -29,6 +28,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -329,7 +329,8 @@ class _ExtensionsSection extends HookConsumerWidget {
                         .addTab(
                           url: Uri.parse('https://addons.mozilla.org'),
                           private: isPrivate,
-                          container: const Value(null),
+                          containerSelection:
+                              const TabContainerSelection.unassigned(),
                           selectTab: true,
                         );
                   },

@@ -26,6 +26,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
@@ -87,20 +88,22 @@ class TabRepository extends _$TabRepository {
     required bool private,
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
-    Value<ContainerData?>? container,
+    TabContainerSelection containerSelection =
+        const TabContainerSelection.useSelected(),
     bool launchedFromIntent = false,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
-    final assingedContainer =
-        container ??
-        Value<ContainerData?>(
-          await ref.read(selectedContainerProvider.notifier).fetchData(),
-        );
+    final assignedContainer = switch (containerSelection) {
+      UseSelectedContainerTabSelection() =>
+        await ref.read(selectedContainerProvider.notifier).fetchData(),
+      UnassignedContainerTabSelection() => null,
+      SpecificContainerTabSelection(:final container) => container,
+    };
 
     final validatedParentId = await _resolveParentIdForContext(
       parentId: parentId,
-      targetContextId: assingedContainer.value?.metadata.contextualIdentity,
+      targetContextId: assignedContainer?.metadata.contextualIdentity,
     );
 
     final newTabId = await tabDao.upsertTabTransactional(
@@ -111,7 +114,7 @@ class TabRepository extends _$TabRepository {
           startLoading: startLoading,
           parentId: validatedParentId,
           flags: flags,
-          contextId: assingedContainer.value?.metadata.contextualIdentity,
+          contextId: assignedContainer?.metadata.contextualIdentity,
           source: source,
           private: private,
           historyMetadata: historyMetadata,
@@ -119,7 +122,7 @@ class TabRepository extends _$TabRepository {
         );
       },
       parentId: Value(validatedParentId),
-      containerId: Value(assingedContainer.value?.id),
+      containerId: Value(assignedContainer?.id),
       isPrivate: Value(private),
       url: Value(url),
     );
@@ -134,10 +137,17 @@ class TabRepository extends _$TabRepository {
   Future<List<String>> addMultipleTabs({
     required List<AddTabParams> tabs,
     String? selectTabId,
-    Value<ContainerData?>? container,
+    TabContainerSelection containerSelection =
+        const TabContainerSelection.unassigned(),
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
     final db = ref.read(tabDatabaseProvider);
+    final assignedContainer = switch (containerSelection) {
+      UseSelectedContainerTabSelection() =>
+        await ref.read(selectedContainerProvider.notifier).fetchData(),
+      UnassignedContainerTabSelection() => null,
+      SpecificContainerTabSelection(:final container) => container,
+    };
 
     return await db.transaction(() async {
       final createdTabIds = await _tabsService.addMultipleTabs(
@@ -177,7 +187,7 @@ class TabRepository extends _$TabRepository {
           tabId,
           parentId: Value(validatedParentId),
           source: TabSource.manual,
-          containerId: Value(container?.value?.id),
+          containerId: Value(assignedContainer?.id),
           isPrivate: Value(tab.private),
           url: Value(Uri.tryParse(tab.url)),
         );
@@ -466,7 +476,9 @@ class TabRepository extends _$TabRepository {
                 await addTab(
                   url: uri,
                   private: tabState.isPrivate,
-                  container: Value(containerData),
+                  containerSelection: TabContainerSelection.specific(
+                    containerData,
+                  ),
                   parentId: tabState.id,
                   selectTab: true,
                 );

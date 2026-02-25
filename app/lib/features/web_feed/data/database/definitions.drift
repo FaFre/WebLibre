@@ -102,7 +102,8 @@ queryArticlesBasic(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
       (:feed_id IS NULL OR a.feed_id = :feed_id)
     ORDER BY 
       weighted_rank ASC,
-      a.created DESC NULLS LAST;
+      a.created DESC NULLS LAST
+    LIMIT :limit;
 
 queryArticlesFullContent(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
   WITH weights AS (
@@ -132,4 +133,5 @@ queryArticlesFullContent(:feed_id AS TEXT OR NULL) WITH FeedArticleQueryResult:
       :feed_id IS NULL OR a.feed_id = :feed_id
     ORDER BY 
       weighted_rank ASC,
-      a.created DESC NULLS LAST;
+      a.created DESC NULLS LAST
+    LIMIT :limit;

@@ -39,6 +39,7 @@ class ArticleSearch extends _$ArticleSearch {
   Future<void> search(
     String input, {
     int snippetLength = 120,
+    int maxResults = 25,
     String matchPrefix = '***',
     String matchSuffix = '***',
     String ellipsis = '…',
@@ -54,6 +55,7 @@ class ArticleSearch extends _$ArticleSearch {
             snippetLength: snippetLength,
             searchString: input,
             feedId: feedId,
+            limit: maxResults,
           )
           .get()
           .then((value) {

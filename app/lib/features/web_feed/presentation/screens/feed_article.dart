@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:collection/collection.dart';
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -26,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
@@ -206,7 +206,8 @@ class FeedArticleScreen extends HookConsumerWidget {
                                 .addTab(
                                   url: articleLink.uri,
                                   private: isPrivate,
-                                  container: const Value(null),
+                                  containerSelection:
+                                      const TabContainerSelection.unassigned(),
                                   selectTab: true,
                                 );
 

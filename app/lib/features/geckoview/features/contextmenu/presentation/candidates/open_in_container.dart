@@ -19,7 +19,6 @@
  */
 import 'dart:convert';
 
-import 'package:drift/drift.dart' hide Column;
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -29,6 +28,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:uuid/enums.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
@@ -103,7 +103,9 @@ class OpenInContainer extends HookConsumerWidget {
               parentId: currentTab?.id,
               selectTab: false,
               private: isPrivate,
-              container: Value(selectedContainer),
+              containerSelection: TabContainerSelection.specific(
+                selectedContainer,
+              ),
             );
 
         if (context.mounted) {

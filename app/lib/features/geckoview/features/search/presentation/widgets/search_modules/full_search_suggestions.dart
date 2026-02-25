@@ -28,6 +28,7 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/smart_bang_selector.dart';
 
 class FullSearchTermSuggestions extends HookConsumerWidget {
@@ -55,8 +56,8 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
     );
 
     final searchSuggestions = ref.watch(searchSuggestionsProvider());
-
     final searchHistory = ref.watch(searchHistoryProvider);
+    final expanded = ref.watch(searchSuggestionsExpandedProvider);
 
     useOnListenableChange(searchTextController, () {
       ref
@@ -64,46 +65,50 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           .addQuery(searchTextController.text);
     });
 
-    final MultiSliver listSliver;
+    Widget buildSuggestionChip(
+      String query, {
+      Widget? avatar,
+      Future<void> Function()? onDelete,
+    }) {
+      return InkWell(
+        onLongPress: () {
+          searchTextController.text = query;
+        },
+        child: InputChip(
+          avatar: avatar ?? const Icon(Icons.search),
+          label: Text(query),
+          onSelected: (value) async {
+            if (value) {
+              await submitSearch(query);
+            }
+          },
+          onDeleted: onDelete == null
+              ? null
+              : () async {
+                  await onDelete();
+                },
+        ),
+      );
+    }
+
+    final List<Widget> suggestionChips;
 
     if (!searchTextIsNotEmpty && (searchHistory.value.isNotEmpty)) {
       final entries = searchHistory.value!;
 
-      listSliver = MultiSliver(
-        children: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Wrap(
-                spacing: 8.0,
-                children: entries.map((entry) {
-                  final query = entry.searchQuery;
+      suggestionChips = entries.map((entry) {
+        final query = entry.searchQuery;
 
-                  return InkWell(
-                    onLongPress: () {
-                      searchTextController.text = query;
-                    },
-                    child: InputChip(
-                      avatar: const Icon(Icons.history),
-                      label: Text(query),
-                      onSelected: (value) async {
-                        if (value) {
-                          await submitSearch(query);
-                        }
-                      },
-                      onDeleted: () async {
-                        await ref
-                            .read(bangDataRepositoryProvider.notifier)
-                            .removeSearchEntry(query);
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        ],
-      );
+        return buildSuggestionChip(
+          query,
+          avatar: const Icon(Icons.history),
+          onDelete: () async {
+            await ref
+                .read(bangDataRepositoryProvider.notifier)
+                .removeSearchEntry(query);
+          },
+        );
+      }).toList();
     } else {
       final prioritizedSuggestions = [
         if (searchTextIsNotEmpty) searchTextController.text,
@@ -113,59 +118,20 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           ),
       ];
 
-      listSliver = MultiSliver(
-        children: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Wrap(
-                spacing: 8.0,
-                children: prioritizedSuggestions.map((query) {
-                  return InkWell(
-                    onLongPress: () {
-                      searchTextController.text = query;
-                    },
-                    child: InputChip(
-                      // avatar: const Icon(Icons.search),
-                      label: Text(query),
-                      onSelected: (value) async {
-                        if (value) {
-                          await submitSearch(query);
-                        }
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        ],
-      );
+      suggestionChips = prioritizedSuggestions.map((query) {
+        return buildSuggestionChip(query);
+      }).toList();
     }
 
-    return MultiSliver(
-      children: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (domain == null)
-                  Text(
-                    'Search Provider',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                SmartBangSelector(
-                  domain: domain,
-                  searchTextController: searchTextController,
-                ),
-              ],
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
+    final toggleButton = IconButton(
+      onPressed: () {
+        ref.read(searchSuggestionsExpandedProvider.notifier).toggle();
+      },
+      icon: Icon(expanded ? Icons.unfold_less : Icons.unfold_more),
+    );
+
+    final suggestionsContent = expanded
+        ? Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 150),
@@ -175,11 +141,60 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                   return CustomScrollView(
                     shrinkWrap: true,
                     controller: controller,
-                    slivers: [listSliver],
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: Wrap(spacing: 8.0, children: suggestionChips),
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
             ),
+          )
+        : Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+            child: SizedBox(
+              height: 44,
+              child: FadingScroll(
+                fadingSize: 25,
+                builder: (context, controller) {
+                  return ListView.separated(
+                    controller: controller,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: suggestionChips.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
+                    itemBuilder: (context, index) => suggestionChips[index],
+                  );
+                },
+              ),
+            ),
+          );
+
+    return MultiSliver(
+      children: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: SmartBangSelector(
+              domain: domain,
+              searchTextController: searchTextController,
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: suggestionsContent),
+              Padding(
+                padding: const EdgeInsets.only(top: 6.0),
+                child: toggleButton,
+              ),
+            ],
           ),
         ),
       ],

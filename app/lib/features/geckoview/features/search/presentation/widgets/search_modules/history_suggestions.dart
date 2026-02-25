@@ -24,8 +24,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -45,6 +46,7 @@ class HistorySuggestions extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historySuggestionsAsync = ref.watch(engineHistorySuggestionsProvider);
+    final totalResults = historySuggestionsAsync.value?.length ?? 0;
 
     useOnListenableChange(searchTextListenable, () async {
       if (ref.exists(engineSuggestionsProvider)) {
@@ -59,90 +61,89 @@ class HistorySuggestions extends HookConsumerWidget {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
-    return MultiSliver(
-      children: [
-        const SliverToBoxAdapter(child: Divider()),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Text(
-              'History',
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-          ),
-        ),
-        SliverSkeletonizer(
-          enabled: historySuggestionsAsync.isLoading,
-          child: historySuggestionsAsync.when(
-            skipLoadingOnReload: true,
-            data: (historySuggestions) {
-              return SliverList.builder(
-                itemCount: historySuggestions.length,
-                itemBuilder: (context, index) {
-                  final suggestion = historySuggestions[index];
-                  final uri = suggestion.description.mapNotNull(Uri.tryParse);
-
-                  return HookBuilder(
-                    key: ValueKey(suggestion.id),
-                    builder: (context) {
-                      final icon = useCachedFuture(
-                        () async => suggestion.icon.mapNotNull(tryDecodeImage),
-                        [suggestion.description, suggestion.icon],
+    return SearchModuleSection(
+      title: 'History',
+      moduleType: SearchModuleType.history,
+      totalCount: totalResults,
+      contentSliverBuilder:
+          ({required bool isCollapsed, required int visibleCount}) => [
+            SliverSkeletonizer(
+              enabled: historySuggestionsAsync.isLoading,
+              child: historySuggestionsAsync.when(
+                skipLoadingOnReload: true,
+                data: (historySuggestions) {
+                  return SliverList.builder(
+                    itemCount: visibleCount,
+                    itemBuilder: (context, index) {
+                      final suggestion = historySuggestions[index];
+                      final uri = suggestion.description.mapNotNull(
+                        Uri.tryParse,
                       );
 
-                      return ListTile(
-                        leading: RepaintBoundary(
-                          child: SafeRawImage(
-                            image: icon.data,
-                            height: 24,
-                            width: 24,
-                            fallback: const Icon(MdiIcons.web, size: 24),
-                          ),
-                        ),
-                        title: suggestion.title.mapNotNull(
-                          (title) => Text(
-                            title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        subtitle:
-                            uri.mapNotNull((uri) => UriBreadcrumb(uri: uri)) ??
-                            suggestion.description.mapNotNull(
-                              (description) => Text(
-                                description,
+                      return HookBuilder(
+                        key: ValueKey(suggestion.id),
+                        builder: (context) {
+                          final icon = useCachedFuture(
+                            () async =>
+                                suggestion.icon.mapNotNull(tryDecodeImage),
+                            [suggestion.description, suggestion.icon],
+                          );
+
+                          return ListTile(
+                            leading: RepaintBoundary(
+                              child: SafeRawImage(
+                                image: icon.data,
+                                height: 24,
+                                width: 24,
+                                fallback: const Icon(MdiIcons.web, size: 24),
+                              ),
+                            ),
+                            title: suggestion.title.mapNotNull(
+                              (title) => Text(
+                                title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                        onTap: () {
-                          if (uri != null) {
-                            onUriSelected(uri);
-                          }
+                            subtitle:
+                                uri.mapNotNull(
+                                  (uri) => UriBreadcrumb(uri: uri),
+                                ) ??
+                                suggestion.description.mapNotNull(
+                                  (description) => Text(
+                                    description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                            onTap: () {
+                              if (uri != null) {
+                                onUriSelected(uri);
+                              }
+                            },
+                          );
                         },
                       );
                     },
                   );
                 },
-              );
-            },
-            error: (error, stackTrace) {
-              return SliverToBoxAdapter(
-                child: FailureWidget(
-                  title: 'Could not load history',
-                  exception: error,
+                error: (error, stackTrace) {
+                  return SliverToBoxAdapter(
+                    child: FailureWidget(
+                      title: 'Could not load history',
+                      exception: error,
+                    ),
+                  );
+                },
+                loading: () => SliverList.builder(
+                  itemCount: isCollapsed ? 0 : previewItemsPerModule,
+                  itemBuilder: (context, index) {
+                    return const ListTile(title: Bone.text());
+                  },
                 ),
-              );
-            },
-            loading: () => SliverList.builder(
-              itemCount: historySuggestionsAsync.value?.length ?? 3,
-              itemBuilder: (context, index) {
-                return const ListTile(title: Bone.text());
-              },
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
     );
   }
 }

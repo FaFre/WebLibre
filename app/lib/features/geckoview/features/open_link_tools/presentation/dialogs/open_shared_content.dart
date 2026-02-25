@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -28,6 +27,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
@@ -167,7 +167,9 @@ class OpenSharedContent extends HookConsumerWidget {
             .addTab(
               url: Uri.parse(textController.text),
               private: isPrivate,
-              container: Value(selectedContainer.value),
+              containerSelection: selectedContainer.value == null
+                  ? const TabContainerSelection.unassigned()
+                  : TabContainerSelection.specific(selectedContainer.value!),
               launchedFromIntent: true,
               selectTab: true,
             );

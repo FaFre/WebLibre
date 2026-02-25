@@ -55,7 +55,7 @@ final class TabSearchRepositoryProvider
 }
 
 String _$tabSearchRepositoryHash() =>
-    r'ac2381c692b9caf93f26f302d15e0160c098917a';
+    r'473057d6a9f1e76d6b7fec13f710189d758bc924';
 
 final class TabSearchRepositoryFamily extends $Family
     with

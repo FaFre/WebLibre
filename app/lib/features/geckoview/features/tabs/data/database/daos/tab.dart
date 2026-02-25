@@ -370,6 +370,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     required String ellipsis,
     required int snippetLength,
     required String searchString,
+    int limit = 25,
   }) {
     final ftsQuery = db.buildFtsQuery(searchString);
 
@@ -380,10 +381,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         beforeMatch: matchPrefix,
         afterMatch: matchSuffix,
         ellipsis: ellipsis,
+        limit: limit,
       );
     } else {
       return db.definitionsDrift.queryTabsBasic(
         query: db.buildLikeQuery(searchString),
+        limit: limit,
       );
     }
   }

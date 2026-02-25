@@ -50,7 +50,7 @@ final class ArticleSearchProvider
   }
 }
 
-String _$articleSearchHash() => r'cc59a5d3c4b926db9f03ed96db592965ff925b04';
+String _$articleSearchHash() => r'48ed3baa560c0e731626f79a8f6ff3dab1e9bc95';
 
 final class ArticleSearchFamily extends $Family
     with

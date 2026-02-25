@@ -26,13 +26,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -128,126 +129,137 @@ class TabSearch extends HookConsumerWidget {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
-    return MultiSliver(
-      children: [
-        const SliverToBoxAdapter(child: Divider()),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Tabs', style: Theme.of(context).textTheme.labelSmall),
-                ContainerChips(
-                  displayMenu: false,
-                  selectedContainer: selectedContainer.value,
-                  showUnassignedChip: containerIdsWithResults.value.containsKey(
-                    null,
+    final filteredResultCount = filteredTabs.length;
+
+    return SearchModuleSection(
+      title: 'Tabs',
+      moduleType: SearchModuleType.tabs,
+      totalCount: filteredResultCount,
+      contentSliverBuilder: ({
+        required bool isCollapsed,
+        required int visibleCount,
+      }) => [
+        if (!isCollapsed)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ContainerChips(
+                    displayMenu: false,
+                    selectedContainer: selectedContainer.value,
+                    showUnassignedChip: containerIdsWithResults.value
+                        .containsKey(null),
+                    onSelected: (container) {
+                      selectedContainer.value = container;
+                    },
+                    onDeleted: (container) {
+                      selectedContainer.value = null;
+                    },
+                    containerFilter: (container) =>
+                        containerIdsWithResults.value.containsKey(container.id),
+                    containerBadgeCount: (container) =>
+                        containerIdsWithResults.value[container?.id] ?? 0,
+                    searchTextListenable: searchTextListenable,
                   ),
-                  onSelected: (container) {
-                    selectedContainer.value = container;
-                  },
-                  onDeleted: (container) {
-                    selectedContainer.value = null;
-                  },
-                  containerFilter: (container) =>
-                      containerIdsWithResults.value.containsKey(container.id),
-                  containerBadgeCount: (container) =>
-                      containerIdsWithResults.value[container?.id] ?? 0,
-                  searchTextListenable: searchTextListenable,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        SliverList.builder(
-          itemCount: filteredTabs.length,
-          itemBuilder: (context, index) {
-            final result = filteredTabs[index];
+        if (!isCollapsed)
+          SliverList.builder(
+            itemCount: visibleCount,
+            itemBuilder: (context, index) {
+              final result = filteredTabs[index];
 
-            final content =
-                (result.extractedContent?.contains(_matchPrefix) == true)
-                ? result.extractedContent
-                : result.fullContent;
+              final content =
+                  (result.extractedContent?.contains(_matchPrefix) == true)
+                  ? result.extractedContent
+                  : result.fullContent;
 
-            final titleHasMatch = result.title.contains(_matchPrefix);
-            final urlHasMatch =
-                result.highlightedUrl?.contains(_matchPrefix) ?? false;
-            final bodyHasMatch = content?.contains(_matchPrefix) ?? false;
+              final titleHasMatch = result.title.contains(_matchPrefix);
+              final urlHasMatch =
+                  result.highlightedUrl?.contains(_matchPrefix) ?? false;
+              final bodyHasMatch = content?.contains(_matchPrefix) ?? false;
 
-            return ListTile(
-              leading: RepaintBoundary(
-                child:
-                    result.icon.mapNotNull(
-                      (icon) => SafeRawImage(
-                        image: icon,
-                        height: 24,
-                        width: 24,
-                        fallback: UrlIcon([result.url], iconSize: 24),
-                      ),
-                    ) ??
-                    UrlIcon([result.url], iconSize: 24),
-              ),
-              title: result.title.mapNotNull(
-                (title) => Text.rich(
-                  buildHighlightedText(
-                    title,
-                    Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    _matchPrefix,
-                    _matchSuffix,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              return ListTile(
+                leading: RepaintBoundary(
+                  child:
+                      result.icon.mapNotNull(
+                        (icon) => SafeRawImage(
+                          image: icon,
+                          height: 24,
+                          width: 24,
+                          fallback: UrlIcon([result.url], iconSize: 24),
+                        ),
+                      ) ??
+                      UrlIcon([result.url], iconSize: 24),
                 ),
-              ),
-              subtitle: (bodyHasMatch || (urlHasMatch && !titleHasMatch))
-                  ? Text.rich(
-                      buildHighlightedText(
-                        (bodyHasMatch ? content! : result.highlightedUrl!),
-                        Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        _matchPrefix,
-                        _matchSuffix,
-                        normalizeWhitespaces: true,
+                title: result.title.mapNotNull(
+                  (title) => Text.rich(
+                    buildHighlightedText(
+                      title,
+                      Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    )
-                  : UriBreadcrumb(uri: result.url),
-              onTap: () async {
-                await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .selectTab(result.id);
-                if (result.sourceSearchQuery.isNotEmpty &&
-                    ref.read(findInPageControllerProvider(result.id)) ==
-                        FindInPageState.hidden()) {
+                      Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      _matchPrefix,
+                      _matchSuffix,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                subtitle: (bodyHasMatch || (urlHasMatch && !titleHasMatch))
+                    ? Text.rich(
+                        buildHighlightedText(
+                          (bodyHasMatch ? content! : result.highlightedUrl!),
+                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          _matchPrefix,
+                          _matchSuffix,
+                          normalizeWhitespaces: true,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : UriBreadcrumb(uri: result.url),
+                onTap: () async {
                   await ref
-                      .read(findInPageControllerProvider(result.id).notifier)
-                      .findAll(text: result.sourceSearchQuery!);
-                }
+                      .read(tabRepositoryProvider.notifier)
+                      .selectTab(result.id);
+                  if (result.sourceSearchQuery.isNotEmpty &&
+                      ref.read(findInPageControllerProvider(result.id)) ==
+                          FindInPageState.hidden()) {
+                    await ref
+                        .read(findInPageControllerProvider(result.id).notifier)
+                        .findAll(text: result.sourceSearchQuery!);
+                  }
 
-                if (context.mounted) {
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
+                  if (context.mounted) {
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
 
-                  const BrowserRoute().go(context);
-                }
-              },
-            );
-          },
-        ),
+                    const BrowserRoute().go(context);
+                  }
+                },
+              );
+            },
+          ),
       ],
     );
   }

@@ -148,6 +148,7 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with $ArticleDaoMixin {
     required int snippetLength,
     required String searchString,
     required Uri? feedId,
+    int limit = 25,
   }) {
     final ftsQuery = db.buildFtsQuery(searchString);
 
@@ -159,11 +160,13 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with $ArticleDaoMixin {
         beforeMatch: matchPrefix,
         afterMatch: matchSuffix,
         ellipsis: ellipsis,
+        limit: limit,
       );
     } else {
       return db.definitionsDrift.queryArticlesBasic(
         feedId: feedId?.toString(),
         query: db.buildLikeQuery(searchString),
+        limit: limit,
       );
     }
   }

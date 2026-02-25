@@ -75,6 +75,7 @@ AsyncValue<List<GeckoSuggestion>> engineHistorySuggestions(Ref ref) {
                       ) !=
                       null),
             )
+            .take(25)
             .toList(),
       ),
     ),

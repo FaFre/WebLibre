@@ -2284,10 +2284,13 @@ class DefinitionsDrift extends i8.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
-  i0.Selectable<i9.TabQueryResult> queryTabsBasic({required String query}) {
+  i0.Selectable<i9.TabQueryResult> queryTabsBasic({
+    required String query,
+    required int limit,
+  }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.is_private, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC',
-      variables: [i0.Variable<String>(query)],
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.is_private, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC LIMIT ?2',
+      variables: [i0.Variable<String>(query), i0.Variable<int>(limit)],
       readsFrom: {tab, tabFts},
     ).map(
       (i0.QueryRow row) => i9.TabQueryResult(
@@ -2310,15 +2313,17 @@ class DefinitionsDrift extends i8.ModularAccessor {
     required String ellipsis,
     required int snippetLength,
     required String query,
+    required int limit,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, t.container_id, t.is_private, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content, t.url AS clean_url,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC',
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, t.container_id, t.is_private, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content, t.url AS clean_url,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC LIMIT ?6',
       variables: [
         i0.Variable<String>(beforeMatch),
         i0.Variable<String>(afterMatch),
         i0.Variable<String>(ellipsis),
         i0.Variable<int>(snippetLength),
         i0.Variable<String>(query),
+        i0.Variable<int>(limit),
       ],
       readsFrom: {tab, tabFts},
     ).map(

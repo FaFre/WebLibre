@@ -32,6 +32,7 @@ class TabSearchRepository extends _$TabSearchRepository {
   Future<void> addQuery(
     String input, {
     int snippetLength = 120,
+    int maxResults = 25,
     String matchPrefix = '***',
     String matchSuffix = '***',
     String ellipsis = '…',
@@ -49,6 +50,7 @@ class TabSearchRepository extends _$TabSearchRepository {
                 ellipsis: ellipsis,
                 snippetLength: snippetLength,
                 searchString: input,
+                limit: maxResults,
               )
               .get(),
         );
