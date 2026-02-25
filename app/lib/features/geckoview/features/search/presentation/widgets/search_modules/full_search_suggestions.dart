@@ -50,10 +50,11 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchTextIsNotEmpty = useListenableSelector(
+    final searchText = useListenableSelector(
       searchTextController,
-      () => searchTextController.text.isNotEmpty,
+      () => searchTextController.text,
     );
+    final searchTextIsNotEmpty = searchText.isNotEmpty;
 
     final searchSuggestions = ref.watch(searchSuggestionsProvider());
     final searchHistory = ref.watch(searchHistoryProvider);
@@ -65,114 +66,21 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           .addQuery(searchTextController.text);
     });
 
-    Widget buildSuggestionChip(
-      String query, {
-      Widget? avatar,
-      Future<void> Function()? onDelete,
-    }) {
-      return InkWell(
-        onLongPress: () {
-          searchTextController.text = query;
-        },
-        child: InputChip(
-          avatar: avatar ?? const Icon(Icons.search),
-          label: Text(query),
-          onSelected: (value) async {
-            if (value) {
-              await submitSearch(query);
-            }
-          },
-          onDeleted: onDelete == null
-              ? null
-              : () async {
-                  await onDelete();
-                },
-        ),
-      );
-    }
+    final showHistory =
+        !searchTextIsNotEmpty && (searchHistory.value.isNotEmpty);
 
-    final List<Widget> suggestionChips;
-
-    if (!searchTextIsNotEmpty && (searchHistory.value.isNotEmpty)) {
-      final entries = searchHistory.value!;
-
-      suggestionChips = entries.map((entry) {
-        final query = entry.searchQuery;
-
-        return buildSuggestionChip(
-          query,
-          avatar: const Icon(Icons.history),
-          onDelete: () async {
-            await ref
-                .read(bangDataRepositoryProvider.notifier)
-                .removeSearchEntry(query);
-          },
-        );
-      }).toList();
-    } else {
-      final prioritizedSuggestions = [
-        if (searchTextIsNotEmpty) searchTextController.text,
-        if (searchSuggestions.value != null)
-          ...searchSuggestions.value!.whereNot(
-            (suggestion) => suggestion == searchTextController.text,
-          ),
-      ];
-
-      suggestionChips = prioritizedSuggestions.map((query) {
-        return buildSuggestionChip(query);
-      }).toList();
-    }
-
-    final toggleButton = IconButton(
-      onPressed: () {
-        ref.read(searchSuggestionsExpandedProvider.notifier).toggle();
-      },
-      icon: Icon(expanded ? Icons.unfold_less : Icons.unfold_more),
+    final suggestionQueries = useMemoized(
+      () => showHistory
+          ? searchHistory.value!.map((e) => e.searchQuery).toList()
+          : [
+              if (searchTextIsNotEmpty) searchText,
+              if (searchSuggestions.value != null)
+                ...searchSuggestions.value!.whereNot(
+                  (s) => s == searchText,
+                ),
+            ],
+      [showHistory, searchText, searchHistory.value, searchSuggestions.value],
     );
-
-    final suggestionsContent = expanded
-        ? Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 150),
-              child: FadingScroll(
-                fadingSize: 25,
-                builder: (context, controller) {
-                  return CustomScrollView(
-                    shrinkWrap: true,
-                    controller: controller,
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Wrap(spacing: 8.0, children: suggestionChips),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          )
-        : Padding(
-            padding: const EdgeInsets.only(left: 16.0, top: 8.0),
-            child: SizedBox(
-              height: 44,
-              child: FadingScroll(
-                fadingSize: 25,
-                builder: (context, controller) {
-                  return ListView.separated(
-                    controller: controller,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: suggestionChips.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 8),
-                    itemBuilder: (context, index) => suggestionChips[index],
-                  );
-                },
-              ),
-            ),
-          );
 
     return MultiSliver(
       children: [
@@ -189,15 +97,148 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: suggestionsContent),
+              Expanded(
+                child: _SuggestionsContent(
+                  expanded: expanded,
+                  queries: suggestionQueries,
+                  showHistory: showHistory,
+                  searchTextController: searchTextController,
+                  submitSearch: submitSearch,
+                  onDeleteHistory: (query) => ref
+                      .read(bangDataRepositoryProvider.notifier)
+                      .removeSearchEntry(query),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(top: 6.0),
-                child: toggleButton,
+                child: IconButton(
+                  onPressed: ref
+                      .read(searchSuggestionsExpandedProvider.notifier)
+                      .toggle,
+                  icon: Icon(
+                    expanded ? Icons.unfold_less : Icons.unfold_more,
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SuggestionsContent extends StatelessWidget {
+  final bool expanded;
+  final List<String> queries;
+  final bool showHistory;
+  final TextEditingController searchTextController;
+  final Future<void> Function(String query) submitSearch;
+  final Future<void> Function(String query) onDeleteHistory;
+
+  const _SuggestionsContent({
+    required this.expanded,
+    required this.queries,
+    required this.showHistory,
+    required this.searchTextController,
+    required this.submitSearch,
+    required this.onDeleteHistory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (expanded) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 150),
+          child: FadingScroll(
+            fadingSize: 25,
+            builder: (context, controller) {
+              return CustomScrollView(
+                shrinkWrap: true,
+                controller: controller,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Wrap(
+                        spacing: 8.0,
+                        children: [
+                          for (final query in queries)
+                            _SuggestionChip(
+                              query: query,
+                              showHistory: showHistory,
+                              searchTextController: searchTextController,
+                              submitSearch: submitSearch,
+                              onDeleteHistory: onDeleteHistory,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+      child: SizedBox(
+        height: 44,
+        child: FadingScroll(
+          fadingSize: 25,
+          builder: (context, controller) {
+            return ListView.separated(
+              controller: controller,
+              scrollDirection: Axis.horizontal,
+              itemCount: queries.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
+              itemBuilder: (context, index) => _SuggestionChip(
+                query: queries[index],
+                showHistory: showHistory,
+                searchTextController: searchTextController,
+                submitSearch: submitSearch,
+                onDeleteHistory: onDeleteHistory,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionChip extends StatelessWidget {
+  final String query;
+  final bool showHistory;
+  final TextEditingController searchTextController;
+  final Future<void> Function(String query) submitSearch;
+  final Future<void> Function(String query) onDeleteHistory;
+
+  const _SuggestionChip({
+    required this.query,
+    required this.showHistory,
+    required this.searchTextController,
+    required this.submitSearch,
+    required this.onDeleteHistory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onLongPress: () => searchTextController.text = query,
+      child: InputChip(
+        avatar: Icon(showHistory ? Icons.history : Icons.search),
+        label: Text(query),
+        onSelected: (value) async {
+          if (value) await submitSearch(query);
+        },
+        onDeleted: showHistory ? () => onDeleteHistory(query) : null,
+      ),
     );
   }
 }
