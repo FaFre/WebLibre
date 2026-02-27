@@ -33,7 +33,6 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class TabTreeDialog extends HookConsumerWidget {
@@ -109,54 +108,47 @@ class TabTreeDialog extends HookConsumerWidget {
         extendBodyBehindAppBar: true,
         body: Skeletonizer(
           enabled: !tabs.hasValue || tabs.value?.isEmpty == true,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: floatingActionButtonBottomInset(context),
-            ),
-            child: Skeleton.replace(
-              replacement: const Bone.square(),
-              child: GraphView.builder(
-                graph: graph,
-                algorithm: graphAlgo,
-                controller: graphViewController,
-                initialNode: selectedTabId.mapNotNull(
-                  (tabId) => ValueKey(tabId),
-                ),
-                paint: Paint()
-                  ..color = Theme.of(context).colorScheme.outline
-                  ..strokeWidth = 1
-                  ..style = PaintingStyle.stroke,
-                builder: (Node node) {
-                  final id = node.key!.value as String;
-                  return SizedBox.fromSize(
-                    size: childSize,
-                    child: SingleGridTabPreview(
-                      key: ValueKey(id),
-                      tabId: id,
-                      activeTabId: selectedTabId,
-                      onClose: () {
-                        final tabViewBottomSheet = ref
-                            .read(generalSettingsWithDefaultsProvider)
-                            .tabViewBottomSheet;
+          child: Skeleton.replace(
+            replacement: const Bone.square(),
+            child: GraphView.builder(
+              graph: graph,
+              algorithm: graphAlgo,
+              controller: graphViewController,
+              initialNode: selectedTabId.mapNotNull((tabId) => ValueKey(tabId)),
+              paint: Paint()
+                ..color = Theme.of(context).colorScheme.outline
+                ..strokeWidth = 1
+                ..style = PaintingStyle.stroke,
+              builder: (Node node) {
+                final id = node.key!.value as String;
+                return SizedBox.fromSize(
+                  size: childSize,
+                  child: SingleGridTabPreview(
+                    key: ValueKey(id),
+                    tabId: id,
+                    activeTabId: selectedTabId,
+                    onClose: () {
+                      final tabViewBottomSheet = ref
+                          .read(generalSettingsWithDefaultsProvider)
+                          .tabViewBottomSheet;
 
-                        if (tabViewBottomSheet) {
-                          ref
-                              .read(bottomSheetControllerProvider.notifier)
-                              .requestDismiss();
-                        }
+                      if (tabViewBottomSheet) {
+                        ref
+                            .read(bottomSheetControllerProvider.notifier)
+                            .requestDismiss();
+                      }
 
-                        const BrowserRoute().go(context);
-                      },
-                      onBeforeDelete: () {
-                        if (graph.nodes.length <= 2) {
-                          context.pop();
-                        }
-                      },
-                      sourceSearchQuery: null,
-                    ),
-                  );
-                },
-              ),
+                      const BrowserRoute().go(context);
+                    },
+                    onBeforeDelete: () {
+                      if (graph.nodes.length <= 2) {
+                        context.pop();
+                      }
+                    },
+                    sourceSearchQuery: null,
+                  ),
+                );
+              },
             ),
           ),
         ),

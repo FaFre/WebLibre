@@ -29,7 +29,6 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 
 class UserBangs extends HookConsumerWidget {
   static const _userGroupFilter = [BangGroup.user];
@@ -46,9 +45,6 @@ class UserBangs extends HookConsumerWidget {
         skipLoadingOnReload: true,
         data: (bangs) {
           return ListView.builder(
-            padding: EdgeInsets.only(
-              bottom: floatingActionButtonBottomInset(context),
-            ),
             itemCount: bangs.length,
             itemBuilder: (context, index) {
               final bang = bangs[index];

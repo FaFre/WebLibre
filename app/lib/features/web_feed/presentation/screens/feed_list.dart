@@ -26,7 +26,6 @@ import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/feed_card.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 
 class FeedListScreen extends HookConsumerWidget {
   const FeedListScreen({super.key});
@@ -77,9 +76,6 @@ class FeedListScreen extends HookConsumerWidget {
                   .fetchAllArticles();
             },
             child: ListView.builder(
-              padding: EdgeInsets.only(
-                bottom: floatingActionButtonBottomInset(context),
-              ),
               itemCount: feeds.length,
               itemBuilder: (context, i) {
                 return FeedCard(feed: feeds[i]);

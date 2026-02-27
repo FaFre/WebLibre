@@ -47,7 +47,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
 
 class _TabDraggable extends HookConsumerWidget {
   final TabEntity entity;
@@ -539,20 +538,10 @@ class ViewTabGridWidget extends HookConsumerWidget {
                   ),
             ),
           ],
-          body: Padding(
-            padding: EdgeInsets.only(
-              bottom: showNewTabFab
-                  ? floatingActionButtonBottomInset(
-                      context,
-                      fabHeight: smallFloatingActionButtonHeight,
-                    )
-                  : 0,
-            ),
-            child: _TabGridView(
-              scrollController: scrollController,
-              tabsReorderable: tabsReorderable,
-              onClose: onClose,
-            ),
+          body: _TabGridView(
+            scrollController: scrollController,
+            tabsReorderable: tabsReorderable,
+            onClose: onClose,
           ),
         ),
         if (showNewTabFab)

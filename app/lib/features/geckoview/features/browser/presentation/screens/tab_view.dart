@@ -28,7 +28,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/widgets/floating_action_button_inset.dart';
+import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
 
 class TabViewScreen extends HookConsumerWidget {
   const TabViewScreen({super.key});
@@ -50,67 +50,68 @@ class TabViewScreen extends HookConsumerWidget {
 
     final scrollController = useScrollController(keys: [tabsReorderable]);
 
+    // Track FAB visibility based on scroll direction
+    final isFabVisible = useScrollVisibility(scrollController);
+
     return Dialog.fullscreen(
       child: Scaffold(
         body: SafeArea(
-          child: Builder(
-            builder: (safeAreaContext) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: isSyncedScope
-                      ? 0
-                      : floatingActionButtonBottomInset(safeAreaContext),
-                ),
-                child: switch (effectiveTabsViewMode) {
-                  TabsViewMode.list => ViewTabListWidget(
-                    key: ValueKey(tabsReorderable),
-                    scrollController: scrollController,
-                    tabsReorderable: tabsReorderable,
-                    showNewTabFab: false,
-                    onClose: () {
-                      const BrowserRoute().go(context);
-                    },
-                  ),
-                  TabsViewMode.grid => ViewTabGridWidget(
-                    key: ValueKey(tabsReorderable),
-                    scrollController: scrollController,
-                    tabsReorderable: tabsReorderable,
-                    showNewTabFab: false,
-                    onClose: () {
-                      const BrowserRoute().go(context);
-                    },
-                  ),
-                  TabsViewMode.tree => ViewTabTreesWidget(
-                    scrollController: scrollController,
-                    showNewTabFab: false,
-                    onClose: () {
-                      const BrowserRoute().go(context);
-                    },
-                  ),
-                },
-              );
-            },
-          ),
+          child: switch (effectiveTabsViewMode) {
+            TabsViewMode.list => ViewTabListWidget(
+              key: ValueKey(tabsReorderable),
+              scrollController: scrollController,
+              tabsReorderable: tabsReorderable,
+              showNewTabFab: false,
+              onClose: () {
+                const BrowserRoute().go(context);
+              },
+            ),
+            TabsViewMode.grid => ViewTabGridWidget(
+              key: ValueKey(tabsReorderable),
+              scrollController: scrollController,
+              tabsReorderable: tabsReorderable,
+              showNewTabFab: false,
+              onClose: () {
+                const BrowserRoute().go(context);
+              },
+            ),
+            TabsViewMode.tree => ViewTabTreesWidget(
+              scrollController: scrollController,
+              showNewTabFab: false,
+              onClose: () {
+                const BrowserRoute().go(context);
+              },
+            ),
+          },
         ),
         floatingActionButton: isSyncedScope
             ? null
-            : FloatingActionButton(
-                onPressed: () async {
-                  final settings = ref.read(
-                    generalSettingsWithDefaultsProvider,
-                  );
+            : AnimatedSlide(
+                duration: const Duration(milliseconds: 200),
+                offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
+                curve: Curves.easeInOut,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isFabVisible.value ? 1.0 : 0.0,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      final settings = ref.read(
+                        generalSettingsWithDefaultsProvider,
+                      );
 
-                  await SearchRoute(
-                    tabType:
-                        ref.read(selectedTabTypeProvider) ??
-                        settings.effectiveDefaultCreateTabType,
-                  ).push(context);
+                      await SearchRoute(
+                        tabType:
+                            ref.read(selectedTabTypeProvider) ??
+                            settings.effectiveDefaultCreateTabType,
+                      ).push(context);
 
-                  if (context.mounted) {
-                    const BrowserRoute().go(context);
-                  }
-                },
-                child: const Icon(Icons.add),
+                      if (context.mounted) {
+                        const BrowserRoute().go(context);
+                      }
+                    },
+                    child: const Icon(Icons.add),
+                  ),
+                ),
               ),
       ),
     );
