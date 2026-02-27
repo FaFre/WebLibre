@@ -20,14 +20,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService;
+
 import 'package:weblibre/utils/ui_helper.dart';
+import 'package:weblibre/utils/uri_input_parser.dart';
+import 'package:weblibre/utils/uri_policy.dart';
 
 Future<void> openInPrivateCustomTab(BuildContext context, String url) async {
   try {
-    await GeckoBrowserService().openInCustomTab(
-      url: Uri.parse(url),
-      private: true,
+    final parsedUrl = parseUserInputUrl(
+      url,
+      policy: SchemePolicy.internalIntent,
+      allowSchemelessHosts: true,
+      enforceMaxInputLength: true,
     );
+    if (parsedUrl == null) {
+      if (context.mounted) {
+        showErrorMessage(context, 'Could not open link: $url');
+      }
+      return;
+    }
+
+    await GeckoBrowserService().openInCustomTab(url: parsedUrl, private: true);
   } catch (e) {
     if (context.mounted) {
       showErrorMessage(context, 'Could not open link: $url');

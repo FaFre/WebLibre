@@ -34,7 +34,6 @@ import 'package:weblibre/features/web_feed/presentation/widgets/tag_field.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 enum _DialogMode { create, edit }
 
@@ -156,19 +155,22 @@ class _FeedEditContent extends HookConsumerWidget {
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
                 final feedData = FeedData(
-                  url: uri_parser.tryParseUrl(
+                  url: parseValidatedUrl(
                     urlTextController.text,
-                    eagerParsing: true,
+                    eagerParsing: false,
+                    onlyHttpProtocol: true,
                   )!,
                   authors: initialFeed.authors,
                   description: descriptionTextController.text.whenNotEmpty,
-                  icon: uri_parser.tryParseUrl(
+                  icon: parseValidatedUrl(
                     iconUrlTextController.text,
-                    eagerParsing: true,
+                    eagerParsing: false,
+                    onlyHttpProtocol: true,
                   ),
-                  siteLink: uri_parser.tryParseUrl(
+                  siteLink: parseValidatedUrl(
                     siteLinkTextController.text,
-                    eagerParsing: true,
+                    eagerParsing: false,
+                    onlyHttpProtocol: true,
                   ),
                   tags: tags.value.map((tag) => FeedCategory(id: tag)).toList(),
                   title: titleTextController.text.whenNotEmpty,

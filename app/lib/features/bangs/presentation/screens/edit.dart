@@ -88,7 +88,14 @@ class EditBangScreen extends HookConsumerWidget {
                   return;
                 }
 
-                final uri = Uri.parse(urlTextController.text);
+                final uri = parseValidatedUrl(
+                  urlTextController.text,
+                  eagerParsing: false,
+                  onlyHttpProtocol: true,
+                );
+                if (uri == null) {
+                  return;
+                }
 
                 final bang = Bang(
                   group: BangGroup.user,

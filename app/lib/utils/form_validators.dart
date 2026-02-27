@@ -21,8 +21,25 @@ import 'dart:io';
 
 import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
+import 'package:weblibre/utils/uri_input_parser.dart';
+import 'package:weblibre/utils/uri_policy.dart';
+
+Uri? parseValidatedUrl(
+  String? value, {
+  required bool eagerParsing,
+  bool onlyHttpProtocol = false,
+}) {
+  final policy = onlyHttpProtocol
+      ? SchemePolicy.strictHttpOnly
+      : SchemePolicy.internalIntent;
+
+  return parseUserInputUrl(
+    value,
+    policy: policy,
+    allowSchemelessHosts: eagerParsing,
+    enforceMaxInputLength: true,
+  );
+}
 
 String? validateUrl(
   String? value, {
@@ -39,16 +56,18 @@ String? validateUrl(
     }
   }
 
-  if (uri_parser.tryParseUrl(value, eagerParsing: eagerParsing)
+  if (parseValidatedUrl(
+        value,
+        eagerParsing: eagerParsing,
+        onlyHttpProtocol: onlyHttpProtocol,
+      )
       case final Uri url) {
     if (!requireAuthority || url.authority.isNotEmpty) {
-      if (!onlyHttpProtocol || url.isHttpOrHttps) {
-        return null;
-      }
+      return null;
     }
   }
 
-  return 'Inavlid URL';
+  return 'Invalid URL';
 }
 
 String? validateRequired(String? value, {String message = 'Value required'}) {

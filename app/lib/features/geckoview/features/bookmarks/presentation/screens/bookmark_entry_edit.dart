@@ -28,7 +28,7 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositori
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_bookmark_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
 import 'package:weblibre/utils/form_validators.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
+import 'package:weblibre/utils/uri_input_parser.dart';
 
 class BookmarkEntryEditScreen extends HookConsumerWidget {
   final BookmarkInfo? initialInfo;
@@ -66,10 +66,17 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
           IconButton(
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
-                final newUrl = uri_parser.tryParseUrl(
+                var newUrl = parseValidatedUrl(
                   urlTextController.text,
                   eagerParsing: true,
-                )!;
+                  onlyHttpProtocol: true,
+                );
+
+                if (newUrl == null) {
+                  return;
+                }
+
+                newUrl = redactUriCredentials(newUrl);
 
                 if (exisitingEntry != null) {
                   await ref

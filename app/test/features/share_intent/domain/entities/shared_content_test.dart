@@ -17,41 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/utils/input_classification.dart';
 
-sealed class SharedContent with FastEquatable {
-  SharedContent();
+import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 
-  factory SharedContent.parse(String content) {
-    if (parseSharedIntentUrl(content) case final Uri uri) {
-      return SharedUrl(uri);
-    } else {
-      return SharedText(content);
-    }
-  }
-}
+void main() {
+  group('SharedContent.parse', () {
+    test('returns SharedUrl for explicit https uri', () {
+      final parsed = SharedContent.parse('https://weblibre.eu/path');
 
-final class SharedUrl extends SharedContent {
-  final Uri url;
+      expect(parsed, isA<SharedUrl>());
+      expect((parsed as SharedUrl).url.host, 'weblibre.eu');
+    });
 
-  SharedUrl(this.url);
+    test('returns SharedText for explicit non-http scheme', () {
+      final parsed = SharedContent.parse('moz-extension://abc/index.html');
 
-  @override
-  String toString() => url.toString();
+      expect(parsed, isA<SharedText>());
+    });
 
-  @override
-  List<Object?> get hashParameters => [url];
-}
+    test('returns SharedText for plain sentence', () {
+      final parsed = SharedContent.parse('WebLibre README.md');
 
-final class SharedText extends SharedContent {
-  final String text;
-
-  SharedText(this.text);
-
-  @override
-  String toString() => text;
-
-  @override
-  List<Object?> get hashParameters => [text];
+      expect(parsed, isA<SharedText>());
+    });
+  });
 }

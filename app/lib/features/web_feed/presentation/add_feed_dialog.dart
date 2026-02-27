@@ -24,7 +24,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
 import 'package:weblibre/utils/form_validators.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class AddFeedDialog extends HookConsumerWidget {
   final Uri? initialUri;
@@ -83,9 +82,16 @@ class AddFeedDialog extends HookConsumerWidget {
         TextButton(
           onPressed: () {
             if (formKey.currentState?.validate() == true) {
-              FeedCreateRoute(
-                feedId: uri_parser.tryParseUrl(textController.text)!,
-              ).pushReplacement(context);
+              final feedId = parseValidatedUrl(
+                textController.text,
+                eagerParsing: false,
+                onlyHttpProtocol: true,
+              );
+              if (feedId == null) {
+                return;
+              }
+
+              FeedCreateRoute(feedId: feedId).pushReplacement(context);
             }
           },
           child: const Text('Add'),

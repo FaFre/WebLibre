@@ -26,7 +26,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class ContainerSitesScreen extends HookConsumerWidget {
   final Set<Uri> initialSites;
@@ -91,11 +90,16 @@ class ContainerSitesScreen extends HookConsumerWidget {
                         return uriValid;
                       }
 
-                      final origin = Uri.parse(
-                        uri_parser
-                            .tryParseUrl(value, eagerParsing: true)!
-                            .origin,
+                      final parsedUrl = parseValidatedUrl(
+                        value,
+                        eagerParsing: true,
+                        onlyHttpProtocol: true,
                       );
+                      if (parsedUrl == null) {
+                        return 'Invalid URL';
+                      }
+
+                      final origin = Uri.parse(parsedUrl.origin);
 
                       if (sites.value.contains(origin)) {
                         return 'This site has been already assigned';
@@ -104,11 +108,16 @@ class ContainerSitesScreen extends HookConsumerWidget {
                       return null;
                     },
                     onSaved: (newValue) async {
-                      final origin = Uri.parse(
-                        uri_parser
-                            .tryParseUrl(newValue, eagerParsing: true)!
-                            .origin,
+                      final parsedUrl = parseValidatedUrl(
+                        newValue,
+                        eagerParsing: true,
+                        onlyHttpProtocol: true,
                       );
+                      if (parsedUrl == null) {
+                        return;
+                      }
+
+                      final origin = Uri.parse(parsedUrl.origin);
 
                       final isAssigned = await ref
                           .read(containerRepositoryProvider.notifier)

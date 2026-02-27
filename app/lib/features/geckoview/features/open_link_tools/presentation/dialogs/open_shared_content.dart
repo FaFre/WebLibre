@@ -74,7 +74,10 @@ class OpenSharedContent extends HookConsumerWidget {
       return null;
     }, [currentUrl]);
 
-    final parsedDebouncedUrl = Uri.tryParse(debouncedUrl.value);
+    final parsedDebouncedUrl = parseValidatedUrl(
+      debouncedUrl.value,
+      eagerParsing: false,
+    );
     final hasExternalApp = useCachedFuture(
       // ignore: discarded_futures useFuture
       () => parsedDebouncedUrl != null
@@ -163,10 +166,18 @@ class OpenSharedContent extends HookConsumerWidget {
 
     Future<void> openTab(TabMode tabMode) async {
       if (formKey.currentState?.validate() == true) {
+        final parsedUrl = parseValidatedUrl(
+          textController.text,
+          eagerParsing: false,
+        );
+        if (parsedUrl == null) {
+          return;
+        }
+
         await ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
-              url: Uri.parse(textController.text),
+              url: parsedUrl,
               tabMode: tabMode,
               containerSelection: selectedContainer.value == null
                   ? const TabContainerSelection.unassigned()
@@ -183,8 +194,16 @@ class OpenSharedContent extends HookConsumerWidget {
 
     Future<void> openCustomTab(bool isPrivate) async {
       if (formKey.currentState?.validate() == true) {
+        final parsedUrl = parseValidatedUrl(
+          textController.text,
+          eagerParsing: false,
+        );
+        if (parsedUrl == null) {
+          return;
+        }
+
         await GeckoBrowserService().openInCustomTab(
-          url: Uri.parse(textController.text),
+          url: parsedUrl,
           private: isPrivate,
           contextId: selectedContainer.value?.id,
         );
@@ -197,7 +216,7 @@ class OpenSharedContent extends HookConsumerWidget {
 
     Future<void> openInApp() async {
       if (formKey.currentState?.validate() == true) {
-        final uri = Uri.tryParse(textController.text);
+        final uri = parseValidatedUrl(textController.text, eagerParsing: false);
         if (uri == null) return;
 
         final success = await _appLinksService.openAppLink(uri);

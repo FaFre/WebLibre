@@ -23,6 +23,7 @@
 import 'dart:convert';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/utils/uri_input_parser.dart';
 
 class BookmarkJSONUtils {
   final GeckoBookmarksService _service;
@@ -156,7 +157,11 @@ class BookmarkJSONUtils {
               await _service.addItem(parentGuid, uri, title, i);
               count++;
             } else {
-              logger.w('Skipping invalid URL: $url');
+              final parsed = Uri.tryParse(url);
+              final redacted = parsed != null
+                  ? redactUriCredentials(parsed)
+                  : url;
+              logger.w('Skipping invalid URL: $redacted');
             }
           } catch (e) {
             logger.e('Failed to import bookmark "$title": $e');

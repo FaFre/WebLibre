@@ -47,8 +47,9 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
+import 'package:weblibre/utils/input_classification.dart';
 import 'package:weblibre/utils/text_field_line_count.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class SearchScreen extends HookConsumerWidget {
   final String? initialSearchText;
@@ -358,12 +359,26 @@ class SearchScreen extends HookConsumerWidget {
                       unfocusOnTapOutside: false,
                       onSubmitted: (value) async {
                         if (value.isNotEmpty) {
-                          var newUrl = uri_parser.tryParseUrl(
-                            value,
-                            eagerParsing: true,
-                          );
+                          final classification = classifyAddressBarInput(value);
+                          Uri? newUrl;
+                          String? searchQuery;
 
-                          if (newUrl == null) {
+                          switch (classification) {
+                            case NavigateInputClassification(:final uri):
+                              newUrl = uri;
+                            case SearchInputClassification(:final query):
+                              searchQuery = query;
+                            case InvalidInputClassification():
+                              if (context.mounted) {
+                                ui_helper.showErrorMessage(
+                                  context,
+                                  'Invalid address',
+                                );
+                              }
+                              return;
+                          }
+
+                          if (newUrl == null && searchQuery != null) {
                             // Read from both providers - use site if set, otherwise global
                             final siteBang = isEditMode
                                 ? ref.read(
@@ -383,12 +398,12 @@ class SearchScreen extends HookConsumerWidget {
                                 );
 
                             if (bang != null) {
-                              newUrl = bang.getTemplateUrl(value);
+                              newUrl = bang.getTemplateUrl(searchQuery);
 
                               if (!privateTabMode) {
                                 await ref
                                     .read(bangSearchProvider.notifier)
-                                    .triggerBangSearch(bang, value);
+                                    .triggerBangSearch(bang, searchQuery);
                               }
                             }
                           }

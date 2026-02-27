@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _supportedSchemes = {'https', 'http', 'ftp', 'file', 'content', 'about'};
+import 'package:weblibre/utils/uri_policy.dart';
 
 extension UriX on Uri {
   Uri get base => Uri.parse('$scheme://$authority');
 
-  bool get hasSupportedScheme => _supportedSchemes.contains(scheme);
+  bool get hasSupportedScheme => allSupportedSchemes.any((s) => s.name == scheme);
 
   bool get isHttp => isScheme('http');
   bool get isHttps => isScheme('https');
