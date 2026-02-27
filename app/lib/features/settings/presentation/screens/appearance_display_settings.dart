@@ -82,6 +82,7 @@ class _TabBarLayoutSection extends StatelessWidget {
         _TabListShowFaviconsTile(),
         _ShowQuickTabSwitcherBarTile(),
         _QuickTabSwitcherModeSection(),
+        _QuickTabSwitcherHistorySuggestionsTile(),
         _QuickTabSwitcherShowTitlesTile(),
       ],
     );
@@ -118,6 +119,43 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
                   .save(
                     (currentSettings) => currentSettings.copyWith
                         .quickTabSwitcherShowTitles(value),
+                  );
+            }
+          : null,
+    );
+  }
+}
+
+class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
+  const _QuickTabSwitcherHistorySuggestionsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showHistorySuggestions = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherShowHistorySuggestions,
+      ),
+    );
+    final tabBarShowQuickTabSwitcherBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarShowQuickTabSwitcherBar,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('History Fallback in Quick Tab Switcher'),
+      subtitle: const Text(
+        'Use browsing history suggestions when no tab chips are available',
+      ),
+      secondary: const Icon(MdiIcons.history),
+      value: showHistorySuggestions,
+      onChanged: tabBarShowQuickTabSwitcherBar
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings.copyWith
+                        .quickTabSwitcherShowHistorySuggestions(value),
                   );
             }
           : null,

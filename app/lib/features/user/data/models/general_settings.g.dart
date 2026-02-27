@@ -75,6 +75,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles);
 
+  GeneralSettings quickTabSwitcherShowHistorySuggestions(
+    bool quickTabSwitcherShowHistorySuggestions,
+  );
+
   GeneralSettings drawerGestureEnabled(bool drawerGestureEnabled);
 
   GeneralSettings syncServerOverride(String syncServerOverride);
@@ -139,6 +143,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowClipboardAccess,
     bool tabListShowFavicons,
     bool quickTabSwitcherShowTitles,
+    bool quickTabSwitcherShowHistorySuggestions,
     bool drawerGestureEnabled,
     String syncServerOverride,
     String syncTokenServerOverride,
@@ -280,6 +285,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(quickTabSwitcherShowTitles: quickTabSwitcherShowTitles);
 
   @override
+  GeneralSettings quickTabSwitcherShowHistorySuggestions(
+    bool quickTabSwitcherShowHistorySuggestions,
+  ) => call(
+    quickTabSwitcherShowHistorySuggestions:
+        quickTabSwitcherShowHistorySuggestions,
+  );
+
+  @override
   GeneralSettings drawerGestureEnabled(bool drawerGestureEnabled) =>
       call(drawerGestureEnabled: drawerGestureEnabled);
 
@@ -370,6 +383,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowClipboardAccess = const $CopyWithPlaceholder(),
     Object? tabListShowFavicons = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherShowHistorySuggestions =
+        const $CopyWithPlaceholder(),
     Object? drawerGestureEnabled = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
@@ -549,6 +564,13 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherShowTitles
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherShowTitles as bool,
+      quickTabSwitcherShowHistorySuggestions:
+          quickTabSwitcherShowHistorySuggestions ==
+                  const $CopyWithPlaceholder() ||
+              quickTabSwitcherShowHistorySuggestions == null
+          ? _value.quickTabSwitcherShowHistorySuggestions
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherShowHistorySuggestions as bool,
       drawerGestureEnabled:
           drawerGestureEnabled == const $CopyWithPlaceholder() ||
               drawerGestureEnabled == null
@@ -704,6 +726,8 @@ GeneralSettings _$GeneralSettingsFromJson(
   allowClipboardAccess: json['allowClipboardAccess'] as bool?,
   tabListShowFavicons: json['tabListShowFavicons'] as bool?,
   quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
+  quickTabSwitcherShowHistorySuggestions:
+      json['quickTabSwitcherShowHistorySuggestions'] as bool?,
   drawerGestureEnabled: json['drawerGestureEnabled'] as bool?,
   syncServerOverride: json['syncServerOverride'] as String?,
   syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
@@ -761,6 +785,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'allowClipboardAccess': instance.allowClipboardAccess,
   'tabListShowFavicons': instance.tabListShowFavicons,
   'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
+  'quickTabSwitcherShowHistorySuggestions':
+      instance.quickTabSwitcherShowHistorySuggestions,
   'drawerGestureEnabled': instance.drawerGestureEnabled,
   'syncServerOverride': instance.syncServerOverride,
   'syncTokenServerOverride': instance.syncTokenServerOverride,

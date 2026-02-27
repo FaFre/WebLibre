@@ -489,6 +489,267 @@ final class SelectedContainerTabStatesWithContainerProvider
 String _$selectedContainerTabStatesWithContainerHash() =>
     r'2fd5e12595b3aced1e235c9626073c34655d57fa';
 
+@ProviderFor(quickTabSwitcherTabStates)
+final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
+
+final class QuickTabSwitcherTabStatesProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabStateWirthContainer>>,
+          EquatableValue<List<TabStateWirthContainer>>,
+          EquatableValue<List<TabStateWirthContainer>>
+        >
+    with $Provider<EquatableValue<List<TabStateWirthContainer>>> {
+  QuickTabSwitcherTabStatesProvider._({
+    required QuickTabSwitcherTabStatesFamily super.from,
+    required QuickTabSwitcherMode super.argument,
+  }) : super(
+         retry: null,
+         name: r'quickTabSwitcherTabStatesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$quickTabSwitcherTabStatesHash();
+
+  @override
+  String toString() {
+    return r'quickTabSwitcherTabStatesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabStateWirthContainer>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabStateWirthContainer>> create(Ref ref) {
+    final argument = this.argument as QuickTabSwitcherMode;
+    return quickTabSwitcherTabStates(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    EquatableValue<List<TabStateWirthContainer>> value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<TabStateWirthContainer>>>(
+            value,
+          ),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is QuickTabSwitcherTabStatesProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$quickTabSwitcherTabStatesHash() =>
+    r'db82bf9e338c94768b0531aeaffb152ff726f81f';
+
+final class QuickTabSwitcherTabStatesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<TabStateWirthContainer>>,
+          QuickTabSwitcherMode
+        > {
+  QuickTabSwitcherTabStatesFamily._()
+    : super(
+        retry: null,
+        name: r'quickTabSwitcherTabStatesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  QuickTabSwitcherTabStatesProvider call(QuickTabSwitcherMode mode) =>
+      QuickTabSwitcherTabStatesProvider._(argument: mode, from: this);
+
+  @override
+  String toString() => r'quickTabSwitcherTabStatesProvider';
+}
+
+@ProviderFor(quickTabSwitcherHistorySuggestions)
+final quickTabSwitcherHistorySuggestionsProvider =
+    QuickTabSwitcherHistorySuggestionsFamily._();
+
+final class QuickTabSwitcherHistorySuggestionsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<VisitInfo>>,
+          List<VisitInfo>,
+          FutureOr<List<VisitInfo>>
+        >
+    with $FutureModifier<List<VisitInfo>>, $FutureProvider<List<VisitInfo>> {
+  QuickTabSwitcherHistorySuggestionsProvider._({
+    required QuickTabSwitcherHistorySuggestionsFamily super.from,
+    required QuickTabSwitcherMode super.argument,
+  }) : super(
+         retry: null,
+         name: r'quickTabSwitcherHistorySuggestionsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$quickTabSwitcherHistorySuggestionsHash();
+
+  @override
+  String toString() {
+    return r'quickTabSwitcherHistorySuggestionsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<VisitInfo>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<VisitInfo>> create(Ref ref) {
+    final argument = this.argument as QuickTabSwitcherMode;
+    return quickTabSwitcherHistorySuggestions(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is QuickTabSwitcherHistorySuggestionsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$quickTabSwitcherHistorySuggestionsHash() =>
+    r'3446741dfedf6fda9ab61421c1b74370c7f43f5b';
+
+final class QuickTabSwitcherHistorySuggestionsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<VisitInfo>>,
+          QuickTabSwitcherMode
+        > {
+  QuickTabSwitcherHistorySuggestionsFamily._()
+    : super(
+        retry: null,
+        name: r'quickTabSwitcherHistorySuggestionsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  QuickTabSwitcherHistorySuggestionsProvider call(QuickTabSwitcherMode mode) =>
+      QuickTabSwitcherHistorySuggestionsProvider._(argument: mode, from: this);
+
+  @override
+  String toString() => r'quickTabSwitcherHistorySuggestionsProvider';
+}
+
+@ProviderFor(quickTabSwitcherHasResults)
+final quickTabSwitcherHasResultsProvider = QuickTabSwitcherHasResultsFamily._();
+
+final class QuickTabSwitcherHasResultsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<bool>,
+          AsyncValue<bool>,
+          AsyncValue<bool>
+        >
+    with $Provider<AsyncValue<bool>> {
+  QuickTabSwitcherHasResultsProvider._({
+    required QuickTabSwitcherHasResultsFamily super.from,
+    required QuickTabSwitcherMode super.argument,
+  }) : super(
+         retry: null,
+         name: r'quickTabSwitcherHasResultsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$quickTabSwitcherHasResultsHash();
+
+  @override
+  String toString() {
+    return r'quickTabSwitcherHasResultsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<bool>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AsyncValue<bool> create(Ref ref) {
+    final argument = this.argument as QuickTabSwitcherMode;
+    return quickTabSwitcherHasResults(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<bool> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<bool>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is QuickTabSwitcherHasResultsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$quickTabSwitcherHasResultsHash() =>
+    r'bcbddfefe7f5eb2c5d8c7c1925fe593a857b477b';
+
+final class QuickTabSwitcherHasResultsFamily extends $Family
+    with $FunctionalFamilyOverride<AsyncValue<bool>, QuickTabSwitcherMode> {
+  QuickTabSwitcherHasResultsFamily._()
+    : super(
+        retry: null,
+        name: r'quickTabSwitcherHasResultsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  QuickTabSwitcherHasResultsProvider call(QuickTabSwitcherMode mode) =>
+      QuickTabSwitcherHasResultsProvider._(argument: mode, from: this);
+
+  @override
+  String toString() => r'quickTabSwitcherHasResultsProvider';
+}
+
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
 

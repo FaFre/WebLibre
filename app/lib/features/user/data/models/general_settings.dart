@@ -88,6 +88,7 @@ class GeneralSettings with FastEquatable {
   final bool allowClipboardAccess;
   final bool tabListShowFavicons;
   final bool quickTabSwitcherShowTitles;
+  final bool quickTabSwitcherShowHistorySuggestions;
   final bool drawerGestureEnabled;
   final String syncServerOverride;
   final String syncTokenServerOverride;
@@ -131,6 +132,7 @@ class GeneralSettings with FastEquatable {
     required this.allowClipboardAccess,
     required this.tabListShowFavicons,
     required this.quickTabSwitcherShowTitles,
+    required this.quickTabSwitcherShowHistorySuggestions,
     required this.drawerGestureEnabled,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
@@ -175,6 +177,7 @@ class GeneralSettings with FastEquatable {
     bool? allowClipboardAccess,
     bool? tabListShowFavicons,
     bool? quickTabSwitcherShowTitles,
+    bool? quickTabSwitcherShowHistorySuggestions,
     bool? drawerGestureEnabled,
     String? syncServerOverride,
     String? syncTokenServerOverride,
@@ -220,6 +223,8 @@ class GeneralSettings with FastEquatable {
        allowClipboardAccess = allowClipboardAccess ?? true,
        tabListShowFavicons = tabListShowFavicons ?? false,
        quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
+       quickTabSwitcherShowHistorySuggestions =
+           quickTabSwitcherShowHistorySuggestions ?? true,
        drawerGestureEnabled = drawerGestureEnabled ?? false,
        syncServerOverride = syncServerOverride ?? '',
        syncTokenServerOverride = syncTokenServerOverride ?? '',
@@ -273,6 +278,7 @@ class GeneralSettings with FastEquatable {
     allowClipboardAccess,
     tabListShowFavicons,
     quickTabSwitcherShowTitles,
+    quickTabSwitcherShowHistorySuggestions,
     drawerGestureEnabled,
     syncServerOverride,
     syncTokenServerOverride,

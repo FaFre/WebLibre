@@ -31,7 +31,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_sour
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 
-@DriftAccessor()
 class SyncTabsResult {
   final Set<String> deletedIsolationContextIds;
   final int deletedCount;
@@ -42,6 +41,7 @@ class SyncTabsResult {
   });
 }
 
+@DriftAccessor()
 class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   final _undoHistory = <String, TabData>{};
   Timer? _clearHistoryTimer;

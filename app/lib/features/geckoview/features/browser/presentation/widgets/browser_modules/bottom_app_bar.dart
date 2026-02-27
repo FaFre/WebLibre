@@ -47,7 +47,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -55,7 +54,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
@@ -487,29 +485,49 @@ class QuickTabSwitcher extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
-    final selectedTabId = ref.watch(selectedTabProvider);
     final showTitles = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
+    final tabStates = ref.watch(
+      quickTabSwitcherTabStatesProvider(quickTabSwitcherMode),
+    );
+    final historySuggestions = ref
+        .watch(quickTabSwitcherHistorySuggestionsProvider(quickTabSwitcherMode))
+        .value;
+    final availableItems = tabStates.value
+        .map<_QuickTabItem>(
+          (state) => (
+            id: state.$1.id,
+            title: state.$1.titleOrAuthority,
+            tabMode: state.$1.tabMode,
+            isHistory: false,
+            url: state.$1.url,
+            color: state.$2?.color,
+            tabState: state.$1,
+          ),
+        )
+        .followedBy(
+          (historySuggestions ?? []).map<_QuickTabItem>((state) {
+            final url = Uri.parse(state.url);
 
-    final tabStates = (switch (quickTabSwitcherMode) {
-      QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider),
-      QuickTabSwitcherMode.containerTabs => ref.watch(
-        selectedContainerTabStatesWithContainerProvider,
-      ),
-    }).value.where((state) => state.$1.id != selectedTabId).toList();
+            return (
+              id: state.url,
+              title: state.title ?? url.authority,
+              tabMode: TabMode.regular,
+              isHistory: true,
+              url: url,
+              color: null,
+              tabState: null,
+            );
+          }),
+        )
+        .toList();
 
-    final historyAsync = useCachedFuture(() {
-      if (tabStates.isEmpty) {
-        return ref
-            .read(historyRepositoryProvider.notifier)
-            .getVisitsPaginated(count: 25);
-      }
-
-      return Future.value(<VisitInfo>[]);
-    }, [tabStates.isEmpty]);
+    if (availableItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     final chipScrollController = useScrollController();
 
@@ -618,33 +636,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
               },
             );
           },
-          availableItems: tabStates
-              .map<_QuickTabItem>(
-                (state) => (
-                  id: state.$1.id,
-                  title: state.$1.titleOrAuthority,
-                  tabMode: state.$1.tabMode,
-                  isHistory: false,
-                  url: state.$1.url,
-                  color: state.$2?.color,
-                  tabState: state.$1,
-                ),
-              )
-              .followedBy(
-                (historyAsync.data ?? []).map<_QuickTabItem>((state) {
-                  final url = Uri.parse(state.url);
-
-                  return (
-                    id: state.url,
-                    title: state.title ?? url.authority,
-                    tabMode: TabMode.regular,
-                    isHistory: true,
-                    url: url,
-                    color: null,
-                    tabState: null,
-                  );
-                }),
-              ),
+          availableItems: availableItems,
         ),
       ),
     );

@@ -27,8 +27,10 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
@@ -37,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
@@ -206,6 +209,82 @@ selectedContainerTabStatesWithContainer(Ref ref) {
           ),
         ),
   ]);
+}
+
+@Riverpod()
+EquatableValue<List<TabStateWirthContainer>> quickTabSwitcherTabStates(
+  Ref ref,
+  QuickTabSwitcherMode mode,
+) {
+  final selectedTabId = ref.watch(selectedTabProvider);
+
+  final tabStates = switch (mode) {
+    QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider).value,
+    QuickTabSwitcherMode.containerTabs =>
+      ref.watch(selectedContainerTabStatesWithContainerProvider).value,
+  };
+
+  return EquatableValue(
+    tabStates.where((state) => state.$1.id != selectedTabId).toList(),
+  );
+}
+
+@Riverpod()
+Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
+  Ref ref,
+  QuickTabSwitcherMode mode,
+) async {
+  final showHistorySuggestions = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.quickTabSwitcherShowHistorySuggestions,
+    ),
+  );
+
+  if (!showHistorySuggestions) {
+    return [];
+  }
+
+  final hasTabStates = ref.watch(
+    quickTabSwitcherTabStatesProvider(
+      mode,
+    ).select((value) => value.value.isNotEmpty),
+  );
+  if (hasTabStates) {
+    return [];
+  }
+
+  return ref
+      .read(historyRepositoryProvider.notifier)
+      .getVisitsPaginated(count: 25);
+}
+
+@Riverpod()
+AsyncValue<bool> quickTabSwitcherHasResults(
+  Ref ref,
+  QuickTabSwitcherMode mode,
+) {
+  final showQuickTabSwitcherBar = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.tabBarShowQuickTabSwitcherBar,
+    ),
+  );
+  if (!showQuickTabSwitcherBar) {
+    return const AsyncValue.data(false);
+  }
+
+  final hasResults = ref.watch(
+    quickTabSwitcherTabStatesProvider(
+      mode,
+    ).select((value) => value.value.isNotEmpty),
+  );
+
+  if (hasResults) {
+    return const AsyncValue.data(true);
+  }
+
+  return ref
+      .watch(quickTabSwitcherHistorySuggestionsProvider(mode))
+      .whenData((visits) => visits.isNotEmpty);
 }
 
 @Riverpod()

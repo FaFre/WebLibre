@@ -39,6 +39,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
@@ -274,6 +275,16 @@ class BrowserScreen extends HookConsumerWidget {
         (value) => value.tabBarShowQuickTabSwitcherBar,
       ),
     );
+    final quickTabSwitcherMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.quickTabSwitcherMode,
+      ),
+    );
+    final quickTabSwitcherHasResults = ref.watch(
+      quickTabSwitcherHasResultsProvider(quickTabSwitcherMode),
+    );
+    final displayQuickTabSwitcherBar =
+        showQuickTabSwitcherBar && (quickTabSwitcherHasResults.value ?? false);
 
     final autoHideTabBar = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -373,7 +384,7 @@ class BrowserScreen extends HookConsumerWidget {
     final bottomAppBarContentSize = BrowserBottomAppBar(
       showMainToolbar: tabBarPosition == TabBarPosition.bottom,
       showContextualToolbar: showContextualToolbar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
       displayedSheet: displayedSheet,
     ).preferredSize;
     // Total height includes safe area padding
@@ -391,7 +402,7 @@ class BrowserScreen extends HookConsumerWidget {
     final topAppBarContentSize = BrowserTopAppBar(
       showMainToolbar: tabBarPosition == TabBarPosition.top,
       showContextualToolbar: showContextualToolbar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
     ).preferredSize;
     final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
 
@@ -608,7 +619,7 @@ class BrowserScreen extends HookConsumerWidget {
                     tabBarPosition: TabBarPosition.bottom,
                     showMainToolbar: tabBarPosition == TabBarPosition.bottom,
                     showContextualToolbar: showContextualToolbar,
-                    showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+                    showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
                     // Only subscribe to scroll events when this is the active position
                     pointerMoveEvents: tabBarPosition == TabBarPosition.bottom
                         ? pointerMoveEventsController.stream
@@ -631,7 +642,7 @@ class BrowserScreen extends HookConsumerWidget {
                       tabBarPosition: TabBarPosition.top,
                       showMainToolbar: true,
                       showContextualToolbar: showContextualToolbar,
-                      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+                      showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
                       pointerMoveEvents: pointerMoveEventsController.stream,
                     ),
                   ),

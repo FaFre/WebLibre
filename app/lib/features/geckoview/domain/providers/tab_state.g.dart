@@ -258,7 +258,7 @@ final class IsTabTunneledProvider
   }
 }
 
-String _$isTabTunneledHash() => r'7265f5e6f32056846d3df38f48476d10c3a70bac';
+String _$isTabTunneledHash() => r'b11134b33ad0c98ffddd14afc2c790fb65735e93';
 
 final class IsTabTunneledFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
@@ -358,7 +358,7 @@ final class SelectedTabTypeProvider
   }
 }
 
-String _$selectedTabTypeHash() => r'fe14b5c9f81d8f5859ae9d758e440c42908e8a54';
+String _$selectedTabTypeHash() => r'4cf99c9175357a7835fc3c4eff29a9f328931e4f';
 
 @ProviderFor(selectedTabContainerId)
 final selectedTabContainerIdProvider = SelectedTabContainerIdProvider._();
