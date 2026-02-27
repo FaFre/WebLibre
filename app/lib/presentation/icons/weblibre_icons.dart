@@ -21,7 +21,8 @@ import 'package:flutter/widgets.dart';
 
 enum WebLibreIcons implements IconData {
   privateTab(0xEA01),
-  tabOptions(0xEA02);
+  tabOptions(0xEA02),
+  tabType(0xEA03);
 
   const WebLibreIcons(this.codePoint);
 

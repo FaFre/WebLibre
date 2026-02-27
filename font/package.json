@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "svgtofont": "^6.5.1"
+  },
+  "scripts": {
+    "svgtofont": "svgtofont --sources ./src/assets/icons --output ./src/assets/generated-icons"
+  }
+}

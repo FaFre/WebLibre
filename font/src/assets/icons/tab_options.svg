@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="mdi-tab"
+   viewBox="0 0 24 24"
+   version="1.1"
+   sodipodi:docname="tab_options.svg"
+   xml:space="preserve"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="33.580037"
+     inkscape:cx="11.405586"
+     inkscape:cy="15.500281"
+     inkscape:window-width="1920"
+     inkscape:window-height="1126"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="mdi-tab" /><path
+     d="M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M21,19H3V5H13V9H21V19Z"
+     id="path1" /><path
+     d="m 15.6,14.011339 a 1.8,1.8 0 0 1 1.8,-1.8 1.8,1.8 0 0 1 1.8,1.8 1.8,1.8 0 0 1 -1.8,1.8 1.8,1.8 0 0 1 -1.8,-1.8 m -5.4,0 a 1.8,1.8 0 0 1 1.8,-1.8 1.8,1.8 0 0 1 1.8,1.8 1.8,1.8 0 0 1 -1.8,1.8 1.8,1.8 0 0 1 -1.8,-1.8 m -5.4,0 a 1.8,1.8 0 0 1 1.8,-1.8 1.8,1.8 0 0 1 1.8,1.8 1.8,1.8 0 0 1 -1.8,1.8 1.8,1.8 0 0 1 -1.8,-1.8 z"
+     id="path1-9"
+     style="stroke-width:0.9" /></svg>

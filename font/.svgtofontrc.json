@@ -1,0 +1,15 @@
+{
+    "emptyDist": true,
+    "fontName": "WebLibre",
+    "css": false,
+    "outSVGReact": false,
+    "outSVGReactNative": false,
+    "outSVGVue": false,
+    "excludeFormat": [
+        "eot",
+        "woff",
+        "woff2",
+        "svg",
+        "symbol.svg"
+    ]
+}
