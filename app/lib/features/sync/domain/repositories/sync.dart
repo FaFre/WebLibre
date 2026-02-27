@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/entities/synced_tab_item.dart';
@@ -281,7 +282,7 @@ class SyncRepository extends _$SyncRepository {
         .addTab(
           url: uri,
           selectTab: true,
-          private: false,
+          tabMode: TabMode.regular,
           containerSelection: assignedContainer == null
               ? const TabContainerSelection.unassigned()
               : TabContainerSelection.specific(assignedContainer),

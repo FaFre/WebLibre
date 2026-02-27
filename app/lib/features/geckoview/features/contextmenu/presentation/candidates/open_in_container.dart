@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/entities/tab_container_select
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -89,12 +90,13 @@ class OpenInContainer extends HookConsumerWidget {
         if (selectedContainer == null || !context.mounted) return;
 
         final currentTab = ref.read(selectedTabStateProvider);
-        final isPrivate =
-            currentTab?.isPrivate ??
-            ref
-                    .read(generalSettingsWithDefaultsProvider)
-                    .defaultCreateTabType ==
-                TabType.private;
+        final tabMode =
+            currentTab?.tabMode ??
+            TabMode.fromTabType(
+              ref
+                  .read(generalSettingsWithDefaultsProvider)
+                  .defaultCreateTabType,
+            );
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)
@@ -102,7 +104,7 @@ class OpenInContainer extends HookConsumerWidget {
               url: hitResult.tryGetLink(),
               parentId: currentTab?.id,
               selectTab: false,
-              private: isPrivate,
+              tabMode: tabMode,
               containerSelection: TabContainerSelection.specific(
                 selectedContainer,
               ),

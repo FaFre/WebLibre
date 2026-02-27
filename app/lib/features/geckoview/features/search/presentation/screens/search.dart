@@ -40,6 +40,8 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/full_search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -92,14 +94,23 @@ class SearchScreen extends HookConsumerWidget {
     // Determine if we're in edit mode (tabId provided AND tab still exists)
     final isEditMode = tabId != null && existingTabState != null;
 
-    // Derive private mode from existing tab or from selector
-    final privateTabMode = isEditMode
-        ? existingTabState.isPrivate
+    final effectiveTabMode = isEditMode
+        ? existingTabState.tabMode
         : switch (selectedTabType.value) {
-            TabType.regular => false,
-            TabType.private => true,
-            TabType.child => currentTabTabType == TabType.private,
+            TabType.regular => TabMode.regular,
+            TabType.private => TabMode.private,
+            TabType.isolated => TabMode.newIsolated(),
+            TabType.child => switch (currentTabTabType) {
+              TabType.private => TabMode.private,
+              TabType.isolated => TabMode.isolated(
+                ref.watch(selectedTabStateProvider)?.isolationContextId ??
+                    newIsolatedContextId(),
+              ),
+              _ => TabMode.regular,
+            },
           };
+
+    final privateTabMode = effectiveTabMode is PrivateTabMode;
 
     final searchTextController = useTextEditingController(
       text: initialSearchText,
@@ -240,7 +251,7 @@ class SearchScreen extends HookConsumerWidget {
               .read(tabRepositoryProvider.notifier)
               .addTab(
                 url: searchUri,
-                private: privateTabMode,
+                tabMode: effectiveTabMode,
                 parentId: (selectedTabType.value == TabType.child)
                     ? ref.read(selectedTabProvider)
                     : null,
@@ -279,7 +290,7 @@ class SearchScreen extends HookConsumerWidget {
                         child: Row(
                           children: [
                             Expanded(
-                              flex: 3,
+                              flex: 4,
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: Focus(
@@ -300,18 +311,24 @@ class SearchScreen extends HookConsumerWidget {
                                           TabType.regular => null,
                                           TabType.private =>
                                             appColors.privateSelectionOverlay,
+                                          TabType.isolated =>
+                                            appColors.isolatedSelectionOverlay,
                                           TabType.child =>
-                                            (currentTabTabType ==
-                                                    TabType.private)
-                                                ? appColors
-                                                      .privateSelectionOverlay
-                                                : null,
+                                            switch (currentTabTabType) {
+                                              TabType.private =>
+                                                appColors
+                                                    .privateSelectionOverlay,
+                                              TabType.isolated =>
+                                                appColors
+                                                    .isolatedSelectionOverlay,
+                                              _ => null,
+                                            },
                                         },
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 8),
                             Flexible(
                               flex: 2,
                               child: Align(
@@ -390,7 +407,7 @@ class SearchScreen extends HookConsumerWidget {
                                   .read(tabRepositoryProvider.notifier)
                                   .addTab(
                                     url: newUrl,
-                                    private: privateTabMode,
+                                    tabMode: effectiveTabMode,
                                     parentId:
                                         (selectedTabType.value == TabType.child)
                                         ? ref.read(selectedTabProvider)
@@ -447,7 +464,7 @@ class SearchScreen extends HookConsumerWidget {
                         .read(tabRepositoryProvider.notifier)
                         .addTab(
                           url: uri,
-                          private: privateTabMode,
+                          tabMode: effectiveTabMode,
                           parentId: (selectedTabType.value == TabType.child)
                               ? ref.read(selectedTabProvider)
                               : null,

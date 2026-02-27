@@ -22,10 +22,10 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -45,12 +45,13 @@ class OpenInNewTab extends HookConsumerWidget {
       title: const Text('Open in new tab'),
       onTap: () async {
         final currentTab = ref.read(selectedTabStateProvider);
-        final isPrivate =
-            currentTab?.isPrivate ??
-            ref
-                    .read(generalSettingsWithDefaultsProvider)
-                    .defaultCreateTabType ==
-                TabType.private;
+        final tabMode =
+            currentTab?.tabMode ??
+            TabMode.fromTabType(
+              ref
+                  .read(generalSettingsWithDefaultsProvider)
+                  .defaultCreateTabType,
+            );
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)
@@ -58,7 +59,7 @@ class OpenInNewTab extends HookConsumerWidget {
               url: hitResult.tryGetLink(),
               parentId: currentTab?.id,
               selectTab: false,
-              private: isPrivate,
+              tabMode: tabMode,
             );
 
         if (context.mounted) {

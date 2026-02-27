@@ -11,12 +11,14 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/converte
     as i5;
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart'
     as i6;
-import 'package:weblibre/data/database/converters/uri.dart' as i7;
-import 'package:drift/internal/modular.dart' as i8;
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart'
+    as i7;
+import 'package:weblibre/data/database/converters/uri.dart' as i8;
+import 'package:drift/internal/modular.dart' as i9;
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart'
-    as i9;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart'
     as i10;
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart'
+    as i11;
 
 typedef $ContainerCreateCompanionBuilder =
     i3.ContainerCompanion Function({
@@ -47,10 +49,10 @@ final class $ContainerReferences
   static i0.MultiTypedResultKey<i3.Tab, List<i3.TabData>> _tabRefsTable(
     i0.GeneratedDatabase db,
   ) => i0.MultiTypedResultKey.fromTable(
-    i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
+    i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
     aliasName: i0.$_aliasNameGenerator(
-      i8.ReadDatabaseContainer(db).resultSet<i3.Container>('container').id,
-      i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
+      i9.ReadDatabaseContainer(db).resultSet<i3.Container>('container').id,
+      i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
     ),
   );
 
@@ -58,7 +60,7 @@ final class $ContainerReferences
     final manager = i3
         .$TabTableManager(
           $_db,
-          i8.ReadDatabaseContainer($_db).resultSet<i3.Tab>('tab'),
+          i9.ReadDatabaseContainer($_db).resultSet<i3.Tab>('tab'),
         )
         .filter((f) => f.containerId.id.sqlEquals($_itemColumn<String>('id')!));
 
@@ -110,7 +112,7 @@ class $ContainerFilterComposer
     final i3.$TabFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+      referencedTable: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
       getReferencedColumn: (t) => t.containerId,
       builder:
           (
@@ -119,7 +121,7 @@ class $ContainerFilterComposer
             $removeJoinBuilderFromRootComposer,
           }) => i3.$TabFilterComposer(
             $db: $db,
-            $table: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $table: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -188,7 +190,7 @@ class $ContainerAnnotationComposer
     final i3.$TabAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+      referencedTable: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
       getReferencedColumn: (t) => t.containerId,
       builder:
           (
@@ -197,7 +199,7 @@ class $ContainerAnnotationComposer
             $removeJoinBuilderFromRootComposer,
           }) => i3.$TabAnnotationComposer(
             $db: $db,
-            $table: i8.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $table: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -275,7 +277,7 @@ class $ContainerTableManager
               db: db,
               explicitlyWatchedTables: [
                 if (tabRefs)
-                  i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
+                  i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -329,7 +331,8 @@ typedef $TabCreateCompanionBuilder =
       required String orderKey,
       i0.Value<Uri?> url,
       i0.Value<String?> title,
-      i0.Value<bool?> isPrivate,
+      i0.Value<i7.TabModeDbValue> tabMode,
+      i0.Value<String?> isolationContextId,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -347,7 +350,8 @@ typedef $TabUpdateCompanionBuilder =
       i0.Value<String> orderKey,
       i0.Value<Uri?> url,
       i0.Value<String?> title,
-      i0.Value<bool?> isPrivate,
+      i0.Value<i7.TabModeDbValue> tabMode,
+      i0.Value<String?> isolationContextId,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -362,12 +366,12 @@ final class $TabReferences
   $TabReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static i3.Container _containerIdTable(i0.GeneratedDatabase db) =>
-      i8.ReadDatabaseContainer(db)
+      i9.ReadDatabaseContainer(db)
           .resultSet<i3.Container>('container')
           .createAlias(
             i0.$_aliasNameGenerator(
-              i8.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
-              i8.ReadDatabaseContainer(
+              i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
+              i9.ReadDatabaseContainer(
                 db,
               ).resultSet<i3.Container>('container').id,
             ),
@@ -379,7 +383,7 @@ final class $TabReferences
     final manager = i3
         .$ContainerTableManager(
           $_db,
-          i8.ReadDatabaseContainer($_db).resultSet<i3.Container>('container'),
+          i9.ReadDatabaseContainer($_db).resultSet<i3.Container>('container'),
         )
         .filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_containerIdTable($_db));
@@ -430,8 +434,14 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnFilters(column),
   );
 
-  i0.ColumnFilters<bool> get isPrivate => $composableBuilder(
-    column: $table.isPrivate,
+  i0.ColumnWithTypeConverterFilters<i7.TabModeDbValue, i7.TabModeDbValue, int>
+  get tabMode => $composableBuilder(
+    column: $table.tabMode,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
+  i0.ColumnFilters<String> get isolationContextId => $composableBuilder(
+    column: $table.isolationContextId,
     builder: (column) => i0.ColumnFilters(column),
   );
 
@@ -469,7 +479,7 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     final i3.$ContainerFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.containerId,
-      referencedTable: i8.ReadDatabaseContainer(
+      referencedTable: i9.ReadDatabaseContainer(
         $db,
       ).resultSet<i3.Container>('container'),
       getReferencedColumn: (t) => t.id,
@@ -480,7 +490,7 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
             $removeJoinBuilderFromRootComposer,
           }) => i3.$ContainerFilterComposer(
             $db: $db,
-            $table: i8.ReadDatabaseContainer(
+            $table: i9.ReadDatabaseContainer(
               $db,
             ).resultSet<i3.Container>('container'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -531,8 +541,13 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
-  i0.ColumnOrderings<bool> get isPrivate => $composableBuilder(
-    column: $table.isPrivate,
+  i0.ColumnOrderings<int> get tabMode => $composableBuilder(
+    column: $table.tabMode,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get isolationContextId => $composableBuilder(
+    column: $table.isolationContextId,
     builder: (column) => i0.ColumnOrderings(column),
   );
 
@@ -570,7 +585,7 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     final i3.$ContainerOrderingComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.containerId,
-      referencedTable: i8.ReadDatabaseContainer(
+      referencedTable: i9.ReadDatabaseContainer(
         $db,
       ).resultSet<i3.Container>('container'),
       getReferencedColumn: (t) => t.id,
@@ -581,7 +596,7 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
             $removeJoinBuilderFromRootComposer,
           }) => i3.$ContainerOrderingComposer(
             $db: $db,
-            $table: i8.ReadDatabaseContainer(
+            $table: i9.ReadDatabaseContainer(
               $db,
             ).resultSet<i3.Container>('container'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -620,8 +635,13 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
   i0.GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
 
-  i0.GeneratedColumn<bool> get isPrivate =>
-      $composableBuilder(column: $table.isPrivate, builder: (column) => column);
+  i0.GeneratedColumnWithTypeConverter<i7.TabModeDbValue, int> get tabMode =>
+      $composableBuilder(column: $table.tabMode, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get isolationContextId => $composableBuilder(
+    column: $table.isolationContextId,
+    builder: (column) => column,
+  );
 
   i0.GeneratedColumn<bool> get isProbablyReaderable => $composableBuilder(
     column: $table.isProbablyReaderable,
@@ -655,7 +675,7 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     final i3.$ContainerAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.containerId,
-      referencedTable: i8.ReadDatabaseContainer(
+      referencedTable: i9.ReadDatabaseContainer(
         $db,
       ).resultSet<i3.Container>('container'),
       getReferencedColumn: (t) => t.id,
@@ -666,7 +686,7 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
             $removeJoinBuilderFromRootComposer,
           }) => i3.$ContainerAnnotationComposer(
             $db: $db,
-            $table: i8.ReadDatabaseContainer(
+            $table: i9.ReadDatabaseContainer(
               $db,
             ).resultSet<i3.Container>('container'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -714,7 +734,8 @@ class $TabTableManager
                 i0.Value<String> orderKey = const i0.Value.absent(),
                 i0.Value<Uri?> url = const i0.Value.absent(),
                 i0.Value<String?> title = const i0.Value.absent(),
-                i0.Value<bool?> isPrivate = const i0.Value.absent(),
+                i0.Value<i7.TabModeDbValue> tabMode = const i0.Value.absent(),
+                i0.Value<String?> isolationContextId = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -732,7 +753,8 @@ class $TabTableManager
                 orderKey: orderKey,
                 url: url,
                 title: title,
-                isPrivate: isPrivate,
+                tabMode: tabMode,
+                isolationContextId: isolationContextId,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -750,7 +772,8 @@ class $TabTableManager
                 required String orderKey,
                 i0.Value<Uri?> url = const i0.Value.absent(),
                 i0.Value<String?> title = const i0.Value.absent(),
-                i0.Value<bool?> isPrivate = const i0.Value.absent(),
+                i0.Value<i7.TabModeDbValue> tabMode = const i0.Value.absent(),
+                i0.Value<String?> isolationContextId = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -768,7 +791,8 @@ class $TabTableManager
                 orderKey: orderKey,
                 url: url,
                 title: title,
-                isPrivate: isPrivate,
+                tabMode: tabMode,
+                isolationContextId: isolationContextId,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -1269,14 +1293,25 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  late final i0.GeneratedColumn<bool> isPrivate = i0.GeneratedColumn<bool>(
-    'is_private',
+  late final i0.GeneratedColumnWithTypeConverter<i7.TabModeDbValue, int>
+  tabMode = i0.GeneratedColumn<int>(
+    'tab_mode',
     aliasedName,
-    true,
-    type: i0.DriftSqlType.bool,
+    false,
+    type: i0.DriftSqlType.int,
     requiredDuringInsert: false,
-    $customConstraints: '',
-  );
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const i0.CustomExpression('0'),
+  ).withConverter<i7.TabModeDbValue>(i3.Tab.$convertertabMode);
+  late final i0.GeneratedColumn<String> isolationContextId =
+      i0.GeneratedColumn<String>(
+        'isolation_context_id',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
   late final i0.GeneratedColumn<bool> isProbablyReaderable =
       i0.GeneratedColumn<bool>(
         'is_probably_readerable',
@@ -1340,7 +1375,8 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     orderKey,
     url,
     title,
-    isPrivate,
+    tabMode,
+    isolationContextId,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -1391,9 +1427,15 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
         i0.DriftSqlType.string,
         data['${effectivePrefix}title'],
       ),
-      isPrivate: attachedDatabase.typeMapping.read(
-        i0.DriftSqlType.bool,
-        data['${effectivePrefix}is_private'],
+      tabMode: i3.Tab.$convertertabMode.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.int,
+          data['${effectivePrefix}tab_mode'],
+        )!,
+      ),
+      isolationContextId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}isolation_context_id'],
       ),
       isProbablyReaderable: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.bool,
@@ -1430,7 +1472,13 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
   static i0.JsonTypeConverter2<i6.TabSource, int, int> $convertersource =
       const i0.EnumIndexConverter<i6.TabSource>(i6.TabSource.values);
   static i0.TypeConverter<Uri?, String?> $converterurl =
-      const i7.UriConverterNullable();
+      const i8.UriConverterNullable();
+  static i0.JsonTypeConverter2<i7.TabModeDbValue, int, int> $convertertabMode =
+      const i0.EnumIndexConverter<i7.TabModeDbValue>(i7.TabModeDbValue.values);
+  @override
+  List<String> get customConstraints => const [
+    'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+  ];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -1443,7 +1491,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   final String orderKey;
   final Uri? url;
   final String? title;
-  final bool? isPrivate;
+  final i7.TabModeDbValue tabMode;
+  final String? isolationContextId;
   final bool? isProbablyReaderable;
   final String? extractedContentMarkdown;
   final String? extractedContentPlain;
@@ -1458,7 +1507,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     required this.orderKey,
     this.url,
     this.title,
-    this.isPrivate,
+    required this.tabMode,
+    this.isolationContextId,
     this.isProbablyReaderable,
     this.extractedContentMarkdown,
     this.extractedContentPlain,
@@ -1486,8 +1536,13 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     if (!nullToAbsent || title != null) {
       map['title'] = i0.Variable<String>(title);
     }
-    if (!nullToAbsent || isPrivate != null) {
-      map['is_private'] = i0.Variable<bool>(isPrivate);
+    {
+      map['tab_mode'] = i0.Variable<int>(
+        i3.Tab.$convertertabMode.toSql(tabMode),
+      );
+    }
+    if (!nullToAbsent || isolationContextId != null) {
+      map['isolation_context_id'] = i0.Variable<String>(isolationContextId);
     }
     if (!nullToAbsent || isProbablyReaderable != null) {
       map['is_probably_readerable'] = i0.Variable<bool>(isProbablyReaderable);
@@ -1527,7 +1582,12 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       orderKey: serializer.fromJson<String>(json['order_key']),
       url: serializer.fromJson<Uri?>(json['url']),
       title: serializer.fromJson<String?>(json['title']),
-      isPrivate: serializer.fromJson<bool?>(json['is_private']),
+      tabMode: i3.Tab.$convertertabMode.fromJson(
+        serializer.fromJson<int>(json['tab_mode']),
+      ),
+      isolationContextId: serializer.fromJson<String?>(
+        json['isolation_context_id'],
+      ),
       isProbablyReaderable: serializer.fromJson<bool?>(
         json['is_probably_readerable'],
       ),
@@ -1557,7 +1617,10 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       'order_key': serializer.toJson<String>(orderKey),
       'url': serializer.toJson<Uri?>(url),
       'title': serializer.toJson<String?>(title),
-      'is_private': serializer.toJson<bool?>(isPrivate),
+      'tab_mode': serializer.toJson<int>(
+        i3.Tab.$convertertabMode.toJson(tabMode),
+      ),
+      'isolation_context_id': serializer.toJson<String?>(isolationContextId),
       'is_probably_readerable': serializer.toJson<bool?>(isProbablyReaderable),
       'extracted_content_markdown': serializer.toJson<String?>(
         extractedContentMarkdown,
@@ -1579,7 +1642,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     String? orderKey,
     i0.Value<Uri?> url = const i0.Value.absent(),
     i0.Value<String?> title = const i0.Value.absent(),
-    i0.Value<bool?> isPrivate = const i0.Value.absent(),
+    i7.TabModeDbValue? tabMode,
+    i0.Value<String?> isolationContextId = const i0.Value.absent(),
     i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
     i0.Value<String?> extractedContentMarkdown = const i0.Value.absent(),
     i0.Value<String?> extractedContentPlain = const i0.Value.absent(),
@@ -1594,7 +1658,10 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     orderKey: orderKey ?? this.orderKey,
     url: url.present ? url.value : this.url,
     title: title.present ? title.value : this.title,
-    isPrivate: isPrivate.present ? isPrivate.value : this.isPrivate,
+    tabMode: tabMode ?? this.tabMode,
+    isolationContextId: isolationContextId.present
+        ? isolationContextId.value
+        : this.isolationContextId,
     isProbablyReaderable: isProbablyReaderable.present
         ? isProbablyReaderable.value
         : this.isProbablyReaderable,
@@ -1623,7 +1690,10 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
       url: data.url.present ? data.url.value : this.url,
       title: data.title.present ? data.title.value : this.title,
-      isPrivate: data.isPrivate.present ? data.isPrivate.value : this.isPrivate,
+      tabMode: data.tabMode.present ? data.tabMode.value : this.tabMode,
+      isolationContextId: data.isolationContextId.present
+          ? data.isolationContextId.value
+          : this.isolationContextId,
       isProbablyReaderable: data.isProbablyReaderable.present
           ? data.isProbablyReaderable.value
           : this.isProbablyReaderable,
@@ -1653,7 +1723,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
-          ..write('isPrivate: $isPrivate, ')
+          ..write('tabMode: $tabMode, ')
+          ..write('isolationContextId: $isolationContextId, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -1673,7 +1744,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     orderKey,
     url,
     title,
-    isPrivate,
+    tabMode,
+    isolationContextId,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -1692,7 +1764,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           other.orderKey == this.orderKey &&
           other.url == this.url &&
           other.title == this.title &&
-          other.isPrivate == this.isPrivate &&
+          other.tabMode == this.tabMode &&
+          other.isolationContextId == this.isolationContextId &&
           other.isProbablyReaderable == this.isProbablyReaderable &&
           other.extractedContentMarkdown == this.extractedContentMarkdown &&
           other.extractedContentPlain == this.extractedContentPlain &&
@@ -1709,7 +1782,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   final i0.Value<String> orderKey;
   final i0.Value<Uri?> url;
   final i0.Value<String?> title;
-  final i0.Value<bool?> isPrivate;
+  final i0.Value<i7.TabModeDbValue> tabMode;
+  final i0.Value<String?> isolationContextId;
   final i0.Value<bool?> isProbablyReaderable;
   final i0.Value<String?> extractedContentMarkdown;
   final i0.Value<String?> extractedContentPlain;
@@ -1725,7 +1799,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     this.orderKey = const i0.Value.absent(),
     this.url = const i0.Value.absent(),
     this.title = const i0.Value.absent(),
-    this.isPrivate = const i0.Value.absent(),
+    this.tabMode = const i0.Value.absent(),
+    this.isolationContextId = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -1742,7 +1817,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     required String orderKey,
     this.url = const i0.Value.absent(),
     this.title = const i0.Value.absent(),
-    this.isPrivate = const i0.Value.absent(),
+    this.tabMode = const i0.Value.absent(),
+    this.isolationContextId = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -1762,7 +1838,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Expression<String>? orderKey,
     i0.Expression<String>? url,
     i0.Expression<String>? title,
-    i0.Expression<bool>? isPrivate,
+    i0.Expression<int>? tabMode,
+    i0.Expression<String>? isolationContextId,
     i0.Expression<bool>? isProbablyReaderable,
     i0.Expression<String>? extractedContentMarkdown,
     i0.Expression<String>? extractedContentPlain,
@@ -1779,7 +1856,9 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       if (orderKey != null) 'order_key': orderKey,
       if (url != null) 'url': url,
       if (title != null) 'title': title,
-      if (isPrivate != null) 'is_private': isPrivate,
+      if (tabMode != null) 'tab_mode': tabMode,
+      if (isolationContextId != null)
+        'isolation_context_id': isolationContextId,
       if (isProbablyReaderable != null)
         'is_probably_readerable': isProbablyReaderable,
       if (extractedContentMarkdown != null)
@@ -1802,7 +1881,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Value<String>? orderKey,
     i0.Value<Uri?>? url,
     i0.Value<String?>? title,
-    i0.Value<bool?>? isPrivate,
+    i0.Value<i7.TabModeDbValue>? tabMode,
+    i0.Value<String?>? isolationContextId,
     i0.Value<bool?>? isProbablyReaderable,
     i0.Value<String?>? extractedContentMarkdown,
     i0.Value<String?>? extractedContentPlain,
@@ -1819,7 +1899,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       orderKey: orderKey ?? this.orderKey,
       url: url ?? this.url,
       title: title ?? this.title,
-      isPrivate: isPrivate ?? this.isPrivate,
+      tabMode: tabMode ?? this.tabMode,
+      isolationContextId: isolationContextId ?? this.isolationContextId,
       isProbablyReaderable: isProbablyReaderable ?? this.isProbablyReaderable,
       extractedContentMarkdown:
           extractedContentMarkdown ?? this.extractedContentMarkdown,
@@ -1858,8 +1939,15 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     if (title.present) {
       map['title'] = i0.Variable<String>(title.value);
     }
-    if (isPrivate.present) {
-      map['is_private'] = i0.Variable<bool>(isPrivate.value);
+    if (tabMode.present) {
+      map['tab_mode'] = i0.Variable<int>(
+        i3.Tab.$convertertabMode.toSql(tabMode.value),
+      );
+    }
+    if (isolationContextId.present) {
+      map['isolation_context_id'] = i0.Variable<String>(
+        isolationContextId.value,
+      );
     }
     if (isProbablyReaderable.present) {
       map['is_probably_readerable'] = i0.Variable<bool>(
@@ -1903,7 +1991,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
-          ..write('isPrivate: $isPrivate, ')
+          ..write('tabMode: $tabMode, ')
+          ..write('isolationContextId: $isolationContextId, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -2211,7 +2300,7 @@ i0.Trigger get tabAfterUpdate => i0.Trigger(
   'tab_after_update',
 );
 
-class DefinitionsDrift extends i8.ModularAccessor {
+class DefinitionsDrift extends i9.ModularAccessor {
   DefinitionsDrift(i0.GeneratedDatabase db) : super(db);
   Future<int> optimizeFtsIndex() {
     return customInsert(
@@ -2284,19 +2373,19 @@ class DefinitionsDrift extends i8.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
-  i0.Selectable<i9.TabQueryResult> queryTabsBasic({
+  i0.Selectable<i10.TabQueryResult> queryTabsBasic({
     required String query,
     required int limit,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.is_private, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC LIMIT ?2',
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.tab_mode, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC LIMIT ?2',
       variables: [i0.Variable<String>(query), i0.Variable<int>(limit)],
       readsFrom: {tab, tabFts},
     ).map(
-      (i0.QueryRow row) => i9.TabQueryResult(
+      (i0.QueryRow row) => i10.TabQueryResult(
         id: row.read<String>('id'),
         containerId: row.readNullable<String>('container_id'),
-        isPrivate: row.readNullable<bool>('is_private'),
+        tabMode: i3.Tab.$convertertabMode.fromSql(row.read<int>('tab_mode')),
         title: row.readNullable<String>('title'),
         url: row.readNullable<String>('url'),
         cleanUrl: i3.Tab.$converterurl.fromSql(
@@ -2307,7 +2396,7 @@ class DefinitionsDrift extends i8.ModularAccessor {
     );
   }
 
-  i0.Selectable<i9.TabQueryResult> queryTabsFullContent({
+  i0.Selectable<i10.TabQueryResult> queryTabsFullContent({
     required String beforeMatch,
     required String afterMatch,
     required String ellipsis,
@@ -2316,7 +2405,7 @@ class DefinitionsDrift extends i8.ModularAccessor {
     required int limit,
   }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, t.container_id, t.is_private, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content, t.url AS clean_url,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC LIMIT ?6',
+      'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight, 3.0 AS extracted_weight, 1.0 AS full_weight) SELECT t.id, t.container_id, t.tab_mode, highlight(tab_fts, 0, ?1, ?2) AS title, highlight(tab_fts, 1, ?1, ?2) AS url, snippet(tab_fts, 2, ?1, ?2, ?3, ?4) AS extracted_content, snippet(tab_fts, 3, ?1, ?2, ?3, ?4) AS full_content, t.url AS clean_url,(bm25(tab_fts, weights.title_weight, weights.url_weight, weights.extracted_weight, weights.full_weight))AS weighted_rank FROM tab_fts(?5)AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights ORDER BY weighted_rank ASC, t.timestamp DESC LIMIT ?6',
       variables: [
         i0.Variable<String>(beforeMatch),
         i0.Variable<String>(afterMatch),
@@ -2327,10 +2416,10 @@ class DefinitionsDrift extends i8.ModularAccessor {
       ],
       readsFrom: {tab, tabFts},
     ).map(
-      (i0.QueryRow row) => i9.TabQueryResult(
+      (i0.QueryRow row) => i10.TabQueryResult(
         id: row.read<String>('id'),
         containerId: row.readNullable<String>('container_id'),
-        isPrivate: row.readNullable<bool>('is_private'),
+        tabMode: i3.Tab.$convertertabMode.fromSql(row.read<int>('tab_mode')),
         title: row.readNullable<String>('title'),
         url: row.readNullable<String>('url'),
         cleanUrl: i3.Tab.$converterurl.fromSql(
@@ -2443,13 +2532,13 @@ class DefinitionsDrift extends i8.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
-  i0.Selectable<i10.SiteAssignment> allAssignedSites() {
+  i0.Selectable<i11.SiteAssignment> allAssignedSites() {
     return customSelect(
       'SELECT container.id, COALESCE(container.metadata ->> \'\$.contextualIdentity\', \'general\') AS contextualIdentity, value AS assigned_site FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE value IS NOT NULL',
       variables: [],
       readsFrom: {container},
     ).map(
-      (i0.QueryRow row) => i10.SiteAssignment(
+      (i0.QueryRow row) => i11.SiteAssignment(
         id: row.read<String>('id'),
         contextualIdentity: row.read<String>('contextualIdentity'),
         assignedSite: row.readNullable<String>('assigned_site'),
@@ -2465,14 +2554,46 @@ class DefinitionsDrift extends i8.ModularAccessor {
     ).map((i0.QueryRow row) => row.readNullable<String>('contextual_identity'));
   }
 
-  i3.TabFts get tabFts => i8.ReadDatabaseContainer(
+  i0.Selectable<int> tabsInIsolationGroup({String? contextId}) {
+    return customSelect(
+      'SELECT COUNT(*) AS count FROM tab WHERE isolation_context_id = ?1',
+      variables: [i0.Variable<String>(contextId)],
+      readsFrom: {tab},
+    ).map((i0.QueryRow row) => row.read<int>('count'));
+  }
+
+  i0.Selectable<String?> allIsolationContextIds() {
+    return customSelect(
+      'SELECT DISTINCT isolation_context_id FROM tab WHERE isolation_context_id IS NOT NULL',
+      variables: [],
+      readsFrom: {tab},
+    ).map(
+      (i0.QueryRow row) => row.readNullable<String>('isolation_context_id'),
+    );
+  }
+
+  i0.Selectable<IsolatedContextContainerPairsResult>
+  isolatedContextContainerPairs() {
+    return customSelect(
+      'SELECT DISTINCT t.isolation_context_id, t.container_id FROM tab AS t WHERE t.tab_mode = 2 AND t.isolation_context_id IS NOT NULL AND t.container_id IS NOT NULL',
+      variables: [],
+      readsFrom: {tab},
+    ).map(
+      (i0.QueryRow row) => IsolatedContextContainerPairsResult(
+        isolationContextId: row.readNullable<String>('isolation_context_id'),
+        containerId: row.readNullable<String>('container_id'),
+      ),
+    );
+  }
+
+  i3.TabFts get tabFts => i9.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.TabFts>('tab_fts');
-  i3.Container get container => i8.ReadDatabaseContainer(
+  i3.Container get container => i9.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.Container>('container');
   i3.Tab get tab =>
-      i8.ReadDatabaseContainer(attachedDatabase).resultSet<i3.Tab>('tab');
+      i9.ReadDatabaseContainer(attachedDatabase).resultSet<i3.Tab>('tab');
 }
 
 class TabTreesResult {
@@ -2492,4 +2613,13 @@ class UnorderedTabDescendantsResult {
   final String id;
   final String? parentId;
   UnorderedTabDescendantsResult({required this.id, this.parentId});
+}
+
+class IsolatedContextContainerPairsResult {
+  final String? isolationContextId;
+  final String? containerId;
+  IsolatedContextContainerPairsResult({
+    this.isolationContextId,
+    this.containerId,
+  });
 }

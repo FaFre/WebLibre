@@ -23,6 +23,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 
@@ -36,6 +37,16 @@ class TabDataRepository extends _$TabDataRepository {
     bool closeOldTab = true,
   }) async {
     final selectedTabId = ref.read(selectedTabProvider);
+    final tabState = ref.read(tabStatesProvider)[tabId];
+
+    // Isolated tabs: always do DB-only assignment (never recreate/recontext)
+    if (tabState != null && tabState.tabMode is IsolatedTabMode) {
+      await ref
+          .read(tabDatabaseProvider)
+          .tabDao
+          .assignContainer(tabId, containerId: targetContainer.id);
+      return;
+    }
 
     final currentContainerData = await getTabContainerData(tabId);
 
@@ -46,7 +57,6 @@ class TabDataRepository extends _$TabDataRepository {
           .tabDao
           .assignContainer(tabId, containerId: targetContainer.id);
     } else {
-      final tabState = ref.read(tabStatesProvider)[tabId];
       if (tabState != null) {
         if (closeOldTab) {
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
@@ -56,7 +66,7 @@ class TabDataRepository extends _$TabDataRepository {
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: tabState.url,
-              private: tabState.isPrivate,
+              tabMode: tabState.tabMode,
               containerSelection: TabContainerSelection.specific(
                 targetContainer,
               ),
@@ -69,6 +79,16 @@ class TabDataRepository extends _$TabDataRepository {
 
   Future<void> unassignContainer(String tabId) async {
     final selectedTabId = ref.read(selectedTabProvider);
+    final tabState = ref.read(tabStatesProvider)[tabId];
+
+    // Isolated tabs: always do DB-only unassignment (never recreate/recontext)
+    if (tabState != null && tabState.tabMode is IsolatedTabMode) {
+      await ref
+          .read(tabDatabaseProvider)
+          .tabDao
+          .assignContainer(tabId, containerId: null);
+      return;
+    }
 
     final currentContainerData = await getTabContainerData(tabId);
 
@@ -78,7 +98,6 @@ class TabDataRepository extends _$TabDataRepository {
           .tabDao
           .assignContainer(tabId, containerId: null);
     } else {
-      final tabState = ref.read(tabStatesProvider)[tabId];
       if (tabState != null) {
         await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
@@ -86,7 +105,7 @@ class TabDataRepository extends _$TabDataRepository {
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: tabState.url,
-              private: tabState.isPrivate,
+              tabMode: tabState.tabMode,
               containerSelection: const TabContainerSelection.unassigned(),
               // parentId defaults to null - breaks parent chain when removing contextual identity
               selectTab: selectedTabId == tabState.id,
@@ -105,6 +124,7 @@ class TabDataRepository extends _$TabDataRepository {
   Future<int> closeAllTabs({
     bool includeRegular = true,
     bool includePrivate = true,
+    bool includeIsolated = true,
   }) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
@@ -112,6 +132,7 @@ class TabDataRepository extends _$TabDataRepository {
         .getAllTabIds(
           includeRegular: includeRegular,
           includePrivate: includePrivate,
+          includeIsolated: includeIsolated,
         )
         .get();
 
@@ -126,6 +147,7 @@ class TabDataRepository extends _$TabDataRepository {
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
+    bool includeIsolated = true,
   }) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
@@ -134,6 +156,7 @@ class TabDataRepository extends _$TabDataRepository {
           containerId,
           includeRegular: includeRegular,
           includePrivate: includePrivate,
+          includeIsolated: includeIsolated,
         )
         .get();
 

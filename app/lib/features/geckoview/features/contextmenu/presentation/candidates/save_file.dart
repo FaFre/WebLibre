@@ -24,6 +24,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 class SaveFile extends HookConsumerWidget {
   final HitResult hitResult;
@@ -48,7 +49,7 @@ class SaveFile extends HookConsumerWidget {
             currentTab.id,
             url: url,
             skipConfirmation: true,
-            isPrivate: currentTab.isPrivate,
+            isPrivate: currentTab.tabMode is PrivateTabMode,
             referrerUrl: currentTab.url,
           );
 

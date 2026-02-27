@@ -50,6 +50,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -405,7 +406,7 @@ class BrowserTabBar extends HookConsumerWidget {
 typedef _QuickTabItem = ({
   Color? color,
   String id,
-  bool isPrivate,
+  TabMode tabMode,
   bool isHistory,
   String title,
   Uri url,
@@ -522,7 +523,10 @@ class QuickTabSwitcher extends HookConsumerWidget {
           scrollController: chipScrollController,
           itemId: (item) => item.id,
           labelPadding: (item) =>
-              (!showTitles && !item.isHistory && !item.isPrivate)
+              (!showTitles &&
+                  !item.isHistory &&
+                  item.tabMode is! PrivateTabMode &&
+                  item.tabMode is! IsolatedTabMode)
               ? EdgeInsets.zero
               : null,
           itemLabel: (item) {
@@ -534,7 +538,16 @@ class QuickTabSwitcher extends HookConsumerWidget {
                     constraints: const BoxConstraints(maxWidth: 64),
                     child: Text(item.title),
                   ),
-                if (item.isPrivate)
+                if (item.tabMode is IsolatedTabMode)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Icon(
+                      MdiIcons.shieldLock,
+                      color: appColors.isolatedTabTeal,
+                      size: 20,
+                    ),
+                  )
+                else if (item.tabMode is PrivateTabMode)
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Icon(
@@ -567,7 +580,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
             if (item.isHistory) {
               await ref
                   .read(tabRepositoryProvider.notifier)
-                  .addTab(url: item.url, private: false, selectTab: true);
+                  .addTab(
+                    url: item.url,
+                    tabMode: TabMode.regular,
+                    selectTab: true,
+                  );
             } else {
               await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
             }
@@ -606,7 +623,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
                 (state) => (
                   id: state.$1.id,
                   title: state.$1.titleOrAuthority,
-                  isPrivate: state.$1.isPrivate,
+                  tabMode: state.$1.tabMode,
                   isHistory: false,
                   url: state.$1.url,
                   color: state.$2?.color,
@@ -620,7 +637,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   return (
                     id: state.url,
                     title: state.title ?? url.authority,
-                    isPrivate: false,
+                    tabMode: TabMode.regular,
                     isHistory: true,
                     url: url,
                     color: null,

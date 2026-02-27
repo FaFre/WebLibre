@@ -25,10 +25,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
@@ -39,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_private_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
@@ -482,6 +485,7 @@ class TabViewHeader extends HookConsumerWidget {
                                         .closeContainerTabs(
                                           selectedContainerId,
                                           includeRegular: false,
+                                          includeIsolated: false,
                                         );
 
                                     if (context.mounted) {
@@ -498,6 +502,55 @@ class TabViewHeader extends HookConsumerWidget {
                                   }
                                 },
                           child: const Text('Close Private Tabs'),
+                        ),
+                        MenuItemButton(
+                          leadingIcon: Icon(
+                            MdiIcons.shieldLock,
+                            color: AppColors.of(context).isolatedTabTeal,
+                          ),
+                          onPressed: isSyncedScope
+                              ? null
+                              : () async {
+                                  // Count distinct isolation groups that will be destroyed
+                                  final allStates = ref.read(tabStatesProvider);
+                                  final isolatedContextIds = allStates.values
+                                      .where(
+                                        (s) =>
+                                            s.tabMode is IsolatedTabMode &&
+                                            s.isolationContextId != null,
+                                      )
+                                      .map((s) => s.isolationContextId!)
+                                      .toSet();
+
+                                  if (isolatedContextIds.isNotEmpty &&
+                                      context.mounted) {
+                                    final confirmed = await ui_helper
+                                        .confirmIsolatedTabClose(
+                                          context,
+                                          groupCount: isolatedContextIds.length,
+                                        );
+                                    if (!confirmed) return;
+                                  }
+
+                                  final count = await ref
+                                      .read(tabDataRepositoryProvider.notifier)
+                                      .closeContainerTabs(
+                                        selectedContainerId,
+                                        includeRegular: false,
+                                        includePrivate: false,
+                                      );
+
+                                  if (context.mounted) {
+                                    ui_helper.showTabUndoClose(
+                                      context,
+                                      ref
+                                          .read(tabRepositoryProvider.notifier)
+                                          .undoClose,
+                                      count: count.length,
+                                    );
+                                  }
+                                },
+                          child: const Text('Close Isolated Tabs'),
                         ),
                         const Divider(),
                         MenuItemButton(
@@ -652,14 +705,23 @@ class TabViewHeader extends HookConsumerWidget {
                                                     startLoading: true,
                                                     parentId: parentId,
                                                     private:
-                                                        tab.isPrivate ?? false,
+                                                        tab.tabMode ==
+                                                        TabModeDbValue.private,
                                                     flags: LoadUrlFlags.NONE
                                                         .toValue(),
                                                     source: Internal.newTab
                                                         .toValue(),
-                                                    contextId: selectedContainer
-                                                        .metadata
-                                                        .contextualIdentity,
+                                                    contextId:
+                                                        tab.tabMode ==
+                                                            TabModeDbValue
+                                                                .isolated
+                                                        ? tab.isolationContextId ??
+                                                              selectedContainer
+                                                                  .metadata
+                                                                  .contextualIdentity
+                                                        : selectedContainer
+                                                              .metadata
+                                                              .contextualIdentity,
                                                   );
                                                 }).toList(),
                                                 containerSelection:

@@ -135,132 +135,135 @@ class TabSearch extends HookConsumerWidget {
       title: 'Tabs',
       moduleType: SearchModuleType.tabs,
       totalCount: filteredResultCount,
-      contentSliverBuilder: ({
-        required bool isCollapsed,
-        required int visibleCount,
-      }) => [
-        if (!isCollapsed)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ContainerChips(
-                    displayMenu: false,
-                    selectedContainer: selectedContainer.value,
-                    showUnassignedChip: containerIdsWithResults.value
-                        .containsKey(null),
-                    onSelected: (container) {
-                      selectedContainer.value = container;
-                    },
-                    onDeleted: (container) {
-                      selectedContainer.value = null;
-                    },
-                    containerFilter: (container) =>
-                        containerIdsWithResults.value.containsKey(container.id),
-                    containerBadgeCount: (container) =>
-                        containerIdsWithResults.value[container?.id] ?? 0,
-                    searchTextListenable: searchTextListenable,
+      contentSliverBuilder:
+          ({required bool isCollapsed, required int visibleCount}) => [
+            if (!isCollapsed)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ContainerChips(
+                        displayMenu: false,
+                        selectedContainer: selectedContainer.value,
+                        showUnassignedChip: containerIdsWithResults.value
+                            .containsKey(null),
+                        onSelected: (container) {
+                          selectedContainer.value = container;
+                        },
+                        onDeleted: (container) {
+                          selectedContainer.value = null;
+                        },
+                        containerFilter: (container) => containerIdsWithResults
+                            .value
+                            .containsKey(container.id),
+                        containerBadgeCount: (container) =>
+                            containerIdsWithResults.value[container?.id] ?? 0,
+                        searchTextListenable: searchTextListenable,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-        if (!isCollapsed)
-          SliverList.builder(
-            itemCount: visibleCount,
-            itemBuilder: (context, index) {
-              final result = filteredTabs[index];
+            if (!isCollapsed)
+              SliverList.builder(
+                itemCount: visibleCount,
+                itemBuilder: (context, index) {
+                  final result = filteredTabs[index];
 
-              final content =
-                  (result.extractedContent?.contains(_matchPrefix) == true)
-                  ? result.extractedContent
-                  : result.fullContent;
+                  final content =
+                      (result.extractedContent?.contains(_matchPrefix) == true)
+                      ? result.extractedContent
+                      : result.fullContent;
 
-              final titleHasMatch = result.title.contains(_matchPrefix);
-              final urlHasMatch =
-                  result.highlightedUrl?.contains(_matchPrefix) ?? false;
-              final bodyHasMatch = content?.contains(_matchPrefix) ?? false;
+                  final titleHasMatch = result.title.contains(_matchPrefix);
+                  final urlHasMatch =
+                      result.highlightedUrl?.contains(_matchPrefix) ?? false;
+                  final bodyHasMatch = content?.contains(_matchPrefix) ?? false;
 
-              return ListTile(
-                leading: RepaintBoundary(
-                  child:
-                      result.icon.mapNotNull(
-                        (icon) => SafeRawImage(
-                          image: icon,
-                          height: 24,
-                          width: 24,
-                          fallback: UrlIcon([result.url], iconSize: 24),
-                        ),
-                      ) ??
-                      UrlIcon([result.url], iconSize: 24),
-                ),
-                title: result.title.mapNotNull(
-                  (title) => Text.rich(
-                    buildHighlightedText(
-                      title,
-                      Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      _matchPrefix,
-                      _matchSuffix,
+                  return ListTile(
+                    leading: RepaintBoundary(
+                      child:
+                          result.icon.mapNotNull(
+                            (icon) => SafeRawImage(
+                              image: icon,
+                              height: 24,
+                              width: 24,
+                              fallback: UrlIcon([result.url], iconSize: 24),
+                            ),
+                          ) ??
+                          UrlIcon([result.url], iconSize: 24),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                subtitle: (bodyHasMatch || (urlHasMatch && !titleHasMatch))
-                    ? Text.rich(
+                    title: result.title.mapNotNull(
+                      (title) => Text.rich(
                         buildHighlightedText(
-                          (bodyHasMatch ? content! : result.highlightedUrl!),
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                          title,
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                          Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
                           ),
                           _matchPrefix,
                           _matchSuffix,
-                          normalizeWhitespaces: true,
                         ),
-                        maxLines: 3,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                      )
-                    : UriBreadcrumb(uri: result.url),
-                onTap: () async {
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .selectTab(result.id);
-                  if (result.sourceSearchQuery.isNotEmpty &&
-                      ref.read(findInPageControllerProvider(result.id)) ==
-                          FindInPageState.hidden()) {
-                    await ref
-                        .read(findInPageControllerProvider(result.id).notifier)
-                        .findAll(text: result.sourceSearchQuery!);
-                  }
+                      ),
+                    ),
+                    subtitle: (bodyHasMatch || (urlHasMatch && !titleHasMatch))
+                        ? Text.rich(
+                            buildHighlightedText(
+                              (bodyHasMatch
+                                  ? content!
+                                  : result.highlightedUrl!),
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              _matchPrefix,
+                              _matchSuffix,
+                              normalizeWhitespaces: true,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        : UriBreadcrumb(uri: result.url),
+                    onTap: () async {
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .selectTab(result.id);
+                      if (result.sourceSearchQuery.isNotEmpty &&
+                          ref.read(findInPageControllerProvider(result.id)) ==
+                              FindInPageState.hidden()) {
+                        await ref
+                            .read(
+                              findInPageControllerProvider(result.id).notifier,
+                            )
+                            .findAll(text: result.sourceSearchQuery!);
+                      }
 
-                  if (context.mounted) {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
+                      if (context.mounted) {
+                        ref
+                            .read(bottomSheetControllerProvider.notifier)
+                            .requestDismiss();
 
-                    const BrowserRoute().go(context);
-                  }
+                        const BrowserRoute().go(context);
+                      }
+                    },
+                  );
                 },
-              );
-            },
-          ),
-      ],
+              ),
+          ],
     );
   }
 }

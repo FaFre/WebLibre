@@ -26,6 +26,7 @@ import 'package:weblibre/extensions/ref_cache.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
@@ -88,9 +89,10 @@ Future<WebPageInfo> pageInfo(
     final torSettings = ref.read(torSettingsWithDefaultsProvider);
 
     if (containerData?.metadata.useProxy == true ||
-        (tabState.isPrivate == false &&
+        (tabState.tabMode is! PrivateTabMode &&
             torSettings.proxyRegularTabsMode == TorRegularTabProxyMode.all) ||
-        (tabState.isPrivate == true && torSettings.proxyPrivateTabsTor)) {
+        (tabState.tabMode is PrivateTabMode &&
+            torSettings.proxyPrivateTabsTor)) {
       proxyPort = await ref.read(
         torProxyServiceProvider.selectAsync((value) => value.socksPort),
       );

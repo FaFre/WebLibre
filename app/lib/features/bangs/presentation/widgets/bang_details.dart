@@ -23,6 +23,7 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -88,19 +89,15 @@ class BangDetails extends HookConsumerWidget {
                     ),
                     onPressed: () async {
                       final url = Uri.parse(bangData.getDefaultUrl().origin);
-                      final isPrivate =
-                          ref
-                              .read(generalSettingsWithDefaultsProvider)
-                              .defaultCreateTabType ==
-                          TabType.private;
+                      final tabMode = TabMode.fromTabType(
+                        ref
+                            .read(generalSettingsWithDefaultsProvider)
+                            .defaultCreateTabType,
+                      );
 
                       await ref
                           .read(tabRepositoryProvider.notifier)
-                          .addTab(
-                            url: url,
-                            private: isPrivate,
-                            selectTab: true,
-                          );
+                          .addTab(url: url, tabMode: tabMode, selectTab: true);
 
                       if (context.mounted) {
                         const BrowserRoute().go(context);

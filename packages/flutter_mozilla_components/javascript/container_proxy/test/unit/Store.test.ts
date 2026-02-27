@@ -164,4 +164,31 @@ describe('Store', () => {
       expect(relations.container2).to.be.deep.equal(['proxy2'])
     })
   })
+
+  describe('isSiteOriginInSameContext', function () {
+    it('should allow proxy-equivalent isolated context', async () => {
+      store.setSiteAssignments(new Map([['https://example.com/page', 'container_ctx']]))
+      await store.setContainerProxyRelation('container_ctx', 'proxy_ctx')
+      await store.setContainerProxyRelation('iso1_ctx', 'proxy_ctx')
+
+      const result = store.isSiteOriginInSameContext(new URL('https://example.com/other'), 'iso1_ctx')
+      expect(result).to.be.equal(true)
+    })
+
+    it('should allow exact context match', async () => {
+      store.setSiteAssignments(new Map([['https://exact.example/path', 'iso1_exact']]))
+
+      const result = store.isSiteOriginInSameContext(new URL('https://exact.example/another'), 'iso1_exact')
+      expect(result).to.be.equal(true)
+    })
+
+    it('should block when contexts are not equivalent', async () => {
+      store.setSiteAssignments(new Map([['https://blocked.example/path', 'container_blocked']]))
+      await store.setContainerProxyRelation('container_blocked', 'proxy_one')
+      await store.setContainerProxyRelation('iso1_blocked', 'proxy_two')
+
+      const result = store.isSiteOriginInSameContext(new URL('https://blocked.example/another'), 'iso1_blocked')
+      expect(result).to.be.equal(false)
+    })
+  })
 })

@@ -25,6 +25,7 @@ import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ai_configuration.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/default_search.dart';
@@ -147,7 +148,7 @@ class OnboardingScreen extends HookConsumerWidget {
                             .read(tabRepositoryProvider.notifier)
                             .addTab(
                               url: ref.read(docsUriProvider),
-                              private: false,
+                              tabMode: TabMode.regular,
                               containerSelection:
                                   const TabContainerSelection.unassigned(),
                               selectTab: true,

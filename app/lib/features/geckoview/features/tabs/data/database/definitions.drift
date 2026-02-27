@@ -4,6 +4,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 
 CREATE TABLE container (
@@ -13,7 +14,7 @@ CREATE TABLE container (
   metadata TEXT MAPPED BY `const ContainerMetadataConverter()`
 ) WITH ContainerData;
 
-CREATE TABLE tab( 
+CREATE TABLE tab(
   id TEXT PRIMARY KEY NOT NULL,
   source ENUM(TabSource) NOT NULL,
   parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
@@ -21,13 +22,18 @@ CREATE TABLE tab(
   order_key TEXT NOT NULL,
   url TEXT MAPPED BY `const UriConverterNullable()`,
   title TEXT,
-  is_private BOOL,
+  tab_mode ENUM(TabModeDbValue) NOT NULL DEFAULT 0,
+  isolation_context_id TEXT,
   is_probably_readerable BOOL,
   extracted_content_markdown TEXT,
   extracted_content_plain TEXT,
   full_content_markdown TEXT,
   full_content_plain TEXT,
-  timestamp DATETIME NOT NULL
+  timestamp DATETIME NOT NULL,
+  CHECK (
+    (tab_mode = 2 AND isolation_context_id IS NOT NULL) OR
+    (tab_mode != 2 AND isolation_context_id IS NULL)
+  )
 );
 
 CREATE VIRTUAL TABLE tab_fts 
@@ -142,58 +148,58 @@ orderKeyBeforeTab(:tab_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
 
 queryTabsBasic WITH TabQueryResult:
   WITH weights AS (
-    SELECT 
+    SELECT
       -- Customize these weights (higher = more important)
       10.0 as title_weight,       -- Title matches are most important
       5.0 as url_weight           -- URL matches are quite important
   )
-  SELECT 
+  SELECT
     t.id,
     t.container_id,
-    t.is_private,
+    t.tab_mode,
     t.title,
     CAST(t.url AS TEXT) AS url,
     t.url AS clean_url,
     bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank
   FROM tab_fts fts
   INNER JOIN
-    tab t ON t.rowid = fts.rowid 
+    tab t ON t.rowid = fts.rowid
   CROSS JOIN weights
-  WHERE 
+  WHERE
   	fts.title LIKE :query OR
   	fts.url LIKE :query
-  ORDER BY 
+  ORDER BY
 	weighted_rank ASC,
 	t.timestamp DESC
   LIMIT :limit;
 
 queryTabsFullContent WITH TabQueryResult:
   WITH weights AS (
-  SELECT 
+  SELECT
     -- Customize these weights (higher = more important)
     10.0 as title_weight,     -- Title matches are most important
     5.0 as url_weight,        -- URL matches are quite important
     3.0 as extracted_weight,  -- Extracted content matches
     1.0 as full_weight       -- Full content matches less important
   )
-  SELECT 
+  SELECT
       t.id,
       t.container_id,
-      t.is_private,
+      t.tab_mode,
       highlight(tab_fts, 0, :beforeMatch, :afterMatch) AS title,
       highlight(tab_fts, 1, :beforeMatch, :afterMatch) AS url,
       snippet(tab_fts, 2, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS extracted_content,
       snippet(tab_fts, 3, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS full_content,
       t.url AS clean_url,
       (
-        bm25(tab_fts, weights.title_weight, weights.url_weight, 
+        bm25(tab_fts, weights.title_weight, weights.url_weight,
             weights.extracted_weight, weights.full_weight)
       ) AS weighted_rank
     FROM tab_fts(:query) fts
     INNER JOIN
       tab t ON t.rowid = fts.rowid
     CROSS JOIN weights
-    ORDER BY 
+    ORDER BY
       weighted_rank ASC,
       t.timestamp DESC
     LIMIT :limit;
@@ -334,3 +340,16 @@ containersToClearOnExit:
   WHERE
     json_extract(container.metadata, '$.clearDataOnExit') = 1
     AND container.metadata ->> '$.contextualIdentity' IS NOT NULL;
+
+tabsInIsolationGroup:
+  SELECT COUNT(*) AS count FROM tab WHERE isolation_context_id = :contextId;
+
+allIsolationContextIds:
+  SELECT DISTINCT isolation_context_id FROM tab WHERE isolation_context_id IS NOT NULL;
+
+isolatedContextContainerPairs:
+  SELECT DISTINCT t.isolation_context_id, t.container_id
+  FROM tab t
+  WHERE t.tab_mode = 2
+    AND t.isolation_context_id IS NOT NULL
+    AND t.container_id IS NOT NULL;

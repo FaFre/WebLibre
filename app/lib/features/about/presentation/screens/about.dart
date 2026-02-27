@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 class AboutDialogScreen extends HookConsumerWidget {
   const AboutDialogScreen({super.key});
@@ -67,7 +68,7 @@ class AboutDialogScreen extends HookConsumerWidget {
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
                   url: Uri.https('feedback.weblibre.eu'),
-                  private: false,
+                  tabMode: TabMode.regular,
                   selectTab: true,
                 );
 
@@ -85,7 +86,7 @@ class AboutDialogScreen extends HookConsumerWidget {
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
                   url: Uri.https('github.com').replace(path: 'FaFre/WebLibre'),
-                  private: false,
+                  tabMode: TabMode.regular,
                   selectTab: true,
                 );
 
@@ -104,7 +105,7 @@ class AboutDialogScreen extends HookConsumerWidget {
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
                   url: Uri.https('docs.weblibre.eu'),
-                  private: false,
+                  tabMode: TabMode.regular,
                   selectTab: true,
                 );
 
@@ -123,7 +124,7 @@ class AboutDialogScreen extends HookConsumerWidget {
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
                   url: Uri.https('github.com').replace(path: 'FaFre/WebLibre'),
-                  private: false,
+                  tabMode: TabMode.regular,
                   selectTab: true,
                 );
 

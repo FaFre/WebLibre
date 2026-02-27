@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -39,14 +40,35 @@ import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+Future<bool> _confirmIsolatedTabCloseIfNeeded(
+  BuildContext context,
+  WidgetRef ref,
+  String tabId,
+) async {
+  final allStates = ref.read(tabStatesProvider);
+  final tabState = allStates[tabId];
+  final contextId = tabState?.isolationContextId;
+
+  if (contextId == null) return true;
+
+  final groupCount = allStates.values
+      .where((state) => state.isolationContextId == contextId)
+      .length;
+
+  if (groupCount > 1) return true;
+  if (!context.mounted) return false;
+
+  return ui_helper.confirmIsolatedTabClose(context);
+}
+
 class GridTabItemContainer extends StatelessWidget {
   final bool isActive;
-  final bool isPrivate;
+  final TabMode tabMode;
   final Widget? child;
 
   const GridTabItemContainer({
     required this.isActive,
-    required this.isPrivate,
+    required this.tabMode,
     this.child,
     super.key,
   });
@@ -55,6 +77,12 @@ class GridTabItemContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final appColors = AppColors.of(context);
+
+    final bgColor = switch (tabMode) {
+      PrivateTabMode() => appColors.privateTabBackground,
+      IsolatedTabMode() => appColors.isolatedTabBackground,
+      RegularTabMode() => colorScheme.surfaceContainerHighest,
+    };
 
     return Container(
       decoration: BoxDecoration(
@@ -65,9 +93,7 @@ class GridTabItemContainer extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(16.0)),
       ),
       child: Material(
-        color: isPrivate
-            ? appColors.privateTabBackground
-            : colorScheme.surfaceContainerHighest,
+        color: bgColor,
         borderRadius: const BorderRadius.all(Radius.circular(14.0)),
         child: child,
       ),
@@ -113,9 +139,15 @@ class GridTabPreview extends HookConsumerWidget {
 
     final extendedDeleteMenuController = useMenuController();
 
+    final modeTextColor = switch (tabState.tabMode) {
+      PrivateTabMode() => appColors.privateTabForeground,
+      IsolatedTabMode() => appColors.isolatedTabForeground,
+      RegularTabMode() => null,
+    };
+
     return GridTabItemContainer(
       isActive: isActive,
-      isPrivate: tabState.isPrivate,
+      tabMode: tabState.tabMode,
       child: InkWell(
         borderRadius: const BorderRadius.all(Radius.circular(14.0)),
         onTap: onTap,
@@ -132,8 +164,8 @@ class GridTabPreview extends HookConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       tabState.titleOrAuthority,
                       maxLines: 2,
-                      style: tabState.isPrivate
-                          ? TextStyle(color: appColors.privateTabForeground)
+                      style: modeTextColor != null
+                          ? TextStyle(color: modeTextColor)
                           : null,
                     ),
                   ),
@@ -183,14 +215,13 @@ class GridTabPreview extends HookConsumerWidget {
                 Expanded(
                   child: Text(
                     tabState.url.authority,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: tabState.isPrivate
-                          ? appColors.privateTabForeground
-                          : null,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: modeTextColor),
                   ),
                 ),
-                if (tabState.isPrivate) ...[
+                if (tabState.tabMode is PrivateTabMode ||
+                    tabState.tabMode is IsolatedTabMode) ...[
                   const SizedBox(width: 6.0),
                   SizedBox(
                     height: 16,
@@ -201,8 +232,12 @@ class GridTabPreview extends HookConsumerWidget {
                         Positioned(
                           top: -4,
                           child: Icon(
-                            MdiIcons.dominoMask,
-                            color: appColors.privateTabPurple,
+                            tabState.tabMode is IsolatedTabMode
+                                ? MdiIcons.shieldLock
+                                : MdiIcons.dominoMask,
+                            color: tabState.tabMode is IsolatedTabMode
+                                ? appColors.isolatedTabTeal
+                                : appColors.privateTabPurple,
                           ),
                         ),
                       ],
@@ -290,9 +325,25 @@ class ListTabPreview extends HookConsumerWidget {
       _ => TabIcon(tabState: tabState, iconSize: 32),
     };
 
+    final listBgColor = switch (tabState.tabMode) {
+      PrivateTabMode() => appColors.privateTabBackground,
+      IsolatedTabMode() => appColors.isolatedTabBackground,
+      RegularTabMode() => null,
+    };
+    final listTextColor = switch (tabState.tabMode) {
+      PrivateTabMode() => appColors.privateTabForeground,
+      IsolatedTabMode() => appColors.isolatedTabForeground,
+      RegularTabMode() => null,
+    };
+    final (modeBadgeIcon, modeBadgeColor) = switch (tabState.tabMode) {
+      PrivateTabMode() => (MdiIcons.dominoMask, appColors.privateTabPurple),
+      IsolatedTabMode() => (MdiIcons.shieldLock, appColors.isolatedTabTeal),
+      RegularTabMode() => (null, null),
+    };
+
     return Container(
       decoration: BoxDecoration(
-        color: tabState.isPrivate ? appColors.privateTabBackground : null,
+        color: listBgColor,
         border: isActive ? Border.all(color: colorScheme.primary) : null,
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
       ),
@@ -309,28 +360,22 @@ class ListTabPreview extends HookConsumerWidget {
                 overflow: TextOverflow.ellipsis,
                 tabState.titleOrAuthority,
                 maxLines: 2,
-                style: tabState.isPrivate
-                    ? TextStyle(color: appColors.privateTabForeground)
+                style: listTextColor != null
+                    ? TextStyle(color: listTextColor)
                     : null,
               ),
               subtitle: Row(
                 children: [
-                  if (tabState.isPrivate) ...[
-                    Icon(
-                      MdiIcons.dominoMask,
-                      color: appColors.privateTabPurple,
-                      size: 14,
-                    ),
+                  if (modeBadgeIcon != null) ...[
+                    Icon(modeBadgeIcon, color: modeBadgeColor, size: 14),
                     const SizedBox(width: 4),
                   ],
                   Expanded(
                     child: UriBreadcrumb(
                       uri: tabState.url,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: tabState.isPrivate
-                            ? appColors.privateTabForeground
-                            : null,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: listTextColor),
                     ),
                   ),
                 ],
@@ -463,6 +508,11 @@ class SingleGridTabPreview extends HookConsumerWidget {
       },
       onHorizontalDragEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
+          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
+            draggedDistance.value = 0.0;
+            return;
+          }
+
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
           if (context.mounted) {
@@ -525,6 +575,10 @@ class SingleGridTabPreview extends HookConsumerWidget {
           onDelete: () async {
             onBeforeDelete?.call();
 
+            if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
+              return;
+            }
+
             await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
             if (context.mounted) {
@@ -579,6 +633,11 @@ class SingleListTabPreview extends HookConsumerWidget {
       },
       onHorizontalDragEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
+          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
+            draggedDistance.value = 0.0;
+            return;
+          }
+
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
           if (context.mounted) {
@@ -640,6 +699,10 @@ class SingleListTabPreview extends HookConsumerWidget {
           // },
           onDelete: () async {
             onBeforeDelete?.call();
+
+            if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
+              return;
+            }
 
             await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 

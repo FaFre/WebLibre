@@ -31,7 +31,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 @DriftDatabase(include: {'definitions.drift'}, daos: [ContainerDao, TabDao])
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 5;
+  final int schemaVersion = 6;
 
   @override
   final int ftsTokenLimit = 10;
@@ -98,6 +98,22 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
     from4To5: (m, schema) async {
       await m.drop(schema.tabMaintainParentChainOnDelete);
       await m.create(schema.tabMaintainParentChainOnDelete);
+    },
+    from5To6: (m, schema) async {
+      await m.alterTable(
+        TableMigration(
+          schema.tab,
+          columnTransformer: {
+            // Backfill tab_mode from is_private: private=true -> 1 (private), else -> 0 (regular)
+            schema.tab.tabMode: const CustomExpression(
+              'CASE WHEN is_private = 1 THEN 1 ELSE 0 END',
+            ),
+          },
+          newColumns: [schema.tab.tabMode, schema.tab.isolationContextId],
+        ),
+      );
+
+      await m.alterTable(TableMigration(schema.tab));
     },
   );
 }

@@ -23,6 +23,7 @@ import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 part 'site_settings_badge_provider.g.dart';
 
@@ -48,7 +49,7 @@ Future<bool> showSiteSettingsBadge(Ref ref) async {
   final permissions = await ref.watch(
     sitePermissionsRepositoryProvider(
       origin: tabState.url.origin,
-      isPrivate: tabState.isPrivate,
+      isPrivate: tabState.tabMode is PrivateTabMode,
     ).future,
   );
 

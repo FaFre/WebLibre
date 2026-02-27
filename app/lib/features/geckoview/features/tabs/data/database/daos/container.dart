@@ -24,6 +24,7 @@ import 'package:drift/drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 
@@ -75,18 +76,17 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   Selectable<String> getAllTabIds({
     bool includeRegular = true,
     bool includePrivate = true,
+    bool includeIsolated = true,
   }) {
     final query = selectOnly(db.tab)..addColumns([db.tab.id]);
 
-    if (!includeRegular) {
-      query.where(
-        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(false),
-      );
-    }
-    if (!includePrivate) {
-      query.where(
-        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(true),
-      );
+    final excludedModes = <TabModeDbValue>[];
+    if (!includeRegular) excludedModes.add(TabModeDbValue.regular);
+    if (!includePrivate) excludedModes.add(TabModeDbValue.private);
+    if (!includeIsolated) excludedModes.add(TabModeDbValue.isolated);
+
+    if (excludedModes.isNotEmpty) {
+      query.where(db.tab.tabMode.isNotInValues(excludedModes));
     }
 
     return query.map((row) => row.read(db.tab.id)!);
@@ -96,6 +96,7 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
+    bool includeIsolated = true,
   }) {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.id])
@@ -106,15 +107,13 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
       )
       ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
 
-    if (!includeRegular) {
-      query.where(
-        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(false),
-      );
-    }
-    if (!includePrivate) {
-      query.where(
-        db.tab.isPrivate.isNotNull() & db.tab.isPrivate.isNotValue(true),
-      );
+    final excludedModes = <TabModeDbValue>[];
+    if (!includeRegular) excludedModes.add(TabModeDbValue.regular);
+    if (!includePrivate) excludedModes.add(TabModeDbValue.private);
+    if (!includeIsolated) excludedModes.add(TabModeDbValue.isolated);
+
+    if (excludedModes.isNotEmpty) {
+      query.where(db.tab.tabMode.isNotInValues(excludedModes));
     }
 
     return query.map((row) => row.read(db.tab.id)!);

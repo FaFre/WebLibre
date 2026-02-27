@@ -236,6 +236,37 @@ void showTabUndoClose(
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
+/// Shows a confirmation dialog before closing isolated tabs whose data
+/// will be permanently cleared. Returns `true` if the user confirms.
+Future<bool> confirmIsolatedTabClose(
+  BuildContext context, {
+  int groupCount = 1,
+}) async {
+  final message = groupCount == 1
+      ? 'This will permanently clear all browsing data for this isolated session.'
+      : 'This will permanently clear browsing data for $groupCount isolated sessions.';
+
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Close isolated tabs?'),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Close'),
+        ),
+      ],
+    ),
+  );
+
+  return result ?? false;
+}
+
 void showDismissOverrideMessage(
   BuildContext context,
   VoidCallback onDismiss, {

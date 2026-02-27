@@ -18,11 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 class TabQueryResult with FastEquatable {
   final String id;
   final String? containerId;
-  final bool? isPrivate;
+  final TabModeDbValue tabMode;
 
   final String? title;
   final Uri? cleanUrl;
@@ -36,7 +37,7 @@ class TabQueryResult with FastEquatable {
   TabQueryResult({
     required this.id,
     required this.containerId,
-    required this.isPrivate,
+    required this.tabMode,
     required this.title,
     required this.url,
     required this.cleanUrl,
@@ -49,7 +50,7 @@ class TabQueryResult with FastEquatable {
   List<Object?> get hashParameters => [
     id,
     containerId,
-    isPrivate,
+    tabMode,
     title,
     cleanUrl,
     url,

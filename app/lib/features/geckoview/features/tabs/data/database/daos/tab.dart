@@ -26,11 +26,22 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 
 @DriftAccessor()
+class SyncTabsResult {
+  final Set<String> deletedIsolationContextIds;
+  final int deletedCount;
+
+  const SyncTabsResult({
+    required this.deletedIsolationContextIds,
+    required this.deletedCount,
+  });
+}
+
 class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   final _undoHistory = <String, TabData>{};
   Timer? _clearHistoryTimer;
@@ -45,12 +56,25 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   SingleOrNullSelectable<TabData> getTabDataById(String id) =>
       db.tab.select()..where((t) => t.id.equals(id));
 
-  SingleOrNullSelectable<bool?> getTabIsPrivate(String tabId) {
+  SingleOrNullSelectable<TabMode> getTabMode(String tabId) {
     final query = selectOnly(db.tab)
-      ..addColumns([db.tab.isPrivate])
+      ..addColumns([db.tab.tabMode, db.tab.isolationContextId])
       ..where(db.tab.id.equals(tabId));
 
-    return query.map((row) => row.read(db.tab.isPrivate));
+    return query.map(
+      (row) => TabMode.fromDbValue(
+        row.readWithConverter(db.tab.tabMode)!,
+        isolationContextId: row.read(db.tab.isolationContextId),
+      ),
+    );
+  }
+
+  SingleOrNullSelectable<String?> getTabIsolationContextId(String tabId) {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.isolationContextId])
+      ..where(db.tab.id.equals(tabId));
+
+    return query.map((row) => row.read(db.tab.isolationContextId));
   }
 
   Selectable<String> getAllTabIds() {
@@ -124,18 +148,24 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
   Future<String> upsertTabTransactional(
     Future<String> Function() createTab, {
-    required Value<bool?> isPrivate,
     required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
     Value<Uri?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
+    Value<TabMode> tabMode = const Value.absent(),
   }) {
     return db.transaction(() async {
       final tabId = await createTab();
       final currentOrderKey =
           orderKey.value ??
           await _generateOrderKey(parentId: parentId, containerId: containerId);
+      final Value<TabModeDbValue> persistedTabMode = tabMode.present
+          ? Value(tabMode.value.toDbValue())
+          : const Value.absent();
+      final Value<String?> isolationContextId = tabMode.present
+          ? Value(tabMode.value.isolationContextId)
+          : const Value.absent();
 
       await db.tab.insertOne(
         TabCompanion.insert(
@@ -146,8 +176,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           containerId: containerId,
           url: url,
           title: title,
-          isPrivate: isPrivate,
           orderKey: currentOrderKey,
+          tabMode: persistedTabMode,
+          isolationContextId: isolationContextId,
         ),
         onConflict: DoUpdate(
           (old) => TabCompanion(
@@ -156,8 +187,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             containerId: containerId,
             url: url,
             title: title,
-            isPrivate: isPrivate,
             orderKey: Value.absentIfNull(orderKey.value),
+            tabMode: persistedTabMode,
+            isolationContextId: isolationContextId,
           ),
         ),
       );
@@ -170,17 +202,23 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Future<String> insertTab(
     String tabId, {
     required TabSource source,
-    required Value<bool?> isPrivate,
     required Value<String?> parentId,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
     Value<Uri?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
+    Value<TabMode> tabMode = const Value.absent(),
   }) {
     return db.transaction(() async {
       final currentOrderKey =
           orderKey.value ??
           await _generateOrderKey(parentId: parentId, containerId: containerId);
+      final Value<TabModeDbValue> persistedTabMode = tabMode.present
+          ? Value(tabMode.value.toDbValue())
+          : const Value.absent();
+      final Value<String?> isolationContextId = tabMode.present
+          ? Value(tabMode.value.isolationContextId)
+          : const Value.absent();
 
       await db.tab.insertOne(
         TabCompanion.insert(
@@ -190,9 +228,10 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           timestamp: DateTime.now(),
           containerId: containerId,
           orderKey: currentOrderKey,
-          isPrivate: isPrivate,
           url: url,
           title: title,
+          tabMode: persistedTabMode,
+          isolationContextId: isolationContextId,
         ),
         onConflict: DoUpdate(
           (old) => TabCompanion(
@@ -201,8 +240,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             containerId: containerId,
             url: url,
             title: title,
-            isPrivate: isPrivate,
             orderKey: Value.absentIfNull(orderKey.value),
+            tabMode: persistedTabMode,
+            isolationContextId: isolationContextId,
           ),
           where: (old) => old.source.isSmallerThanValue(source.index),
         ),
@@ -301,7 +341,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           if (previousState == null ||
               previousState.url != state.url ||
               previousState.title != state.title ||
-              previousState.parentId != state.parentId) {
+              previousState.parentId != state.parentId ||
+              previousState.tabMode != state.tabMode) {
             batch.update(
               db.tab,
               TabCompanion(
@@ -314,6 +355,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
                 title: (previousState?.title != state.title)
                     ? Value(state.title)
                     : const Value.absent(),
+                tabMode: (previousState?.tabMode != state.tabMode)
+                    ? Value(state.tabMode.toDbValue())
+                    : const Value.absent(),
+                isolationContextId: (previousState?.tabMode != state.tabMode)
+                    ? Value(state.isolationContextId)
+                    : const Value.absent(),
               ),
               where: (t) => t.id.equals(state.id),
             );
@@ -323,11 +370,18 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     });
   }
 
-  Future<void> syncTabs({required List<String> retainTabIds}) {
+  /// Syncs DB tab rows with the engine's active tab list.
+  /// Returns metadata about deleted rows for follow-up cleanup.
+  Future<SyncTabsResult> syncTabs({required List<String> retainTabIds}) {
     return db.transaction(() async {
       final deleted =
           await (db.tab.delete()..where((t) => t.id.isNotIn(retainTabIds)))
               .goAndReturn();
+
+      final deletedIsolationContextIds = <String>{
+        for (final tab in deleted)
+          if (tab.isolationContextId != null) tab.isolationContextId!,
+      };
 
       if (deleted.isNotEmpty) {
         _clearHistoryTimer?.cancel();
@@ -361,6 +415,11 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         }),
         onConflict: DoNothing(),
       );
+
+      return SyncTabsResult(
+        deletedIsolationContextIds: deletedIsolationContextIds,
+        deletedCount: deleted.length,
+      );
     });
   }
 
@@ -389,6 +448,19 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         limit: limit,
       );
     }
+  }
+
+  SingleSelectable<int> tabsInIsolationGroup(String contextId) {
+    return db.definitionsDrift.tabsInIsolationGroup(contextId: contextId);
+  }
+
+  Selectable<String?> allIsolationContextIds() {
+    return db.definitionsDrift.allIsolationContextIds();
+  }
+
+  Selectable<IsolatedContextContainerPairsResult>
+  isolatedContextContainerPairs() {
+    return db.definitionsDrift.isolatedContextContainerPairs();
   }
 
   Future<List<String>> getUnassignedTabsOlderThan(DateTime threshold) {

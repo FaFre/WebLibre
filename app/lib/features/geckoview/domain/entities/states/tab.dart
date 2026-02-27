@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/find_result.d
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 part 'tab.g.dart';
 
@@ -61,7 +62,9 @@ class TabState extends WebPageInfo {
 
   final int progress;
 
-  final bool isPrivate;
+  final TabMode tabMode;
+  String? get isolationContextId => tabMode.isolationContextId;
+
   final bool isFullScreen;
   final bool isLoading;
   final bool showToolbarAsExpanded;
@@ -82,7 +85,7 @@ class TabState extends WebPageInfo {
     required this.icon,
     required this.thumbnail,
     required this.progress,
-    required this.isPrivate,
+    this.tabMode = TabMode.regular,
     required this.isFullScreen,
     required this.isLoading,
     required this.showToolbarAsExpanded,
@@ -101,7 +104,6 @@ class TabState extends WebPageInfo {
     icon: null,
     thumbnail: null,
     progress: 0,
-    isPrivate: false,
     isFullScreen: false,
     isLoading: false,
     showToolbarAsExpanded: false,
@@ -120,7 +122,7 @@ class TabState extends WebPageInfo {
     icon,
     thumbnail,
     progress,
-    isPrivate,
+    tabMode,
     isFullScreen,
     isLoading,
     showToolbarAsExpanded,

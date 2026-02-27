@@ -20,7 +20,6 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -32,6 +31,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
@@ -51,13 +51,10 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
               tabStatesProvider,
             )[ref.read(selectedTabProvider)];
 
-            final isPrivate = selectedTabState?.isPrivate.mapNotNull(
-              (isCurrentPrivate) =>
-                  isCurrentPrivate ? TabType.private : TabType.regular,
-            );
+            final selectedTabType = selectedTabState?.tabMode.toTabType();
 
             final route = SearchRoute(
-              tabType: isPrivate ?? settings.defaultCreateTabType,
+              tabType: selectedTabType ?? settings.defaultCreateTabType,
               searchText: text,
             );
 
@@ -76,19 +73,20 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
               tabStatesProvider,
             )[ref.read(selectedTabProvider)];
 
-            final isPrivate =
-                currentTab?.isPrivate ??
-                ref
-                        .read(generalSettingsWithDefaultsProvider)
-                        .defaultCreateTabType ==
-                    TabType.private;
+            final tabMode =
+                currentTab?.tabMode ??
+                TabMode.fromTabType(
+                  ref
+                      .read(generalSettingsWithDefaultsProvider)
+                      .defaultCreateTabType,
+                );
 
             await ref
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
                   url: defaultSearchBang.getTemplateUrl(text),
                   parentId: currentTab?.id,
-                  private: isPrivate,
+                  tabMode: tabMode,
                   selectTab: true,
                 );
           } else {

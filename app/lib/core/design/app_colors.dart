@@ -27,6 +27,10 @@ class AppColors extends ThemeExtension<AppColors> {
     this.privateTabBackground = const Color(0xFF25003E),
     this.privateTabForeground = const Color(0xFFFFFFFF),
     this.privateSelectionOverlay = const Color(0x648000D7),
+    this.isolatedTabTeal = const Color(0xFF00897B),
+    this.isolatedTabBackground = const Color(0xFF003D36),
+    this.isolatedTabForeground = const Color(0xFFFFFFFF),
+    this.isolatedSelectionOverlay = const Color(0x6400897B),
     this.torPurple = const Color(0xFF7D4698),
     this.torActiveGreen = const Color(0xFF68B030),
     this.torBackgroundGrey = const Color(0xFF333A41),
@@ -38,6 +42,10 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color privateTabBackground;
   final Color privateTabForeground;
   final Color privateSelectionOverlay;
+  final Color isolatedTabTeal;
+  final Color isolatedTabBackground;
+  final Color isolatedTabForeground;
+  final Color isolatedSelectionOverlay;
   final Color torPurple;
   final Color torActiveGreen;
   final Color torBackgroundGrey;
@@ -53,6 +61,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? privateTabBackground,
     Color? privateTabForeground,
     Color? privateSelectionOverlay,
+    Color? isolatedTabTeal,
+    Color? isolatedTabBackground,
+    Color? isolatedTabForeground,
+    Color? isolatedSelectionOverlay,
     Color? torPurple,
     Color? torActiveGreen,
     Color? torBackgroundGrey,
@@ -65,6 +77,13 @@ class AppColors extends ThemeExtension<AppColors> {
       privateTabForeground: privateTabForeground ?? this.privateTabForeground,
       privateSelectionOverlay:
           privateSelectionOverlay ?? this.privateSelectionOverlay,
+      isolatedTabTeal: isolatedTabTeal ?? this.isolatedTabTeal,
+      isolatedTabBackground:
+          isolatedTabBackground ?? this.isolatedTabBackground,
+      isolatedTabForeground:
+          isolatedTabForeground ?? this.isolatedTabForeground,
+      isolatedSelectionOverlay:
+          isolatedSelectionOverlay ?? this.isolatedSelectionOverlay,
       torPurple: torPurple ?? this.torPurple,
       torActiveGreen: torActiveGreen ?? this.torActiveGreen,
       torBackgroundGrey: torBackgroundGrey ?? this.torBackgroundGrey,
@@ -98,6 +117,22 @@ class AppColors extends ThemeExtension<AppColors> {
       privateSelectionOverlay: Color.lerp(
         privateSelectionOverlay,
         other.privateSelectionOverlay,
+        t,
+      )!,
+      isolatedTabTeal: Color.lerp(isolatedTabTeal, other.isolatedTabTeal, t)!,
+      isolatedTabBackground: Color.lerp(
+        isolatedTabBackground,
+        other.isolatedTabBackground,
+        t,
+      )!,
+      isolatedTabForeground: Color.lerp(
+        isolatedTabForeground,
+        other.isolatedTabForeground,
+        t,
+      )!,
+      isolatedSelectionOverlay: Color.lerp(
+        isolatedSelectionOverlay,
+        other.isolatedSelectionOverlay,
         t,
       )!,
       torPurple: Color.lerp(torPurple, other.torPurple, t)!,

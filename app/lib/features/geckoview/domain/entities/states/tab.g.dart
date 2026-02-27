@@ -21,7 +21,7 @@ abstract class _$TabStateCWProxy {
 
   TabState progress(int progress);
 
-  TabState isPrivate(bool isPrivate);
+  TabState tabMode(TabMode tabMode);
 
   TabState isFullScreen(bool isFullScreen);
 
@@ -52,7 +52,7 @@ abstract class _$TabStateCWProxy {
     EquatableImage? icon,
     EquatableImage? thumbnail,
     int progress,
-    bool isPrivate,
+    TabMode tabMode,
     bool isFullScreen,
     bool isLoading,
     bool showToolbarAsExpanded,
@@ -92,7 +92,7 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   TabState progress(int progress) => call(progress: progress);
 
   @override
-  TabState isPrivate(bool isPrivate) => call(isPrivate: isPrivate);
+  TabState tabMode(TabMode tabMode) => call(tabMode: tabMode);
 
   @override
   TabState isFullScreen(bool isFullScreen) => call(isFullScreen: isFullScreen);
@@ -136,7 +136,7 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
     Object? icon = const $CopyWithPlaceholder(),
     Object? thumbnail = const $CopyWithPlaceholder(),
     Object? progress = const $CopyWithPlaceholder(),
-    Object? isPrivate = const $CopyWithPlaceholder(),
+    Object? tabMode = const $CopyWithPlaceholder(),
     Object? isFullScreen = const $CopyWithPlaceholder(),
     Object? isLoading = const $CopyWithPlaceholder(),
     Object? showToolbarAsExpanded = const $CopyWithPlaceholder(),
@@ -175,10 +175,10 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
           ? _value.progress
           // ignore: cast_nullable_to_non_nullable
           : progress as int,
-      isPrivate: isPrivate == const $CopyWithPlaceholder() || isPrivate == null
-          ? _value.isPrivate
+      tabMode: tabMode == const $CopyWithPlaceholder() || tabMode == null
+          ? _value.tabMode
           // ignore: cast_nullable_to_non_nullable
-          : isPrivate as bool,
+          : tabMode as TabMode,
       isFullScreen:
           isFullScreen == const $CopyWithPlaceholder() || isFullScreen == null
           ? _value.isFullScreen

@@ -24,6 +24,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
@@ -31,12 +32,16 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/tor/domain/repositories/tor_proxy.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
@@ -46,6 +51,8 @@ class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
 
   final _tabFromIntent = <String>{};
+  final _closeLock = Lock();
+  final _pendingIsolationCleanup = <String>{};
 
   bool hasLaunchedFromIntent(String? tabId) {
     if (tabId == null) {
@@ -79,13 +86,13 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<String> addTab({
+    required TabMode tabMode,
     Uri? url,
     required bool selectTab,
     bool startLoading = true,
     String? parentId,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
     Source source = Internal.newTab,
-    required bool private,
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
     TabContainerSelection containerSelection =
@@ -101,10 +108,20 @@ class TabRepository extends _$TabRepository {
       SpecificContainerTabSelection(:final container) => container,
     };
 
-    final validatedParentId = await _resolveParentIdForContext(
-      parentId: parentId,
-      targetContextId: assignedContainer?.metadata.contextualIdentity,
-    );
+    // For isolated tabs, skip parent context validation since
+    // isolated tabs use their own immutable context ID.
+    final validatedParentId = tabMode is IsolatedTabMode
+        ? parentId
+        : await _resolveParentIdForContext(
+            parentId: parentId,
+            targetContextId: assignedContainer?.metadata.contextualIdentity,
+          );
+
+    final effectiveIsolationContextId = tabMode.isolationContextId;
+
+    final effectiveContextId = tabMode is IsolatedTabMode
+        ? effectiveIsolationContextId
+        : assignedContainer?.metadata.contextualIdentity;
 
     final newTabId = await tabDao.upsertTabTransactional(
       () {
@@ -114,17 +131,17 @@ class TabRepository extends _$TabRepository {
           startLoading: startLoading,
           parentId: validatedParentId,
           flags: flags,
-          contextId: assignedContainer?.metadata.contextualIdentity,
+          contextId: effectiveContextId,
           source: source,
-          private: private,
+          private: tabMode is PrivateTabMode,
           historyMetadata: historyMetadata,
           additionalHeaders: additionalHeaders,
         );
       },
       parentId: Value(validatedParentId),
       containerId: Value(assignedContainer?.id),
-      isPrivate: Value(private),
       url: Value(url),
+      tabMode: Value(tabMode),
     );
 
     if (launchedFromIntent) {
@@ -188,8 +205,14 @@ class TabRepository extends _$TabRepository {
           parentId: Value(validatedParentId),
           source: TabSource.manual,
           containerId: Value(assignedContainer?.id),
-          isPrivate: Value(tab.private),
           url: Value(Uri.tryParse(tab.url)),
+          tabMode: Value(
+            isIsolatedContextId(tab.contextId)
+                ? TabMode.isolated(tab.contextId!)
+                : tab.private
+                ? TabMode.private
+                : TabMode.regular,
+          ),
         );
       }
 
@@ -204,19 +227,35 @@ class TabRepository extends _$TabRepository {
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
+    final sourceTabMode =
+        await tabDao.getTabMode(selectTabId).getSingleOrNull() ??
+        TabMode.regular;
+
+    // Duplicating an isolated tab creates a new isolation group
+    final duplicateIsolationContextId = sourceTabMode is IsolatedTabMode
+        ? newIsolatedContextId()
+        : null;
+
+    final duplicateTabMode = sourceTabMode is IsolatedTabMode
+        ? TabMode.isolated(duplicateIsolationContextId!)
+        : sourceTabMode;
+
+    // Isolated tabs always use their isolation context ID
+    final effectiveContextId = sourceTabMode is IsolatedTabMode
+        ? duplicateIsolationContextId
+        : containerData?.metadata.contextualIdentity;
+
     return await tabDao.upsertTabTransactional(
       () {
         return _tabsService.duplicateTab(
           selectTabId: selectTabId,
-          newContextId: containerData?.metadata.contextualIdentity,
+          newContextId: effectiveContextId,
           selectNewTab: selectTab,
         );
       },
       parentId: const Value.absent(),
       containerId: Value(containerData?.id),
-      isPrivate: Value(
-        await tabDao.getTabIsPrivate(selectTabId).getSingleOrNull(),
-      ),
+      tabMode: Value(duplicateTabMode),
     );
   }
 
@@ -402,26 +441,147 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  Future<void> closeTab(String tabId) async {
-    if (ref.read(selectedTabProvider) == tabId) {
-      await _selectNextTab(tabId);
-    }
+  Future<void> closeTab(String tabId) {
+    return _closeLock.synchronized(() async {
+      // Collect isolation context before close
+      final isolationContextId = ref
+          .read(tabStatesProvider)[tabId]
+          ?.isolationContextId;
 
-    return _tabsService.removeTab(tabId: tabId);
+      if (ref.read(selectedTabProvider) == tabId) {
+        await _selectNextTab(tabId);
+      }
+
+      await _tabsService.removeTab(tabId: tabId);
+
+      // Queue isolation cleanup — actual cleanup runs after syncTabs
+      // deletes the DB row, so the count check is accurate.
+      if (isolationContextId != null) {
+        _pendingIsolationCleanup.add(isolationContextId);
+      }
+    });
   }
 
-  Future<void> closeTabs(List<String> tabIds) async {
-    final selectedTab = ref.read(selectedTabProvider);
-    if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
-      await _selectNextTab(selectedTab!);
+  Future<void> closeTabs(List<String> tabIds) {
+    return _closeLock.synchronized(() async {
+      // Collect isolation contexts from tabs being closed
+      for (final tabId in tabIds) {
+        final contextId = ref
+            .read(tabStatesProvider)[tabId]
+            ?.isolationContextId;
+        if (contextId != null) {
+          _pendingIsolationCleanup.add(contextId);
+        }
+      }
+
+      final selectedTab = ref.read(selectedTabProvider);
+      if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
+        await _selectNextTab(selectedTab!);
+      }
+
+      await _tabsService.removeTabs(ids: tabIds);
+    });
+  }
+
+  /// Clears Gecko browsing data and removes proxy alias for an isolation
+  /// context if no more tabs share it.
+  Future<void> _cleanupIsolationContextIfEmpty(String contextId) async {
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+
+    // Re-verify count after close (handles concurrent close races)
+    final remaining = await tabDao.tabsInIsolationGroup(contextId).getSingle();
+
+    if (remaining > 0) return;
+
+    // Guard against debounced DB persistence: a sibling tab can already be
+    // active in-memory for this context before isolation_context_id is written.
+    final activeTabs = ref.read(tabListProvider).value;
+    final activeStates = ref.read(tabStatesProvider);
+    final hasActiveSibling = activeTabs.any((tabId) {
+      final state = activeStates[tabId];
+      if (state == null) return false;
+
+      return state.isolationContextId == contextId ||
+          state.contextId == contextId;
+    });
+
+    if (hasActiveSibling) {
+      logger.i(
+        'Skipping isolation cleanup for active context still in memory: $contextId',
+      );
+      return;
     }
 
-    return _tabsService.removeTabs(ids: tabIds);
+    logger.i('Cleaning up isolation context: $contextId');
+
+    // Clear Gecko browsing data for this context
+    try {
+      await ref
+          .read(browserDataServiceProvider.notifier)
+          .clearDataForContext(contextId);
+    } catch (e, st) {
+      logger.e(
+        'Failed to clear data for isolation context $contextId',
+        error: e,
+        stackTrace: st,
+      );
+    }
+
+    // Best-effort: remove proxy alias (no-op if never set)
+    try {
+      await ref
+          .read(torProxyRepositoryProvider.notifier)
+          .removeContainerProxy(contextId);
+    } catch (e, st) {
+      logger.e(
+        'Failed to remove proxy for isolation context $contextId',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   Future<void> undoClose() {
     return _tabsService.undo();
   }
+
+  /// Cleans up isolation contexts from previous crashed sessions.
+  /// Called once after tab list stabilizes on startup.
+  // Future<void> _cleanupOrphanedIsolationContexts() async {
+  //   final tabDao = ref.read(tabDatabaseProvider).tabDao;
+
+  //   try {
+  //     await _closeLock.synchronized(() async {
+  //       if (!ref.mounted) return;
+
+  //       // Reconcile DB rows against the current engine tab snapshot, including
+  //       // valid empty-tab sessions (retainTabIds can be empty here).
+  //       final syncTabsResult = await tabDao.syncTabs(
+  //         retainTabIds: ref.read(tabListProvider).value,
+  //       );
+  //       _pendingIsolationCleanup.addAll(
+  //         syncTabsResult.deletedIsolationContextIds,
+  //       );
+
+  //       if (_pendingIsolationCleanup.isNotEmpty) {
+  //         final pending = Set<String>.of(_pendingIsolationCleanup);
+  //         _pendingIsolationCleanup.clear();
+
+  //         for (final contextId in pending) {
+  //           if (!ref.mounted) return;
+  //           logger.i('Cleaning orphaned isolation context: $contextId');
+  //           await _cleanupIsolationContextIfEmpty(contextId);
+  //         }
+  //       }
+  //     });
+  //   } catch (e, st) {
+  //     logger.e(
+  //       'Error during orphan isolation context cleanup',
+  //       error: e,
+  //       stackTrace: st,
+  //     );
+  //   }
+  // }
 
   @override
   void build() {
@@ -438,7 +598,6 @@ class TabRepository extends _$TabRepository {
           parentId: const Value.absent(),
           source: TabSource.addedEvent,
           containerId: Value(containerId),
-          isPrivate: const Value.absent(),
         );
       },
       onError: (Object error, StackTrace stackTrace) {
@@ -475,7 +634,7 @@ class TabRepository extends _$TabRepository {
               if (event.blocked || tabIsEmpty) {
                 await addTab(
                   url: uri,
-                  private: tabState.isPrivate,
+                  tabMode: tabState.tabMode,
                   containerSelection: TabContainerSelection.specific(
                     containerData,
                   ),
@@ -567,12 +726,42 @@ class TabRepository extends _$TabRepository {
       tabListProvider,
       (previous, next) async {
         //Only sync tabs if there has been a previous value or is not empty
-        final syncTabs =
+        final shouldSyncTabs =
             next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
 
-        if (syncTabs) {
-          await db.tabDao.syncTabs(retainTabIds: next.value);
+        if (shouldSyncTabs) {
+          final syncTabsResult = await db.tabDao.syncTabs(
+            retainTabIds: next.value,
+          );
+          // Capture isolation contexts from rows deleted by syncTabs
+          // (orphaned tabs from crashes, or tabs the engine dropped).
+          _pendingIsolationCleanup.addAll(
+            syncTabsResult.deletedIsolationContextIds,
+          );
         }
+
+        // Process pending isolation context cleanups after syncTabs
+        // has deleted the rows, so the count check is accurate.
+        if (_pendingIsolationCleanup.isNotEmpty) {
+          final pending = Set<String>.of(_pendingIsolationCleanup);
+          _pendingIsolationCleanup.clear();
+          for (final contextId in pending) {
+            if (!ref.mounted) break;
+            await _cleanupIsolationContextIfEmpty(contextId);
+          }
+        }
+
+        // One-shot orphan cleanup after tab list stabilizes (5s debounce).
+        // Also runs for DB-only contexts whose rows were already deleted
+        // by syncTabs above (those are handled via _pendingIsolationCleanup).
+        // if (!orphanCleanupDone) {
+        //   orphanCleanupTimer?.cancel();
+        //   orphanCleanupTimer = Timer(const Duration(seconds: 5), () async {
+        //     if (orphanCleanupDone || !ref.mounted) return;
+        //     orphanCleanupDone = true;
+        //     await _cleanupOrphanedIsolationContexts();
+        //   });
+        // }
       },
       onError: (Object error, StackTrace stackTrace) {
         logger.e(

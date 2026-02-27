@@ -72,6 +72,15 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.private),
               ),
+              _divider(borderColor),
+              _Segment(
+                tabType: TabType.isolated,
+                icon: MdiIcons.shieldLock,
+                label: 'Isolated',
+                isSelected: selected == TabType.isolated,
+                selectedBackgroundColor: selectedBackgroundColor,
+                onTap: () => onChanged(TabType.isolated),
+              ),
               if (showChildOption) ...[
                 _divider(borderColor),
                 _Segment(

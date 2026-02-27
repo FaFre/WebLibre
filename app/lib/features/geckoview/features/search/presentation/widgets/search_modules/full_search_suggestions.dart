@@ -75,9 +75,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
           : [
               if (searchTextIsNotEmpty) searchText,
               if (searchSuggestions.value != null)
-                ...searchSuggestions.value!.whereNot(
-                  (s) => s == searchText,
-                ),
+                ...searchSuggestions.value!.whereNot((s) => s == searchText),
             ],
       [showHistory, searchText, searchHistory.value, searchSuggestions.value],
     );
@@ -115,9 +113,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                   onPressed: ref
                       .read(searchSuggestionsExpandedProvider.notifier)
                       .toggle,
-                  icon: Icon(
-                    expanded ? Icons.unfold_less : Icons.unfold_more,
-                  ),
+                  icon: Icon(expanded ? Icons.unfold_less : Icons.unfold_more),
                 ),
               ),
             ],

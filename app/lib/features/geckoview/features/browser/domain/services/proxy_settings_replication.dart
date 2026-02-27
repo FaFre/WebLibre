@@ -21,8 +21,11 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/tor/domain/repositories/tor_proxy.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
@@ -32,6 +35,82 @@ part 'proxy_settings_replication.g.dart';
 
 @Riverpod(keepAlive: true)
 class ProxySettingsReplication extends _$ProxySettingsReplication {
+  var _proxiedIsolationContexts = <String>{};
+
+  final _recomputeLock = Lock();
+
+  Future<void> _queueIsolatedProxyAliasesRecompute() async {
+    if (_recomputeLock.inLock) {
+      return;
+    }
+
+    await _recomputeLock.synchronized(() async {
+      try {
+        await _recomputeIsolatedProxyAliases();
+      } catch (error, stackTrace) {
+        logger.e(
+          'Error recomputing isolated proxy aliases',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    });
+  }
+
+  Future<void> _recomputeIsolatedProxyAliases() async {
+    final db = ref.read(tabDatabaseProvider);
+
+    final contextContainerMap = <String, Set<String>>{};
+    final pairs = await db.tabDao.isolatedContextContainerPairs().get();
+
+    for (final pair in pairs) {
+      final isolationContextId = pair.isolationContextId;
+      final containerId = pair.containerId;
+
+      if (isolationContextId == null || containerId == null) continue;
+
+      contextContainerMap
+          .putIfAbsent(isolationContextId, () => <String>{})
+          .add(containerId);
+    }
+
+    final containers = await ref
+        .read(containerRepositoryProvider.notifier)
+        .getAllContainersWithCount();
+
+    // Build set of container IDs that have useProxy enabled.
+    final proxiedContainerIds = <String>{
+      for (final c in containers)
+        if (c.metadata.useProxy) c.id,
+    };
+
+    // Compute which isolation contexts need proxy aliases.
+    // A context needs an alias if ANY of its associated containers
+    // has useProxy enabled.
+    final newProxied = <String>{
+      for (final entry in contextContainerMap.entries)
+        if (entry.value.any(proxiedContainerIds.contains)) entry.key,
+    };
+
+    // Remove aliases that are no longer needed.
+    final toRemove = _proxiedIsolationContexts.difference(newProxied);
+    for (final contextId in toRemove) {
+      await ref
+          .read(torProxyRepositoryProvider.notifier)
+          .removeContainerProxy(contextId);
+    }
+
+    // Add aliases that are newly needed.
+    final toAdd = newProxied.difference(_proxiedIsolationContexts);
+    for (final contextId in toAdd) {
+      await ref
+          .read(torProxyRepositoryProvider.notifier)
+          .addContainerProxy(contextId);
+    }
+
+    _proxiedIsolationContexts = newProxied;
+  }
+
   @override
   void build() {
     ref.listen(
@@ -142,5 +221,35 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
             .setSiteAssignments(next.requireValue);
       }
     });
+
+    ref.listen(
+      fireImmediately: true,
+      watchIsolatedContextContainerMapProvider.select(
+        (value) => EquatableValue(value.value),
+      ),
+      (previous, next) => _queueIsolatedProxyAliasesRecompute(),
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to isolated context proxy aliases',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      watchContainersWithCountProvider.select(
+        (value) => EquatableValue(value.value),
+      ),
+      (previous, next) => _queueIsolatedProxyAliasesRecompute(),
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to container proxy changes for isolated aliases',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
   }
 }

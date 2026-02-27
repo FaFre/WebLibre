@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
@@ -318,17 +319,17 @@ class _ExtensionsSection extends HookConsumerWidget {
                   dense: true,
                   onTap: () async {
                     Navigator.of(context).pop(); // Close drawer
-                    final isPrivate =
-                        ref
-                            .read(generalSettingsWithDefaultsProvider)
-                            .defaultCreateTabType ==
-                        TabType.private;
+                    final tabMode = TabMode.fromTabType(
+                      ref
+                          .read(generalSettingsWithDefaultsProvider)
+                          .defaultCreateTabType,
+                    );
 
                     await ref
                         .read(tabRepositoryProvider.notifier)
                         .addTab(
                           url: Uri.parse('https://addons.mozilla.org'),
-                          private: isPrivate,
+                          tabMode: tabMode,
                           containerSelection:
                               const TabContainerSelection.unassigned(),
                           selectTab: true,

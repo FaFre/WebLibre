@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/clear_site_data_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
 
 class ClampingScrollPhysicsWithoutImplicit extends ClampingScrollPhysics {
@@ -121,9 +122,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                         searchText: searchText.isEmpty
                             ? SearchRoute.emptySearchText
                             : searchText,
-                        tabType: initialTabState.isPrivate
-                            ? TabType.private
-                            : TabType.regular,
+                        tabType: initialTabState.tabMode.toTabType(),
                       ).push(context);
                     },
                     child: WebsiteTitleTile(initialTabState),
@@ -151,7 +150,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
               // Permissions Section
               PermissionsSection(
                 origin: initialTabState.url.origin,
-                isPrivate: initialTabState.isPrivate,
+                isPrivate: initialTabState.tabMode is PrivateTabMode,
               ),
               const Divider(),
               // Clear Site Data Section

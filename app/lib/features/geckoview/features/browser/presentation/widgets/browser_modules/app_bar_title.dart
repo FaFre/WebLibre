@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/she
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class AppBarTitle extends HookConsumerWidget {
@@ -117,7 +118,7 @@ class AppBarTitle extends HookConsumerWidget {
                 searchText: searchText.isEmpty
                     ? SearchRoute.emptySearchText
                     : searchText,
-                tabType: tabState.isPrivate ? TabType.private : TabType.regular,
+                tabType: tabState.tabMode.toTabType(),
               ).push(context);
             },
             child: Column(
@@ -158,10 +159,17 @@ class AppBarTitle extends HookConsumerWidget {
                     ],
                     icon,
                     const SizedBox(width: 4),
-                    if (tabState.isPrivate) ...[
+                    if (tabState.tabMode is PrivateTabMode) ...[
                       Icon(
                         MdiIcons.dominoMask,
                         color: appColors.privateTabPurple,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                    ] else if (tabState.tabMode is IsolatedTabMode) ...[
+                      Icon(
+                        MdiIcons.shieldLock,
+                        color: appColors.isolatedTabTeal,
                         size: 14,
                       ),
                       const SizedBox(width: 4),

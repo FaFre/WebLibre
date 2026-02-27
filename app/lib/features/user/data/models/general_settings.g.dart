@@ -803,6 +803,7 @@ const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
   TabType.child: 'child',
+  TabType.isolated: 'isolated',
 };
 
 const _$TabIntentOpenSettingEnumMap = {

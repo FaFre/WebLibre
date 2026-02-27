@@ -49,6 +49,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/pro
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
@@ -202,9 +203,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       .read(tabRepositoryProvider.notifier)
                       .addTab(
                         url: sharedContent.url,
-                        private:
+                        tabMode:
                             settings.tabIntentOpenSetting ==
-                            TabIntentOpenSetting.private,
+                                TabIntentOpenSetting.private
+                            ? TabMode.private
+                            : TabMode.regular,
                         launchedFromIntent: true,
                         selectTab: true,
                       );
@@ -217,9 +220,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       .read(tabRepositoryProvider.notifier)
                       .addTab(
                         url: bang?.getTemplateUrl(sharedContent.text),
-                        private:
+                        tabMode:
                             settings.tabIntentOpenSetting ==
-                            TabIntentOpenSetting.private,
+                                TabIntentOpenSetting.private
+                            ? TabMode.private
+                            : TabMode.regular,
                         launchedFromIntent: true,
                         selectTab: true,
                       );
@@ -328,6 +333,13 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         const route = SearchRoute(tabType: TabType.private);
 
                         await router.push(route.location);
+                      } else if (type == 'new_isolated_tab') {
+                        lastAction = DateTime.now();
+
+                        final router = await ref.read(routerProvider.future);
+                        const route = SearchRoute(tabType: TabType.isolated);
+
+                        await router.push(route.location);
                       } else {
                         throw UnimplementedError(
                           'Unknown quick action shortcut type',
@@ -345,6 +357,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     const ShortcutItem(
                       type: 'new_private_tab',
                       localizedTitle: 'New Private Tab',
+                    ),
+                    const ShortcutItem(
+                      type: 'new_isolated_tab',
+                      localizedTitle: 'New Isolated Tab',
                     ),
                   ]);
 

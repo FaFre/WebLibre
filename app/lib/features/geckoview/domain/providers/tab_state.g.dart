@@ -41,7 +41,7 @@ final class TabStatesProvider
   }
 }
 
-String _$tabStatesHash() => r'975de1242f42e2017754dc560125788b83ad8b72';
+String _$tabStatesHash() => r'0fd97193ff963006e1943436b25b025dd3885c65';
 
 abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
   Map<String, TabState> build();
@@ -258,7 +258,7 @@ final class IsTabTunneledProvider
   }
 }
 
-String _$isTabTunneledHash() => r'55a42ccb73d1921eed27d32f6da3a54680d4ac8c';
+String _$isTabTunneledHash() => r'7265f5e6f32056846d3df38f48476d10c3a70bac';
 
 final class IsTabTunneledFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
@@ -358,7 +358,7 @@ final class SelectedTabTypeProvider
   }
 }
 
-String _$selectedTabTypeHash() => r'53093fc6db8becde7500163661e087fb0a2eb955';
+String _$selectedTabTypeHash() => r'fe14b5c9f81d8f5859ae9d758e440c42908e8a54';
 
 @ProviderFor(selectedTabContainerId)
 final selectedTabContainerIdProvider = SelectedTabContainerIdProvider._();

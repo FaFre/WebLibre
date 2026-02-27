@@ -93,8 +93,38 @@ export class Store {
     return this.siteAssignments.has(uri.origin)
   }
 
+  /**
+   * Returns the effective proxy relation for a context ID, mirroring the
+   * fallback logic in getProxiesForContainer: explicit relation first,
+   * then 'general' for non-private contexts, then empty.
+   */
+  private getEffectiveRelation(contextId: string): string[] {
+    return this.relations[contextId]
+      ?? ((contextId !== 'private') ? this.relations['general'] : undefined)
+      ?? [];
+  }
+
   isSiteOriginInSameContext(uri: URL, contextId: string): boolean {
-    return this.siteAssignments.get(uri.origin) === contextId;
+    const assignedContextId = this.siteAssignments.get(uri.origin);
+    if (assignedContextId === undefined) return false;
+    if (assignedContextId === contextId) return true;
+
+    // Context equivalence: compare effective proxy relations (including
+    // fallback to 'general') so that isolated tabs in non-proxied containers
+    // or containers relying on the general relation are treated as compatible.
+    const assignedRelation = this.getEffectiveRelation(assignedContextId);
+    const currentRelation = this.getEffectiveRelation(contextId);
+
+    // Only treat as equivalent if both have actual proxy relations —
+    // empty relations mean no proxy, and different non-proxied contexts
+    // should not be considered equivalent.
+    if (assignedRelation.length > 0 &&
+        assignedRelation.length === currentRelation.length &&
+        assignedRelation.every((id, i) => id === currentRelation[i])) {
+      return true;
+    }
+
+    return false;
   }
 
   getAllProxies(): ProxySettings[] {

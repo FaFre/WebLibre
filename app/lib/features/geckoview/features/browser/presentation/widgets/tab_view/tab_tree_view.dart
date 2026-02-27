@@ -71,11 +71,11 @@ class _TabTreePreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isTabPrivate = ref.watch(
-      tabStateProvider(entity.tabId).select((value) => value?.isPrivate),
+    final tabMode = ref.watch(
+      tabStateProvider(entity.tabId).select((value) => value?.tabMode),
     );
 
-    if (isTabPrivate == null) {
+    if (tabMode == null) {
       return const SizedBox.shrink();
     }
 
@@ -89,7 +89,7 @@ class _TabTreePreview extends HookConsumerWidget {
             stackCount,
             GridTabItemContainer(
               isActive: entity.tabId == activeTabId,
-              isPrivate: isTabPrivate == true,
+              tabMode: tabMode,
             ),
           ),
         _addPadding(
@@ -151,6 +151,33 @@ class _TabTreePreview extends HookConsumerWidget {
                 final tabs = await ref
                     .read(tabDataRepositoryProvider.notifier)
                     .getTabDescendants(entity.rootId);
+
+                final allStates = ref.read(tabStatesProvider);
+                final isolatedContextInCloseSet = <String, int>{};
+
+                for (final tabId in tabs.keys) {
+                  final contextId = allStates[tabId]?.isolationContextId;
+                  if (contextId == null) continue;
+                  isolatedContextInCloseSet[contextId] =
+                      (isolatedContextInCloseSet[contextId] ?? 0) + 1;
+                }
+
+                final groupsToDelete = isolatedContextInCloseSet.entries.where((
+                  entry,
+                ) {
+                  final totalInGroup = allStates.values
+                      .where((state) => state.isolationContextId == entry.key)
+                      .length;
+                  return totalInGroup == entry.value;
+                }).length;
+
+                if (groupsToDelete > 0 && context.mounted) {
+                  final confirmed = await ui_helper.confirmIsolatedTabClose(
+                    context,
+                    groupCount: groupsToDelete,
+                  );
+                  if (!confirmed) return;
+                }
 
                 await ref
                     .read(tabRepositoryProvider.notifier)

@@ -871,6 +871,72 @@ final class WatchAllAssignedSitesProvider
 String _$watchAllAssignedSitesHash() =>
     r'5f658b5733ee20192eb86d3aeb79aa9678dafba8';
 
+/// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
+/// assigned to containers. Used by ProxySettingsReplication to manage proxy
+/// aliases for isolated contexts.
+///
+/// Returns a map from isolation context ID to the set of container IDs it
+/// appears in. An isolation context needs a proxy alias if ANY of its
+/// associated containers has useProxy enabled.
+
+@ProviderFor(watchIsolatedContextContainerMap)
+final watchIsolatedContextContainerMapProvider =
+    WatchIsolatedContextContainerMapProvider._();
+
+/// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
+/// assigned to containers. Used by ProxySettingsReplication to manage proxy
+/// aliases for isolated contexts.
+///
+/// Returns a map from isolation context ID to the set of container IDs it
+/// appears in. An isolation context needs a proxy alias if ANY of its
+/// associated containers has useProxy enabled.
+
+final class WatchIsolatedContextContainerMapProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, Set<String>>>,
+          Map<String, Set<String>>,
+          Stream<Map<String, Set<String>>>
+        >
+    with
+        $FutureModifier<Map<String, Set<String>>>,
+        $StreamProvider<Map<String, Set<String>>> {
+  /// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
+  /// assigned to containers. Used by ProxySettingsReplication to manage proxy
+  /// aliases for isolated contexts.
+  ///
+  /// Returns a map from isolation context ID to the set of container IDs it
+  /// appears in. An isolation context needs a proxy alias if ANY of its
+  /// associated containers has useProxy enabled.
+  WatchIsolatedContextContainerMapProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchIsolatedContextContainerMapProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchIsolatedContextContainerMapHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, Set<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, Set<String>>> create(Ref ref) {
+    return watchIsolatedContextContainerMap(ref);
+  }
+}
+
+String _$watchIsolatedContextContainerMapHash() =>
+    r'6275a6c508777c306e2ababca83e2792d6d5efe1';
+
 @ProviderFor(watchIsCurrentSiteAssignedToContainer)
 final watchIsCurrentSiteAssignedToContainerProvider =
     WatchIsCurrentSiteAssignedToContainerProvider._();

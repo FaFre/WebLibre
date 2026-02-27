@@ -55,7 +55,7 @@ final class SelectionActionServiceProvider
 }
 
 String _$selectionActionServiceHash() =>
-    r'75fa0fa770e74e49554d4098102fde9f9e531c4f';
+    r'75701bb0be3302b461d296a7b0b28e3a30a9d346';
 
 @ProviderFor(eventService)
 final eventServiceProvider = EventServiceProvider._();

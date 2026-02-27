@@ -34,6 +34,8 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -78,13 +80,23 @@ class TabStates extends _$TabStates {
       resolvedTitle = contentState.title;
     }
 
+    // Infer tabMode from context ID if not already set and context is isolated
+    final inferredTabMode = switch (current.tabMode) {
+      IsolatedTabMode() => current.tabMode,
+      _ when isIsolatedContextId(contentState.contextId) => TabMode.isolated(
+        contentState.contextId!,
+      ),
+      _ when contentState.isPrivate => TabMode.private,
+      _ => TabMode.regular,
+    };
+
     final newState = current.copyWith(
       parentId: contentState.parentId,
       contextId: contentState.contextId,
       url: url,
       title: resolvedTitle,
       progress: contentState.progress,
-      isPrivate: contentState.isPrivate,
+      tabMode: inferredTabMode,
       isFullScreen: contentState.isFullScreen,
       isLoading: contentState.isLoading,
       showToolbarAsExpanded: contentState.showToolbarAsExpanded,
@@ -373,7 +385,9 @@ Future<bool> isTabTunneled(Ref ref, String? tabId) async {
   final torSettings = ref.watch(torSettingsWithDefaultsProvider);
 
   if (tabState != null) {
-    if (tabState.isPrivate) {
+    // Isolated tabs follow the same proxy rules as regular tabs
+    // (container-based routing via proxy aliasing)
+    if (tabState.tabMode is PrivateTabMode) {
       return torSettings.proxyPrivateTabsTor;
     } else {
       switch (torSettings.proxyRegularTabsMode) {
@@ -402,13 +416,9 @@ TabState? selectedTabState(Ref ref) {
 
 @Riverpod()
 TabType? selectedTabType(Ref ref) {
-  final isPrivate = ref.watch(
-    selectedTabStateProvider.select((value) => value?.isPrivate),
-  );
+  final selectedState = ref.watch(selectedTabStateProvider);
 
-  return isPrivate.mapNotNull(
-    (isCurrentPrivate) => isCurrentPrivate ? TabType.private : TabType.regular,
-  );
+  return selectedState?.tabMode.toTabType();
 }
 
 @Riverpod()

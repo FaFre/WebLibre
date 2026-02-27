@@ -27,6 +27,7 @@ import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
@@ -195,17 +196,17 @@ class FeedArticleScreen extends HookConsumerWidget {
                       if (articleLink != null)
                         IconButton(
                           onPressed: () async {
-                            final isPrivate =
-                                ref
-                                    .read(generalSettingsWithDefaultsProvider)
-                                    .defaultCreateTabType ==
-                                TabType.private;
+                            final tabMode = TabMode.fromTabType(
+                              ref
+                                  .read(generalSettingsWithDefaultsProvider)
+                                  .defaultCreateTabType,
+                            );
 
                             await ref
                                 .read(tabRepositoryProvider.notifier)
                                 .addTab(
                                   url: articleLink.uri,
-                                  private: isPrivate,
+                                  tabMode: tabMode,
                                   containerSelection:
                                       const TabContainerSelection.unassigned(),
                                   selectTab: true,
@@ -245,17 +246,17 @@ class FeedArticleScreen extends HookConsumerWidget {
                         onTapLink: (text, href, title) async {
                           if (href.mapNotNull(Uri.tryParse)
                               case final Uri url) {
-                            final isPrivate =
-                                ref
-                                    .read(generalSettingsWithDefaultsProvider)
-                                    .defaultCreateTabType ==
-                                TabType.private;
+                            final tabMode = TabMode.fromTabType(
+                              ref
+                                  .read(generalSettingsWithDefaultsProvider)
+                                  .defaultCreateTabType,
+                            );
 
                             await ref
                                 .read(tabRepositoryProvider.notifier)
                                 .addTab(
                                   url: url,
-                                  private: isPrivate,
+                                  tabMode: tabMode,
                                   selectTab: true,
                                 );
 

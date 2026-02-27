@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/serv
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/controllers/open_shared_content_unshorten_controller.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/attribution_link.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -160,13 +161,13 @@ class OpenSharedContent extends HookConsumerWidget {
       showInfoMessage(context, 'URL preview applied');
     }
 
-    Future<void> openTab(bool isPrivate) async {
+    Future<void> openTab(TabMode tabMode) async {
       if (formKey.currentState?.validate() == true) {
         await ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: Uri.parse(textController.text),
-              private: isPrivate,
+              tabMode: tabMode,
               containerSelection: selectedContainer.value == null
                   ? const TabContainerSelection.unassigned()
                   : TabContainerSelection.specific(selectedContainer.value!),
@@ -359,16 +360,42 @@ class OpenSharedContent extends HookConsumerWidget {
                 title: 'Open in new tab',
                 subtitle: 'Add to your browser tabs',
                 icon: MdiIcons.tab,
-                trailing: IconButton(
-                  icon: Icon(
-                    MdiIcons.dominoMask,
-                    color: appColors.privateTabPurple,
-                    size: 24,
-                  ),
-                  tooltip: 'Private',
-                  onPressed: () => openTab(true),
+                trailing: PopupMenuButton<TabMode>(
+                  icon: Icon(MdiIcons.tabUnselected, size: 24),
+                  tooltip: 'Private / Isolated',
+                  onSelected: openTab,
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: TabMode.private,
+                      child: Row(
+                        children: [
+                          Icon(
+                            MdiIcons.dominoMask,
+                            color: appColors.privateTabPurple,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text('Private'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: TabMode.newIsolated(),
+                      child: Row(
+                        children: [
+                          Icon(
+                            MdiIcons.shieldLock,
+                            color: appColors.isolatedTabTeal,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text('Isolated'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                onTap: () => openTab(false),
+                onTap: () => openTab(TabMode.regular),
               ),
               _OpenActionTile(
                 title: 'Open in custom tab',

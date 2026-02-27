@@ -105,18 +105,14 @@ class SearchModuleHeader extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    isExpanded
-                        ? 'Show less'
-                        : 'Show all $totalCount',
+                    isExpanded ? 'Show less' : 'Show all $totalCount',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    isExpanded
-                        ? Icons.expand_less
-                        : Icons.expand_more,
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
                     size: 16,
                     color: Theme.of(context).colorScheme.primary,
                   ),

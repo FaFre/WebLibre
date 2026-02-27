@@ -33,13 +33,13 @@ import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_file.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -504,7 +504,7 @@ class HistoryScreen extends HookConsumerWidget {
                                       .read(tabRepositoryProvider.notifier)
                                       .addTab(
                                         url: Uri.parse(item.url),
-                                        private: false,
+                                        tabMode: TabMode.regular,
                                         selectTab: true,
                                       );
 

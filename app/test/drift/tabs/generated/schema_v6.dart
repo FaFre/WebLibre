@@ -273,6 +273,14 @@ class Tab extends Table with TableInfo<Tab, TabData> {
     requiredDuringInsert: true,
     $customConstraints: 'PRIMARY KEY NOT NULL',
   );
+  late final GeneratedColumn<int> source = GeneratedColumn<int>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
   late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
     'parent_id',
     aliasedName,
@@ -313,6 +321,24 @@ class Tab extends Table with TableInfo<Tab, TabData> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
+  late final GeneratedColumn<int> tabMode = GeneratedColumn<int>(
+    'tab_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const CustomExpression('0'),
+  );
+  late final GeneratedColumn<String> isolationContextId =
+      GeneratedColumn<String>(
+        'isolation_context_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
   late final GeneratedColumn<int> isProbablyReaderable = GeneratedColumn<int>(
     'is_probably_readerable',
     aliasedName,
@@ -367,11 +393,14 @@ class Tab extends Table with TableInfo<Tab, TabData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    source,
     parentId,
     containerId,
     orderKey,
     url,
     title,
+    tabMode,
+    isolationContextId,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -394,6 +423,10 @@ class Tab extends Table with TableInfo<Tab, TabData> {
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}source'],
+      )!,
       parentId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}parent_id'],
@@ -413,6 +446,14 @@ class Tab extends Table with TableInfo<Tab, TabData> {
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
+      ),
+      tabMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tab_mode'],
+      )!,
+      isolationContextId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}isolation_context_id'],
       ),
       isProbablyReaderable: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -447,16 +488,23 @@ class Tab extends Table with TableInfo<Tab, TabData> {
   }
 
   @override
+  List<String> get customConstraints => const [
+    'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+  ];
+  @override
   bool get dontWriteConstraints => true;
 }
 
 class TabData extends DataClass implements Insertable<TabData> {
   final String id;
+  final int source;
   final String? parentId;
   final String? containerId;
   final String orderKey;
   final String? url;
   final String? title;
+  final int tabMode;
+  final String? isolationContextId;
   final int? isProbablyReaderable;
   final String? extractedContentMarkdown;
   final String? extractedContentPlain;
@@ -465,11 +513,14 @@ class TabData extends DataClass implements Insertable<TabData> {
   final int timestamp;
   const TabData({
     required this.id,
+    required this.source,
     this.parentId,
     this.containerId,
     required this.orderKey,
     this.url,
     this.title,
+    required this.tabMode,
+    this.isolationContextId,
     this.isProbablyReaderable,
     this.extractedContentMarkdown,
     this.extractedContentPlain,
@@ -481,6 +532,7 @@ class TabData extends DataClass implements Insertable<TabData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    map['source'] = Variable<int>(source);
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
     }
@@ -493,6 +545,10 @@ class TabData extends DataClass implements Insertable<TabData> {
     }
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
+    }
+    map['tab_mode'] = Variable<int>(tabMode);
+    if (!nullToAbsent || isolationContextId != null) {
+      map['isolation_context_id'] = Variable<String>(isolationContextId);
     }
     if (!nullToAbsent || isProbablyReaderable != null) {
       map['is_probably_readerable'] = Variable<int>(isProbablyReaderable);
@@ -522,11 +578,16 @@ class TabData extends DataClass implements Insertable<TabData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TabData(
       id: serializer.fromJson<String>(json['id']),
+      source: serializer.fromJson<int>(json['source']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       containerId: serializer.fromJson<String?>(json['containerId']),
       orderKey: serializer.fromJson<String>(json['orderKey']),
       url: serializer.fromJson<String?>(json['url']),
       title: serializer.fromJson<String?>(json['title']),
+      tabMode: serializer.fromJson<int>(json['tabMode']),
+      isolationContextId: serializer.fromJson<String?>(
+        json['isolationContextId'],
+      ),
       isProbablyReaderable: serializer.fromJson<int?>(
         json['isProbablyReaderable'],
       ),
@@ -548,11 +609,14 @@ class TabData extends DataClass implements Insertable<TabData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'source': serializer.toJson<int>(source),
       'parentId': serializer.toJson<String?>(parentId),
       'containerId': serializer.toJson<String?>(containerId),
       'orderKey': serializer.toJson<String>(orderKey),
       'url': serializer.toJson<String?>(url),
       'title': serializer.toJson<String?>(title),
+      'tabMode': serializer.toJson<int>(tabMode),
+      'isolationContextId': serializer.toJson<String?>(isolationContextId),
       'isProbablyReaderable': serializer.toJson<int?>(isProbablyReaderable),
       'extractedContentMarkdown': serializer.toJson<String?>(
         extractedContentMarkdown,
@@ -568,11 +632,14 @@ class TabData extends DataClass implements Insertable<TabData> {
 
   TabData copyWith({
     String? id,
+    int? source,
     Value<String?> parentId = const Value.absent(),
     Value<String?> containerId = const Value.absent(),
     String? orderKey,
     Value<String?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
+    int? tabMode,
+    Value<String?> isolationContextId = const Value.absent(),
     Value<int?> isProbablyReaderable = const Value.absent(),
     Value<String?> extractedContentMarkdown = const Value.absent(),
     Value<String?> extractedContentPlain = const Value.absent(),
@@ -581,11 +648,16 @@ class TabData extends DataClass implements Insertable<TabData> {
     int? timestamp,
   }) => TabData(
     id: id ?? this.id,
+    source: source ?? this.source,
     parentId: parentId.present ? parentId.value : this.parentId,
     containerId: containerId.present ? containerId.value : this.containerId,
     orderKey: orderKey ?? this.orderKey,
     url: url.present ? url.value : this.url,
     title: title.present ? title.value : this.title,
+    tabMode: tabMode ?? this.tabMode,
+    isolationContextId: isolationContextId.present
+        ? isolationContextId.value
+        : this.isolationContextId,
     isProbablyReaderable: isProbablyReaderable.present
         ? isProbablyReaderable.value
         : this.isProbablyReaderable,
@@ -606,6 +678,7 @@ class TabData extends DataClass implements Insertable<TabData> {
   TabData copyWithCompanion(TabCompanion data) {
     return TabData(
       id: data.id.present ? data.id.value : this.id,
+      source: data.source.present ? data.source.value : this.source,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       containerId: data.containerId.present
           ? data.containerId.value
@@ -613,6 +686,10 @@ class TabData extends DataClass implements Insertable<TabData> {
       orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
       url: data.url.present ? data.url.value : this.url,
       title: data.title.present ? data.title.value : this.title,
+      tabMode: data.tabMode.present ? data.tabMode.value : this.tabMode,
+      isolationContextId: data.isolationContextId.present
+          ? data.isolationContextId.value
+          : this.isolationContextId,
       isProbablyReaderable: data.isProbablyReaderable.present
           ? data.isProbablyReaderable.value
           : this.isProbablyReaderable,
@@ -636,11 +713,14 @@ class TabData extends DataClass implements Insertable<TabData> {
   String toString() {
     return (StringBuffer('TabData(')
           ..write('id: $id, ')
+          ..write('source: $source, ')
           ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
+          ..write('tabMode: $tabMode, ')
+          ..write('isolationContextId: $isolationContextId, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -654,11 +734,14 @@ class TabData extends DataClass implements Insertable<TabData> {
   @override
   int get hashCode => Object.hash(
     id,
+    source,
     parentId,
     containerId,
     orderKey,
     url,
     title,
+    tabMode,
+    isolationContextId,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -671,11 +754,14 @@ class TabData extends DataClass implements Insertable<TabData> {
       identical(this, other) ||
       (other is TabData &&
           other.id == this.id &&
+          other.source == this.source &&
           other.parentId == this.parentId &&
           other.containerId == this.containerId &&
           other.orderKey == this.orderKey &&
           other.url == this.url &&
           other.title == this.title &&
+          other.tabMode == this.tabMode &&
+          other.isolationContextId == this.isolationContextId &&
           other.isProbablyReaderable == this.isProbablyReaderable &&
           other.extractedContentMarkdown == this.extractedContentMarkdown &&
           other.extractedContentPlain == this.extractedContentPlain &&
@@ -686,11 +772,14 @@ class TabData extends DataClass implements Insertable<TabData> {
 
 class TabCompanion extends UpdateCompanion<TabData> {
   final Value<String> id;
+  final Value<int> source;
   final Value<String?> parentId;
   final Value<String?> containerId;
   final Value<String> orderKey;
   final Value<String?> url;
   final Value<String?> title;
+  final Value<int> tabMode;
+  final Value<String?> isolationContextId;
   final Value<int?> isProbablyReaderable;
   final Value<String?> extractedContentMarkdown;
   final Value<String?> extractedContentPlain;
@@ -700,11 +789,14 @@ class TabCompanion extends UpdateCompanion<TabData> {
   final Value<int> rowid;
   const TabCompanion({
     this.id = const Value.absent(),
+    this.source = const Value.absent(),
     this.parentId = const Value.absent(),
     this.containerId = const Value.absent(),
     this.orderKey = const Value.absent(),
     this.url = const Value.absent(),
     this.title = const Value.absent(),
+    this.tabMode = const Value.absent(),
+    this.isolationContextId = const Value.absent(),
     this.isProbablyReaderable = const Value.absent(),
     this.extractedContentMarkdown = const Value.absent(),
     this.extractedContentPlain = const Value.absent(),
@@ -715,11 +807,14 @@ class TabCompanion extends UpdateCompanion<TabData> {
   });
   TabCompanion.insert({
     required String id,
+    required int source,
     this.parentId = const Value.absent(),
     this.containerId = const Value.absent(),
     required String orderKey,
     this.url = const Value.absent(),
     this.title = const Value.absent(),
+    this.tabMode = const Value.absent(),
+    this.isolationContextId = const Value.absent(),
     this.isProbablyReaderable = const Value.absent(),
     this.extractedContentMarkdown = const Value.absent(),
     this.extractedContentPlain = const Value.absent(),
@@ -728,15 +823,19 @@ class TabCompanion extends UpdateCompanion<TabData> {
     required int timestamp,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
+       source = Value(source),
        orderKey = Value(orderKey),
        timestamp = Value(timestamp);
   static Insertable<TabData> custom({
     Expression<String>? id,
+    Expression<int>? source,
     Expression<String>? parentId,
     Expression<String>? containerId,
     Expression<String>? orderKey,
     Expression<String>? url,
     Expression<String>? title,
+    Expression<int>? tabMode,
+    Expression<String>? isolationContextId,
     Expression<int>? isProbablyReaderable,
     Expression<String>? extractedContentMarkdown,
     Expression<String>? extractedContentPlain,
@@ -747,11 +846,15 @@ class TabCompanion extends UpdateCompanion<TabData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (source != null) 'source': source,
       if (parentId != null) 'parent_id': parentId,
       if (containerId != null) 'container_id': containerId,
       if (orderKey != null) 'order_key': orderKey,
       if (url != null) 'url': url,
       if (title != null) 'title': title,
+      if (tabMode != null) 'tab_mode': tabMode,
+      if (isolationContextId != null)
+        'isolation_context_id': isolationContextId,
       if (isProbablyReaderable != null)
         'is_probably_readerable': isProbablyReaderable,
       if (extractedContentMarkdown != null)
@@ -768,11 +871,14 @@ class TabCompanion extends UpdateCompanion<TabData> {
 
   TabCompanion copyWith({
     Value<String>? id,
+    Value<int>? source,
     Value<String?>? parentId,
     Value<String?>? containerId,
     Value<String>? orderKey,
     Value<String?>? url,
     Value<String?>? title,
+    Value<int>? tabMode,
+    Value<String?>? isolationContextId,
     Value<int?>? isProbablyReaderable,
     Value<String?>? extractedContentMarkdown,
     Value<String?>? extractedContentPlain,
@@ -783,11 +889,14 @@ class TabCompanion extends UpdateCompanion<TabData> {
   }) {
     return TabCompanion(
       id: id ?? this.id,
+      source: source ?? this.source,
       parentId: parentId ?? this.parentId,
       containerId: containerId ?? this.containerId,
       orderKey: orderKey ?? this.orderKey,
       url: url ?? this.url,
       title: title ?? this.title,
+      tabMode: tabMode ?? this.tabMode,
+      isolationContextId: isolationContextId ?? this.isolationContextId,
       isProbablyReaderable: isProbablyReaderable ?? this.isProbablyReaderable,
       extractedContentMarkdown:
           extractedContentMarkdown ?? this.extractedContentMarkdown,
@@ -806,6 +915,9 @@ class TabCompanion extends UpdateCompanion<TabData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (source.present) {
+      map['source'] = Variable<int>(source.value);
+    }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
     }
@@ -820,6 +932,12 @@ class TabCompanion extends UpdateCompanion<TabData> {
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
+    }
+    if (tabMode.present) {
+      map['tab_mode'] = Variable<int>(tabMode.value);
+    }
+    if (isolationContextId.present) {
+      map['isolation_context_id'] = Variable<String>(isolationContextId.value);
     }
     if (isProbablyReaderable.present) {
       map['is_probably_readerable'] = Variable<int>(isProbablyReaderable.value);
@@ -855,11 +973,14 @@ class TabCompanion extends UpdateCompanion<TabData> {
   String toString() {
     return (StringBuffer('TabCompanion(')
           ..write('id: $id, ')
+          ..write('source: $source, ')
           ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
           ..write('title: $title, ')
+          ..write('tabMode: $tabMode, ')
+          ..write('isolationContextId: $isolationContextId, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -1158,13 +1279,13 @@ class TabFtsCompanion extends UpdateCompanion<TabFtsData> {
   }
 }
 
-class DatabaseAtV2 extends GeneratedDatabase {
-  DatabaseAtV2(QueryExecutor e) : super(e);
+class DatabaseAtV6 extends GeneratedDatabase {
+  DatabaseAtV6(QueryExecutor e) : super(e);
   late final Container container = Container(this);
   late final Tab tab = Tab(this);
   late final TabFts tabFts = TabFts(this);
   late final Trigger tabMaintainParentChainOnDelete = Trigger(
-    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = OLD.parent_id WHERE parent_id = OLD.id;END',
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
     'tab_maintain_parent_chain_on_delete',
   );
   late final Trigger tabAfterInsert = Trigger(
@@ -1231,5 +1352,5 @@ class DatabaseAtV2 extends GeneratedDatabase {
     ),
   ]);
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 6;
 }

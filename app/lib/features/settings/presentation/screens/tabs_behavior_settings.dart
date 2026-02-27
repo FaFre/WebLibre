@@ -129,16 +129,26 @@ class _NewTabDefaultSection extends HookConsumerWidget {
           Center(
             child: SegmentedButton(
               showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(
+              segments: [
+                const ButtonSegment(
                   value: TabType.regular,
                   label: Text('Regular'),
                   icon: Icon(MdiIcons.tab),
                 ),
-                ButtonSegment(
+                const ButtonSegment(
                   value: TabType.private,
                   label: Text('Private'),
                   icon: Icon(WebLibreIcons.privateTab),
+                ),
+                ButtonSegment(
+                  value: TabType.isolated,
+                  label: const Text('Isolated'),
+                  icon: Icon(
+                    MdiIcons.shieldLock,
+                    color: defaultCreateTabType == TabType.isolated
+                        ? null
+                        : appColors.isolatedTabTeal,
+                  ),
                 ),
               ],
               selected: {defaultCreateTabType},
@@ -156,6 +166,9 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                   selectedBackgroundColor: appColors.privateSelectionOverlay,
                 ),
                 TabType.child => null,
+                TabType.isolated => SegmentedButton.styleFrom(
+                  selectedBackgroundColor: appColors.isolatedSelectionOverlay,
+                ),
               },
             ),
           ),

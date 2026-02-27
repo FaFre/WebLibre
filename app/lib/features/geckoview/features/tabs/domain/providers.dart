@@ -155,6 +155,25 @@ Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
   return db.containerDao.allAssignedSites().watch();
 }
 
+/// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
+/// assigned to containers. Used by ProxySettingsReplication to manage proxy
+/// aliases for isolated contexts.
+///
+/// Returns a map from isolation context ID to the set of container IDs it
+/// appears in. An isolation context needs a proxy alias if ANY of its
+/// associated containers has useProxy enabled.
+@Riverpod(keepAlive: true)
+Stream<Map<String, Set<String>>> watchIsolatedContextContainerMap(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.isolatedContextContainerPairs().watch().map((pairs) {
+    final map = <String, Set<String>>{};
+    for (final p in pairs) {
+      map.putIfAbsent(p.isolationContextId!, () => {}).add(p.containerId!);
+    }
+    return map;
+  });
+}
+
 @Riverpod()
 Stream<bool> watchIsCurrentSiteAssignedToContainer(Ref ref) {
   final currentUri = ref.watch(

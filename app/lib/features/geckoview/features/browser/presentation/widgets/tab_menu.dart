@@ -27,6 +27,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
@@ -41,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -234,12 +236,12 @@ class TabMenu extends HookConsumerWidget {
                       .read(tabDataRepositoryProvider.notifier)
                       .getTabContainerData(selectedTabId);
 
-                  final tabId = (tabState.isPrivate)
+                  final tabId = (tabState.tabMode is! RegularTabMode)
                       ? await ref
                             .read(tabRepositoryProvider.notifier)
                             .addTab(
+                              tabMode: TabMode.regular,
                               url: tabState.url,
-                              private: false,
                               containerSelection: containerData == null
                                   ? const TabContainerSelection.unassigned()
                                   : TabContainerSelection.specific(
@@ -277,12 +279,12 @@ class TabMenu extends HookConsumerWidget {
                       .read(tabDataRepositoryProvider.notifier)
                       .getTabContainerData(selectedTabId);
 
-                  final tabId = (!tabState.isPrivate)
+                  final tabId = (tabState.tabMode is! PrivateTabMode)
                       ? await ref
                             .read(tabRepositoryProvider.notifier)
                             .addTab(
                               url: tabState.url,
-                              private: true,
+                              tabMode: TabMode.private,
                               containerSelection: containerData == null
                                   ? const TabContainerSelection.unassigned()
                                   : TabContainerSelection.specific(
@@ -300,6 +302,41 @@ class TabMenu extends HookConsumerWidget {
 
                   if (context.mounted) {
                     //save reference before pop `ref` gets disposed
+                    final repo = ref.read(tabRepositoryProvider.notifier);
+
+                    ui_helper.showTabSwitchMessage(
+                      context,
+                      onSwitch: () async {
+                        await repo.selectTab(tabId);
+                      },
+                    );
+                  }
+                },
+              ),
+              MenuItemButton(
+                leadingIcon: Icon(
+                  MdiIcons.shieldLock,
+                  color: AppColors.of(context).isolatedTabTeal,
+                ),
+                child: const Text('Isolated'),
+                onPressed: () async {
+                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                  final containerData = await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .getTabContainerData(selectedTabId);
+
+                  final tabId = await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(
+                        url: tabState.url,
+                        tabMode: TabMode.newIsolated(),
+                        containerSelection: containerData == null
+                            ? const TabContainerSelection.unassigned()
+                            : TabContainerSelection.specific(containerData),
+                        selectTab: false,
+                      );
+
+                  if (context.mounted) {
                     final repo = ref.read(tabRepositoryProvider.notifier);
 
                     ui_helper.showTabSwitchMessage(
@@ -540,6 +577,24 @@ class TabMenu extends HookConsumerWidget {
         if (enableCloseTab)
           MenuItemButton(
             onPressed: () async {
+              // Confirm before closing the last tab in an isolation group
+              final tabState = ref.read(tabStateProvider(selectedTabId));
+              if (tabState != null && tabState.tabMode is IsolatedTabMode) {
+                final allStates = ref.read(tabStatesProvider);
+                final groupCount = allStates.values
+                    .where(
+                      (s) =>
+                          s.isolationContextId == tabState.isolationContextId,
+                    )
+                    .length;
+                if (groupCount <= 1 && context.mounted) {
+                  final confirmed = await ui_helper.confirmIsolatedTabClose(
+                    context,
+                  );
+                  if (!confirmed) return;
+                }
+              }
+
               await ref
                   .read(tabRepositoryProvider.notifier)
                   .closeTab(selectedTabId);
