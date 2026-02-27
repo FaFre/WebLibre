@@ -23,7 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -79,14 +78,15 @@ class SearchField extends HookConsumerWidget {
 
     if (showSuggestions) {
       useOnListenableChange(textEditingController, () async {
-        if (textEditingController.text.isNotEmpty) {
-          if (suggestion.value.isNotEmpty &&
-              lastText.value.length > 1 &&
-              textEditingController.text ==
-                  lastText.value.substring(0, lastText.value.length - 1)) {
+        if (textEditingController.text.isEmpty) {
+          suggestion.value = null;
+        } else if (textEditingController.text != lastText.value) {
+          final isDeleting =
+              textEditingController.text.length < lastText.value.length;
+
+          if (isDeleting) {
             suggestion.value = null;
-            textEditingController.text = lastText.value;
-          } else if (textEditingController.text != lastText.value) {
+          } else {
             final result = await ref
                 .read(engineSuggestionsProvider.notifier)
                 .getAutocompleteSuggestion(textEditingController.text);
