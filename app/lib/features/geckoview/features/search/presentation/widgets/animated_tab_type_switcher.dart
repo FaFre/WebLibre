@@ -20,7 +20,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 
 /// An animated tab type switcher that only shows the label for the currently
 /// active option. Inactive options collapse to show only their icon.
@@ -65,26 +64,6 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.regular),
               ),
-              _divider(borderColor),
-              _Segment(
-                tabType: TabType.private,
-                icon: WebLibreIcons.privateTab,
-                label: 'Private',
-                isSelected: selected == TabType.private,
-                selectedBackgroundColor: selectedBackgroundColor,
-                onTap: () => onChanged(TabType.private),
-              ),
-              if (showIsolatedOption) ...[
-                _divider(borderColor),
-                _Segment(
-                  tabType: TabType.isolated,
-                  icon: MdiIcons.shieldLock,
-                  label: 'Isolated',
-                  isSelected: selected == TabType.isolated,
-                  selectedBackgroundColor: selectedBackgroundColor,
-                  onTap: () => onChanged(TabType.isolated),
-                ),
-              ],
               if (showChildOption) ...[
                 _divider(borderColor),
                 _Segment(
@@ -94,6 +73,26 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                   isSelected: selected == TabType.child,
                   selectedBackgroundColor: selectedBackgroundColor,
                   onTap: () => onChanged(TabType.child),
+                ),
+              ],
+              _divider(borderColor),
+              _Segment(
+                tabType: TabType.private,
+                icon: MdiIcons.dominoMask,
+                label: 'Private',
+                isSelected: selected == TabType.private,
+                selectedBackgroundColor: selectedBackgroundColor,
+                onTap: () => onChanged(TabType.private),
+              ),
+              if (showIsolatedOption) ...[
+                _divider(borderColor),
+                _Segment(
+                  tabType: TabType.isolated,
+                  icon: MdiIcons.snowflake,
+                  label: 'Isolated',
+                  isSelected: selected == TabType.isolated,
+                  selectedBackgroundColor: selectedBackgroundColor,
+                  onTap: () => onChanged(TabType.isolated),
                 ),
               ],
             ],

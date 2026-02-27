@@ -30,7 +30,6 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 
 class TabsBehaviorSettingsScreen extends StatelessWidget {
   const TabsBehaviorSettingsScreen({super.key});
@@ -137,17 +136,22 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                   label: Text('Regular'),
                   icon: Icon(MdiIcons.tab),
                 ),
-                const ButtonSegment(
+                ButtonSegment(
                   value: TabType.private,
-                  label: Text('Private'),
-                  icon: Icon(WebLibreIcons.privateTab),
+                  label: const Text('Private'),
+                  icon: Icon(
+                    MdiIcons.dominoMask,
+                    color: defaultCreateTabType == TabType.private
+                        ? null
+                        : appColors.privateTabPurple,
+                  ),
                 ),
                 if (settings.showIsolatedTabUi)
                   ButtonSegment(
                     value: TabType.isolated,
                     label: const Text('Isolated'),
                     icon: Icon(
-                      MdiIcons.shieldLock,
+                      MdiIcons.snowflake,
                       color: defaultCreateTabType == TabType.isolated
                           ? null
                           : appColors.isolatedTabTeal,
@@ -206,21 +210,26 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
           Center(
             child: SegmentedButton(
               showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(
+              segments: [
+                const ButtonSegment(
                   value: TabIntentOpenSetting.ask,
                   label: Text('Prompt'),
                   icon: Icon(MdiIcons.messageQuestion),
                 ),
-                ButtonSegment(
+                const ButtonSegment(
                   value: TabIntentOpenSetting.regular,
                   label: Text('Regular'),
                   icon: Icon(MdiIcons.tab),
                 ),
                 ButtonSegment(
                   value: TabIntentOpenSetting.private,
-                  label: Text('Private'),
-                  icon: Icon(WebLibreIcons.privateTab),
+                  label: const Text('Private'),
+                  icon: Icon(
+                    MdiIcons.dominoMask,
+                    color: tabIntentOpenSetting == TabIntentOpenSetting.private
+                        ? null
+                        : appColors.privateTabPurple,
+                  ),
                 ),
               ],
               selected: {tabIntentOpenSetting},
@@ -326,7 +335,10 @@ class _ShowIsolatedTabUiTile extends HookConsumerWidget {
     return SwitchListTile.adaptive(
       title: const Text('Show Isolated Tab UI'),
       subtitle: const Text('Show isolated-tab creation options in the UI'),
-      secondary: const Icon(MdiIcons.shieldLock),
+      secondary: Icon(
+        MdiIcons.snowflake,
+        color: AppColors.of(context).isolatedTabTeal,
+      ),
       value: showIsolatedTabUi,
       onChanged: (value) async {
         await ref.read(saveGeneralSettingsControllerProvider.notifier).save((

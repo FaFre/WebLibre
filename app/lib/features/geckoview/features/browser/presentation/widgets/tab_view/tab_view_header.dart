@@ -516,7 +516,7 @@ class TabViewHeader extends HookConsumerWidget {
                         if (showIsolatedTabUi)
                           MenuItemButton(
                             leadingIcon: Icon(
-                              MdiIcons.shieldLock,
+                              MdiIcons.snowflake,
                               color: AppColors.of(context).isolatedTabTeal,
                             ),
                             onPressed: isSyncedScope

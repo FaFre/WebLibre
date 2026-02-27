@@ -45,7 +45,9 @@ const allSupportedSchemes = [
 const httpOnlySchemes = [kSchemeHttp, kSchemeHttps];
 
 bool schemeRequiresAuthority(String scheme) {
-  return allSupportedSchemes.any((s) => s.name == scheme && s.requiresAuthority);
+  return allSupportedSchemes.any(
+    (s) => s.name == scheme && s.requiresAuthority,
+  );
 }
 
 enum SchemePolicy {

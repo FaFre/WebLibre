@@ -23,7 +23,8 @@ import 'package:weblibre/utils/uri_policy.dart';
 extension UriX on Uri {
   Uri get base => Uri.parse('$scheme://$authority');
 
-  bool get hasSupportedScheme => allSupportedSchemes.any((s) => s.name == scheme);
+  bool get hasSupportedScheme =>
+      allSupportedSchemes.any((s) => s.name == scheme);
 
   bool get isHttp => isScheme('http');
   bool get isHttps => isScheme('https');

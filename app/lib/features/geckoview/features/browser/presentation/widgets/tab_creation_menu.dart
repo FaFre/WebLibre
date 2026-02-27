@@ -23,7 +23,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 
 class TabCreationMenu extends HookConsumerWidget {
   final Widget child;
@@ -61,11 +60,22 @@ class TabCreationMenu extends HookConsumerWidget {
           leadingIcon: const Icon(MdiIcons.tab),
           child: const Text('Add Regular Tab'),
         ),
+        if (createChildTabsOption)
+          MenuItemButton(
+            onPressed: () async {
+              await const SearchRoute(tabType: TabType.child).push(context);
+            },
+            leadingIcon: const Icon(MdiIcons.fileTree),
+            child: const Text('Add Child Tab'),
+          ),
         MenuItemButton(
           onPressed: () async {
             await const SearchRoute(tabType: TabType.private).push(context);
           },
-          leadingIcon: const Icon(WebLibreIcons.privateTab),
+          leadingIcon: Icon(
+            MdiIcons.dominoMask,
+            color: AppColors.of(context).privateTabPurple,
+          ),
           child: const Text('Add Private Tab'),
         ),
         if (showIsolatedTabUi)
@@ -74,18 +84,10 @@ class TabCreationMenu extends HookConsumerWidget {
               await const SearchRoute(tabType: TabType.isolated).push(context);
             },
             leadingIcon: Icon(
-              MdiIcons.shieldLock,
+              MdiIcons.snowflake,
               color: AppColors.of(context).isolatedTabTeal,
             ),
             child: const Text('Add Isolated Tab'),
-          ),
-        if (createChildTabsOption)
-          MenuItemButton(
-            onPressed: () async {
-              await const SearchRoute(tabType: TabType.child).push(context);
-            },
-            leadingIcon: const Icon(MdiIcons.fileTree),
-            child: const Text('Add Child Tab'),
           ),
       ],
       child: child,

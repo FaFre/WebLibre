@@ -233,7 +233,7 @@ class GridTabPreview extends HookConsumerWidget {
                           top: -4,
                           child: Icon(
                             tabState.tabMode is IsolatedTabMode
-                                ? MdiIcons.shieldLock
+                                ? MdiIcons.snowflake
                                 : MdiIcons.dominoMask,
                             color: tabState.tabMode is IsolatedTabMode
                                 ? appColors.isolatedTabTeal
@@ -337,7 +337,7 @@ class ListTabPreview extends HookConsumerWidget {
     };
     final (modeBadgeIcon, modeBadgeColor) = switch (tabState.tabMode) {
       PrivateTabMode() => (MdiIcons.dominoMask, appColors.privateTabPurple),
-      IsolatedTabMode() => (MdiIcons.shieldLock, appColors.isolatedTabTeal),
+      IsolatedTabMode() => (MdiIcons.snowflake, appColors.isolatedTabTeal),
       RegularTabMode() => (null, null),
     };
 

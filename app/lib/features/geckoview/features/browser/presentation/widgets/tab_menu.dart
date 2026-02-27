@@ -50,7 +50,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -273,7 +272,10 @@ class TabMenu extends HookConsumerWidget {
                 },
               ),
               MenuItemButton(
-                leadingIcon: const Icon(WebLibreIcons.privateTab),
+                leadingIcon: Icon(
+                  MdiIcons.dominoMask,
+                  color: AppColors.of(context).privateTabPurple,
+                ),
                 child: const Text('Private'),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
@@ -318,7 +320,7 @@ class TabMenu extends HookConsumerWidget {
               if (settings.showIsolatedTabUi)
                 MenuItemButton(
                   leadingIcon: Icon(
-                    MdiIcons.shieldLock,
+                    MdiIcons.snowflake,
                     color: AppColors.of(context).isolatedTabTeal,
                   ),
                   child: const Text('Isolated'),

@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/debouncer.dart';
+import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -381,7 +382,7 @@ class OpenSharedContent extends HookConsumerWidget {
                 subtitle: 'Add to your browser tabs',
                 icon: MdiIcons.tab,
                 trailing: PopupMenuButton<TabMode>(
-                  icon: const Icon(MdiIcons.tabUnselected, size: 24),
+                  icon: const Icon(WebLibreIcons.tabType, size: 24),
                   tooltip: settings.showIsolatedTabUi
                       ? 'Private / Isolated'
                       : 'Private',
@@ -407,7 +408,7 @@ class OpenSharedContent extends HookConsumerWidget {
                         child: Row(
                           children: [
                             Icon(
-                              MdiIcons.shieldLock,
+                              MdiIcons.snowflake,
                               color: appColors.isolatedTabTeal,
                               size: 20,
                             ),

@@ -553,7 +553,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Icon(
-                      MdiIcons.shieldLock,
+                      MdiIcons.snowflake,
                       color: appColors.isolatedTabTeal,
                       size: 20,
                     ),

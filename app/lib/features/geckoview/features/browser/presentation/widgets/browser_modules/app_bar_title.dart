@@ -152,13 +152,6 @@ class AppBarTitle extends HookConsumerWidget {
                 ),
                 Row(
                   children: [
-                    if (isTabTuneledAsync.hasValue &&
-                        isTabTuneledAsync.value == true) ...[
-                      const Icon(MdiIcons.tunnelOutline, size: 14),
-                      const SizedBox(width: 4),
-                    ],
-                    icon,
-                    const SizedBox(width: 4),
                     if (tabState.tabMode is PrivateTabMode) ...[
                       Icon(
                         MdiIcons.dominoMask,
@@ -168,12 +161,19 @@ class AppBarTitle extends HookConsumerWidget {
                       const SizedBox(width: 4),
                     ] else if (tabState.tabMode is IsolatedTabMode) ...[
                       Icon(
-                        MdiIcons.shieldLock,
+                        MdiIcons.snowflake,
                         color: appColors.isolatedTabTeal,
                         size: 14,
                       ),
                       const SizedBox(width: 4),
                     ],
+                    if (isTabTuneledAsync.hasValue &&
+                        isTabTuneledAsync.value == true) ...[
+                      const Icon(MdiIcons.tunnelOutline, size: 14),
+                      const SizedBox(width: 4),
+                    ],
+                    icon,
+                    const SizedBox(width: 4),
                     Expanded(
                       child: UriBreadcrumb(
                         uri: tabState.url,
