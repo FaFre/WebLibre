@@ -50,7 +50,7 @@ class OpenImageInNewTab extends HookConsumerWidget {
             TabMode.fromTabType(
               ref
                   .read(generalSettingsWithDefaultsProvider)
-                  .defaultCreateTabType,
+                  .effectiveDefaultCreateTabType,
             );
 
         final tabId = await ref

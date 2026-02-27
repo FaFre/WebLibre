@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// A compact container selector that displays only the currently selected
 /// container (or "unassigned" if none selected) without counts.
@@ -40,6 +41,15 @@ class CompactContainerSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final containerUiEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.showContainerUi,
+      ),
+    );
+    if (!containerUiEnabled) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
     final isSelected = selectedContainer != null;
 

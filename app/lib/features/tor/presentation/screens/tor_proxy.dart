@@ -29,6 +29,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/screens/country_picker.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -79,6 +80,9 @@ class TorProxyScreen extends HookConsumerWidget {
         bootstrapProgress > 0 && bootstrapProgress < 100;
 
     final torSettings = ref.watch(torSettingsWithDefaultsProvider);
+    final showContainerUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+    );
 
     useOnInitialization(() async {
       await ref.read(torProxyServiceProvider.notifier).requestSync();
@@ -246,22 +250,36 @@ class TorProxyScreen extends HookConsumerWidget {
                               );
                         }
                       },
-                      child: const Column(
+                      child: Column(
                         children: [
-                          RadioListTile.adaptive(
-                            value: TorRegularTabProxyMode.container,
-                            title: Text('Container-Based Routing'),
-                            subtitle: Text(
-                              'Route only tabs in Tor containers through the Tor network. Private tabs remain unaffected.',
+                          if (showContainerUi)
+                            const RadioListTile.adaptive(
+                              value: TorRegularTabProxyMode.container,
+                              title: Text('Container-Based Routing'),
+                              subtitle: Text(
+                                'Route only tabs in Tor containers through the Tor network. Private tabs remain unaffected.',
+                              ),
                             ),
-                          ),
-                          RadioListTile.adaptive(
+                          const RadioListTile.adaptive(
                             value: TorRegularTabProxyMode.all,
                             title: Text('Global Routing'),
                             subtitle: Text(
                               'Route all regular tabs through the Tor network. Private tabs remain unaffected.',
                             ),
                           ),
+                          if (!showContainerUi &&
+                              torSettings.proxyRegularTabsMode ==
+                                  TorRegularTabProxyMode.container)
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 56,
+                                right: 24,
+                                top: 4,
+                              ),
+                              child: Text(
+                                'Container-based routing is currently active but hidden because Container UI is disabled.',
+                              ),
+                            ),
                         ],
                       ),
                     ),

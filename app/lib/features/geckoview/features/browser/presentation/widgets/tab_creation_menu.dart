@@ -42,6 +42,11 @@ class TabCreationMenu extends HookConsumerWidget {
         (value) => value.createChildTabsOption,
       ),
     );
+    final showIsolatedTabUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.showIsolatedTabUi,
+      ),
+    );
 
     return MenuAnchor(
       controller: controller,
@@ -63,16 +68,17 @@ class TabCreationMenu extends HookConsumerWidget {
           leadingIcon: const Icon(WebLibreIcons.privateTab),
           child: const Text('Add Private Tab'),
         ),
-        MenuItemButton(
-          onPressed: () async {
-            await const SearchRoute(tabType: TabType.isolated).push(context);
-          },
-          leadingIcon: Icon(
-            MdiIcons.shieldLock,
-            color: AppColors.of(context).isolatedTabTeal,
+        if (showIsolatedTabUi)
+          MenuItemButton(
+            onPressed: () async {
+              await const SearchRoute(tabType: TabType.isolated).push(context);
+            },
+            leadingIcon: Icon(
+              MdiIcons.shieldLock,
+              color: AppColors.of(context).isolatedTabTeal,
+            ),
+            child: const Text('Add Isolated Tab'),
           ),
-          child: const Text('Add Isolated Tab'),
-        ),
         if (createChildTabsOption)
           MenuItemButton(
             onPressed: () async {

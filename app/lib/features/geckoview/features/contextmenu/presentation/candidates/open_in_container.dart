@@ -61,6 +61,11 @@ class OpenInContainer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    if (!settings.showContainerUi) {
+      return const SizedBox.shrink();
+    }
+
     return ListTile(
       leading: const Icon(MdiIcons.selectGroup),
       title: const Text('Open in container'),
@@ -92,11 +97,7 @@ class OpenInContainer extends HookConsumerWidget {
         final currentTab = ref.read(selectedTabStateProvider);
         final tabMode =
             currentTab?.tabMode ??
-            TabMode.fromTabType(
-              ref
-                  .read(generalSettingsWithDefaultsProvider)
-                  .defaultCreateTabType,
-            );
+            TabMode.fromTabType(settings.effectiveDefaultCreateTabType);
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)

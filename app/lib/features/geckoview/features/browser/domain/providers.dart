@@ -216,9 +216,14 @@ EquatableValue<List<TabStateWirthContainer>> quickTabSwitcherTabStates(
   Ref ref,
   QuickTabSwitcherMode mode,
 ) {
+  final effectiveMode = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveUiQuickTabSwitcherMode(),
+    ),
+  );
   final selectedTabId = ref.watch(selectedTabProvider);
 
-  final tabStates = switch (mode) {
+  final tabStates = switch (effectiveMode) {
     QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider).value,
     QuickTabSwitcherMode.containerTabs =>
       ref.watch(selectedContainerTabStatesWithContainerProvider).value,
@@ -234,6 +239,11 @@ Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
   Ref ref,
   QuickTabSwitcherMode mode,
 ) async {
+  final effectiveMode = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveUiQuickTabSwitcherMode(),
+    ),
+  );
   final showHistorySuggestions = ref.watch(
     generalSettingsWithDefaultsProvider.select(
       (settings) => settings.quickTabSwitcherShowHistorySuggestions,
@@ -246,7 +256,7 @@ Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
 
   final hasTabStates = ref.watch(
     quickTabSwitcherTabStatesProvider(
-      mode,
+      effectiveMode,
     ).select((value) => value.value.isNotEmpty),
   );
   if (hasTabStates) {
@@ -263,6 +273,11 @@ AsyncValue<bool> quickTabSwitcherHasResults(
   Ref ref,
   QuickTabSwitcherMode mode,
 ) {
+  final effectiveMode = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveUiQuickTabSwitcherMode(),
+    ),
+  );
   final showQuickTabSwitcherBar = ref.watch(
     generalSettingsWithDefaultsProvider.select(
       (settings) => settings.tabBarShowQuickTabSwitcherBar,
@@ -274,7 +289,7 @@ AsyncValue<bool> quickTabSwitcherHasResults(
 
   final hasResults = ref.watch(
     quickTabSwitcherTabStatesProvider(
-      mode,
+      effectiveMode,
     ).select((value) => value.value.isNotEmpty),
   );
 
@@ -283,7 +298,7 @@ AsyncValue<bool> quickTabSwitcherHasResults(
   }
 
   return ref
-      .watch(quickTabSwitcherHistorySuggestionsProvider(mode))
+      .watch(quickTabSwitcherHistorySuggestionsProvider(effectiveMode))
       .whenData((visits) => visits.isNotEmpty);
 }
 

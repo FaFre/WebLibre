@@ -559,7 +559,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'db82bf9e338c94768b0531aeaffb152ff726f81f';
+    r'df990fb96cca62a272572c925028725f81a0e96b';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
@@ -642,7 +642,7 @@ final class QuickTabSwitcherHistorySuggestionsProvider
 }
 
 String _$quickTabSwitcherHistorySuggestionsHash() =>
-    r'3446741dfedf6fda9ab61421c1b74370c7f43f5b';
+    r'2e689ce72aac6b5b5b41e0390b168b3fdf5d4251';
 
 final class QuickTabSwitcherHistorySuggestionsFamily extends $Family
     with
@@ -730,7 +730,7 @@ final class QuickTabSwitcherHasResultsProvider
 }
 
 String _$quickTabSwitcherHasResultsHash() =>
-    r'bcbddfefe7f5eb2c5d8c7c1925fe593a857b477b';
+    r'5c488c9933372350c9e87ca1b83145176823dc88';
 
 final class QuickTabSwitcherHasResultsFamily extends $Family
     with $FunctionalFamilyOverride<AsyncValue<bool>, QuickTabSwitcherMode> {

@@ -29,7 +29,13 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures);
 
-  GeneralSettings defaultCreateTabType(TabType defaultCreateTabType);
+  GeneralSettings showContainerUi(bool showContainerUi);
+
+  GeneralSettings showIsolatedTabUi(bool showIsolatedTabUi);
+
+  GeneralSettings storedDefaultCreateTabType(
+    TabType storedDefaultCreateTabType,
+  );
 
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
@@ -124,7 +130,9 @@ abstract class _$GeneralSettingsCWProxy {
     bool createChildTabsOption,
     bool showExtensionShortcut,
     bool enableLocalAiFeatures,
-    TabType defaultCreateTabType,
+    bool showContainerUi,
+    bool showIsolatedTabUi,
+    TabType storedDefaultCreateTabType,
     TabIntentOpenSetting tabIntentOpenSetting,
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
@@ -205,8 +213,17 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(enableLocalAiFeatures: enableLocalAiFeatures);
 
   @override
-  GeneralSettings defaultCreateTabType(TabType defaultCreateTabType) =>
-      call(defaultCreateTabType: defaultCreateTabType);
+  GeneralSettings showContainerUi(bool showContainerUi) =>
+      call(showContainerUi: showContainerUi);
+
+  @override
+  GeneralSettings showIsolatedTabUi(bool showIsolatedTabUi) =>
+      call(showIsolatedTabUi: showIsolatedTabUi);
+
+  @override
+  GeneralSettings storedDefaultCreateTabType(
+    TabType storedDefaultCreateTabType,
+  ) => call(storedDefaultCreateTabType: storedDefaultCreateTabType);
 
   @override
   GeneralSettings tabIntentOpenSetting(
@@ -364,7 +381,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? showExtensionShortcut = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
-    Object? defaultCreateTabType = const $CopyWithPlaceholder(),
+    Object? showContainerUi = const $CopyWithPlaceholder(),
+    Object? showIsolatedTabUi = const $CopyWithPlaceholder(),
+    Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
@@ -450,12 +469,24 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.enableLocalAiFeatures
           // ignore: cast_nullable_to_non_nullable
           : enableLocalAiFeatures as bool,
-      defaultCreateTabType:
-          defaultCreateTabType == const $CopyWithPlaceholder() ||
-              defaultCreateTabType == null
-          ? _value.defaultCreateTabType
+      showContainerUi:
+          showContainerUi == const $CopyWithPlaceholder() ||
+              showContainerUi == null
+          ? _value.showContainerUi
           // ignore: cast_nullable_to_non_nullable
-          : defaultCreateTabType as TabType,
+          : showContainerUi as bool,
+      showIsolatedTabUi:
+          showIsolatedTabUi == const $CopyWithPlaceholder() ||
+              showIsolatedTabUi == null
+          ? _value.showIsolatedTabUi
+          // ignore: cast_nullable_to_non_nullable
+          : showIsolatedTabUi as bool,
+      storedDefaultCreateTabType:
+          storedDefaultCreateTabType == const $CopyWithPlaceholder() ||
+              storedDefaultCreateTabType == null
+          ? _value.storedDefaultCreateTabType
+          // ignore: cast_nullable_to_non_nullable
+          : storedDefaultCreateTabType as TabType,
       tabIntentOpenSetting:
           tabIntentOpenSetting == const $CopyWithPlaceholder() ||
               tabIntentOpenSetting == null
@@ -682,9 +713,11 @@ GeneralSettings _$GeneralSettingsFromJson(
   createChildTabsOption: json['createChildTabsOption'] as bool?,
   showExtensionShortcut: json['showExtensionShortcut'] as bool?,
   enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
-  defaultCreateTabType: $enumDecodeNullable(
+  showContainerUi: json['showContainerUi'] as bool?,
+  showIsolatedTabUi: json['showIsolatedTabUi'] as bool?,
+  storedDefaultCreateTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
-    json['defaultCreateTabType'],
+    json['storedDefaultCreateTabType'],
   ),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
@@ -763,7 +796,10 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'createChildTabsOption': instance.createChildTabsOption,
   'showExtensionShortcut': instance.showExtensionShortcut,
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
-  'defaultCreateTabType': _$TabTypeEnumMap[instance.defaultCreateTabType]!,
+  'showContainerUi': instance.showContainerUi,
+  'showIsolatedTabUi': instance.showIsolatedTabUi,
+  'storedDefaultCreateTabType':
+      _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'autoHideTabBar': instance.autoHideTabBar,

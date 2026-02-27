@@ -78,9 +78,23 @@ class SearchScreen extends HookConsumerWidget {
         (value) => value.createChildTabsOption,
       ),
     );
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
-    final selectedTabType = useState(tabType);
+    final initialTabType =
+        !settings.showIsolatedTabUi && tabType == TabType.isolated
+        ? TabType.regular
+        : tabType;
+
+    final selectedTabType = useState(initialTabType);
     final currentTabTabType = ref.watch(selectedTabTypeProvider);
+
+    useEffect(() {
+      if (!settings.showIsolatedTabUi &&
+          selectedTabType.value == TabType.isolated) {
+        selectedTabType.value = TabType.regular;
+      }
+      return null;
+    }, [settings.showIsolatedTabUi]);
 
     final selectedContainer = ref.watch(
       selectedContainerDataProvider.select((value) => value.value),
@@ -288,58 +302,72 @@ class SearchScreen extends HookConsumerWidget {
                     ? null
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Focus(
-                                  canRequestFocus: false,
-                                  child: AnimatedTabTypeSwitcher(
-                                    selected: selectedTabType.value,
-                                    onChanged: (value) {
-                                      selectedTabType.value = value;
-                                      // Restore focus to search field after segment change
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                            searchFocusNode.requestFocus();
-                                          });
-                                    },
-                                    showChildOption: createChildTabsOption,
-                                    selectedBackgroundColor:
-                                        switch (selectedTabType.value) {
-                                          TabType.regular => null,
-                                          TabType.private =>
-                                            appColors.privateSelectionOverlay,
-                                          TabType.isolated =>
-                                            appColors.isolatedSelectionOverlay,
-                                          TabType.child =>
-                                            switch (currentTabTabType) {
-                                              TabType.private =>
-                                                appColors
-                                                    .privateSelectionOverlay,
-                                              TabType.isolated =>
-                                                appColors
-                                                    .isolatedSelectionOverlay,
-                                              _ => null,
-                                            },
-                                        },
+                        child: Builder(
+                          builder: (context) {
+                            final tabTypeSwitcher = Focus(
+                              canRequestFocus: false,
+                              child: AnimatedTabTypeSwitcher(
+                                selected: selectedTabType.value,
+                                onChanged: (value) {
+                                  selectedTabType.value = value;
+                                  // Restore focus to search field after segment change
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    searchFocusNode.requestFocus();
+                                  });
+                                },
+                                showChildOption: createChildTabsOption,
+                                showIsolatedOption: settings.showIsolatedTabUi,
+                                selectedBackgroundColor: switch (selectedTabType
+                                    .value) {
+                                  TabType.regular => null,
+                                  TabType.private =>
+                                    appColors.privateSelectionOverlay,
+                                  TabType.isolated =>
+                                    appColors.isolatedSelectionOverlay,
+                                  TabType.child => switch (currentTabTabType) {
+                                    TabType.private =>
+                                      appColors.privateSelectionOverlay,
+                                    TabType.isolated =>
+                                      appColors.isolatedSelectionOverlay,
+                                    _ => null,
+                                  },
+                                },
+                              ),
+                            );
+
+                            if (!settings.showContainerUi) {
+                              return Center(
+                                child: Transform.scale(
+                                  scale: 1.08,
+                                  child: tabTypeSwitcher,
+                                ),
+                              );
+                            }
+
+                            return Row(
+                              children: [
+                                Expanded(
+                                  flex: 4,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: tabTypeSwitcher,
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              flex: 2,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: CompactContainerSelector(
-                                  selectedContainer: selectedContainer,
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  flex: 2,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: CompactContainerSelector(
+                                      selectedContainer: selectedContainer,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
+                              ],
+                            );
+                          },
                         ),
                       ),
                 bottom: PreferredSize(

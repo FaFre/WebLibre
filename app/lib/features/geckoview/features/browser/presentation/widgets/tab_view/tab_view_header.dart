@@ -230,6 +230,16 @@ class TabViewHeader extends HookConsumerWidget {
         (settings) => settings.enableLocalAiFeatures,
       ),
     );
+    final showContainerUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.showContainerUi,
+      ),
+    );
+    final showIsolatedTabUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.showIsolatedTabUi,
+      ),
+    );
 
     final selectedContainerId = ref.watch(selectedContainerProvider);
     final isSyncedScope = ref.watch(
@@ -503,55 +513,63 @@ class TabViewHeader extends HookConsumerWidget {
                                 },
                           child: const Text('Close Private Tabs'),
                         ),
-                        MenuItemButton(
-                          leadingIcon: Icon(
-                            MdiIcons.shieldLock,
-                            color: AppColors.of(context).isolatedTabTeal,
-                          ),
-                          onPressed: isSyncedScope
-                              ? null
-                              : () async {
-                                  // Count distinct isolation groups that will be destroyed
-                                  final allStates = ref.read(tabStatesProvider);
-                                  final isolatedContextIds = allStates.values
-                                      .where(
-                                        (s) =>
-                                            s.tabMode is IsolatedTabMode &&
-                                            s.isolationContextId != null,
-                                      )
-                                      .map((s) => s.isolationContextId!)
-                                      .toSet();
-
-                                  if (isolatedContextIds.isNotEmpty &&
-                                      context.mounted) {
-                                    final confirmed = await ui_helper
-                                        .confirmIsolatedTabClose(
-                                          context,
-                                          groupCount: isolatedContextIds.length,
-                                        );
-                                    if (!confirmed) return;
-                                  }
-
-                                  final count = await ref
-                                      .read(tabDataRepositoryProvider.notifier)
-                                      .closeContainerTabs(
-                                        selectedContainerId,
-                                        includeRegular: false,
-                                        includePrivate: false,
-                                      );
-
-                                  if (context.mounted) {
-                                    ui_helper.showTabUndoClose(
-                                      context,
-                                      ref
-                                          .read(tabRepositoryProvider.notifier)
-                                          .undoClose,
-                                      count: count.length,
+                        if (showIsolatedTabUi)
+                          MenuItemButton(
+                            leadingIcon: Icon(
+                              MdiIcons.shieldLock,
+                              color: AppColors.of(context).isolatedTabTeal,
+                            ),
+                            onPressed: isSyncedScope
+                                ? null
+                                : () async {
+                                    // Count distinct isolation groups that will be destroyed
+                                    final allStates = ref.read(
+                                      tabStatesProvider,
                                     );
-                                  }
-                                },
-                          child: const Text('Close Isolated Tabs'),
-                        ),
+                                    final isolatedContextIds = allStates.values
+                                        .where(
+                                          (s) =>
+                                              s.tabMode is IsolatedTabMode &&
+                                              s.isolationContextId != null,
+                                        )
+                                        .map((s) => s.isolationContextId!)
+                                        .toSet();
+
+                                    if (isolatedContextIds.isNotEmpty &&
+                                        context.mounted) {
+                                      final confirmed = await ui_helper
+                                          .confirmIsolatedTabClose(
+                                            context,
+                                            groupCount:
+                                                isolatedContextIds.length,
+                                          );
+                                      if (!confirmed) return;
+                                    }
+
+                                    final count = await ref
+                                        .read(
+                                          tabDataRepositoryProvider.notifier,
+                                        )
+                                        .closeContainerTabs(
+                                          selectedContainerId,
+                                          includeRegular: false,
+                                          includePrivate: false,
+                                        );
+
+                                    if (context.mounted) {
+                                      ui_helper.showTabUndoClose(
+                                        context,
+                                        ref
+                                            .read(
+                                              tabRepositoryProvider.notifier,
+                                            )
+                                            .undoClose,
+                                        count: count.length,
+                                      );
+                                    }
+                                  },
+                            child: const Text('Close Isolated Tabs'),
+                          ),
                         const Divider(),
                         MenuItemButton(
                           leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
@@ -809,11 +827,12 @@ class TabViewHeader extends HookConsumerWidget {
                     ),
                   ),
                 ),
-              Consumer(
-                builder: (context, ref, child) {
-                  return _TabFilters(tabsViewMode: tabsViewMode);
-                },
-              ),
+              if (showContainerUi)
+                Consumer(
+                  builder: (context, ref, child) {
+                    return _TabFilters(tabsViewMode: tabsViewMode);
+                  },
+                ),
               const SizedBox(height: 8),
             ],
           ),

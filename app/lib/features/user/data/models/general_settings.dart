@@ -69,7 +69,9 @@ class GeneralSettings with FastEquatable {
   final bool createChildTabsOption;
   final bool showExtensionShortcut;
   final bool enableLocalAiFeatures;
-  final TabType defaultCreateTabType;
+  final bool showContainerUi;
+  final bool showIsolatedTabUi;
+  final TabType storedDefaultCreateTabType;
   final TabIntentOpenSetting tabIntentOpenSetting;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
@@ -113,7 +115,9 @@ class GeneralSettings with FastEquatable {
     required this.createChildTabsOption,
     required this.showExtensionShortcut,
     required this.enableLocalAiFeatures,
-    required this.defaultCreateTabType,
+    required this.showContainerUi,
+    required this.showIsolatedTabUi,
+    required this.storedDefaultCreateTabType,
     required this.tabIntentOpenSetting,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
@@ -158,7 +162,9 @@ class GeneralSettings with FastEquatable {
     bool? createChildTabsOption,
     bool? showExtensionShortcut,
     bool? enableLocalAiFeatures,
-    TabType? defaultCreateTabType,
+    bool? showContainerUi,
+    bool? showIsolatedTabUi,
+    TabType? storedDefaultCreateTabType,
     TabIntentOpenSetting? tabIntentOpenSetting,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
@@ -200,7 +206,10 @@ class GeneralSettings with FastEquatable {
        createChildTabsOption = createChildTabsOption ?? false,
        showExtensionShortcut = showExtensionShortcut ?? false,
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
-       defaultCreateTabType = defaultCreateTabType ?? TabType.regular,
+       showContainerUi = showContainerUi ?? true,
+       showIsolatedTabUi = showIsolatedTabUi ?? true,
+       storedDefaultCreateTabType =
+           storedDefaultCreateTabType ?? TabType.regular,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
@@ -248,6 +257,21 @@ class GeneralSettings with FastEquatable {
 
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
 
+  TabType get effectiveDefaultCreateTabType {
+    if (!showIsolatedTabUi && storedDefaultCreateTabType == TabType.isolated) {
+      return TabType.regular;
+    }
+    return storedDefaultCreateTabType;
+  }
+
+  QuickTabSwitcherMode effectiveUiQuickTabSwitcherMode() {
+    if (!showContainerUi &&
+        quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs) {
+      return QuickTabSwitcherMode.lastUsedTabs;
+    }
+    return quickTabSwitcherMode;
+  }
+
   @override
   List<Object?> get hashParameters => [
     themeMode,
@@ -259,7 +283,9 @@ class GeneralSettings with FastEquatable {
     createChildTabsOption,
     showExtensionShortcut,
     enableLocalAiFeatures,
-    defaultCreateTabType,
+    showContainerUi,
+    showIsolatedTabUi,
+    storedDefaultCreateTabType,
     tabIntentOpenSetting,
     autoHideTabBar,
     tabBarSwipeAction,

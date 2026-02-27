@@ -353,9 +353,8 @@ class _QuickTabSwitcherModeSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final quickTabSwitcherMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.quickTabSwitcherMode),
-    );
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final quickTabSwitcherMode = settings.effectiveUiQuickTabSwitcherMode();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -380,18 +379,19 @@ class _QuickTabSwitcherModeSection extends HookConsumerWidget {
                     );
               }
             },
-            child: const Column(
+            child: Column(
               children: [
-                RadioListTile.adaptive(
+                const RadioListTile.adaptive(
                   value: QuickTabSwitcherMode.lastUsedTabs,
                   title: Text('Recently Used Tabs'),
                   subtitle: Text('Recently used tabs across all containers'),
                 ),
-                RadioListTile.adaptive(
-                  value: QuickTabSwitcherMode.containerTabs,
-                  title: Text('Container Tabs'),
-                  subtitle: Text('Ordered tabs of the selected container'),
-                ),
+                if (settings.showContainerUi)
+                  const RadioListTile.adaptive(
+                    value: QuickTabSwitcherMode.containerTabs,
+                    title: Text('Container Tabs'),
+                    subtitle: Text('Ordered tabs of the selected container'),
+                  ),
               ],
             ),
           ),

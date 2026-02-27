@@ -28,6 +28,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
   final TabType selected;
   final ValueChanged<TabType> onChanged;
   final bool showChildOption;
+  final bool showIsolatedOption;
   final Color? selectedBackgroundColor;
 
   const AnimatedTabTypeSwitcher({
@@ -35,6 +36,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     this.showChildOption = false,
+    this.showIsolatedOption = true,
     this.selectedBackgroundColor,
   });
 
@@ -72,15 +74,17 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.private),
               ),
-              _divider(borderColor),
-              _Segment(
-                tabType: TabType.isolated,
-                icon: MdiIcons.shieldLock,
-                label: 'Isolated',
-                isSelected: selected == TabType.isolated,
-                selectedBackgroundColor: selectedBackgroundColor,
-                onTap: () => onChanged(TabType.isolated),
-              ),
+              if (showIsolatedOption) ...[
+                _divider(borderColor),
+                _Segment(
+                  tabType: TabType.isolated,
+                  icon: MdiIcons.shieldLock,
+                  label: 'Isolated',
+                  isSelected: selected == TabType.isolated,
+                  selectedBackgroundColor: selectedBackgroundColor,
+                  onTap: () => onChanged(TabType.isolated),
+                ),
+              ],
               if (showChildOption) ...[
                 _divider(borderColor),
                 _Segment(

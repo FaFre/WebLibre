@@ -194,6 +194,7 @@ class BrowserTabBar extends HookConsumerWidget {
     final trippleDotMenuController = useMenuController();
 
     final selectedTabId = ref.watch(selectedTabProvider);
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
@@ -201,23 +202,10 @@ class BrowserTabBar extends HookConsumerWidget {
       ).select((data) => data.value?.color),
     );
 
-    final showExtensionShortcut = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.showExtensionShortcut,
-      ),
-    );
+    final showExtensionShortcut = settings.showExtensionShortcut;
+    final quickTabSwitcherMode = settings.effectiveUiQuickTabSwitcherMode();
 
-    final quickTabSwitcherMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.quickTabSwitcherMode,
-      ),
-    );
-
-    final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.tabBarPosition,
-      ),
-    );
+    final tabBarPosition = settings.tabBarPosition;
 
     final dragStartPosition = useRef(Offset.zero);
 
@@ -300,7 +288,9 @@ class BrowserTabBar extends HookConsumerWidget {
                 leadingWidth: 40.0,
                 toolbarHeight: kToolbarHeight,
                 backgroundColor:
-                    (containerColor != null && displayedSheet is! ViewTabsSheet)
+                    (settings.showContainerUi &&
+                        containerColor != null &&
+                        displayedSheet is! ViewTabsSheet)
                     ? ContainerColors.forAppBar(containerColor)
                     : null,
                 leading: showMainToolbarNavigationButton
@@ -485,6 +475,9 @@ class QuickTabSwitcher extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
+    final showIsolatedTabUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
+    );
     final showTitles = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherShowTitles,
@@ -556,7 +549,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
                     constraints: const BoxConstraints(maxWidth: 64),
                     child: Text(item.title),
                   ),
-                if (item.tabMode is IsolatedTabMode)
+                if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Icon(
@@ -710,7 +703,7 @@ class AddTabButton extends HookConsumerWidget {
           await SearchRoute(
             tabType:
                 ref.read(selectedTabTypeProvider) ??
-                settings.defaultCreateTabType,
+                settings.effectiveDefaultCreateTabType,
           ).push(context);
 
           if (context.mounted) {

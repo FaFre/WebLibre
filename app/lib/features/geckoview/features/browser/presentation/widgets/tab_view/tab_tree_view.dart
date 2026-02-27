@@ -345,7 +345,7 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                 await SearchRoute(
                   tabType:
                       ref.read(selectedTabTypeProvider) ??
-                      settings.defaultCreateTabType,
+                      settings.effectiveDefaultCreateTabType,
                 ).push(context);
 
                 onClose();

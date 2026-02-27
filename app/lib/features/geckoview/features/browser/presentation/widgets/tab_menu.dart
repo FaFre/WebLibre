@@ -48,6 +48,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
@@ -94,6 +95,7 @@ class TabMenu extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showFeeds = useState(false);
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     final controller = this.controller ?? useMenuController();
 
@@ -313,46 +315,47 @@ class TabMenu extends HookConsumerWidget {
                   }
                 },
               ),
-              MenuItemButton(
-                leadingIcon: Icon(
-                  MdiIcons.shieldLock,
-                  color: AppColors.of(context).isolatedTabTeal,
-                ),
-                child: const Text('Isolated'),
-                onPressed: () async {
-                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                  final containerData = await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .getTabContainerData(selectedTabId);
+              if (settings.showIsolatedTabUi)
+                MenuItemButton(
+                  leadingIcon: Icon(
+                    MdiIcons.shieldLock,
+                    color: AppColors.of(context).isolatedTabTeal,
+                  ),
+                  child: const Text('Isolated'),
+                  onPressed: () async {
+                    final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                    final containerData = await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .getTabContainerData(selectedTabId);
 
-                  final tabId = await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: tabState.url,
-                        tabMode: TabMode.newIsolated(),
-                        containerSelection: containerData == null
-                            ? const TabContainerSelection.unassigned()
-                            : TabContainerSelection.specific(containerData),
-                        selectTab: false,
+                    final tabId = await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .addTab(
+                          url: tabState.url,
+                          tabMode: TabMode.newIsolated(),
+                          containerSelection: containerData == null
+                              ? const TabContainerSelection.unassigned()
+                              : TabContainerSelection.specific(containerData),
+                          selectTab: false,
+                        );
+
+                    if (context.mounted) {
+                      final repo = ref.read(tabRepositoryProvider.notifier);
+
+                      ui_helper.showTabSwitchMessage(
+                        context,
+                        onSwitch: () async {
+                          await repo.selectTab(tabId);
+                        },
                       );
-
-                  if (context.mounted) {
-                    final repo = ref.read(tabRepositoryProvider.notifier);
-
-                    ui_helper.showTabSwitchMessage(
-                      context,
-                      onSwitch: () async {
-                        await repo.selectTab(tabId);
-                      },
-                    );
-                  }
-                },
-              ),
+                    }
+                  },
+                ),
             ],
             leadingIcon: const Icon(MdiIcons.tabPlus),
             child: const Text('Clone Tab'),
           ),
-        if (enableContainer)
+        if (enableContainer && settings.showContainerUi)
           SubmenuButton(
             menuChildren: [
               MenuItemButton(

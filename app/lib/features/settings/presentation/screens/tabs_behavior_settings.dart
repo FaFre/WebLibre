@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -83,6 +84,8 @@ class _TabOrganizationSection extends StatelessWidget {
     return const Column(
       children: [
         SettingSection(name: 'Tab Organization'),
+        _ShowContainerUiTile(),
+        _ShowIsolatedTabUiTile(),
         _CreateChildTabsTile(),
       ],
     );
@@ -110,9 +113,8 @@ class _NewTabDefaultSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
-    final defaultCreateTabType = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.defaultCreateTabType),
-    );
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final defaultCreateTabType = settings.effectiveDefaultCreateTabType;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -140,16 +142,17 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                   label: Text('Private'),
                   icon: Icon(WebLibreIcons.privateTab),
                 ),
-                ButtonSegment(
-                  value: TabType.isolated,
-                  label: const Text('Isolated'),
-                  icon: Icon(
-                    MdiIcons.shieldLock,
-                    color: defaultCreateTabType == TabType.isolated
-                        ? null
-                        : appColors.isolatedTabTeal,
+                if (settings.showIsolatedTabUi)
+                  ButtonSegment(
+                    value: TabType.isolated,
+                    label: const Text('Isolated'),
+                    icon: Icon(
+                      MdiIcons.shieldLock,
+                      color: defaultCreateTabType == TabType.isolated
+                          ? null
+                          : appColors.isolatedTabTeal,
+                    ),
                   ),
-                ),
               ],
               selected: {defaultCreateTabType},
               onSelectionChanged: (value) async {
@@ -157,7 +160,7 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                     .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) => currentSettings.copyWith
-                          .defaultCreateTabType(value.first),
+                          .storedDefaultCreateTabType(value.first),
                     );
               },
               style: switch (defaultCreateTabType) {
@@ -269,6 +272,75 @@ class _CreateChildTabsTile extends HookConsumerWidget {
               (currentSettings) =>
                   currentSettings.copyWith.createChildTabsOption(value),
             );
+      },
+    );
+  }
+}
+
+class _ShowContainerUiTile extends HookConsumerWidget {
+  const _ShowContainerUiTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showContainerUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Container UI'),
+      subtitle: const Text('Show container selectors, menus, and management'),
+      secondary: const Icon(MdiIcons.folder),
+      value: showContainerUi,
+      onChanged: (value) async {
+        await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
+          currentSettings,
+        ) {
+          var updated = currentSettings.copyWith.showContainerUi(value);
+          if (!value &&
+              updated.quickTabSwitcherMode ==
+                  QuickTabSwitcherMode.containerTabs) {
+            updated = updated.copyWith.quickTabSwitcherMode(
+              QuickTabSwitcherMode.lastUsedTabs,
+            );
+          }
+          return updated;
+        });
+
+        if (!value) {
+          ref.read(selectedContainerProvider.notifier).clearContainer();
+        }
+      },
+    );
+  }
+}
+
+class _ShowIsolatedTabUiTile extends HookConsumerWidget {
+  const _ShowIsolatedTabUiTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showIsolatedTabUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Isolated Tab UI'),
+      subtitle: const Text('Show isolated-tab creation options in the UI'),
+      secondary: const Icon(MdiIcons.shieldLock),
+      value: showIsolatedTabUi,
+      onChanged: (value) async {
+        await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
+          currentSettings,
+        ) {
+          var updated = currentSettings.copyWith.showIsolatedTabUi(value);
+          if (!value &&
+              updated.storedDefaultCreateTabType == TabType.isolated) {
+            updated = updated.copyWith.storedDefaultCreateTabType(
+              TabType.regular,
+            );
+          }
+          return updated;
+        });
       },
     );
   }

@@ -52,6 +52,9 @@ class BrowserNavigationDrawer extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final showContainerUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+    );
 
     return NavigationDrawer(
       backgroundColor: colorScheme.surface,
@@ -137,14 +140,15 @@ class BrowserNavigationDrawer extends HookConsumerWidget {
           },
         ),
 
-        ListTile(
-          leading: const Icon(MdiIcons.folder),
-          title: const Text('Containers'),
-          onTap: () async {
-            Navigator.of(context).pop();
-            await const ContainerListRoute().push(context);
-          },
-        ),
+        if (showContainerUi)
+          ListTile(
+            leading: const Icon(MdiIcons.folder),
+            title: const Text('Containers'),
+            onTap: () async {
+              Navigator.of(context).pop();
+              await const ContainerListRoute().push(context);
+            },
+          ),
 
         ListTile(
           leading: const Icon(Icons.rss_feed),
@@ -322,7 +326,7 @@ class _ExtensionsSection extends HookConsumerWidget {
                     final tabMode = TabMode.fromTabType(
                       ref
                           .read(generalSettingsWithDefaultsProvider)
-                          .defaultCreateTabType,
+                          .effectiveDefaultCreateTabType,
                     );
 
                     await ref

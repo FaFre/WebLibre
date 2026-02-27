@@ -80,7 +80,15 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
-      'defaultCreateTabType': settings['defaultCreateTabType']?.readAs(
+      'showContainerUi': settings['showContainerUi']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'showIsolatedTabUi': settings['showIsolatedTabUi']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'storedDefaultCreateTabType': settings['defaultCreateTabType']?.readAs(
         DriftSqlType.string,
         db.typeMapping,
       ),

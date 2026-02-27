@@ -103,7 +103,7 @@ class TabViewScreen extends HookConsumerWidget {
                   await SearchRoute(
                     tabType:
                         ref.read(selectedTabTypeProvider) ??
-                        settings.defaultCreateTabType,
+                        settings.effectiveDefaultCreateTabType,
                   ).push(context);
 
                   if (context.mounted) {

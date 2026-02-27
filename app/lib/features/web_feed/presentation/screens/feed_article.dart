@@ -199,7 +199,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                             final tabMode = TabMode.fromTabType(
                               ref
                                   .read(generalSettingsWithDefaultsProvider)
-                                  .defaultCreateTabType,
+                                  .effectiveDefaultCreateTabType,
                             );
 
                             await ref
@@ -249,7 +249,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                             final tabMode = TabMode.fromTabType(
                               ref
                                   .read(generalSettingsWithDefaultsProvider)
-                                  .defaultCreateTabType,
+                                  .effectiveDefaultCreateTabType,
                             );
 
                             await ref

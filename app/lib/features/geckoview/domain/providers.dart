@@ -54,7 +54,8 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
             final selectedTabType = selectedTabState?.tabMode.toTabType();
 
             final route = SearchRoute(
-              tabType: selectedTabType ?? settings.defaultCreateTabType,
+              tabType:
+                  selectedTabType ?? settings.effectiveDefaultCreateTabType,
               searchText: text,
             );
 
@@ -78,7 +79,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
                 TabMode.fromTabType(
                   ref
                       .read(generalSettingsWithDefaultsProvider)
-                      .defaultCreateTabType,
+                      .effectiveDefaultCreateTabType,
                 );
 
             await ref

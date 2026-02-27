@@ -200,6 +200,15 @@ class ContainerChips extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final containerUiEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.showContainerUi,
+      ),
+    );
+    if (!containerUiEnabled) {
+      return const SizedBox.shrink();
+    }
+
     final searchText = useListenableSelector(
       searchTextListenable,
       () => searchTextListenable?.value.text,

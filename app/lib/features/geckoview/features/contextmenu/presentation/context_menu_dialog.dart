@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/presentation/ca
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_email.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_image.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_link.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class ContextMenuDialog extends HookConsumerWidget {
@@ -46,6 +47,10 @@ class ContextMenuDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final showContainerUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+    );
+
     return SimpleDialog(
       title: AutoSizeText(
         hitResult.getTitle(),
@@ -58,7 +63,7 @@ class ContextMenuDialog extends HookConsumerWidget {
       children: [
         if (OpenInNewTab.isSupported(hitResult))
           OpenInNewTab(hitResult: hitResult),
-        if (OpenInContainer.isSupported(hitResult))
+        if (showContainerUi && OpenInContainer.isSupported(hitResult))
           OpenInContainer(hitResult: hitResult),
         if (CopyLink.isSupported(hitResult)) CopyLink(hitResult: hitResult),
         if (SaveFile.isSupported(hitResult)) SaveFile(hitResult: hitResult),

@@ -277,7 +277,7 @@ class BrowserScreen extends HookConsumerWidget {
     );
     final quickTabSwitcherMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (value) => value.quickTabSwitcherMode,
+        (value) => value.effectiveUiQuickTabSwitcherMode(),
       ),
     );
     final quickTabSwitcherHasResults = ref.watch(

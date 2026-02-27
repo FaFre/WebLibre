@@ -69,7 +69,7 @@ class BangCategoryScreen extends HookConsumerWidget {
                       SearchRoute(
                         tabType:
                             ref.read(selectedTabTypeProvider) ??
-                            settings.defaultCreateTabType,
+                            settings.effectiveDefaultCreateTabType,
                       ).go(context);
                     },
                   );

@@ -92,7 +92,7 @@ class BangDetails extends HookConsumerWidget {
                       final tabMode = TabMode.fromTabType(
                         ref
                             .read(generalSettingsWithDefaultsProvider)
-                            .defaultCreateTabType,
+                            .effectiveDefaultCreateTabType,
                       );
 
                       await ref

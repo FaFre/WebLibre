@@ -240,7 +240,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                   final route = SearchRoute(
                     tabType:
                         ref.read(selectedTabTypeProvider) ??
-                        settings.defaultCreateTabType,
+                        settings.effectiveDefaultCreateTabType,
                     searchText: sharedContent.text,
                     launchedFromIntent: true, //launched from intent
                   );
@@ -334,6 +334,13 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
                         await router.push(route.location);
                       } else if (type == 'new_isolated_tab') {
+                        final settings = ref.read(
+                          generalSettingsWithDefaultsProvider,
+                        );
+                        if (!settings.showIsolatedTabUi) {
+                          return;
+                        }
+
                         lastAction = DateTime.now();
 
                         final router = await ref.read(routerProvider.future);
@@ -348,6 +355,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     }
                   });
 
+                  final settings = ref.read(
+                    generalSettingsWithDefaultsProvider,
+                  );
                   await quickActions.setShortcutItems([
                     //TODO: add icons
                     const ShortcutItem(
@@ -358,10 +368,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       type: 'new_private_tab',
                       localizedTitle: 'New Private Tab',
                     ),
-                    const ShortcutItem(
-                      type: 'new_isolated_tab',
-                      localizedTitle: 'New Isolated Tab',
-                    ),
+                    if (settings.showIsolatedTabUi)
+                      const ShortcutItem(
+                        type: 'new_isolated_tab',
+                        localizedTitle: 'New Isolated Tab',
+                      ),
                   ]);
 
                   initializationCompleter.complete();
@@ -592,7 +603,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     await SearchRoute(
                       tabType:
                           ref.read(selectedTabTypeProvider) ??
-                          settings.defaultCreateTabType,
+                          settings.effectiveDefaultCreateTabType,
                       searchText: searchText ?? SearchRoute.emptySearchText,
                     ).push(context);
                   },

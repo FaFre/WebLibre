@@ -240,16 +240,17 @@ class OpenSharedContent extends HookConsumerWidget {
             children: [
               Text('Open link', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
-              ContainerChips(
-                displayMenu: false,
-                selectedContainer: selectedContainer.value,
-                onSelected: (container) {
-                  selectedContainer.value = container;
-                },
-                onDeleted: (container) {
-                  selectedContainer.value = null;
-                },
-              ),
+              if (settings.showContainerUi)
+                ContainerChips(
+                  displayMenu: false,
+                  selectedContainer: selectedContainer.value,
+                  onSelected: (container) {
+                    selectedContainer.value = container;
+                  },
+                  onDeleted: (container) {
+                    selectedContainer.value = null;
+                  },
+                ),
               TextFormField(
                 controller: textController,
                 keyboardType: TextInputType.url,
@@ -380,8 +381,10 @@ class OpenSharedContent extends HookConsumerWidget {
                 subtitle: 'Add to your browser tabs',
                 icon: MdiIcons.tab,
                 trailing: PopupMenuButton<TabMode>(
-                  icon: Icon(MdiIcons.tabUnselected, size: 24),
-                  tooltip: 'Private / Isolated',
+                  icon: const Icon(MdiIcons.tabUnselected, size: 24),
+                  tooltip: settings.showIsolatedTabUi
+                      ? 'Private / Isolated'
+                      : 'Private',
                   onSelected: openTab,
                   itemBuilder: (context) => [
                     PopupMenuItem(
@@ -398,20 +401,21 @@ class OpenSharedContent extends HookConsumerWidget {
                         ],
                       ),
                     ),
-                    PopupMenuItem(
-                      value: TabMode.newIsolated(),
-                      child: Row(
-                        children: [
-                          Icon(
-                            MdiIcons.shieldLock,
-                            color: appColors.isolatedTabTeal,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          const Text('Isolated'),
-                        ],
+                    if (settings.showIsolatedTabUi)
+                      PopupMenuItem(
+                        value: TabMode.newIsolated(),
+                        child: Row(
+                          children: [
+                            Icon(
+                              MdiIcons.shieldLock,
+                              color: appColors.isolatedTabTeal,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            const Text('Isolated'),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 onTap: () => openTab(TabMode.regular),
