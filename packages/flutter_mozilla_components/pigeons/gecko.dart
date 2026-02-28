@@ -1602,6 +1602,8 @@ abstract class GeckoSelectionActionEvents {
 abstract class GeckoAddonsApi {
   void startAddonManagerActivity();
 
+  void startAddonSettingsActivity(String extensionId);
+
   void invokeAddonAction(String extensionId, WebExtensionActionType actionType);
 
   @async

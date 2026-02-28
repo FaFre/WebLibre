@@ -32,6 +32,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/error_observer.dart';
@@ -47,6 +48,38 @@ import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articl
 import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
+
+ColorScheme _fixSurfaceContainerColors(
+  ColorScheme scheme,
+  TonalPalette neutralPalette,
+  Brightness brightness,
+) {
+  if (brightness == Brightness.light) {
+    return scheme.copyWith(
+      surfaceContainerLowest: Color(neutralPalette.get(100)),
+      surfaceContainerLow: Color(neutralPalette.get(96)),
+      surfaceContainer: Color(neutralPalette.get(94)),
+      surfaceContainerHigh: Color(neutralPalette.get(92)),
+      surfaceContainerHighest: Color(neutralPalette.get(90)),
+    );
+  } else {
+    return scheme.copyWith(
+      surfaceContainerLowest: Color(neutralPalette.get(4)),
+      surfaceContainerLow: Color(neutralPalette.get(10)),
+      surfaceContainer: Color(neutralPalette.get(12)),
+      surfaceContainerHigh: Color(neutralPalette.get(17)),
+      surfaceContainerHighest: Color(neutralPalette.get(22)),
+    );
+  }
+}
+
+bool _hasBrokenSurfaceContainerColors(ColorScheme scheme) {
+  return scheme.surfaceContainerLowest == scheme.surface &&
+      scheme.surfaceContainerLow == scheme.surface &&
+      scheme.surfaceContainer == scheme.surface &&
+      scheme.surfaceContainerHigh == scheme.surface &&
+      scheme.surfaceContainerHighest == scheme.surface;
+}
 
 class _MainWidget extends HookConsumerWidget {
   const _MainWidget();
@@ -159,18 +192,45 @@ class _MainWidget extends HookConsumerWidget {
       }
     });
 
+    final corePaletteSnapshot = useFuture(
+      useMemoized(() => DynamicColorPlugin.getCorePalette()),
+    );
+
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         ColorScheme lightColorScheme;
         ColorScheme darkColorScheme;
 
         if (lightDynamic != null && darkDynamic != null) {
+          final corePalette = corePaletteSnapshot.data;
+
           // On Android S+ devices, use the provided dynamic color scheme.
           // (Recommended) Harmonize the dynamic color scheme' built-in semantic colors.
-          lightColorScheme = lightDynamic.harmonized();
+          final harmonizedLight = lightDynamic.harmonized();
+          final harmonizedDark = darkDynamic.harmonized();
 
-          // Repeat for the dark color scheme.
-          darkColorScheme = darkDynamic.harmonized();
+          // Workaround for https://github.com/material-foundation/flutter-packages/issues/649
+          // dynamic_color package returns broken surfaceContainer* colors.
+          // Fix them using the neutral tonal palette from CorePalette.
+          if (corePalette != null) {
+            lightColorScheme = _hasBrokenSurfaceContainerColors(harmonizedLight)
+                ? _fixSurfaceContainerColors(
+                    harmonizedLight,
+                    corePalette.neutral,
+                    Brightness.light,
+                  )
+                : harmonizedLight;
+            darkColorScheme = _hasBrokenSurfaceContainerColors(harmonizedDark)
+                ? _fixSurfaceContainerColors(
+                    harmonizedDark,
+                    corePalette.neutral,
+                    Brightness.dark,
+                  )
+                : harmonizedDark;
+          } else {
+            lightColorScheme = harmonizedLight;
+            darkColorScheme = harmonizedDark;
+          }
         } else {
           // Otherwise, use fallback schemes.
           lightColorScheme = ColorScheme.fromSeed(

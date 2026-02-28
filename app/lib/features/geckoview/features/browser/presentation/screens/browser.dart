@@ -47,7 +47,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/navigation_drawer.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
@@ -292,11 +291,6 @@ class BrowserScreen extends HookConsumerWidget {
       ),
     );
 
-    final drawerGestureEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.drawerGestureEnabled,
-      ),
-    );
 
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
@@ -567,8 +561,6 @@ class BrowserScreen extends HookConsumerWidget {
         child: Scaffold(
           // Minimal scaffold - only for Material overlay support (SnackBars)
           resizeToAvoidBottomInset: false,
-          endDrawer: const BrowserNavigationDrawer(),
-          endDrawerEnableOpenDragGesture: drawerGestureEnabled,
           body: Stack(
             children: [
               // Layer 0: Browser content
@@ -877,6 +869,13 @@ class _Browser extends HookConsumerWidget {
                 if (GoRouterState.of(context).topRoute?.name !=
                     BrowserRoute.name) {
                   return false;
+                }
+
+                // Dismiss modal routes (e.g. showModalBottomSheet)
+                final rootNavigator = Navigator.of(context, rootNavigator: true);
+                if (rootNavigator.canPop()) {
+                  rootNavigator.pop();
+                  return true;
                 }
 
                 if (ref.read(bottomSheetControllerProvider) != null) {

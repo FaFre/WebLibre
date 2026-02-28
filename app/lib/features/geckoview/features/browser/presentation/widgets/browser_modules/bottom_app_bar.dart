@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_menu_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
@@ -55,7 +56,6 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -80,7 +80,6 @@ class BrowserTopAppBar extends HookConsumerWidget {
       showQuickTabSwitcherBar: false,
       showMainToolbarNavigationButton: !showContextualToolbar,
       showMainToolbarTabsCount: !showContextualToolbar,
-      showMainToolbarTabActionButton: !showContextualToolbar,
     );
   }
 
@@ -117,7 +116,6 @@ class BrowserBottomAppBar extends HookConsumerWidget {
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
       showMainToolbarNavigationButton: !showContextualToolbar,
       showMainToolbarTabsCount: !showContextualToolbar,
-      showMainToolbarTabActionButton: !showContextualToolbar,
     );
   }
 
@@ -147,7 +145,6 @@ class BrowserTabBar extends HookConsumerWidget {
 
   final bool showMainToolbarTabsCount;
   final bool showMainToolbarNavigationButton;
-  final bool showMainToolbarTabActionButton;
 
   const BrowserTabBar({
     super.key,
@@ -157,7 +154,6 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.showQuickTabSwitcherBar,
     required this.showMainToolbarTabsCount,
     required this.showMainToolbarNavigationButton,
-    required this.showMainToolbarTabActionButton,
   });
 
   static const contextualToolabarHeight = 54.0;
@@ -191,7 +187,6 @@ class BrowserTabBar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final extensionMenuController = useMenuController();
-    final trippleDotMenuController = useMenuController();
 
     final selectedTabId = ref.watch(selectedTabProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
@@ -360,23 +355,6 @@ class BrowserTabBar extends HookConsumerWidget {
                       displayedSheet: displayedSheet,
                       showLongPressMenu: true,
                     ),
-                  if (selectedTabId != null && showMainToolbarTabActionButton)
-                    TabMenu(
-                      controller: trippleDotMenuController,
-                      selectedTabId: selectedTabId,
-                      builder: (context, controller, child) {
-                        return ToolbarButton(
-                          onTap: () {
-                            if (controller.isOpen) {
-                              controller.close();
-                            } else {
-                              controller.open();
-                            }
-                          },
-                          child: const Icon(WebLibreIcons.tabOptions),
-                        );
-                      },
-                    ),
                 ],
               ),
             ),
@@ -444,24 +422,6 @@ class ContextualToolbar extends HookConsumerWidget {
           displayedSheet: displayedSheet,
           showLongPressMenu: false,
         ),
-        if (selectedTabId != null)
-          TabMenu(
-            controller: useMenuController(),
-            selectedTabId: selectedTabId!,
-            enableNavigationButtons: false,
-            builder: (context, controller, child) {
-              return ToolbarButton(
-                onTap: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                child: const Icon(WebLibreIcons.tabOptions),
-              );
-            },
-          ),
       ],
     );
   }
@@ -679,8 +639,8 @@ class NavigationMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ToolbarButton(
-      onTap: () {
-        Scaffold.of(context).openEndDrawer();
+      onTap: () async {
+        await showBrowserMenuSheet(context);
       },
       child: const Icon(Icons.menu),
     );

@@ -38,6 +38,10 @@ class GeckoAddonService extends GeckoAddonEvents {
     return _api.startAddonManagerActivity();
   }
 
+  Future<void> startAddonSettingsActivity(String extensionId) {
+    return _api.startAddonSettingsActivity(extensionId);
+  }
+
   Future<void> invokeAddonAction(
     String extensionId,
     WebExtensionActionType actionType,

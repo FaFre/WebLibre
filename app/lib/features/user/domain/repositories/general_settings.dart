@@ -164,10 +164,6 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
             DriftSqlType.bool,
             db.typeMapping,
           ),
-      'drawerGestureEnabled': settings['drawerGestureEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
       'syncServerOverride': settings['syncServerOverride']?.readAs(
         DriftSqlType.string,
         db.typeMapping,

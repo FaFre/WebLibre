@@ -6815,6 +6815,7 @@ class GeckoSelectionActionEvents(private val binaryMessenger: BinaryMessenger, p
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoAddonsApi {
   fun startAddonManagerActivity()
+  fun startAddonSettingsActivity(extensionId: String)
   fun invokeAddonAction(extensionId: String, actionType: WebExtensionActionType)
   fun installAddon(url: String, callback: (Result<Unit>) -> Unit)
 
@@ -6833,6 +6834,24 @@ interface GeckoAddonsApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               api.startAddonManagerActivity()
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.startAddonSettingsActivity$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val extensionIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.startAddonSettingsActivity(extensionIdArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

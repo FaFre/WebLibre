@@ -85,8 +85,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool quickTabSwitcherShowHistorySuggestions,
   );
 
-  GeneralSettings drawerGestureEnabled(bool drawerGestureEnabled);
-
   GeneralSettings syncServerOverride(String syncServerOverride);
 
   GeneralSettings syncTokenServerOverride(String syncTokenServerOverride);
@@ -152,7 +150,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabListShowFavicons,
     bool quickTabSwitcherShowTitles,
     bool quickTabSwitcherShowHistorySuggestions,
-    bool drawerGestureEnabled,
     String syncServerOverride,
     String syncTokenServerOverride,
     bool urlCleanerEnabled,
@@ -310,10 +307,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   );
 
   @override
-  GeneralSettings drawerGestureEnabled(bool drawerGestureEnabled) =>
-      call(drawerGestureEnabled: drawerGestureEnabled);
-
-  @override
   GeneralSettings syncServerOverride(String syncServerOverride) =>
       call(syncServerOverride: syncServerOverride);
 
@@ -404,7 +397,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
-    Object? drawerGestureEnabled = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
     Object? urlCleanerEnabled = const $CopyWithPlaceholder(),
@@ -602,12 +594,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherShowHistorySuggestions
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherShowHistorySuggestions as bool,
-      drawerGestureEnabled:
-          drawerGestureEnabled == const $CopyWithPlaceholder() ||
-              drawerGestureEnabled == null
-          ? _value.drawerGestureEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : drawerGestureEnabled as bool,
       syncServerOverride:
           syncServerOverride == const $CopyWithPlaceholder() ||
               syncServerOverride == null
@@ -761,7 +747,6 @@ GeneralSettings _$GeneralSettingsFromJson(
   quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
   quickTabSwitcherShowHistorySuggestions:
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
-  drawerGestureEnabled: json['drawerGestureEnabled'] as bool?,
   syncServerOverride: json['syncServerOverride'] as String?,
   syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
   urlCleanerEnabled: json['urlCleanerEnabled'] as bool?,
@@ -823,7 +808,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
-  'drawerGestureEnabled': instance.drawerGestureEnabled,
   'syncServerOverride': instance.syncServerOverride,
   'syncTokenServerOverride': instance.syncTokenServerOverride,
   'urlCleanerEnabled': instance.urlCleanerEnabled,

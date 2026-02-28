@@ -91,7 +91,6 @@ class GeneralSettings with FastEquatable {
   final bool tabListShowFavicons;
   final bool quickTabSwitcherShowTitles;
   final bool quickTabSwitcherShowHistorySuggestions;
-  final bool drawerGestureEnabled;
   final String syncServerOverride;
   final String syncTokenServerOverride;
   final bool urlCleanerEnabled;
@@ -137,7 +136,6 @@ class GeneralSettings with FastEquatable {
     required this.tabListShowFavicons,
     required this.quickTabSwitcherShowTitles,
     required this.quickTabSwitcherShowHistorySuggestions,
-    required this.drawerGestureEnabled,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
     required this.urlCleanerEnabled,
@@ -184,7 +182,6 @@ class GeneralSettings with FastEquatable {
     bool? tabListShowFavicons,
     bool? quickTabSwitcherShowTitles,
     bool? quickTabSwitcherShowHistorySuggestions,
-    bool? drawerGestureEnabled,
     String? syncServerOverride,
     String? syncTokenServerOverride,
     bool? urlCleanerEnabled,
@@ -234,7 +231,6 @@ class GeneralSettings with FastEquatable {
        quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
        quickTabSwitcherShowHistorySuggestions =
            quickTabSwitcherShowHistorySuggestions ?? true,
-       drawerGestureEnabled = drawerGestureEnabled ?? false,
        syncServerOverride = syncServerOverride ?? '',
        syncTokenServerOverride = syncTokenServerOverride ?? '',
        urlCleanerEnabled = urlCleanerEnabled ?? true,
@@ -305,7 +301,6 @@ class GeneralSettings with FastEquatable {
     tabListShowFavicons,
     quickTabSwitcherShowTitles,
     quickTabSwitcherShowHistorySuggestions,
-    drawerGestureEnabled,
     syncServerOverride,
     syncTokenServerOverride,
     urlCleanerEnabled,
