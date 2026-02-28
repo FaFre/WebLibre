@@ -57,6 +57,8 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
           BookmarkRoot.mobile.id,
     );
 
+    final addToTop = useState(false);
+
     return Scaffold(
       appBar: AppBar(
         title: (exisitingEntry != null)
@@ -104,6 +106,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                         parentGuid: parentGuid.value,
                         title: nameTextController.text,
                         url: newUrl,
+                        position: addToTop.value ? 0 : null,
                       );
 
                   if (context.mounted) {
@@ -157,6 +160,15 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                   selectedFolderGuid: parentGuid,
                   entryGuid: BookmarkRoot.root.id,
                 ),
+                if (exisitingEntry == null) ...[
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Add to top'),
+                    value: addToTop.value,
+                    onChanged: (value) => addToTop.value = value,
+                  ),
+                ],
                 const SizedBox(height: 16),
                 if (exisitingEntry != null)
                   SizedBox(

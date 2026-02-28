@@ -20,6 +20,7 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
@@ -36,16 +37,18 @@ class BookmarksRepository extends _$BookmarksRepository {
     required String parentGuid,
     required Uri url,
     required String title,
+    int? position,
   }) async {
-    await _service.addItem(parentGuid, url, title, null);
+    await _service.addItem(parentGuid, url, title, position);
     ref.invalidateSelf();
   }
 
   Future<void> addFolder({
     required String parentGuid,
     required String title,
+    int? position,
   }) async {
-    await _service.addFolder(parentGuid, title, null);
+    await _service.addFolder(parentGuid, title, position);
     ref.invalidateSelf();
   }
 
@@ -54,10 +57,16 @@ class BookmarksRepository extends _$BookmarksRepository {
     String? title,
     Uri? url,
     String? parentGuid,
+    int? position,
   }) async {
     await _service.updateNode(
       guid,
-      BookmarkInfo(title: title, url: url?.toString(), parentGuid: parentGuid),
+      BookmarkInfo(
+        title: title,
+        url: url?.toString(),
+        parentGuid: parentGuid,
+        position: position,
+      ),
     );
     ref.invalidateSelf();
   }
@@ -66,10 +75,11 @@ class BookmarksRepository extends _$BookmarksRepository {
     required String guid,
     String? title,
     String? parentGuid,
+    int? position,
   }) async {
     await _service.updateNode(
       guid,
-      BookmarkInfo(title: title, parentGuid: parentGuid),
+      BookmarkInfo(title: title, parentGuid: parentGuid, position: position),
     );
     ref.invalidateSelf();
   }
@@ -77,6 +87,78 @@ class BookmarksRepository extends _$BookmarksRepository {
   Future<void> delete(String guid) async {
     await _service.deleteNode(guid);
     ref.invalidateSelf();
+  }
+
+  Future<void> moveMany({
+    required Iterable<BookmarkItem> items,
+    required String targetParentGuid,
+  }) async {
+    for (final item in items) {
+      if (bookmarkRootIds.contains(item.guid)) {
+        logger.w('Skipping move of root folder: ${item.guid}');
+        continue;
+      }
+      if (item.parentGuid == targetParentGuid) continue;
+      await _service.updateNode(
+        item.guid,
+        BookmarkInfo(parentGuid: targetParentGuid),
+      );
+    }
+    ref.invalidateSelf();
+  }
+
+  Future<void> deleteMany(Iterable<String> guids) async {
+    for (final guid in guids) {
+      if (bookmarkRootIds.contains(guid)) {
+        logger.w('Skipping delete of root folder: $guid');
+        continue;
+      }
+      await _service.deleteNode(guid);
+    }
+    ref.invalidateSelf();
+  }
+
+  Future<void> flattenFolder({required BookmarkFolder folder}) async {
+    if (folder.parentGuid == null || bookmarkRootIds.contains(folder.guid)) {
+      logger.w('Cannot flatten root or parentless folder: ${folder.guid}');
+      return;
+    }
+    // Fetch the full folder tree from storage to avoid operating on a
+    // filtered subset (e.g. when search is active), which would silently
+    // delete children that were not moved.
+    final fullNode = await _service.getTree(folder.guid);
+    final children = fullNode?.children;
+    if (children != null) {
+      for (final child in children) {
+        await _service.updateNode(
+          child.guid,
+          BookmarkInfo(parentGuid: folder.parentGuid),
+        );
+      }
+    }
+    await _service.deleteNode(folder.guid);
+    ref.invalidateSelf();
+  }
+
+  /// Returns the GUIDs of all descendant folders of [guid] by fetching the
+  /// full subtree from storage. This is safe to call even when the UI tree is
+  /// filtered (e.g. during search), unlike the pure-utility
+  /// [collectDescendantFolderGuids] which only walks the in-memory tree.
+  Future<Set<String>> getDescendantFolderGuids(String guid) async {
+    final node = await _service.getTree(guid, recursive: true);
+    if (node == null) return const {};
+    final result = <String>{};
+    void collect(BookmarkNode n) {
+      for (final child in n.children ?? const <BookmarkNode>[]) {
+        if (child.type == BookmarkNodeType.folder) {
+          result.add(child.guid);
+          collect(child);
+        }
+      }
+    }
+
+    collect(node);
+    return result;
   }
 
   Future<void> eraseEverything(BookmarkRoot root) async {

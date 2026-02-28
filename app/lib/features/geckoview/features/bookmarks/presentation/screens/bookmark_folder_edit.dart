@@ -47,6 +47,8 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
       parentGuid ?? folder?.parentGuid ?? BookmarkRoot.mobile.id,
     );
 
+    final addToTop = useState(false);
+
     // Check if this is a bookmark root folder (these cannot be moved)
     final isBookmarkRoot =
         folder != null && bookmarkRootIds.contains(folder!.guid);
@@ -84,6 +86,7 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
                       .addFolder(
                         parentGuid: currentParentGuid.value,
                         title: nameTextController.text,
+                        position: addToTop.value ? 0 : null,
                       );
 
                   if (context.mounted) {
@@ -114,9 +117,20 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
               if (!isBookmarkRoot) ...[
                 FolderTreePicker(
                   selectedFolderGuid: currentParentGuid,
-                  excludeFolderGuid: folder?.guid,
+                  excludeFolderGuids: folder != null
+                      ? {folder!.guid}
+                      : const {},
                   entryGuid: BookmarkRoot.root.id,
                 ),
+                if (folder == null) ...[
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Add to top'),
+                    value: addToTop.value,
+                    onChanged: (value) => addToTop.value = value,
+                  ),
+                ],
                 const SizedBox(height: 16),
               ],
               if (folder != null)

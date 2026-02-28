@@ -31,22 +31,22 @@ import 'package:weblibre/presentation/widgets/failure_widget.dart';
 /// A widget that displays a tree view of bookmark folders and allows the user
 /// to select a parent folder.
 ///
-/// When editing a folder, pass [excludeFolderGuid] to prevent selecting the
-/// folder itself or its descendants as the parent (which would create a circular reference).
+/// When editing a folder, pass [excludeFolderGuids] to prevent selecting the
+/// folders or their descendants as the parent (which would create a circular reference).
 class FolderTreePicker extends HookConsumerWidget {
   /// The currently selected folder GUID
   final ValueNotifier<String> selectedFolderGuid;
 
-  /// Optional folder GUID to exclude from the tree (along with its descendants).
-  /// Used when editing a folder to prevent circular parent relationships.
-  final String? excludeFolderGuid;
+  /// Optional folder GUIDs to exclude from the tree (along with their descendants).
+  /// Used when editing/moving folders to prevent circular parent relationships.
+  final Set<String> excludeFolderGuids;
 
   final String entryGuid;
 
   const FolderTreePicker({
     required this.selectedFolderGuid,
     required this.entryGuid,
-    this.excludeFolderGuid,
+    this.excludeFolderGuids = const {},
     super.key,
   });
 
@@ -72,9 +72,9 @@ class FolderTreePicker extends HookConsumerWidget {
 
               if (item.children != null) {
                 for (final child in item.children!) {
-                  // Skip the excluded folder and its descendants
+                  // Skip excluded folders and their descendants
                   if (child is BookmarkFolder &&
-                      child.guid != excludeFolderGuid) {
+                      !excludeFolderGuids.contains(child.guid)) {
                     addChildren(node, child);
                   }
                 }
