@@ -44,6 +44,11 @@ class InstalledAddonDetailsActivity : AppCompatActivity() {
         bindAddon(addon)
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
+    }
+
     private fun bindAddon(addon: Addon) {
         scope.launch {
             try {

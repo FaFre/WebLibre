@@ -54,6 +54,11 @@ class WebExtensionActionPopupActivity : AppCompatActivity() {
         })
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
+    }
+
     override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? =
         when (name) {
             EngineView::class.java.name -> components.core.engine.createView(context, attrs).asView()
