@@ -25,8 +25,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -109,7 +109,7 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabSuggestionsEnabled = ref.watch(tabSuggestionsControllerProvider);
+    final tabSuggestionsEnabled = ref.watch(persistedBoolProvider(PersistedBoolKey.tabSuggestions));
     final enableAiFeatures = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,

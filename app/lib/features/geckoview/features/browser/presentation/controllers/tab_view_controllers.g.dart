@@ -9,59 +9,6 @@ part of 'tab_view_controllers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(TabSuggestionsController)
-final tabSuggestionsControllerProvider = TabSuggestionsControllerProvider._();
-
-final class TabSuggestionsControllerProvider
-    extends $NotifierProvider<TabSuggestionsController, bool> {
-  TabSuggestionsControllerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'tabSuggestionsControllerProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$tabSuggestionsControllerHash();
-
-  @$internal
-  @override
-  TabSuggestionsController create() => TabSuggestionsController();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
-    );
-  }
-}
-
-String _$tabSuggestionsControllerHash() =>
-    r'27a22674f9e4efb01e70120338202e95acef4791';
-
-abstract class _$TabSuggestionsController extends $Notifier<bool> {
-  bool build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<bool, bool>,
-              bool,
-              Object?,
-              Object?
-            >;
-    element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(TabsViewModeController)
 final tabsViewModeControllerProvider = TabsViewModeControllerProvider._();
 

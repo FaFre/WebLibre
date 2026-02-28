@@ -29,6 +29,7 @@ import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
+import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -153,7 +154,7 @@ class _TabGridView extends HookConsumerWidget {
       ),
     );
 
-    final tabSuggestionsEnabled = ref.watch(tabSuggestionsControllerProvider);
+    final tabSuggestionsEnabled = ref.watch(persistedBoolProvider(PersistedBoolKey.tabSuggestions));
 
     final suggestedTabEntities = tabSuggestionsEnabled
         ? ref.watch(suggestedTabEntitiesProvider(containerId))

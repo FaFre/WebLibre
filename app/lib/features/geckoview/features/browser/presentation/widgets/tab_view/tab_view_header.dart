@@ -27,6 +27,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -345,7 +346,7 @@ class TabViewHeader extends HookConsumerWidget {
                           Consumer(
                             builder: (context, ref, child) {
                               final tabSuggestionsEnabled = ref.watch(
-                                tabSuggestionsControllerProvider,
+                                persistedBoolProvider(PersistedBoolKey.tabSuggestions),
                               );
                               final downloadProgress = ref.watch(
                                 mlDownloadStateProvider,
@@ -380,18 +381,18 @@ class TabViewHeader extends HookConsumerWidget {
                                       if (result == true) {
                                         ref
                                             .read(
-                                              tabSuggestionsControllerProvider
+                                              persistedBoolProvider(PersistedBoolKey.tabSuggestions)
                                                   .notifier,
                                             )
-                                            .enable();
+                                            .set(true);
                                       }
                                     } else {
                                       ref
                                           .read(
-                                            tabSuggestionsControllerProvider
+                                            persistedBoolProvider(PersistedBoolKey.tabSuggestions)
                                                 .notifier,
                                           )
-                                          .disable();
+                                          .set(false);
                                     }
                                   },
                                 ),
@@ -409,9 +410,7 @@ class TabViewHeader extends HookConsumerWidget {
                               );
 
                               return IconButton.filledTonal(
-                                icon: const Icon(
-                                  MdiIcons.orderNumericAscending,
-                                ),
+                                icon: const Icon(Icons.swap_vert),
                                 isSelected: tabsReorderabe,
                                 iconSize: 18,
                                 padding: EdgeInsets.zero,

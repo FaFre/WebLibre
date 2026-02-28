@@ -34,6 +34,7 @@ import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
@@ -47,7 +48,6 @@ import 'package:weblibre/features/geckoview/domain/providers/web_extensions_stat
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/providers/extensions_expanded.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
@@ -1368,7 +1368,7 @@ class _ExtensionsCard extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final addonService = ref.watch(addonServiceProvider);
-    final extensionsExpanded = ref.watch(extensionsExpandedProvider);
+    final extensionsExpanded = ref.watch(persistedBoolProvider(PersistedBoolKey.extensionsExpanded));
     final pageExtensions = ref.watch(
       webExtensionsStateProvider(
         WebExtensionActionType.page,
@@ -1394,7 +1394,7 @@ class _ExtensionsCard extends HookConsumerWidget {
             title: const Text('Extensions'),
             initiallyExpanded: extensionsExpanded,
             onExpansionChanged: (_) =>
-                ref.read(extensionsExpandedProvider.notifier).toggle(),
+                ref.read(persistedBoolProvider(PersistedBoolKey.extensionsExpanded).notifier).toggle(),
             children: [
               // Page extensions
               if (pageExtensions.isNotEmpty) ...[

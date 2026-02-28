@@ -28,35 +28,6 @@ import 'package:weblibre/features/user/data/providers.dart';
 
 part 'tab_view_controllers.g.dart';
 
-@Riverpod(keepAlive: true)
-class TabSuggestionsController extends _$TabSuggestionsController {
-  void enable() {
-    state = true;
-  }
-
-  void disable() {
-    state = false;
-  }
-
-  void hide() {
-    if (state) {
-      state = false;
-    }
-  }
-
-  @override
-  bool build() {
-    persist(
-      ref.watch(riverpodDatabaseStorageProvider),
-      key: 'TabSuggestions',
-      encode: (state) => jsonEncode([state]),
-      decode: (encoded) => (jsonDecode(encoded) as List<dynamic>).first as bool,
-    );
-
-    return stateOrNull ?? false;
-  }
-}
-
 enum TabsViewMode {
   list(MdiIcons.folderTable, 'List'),
   grid(MdiIcons.table, 'Grid'),

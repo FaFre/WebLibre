@@ -24,23 +24,38 @@ import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
-part 'search_suggestions_view.g.dart';
+part 'persisted_bool.g.dart';
+
+enum PersistedBoolKey {
+  extensionsExpanded(key: 'ExtensionsExpanded', defaultValue: false),
+  searchSuggestionsExpanded(
+    key: 'SearchSuggestionsExpanded',
+    defaultValue: true,
+  ),
+  tabSuggestions(key: 'TabSuggestions', defaultValue: false);
+
+  const PersistedBoolKey({required this.key, required this.defaultValue});
+
+  final String key;
+  final bool defaultValue;
+}
 
 @Riverpod(keepAlive: true)
-class SearchSuggestionsExpanded extends _$SearchSuggestionsExpanded {
-  void toggle() {
-    state = !state;
-  }
+class PersistedBool extends _$PersistedBool {
+  void toggle() => state = !state;
+
+  // ignore: use_setters_to_change_properties
+  void set(bool value) => state = value;
 
   @override
-  bool build() {
+  bool build(PersistedBoolKey key) {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
-      key: 'SearchSuggestionsExpanded',
+      key: key.key,
       encode: (state) => jsonEncode([state]),
       decode: (encoded) => (jsonDecode(encoded) as List<dynamic>).first as bool,
     );
 
-    return stateOrNull ?? true;
+    return stateOrNull ?? key.defaultValue;
   }
 }

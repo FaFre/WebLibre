@@ -24,11 +24,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/smart_bang_selector.dart';
 
 class FullSearchTermSuggestions extends HookConsumerWidget {
@@ -58,7 +58,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
 
     final searchSuggestions = ref.watch(searchSuggestionsProvider());
     final searchHistory = ref.watch(searchHistoryProvider);
-    final expanded = ref.watch(searchSuggestionsExpandedProvider);
+    final expanded = ref.watch(persistedBoolProvider(PersistedBoolKey.searchSuggestionsExpanded));
 
     useOnListenableChange(searchTextController, () {
       ref
@@ -111,7 +111,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                 padding: const EdgeInsets.only(top: 6.0),
                 child: IconButton(
                   onPressed: ref
-                      .read(searchSuggestionsExpandedProvider.notifier)
+                      .read(persistedBoolProvider(PersistedBoolKey.searchSuggestionsExpanded).notifier)
                       .toggle,
                   icon: Icon(expanded ? Icons.unfold_less : Icons.unfold_more),
                 ),
