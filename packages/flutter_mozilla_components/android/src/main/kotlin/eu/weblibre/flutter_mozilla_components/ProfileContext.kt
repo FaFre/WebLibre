@@ -2,6 +2,7 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.ComponentCallbacks
 import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.os.Build
@@ -60,6 +61,14 @@ class ProfileContext(private val base: Context, val relativePath: String) :
 
     override fun getApplicationContext(): Context {
         return this
+    }
+
+    override fun registerComponentCallbacks(callback: ComponentCallbacks) {
+        base.applicationContext.registerComponentCallbacks(callback)
+    }
+
+    override fun unregisterComponentCallbacks(callback: ComponentCallbacks) {
+        base.applicationContext.unregisterComponentCallbacks(callback)
     }
 
     override fun getFilesDir(): File {
