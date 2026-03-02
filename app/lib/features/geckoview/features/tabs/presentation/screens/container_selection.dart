@@ -54,7 +54,7 @@ class ContainerSelectionScreen extends HookConsumerWidget {
             builder: (context, controller) {
               return ListView.builder(
                 controller: controller,
-                itemCount: containers.length,
+                itemCount: containers.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return ListTileTheme(
