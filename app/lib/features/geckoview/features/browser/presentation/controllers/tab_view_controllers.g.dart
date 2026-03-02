@@ -62,6 +62,63 @@ abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
   }
 }
 
+@ProviderFor(TabViewFilterController)
+@JsonPersist()
+final tabViewFilterControllerProvider = TabViewFilterControllerProvider._();
+
+@JsonPersist()
+final class TabViewFilterControllerProvider
+    extends $NotifierProvider<TabViewFilterController, TabViewFilterOptions> {
+  TabViewFilterControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabViewFilterControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabViewFilterControllerHash();
+
+  @$internal
+  @override
+  TabViewFilterController create() => TabViewFilterController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabViewFilterOptions value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabViewFilterOptions>(value),
+    );
+  }
+}
+
+String _$tabViewFilterControllerHash() =>
+    r'95e8a03d60ebe05e0c5df38f810f951a4fe2ed78';
+
+@JsonPersist()
+abstract class _$TabViewFilterControllerBase
+    extends $Notifier<TabViewFilterOptions> {
+  TabViewFilterOptions build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<TabViewFilterOptions, TabViewFilterOptions>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<TabViewFilterOptions, TabViewFilterOptions>,
+              TabViewFilterOptions,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(TabsReorderableController)
 final tabsReorderableControllerProvider = TabsReorderableControllerProvider._();
 
@@ -112,5 +169,42 @@ abstract class _$TabsReorderableController extends $Notifier<bool> {
               Object?
             >;
     element.handleCreate(ref, build);
+  }
+}
+
+// **************************************************************************
+// JsonGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+abstract class _$TabViewFilterController extends _$TabViewFilterControllerBase {
+  /// The default key used by [persist].
+  String get key {
+    const resolvedKey = "TabViewFilterController";
+    return resolvedKey;
+  }
+
+  /// A variant of [persist], for JSON-specific encoding.
+  ///
+  /// You can override [key] to customize the key used for storage.
+  PersistResult persist(
+    FutureOr<Storage<String, String>> storage, {
+    String? key,
+    String Function(TabViewFilterOptions state)? encode,
+    TabViewFilterOptions Function(String encoded)? decode,
+    StorageOptions options = const StorageOptions(),
+  }) {
+    return NotifierPersistX(this).persist<String, String>(
+      storage,
+      key: key ?? this.key,
+      encode: encode ?? $jsonCodex.encode,
+      decode:
+          decode ??
+          (encoded) {
+            final e = $jsonCodex.decode(encoded);
+            return TabViewFilterOptions.fromJson(e as Map<String, Object?>);
+          },
+      options: options,
+    );
   }
 }

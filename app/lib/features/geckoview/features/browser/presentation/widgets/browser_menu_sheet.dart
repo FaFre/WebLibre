@@ -1368,7 +1368,9 @@ class _ExtensionsCard extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final addonService = ref.watch(addonServiceProvider);
-    final extensionsExpanded = ref.watch(persistedBoolProvider(PersistedBoolKey.extensionsExpanded));
+    final extensionsExpanded = ref.watch(
+      persistedBoolProvider(PersistedBoolKey.extensionsExpanded),
+    );
     final pageExtensions = ref.watch(
       webExtensionsStateProvider(
         WebExtensionActionType.page,
@@ -1393,8 +1395,13 @@ class _ExtensionsCard extends HookConsumerWidget {
             leading: const Icon(MdiIcons.puzzle),
             title: const Text('Extensions'),
             initiallyExpanded: extensionsExpanded,
-            onExpansionChanged: (_) =>
-                ref.read(persistedBoolProvider(PersistedBoolKey.extensionsExpanded).notifier).toggle(),
+            onExpansionChanged: (_) => ref
+                .read(
+                  persistedBoolProvider(
+                    PersistedBoolKey.extensionsExpanded,
+                  ).notifier,
+                )
+                .toggle(),
             children: [
               // Page extensions
               if (pageExtensions.isNotEmpty) ...[

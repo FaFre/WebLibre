@@ -333,6 +333,7 @@ typedef $TabCreateCompanionBuilder =
       i0.Value<String?> title,
       i0.Value<i7.TabModeDbValue> tabMode,
       i0.Value<String?> isolationContextId,
+      i0.Value<bool> isPinned,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -352,6 +353,7 @@ typedef $TabUpdateCompanionBuilder =
       i0.Value<String?> title,
       i0.Value<i7.TabModeDbValue> tabMode,
       i0.Value<String?> isolationContextId,
+      i0.Value<bool> isPinned,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -442,6 +444,11 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
 
   i0.ColumnFilters<String> get isolationContextId => $composableBuilder(
     column: $table.isolationContextId,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
     builder: (column) => i0.ColumnFilters(column),
   );
 
@@ -551,6 +558,11 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<bool> get isProbablyReaderable => $composableBuilder(
     column: $table.isProbablyReaderable,
     builder: (column) => i0.ColumnOrderings(column),
@@ -642,6 +654,9 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     column: $table.isolationContextId,
     builder: (column) => column,
   );
+
+  i0.GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
 
   i0.GeneratedColumn<bool> get isProbablyReaderable => $composableBuilder(
     column: $table.isProbablyReaderable,
@@ -736,6 +751,7 @@ class $TabTableManager
                 i0.Value<String?> title = const i0.Value.absent(),
                 i0.Value<i7.TabModeDbValue> tabMode = const i0.Value.absent(),
                 i0.Value<String?> isolationContextId = const i0.Value.absent(),
+                i0.Value<bool> isPinned = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -755,6 +771,7 @@ class $TabTableManager
                 title: title,
                 tabMode: tabMode,
                 isolationContextId: isolationContextId,
+                isPinned: isPinned,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -774,6 +791,7 @@ class $TabTableManager
                 i0.Value<String?> title = const i0.Value.absent(),
                 i0.Value<i7.TabModeDbValue> tabMode = const i0.Value.absent(),
                 i0.Value<String?> isolationContextId = const i0.Value.absent(),
+                i0.Value<bool> isPinned = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -793,6 +811,7 @@ class $TabTableManager
                 title: title,
                 tabMode: tabMode,
                 isolationContextId: isolationContextId,
+                isPinned: isPinned,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -1312,6 +1331,15 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
         requiredDuringInsert: false,
         $customConstraints: '',
       );
+  late final i0.GeneratedColumn<bool> isPinned = i0.GeneratedColumn<bool>(
+    'is_pinned',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const i0.CustomExpression('0'),
+  );
   late final i0.GeneratedColumn<bool> isProbablyReaderable =
       i0.GeneratedColumn<bool>(
         'is_probably_readerable',
@@ -1377,6 +1405,7 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     title,
     tabMode,
     isolationContextId,
+    isPinned,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -1437,6 +1466,10 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
         i0.DriftSqlType.string,
         data['${effectivePrefix}isolation_context_id'],
       ),
+      isPinned: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}is_pinned'],
+      )!,
       isProbablyReaderable: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.bool,
         data['${effectivePrefix}is_probably_readerable'],
@@ -1493,6 +1526,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   final String? title;
   final i7.TabModeDbValue tabMode;
   final String? isolationContextId;
+  final bool isPinned;
   final bool? isProbablyReaderable;
   final String? extractedContentMarkdown;
   final String? extractedContentPlain;
@@ -1509,6 +1543,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     this.title,
     required this.tabMode,
     this.isolationContextId,
+    required this.isPinned,
     this.isProbablyReaderable,
     this.extractedContentMarkdown,
     this.extractedContentPlain,
@@ -1544,6 +1579,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     if (!nullToAbsent || isolationContextId != null) {
       map['isolation_context_id'] = i0.Variable<String>(isolationContextId);
     }
+    map['is_pinned'] = i0.Variable<bool>(isPinned);
     if (!nullToAbsent || isProbablyReaderable != null) {
       map['is_probably_readerable'] = i0.Variable<bool>(isProbablyReaderable);
     }
@@ -1588,6 +1624,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       isolationContextId: serializer.fromJson<String?>(
         json['isolation_context_id'],
       ),
+      isPinned: serializer.fromJson<bool>(json['is_pinned']),
       isProbablyReaderable: serializer.fromJson<bool?>(
         json['is_probably_readerable'],
       ),
@@ -1621,6 +1658,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
         i3.Tab.$convertertabMode.toJson(tabMode),
       ),
       'isolation_context_id': serializer.toJson<String?>(isolationContextId),
+      'is_pinned': serializer.toJson<bool>(isPinned),
       'is_probably_readerable': serializer.toJson<bool?>(isProbablyReaderable),
       'extracted_content_markdown': serializer.toJson<String?>(
         extractedContentMarkdown,
@@ -1644,6 +1682,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     i0.Value<String?> title = const i0.Value.absent(),
     i7.TabModeDbValue? tabMode,
     i0.Value<String?> isolationContextId = const i0.Value.absent(),
+    bool? isPinned,
     i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
     i0.Value<String?> extractedContentMarkdown = const i0.Value.absent(),
     i0.Value<String?> extractedContentPlain = const i0.Value.absent(),
@@ -1662,6 +1701,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     isolationContextId: isolationContextId.present
         ? isolationContextId.value
         : this.isolationContextId,
+    isPinned: isPinned ?? this.isPinned,
     isProbablyReaderable: isProbablyReaderable.present
         ? isProbablyReaderable.value
         : this.isProbablyReaderable,
@@ -1694,6 +1734,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       isolationContextId: data.isolationContextId.present
           ? data.isolationContextId.value
           : this.isolationContextId,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
       isProbablyReaderable: data.isProbablyReaderable.present
           ? data.isProbablyReaderable.value
           : this.isProbablyReaderable,
@@ -1725,6 +1766,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           ..write('title: $title, ')
           ..write('tabMode: $tabMode, ')
           ..write('isolationContextId: $isolationContextId, ')
+          ..write('isPinned: $isPinned, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -1746,6 +1788,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     title,
     tabMode,
     isolationContextId,
+    isPinned,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -1766,6 +1809,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           other.title == this.title &&
           other.tabMode == this.tabMode &&
           other.isolationContextId == this.isolationContextId &&
+          other.isPinned == this.isPinned &&
           other.isProbablyReaderable == this.isProbablyReaderable &&
           other.extractedContentMarkdown == this.extractedContentMarkdown &&
           other.extractedContentPlain == this.extractedContentPlain &&
@@ -1784,6 +1828,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   final i0.Value<String?> title;
   final i0.Value<i7.TabModeDbValue> tabMode;
   final i0.Value<String?> isolationContextId;
+  final i0.Value<bool> isPinned;
   final i0.Value<bool?> isProbablyReaderable;
   final i0.Value<String?> extractedContentMarkdown;
   final i0.Value<String?> extractedContentPlain;
@@ -1801,6 +1846,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     this.title = const i0.Value.absent(),
     this.tabMode = const i0.Value.absent(),
     this.isolationContextId = const i0.Value.absent(),
+    this.isPinned = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -1819,6 +1865,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     this.title = const i0.Value.absent(),
     this.tabMode = const i0.Value.absent(),
     this.isolationContextId = const i0.Value.absent(),
+    this.isPinned = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -1840,6 +1887,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Expression<String>? title,
     i0.Expression<int>? tabMode,
     i0.Expression<String>? isolationContextId,
+    i0.Expression<bool>? isPinned,
     i0.Expression<bool>? isProbablyReaderable,
     i0.Expression<String>? extractedContentMarkdown,
     i0.Expression<String>? extractedContentPlain,
@@ -1859,6 +1907,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       if (tabMode != null) 'tab_mode': tabMode,
       if (isolationContextId != null)
         'isolation_context_id': isolationContextId,
+      if (isPinned != null) 'is_pinned': isPinned,
       if (isProbablyReaderable != null)
         'is_probably_readerable': isProbablyReaderable,
       if (extractedContentMarkdown != null)
@@ -1883,6 +1932,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Value<String?>? title,
     i0.Value<i7.TabModeDbValue>? tabMode,
     i0.Value<String?>? isolationContextId,
+    i0.Value<bool>? isPinned,
     i0.Value<bool?>? isProbablyReaderable,
     i0.Value<String?>? extractedContentMarkdown,
     i0.Value<String?>? extractedContentPlain,
@@ -1901,6 +1951,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       title: title ?? this.title,
       tabMode: tabMode ?? this.tabMode,
       isolationContextId: isolationContextId ?? this.isolationContextId,
+      isPinned: isPinned ?? this.isPinned,
       isProbablyReaderable: isProbablyReaderable ?? this.isProbablyReaderable,
       extractedContentMarkdown:
           extractedContentMarkdown ?? this.extractedContentMarkdown,
@@ -1949,6 +2000,9 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
         isolationContextId.value,
       );
     }
+    if (isPinned.present) {
+      map['is_pinned'] = i0.Variable<bool>(isPinned.value);
+    }
     if (isProbablyReaderable.present) {
       map['is_probably_readerable'] = i0.Variable<bool>(
         isProbablyReaderable.value,
@@ -1993,6 +2047,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
           ..write('title: $title, ')
           ..write('tabMode: $tabMode, ')
           ..write('isolationContextId: $isolationContextId, ')
+          ..write('isPinned: $isPinned, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')

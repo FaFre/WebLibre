@@ -67,9 +67,11 @@ void showInfoMessage(
   String message, {
   Duration duration = const Duration(seconds: 4),
   bool persist = false,
+  SnackBarAction? action,
 }) {
   final snackBar = _createFloatingSnackBar(
     content: Text(message),
+    action: action,
     duration: duration,
     persist: persist,
   );

@@ -9,6 +9,48 @@ part of 'providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(canManualTabReorder)
+final canManualTabReorderProvider = CanManualTabReorderProvider._();
+
+final class CanManualTabReorderProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  CanManualTabReorderProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'canManualTabReorderProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$canManualTabReorderHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return canManualTabReorder(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$canManualTabReorderHash() =>
+    r'ba5d961933464b6e005d7945802908a9a4ae034b';
+
 @ProviderFor(SelectedBangTrigger)
 final selectedBangTriggerProvider = SelectedBangTriggerFamily._();
 
@@ -269,7 +311,7 @@ final class ContainerTabEntitiesProvider
 }
 
 String _$containerTabEntitiesHash() =>
-    r'350b3e2a2672ab0a303344c7d8301af24c991ee5';
+    r'bcd932968bae46fb5e27a60819ea7aad7a8e41e7';
 
 final class ContainerTabEntitiesFamily extends $Family
     with
@@ -487,7 +529,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'2fd5e12595b3aced1e235c9626073c34655d57fa';
+    r'e2dc85fc72ee29736d8fdaabb1abadd23cc4bac0';
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -816,7 +858,7 @@ final class SuggestedTabEntitiesProvider
 }
 
 String _$suggestedTabEntitiesHash() =>
-    r'1c3d9a4f85db60301fe5c5b55fb55512d1b59696';
+    r'b140a1d0badad3d976b91ab9154300873a8bd4e9';
 
 final class SuggestedTabEntitiesFamily extends $Family
     with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {
@@ -920,7 +962,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'b0477aa6297183575264d54a82575dfb01fa4c32';
+    r'bc6833f975e9af3b2117268d7644dc56131c85a3';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with

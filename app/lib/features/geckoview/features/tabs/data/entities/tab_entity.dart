@@ -21,39 +21,56 @@ import 'package:fast_equatable/fast_equatable.dart';
 
 sealed class TabEntity with FastEquatable {
   String get tabId;
+  String get orderKey;
 }
 
 class DefaultTabEntity extends TabEntity {
   @override
   final String tabId;
+  @override
+  final String orderKey;
   final String? containerId;
 
-  DefaultTabEntity({required this.tabId, required this.containerId});
+  DefaultTabEntity({
+    required this.tabId,
+    required this.orderKey,
+    required this.containerId,
+  });
 
   @override
-  List<Object?> get hashParameters => [tabId, containerId];
+  List<Object?> get hashParameters => [tabId, orderKey, containerId];
 }
 
 class SearchResultTabEntity extends TabEntity {
   @override
   final String tabId;
+  @override
+  final String orderKey;
   final String? containerId;
 
   final String searchQuery;
 
   SearchResultTabEntity({
     required this.tabId,
+    required this.orderKey,
     required this.searchQuery,
     required this.containerId,
   });
 
   @override
-  List<Object?> get hashParameters => [tabId, searchQuery, containerId];
+  List<Object?> get hashParameters => [
+    tabId,
+    orderKey,
+    searchQuery,
+    containerId,
+  ];
 }
 
 class TabTreeEntity extends TabEntity {
   @override
   final String tabId;
+  @override
+  final String orderKey;
 
   final String? containerId;
 
@@ -63,11 +80,18 @@ class TabTreeEntity extends TabEntity {
 
   TabTreeEntity({
     required this.tabId,
+    required this.orderKey,
     required this.containerId,
     required this.rootId,
     required this.totalTabs,
   });
 
   @override
-  List<Object?> get hashParameters => [tabId, containerId, rootId, totalTabs];
+  List<Object?> get hashParameters => [
+    tabId,
+    orderKey,
+    containerId,
+    rootId,
+    totalTabs,
+  ];
 }

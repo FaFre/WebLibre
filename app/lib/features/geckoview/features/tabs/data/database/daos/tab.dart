@@ -128,6 +128,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     );
   }
 
+  Selectable<MapEntry<String, String>> getTabOrderKeys() {
+    final query = selectOnly(db.tab)..addColumns([db.tab.id, db.tab.orderKey]);
+
+    return query.map(
+      (row) => MapEntry(row.read(db.tab.id)!, row.read(db.tab.orderKey)!),
+    );
+  }
+
   Future<String> _generateOrderKey({
     required Value<String?> parentId,
     required Value<String?> containerId,
@@ -461,6 +469,27 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Selectable<IsolatedContextContainerPairsResult>
   isolatedContextContainerPairs() {
     return db.definitionsDrift.isolatedContextContainerPairs();
+  }
+
+  Future<void> setPinned(String id, {required bool pinned}) {
+    final statement = _updateByIdStatement(id);
+    return statement.write(TabCompanion(isPinned: Value(pinned)));
+  }
+
+  Selectable<String> getPinnedTabIds() {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(db.tab.isPinned.equals(true));
+
+    return query.map((row) => row.read(db.tab.id)!);
+  }
+
+  Selectable<MapEntry<String, DateTime>> getTabTimestamps() {
+    final query = selectOnly(db.tab)..addColumns([db.tab.id, db.tab.timestamp]);
+
+    return query.map(
+      (row) => MapEntry(row.read(db.tab.id)!, row.read(db.tab.timestamp)!),
+    );
   }
 
   Future<List<String>> getUnassignedTabsOlderThan(DateTime threshold) {

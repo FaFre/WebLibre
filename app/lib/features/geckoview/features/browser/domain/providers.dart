@@ -23,6 +23,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/sort_field.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
@@ -30,6 +31,8 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -45,6 +48,19 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 part 'providers.g.dart';
 
 typedef TabStateWirthContainer = (TabState, ContainerData?);
+
+@Riverpod()
+bool canManualTabReorder(Ref ref) {
+  final filterOptions = ref.watch(tabViewFilterControllerProvider);
+
+  final hasActiveSearch = ref.watch(
+    tabSearchRepositoryProvider(
+      TabSearchPartition.preview,
+    ).select((value) => (value.value?.query ?? '').isNotEmpty),
+  );
+
+  return !filterOptions.hasActiveFilter && !hasActiveSearch;
+}
 
 @Riverpod(keepAlive: true)
 class SelectedBangTrigger extends _$SelectedBangTrigger {
@@ -100,6 +116,9 @@ EquatableValue<List<DefaultTabEntity>> containerTabEntities(
     ).select((value) => value.value),
   );
   final tabList = ref.watch(tabListProvider);
+  final orderKeys = ref.watch(
+    watchTabOrderKeysProvider.select((value) => value.value),
+  );
 
   final availableTabs =
       containerTabs?.where((tabId) => tabList.value.contains(tabId)).toList() ??
@@ -112,6 +131,7 @@ EquatableValue<List<DefaultTabEntity>> containerTabEntities(
             .map(
               (t) => DefaultTabEntity(
                 tabId: t,
+                orderKey: orderKeys?[t] ?? '',
                 containerId: containerFilter.containerId,
               ),
             )
@@ -123,8 +143,11 @@ EquatableValue<List<DefaultTabEntity>> containerTabEntities(
           (value) => EquatableValue(
             value.value?.entries
                     .map(
-                      (e) =>
-                          DefaultTabEntity(tabId: e.key, containerId: e.value),
+                      (e) => DefaultTabEntity(
+                        tabId: e.key,
+                        orderKey: orderKeys?[e.key] ?? '',
+                        containerId: e.value,
+                      ),
                     )
                     .toList() ??
                 [],
@@ -199,7 +222,13 @@ selectedContainerTabStatesWithContainer(Ref ref) {
 
   final tabStates = ref.watch(tabStatesProvider);
 
-  return EquatableValue([
+  final pinnedTabIds = ref.watch(
+    watchPinnedTabIdsProvider.select((value) => value.value),
+  );
+
+  final orderKeys = {for (final tab in sortedTabs) tab.tabId: tab.orderKey};
+
+  final items = [
     for (final tabEntity in sortedTabs)
       if (tabStates.containsKey(tabEntity.tabId))
         (
@@ -208,7 +237,22 @@ selectedContainerTabStatesWithContainer(Ref ref) {
             (containerId) => containerData?[containerId],
           ),
         ),
-  ]);
+  ];
+
+  items.sort((a, b) {
+    final aPinned = pinnedTabIds?.contains(a.$1.id) ?? false;
+    final bPinned = pinnedTabIds?.contains(b.$1.id) ?? false;
+
+    if (aPinned != bPinned) {
+      return aPinned ? -1 : 1;
+    }
+
+    final aOrderKey = orderKeys[a.$1.id] ?? '';
+    final bOrderKey = orderKeys[b.$1.id] ?? '';
+    return aOrderKey.compareTo(bOrderKey);
+  });
+
+  return EquatableValue(items);
 }
 
 @Riverpod()
@@ -324,6 +368,10 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
     ).select((value) => EquatableValue(value.value)),
   );
 
+  final orderKeys = ref.watch(
+    watchTabOrderKeysProvider.select((value) => value.value),
+  );
+
   final suggestions = ref.watch(
     containerTabSuggestionsProvider(containerId).select(
       (value) => EquatableValue(
@@ -335,6 +383,7 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
                   .map(
                     (tabId) => DefaultTabEntity(
                       tabId: tabId,
+                      orderKey: orderKeys?[tabId] ?? '',
                       containerId: containerId,
                     ),
                   )
@@ -348,6 +397,103 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
   return suggestions;
 }
 
+List<TabEntity> _applyTabFiltersAndSort(
+  List<TabEntity> entities,
+  TabViewFilterOptions filterOptions,
+  Map<String, TabState> tabStates,
+  Set<String> pinnedTabIds,
+  Map<String, DateTime>? tabTimestamps,
+) {
+  final sortField = filterOptions.sortType.sortField;
+  final filteredRows = <_TabFilterRow>[];
+  var hasPinned = false;
+
+  for (final entity in entities) {
+    final tabState = tabStates[entity.tabId];
+    final timestamp = tabTimestamps?[entity.tabId];
+
+    if (!filterOptions.matchesTab(tabState?.tabMode, timestamp)) {
+      continue;
+    }
+
+    final isPinned = pinnedTabIds.contains(entity.tabId);
+    hasPinned = hasPinned || isPinned;
+
+    filteredRows.add(
+      _TabFilterRow(
+        entity: entity,
+        isPinned: isPinned,
+        titleKey:
+            sortField == SortField.titleAsc || sortField == SortField.titleDesc
+            ? (tabState?.titleOrAuthority ?? '').toLowerCase()
+            : null,
+        urlKey: sortField == SortField.urlAsc || sortField == SortField.urlDesc
+            ? (tabState?.url.toString() ?? '')
+            : null,
+        dateKey:
+            sortField == SortField.dateAsc || sortField == SortField.dateDesc
+            ? (timestamp ?? DateTime(0))
+            : null,
+      ),
+    );
+  }
+
+  if (sortField != null) {
+    filteredRows.sort((a, b) {
+      if (filterOptions.sortPinnedFirst && a.isPinned != b.isPinned) {
+        return b.isPinned ? 1 : -1;
+      }
+
+      final cmp = switch (sortField) {
+        SortField.titleAsc => a.titleKey!.compareTo(b.titleKey!),
+        SortField.titleDesc => b.titleKey!.compareTo(a.titleKey!),
+        SortField.urlAsc => a.urlKey!.compareTo(b.urlKey!),
+        SortField.urlDesc => b.urlKey!.compareTo(a.urlKey!),
+        SortField.dateAsc => a.dateKey!.compareTo(b.dateKey!),
+        SortField.dateDesc => b.dateKey!.compareTo(a.dateKey!),
+      };
+
+      if (cmp == 0) return a.entity.orderKey.compareTo(b.entity.orderKey);
+
+      return cmp;
+    });
+
+    return filteredRows.map((row) => row.entity).toList();
+  }
+
+  if (!hasPinned || !filterOptions.sortPinnedFirst) {
+    return filteredRows.map((row) => row.entity).toList();
+  }
+
+  final pinned = <TabEntity>[];
+  final unpinned = <TabEntity>[];
+  for (final row in filteredRows) {
+    if (row.isPinned) {
+      pinned.add(row.entity);
+    } else {
+      unpinned.add(row.entity);
+    }
+  }
+
+  return [...pinned, ...unpinned];
+}
+
+class _TabFilterRow {
+  final TabEntity entity;
+  final bool isPinned;
+  final String? titleKey;
+  final String? urlKey;
+  final DateTime? dateKey;
+
+  const _TabFilterRow({
+    required this.entity,
+    required this.isPinned,
+    required this.titleKey,
+    required this.urlKey,
+    required this.dateKey,
+  });
+}
+
 @Riverpod()
 EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   Ref ref, {
@@ -355,6 +501,10 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   required ContainerFilter containerFilter,
   required bool groupTrees,
 }) {
+  final orderKeys = ref.watch(
+    watchTabOrderKeysProvider.select((value) => value.value),
+  );
+
   final tabSearchResults = ref
       .watch(
         tabSearchRepositoryProvider(searchPartition).select(
@@ -364,6 +514,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
                   .map(
                     (tab) => SearchResultTabEntity(
                       tabId: tab.id,
+                      orderKey: orderKeys?[tab.id] ?? '',
                       containerId: tab.containerId,
                       searchQuery: result.query,
                     ),
@@ -379,53 +530,98 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
     containerTabEntitiesProvider(containerFilter),
   );
 
-  if (tabSearchResults == null) {
-    if (groupTrees) {
-      final trees = ref.watch(
-        watchTabTreesProvider.select(
-          (value) => EquatableValue(
-            value.value?.map((tree) {
-                  // Find the container ID for the latest tab
-                  final containerForTab = availableTabs.value
-                      .where((t) => t.tabId == tree.latestTabId)
-                      .firstOrNull
-                      ?.containerId;
+  // Tree mode: no filtering/sorting, return as-is
+  if (groupTrees && tabSearchResults == null) {
+    final trees = ref.watch(
+      watchTabTreesProvider.select(
+        (value) => EquatableValue(
+          value.value?.map((tree) {
+                // Find the container ID for the latest tab
+                final containerForTab = availableTabs.value
+                    .where((t) => t.tabId == tree.latestTabId)
+                    .firstOrNull
+                    ?.containerId;
 
-                  return TabTreeEntity(
-                    tabId: tree.latestTabId,
-                    containerId: containerForTab,
-                    rootId: tree.rootTabId,
-                    totalTabs: tree.totalTabs,
-                  );
-                }).toList() ??
-                [],
-          ),
+                return TabTreeEntity(
+                  tabId: tree.latestTabId,
+                  orderKey: orderKeys?[tree.latestTabId] ?? '',
+                  containerId: containerForTab,
+                  rootId: tree.rootTabId,
+                  totalTabs: tree.totalTabs,
+                );
+              }).toList() ??
+              [],
         ),
-      );
+      ),
+    );
 
+    return EquatableValue(
+      trees.value
+          .where(
+            (tree) => availableTabs.value.any(
+              (available) => available.tabId == tree.tabId,
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  final tabStates = ref.watch(tabStatesProvider);
+
+  final filterOptions = ref.watch(tabViewFilterControllerProvider);
+
+  final pinnedTabIds = ref.watch(
+    watchPinnedTabIdsProvider.select(
+      (value) => value.value ?? const <String>{},
+    ),
+  );
+
+  // Only pull timestamps from DB when date filtering/sorting is active
+  final needsTimestamps =
+      filterOptions.effectiveDateRange != null ||
+      filterOptions.sortType.sortField == SortField.dateAsc ||
+      filterOptions.sortType.sortField == SortField.dateDesc;
+  final tabTimestamps = needsTimestamps
+      ? ref.watch(watchTabTimestampsProvider.select((value) => value.value))
+      : null;
+
+  if (tabSearchResults == null) {
+    if (filterOptions.hasActiveFilter || pinnedTabIds.isNotEmpty) {
       return EquatableValue(
-        trees.value
-            .where(
-              (tree) => availableTabs.value.any(
-                (available) => available.tabId == tree.tabId,
-              ),
-            )
-            .toList(),
+        _applyTabFiltersAndSort(
+          availableTabs.value,
+          filterOptions,
+          tabStates,
+          pinnedTabIds,
+          tabTimestamps,
+        ),
       );
     }
 
     return availableTabs;
   }
 
-  return EquatableValue(
-    tabSearchResults
-        .where(
-          (tab) => availableTabs.value.any(
-            (available) => available.tabId == tab.tabId,
-          ),
-        )
-        .toList(),
-  );
+  final searchFiltered = tabSearchResults
+      .where(
+        (tab) => availableTabs.value.any(
+          (available) => available.tabId == tab.tabId,
+        ),
+      )
+      .toList();
+
+  if (filterOptions.hasActiveFilter || pinnedTabIds.isNotEmpty) {
+    return EquatableValue(
+      _applyTabFiltersAndSort(
+        searchFiltered,
+        filterOptions,
+        tabStates,
+        pinnedTabIds,
+        tabTimestamps,
+      ),
+    );
+  }
+
+  return EquatableValue(searchFiltered);
 }
 
 @Riverpod()

@@ -20,6 +20,7 @@
 
 import 'dart:async';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -369,15 +370,39 @@ class BrowserTabBar extends HookConsumerWidget {
   }
 }
 
-typedef _QuickTabItem = ({
-  Color? color,
-  String id,
-  TabMode tabMode,
-  bool isHistory,
-  String title,
-  Uri url,
-  TabState? tabState,
-});
+class _QuickTabItem with FastEquatable {
+  final Color? color;
+  final String id;
+  final TabMode tabMode;
+  final bool isHistory;
+  final bool isPinned;
+  final String title;
+  final Uri url;
+  final TabState? tabState;
+
+  _QuickTabItem({
+    required this.color,
+    required this.id,
+    required this.tabMode,
+    required this.isHistory,
+    required this.isPinned,
+    required this.title,
+    required this.url,
+    required this.tabState,
+  });
+
+  @override
+  List<Object?> get hashParameters => [
+    color,
+    id,
+    tabMode,
+    isHistory,
+    isPinned,
+    title,
+    url,
+    tabState,
+  ];
+}
 
 class ContextualToolbar extends HookConsumerWidget {
   const ContextualToolbar({
@@ -443,6 +468,14 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
+    final effectiveMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.effectiveUiQuickTabSwitcherMode(),
+      ),
+    );
+    final pinnedTabIds = ref.watch(
+      watchPinnedTabIdsProvider.select((value) => value.value),
+    );
     final tabStates = ref.watch(
       quickTabSwitcherTabStatesProvider(quickTabSwitcherMode),
     );
@@ -451,11 +484,12 @@ class QuickTabSwitcher extends HookConsumerWidget {
         .value;
     final availableItems = tabStates.value
         .map<_QuickTabItem>(
-          (state) => (
+          (state) => _QuickTabItem(
             id: state.$1.id,
             title: state.$1.titleOrAuthority,
             tabMode: state.$1.tabMode,
             isHistory: false,
+            isPinned: pinnedTabIds?.contains(state.$1.id) ?? false,
             url: state.$1.url,
             color: state.$2?.color,
             tabState: state.$1,
@@ -465,11 +499,12 @@ class QuickTabSwitcher extends HookConsumerWidget {
           (historySuggestions ?? []).map<_QuickTabItem>((state) {
             final url = Uri.parse(state.url);
 
-            return (
+            return _QuickTabItem(
               id: state.url,
               title: state.title ?? url.authority,
               tabMode: TabMode.regular,
               isHistory: true,
+              isPinned: false,
               url: url,
               color: null,
               tabState: null,
@@ -496,6 +531,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
           labelPadding: (item) =>
               (!showTitles &&
                   !item.isHistory &&
+                  !item.isPinned &&
                   item.tabMode is! PrivateTabMode &&
                   item.tabMode is! IsolatedTabMode)
               ? EdgeInsets.zero
@@ -524,6 +560,15 @@ class QuickTabSwitcher extends HookConsumerWidget {
                     child: Icon(
                       MdiIcons.dominoMask,
                       color: appColors.privateTabPurple,
+                      size: 20,
+                    ),
+                  ),
+                if (item.isPinned)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Icon(
+                      MdiIcons.pin,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
                   ),
@@ -575,6 +620,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
               enableReloadButton: false,
               enableNavigationButtons: false,
               enableAddToHomeScreen: false,
+              enablePinTab: effectiveMode == QuickTabSwitcherMode.containerTabs,
               builder: (context, controller, _) {
                 return InkWell(
                   onLongPress: () {

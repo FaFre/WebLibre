@@ -508,7 +508,6 @@ class _PullToRefreshTile extends HookConsumerWidget {
   }
 }
 
-
 class _DoubleBackCloseTabTile extends HookConsumerWidget {
   const _DoubleBackCloseTabTile();
 

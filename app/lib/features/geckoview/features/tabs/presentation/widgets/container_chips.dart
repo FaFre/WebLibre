@@ -109,7 +109,9 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabSuggestionsEnabled = ref.watch(persistedBoolProvider(PersistedBoolKey.tabSuggestions));
+    final tabSuggestionsEnabled = ref.watch(
+      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
+    );
     final enableAiFeatures = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
@@ -306,7 +308,7 @@ class ContainerChips extends HookConsumerWidget {
               ),
               if (displayMenu)
                 IconButton(
-                  visualDensity: VisualDensity.compact,
+                  // visualDensity: VisualDensity.compact,
                   onPressed: () async {
                     await const ContainerListRoute().push(context);
                   },

@@ -24,6 +24,7 @@ CREATE TABLE tab(
   title TEXT,
   tab_mode ENUM(TabModeDbValue) NOT NULL DEFAULT 0,
   isolation_context_id TEXT,
+  is_pinned BOOL NOT NULL DEFAULT 0,
   is_probably_readerable BOOL,
   extracted_content_markdown TEXT,
   extracted_content_plain TEXT,

@@ -115,6 +115,24 @@ Stream<List<TabData>> watchContainerTabsData(Ref ref, String? containerId) {
   return db.containerDao.getContainerTabsData(containerId).watch();
 }
 
+@Riverpod(keepAlive: true)
+Stream<Set<String>> watchPinnedTabIds(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getPinnedTabIds().watch().map((ids) => ids.toSet());
+}
+
+@Riverpod()
+Stream<Map<String, DateTime>> watchTabTimestamps(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getTabTimestamps().watch().map(Map.fromEntries);
+}
+
+@Riverpod(keepAlive: true)
+Stream<Map<String, String>> watchTabOrderKeys(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getTabOrderKeys().watch().map(Map.fromEntries);
+}
+
 @Riverpod()
 Stream<ContainerData?> watchContainerData(Ref ref, String containerId) {
   final db = ref.watch(tabDatabaseProvider);

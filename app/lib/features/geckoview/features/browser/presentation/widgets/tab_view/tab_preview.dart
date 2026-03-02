@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -73,29 +74,46 @@ class GridTabItemContainer extends StatelessWidget {
     super.key,
   });
 
+  static const borderRadius = BorderRadius.all(Radius.circular(12.0));
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final appColors = AppColors.of(context);
 
     final bgColor = switch (tabMode) {
-      PrivateTabMode() => appColors.privateTabBackground,
-      IsolatedTabMode() => appColors.isolatedTabBackground,
-      RegularTabMode() => colorScheme.surfaceContainerHighest,
+      PrivateTabMode() => appColors.privateTabBackground.withAlpha(80),
+      IsolatedTabMode() => appColors.isolatedTabBackground.withAlpha(80),
+      RegularTabMode() => colorScheme.surfaceContainerHigh,
     };
+
+    final borderWidth = isActive ? 4.0 : 3.0;
+    final innerRadius = BorderRadius.all(Radius.circular(12.0 - borderWidth));
 
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: isActive ? colorScheme.primary : colorScheme.outline,
-          width: isActive ? 2.0 : 1.0,
+          color: isActive
+              ? colorScheme.primary
+              : colorScheme.outline.withAlpha(40),
+          width: borderWidth,
         ),
-        borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+        borderRadius: borderRadius,
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: colorScheme.primary.withAlpha(60),
+                  blurRadius: 8.0,
+                  spreadRadius: 1.0,
+                ),
+              ]
+            : null,
       ),
       child: Material(
-        color: bgColor,
-        borderRadius: const BorderRadius.all(Radius.circular(14.0)),
-        child: child,
+        color: colorScheme.surface,
+        borderRadius: innerRadius,
+        clipBehavior: Clip.antiAlias,
+        child: Material(color: bgColor, child: child),
       ),
     );
   }
@@ -107,9 +125,10 @@ class GridTabPreview extends HookConsumerWidget {
 
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
-  final VoidCallback? onLongPress;
   final VoidCallback? onDelete;
   final void Function(String host)? onDeleteAll;
+
+  final bool showPinBadge;
 
   final Widget? trailingChild;
 
@@ -118,15 +137,17 @@ class GridTabPreview extends HookConsumerWidget {
     required this.isActive,
     this.onTap,
     this.onDoubleTap,
-    this.onLongPress,
     this.onDelete,
     this.onDeleteAll,
+    this.showPinBadge = false,
     this.trailingChild,
     super.key,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final appColors = AppColors.of(context);
 
     final tabState =
@@ -139,137 +160,232 @@ class GridTabPreview extends HookConsumerWidget {
 
     final extendedDeleteMenuController = useMenuController();
 
+    // ignore: avoid_bool_literals_in_conditional_expressions
+    final isPinned = showPinBadge
+        ? ref.watch(
+            watchPinnedTabIdsProvider.select(
+              (v) => v.value?.contains(tabId) ?? false,
+            ),
+          )
+        : false;
+
     final modeTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
       IsolatedTabMode() => appColors.isolatedTabForeground,
       RegularTabMode() => null,
     };
 
+    final subtitleColor = switch (tabState.tabMode) {
+      PrivateTabMode() => Color.lerp(
+        appColors.privateTabPurple,
+        Colors.white,
+        0.4,
+      )!,
+      IsolatedTabMode() => Color.lerp(
+        appColors.isolatedTabTeal,
+        Colors.white,
+        0.4,
+      )!,
+      RegularTabMode() => colorScheme.onSurfaceVariant,
+    };
+
+    final (modeBadgeIcon, modeBadgeColor) = switch (tabState.tabMode) {
+      PrivateTabMode() => (MdiIcons.dominoMask, appColors.privateTabPurple),
+      IsolatedTabMode() => (MdiIcons.snowflake, appColors.isolatedTabTeal),
+      RegularTabMode() => (null, null),
+    };
+
     return GridTabItemContainer(
       isActive: isActive,
       tabMode: tabState.tabMode,
       child: InkWell(
-        borderRadius: const BorderRadius.all(Radius.circular(14.0)),
+        borderRadius: GridTabItemContainer.borderRadius,
         onTap: onTap,
         onDoubleTap: onDoubleTap,
-        onLongPress: onLongPress,
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6.0, top: 2.0),
-                    child: Text(
-                      overflow: TextOverflow.ellipsis,
-                      tabState.titleOrAuthority,
-                      maxLines: 2,
-                      style: modeTextColor != null
-                          ? TextStyle(color: modeTextColor)
-                          : null,
-                    ),
-                  ),
-                ),
-                if (onDelete != null || onDeleteAll != null)
-                  MenuAnchor(
-                    controller: extendedDeleteMenuController,
-                    builder: (context, controller, child) {
-                      return child!;
-                    },
-                    menuChildren: [
-                      MenuItemButton(
-                        onPressed: () {
-                          onDeleteAll?.call(tabState.url.host);
-                        },
-
-                        leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                        child: Text('Close all from ${tabState.url.host}'),
-                      ),
-                    ],
-                    child: IconButton(
-                      visualDensity: const VisualDensity(
-                        horizontal: -4.0,
-                        vertical: -4.0,
-                      ),
-                      onPressed: onDelete,
-                      onLongPress: onDeleteAll != null
-                          ? () {
-                              if (extendedDeleteMenuController.isOpen) {
-                                extendedDeleteMenuController.close();
-                              } else {
-                                extendedDeleteMenuController.open();
-                              }
-                            }
-                          : null,
-                      icon: const Icon(Icons.close),
-                    ),
-                  ),
-                ?trailingChild,
-              ],
-            ),
-            Row(
-              children: [
-                const SizedBox(width: 6.0),
-                TabIcon(tabState: tabState, iconSize: 16.0),
-                const SizedBox(width: 6.0),
-                Expanded(
-                  child: Text(
-                    tabState.url.authority,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: modeTextColor),
-                  ),
-                ),
-                if (tabState.tabMode is PrivateTabMode ||
-                    tabState.tabMode is IsolatedTabMode) ...[
-                  const SizedBox(width: 6.0),
-                  SizedBox(
-                    height: 16,
-                    width: 24,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Positioned(
-                          top: -4,
-                          child: Icon(
-                            tabState.tabMode is IsolatedTabMode
-                                ? MdiIcons.snowflake
-                                : MdiIcons.dominoMask,
-                            color: tabState.tabMode is IsolatedTabMode
-                                ? appColors.isolatedTabTeal
-                                : appColors.privateTabPurple,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(width: 8.0),
-              ],
-            ),
-            const SizedBox(height: 6),
-            if (tabState.thumbnail != null && !tabState.thumbnail!.isDisposed)
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(14.0),
-                    bottomRight: Radius.circular(14.0),
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: RepaintBoundary(
+            // Thumbnail or icon area
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (tabState.thumbnail != null &&
+                      !tabState.thumbnail!.isDisposed)
+                    RepaintBoundary(
                       child: SafeRawImage(
                         image: tabState.thumbnail,
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  else
+                    Center(child: TabIcon(tabState: tabState, iconSize: 48)),
+                  // Close button overlay
+                  if (onDelete != null || onDeleteAll != null)
+                    Positioned(
+                      top: 6.0,
+                      right: 6.0,
+                      child: MenuAnchor(
+                        controller: extendedDeleteMenuController,
+                        builder: (context, controller, child) {
+                          return child!;
+                        },
+                        menuChildren: [
+                          MenuItemButton(
+                            onPressed: () {
+                              onDeleteAll?.call(tabState.url.host);
+                            },
+                            leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
+                            child: Text('Close all from ${tabState.url.host}'),
+                          ),
+                        ],
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: Material(
+                            color: colorScheme.surfaceContainerHighest
+                                .withAlpha(200),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(8.0),
+                            ),
+                            child: InkWell(
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(8.0),
+                              ),
+                              onTap: onDelete,
+                              onLongPress: onDeleteAll != null
+                                  ? () {
+                                      if (extendedDeleteMenuController.isOpen) {
+                                        extendedDeleteMenuController.close();
+                                      } else {
+                                        extendedDeleteMenuController.open();
+                                      }
+                                    }
+                                  : null,
+                              child: Icon(
+                                Icons.close,
+                                size: 16,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: Center(child: TabIcon(tabState: tabState, iconSize: 48)),
+                  if (trailingChild != null || isPinned)
+                    Positioned(
+                      top: 6.0,
+                      left: 6.0,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (trailingChild != null) trailingChild!,
+                          if (isPinned)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: trailingChild != null ? 4.0 : 0,
+                              ),
+                              child: SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: Material(
+                                  color: colorScheme.surfaceContainerHighest
+                                      .withAlpha(200),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(8.0),
+                                  ),
+                                  child: InkWell(
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(8.0),
+                                    ),
+                                    onTap: () async {
+                                      await ref
+                                          .read(
+                                            tabDataRepositoryProvider.notifier,
+                                          )
+                                          .setPinned(tabId, pinned: false);
+
+                                      if (context.mounted) {
+                                        ui_helper.showInfoMessage(
+                                          context,
+                                          'Tab unpinned',
+                                          action: SnackBarAction(
+                                            label: 'Undo',
+                                            onPressed: () async {
+                                              await ref
+                                                  .read(
+                                                    tabDataRepositoryProvider
+                                                        .notifier,
+                                                  )
+                                                  .setPinned(
+                                                    tabId,
+                                                    pinned: true,
+                                                  );
+                                            },
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Icon(
+                                      MdiIcons.pin,
+                                      size: 16,
+                                      color: colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
+            ),
+            // Bottom info band
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10.0,
+                vertical: 8.0,
+              ),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withAlpha(120),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tabState.titleOrAuthority,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: modeTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2.0),
+                  Row(
+                    children: [
+                      TabIcon(tabState: tabState, iconSize: 14.0),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          tabState.url.authority,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: subtitleColor,
+                          ),
+                        ),
+                      ),
+                      if (modeBadgeIcon != null) ...[
+                        const SizedBox(width: 4),
+                        Icon(modeBadgeIcon, color: modeBadgeColor, size: 14),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -282,9 +398,10 @@ class ListTabPreview extends HookConsumerWidget {
   final bool isActive;
 
   final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
   final VoidCallback? onDelete;
   final void Function(String host)? onDeleteAll;
+
+  final bool showPinBadge;
 
   final Widget? trailingChild;
 
@@ -292,9 +409,9 @@ class ListTabPreview extends HookConsumerWidget {
     required this.tabId,
     required this.isActive,
     this.onTap,
-    this.onLongPress,
     this.onDelete,
     this.onDeleteAll,
+    this.showPinBadge = false,
     this.trailingChild,
     super.key,
   });
@@ -302,6 +419,7 @@ class ListTabPreview extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final appColors = AppColors.of(context);
 
     final tabState =
@@ -318,17 +436,30 @@ class ListTabPreview extends HookConsumerWidget {
 
     final extendedDeleteMenuController = useMenuController();
 
+    // ignore: avoid_bool_literals_in_conditional_expressions
+    final isPinned = showPinBadge
+        ? ref.watch(
+            watchPinnedTabIdsProvider.select(
+              (v) => v.value?.contains(tabId) ?? false,
+            ),
+          )
+        : false;
+
     final leadingWidget = switch ((tabListShowFavicons, tabState.thumbnail)) {
-      (false, final thumbnail?) when !thumbnail.isDisposed => RepaintBoundary(
-        child: SafeRawImage(image: thumbnail, fit: BoxFit.fitHeight),
+      (false, final thumbnail?) when !thumbnail.isDisposed => ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+        child: RepaintBoundary(
+          child: SafeRawImage(image: thumbnail, fit: BoxFit.fitHeight),
+        ),
       ),
       _ => TabIcon(tabState: tabState, iconSize: 32),
     };
 
     final listBgColor = switch (tabState.tabMode) {
-      PrivateTabMode() => appColors.privateTabBackground,
-      IsolatedTabMode() => appColors.isolatedTabBackground,
-      RegularTabMode() => null,
+      PrivateTabMode() => appColors.privateTabBackground.withAlpha(80),
+      IsolatedTabMode() => appColors.isolatedTabBackground.withAlpha(80),
+      RegularTabMode() when isActive => colorScheme.primary.withAlpha(20),
+      RegularTabMode() => Colors.transparent,
     };
     final listTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
@@ -341,84 +472,128 @@ class ListTabPreview extends HookConsumerWidget {
       RegularTabMode() => (null, null),
     };
 
+    final subtitleColor = switch (tabState.tabMode) {
+      PrivateTabMode() => Color.lerp(
+        appColors.privateTabPurple,
+        Colors.white,
+        0.4,
+      )!,
+      IsolatedTabMode() => Color.lerp(
+        appColors.isolatedTabTeal,
+        Colors.white,
+        0.4,
+      )!,
+      RegularTabMode() => colorScheme.onSurfaceVariant,
+    };
+
+    const borderRadius = BorderRadius.all(Radius.circular(12.0));
+
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 4.0),
       decoration: BoxDecoration(
         color: listBgColor,
-        border: isActive ? Border.all(color: colorScheme.primary) : null,
-        borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+        borderRadius: borderRadius,
+        border: isActive
+            ? Border(left: BorderSide(color: colorScheme.primary, width: 4.0))
+            : null,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: ListTile(
-              key: ValueKey(tabState.id),
-              onTap: onTap,
-              onLongPress: onLongPress,
-              contentPadding: const EdgeInsets.only(left: 4),
-              leading: leadingWidget,
-              title: Text(
-                overflow: TextOverflow.ellipsis,
-                tabState.titleOrAuthority,
-                maxLines: 2,
-                style: listTextColor != null
-                    ? TextStyle(color: listTextColor)
-                    : null,
-              ),
-              subtitle: Row(
-                children: [
-                  if (modeBadgeIcon != null) ...[
-                    Icon(modeBadgeIcon, color: modeBadgeColor, size: 14),
-                    const SizedBox(width: 4),
-                  ],
-                  Expanded(
-                    child: UriBreadcrumb(
-                      uri: tabState.url,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: listTextColor),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (onDelete != null || onDeleteAll != null)
-                MenuAnchor(
-                  controller: extendedDeleteMenuController,
-                  builder: (context, controller, child) {
-                    return child!;
-                  },
-                  menuChildren: [
-                    MenuItemButton(
-                      onPressed: () {
-                        onDeleteAll?.call(tabState.url.host);
-                      },
-
-                      leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                      child: Text('Close all from ${tabState.url.host}'),
-                    ),
-                  ],
-                  child: IconButton(
-                    onPressed: onDelete,
-                    onLongPress: onDeleteAll != null
-                        ? () {
-                            if (extendedDeleteMenuController.isOpen) {
-                              extendedDeleteMenuController.close();
-                            } else {
-                              extendedDeleteMenuController.open();
-                            }
-                          }
-                        : null,
-                    icon: const Icon(Icons.close),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: borderRadius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: borderRadius,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12.0, top: 10.0, bottom: 10.0),
+            child: Row(
+              children: [
+                leadingWidget,
+                const SizedBox(width: 14.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        tabState.titleOrAuthority,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: listTextColor,
+                        ),
+                      ),
+                      const SizedBox(height: 3.0),
+                      Row(
+                        children: [
+                          if (isPinned) ...[
+                            Icon(
+                              MdiIcons.pin,
+                              color: colorScheme.primary,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          if (modeBadgeIcon != null) ...[
+                            Icon(
+                              modeBadgeIcon,
+                              color: modeBadgeColor,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                          Expanded(
+                            child: UriBreadcrumb(
+                              uri: tabState.url,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: subtitleColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ?trailingChild,
-            ],
+                if (onDelete != null || onDeleteAll != null)
+                  MenuAnchor(
+                    controller: extendedDeleteMenuController,
+                    builder: (context, controller, child) {
+                      return child!;
+                    },
+                    menuChildren: [
+                      MenuItemButton(
+                        onPressed: () {
+                          onDeleteAll?.call(tabState.url.host);
+                        },
+                        leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
+                        child: Text('Close all from ${tabState.url.host}'),
+                      ),
+                    ],
+                    child: IconButton(
+                      onPressed: onDelete,
+                      onLongPress: onDeleteAll != null
+                          ? () {
+                              if (extendedDeleteMenuController.isOpen) {
+                                extendedDeleteMenuController.close();
+                              } else {
+                                extendedDeleteMenuController.open();
+                              }
+                            }
+                          : null,
+                      icon: Icon(
+                        Icons.close,
+                        size: 20,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ?trailingChild,
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -530,6 +705,7 @@ class SingleGridTabPreview extends HookConsumerWidget {
         child: GridTabPreview(
           tabId: tabId,
           isActive: tabId == activeTabId,
+          showPinBadge: true,
           onTap: () async {
             if (tabId != activeTabId) {
               //Close first to avoid rebuilds
@@ -563,15 +739,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
               );
             }
           },
-          // onDoubleTap: () {
-          //   ref.read(overlayDialogControllerProvider.notifier).show(
-          //         TabActionDialog(
-          //           initialTab: tab,
-          //           onDismiss:
-          //               ref.read(overlayDialogControllerProvider.notifier).dismiss,
-          //         ),
-          //       );
-          // },
           onDelete: () async {
             onBeforeDelete?.call();
 
@@ -655,6 +822,7 @@ class SingleListTabPreview extends HookConsumerWidget {
         child: ListTabPreview(
           tabId: tabId,
           isActive: tabId == activeTabId,
+          showPinBadge: true,
           onTap: () async {
             if (tabId != activeTabId) {
               //Close first to avoid rebuilds
@@ -688,15 +856,6 @@ class SingleListTabPreview extends HookConsumerWidget {
               );
             }
           },
-          // onDoubleTap: () {
-          //   ref.read(overlayDialogControllerProvider.notifier).show(
-          //         TabActionDialog(
-          //           initialTab: tab,
-          //           onDismiss:
-          //               ref.read(overlayDialogControllerProvider.notifier).dismiss,
-          //         ),
-          //       );
-          // },
           onDelete: () async {
             onBeforeDelete?.call();
 
@@ -741,10 +900,16 @@ class SuggestedSingleGridTabPreview extends StatelessWidget {
         tabId: tabId,
         isActive: tabId == activeTabId,
         onTap: onTap,
-        trailingChild: const IconButton(
-          visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
-          icon: Icon(MdiIcons.creation),
-          onPressed: null,
+        trailingChild: SizedBox(
+          width: 28,
+          height: 28,
+          child: Material(
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withAlpha(200),
+            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+            child: const Icon(MdiIcons.creation, size: 16),
+          ),
         ),
       ),
     );

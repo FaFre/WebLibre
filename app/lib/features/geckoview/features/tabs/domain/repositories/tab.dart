@@ -22,6 +22,7 @@ import 'package:weblibre/features/geckoview/domain/entities/tab_container_select
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -112,6 +113,13 @@ class TabDataRepository extends _$TabDataRepository {
             );
       }
     }
+  }
+
+  Future<void> setPinned(String tabId, {required bool pinned}) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .setPinned(tabId, pinned: pinned);
   }
 
   Future<void> assignOrderKey(String tabId, String orderKey) {
@@ -233,6 +241,36 @@ class TabDataRepository extends _$TabDataRepository {
     return Map.fromEntries(
       results.map((pair) => MapEntry(pair.id, pair.parentId)),
     );
+  }
+
+  Future<List<String>> getFilteredTabIds(String? containerId) async {
+    final db = ref.read(tabDatabaseProvider);
+    final filterOptions = ref.read(tabViewFilterControllerProvider);
+    final tabStates = ref.read(tabStatesProvider);
+
+    // Get all tab IDs in this container from DB
+    final containerTabIds = await db.containerDao
+        .getContainerTabIds(containerId)
+        .get();
+
+    // Only keep tabs that exist in the engine
+    final candidateIds = containerTabIds
+        .where((id) => tabStates.containsKey(id))
+        .toList();
+
+    if (candidateIds.isEmpty) return const [];
+
+    if (!filterOptions.hasActiveFilter) return candidateIds;
+
+    // Only fetch timestamps when date filtering is active
+    final timestamps = filterOptions.effectiveDateRange != null
+        ? Map.fromEntries(await db.tabDao.getTabTimestamps().get())
+        : null;
+
+    return candidateIds.where((id) {
+      final state = tabStates[id];
+      return filterOptions.matchesTab(state?.tabMode, timestamps?[id]);
+    }).toList();
   }
 
   Future<int> deleteUnassignedTabsOlderThan(DateTime threshold) async {

@@ -58,7 +58,9 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
 
     final searchSuggestions = ref.watch(searchSuggestionsProvider());
     final searchHistory = ref.watch(searchHistoryProvider);
-    final expanded = ref.watch(persistedBoolProvider(PersistedBoolKey.searchSuggestionsExpanded));
+    final expanded = ref.watch(
+      persistedBoolProvider(PersistedBoolKey.searchSuggestionsExpanded),
+    );
 
     useOnListenableChange(searchTextController, () {
       ref
@@ -111,7 +113,11 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
                 padding: const EdgeInsets.only(top: 6.0),
                 child: IconButton(
                   onPressed: ref
-                      .read(persistedBoolProvider(PersistedBoolKey.searchSuggestionsExpanded).notifier)
+                      .read(
+                        persistedBoolProvider(
+                          PersistedBoolKey.searchSuggestionsExpanded,
+                        ).notifier,
+                      )
                       .toggle,
                   icon: Icon(expanded ? Icons.unfold_less : Icons.unfold_more),
                 ),

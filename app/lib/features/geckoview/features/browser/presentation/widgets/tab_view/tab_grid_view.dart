@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
@@ -141,6 +142,8 @@ class _TabGridView extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final canManualReorder = ref.watch(canManualTabReorderProvider);
+    final reorderEnabled = tabsReorderable && canManualReorder;
 
     final containerId = ref.watch(selectedContainerProvider);
 
@@ -154,7 +157,9 @@ class _TabGridView extends HookConsumerWidget {
       ),
     );
 
-    final tabSuggestionsEnabled = ref.watch(persistedBoolProvider(PersistedBoolKey.tabSuggestions));
+    final tabSuggestionsEnabled = ref.watch(
+      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
+    );
 
     final suggestedTabEntities = tabSuggestionsEnabled
         ? ref.watch(suggestedTabEntitiesProvider(containerId))
@@ -164,6 +169,9 @@ class _TabGridView extends HookConsumerWidget {
         filteredTabEntities.value.length +
         //Limit to 3 sugegstions for now
         math.min<int>(suggestedTabEntities.value.length, 3);
+    final displayItemCount = reorderEnabled
+        ? filteredTabEntities.value.length
+        : itemCount;
 
     final activeTab = ref.watch(selectedTabProvider);
 
@@ -239,34 +247,22 @@ class _TabGridView extends HookConsumerWidget {
         fadingSize: 5,
         controller: scrollController,
         builder: (context, controller) {
-          return !tabsReorderable
+          return !reorderEnabled
               ? _TabGrid(
                   key: ValueKey(crossAxisCount),
                   crossAxisCount: crossAxisCount,
-                  itemCount: itemCount,
+                  itemCount: displayItemCount,
                   scrollController: controller,
                   itemBuilder: (widget, _) {
                     if (widget is CustomDraggable) {
-                      return LongPressDraggable(
-                        feedback: Material(
-                          color: Colors
-                              .transparent, // removes white corners when having shadow
-                          child: Transform.scale(
-                            scale: 1.05,
-                            child: SizedBox(
-                              height: itemSize.height,
-                              width: itemSize.width,
-                              child: widget.child,
-                            ),
-                          ),
-                        ),
-                        data: widget.data,
-                        childWhenDragging: SizedBox(
-                          height: itemSize.height,
-                          width: itemSize.width,
-                        ),
-                        child: widget.child,
-                      );
+                      if (widget.data case final TabDragData dragData) {
+                        return TabContextMenuDraggable(
+                          tabId: dragData.tabId,
+                          data: dragData,
+                          feedbackSize: itemSize,
+                          child: widget.child,
+                        );
+                      }
                     }
 
                     return widget;
@@ -280,7 +276,7 @@ class _TabGridView extends HookConsumerWidget {
                   //Rebuild when cross axis count changes
                   key: ValueKey(crossAxisCount),
                   scrollController: controller,
-                  itemCount: itemCount,
+                  itemCount: displayItemCount,
                   onDragStarted: (index) {
                     ref.read(willAcceptDropProvider.notifier).clear();
                   },
@@ -307,25 +303,35 @@ class _TabGridView extends HookConsumerWidget {
                         .read(tabDataRepositoryProvider.notifier)
                         .getTabContainerId(tabId);
 
+                    var targetIndex = newIndex;
+                    if (targetIndex > oldIndex) {
+                      targetIndex -= 1;
+                    }
+
+                    targetIndex = targetIndex.clamp(
+                      0,
+                      filteredTabEntities.value.length - 1,
+                    );
+
                     final String key;
-                    if (newIndex <= 0) {
+                    if (targetIndex <= 0) {
                       key = await containerRepository.getLeadingOrderKey(
                         containerId,
                       );
-                    } else if (newIndex >=
+                    } else if (targetIndex >=
                         filteredTabEntities.value.length - 1) {
                       key = await containerRepository.getTrailingOrderKey(
                         containerId,
                       );
                     } else {
-                      if (newIndex < oldIndex) {
+                      if (targetIndex < oldIndex) {
                         key = (await containerRepository.getOrderKeyAfterTab(
-                          filteredTabEntities.value[newIndex - 1].tabId,
+                          filteredTabEntities.value[targetIndex - 1].tabId,
                           containerId,
                         ))!;
                       } else {
                         key = await containerRepository.getOrderKeyBeforeTab(
-                          filteredTabEntities.value[newIndex + 1].tabId,
+                          filteredTabEntities.value[targetIndex + 1].tabId,
                           containerId,
                         );
                       }
@@ -335,12 +341,30 @@ class _TabGridView extends HookConsumerWidget {
                         .read(tabDataRepositoryProvider.notifier)
                         .assignOrderKey(tabId, key);
                   },
-                  childBuilder: (itemBuilder) {
+                  childBuilder: (reorderableItemBuilder) {
                     return _TabGrid(
                       crossAxisCount: crossAxisCount,
-                      itemCount: itemCount,
+                      itemCount: displayItemCount,
                       scrollController: controller,
-                      itemBuilder: itemBuilder,
+                      itemBuilder: (widget, index) {
+                        // Wrap with context menu before passing to reorderable
+                        Widget wrapped = widget;
+                        if (widget is CustomDraggable) {
+                          if (widget.data case final TabDragData dragData) {
+                            wrapped = CustomDraggable(
+                              key: widget.key!,
+                              data: widget.data,
+                              child: TabContextMenuDraggable(
+                                tabId: dragData.tabId,
+                                feedbackSize: Size.zero,
+                                externalDrag: true,
+                                child: widget.child,
+                              ),
+                            );
+                          }
+                        }
+                        return reorderableItemBuilder(wrapped, index);
+                      },
                       suggestedContainerId: containerId,
                       filteredTabEntities: filteredTabEntities,
                       suggestedTabEntities: suggestedTabEntities,

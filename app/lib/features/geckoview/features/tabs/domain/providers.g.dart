@@ -525,6 +525,128 @@ final class WatchContainerTabsDataFamily extends $Family
   String toString() => r'watchContainerTabsDataProvider';
 }
 
+@ProviderFor(watchPinnedTabIds)
+final watchPinnedTabIdsProvider = WatchPinnedTabIdsProvider._();
+
+final class WatchPinnedTabIdsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Set<String>>,
+          Set<String>,
+          Stream<Set<String>>
+        >
+    with $FutureModifier<Set<String>>, $StreamProvider<Set<String>> {
+  WatchPinnedTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchPinnedTabIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchPinnedTabIdsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Set<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Set<String>> create(Ref ref) {
+    return watchPinnedTabIds(ref);
+  }
+}
+
+String _$watchPinnedTabIdsHash() => r'5623faf1a4d90185c718654f4172092e28dd1e54';
+
+@ProviderFor(watchTabTimestamps)
+final watchTabTimestampsProvider = WatchTabTimestampsProvider._();
+
+final class WatchTabTimestampsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, DateTime>>,
+          Map<String, DateTime>,
+          Stream<Map<String, DateTime>>
+        >
+    with
+        $FutureModifier<Map<String, DateTime>>,
+        $StreamProvider<Map<String, DateTime>> {
+  WatchTabTimestampsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchTabTimestampsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchTabTimestampsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, DateTime>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, DateTime>> create(Ref ref) {
+    return watchTabTimestamps(ref);
+  }
+}
+
+String _$watchTabTimestampsHash() =>
+    r'8b3eea3dded71795f80c607117978bbec1de7cff';
+
+@ProviderFor(watchTabOrderKeys)
+final watchTabOrderKeysProvider = WatchTabOrderKeysProvider._();
+
+final class WatchTabOrderKeysProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, String>>,
+          Map<String, String>,
+          Stream<Map<String, String>>
+        >
+    with
+        $FutureModifier<Map<String, String>>,
+        $StreamProvider<Map<String, String>> {
+  WatchTabOrderKeysProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchTabOrderKeysProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchTabOrderKeysHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, String>> create(Ref ref) {
+    return watchTabOrderKeys(ref);
+  }
+}
+
+String _$watchTabOrderKeysHash() => r'675ef0d1b1c5445face8d6ab727507ca1a5e2c44';
+
 @ProviderFor(watchContainerData)
 final watchContainerDataProvider = WatchContainerDataFamily._();
 

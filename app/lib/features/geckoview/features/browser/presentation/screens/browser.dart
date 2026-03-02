@@ -291,7 +291,6 @@ class BrowserScreen extends HookConsumerWidget {
       ),
     );
 
-
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
         overlayController.show();
@@ -872,7 +871,10 @@ class _Browser extends HookConsumerWidget {
                 }
 
                 // Dismiss modal routes (e.g. showModalBottomSheet)
-                final rootNavigator = Navigator.of(context, rootNavigator: true);
+                final rootNavigator = Navigator.of(
+                  context,
+                  rootNavigator: true,
+                );
                 if (rootNavigator.canPop()) {
                   rootNavigator.pop();
                   return true;

@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
@@ -147,7 +148,7 @@ class _TabListView extends HookConsumerWidget {
     required this.onClose,
   });
 
-  static const _itemHeight = 80.0;
+  static const _itemHeight = 86.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -204,6 +205,8 @@ class _TabListView extends HookConsumerWidget {
 
   Widget _buildLocalTabsView(BuildContext context, WidgetRef ref) {
     final containerId = ref.watch(selectedContainerProvider);
+    final canManualReorder = ref.watch(canManualTabReorderProvider);
+    final reorderEnabled = tabsReorderable && canManualReorder;
 
     final filteredTabEntities = ref.watch(
       seamlessFilteredTabEntitiesProvider(
@@ -215,7 +218,9 @@ class _TabListView extends HookConsumerWidget {
       ),
     );
 
-    final tabSuggestionsEnabled = ref.watch(persistedBoolProvider(PersistedBoolKey.tabSuggestions));
+    final tabSuggestionsEnabled = ref.watch(
+      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
+    );
 
     final suggestedTabEntities = tabSuggestionsEnabled
         ? ref.watch(suggestedTabEntitiesProvider(containerId))
@@ -225,6 +230,9 @@ class _TabListView extends HookConsumerWidget {
         filteredTabEntities.value.length +
         //Limit to 3 sugegstions for now
         math.min<int>(suggestedTabEntities.value.length, 3);
+    final displayItemCount = reorderEnabled
+        ? filteredTabEntities.value.length
+        : itemCount;
 
     final activeTab = ref.watch(selectedTabProvider);
 
@@ -282,11 +290,11 @@ class _TabListView extends HookConsumerWidget {
         fadingSize: 5,
         controller: scrollController,
         builder: (context, controller) {
-          return !tabsReorderable
+          return !reorderEnabled
               ? ListView.builder(
                   padding: EdgeInsets.zero,
                   controller: scrollController,
-                  itemCount: itemCount,
+                  itemCount: displayItemCount,
                   itemExtent: _itemHeight,
                   itemBuilder: (context, index) {
                     final TabEntity entity;
@@ -322,29 +330,23 @@ class _TabListView extends HookConsumerWidget {
                     return TabDropTarget(
                       targetTabId: entity.tabId,
                       enabled: suggestedId == null,
-                      child: LongPressDraggable(
-                        feedback: Material(
-                          color: Colors
-                              .transparent, // removes white corners when having shadow
-                          child: Transform.scale(
-                            scale: 1.05,
-                            child: SizedBox(
-                              height: _itemHeight,
-                              width: MediaQuery.of(context).size.width,
+                      child: tab.data is TabDragData
+                          ? TabContextMenuDraggable(
+                              tabId: (tab.data! as TabDragData).tabId,
+                              data: tab.data! as TabDragData,
+                              feedbackSize: Size(
+                                MediaQuery.of(context).size.width,
+                                _itemHeight,
+                              ),
                               child: tab.child,
-                            ),
-                          ),
-                        ),
-                        data: tab.data,
-                        childWhenDragging: const SizedBox(height: _itemHeight),
-                        child: tab.child,
-                      ),
+                            )
+                          : tab.child,
                     );
                   },
                 )
               : ReorderableListView.builder(
                   scrollController: controller,
-                  itemCount: itemCount,
+                  itemCount: displayItemCount,
                   itemExtent: _itemHeight,
                   onReorderStart: (index) {
                     ref.read(willAcceptDropProvider.notifier).clear();
@@ -364,25 +366,35 @@ class _TabListView extends HookConsumerWidget {
                         .read(tabDataRepositoryProvider.notifier)
                         .getTabContainerId(tabId);
 
+                    var targetIndex = newIndex;
+                    if (targetIndex > oldIndex) {
+                      targetIndex -= 1;
+                    }
+
+                    targetIndex = targetIndex.clamp(
+                      0,
+                      filteredTabEntities.value.length - 1,
+                    );
+
                     final String key;
-                    if (newIndex <= 0) {
+                    if (targetIndex <= 0) {
                       key = await containerRepository.getLeadingOrderKey(
                         containerId,
                       );
-                    } else if (newIndex >=
+                    } else if (targetIndex >=
                         filteredTabEntities.value.length - 1) {
                       key = await containerRepository.getTrailingOrderKey(
                         containerId,
                       );
                     } else {
-                      if (newIndex < oldIndex) {
+                      if (targetIndex < oldIndex) {
                         key = (await containerRepository.getOrderKeyAfterTab(
-                          filteredTabEntities.value[newIndex - 1].tabId,
+                          filteredTabEntities.value[targetIndex - 1].tabId,
                           containerId,
                         ))!;
                       } else {
                         key = await containerRepository.getOrderKeyBeforeTab(
-                          filteredTabEntities.value[newIndex + 1].tabId,
+                          filteredTabEntities.value[targetIndex + 1].tabId,
                           containerId,
                         );
                       }
@@ -393,17 +405,20 @@ class _TabListView extends HookConsumerWidget {
                         .assignOrderKey(tabId, key);
                   },
                   itemBuilder: (context, index) {
-                    final CustomDraggable tab;
-
                     if (index < filteredTabEntities.value.length) {
                       final entity = filteredTabEntities.value[index];
-                      tab = CustomDraggable(
+                      return CustomDraggable(
                         key: Key(entity.tabId),
                         data: TabDragData(entity.tabId),
-                        child: _TabDraggable(
-                          entity: entity,
-                          onClose: onClose,
-                          height: _itemHeight,
+                        child: TabContextMenuDraggable(
+                          tabId: entity.tabId,
+                          feedbackSize: Size.zero,
+                          externalDrag: true,
+                          child: _TabDraggable(
+                            entity: entity,
+                            onClose: onClose,
+                            height: _itemHeight,
+                          ),
                         ),
                       );
                     } else {
@@ -411,7 +426,7 @@ class _TabListView extends HookConsumerWidget {
                           index - filteredTabEntities.value.length;
                       final entity = suggestedTabEntities.value[suggestedIndex];
 
-                      tab = CustomDraggable(
+                      return CustomDraggable(
                         key: Key('suggested_${entity.tabId}'),
                         child: _TabDraggable(
                           entity: entity,
@@ -421,25 +436,6 @@ class _TabListView extends HookConsumerWidget {
                         ),
                       );
                     }
-
-                    // return LongPressDraggable(
-                    //   key: tab.key,
-                    //   feedback: Material(
-                    //     color: Colors
-                    //         .transparent, // removes white corners when having shadow
-                    //     child: Transform.scale(
-                    //       scale: 1.05,
-                    //       child: SizedBox(
-                    //         height: _itemHeight,
-                    //         width: MediaQuery.of(context).size.width,
-                    //         child: tab.child,
-                    //       ),
-                    //     ),
-                    //   ),
-                    //   data: tab.data,
-                    //   child: tab.child,
-                    // );
-                    return tab;
                   },
                 );
         },

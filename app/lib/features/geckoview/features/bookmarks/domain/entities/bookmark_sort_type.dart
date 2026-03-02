@@ -17,18 +17,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:weblibre/core/sort_field.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 
 enum BookmarkSortType {
-  manual('Default'),
-  titleAsc('Title A-Z'),
-  titleDesc('Title Z-A'),
-  urlAsc('URL A-Z'),
-  dateAddedDesc('Newest First');
+  manual('Default', null),
+  titleAsc('Title A-Z', SortField.titleAsc),
+  titleDesc('Title Z-A', SortField.titleDesc),
+  urlAsc('URL A-Z', SortField.urlAsc),
+  urlDesc('URL Z-A', SortField.urlDesc),
+  dateAddedDesc('Newest First', SortField.dateDesc),
+  dateAddedAsc('Oldest First', SortField.dateAsc);
 
   final String label;
+  final SortField? sortField;
 
-  const BookmarkSortType(this.label);
+  const BookmarkSortType(this.label, this.sortField);
 }
 
 int compareBookmarkItems(
@@ -36,21 +40,24 @@ int compareBookmarkItems(
   BookmarkItem b,
   BookmarkSortType sort,
 ) {
-  return switch (sort) {
-    BookmarkSortType.manual => 0,
-    BookmarkSortType.titleAsc => a.title.toLowerCase().compareTo(
+  final sortField = sort.sortField;
+  if (sortField == null) {
+    return 0;
+  }
+
+  return switch (sortField) {
+    SortField.titleAsc => a.title.toLowerCase().compareTo(
       b.title.toLowerCase(),
     ),
-    BookmarkSortType.titleDesc => b.title.toLowerCase().compareTo(
+    SortField.titleDesc => b.title.toLowerCase().compareTo(
       a.title.toLowerCase(),
     ),
-    BookmarkSortType.urlAsc => _compareByUrl(a, b),
-    BookmarkSortType.dateAddedDesc => b.dateAdded.compareTo(a.dateAdded),
+    SortField.urlAsc => _urlKey(a).compareTo(_urlKey(b)),
+    SortField.urlDesc => _urlKey(b).compareTo(_urlKey(a)),
+    SortField.dateAsc => a.dateAdded.compareTo(b.dateAdded),
+    SortField.dateDesc => b.dateAdded.compareTo(a.dateAdded),
   };
 }
 
-int _compareByUrl(BookmarkItem a, BookmarkItem b) {
-  final aUrl = a is BookmarkEntry ? a.url.toString() : a.title.toLowerCase();
-  final bUrl = b is BookmarkEntry ? b.url.toString() : b.title.toLowerCase();
-  return aUrl.compareTo(bUrl);
-}
+String _urlKey(BookmarkItem item) =>
+    item is BookmarkEntry ? item.url.toString() : item.title.toLowerCase();

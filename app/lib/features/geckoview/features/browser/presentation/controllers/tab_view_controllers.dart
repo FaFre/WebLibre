@@ -22,8 +22,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
 part 'tab_view_controllers.g.dart';
@@ -60,6 +62,46 @@ class TabsViewModeController extends _$TabsViewModeController {
     );
 
     return stateOrNull ?? TabsViewMode.list;
+  }
+}
+
+@Riverpod(keepAlive: true)
+@JsonPersist()
+class TabViewFilterController extends _$TabViewFilterController {
+  void setTabTypeFilter(TabTypeFilter filter) {
+    state = state.copyWith.tabTypeFilter(filter);
+  }
+
+  void setSortType(TabSortType sort) {
+    state = state.copyWith.sortType(sort);
+  }
+
+  void setSortPinnedFirst(bool value) {
+    state = state.copyWith(sortPinnedFirst: value);
+  }
+
+  void setDateRange(DateTimeRange<DateTime>? range) {
+    // ignore: avoid_redundant_argument_values
+    state = state.copyWith(dateRange: range, quickInterval: null);
+  }
+
+  void setQuickInterval(TabQuickInterval? interval) {
+    // ignore: avoid_redundant_argument_values
+    state = state.copyWith(quickInterval: interval, dateRange: null);
+  }
+
+  void reset() {
+    state = TabViewFilterOptions.withDefaults();
+  }
+
+  @override
+  TabViewFilterOptions build() {
+    persist(
+      ref.watch(riverpodDatabaseStorageProvider),
+      key: 'TabViewFilterOptions',
+    );
+
+    return stateOrNull ?? TabViewFilterOptions.withDefaults();
   }
 }
 

@@ -25,6 +25,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
@@ -34,6 +35,8 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/bookmark_all_dialog.dart';
@@ -220,6 +223,7 @@ class TabViewHeader extends HookConsumerWidget {
 
     final viewModeMenuController = useMenuController();
     final tabsActionMenuController = useMenuController();
+    final filterMenuController = useMenuController();
 
     final hasSearchText = useListenableSelector(
       searchTextController,
@@ -248,6 +252,39 @@ class TabViewHeader extends HookConsumerWidget {
         (scope) => scope == TabsTrayScope.synced,
       ),
     );
+    final canManualTabReorder = ref.watch(canManualTabReorderProvider);
+
+    final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
+
+    final canManualReorder =
+        !isSyncedScope &&
+        tabsViewMode != TabsViewMode.tree &&
+        canManualTabReorder;
+
+    final didShowReorderDisabledInfo = useRef(false);
+
+    useEffect(() {
+      if (tabsReorderable && !canManualReorder) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(tabsReorderableControllerProvider.notifier).hide();
+
+          if (!didShowReorderDisabledInfo.value) {
+            didShowReorderDisabledInfo.value = true;
+
+            if (context.mounted) {
+              ui_helper.showInfoMessage(
+                context,
+                'Tab reordering is only available in default manual mode',
+              );
+            }
+          }
+        });
+      } else {
+        didShowReorderDisabledInfo.value = false;
+      }
+
+      return null;
+    }, [tabsReorderable, canManualReorder]);
 
     useOnListenableChange(searchTextController, () async {
       if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.preview))) {
@@ -269,307 +306,600 @@ class TabViewHeader extends HookConsumerWidget {
             children: [
               if (!searchMode.value)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(MdiIcons.tabSearch),
-                          iconSize: 18,
-                          padding: EdgeInsets.zero,
-                          tooltip: 'Search inside tabs',
-                          onPressed: () {
-                            switch (ref.read(tabsViewModeControllerProvider)) {
-                              case TabsViewMode.tree:
-                              case TabsViewMode.list:
-                                break;
-                              case TabsViewMode.grid:
+                    if (tabsViewMode != TabsViewMode.tree)
+                      IconButton(
+                        icon: const Icon(MdiIcons.tabSearch),
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        tooltip: 'Search inside tabs',
+                        onPressed: () {
+                          searchMode.value = true;
+                          searchTextFocus.requestFocus();
+                        },
+                      ),
+                    if (!isSyncedScope && tabsViewMode != TabsViewMode.tree)
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final filterOptions = ref.watch(
+                            tabViewFilterControllerProvider,
+                          );
+                          final hasActiveFilter = filterOptions.hasActiveFilter;
+
+                          return MenuAnchor(
+                            controller: filterMenuController,
+                            consumeOutsideTap: true,
+                            menuChildren: [
+                              // Tab type filter
+                              SubmenuButton(
+                                leadingIcon: const Icon(MdiIcons.tabUnselected),
+                                menuChildren: TabTypeFilter.values.map((type) {
+                                  final appColors = AppColors.of(context);
+                                  final (icon, color) = switch (type) {
+                                    TabTypeFilter.all => (
+                                      MdiIcons.tabUnselected,
+                                      null,
+                                    ),
+                                    TabTypeFilter.regularOnly => (
+                                      MdiIcons.tab,
+                                      null,
+                                    ),
+                                    TabTypeFilter.privateOnly => (
+                                      MdiIcons.dominoMask,
+                                      appColors.privateTabPurple,
+                                    ),
+                                    TabTypeFilter.isolatedOnly => (
+                                      MdiIcons.snowflake,
+                                      appColors.isolatedTabTeal,
+                                    ),
+                                  };
+
+                                  return MenuItemButton(
+                                    leadingIcon: Icon(
+                                      filterOptions.tabTypeFilter == type
+                                          ? Icons.radio_button_checked
+                                          : Icons.radio_button_unchecked,
+                                    ),
+                                    trailingIcon: Icon(icon, color: color),
+                                    child: Text(type.label),
+                                    onPressed: () {
+                                      ref
+                                          .read(
+                                            tabViewFilterControllerProvider
+                                                .notifier,
+                                          )
+                                          .setTabTypeFilter(type);
+                                    },
+                                  );
+                                }).toList(),
+                                child: const Text('Tab Type'),
+                              ),
+                              // Sort
+                              SubmenuButton(
+                                leadingIcon: const Icon(Icons.sort),
+                                menuChildren: [
+                                  ...TabSortType.values.map(
+                                    (sort) => MenuItemButton(
+                                      leadingIcon: Icon(
+                                        filterOptions.sortType == sort
+                                            ? Icons.radio_button_checked
+                                            : Icons.radio_button_unchecked,
+                                      ),
+                                      child: Text(sort.label),
+                                      onPressed: () {
+                                        ref
+                                            .read(
+                                              tabViewFilterControllerProvider
+                                                  .notifier,
+                                            )
+                                            .setSortType(sort);
+                                      },
+                                    ),
+                                  ),
+                                  const Divider(),
+                                  MenuItemButton(
+                                    leadingIcon: Icon(
+                                      filterOptions.sortPinnedFirst ||
+                                              filterOptions
+                                                      .sortType
+                                                      .sortField ==
+                                                  null
+                                          ? Icons.check_box
+                                          : Icons.check_box_outline_blank,
+                                    ),
+                                    onPressed:
+                                        filterOptions.sortType.sortField == null
+                                        ? null
+                                        : () {
+                                            ref
+                                                .read(
+                                                  tabViewFilterControllerProvider
+                                                      .notifier,
+                                                )
+                                                .setSortPinnedFirst(
+                                                  !filterOptions
+                                                      .sortPinnedFirst,
+                                                );
+                                          },
+                                    child: const Text('Sort Pinned First'),
+                                  ),
+                                ],
+                                child: const Text('Sort'),
+                              ),
+                              const Divider(),
+                              // Date range picker
+                              MenuItemButton(
+                                closeOnActivate: false,
+                                leadingIcon: const Icon(MdiIcons.calendarRange),
+                                trailingIcon: filterOptions.dateRange != null
+                                    ? IconButton(
+                                        onPressed: () {
+                                          ref
+                                              .read(
+                                                tabViewFilterControllerProvider
+                                                    .notifier,
+                                              )
+                                              .setDateRange(null);
+                                        },
+                                        icon: const Icon(Icons.clear),
+                                      )
+                                    : null,
+                                child: filterOptions.dateRange != null
+                                    ? Text(
+                                        '${DateFormat.yMd().format(filterOptions.dateRange!.start)} - ${DateFormat.yMd().format(filterOptions.dateRange!.end)}',
+                                      )
+                                    : const Text('Filter Date'),
+                                onPressed: () async {
+                                  final range = await showDateRangePicker(
+                                    context: context,
+                                    initialDateRange: filterOptions.dateRange,
+                                    firstDate: DateTime.now().subtract(
+                                      const Duration(days: 365),
+                                    ),
+                                    lastDate: DateTime.now(),
+                                  );
+                                  if (range != null) {
+                                    ref
+                                        .read(
+                                          tabViewFilterControllerProvider
+                                              .notifier,
+                                        )
+                                        .setDateRange(
+                                          DateTimeRange(
+                                            start: range.start,
+                                            end: range.end.add(
+                                              const Duration(days: 1) -
+                                                  const Duration(
+                                                    milliseconds: 1,
+                                                  ),
+                                            ),
+                                          ),
+                                        );
+                                  }
+                                },
+                              ),
+                              // Quick intervals
+                              SubmenuButton(
+                                leadingIcon: const Icon(MdiIcons.clockOutline),
+                                menuChildren: TabQuickInterval.values
+                                    .map(
+                                      (interval) => MenuItemButton(
+                                        leadingIcon: Icon(
+                                          filterOptions.quickInterval ==
+                                                  interval
+                                              ? Icons.radio_button_checked
+                                              : Icons.radio_button_unchecked,
+                                        ),
+                                        child: Text(interval.label),
+                                        onPressed: () {
+                                          ref
+                                              .read(
+                                                tabViewFilterControllerProvider
+                                                    .notifier,
+                                              )
+                                              .setQuickInterval(
+                                                filterOptions.quickInterval ==
+                                                        interval
+                                                    ? null
+                                                    : interval,
+                                              );
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                                child: const Text('Quick Interval'),
+                              ),
+                              const Divider(),
+                              // Reset
+                              MenuItemButton(
+                                leadingIcon: const Icon(MdiIcons.restore),
+                                child: const Text('Reset Filter'),
+                                onPressed: () {
+                                  ref
+                                      .read(
+                                        tabViewFilterControllerProvider
+                                            .notifier,
+                                      )
+                                      .reset();
+                                },
+                              ),
+                            ],
+                            child: IconButton(
+                              tooltip: 'Filter & Sort',
+                              onPressed: () {
+                                if (filterMenuController.isOpen) {
+                                  filterMenuController.close();
+                                } else {
+                                  filterMenuController.open();
+                                }
+                              },
+                              icon: Badge(
+                                isLabelVisible: hasActiveFilter,
+                                child: const Icon(MdiIcons.filter, size: 18),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    const Spacer(),
+                    MenuAnchor(
+                      controller: viewModeMenuController,
+                      menuChildren: TabsViewMode.values
+                          .map(
+                            (mode) => MenuItemButton(
+                              leadingIcon: Icon(mode.icon),
+                              child: Text(mode.label),
+                              onPressed: () {
+                                if (mode == TabsViewMode.tree) {
+                                  searchTextController.clear();
+                                  searchMode.value = false;
+                                }
+
                                 ref
                                     .read(
                                       tabsViewModeControllerProvider.notifier,
                                     )
-                                    .set(TabsViewMode.list);
-                            }
+                                    .set(mode);
+                              },
+                            ),
+                          )
+                          .toList(),
+                      child: IconButton(
+                        tooltip: 'Change view mode',
+                        onPressed: isSyncedScope
+                            ? null
+                            : () {
+                                if (viewModeMenuController.isOpen) {
+                                  viewModeMenuController.close();
+                                } else {
+                                  viewModeMenuController.open();
+                                }
+                              },
+                        icon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(tabsViewMode.icon, size: 18),
+                            const Icon(Icons.arrow_drop_down, size: 18),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (enableAiFeatures &&
+                        switch (tabsViewMode) {
+                          TabsViewMode.list || TabsViewMode.grid => true,
+                          TabsViewMode.tree => false,
+                        })
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final tabSuggestionsEnabled = ref.watch(
+                            persistedBoolProvider(
+                              PersistedBoolKey.tabSuggestions,
+                            ),
+                          );
+                          final downloadProgress = ref.watch(
+                            mlDownloadStateProvider,
+                          );
 
-                            searchMode.value = true;
-                            searchTextFocus.requestFocus();
-                          },
-                        ),
-                        const SizedBox(
-                          height: 32,
-                          child: VerticalDivider(indent: 4, endIndent: 4),
-                        ),
-                        MenuAnchor(
-                          controller: viewModeMenuController,
-                          menuChildren: TabsViewMode.values
-                              .map(
-                                (mode) => MenuItemButton(
-                                  leadingIcon: Icon(mode.icon),
-                                  child: Text(mode.label),
-                                  onPressed: () {
+                          return Badge(
+                            isLabelVisible: downloadProgress != null,
+                            offset: const Offset(-2, 2),
+                            label: downloadProgress != null
+                                ? Text(
+                                    '${downloadProgress.progress.toInt()}%',
+                                    style: const TextStyle(fontSize: 10),
+                                  )
+                                : null,
+                            child: IconButton.filledTonal(
+                              icon: const Icon(MdiIcons.imageAutoAdjust),
+                              isSelected: tabSuggestionsEnabled,
+                              iconSize: 18,
+                              padding: EdgeInsets.zero,
+                              tooltip: downloadProgress != null
+                                  ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
+                                  : tabSuggestionsEnabled
+                                  ? 'Disable AI tab suggestions'
+                                  : 'Enable AI tab suggestions',
+                              onPressed: () async {
+                                if (!tabSuggestionsEnabled) {
+                                  final result =
+                                      await showEnableAiTabSuggestionsDialog(
+                                        context,
+                                      );
+
+                                  if (result == true) {
                                     ref
                                         .read(
-                                          tabsViewModeControllerProvider
-                                              .notifier,
+                                          persistedBoolProvider(
+                                            PersistedBoolKey.tabSuggestions,
+                                          ).notifier,
                                         )
-                                        .set(mode);
-                                  },
-                                ),
-                              )
-                              .toList(),
-                          child: IconButton(
-                            tooltip: 'Change view mode',
-                            onPressed: isSyncedScope
-                                ? null
-                                : () {
-                                    if (viewModeMenuController.isOpen) {
-                                      viewModeMenuController.close();
-                                    } else {
-                                      viewModeMenuController.open();
-                                    }
-                                  },
-                            icon: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(tabsViewMode.icon, size: 18),
-                                const Icon(Icons.arrow_drop_down, size: 18),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (enableAiFeatures &&
-                            switch (tabsViewMode) {
-                              TabsViewMode.list || TabsViewMode.grid => true,
-                              TabsViewMode.tree => false,
-                            })
-                          Consumer(
-                            builder: (context, ref, child) {
-                              final tabSuggestionsEnabled = ref.watch(
-                                persistedBoolProvider(PersistedBoolKey.tabSuggestions),
-                              );
-                              final downloadProgress = ref.watch(
-                                mlDownloadStateProvider,
-                              );
-
-                              return Badge(
-                                isLabelVisible: downloadProgress != null,
-                                offset: const Offset(-2, 2),
-                                label: downloadProgress != null
-                                    ? Text(
-                                        '${downloadProgress.progress.toInt()}%',
-                                        style: const TextStyle(fontSize: 10),
+                                        .set(true);
+                                  }
+                                } else {
+                                  ref
+                                      .read(
+                                        persistedBoolProvider(
+                                          PersistedBoolKey.tabSuggestions,
+                                        ).notifier,
                                       )
-                                    : null,
-                                child: IconButton.filledTonal(
-                                  icon: const Icon(MdiIcons.imageAutoAdjust),
-                                  isSelected: tabSuggestionsEnabled,
-                                  iconSize: 18,
-                                  padding: EdgeInsets.zero,
-                                  tooltip: downloadProgress != null
-                                      ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
-                                      : tabSuggestionsEnabled
-                                      ? 'Disable AI tab suggestions'
-                                      : 'Enable AI tab suggestions',
-                                  onPressed: () async {
-                                    if (!tabSuggestionsEnabled) {
+                                      .set(false);
+                                }
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    if (switch (tabsViewMode) {
+                      TabsViewMode.list || TabsViewMode.grid => true,
+                      TabsViewMode.tree => false,
+                    })
+                      IconButton.filledTonal(
+                        icon: const Icon(Icons.swap_vert),
+                        isSelected: tabsReorderable,
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        tooltip: tabsReorderable
+                            ? 'Disable reordering mode'
+                            : canManualReorder
+                            ? 'Enable reordering mode'
+                            : 'Reordering requires default manual mode',
+                        onPressed: canManualReorder
+                            ? () {
+                                final wasEnabled = tabsReorderable;
+
+                                ref
+                                    .read(
+                                      tabsReorderableControllerProvider
+                                          .notifier,
+                                    )
+                                    .toggle();
+
+                                // Show info when enabling reordering
+                                if (!wasEnabled && context.mounted) {
+                                  ui_helper.showInfoMessage(
+                                    context,
+                                    'Drag and drop tabs to reorder them',
+                                  );
+                                }
+                              }
+                            : null,
+                      ),
+                    MenuAnchor(
+                      controller: tabsActionMenuController,
+                      menuChildren: [
+                        SubmenuButton(
+                          leadingIcon: const Icon(MdiIcons.closeCircle),
+                          menuChildren: [
+                            MenuItemButton(
+                              leadingIcon: const Icon(MdiIcons.closeCircle),
+                              onPressed: isSyncedScope
+                                  ? null
+                                  : () async {
                                       final result =
-                                          await showEnableAiTabSuggestionsDialog(
+                                          await showCloseAllTabsDialog(context);
+
+                                      if (result == true) {
+                                        final count = await ref
+                                            .read(
+                                              tabDataRepositoryProvider
+                                                  .notifier,
+                                            )
+                                            .closeContainerTabs(
+                                              selectedContainerId,
+                                            );
+
+                                        if (context.mounted) {
+                                          ui_helper.showTabUndoClose(
+                                            context,
+                                            ref
+                                                .read(
+                                                  tabRepositoryProvider
+                                                      .notifier,
+                                                )
+                                                .undoClose,
+                                            count: count.length,
+                                          );
+                                        }
+                                      }
+                                    },
+                              child: const Text('All Tabs'),
+                            ),
+                            MenuItemButton(
+                              leadingIcon: Icon(
+                                MdiIcons.dominoMask,
+                                color: AppColors.of(context).privateTabPurple,
+                              ),
+                              onPressed: isSyncedScope
+                                  ? null
+                                  : () async {
+                                      final result =
+                                          await showCloseAllPrivateTabsDialog(
                                             context,
                                           );
 
                                       if (result == true) {
-                                        ref
+                                        final count = await ref
                                             .read(
-                                              persistedBoolProvider(PersistedBoolKey.tabSuggestions)
+                                              tabDataRepositoryProvider
                                                   .notifier,
                                             )
-                                            .set(true);
-                                      }
-                                    } else {
-                                      ref
-                                          .read(
-                                            persistedBoolProvider(PersistedBoolKey.tabSuggestions)
-                                                .notifier,
-                                          )
-                                          .set(false);
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        if (switch (tabsViewMode) {
-                          TabsViewMode.list || TabsViewMode.grid => true,
-                          TabsViewMode.tree => false,
-                        })
-                          Consumer(
-                            builder: (context, ref, child) {
-                              final tabsReorderabe = ref.watch(
-                                tabsReorderableControllerProvider,
-                              );
+                                            .closeContainerTabs(
+                                              selectedContainerId,
+                                              includeRegular: false,
+                                              includeIsolated: false,
+                                            );
 
-                              return IconButton.filledTonal(
-                                icon: const Icon(Icons.swap_vert),
-                                isSelected: tabsReorderabe,
-                                iconSize: 18,
-                                padding: EdgeInsets.zero,
-                                tooltip: tabsReorderabe
-                                    ? 'Disable reordering mode'
-                                    : 'Enable reordering mode',
-                                onPressed: () {
-                                  final wasEnabled = tabsReorderabe;
-
-                                  ref
-                                      .read(
-                                        tabsReorderableControllerProvider
-                                            .notifier,
-                                      )
-                                      .toggle();
-
-                                  // Show info when enabling reordering
-                                  if (!wasEnabled && context.mounted) {
-                                    ui_helper.showInfoMessage(
-                                      context,
-                                      'Drag and drop tabs to reorder them',
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                          ),
-                      ],
-                    ),
-                    MenuAnchor(
-                      controller: tabsActionMenuController,
-                      menuChildren: [
-                        MenuItemButton(
-                          leadingIcon: const Icon(MdiIcons.closeCircle),
-                          onPressed: isSyncedScope
-                              ? null
-                              : () async {
-                                  final result = await showCloseAllTabsDialog(
-                                    context,
-                                  );
-
-                                  if (result == true) {
-                                    final count = await ref
-                                        .read(
-                                          tabDataRepositoryProvider.notifier,
-                                        )
-                                        .closeContainerTabs(
-                                          selectedContainerId,
-                                        );
-
-                                    if (context.mounted) {
-                                      ui_helper.showTabUndoClose(
-                                        context,
-                                        ref
-                                            .read(
-                                              tabRepositoryProvider.notifier,
-                                            )
-                                            .undoClose,
-                                        count: count.length,
-                                      );
-                                    }
-                                  }
-                                },
-                          child: const Text('Close All Tabs'),
-                        ),
-                        MenuItemButton(
-                          leadingIcon: const Icon(MdiIcons.incognitoCircleOff),
-                          onPressed: isSyncedScope
-                              ? null
-                              : () async {
-                                  final result =
-                                      await showCloseAllPrivateTabsDialog(
-                                        context,
-                                      );
-
-                                  if (result == true) {
-                                    final count = await ref
-                                        .read(
-                                          tabDataRepositoryProvider.notifier,
-                                        )
-                                        .closeContainerTabs(
-                                          selectedContainerId,
-                                          includeRegular: false,
-                                          includeIsolated: false,
-                                        );
-
-                                    if (context.mounted) {
-                                      ui_helper.showTabUndoClose(
-                                        context,
-                                        ref
-                                            .read(
-                                              tabRepositoryProvider.notifier,
-                                            )
-                                            .undoClose,
-                                        count: count.length,
-                                      );
-                                    }
-                                  }
-                                },
-                          child: const Text('Close Private Tabs'),
-                        ),
-                        if (showIsolatedTabUi)
-                          MenuItemButton(
-                            leadingIcon: Icon(
-                              MdiIcons.snowflake,
-                              color: AppColors.of(context).isolatedTabTeal,
-                            ),
-                            onPressed: isSyncedScope
-                                ? null
-                                : () async {
-                                    // Count distinct isolation groups that will be destroyed
-                                    final allStates = ref.read(
-                                      tabStatesProvider,
-                                    );
-                                    final isolatedContextIds = allStates.values
-                                        .where(
-                                          (s) =>
-                                              s.tabMode is IsolatedTabMode &&
-                                              s.isolationContextId != null,
-                                        )
-                                        .map((s) => s.isolationContextId!)
-                                        .toSet();
-
-                                    if (isolatedContextIds.isNotEmpty &&
-                                        context.mounted) {
-                                      final confirmed = await ui_helper
-                                          .confirmIsolatedTabClose(
+                                        if (context.mounted) {
+                                          ui_helper.showTabUndoClose(
                                             context,
-                                            groupCount:
-                                                isolatedContextIds.length,
+                                            ref
+                                                .read(
+                                                  tabRepositoryProvider
+                                                      .notifier,
+                                                )
+                                                .undoClose,
+                                            count: count.length,
                                           );
-                                      if (!confirmed) return;
-                                    }
-
-                                    final count = await ref
-                                        .read(
-                                          tabDataRepositoryProvider.notifier,
-                                        )
-                                        .closeContainerTabs(
-                                          selectedContainerId,
-                                          includeRegular: false,
-                                          includePrivate: false,
+                                        }
+                                      }
+                                    },
+                              child: const Text('Private Tabs'),
+                            ),
+                            if (showIsolatedTabUi)
+                              MenuItemButton(
+                                leadingIcon: Icon(
+                                  MdiIcons.snowflake,
+                                  color: AppColors.of(context).isolatedTabTeal,
+                                ),
+                                onPressed: isSyncedScope
+                                    ? null
+                                    : () async {
+                                        // Count distinct isolation groups that will be destroyed
+                                        final allStates = ref.read(
+                                          tabStatesProvider,
                                         );
+                                        final isolatedContextIds = allStates
+                                            .values
+                                            .where(
+                                              (s) =>
+                                                  s.tabMode
+                                                      is IsolatedTabMode &&
+                                                  s.isolationContextId != null,
+                                            )
+                                            .map((s) => s.isolationContextId!)
+                                            .toSet();
 
-                                    if (context.mounted) {
-                                      ui_helper.showTabUndoClose(
-                                        context,
-                                        ref
+                                        if (isolatedContextIds.isNotEmpty &&
+                                            context.mounted) {
+                                          final confirmed = await ui_helper
+                                              .confirmIsolatedTabClose(
+                                                context,
+                                                groupCount:
+                                                    isolatedContextIds.length,
+                                              );
+                                          if (!confirmed) return;
+                                        }
+
+                                        final count = await ref
+                                            .read(
+                                              tabDataRepositoryProvider
+                                                  .notifier,
+                                            )
+                                            .closeContainerTabs(
+                                              selectedContainerId,
+                                              includeRegular: false,
+                                              includePrivate: false,
+                                            );
+
+                                        if (context.mounted) {
+                                          ui_helper.showTabUndoClose(
+                                            context,
+                                            ref
+                                                .read(
+                                                  tabRepositoryProvider
+                                                      .notifier,
+                                                )
+                                                .undoClose,
+                                            count: count.length,
+                                          );
+                                        }
+                                      },
+                                child: const Text('Isolated Tabs'),
+                              ),
+                            if (tabsViewMode != TabsViewMode.tree)
+                              MenuItemButton(
+                                leadingIcon: const Icon(MdiIcons.filterOutline),
+                                onPressed:
+                                    isSyncedScope ||
+                                        !ref
+                                            .read(
+                                              tabViewFilterControllerProvider,
+                                            )
+                                            .hasActiveFilter
+                                    ? null
+                                    : () async {
+                                        final filteredIds = await ref
+                                            .read(
+                                              tabDataRepositoryProvider
+                                                  .notifier,
+                                            )
+                                            .getFilteredTabIds(
+                                              selectedContainerId,
+                                            );
+
+                                        if (filteredIds.isEmpty) return;
+
+                                        // Check for isolated tabs
+                                        final allStates = ref.read(
+                                          tabStatesProvider,
+                                        );
+                                        final isolatedContextIds = filteredIds
+                                            .map((id) => allStates[id])
+                                            .where(
+                                              (s) =>
+                                                  s != null &&
+                                                  s.tabMode
+                                                      is IsolatedTabMode &&
+                                                  s.isolationContextId != null,
+                                            )
+                                            .map((s) => s!.isolationContextId!)
+                                            .toSet();
+
+                                        if (isolatedContextIds.isNotEmpty &&
+                                            context.mounted) {
+                                          final confirmed = await ui_helper
+                                              .confirmIsolatedTabClose(
+                                                context,
+                                                groupCount:
+                                                    isolatedContextIds.length,
+                                              );
+                                          if (!confirmed) return;
+                                        }
+
+                                        await ref
                                             .read(
                                               tabRepositoryProvider.notifier,
                                             )
-                                            .undoClose,
-                                        count: count.length,
-                                      );
-                                    }
-                                  },
-                            child: const Text('Close Isolated Tabs'),
-                          ),
-                        const Divider(),
+                                            .closeTabs(filteredIds);
+
+                                        if (context.mounted) {
+                                          ui_helper.showTabUndoClose(
+                                            context,
+                                            ref
+                                                .read(
+                                                  tabRepositoryProvider
+                                                      .notifier,
+                                                )
+                                                .undoClose,
+                                            count: filteredIds.length,
+                                          );
+                                        }
+                                      },
+                                child: const Text('Filtered Tabs'),
+                              ),
+                          ],
+                          child: const Text('Close Tabs'),
+                        ),
                         MenuItemButton(
                           leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
                           onPressed: isSyncedScope
@@ -799,11 +1129,10 @@ class TabViewHeader extends HookConsumerWidget {
                 TextField(
                   controller: searchTextController,
                   focusNode: searchTextFocus,
-                  // enableIMEPersonalizedLearning: !incognitoEnabled,
                   decoration: InputDecoration(
-                    // border: InputBorder.none,
+                    border: InputBorder.none,
                     prefixIcon: const Icon(MdiIcons.tabSearch, size: 18),
-                    hintText: 'Search inside tabs...',
+                    hintText: 'Search tabs',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -816,9 +1145,12 @@ class TabViewHeader extends HookConsumerWidget {
                           ),
                         IconButton(
                           onPressed: () {
-                            searchTextController.clear();
-                            searchTextFocus.requestFocus();
-                            searchMode.value = false;
+                            if (searchTextController.text.isNotEmpty) {
+                              searchTextController.clear();
+                              searchTextFocus.requestFocus();
+                            } else {
+                              searchMode.value = false;
+                            }
                           },
                           icon: const Icon(Icons.clear),
                         ),
@@ -826,6 +1158,7 @@ class TabViewHeader extends HookConsumerWidget {
                     ),
                   ),
                 ),
+              const Divider(),
               if (showContainerUi)
                 Consumer(
                   builder: (context, ref, child) {

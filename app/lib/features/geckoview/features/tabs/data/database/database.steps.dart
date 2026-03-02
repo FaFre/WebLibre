@@ -594,11 +594,140 @@ i1.GeneratedColumn<String> _column_18(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: '',
     );
+
+final class Schema7 extends i0.VersionedSchema {
+  Schema7({required super.database}) : super(version: 7);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    container,
+    tab,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+  ];
+  late final Shape0 container = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 tab = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_16,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 tabFts = Shape2(
+    source: i0.VersionedVirtualTable(
+      entityName: 'tab_fts',
+      moduleAndArgs:
+          'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")',
+      columns: [_column_8, _column_7, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger tabMaintainParentChainOnDelete = i1.Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  final i1.Trigger tabAfterInsert = i1.Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  final i1.Trigger tabAfterDelete = i1.Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  final i1.Trigger tabAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+}
+
+class Shape5 extends i0.VersionedTable {
+  Shape5({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get source =>
+      columnsByName['source']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get parentId =>
+      columnsByName['parent_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get containerId =>
+      columnsByName['container_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get orderKey =>
+      columnsByName['order_key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get url =>
+      columnsByName['url']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get title =>
+      columnsByName['title']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get tabMode =>
+      columnsByName['tab_mode']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get isolationContextId =>
+      columnsByName['isolation_context_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get isPinned =>
+      columnsByName['is_pinned']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get isProbablyReaderable =>
+      columnsByName['is_probably_readerable']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get extractedContentMarkdown =>
+      columnsByName['extracted_content_markdown']!
+          as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get extractedContentPlain =>
+      columnsByName['extracted_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentMarkdown =>
+      columnsByName['full_content_markdown']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentPlain =>
+      columnsByName['full_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get timestamp =>
+      columnsByName['timestamp']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_19(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'is_pinned',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL DEFAULT 0',
+      defaultValue: const i1.CustomExpression('0'),
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -622,6 +751,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from5To6(migrator, schema);
         return 6;
+      case 6:
+        final schema = Schema7(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from6To7(migrator, schema);
+        return 7;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -633,11 +767,13 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from2To3: from2To3,
     from3To4: from3To4,
     from4To5: from4To5,
     from5To6: from5To6,
+    from6To7: from6To7,
   ),
 );

@@ -68,6 +68,7 @@ class TabMenu extends HookConsumerWidget {
   final bool enableShare;
   final bool enableExport;
   final bool enableCloseTab;
+  final bool enablePinTab;
   final bool enableReloadButton;
   final bool enableNavigationButtons;
 
@@ -87,6 +88,7 @@ class TabMenu extends HookConsumerWidget {
     this.enableShare = true,
     this.enableExport = true,
     this.enableCloseTab = true,
+    this.enablePinTab = true,
     this.enableReloadButton = true,
     this.enableNavigationButtons = true,
   });
@@ -578,6 +580,31 @@ class TabMenu extends HookConsumerWidget {
             ],
             leadingIcon: const Icon(MdiIcons.fileExport),
             child: const Text('Export'),
+          ),
+        if (enablePinTab)
+          Consumer(
+            builder: (context, childRef, child) {
+              final isPinned = childRef.watch(
+                watchPinnedTabIdsProvider.select(
+                  (v) => v.value?.contains(selectedTabId) ?? false,
+                ),
+              );
+
+              return MenuItemButton(
+                closeOnActivate: false,
+                onPressed: () async {
+                  await childRef
+                      .read(tabDataRepositoryProvider.notifier)
+                      .setPinned(selectedTabId, pinned: !isPinned);
+
+                  if (context.mounted) {
+                    MenuController.maybeOf(context)?.close();
+                  }
+                },
+                leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
+                child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
+              );
+            },
           ),
         if (enableCloseTab)
           MenuItemButton(

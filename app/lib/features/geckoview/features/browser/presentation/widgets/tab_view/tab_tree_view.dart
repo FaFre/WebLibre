@@ -97,24 +97,13 @@ class _TabTreePreview extends HookConsumerWidget {
           Badge.count(
             isLabelVisible: entity.totalTabs > 1,
             count: entity.totalTabs,
-            alignment: AlignmentDirectional.bottomEnd,
-            offset: const Offset(-8, -24),
+            alignment: AlignmentDirectional.topStart,
+            offset: const Offset(8, 8),
             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             textColor: Theme.of(context).colorScheme.onPrimaryContainer,
             child: GridTabPreview(
               tabId: entity.tabId,
               isActive: entity.tabId == activeTabId,
-              onLongPress: () async {
-                if (entity.tabId != activeTabId) {
-                  //Close first to avoid rebuilds
-                  onClose();
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .selectTab(entity.tabId);
-                } else {
-                  onClose();
-                }
-              },
               onTap: () async {
                 if (entity.totalTabs > 1) {
                   await TabTreeRoute(entity.rootId).push(context);
