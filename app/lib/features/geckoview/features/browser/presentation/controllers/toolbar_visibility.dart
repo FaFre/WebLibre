@@ -75,6 +75,8 @@ class ToolbarVisibilityController extends _$ToolbarVisibilityController {
 
   /// Hide toolbar via scroll. All guards checked internally.
   void requestHide() {
+    if (state != ToolbarVisibility.visible) return;
+
     final settings = ref.read(generalSettingsWithDefaultsProvider);
     if (!settings.autoHideTabBar) return;
 
@@ -84,15 +86,13 @@ class ToolbarVisibilityController extends _$ToolbarVisibilityController {
     final viewportService = ref.read(viewportServiceProvider);
     if (!viewportService.isBrowserHandlingScrollEnabled) return;
 
-    if (state == ToolbarVisibility.dismissed) return;
-
     state = ToolbarVisibility.hidden;
   }
 
   /// Show toolbar (scroll-up, tab change, loading start, etc).
   /// Won't show if manually dismissed — use forceShow() for that.
   void show() {
-    if (state == ToolbarVisibility.dismissed) return;
+    if (state != ToolbarVisibility.hidden) return;
     state = ToolbarVisibility.visible;
   }
 

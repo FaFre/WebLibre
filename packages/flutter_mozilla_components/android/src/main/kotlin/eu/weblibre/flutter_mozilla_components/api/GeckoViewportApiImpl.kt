@@ -8,7 +8,6 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportApi
-import mozilla.components.support.base.log.logger.Logger
 
 /**
  * Implementation of GeckoViewportApi that controls GeckoView's viewport behavior
@@ -22,12 +21,6 @@ import mozilla.components.support.base.log.logger.Logger
  * is called, the value is stored and applied when the EngineView becomes available.
  */
 class GeckoViewportApiImpl : GeckoViewportApi {
-    companion object {
-        private const val TAG = "GeckoViewportApi"
-    }
-
-    private val logger = Logger(TAG)
-
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
@@ -46,13 +39,11 @@ class GeckoViewportApiImpl : GeckoViewportApi {
 
         val engineView = components.mainBrowserEngineView
         if (engineView == null) {
-            logger.debug("$TAG: setDynamicToolbarMaxHeight($height) - mainBrowserEngineView not ready, storing as pending")
             pendingToolbarHeight = height
             return
         }
 
         pendingToolbarHeight = null
-        logger.debug("$TAG: setDynamicToolbarMaxHeight($height)")
         engineView.setDynamicToolbarMaxHeight(height)
     }
 
@@ -64,7 +55,6 @@ class GeckoViewportApiImpl : GeckoViewportApi {
         val pending = pendingToolbarHeight ?: return
         val engineView = components.mainBrowserEngineView ?: return
         pendingToolbarHeight = null
-        logger.debug("$TAG: Applying pending toolbar height: $pending")
         engineView.setDynamicToolbarMaxHeight(pending)
     }
 
@@ -78,11 +68,9 @@ class GeckoViewportApiImpl : GeckoViewportApi {
 
         val engineView = components.mainBrowserEngineView
         if (engineView == null) {
-            logger.warn("$TAG: setVerticalClipping called but mainBrowserEngineView is null")
             return
         }
 
-        logger.debug("$TAG: setVerticalClipping($clipping)")
         engineView.setVerticalClipping(clipping)
     }
 }

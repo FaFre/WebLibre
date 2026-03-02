@@ -90,6 +90,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   DateTime? _suggestionCountTime;
 
+  static const _pointerThrottleInterval = Duration(milliseconds: 32);
+  DateTime _lastPointerEvent = DateTime(0);
+  Offset _accumulatedDelta = Offset.zero;
+
   Future<void> _timerTick(Timer timer) async {
     await ref
         .read(selectedTabSessionProvider)
@@ -280,10 +284,25 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     return Listener(
       behavior: HitTestBehavior.translucent,
+      onPointerUp: (widget.pointerMoveEventSink != null)
+          ? (_) {
+              if (_accumulatedDelta != Offset.zero) {
+                widget.pointerMoveEventSink!.add(_accumulatedDelta);
+                _accumulatedDelta = Offset.zero;
+              }
+            }
+          : null,
       onPointerMove: (widget.pointerMoveEventSink != null)
           ? (event) {
               if (event.down) {
-                widget.pointerMoveEventSink!.add(event.localDelta);
+                _accumulatedDelta += event.localDelta;
+                final now = DateTime.now();
+                if (now.difference(_lastPointerEvent) >=
+                    _pointerThrottleInterval) {
+                  _lastPointerEvent = now;
+                  widget.pointerMoveEventSink!.add(_accumulatedDelta);
+                  _accumulatedDelta = Offset.zero;
+                }
               }
             }
           : null,
