@@ -5,11 +5,11 @@ import mozilla.components.browser.state.action.EngineAction
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.feature.addons.logger
 import mozilla.components.lib.state.Middleware
-import mozilla.components.lib.state.MiddlewareContext
+import mozilla.components.lib.state.Store
 
 class SaveToPDFMiddleware : Middleware<BrowserState, BrowserAction> {
     override fun invoke(
-        context: MiddlewareContext<BrowserState, BrowserAction>,
+        store: Store<BrowserState, BrowserAction>,
         next: (BrowserAction) -> Unit,
         action: BrowserAction,
     ) {

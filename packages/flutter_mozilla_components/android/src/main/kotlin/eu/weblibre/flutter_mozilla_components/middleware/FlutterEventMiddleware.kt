@@ -29,7 +29,7 @@ import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.concept.engine.HitResult
 import mozilla.components.feature.addons.logger
 import mozilla.components.lib.state.Middleware
-import mozilla.components.lib.state.MiddlewareContext
+import mozilla.components.lib.state.Store
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import java.io.ByteArrayOutputStream
 import kotlin.reflect.typeOf
@@ -46,7 +46,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
     
     @Suppress("ComplexMethod")
     override fun invoke(
-        context: MiddlewareContext<BrowserState, BrowserAction>,
+        store: Store<BrowserState, BrowserAction>,
         next: (BrowserAction) -> Unit,
         action: BrowserAction,
     ) {
