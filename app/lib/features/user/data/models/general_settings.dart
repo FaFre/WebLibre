@@ -71,6 +71,7 @@ class GeneralSettings with FastEquatable {
   final bool enableLocalAiFeatures;
   final bool showContainerUi;
   final bool showIsolatedTabUi;
+  @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
   final TabIntentOpenSetting tabIntentOpenSetting;
   final bool autoHideTabBar;

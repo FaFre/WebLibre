@@ -703,7 +703,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   showIsolatedTabUi: json['showIsolatedTabUi'] as bool?,
   storedDefaultCreateTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
-    json['storedDefaultCreateTabType'],
+    json['defaultCreateTabType'],
   ),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
@@ -783,7 +783,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'showContainerUi': instance.showContainerUi,
   'showIsolatedTabUi': instance.showIsolatedTabUi,
-  'storedDefaultCreateTabType':
+  'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
