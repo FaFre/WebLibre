@@ -37,8 +37,12 @@ import 'package:weblibre/features/geckoview/features/contextmenu/presentation/ca
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_email.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_image.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_link.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class ContextMenuDialog extends HookConsumerWidget {
   final HitResult hitResult;
@@ -47,13 +51,46 @@ class ContextMenuDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final showContainerUi = settings.showContainerUi;
+    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
+
+    final effectiveHitResult = useState(hitResult);
+
+    final url = hitResult.tryGetLink()?.toString();
+    final isCleanable = hitResult.isHttpLink();
+    final cleaner = useUrlCleanerController(
+      sourceUrl: isCleanable
+          ? effectiveHitResult.value.tryGetLink()?.toString()
+          : null,
+      rules: catalogAsync.value,
+      cleanerEnabled: settings.urlCleanerEnabled,
+      allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
+      autoApply: settings.urlCleanerAutoApply,
+      getCurrentUrl: () => effectiveHitResult.value.tryGetLink()?.toString(),
+      onApplyCleanedUrl: (cleanedUrl) {
+        effectiveHitResult.value = hitResult.withCleanedLink(cleanedUrl);
+      },
     );
+
+    void applyCleanUrl() {
+      if (cleaner.applyCleanUrl()) {
+        showInfoMessage(context, 'URL cleaned');
+      }
+    }
+
+    void applySelectedTrackingRemovals(String previewUrl) {
+      if (cleaner.applyPreviewUrl(previewUrl)) {
+        showInfoMessage(context, 'URL preview applied');
+      }
+    }
+
+    final effective = effectiveHitResult.value;
+    final showCleanerTile = isCleanable && cleaner.showTile;
 
     return SimpleDialog(
       title: AutoSizeText(
-        hitResult.getTitle(),
+        effective.getTitle(),
         minFontSize: 18,
         maxFontSize: DefaultTextStyle.of(context).style.fontSize,
         maxLines: 10,
@@ -61,28 +98,37 @@ class ContextMenuDialog extends HookConsumerWidget {
         softWrap: true,
       ),
       children: [
-        if (OpenInNewTab.isSupported(hitResult))
-          OpenInNewTab(hitResult: hitResult),
-        if (showContainerUi && OpenInContainer.isSupported(hitResult))
-          OpenInContainer(hitResult: hitResult),
-        if (CopyLink.isSupported(hitResult)) CopyLink(hitResult: hitResult),
-        if (SaveFile.isSupported(hitResult)) SaveFile(hitResult: hitResult),
-        if (ShareLink.isSupported(hitResult)) ShareLink(hitResult: hitResult),
-        if (ShareImage.isSupported(hitResult)) ShareImage(hitResult: hitResult),
-        if (OpenImageInNewTab.isSupported(hitResult))
-          OpenImageInNewTab(hitResult: hitResult),
-        if (CopyImage.isSupported(hitResult)) CopyImage(hitResult: hitResult),
-        if (SaveImage.isSupported(hitResult)) SaveImage(hitResult: hitResult),
-        if (CopyImageLocation.isSupported(hitResult))
-          CopyImageLocation(hitResult: hitResult),
-        if (ShareEmail.isSupported(hitResult)) ShareEmail(hitResult: hitResult),
-        if (CopyEmail.isSupported(hitResult)) CopyEmail(hitResult: hitResult),
+        if (showCleanerTile)
+          UrlCleanerTile(
+            result: cleaner.result!,
+            currentUrl: effective.tryGetLink()?.toString() ?? url ?? '',
+            allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
+            onClean: applyCleanUrl,
+            onApplySelectedRemovals: applySelectedTrackingRemovals,
+            applied: cleaner.applied,
+          ),
+        if (OpenInNewTab.isSupported(effective))
+          OpenInNewTab(hitResult: effective),
+        if (showContainerUi && OpenInContainer.isSupported(effective))
+          OpenInContainer(hitResult: effective),
+        if (CopyLink.isSupported(effective)) CopyLink(hitResult: effective),
+        if (SaveFile.isSupported(effective)) SaveFile(hitResult: effective),
+        if (ShareLink.isSupported(effective)) ShareLink(hitResult: effective),
+        if (ShareImage.isSupported(effective)) ShareImage(hitResult: effective),
+        if (OpenImageInNewTab.isSupported(effective))
+          OpenImageInNewTab(hitResult: effective),
+        if (CopyImage.isSupported(effective)) CopyImage(hitResult: effective),
+        if (SaveImage.isSupported(effective)) SaveImage(hitResult: effective),
+        if (CopyImageLocation.isSupported(effective))
+          CopyImageLocation(hitResult: effective),
+        if (ShareEmail.isSupported(effective)) ShareEmail(hitResult: effective),
+        if (CopyEmail.isSupported(effective)) CopyEmail(hitResult: effective),
         HookBuilder(
           builder: (context) {
             final isSupported = useCachedFuture(
               // ignore: discarded_futures useFuture
-              () => LaunchExternal.isSupported(hitResult),
-              [hitResult],
+              () => LaunchExternal.isSupported(effective),
+              [effective],
             );
 
             if (isSupported.data == false) {
@@ -91,7 +137,7 @@ class ContextMenuDialog extends HookConsumerWidget {
 
             return Skeletonizer(
               enabled: isSupported.connectionState != ConnectionState.done,
-              child: LaunchExternal(hitResult: hitResult),
+              child: LaunchExternal(hitResult: effective),
             );
           },
         ),

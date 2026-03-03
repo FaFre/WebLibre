@@ -29,13 +29,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_unshortener_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/controllers/open_shared_content_unshorten_controller.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/attribution_link.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
@@ -96,73 +95,32 @@ class OpenSharedContent extends HookConsumerWidget {
               supportedShortenerHosts.value ?? const <String>{},
             );
 
-    // URL cleaner state
-    final cleanerResult = useState<UrlCleanerResult?>(null);
-    final cleanerApplied = useState(false);
-
     final unshortenState = ref.watch(
       openSharedContentUnshortenControllerProvider,
     );
-
-    void runCleaner({bool allowAutoApply = false}) {
-      final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-      if (!settings.urlCleanerEnabled) return;
-
-      final rules = catalogAsync.value;
-      if (rules == null) return;
-
-      final result = cleanUrl(
-        currentUrl,
-        rules,
-        allowReferral: settings.urlCleanerAllowReferralMarketing,
-      );
-      cleanerResult.value = result;
-
-      // Only reset applied state when new tracking params are found,
-      // preserving the "cleaned" indicator when the URL is already clean.
-      if (result.removedParams.isNotEmpty) {
-        cleanerApplied.value = false;
-      }
-
-      if (allowAutoApply && result.changed) {
-        textController.text = result.cleanedUrl;
-        cleanerApplied.value = true;
-      }
-    }
-
-    // Run URL cleaner on build when enabled and catalog is loaded.
-    // Uses debouncedUrl to avoid running regex matching on every keystroke.
-    useEffect(
-      () {
-        runCleaner(allowAutoApply: settings.urlCleanerAutoApply);
-        return null;
+    final cleaner = useUrlCleanerController(
+      // Avoid expensive matching work on every keystroke.
+      sourceUrl: debouncedUrl.value,
+      rules: catalogAsync.value,
+      cleanerEnabled: settings.urlCleanerEnabled,
+      allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
+      autoApply: settings.urlCleanerAutoApply,
+      getCurrentUrl: () => textController.text,
+      onApplyCleanedUrl: (cleanedUrl) {
+        textController.text = cleanedUrl;
       },
-      [
-        debouncedUrl.value,
-        catalogAsync.value,
-        settings.urlCleanerEnabled,
-        settings.urlCleanerAllowReferralMarketing,
-        settings.urlCleanerAutoApply,
-      ],
     );
 
     void applyCleanUrl() {
-      final result = cleanerResult.value;
-      if (result != null && result.changed) {
-        textController.text = result.cleanedUrl;
-        cleanerApplied.value = true;
+      if (cleaner.applyCleanUrl()) {
         showInfoMessage(context, 'URL cleaned');
       }
     }
 
     void applySelectedTrackingRemovals(String previewUrl) {
-      if (previewUrl == textController.text) return;
-
-      textController.text = previewUrl;
-      cleanerApplied.value = true;
-
-      showInfoMessage(context, 'URL preview applied');
+      if (cleaner.applyPreviewUrl(previewUrl)) {
+        showInfoMessage(context, 'URL preview applied');
+      }
     }
 
     Future<void> openTab(TabMode tabMode) async {
@@ -234,7 +192,12 @@ class OpenSharedContent extends HookConsumerWidget {
       child: Form(
         key: formKey,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -263,9 +226,8 @@ class OpenSharedContent extends HookConsumerWidget {
               ),
               const SizedBox(height: 8),
               // URL Cleaner tile
-              if (settings.urlCleanerEnabled &&
-                  cleanerResult.value != null) ...[
-                if (cleanerResult.value!.blocked)
+              if (settings.urlCleanerEnabled && cleaner.result != null) ...[
+                if (cleaner.result!.blocked)
                   ListTile(
                     leading: Icon(
                       MdiIcons.alertCircle,
@@ -274,20 +236,18 @@ class OpenSharedContent extends HookConsumerWidget {
                     title: const Text('URL blocked by ClearURLs'),
                     dense: true,
                   )
-                else if (cleanerResult.value!.removedParams.isNotEmpty)
-                  _UrlCleanerTile(
-                    result: cleanerResult.value!,
+                else if (cleaner.result!.removedParams.isNotEmpty)
+                  UrlCleanerTile(
+                    result: cleaner.result!,
                     currentUrl: currentUrl,
                     allowReferralMarketing:
                         settings.urlCleanerAllowReferralMarketing,
-                    onClean: cleanerResult.value!.changed
-                        ? applyCleanUrl
-                        : null,
+                    onClean: cleaner.result!.changed ? applyCleanUrl : null,
                     onApplySelectedRemovals: applySelectedTrackingRemovals,
                   )
-                else if (cleanerApplied.value)
-                  _UrlCleanerTile(
-                    result: cleanerResult.value!,
+                else if (cleaner.applied)
+                  UrlCleanerTile(
+                    result: cleaner.result!,
                     currentUrl: currentUrl,
                     allowReferralMarketing:
                         settings.urlCleanerAllowReferralMarketing,
@@ -523,80 +483,6 @@ Future<void> _showUnshortenerInfoDialog(BuildContext context) {
       ],
     ),
   );
-}
-
-class _UrlCleanerTile extends StatelessWidget {
-  final UrlCleanerResult result;
-  final String currentUrl;
-  final bool allowReferralMarketing;
-  final VoidCallback? onClean;
-  final ValueChanged<String>? onApplySelectedRemovals;
-  final bool applied;
-
-  const _UrlCleanerTile({
-    required this.result,
-    required this.currentUrl,
-    required this.allowReferralMarketing,
-    this.onClean,
-    this.onApplySelectedRemovals,
-    this.applied = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final paramCount = result.removedParams.length;
-    final hasParams = paramCount > 0;
-
-    final String subtitle;
-    if (!hasParams) {
-      subtitle = 'Tracking parameters removed';
-    } else if (paramCount == 1) {
-      subtitle = '1 tracking parameter found';
-    } else {
-      subtitle = '$paramCount tracking parameters found';
-    }
-
-    return ListTile(
-      leading: Icon(
-        applied ? MdiIcons.checkCircle : MdiIcons.broom,
-        color: applied
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.error,
-      ),
-      title: Text(applied ? 'URL cleaned' : 'Tracking detected'),
-      subtitle: Text(subtitle),
-      trailing: applied || !hasParams
-          ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 24, child: VerticalDivider(width: 16)),
-
-                IconButton(
-                  icon: const Icon(MdiIcons.linkVariantRemove),
-                  tooltip: 'Clean URL',
-                  onPressed: onClean,
-                ),
-              ],
-            ),
-      dense: true,
-      onTap: hasParams
-          ? () {
-              unawaited(
-                showDialog(
-                  context: context,
-                  builder: (context) => TrackingDetailsDialog(
-                    currentUrl: currentUrl,
-                    result: result,
-                    allowReferralMarketing: allowReferralMarketing,
-                    onApplySelectedRemovals: onApplySelectedRemovals,
-                  ),
-                ),
-              );
-            }
-          : null,
-    );
-  }
 }
 
 class _OpenActionTile extends StatelessWidget {

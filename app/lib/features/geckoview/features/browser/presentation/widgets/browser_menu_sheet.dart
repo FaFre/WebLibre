@@ -50,6 +50,9 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/dialog
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
@@ -120,11 +123,6 @@ class _BrowserMenuSheet extends HookConsumerWidget {
                   vertical: 8,
                 ),
                 children: [
-                  // Navigation row
-                  if (selectedTabId != null)
-                    _NavigationRow(selectedTabId: selectedTabId),
-                  const SizedBox(height: 16),
-
                   // Quick toggles (Desktop Mode / Reader Mode)
                   if (selectedTabId != null) ...[
                     _QuickTogglesGrid(selectedTabId: selectedTabId),
@@ -161,6 +159,18 @@ class _BrowserMenuSheet extends HookConsumerWidget {
                 ],
               ),
             ),
+
+            // Persistent navigation row at the bottom
+            if (selectedTabId != null) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom,
+                  top: 8,
+                ),
+                child: _NavigationRow(selectedTabId: selectedTabId),
+              ),
+            ],
           ],
         );
       },
@@ -187,12 +197,14 @@ Widget _buildSubTile(
   String title, {
   IconData? icon,
   Color? iconColor,
+  Widget? trailing,
   required VoidCallback onTap,
 }) {
   return ListTile(
     contentPadding: const EdgeInsets.only(left: 56, right: 16),
     leading: icon != null ? Icon(icon, color: iconColor, size: 20) : null,
     title: Text(title, style: const TextStyle(fontSize: 14)),
+    trailing: trailing,
     dense: true,
     onTap: onTap,
   );
@@ -1013,20 +1025,74 @@ class _ShareExpansion extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
+    final tabState = ref.watch(tabStateProvider(selectedTabId));
+    final tabUrl = tabState?.url;
+
+    final cleanedUrl = useState<Uri?>(null);
+    final cleaner = useUrlCleanerController(
+      sourceUrl: (cleanedUrl.value ?? tabUrl)?.toString(),
+      rules: catalogAsync.value,
+      cleanerEnabled: settings.urlCleanerEnabled,
+      allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
+      autoApply: settings.urlCleanerAutoApply,
+      getCurrentUrl: () => (cleanedUrl.value ?? tabUrl)?.toString(),
+      onApplyCleanedUrl: (cleanedUrlValue) {
+        cleanedUrl.value = Uri.parse(cleanedUrlValue);
+      },
+    );
+
+    void applyCleanUrl() {
+      if (cleaner.applyCleanUrl()) {
+        ui_helper.showInfoMessage(context, 'URL cleaned');
+      }
+    }
+
+    void applySelectedTrackingRemovals(String previewUrl) {
+      if (cleaner.applyPreviewUrl(previewUrl)) {
+        ui_helper.showInfoMessage(context, 'URL preview applied');
+      }
+    }
+
+    final effectiveUrl = cleanedUrl.value ?? tabUrl;
+    final cleaningHappened = cleanedUrl.value != null;
+    final hasActiveTracking = cleaner.result?.removedParams.isNotEmpty ?? false;
+    final cleanedTrailing = cleaningHappened
+        ? Icon(
+            hasActiveTracking
+                ? MdiIcons.shieldLinkVariantOutline
+                : MdiIcons.shieldLinkVariant,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          )
+        : null;
+    final showCleanerTile = tabUrl != null && cleaner.showTile;
+
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         leading: const Icon(Icons.share),
         title: const Text('Share'),
         children: [
+          if (showCleanerTile)
+            UrlCleanerTile(
+              result: cleaner.result!,
+              currentUrl: effectiveUrl?.toString() ?? '',
+              allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
+              onClean: applyCleanUrl,
+              onApplySelectedRemovals: applySelectedTrackingRemovals,
+              applied: cleaner.applied,
+            ),
+
           // Copy Address
           _buildSubTile(
             'Copy Address',
             icon: MdiIcons.contentCopy,
+            trailing: cleanedTrailing,
             onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
               await Clipboard.setData(
-                ClipboardData(text: tabState.url.toString()),
+                ClipboardData(text: effectiveUrl.toString()),
               );
               if (context.mounted) Navigator.pop(context);
             },
@@ -1044,7 +1110,7 @@ class _ShareExpansion extends HookConsumerWidget {
                   .read(selectedTabSessionProvider)
                   .requestScreenshot();
 
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
+              final ts = ref.read(tabStateProvider(selectedTabId))!;
 
               if (screenshot != null) {
                 ui.decodeImageFromList(screenshot, (result) async {
@@ -1062,7 +1128,7 @@ class _ShareExpansion extends HookConsumerWidget {
                       await SharePlus.instance.share(
                         ShareParams(
                           files: [file],
-                          subject: tabState.titleOrAuthority,
+                          subject: ts.titleOrAuthority,
                         ),
                       );
                     }
@@ -1080,9 +1146,9 @@ class _ShareExpansion extends HookConsumerWidget {
           _buildSubTile(
             'Share Link',
             icon: Icons.share,
+            trailing: cleanedTrailing,
             onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              await SharePlus.instance.share(ShareParams(uri: tabState.url));
+              await SharePlus.instance.share(ShareParams(uri: effectiveUrl));
               if (context.mounted) Navigator.pop(context);
             },
           ),
@@ -1094,11 +1160,11 @@ class _ShareExpansion extends HookConsumerWidget {
           _buildSubTile(
             'Show QR Code',
             icon: Icons.qr_code,
+            trailing: cleanedTrailing,
             onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
               if (context.mounted) {
                 Navigator.pop(context);
-                await showQrCode(context, tabState.url.toString());
+                await showQrCode(context, effectiveUrl.toString());
               }
             },
           ),
@@ -1716,8 +1782,8 @@ class _ProfileCard extends HookConsumerWidget {
             Navigator.pop(context);
             final result = await showQuitBrowserDialog(context);
 
-            if (result == true && context.mounted) {
-              await exitApp(ProviderScope.containerOf(context));
+            if (result == true) {
+              await exitApp(ref.container);
             }
           },
         ),

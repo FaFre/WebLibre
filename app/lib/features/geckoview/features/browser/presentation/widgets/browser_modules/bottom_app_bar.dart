@@ -42,8 +42,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_menu_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
@@ -289,9 +289,6 @@ class BrowserTabBar extends HookConsumerWidget {
                         displayedSheet is! ViewTabsSheet)
                     ? ContainerColors.forAppBar(containerColor)
                     : null,
-                leading: showMainToolbarNavigationButton
-                    ? NavigationMenuButton(selectedTabId: selectedTabId)
-                    : null,
                 title:
                     (selectedTabId != null && displayedSheet is! ViewTabsSheet)
                     ? const AppBarTitle()
@@ -356,6 +353,8 @@ class BrowserTabBar extends HookConsumerWidget {
                       displayedSheet: displayedSheet,
                       showLongPressMenu: true,
                     ),
+                  if (showMainToolbarNavigationButton)
+                    NavigationMenuButton(selectedTabId: selectedTabId),
                 ],
               ),
             ),
@@ -421,7 +420,6 @@ class ContextualToolbar extends HookConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        NavigationMenuButton(selectedTabId: selectedTabId),
         if (tabState?.historyState.canGoBack == true ||
             tabState?.isLoading == true)
           NavigateBackButton(
@@ -447,6 +445,7 @@ class ContextualToolbar extends HookConsumerWidget {
           displayedSheet: displayedSheet,
           showLongPressMenu: false,
         ),
+        NavigationMenuButton(selectedTabId: selectedTabId),
       ],
     );
   }
@@ -642,37 +641,21 @@ class QuickTabSwitcher extends HookConsumerWidget {
   }
 }
 
-class ShareMenuButton extends HookConsumerWidget {
+class ShareMenuButton extends StatelessWidget {
   final String? selectedTabId;
 
   const ShareMenuButton({super.key, required this.selectedTabId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final menuController = useMenuController();
-
-    return MenuAnchor(
-      controller: menuController,
-      menuChildren: [
-        CopyAddressMenuItemButton(selectedTabId: selectedTabId),
-        OpenInAppMenuItemButton(selectedTabId: selectedTabId),
-        ShareScreenshotMenuItemButton(selectedTabId: selectedTabId),
-        ShareMenuItemButton(selectedTabId: selectedTabId),
-        SendTabToDeviceMenuItemButton(selectedTabId: selectedTabId),
-        ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
-      ],
-      builder: (context, controller, child) {
-        return IconButton(
-          onPressed: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-          icon: const Icon(Icons.share),
-        );
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () async {
+        final tabId = selectedTabId;
+        if (tabId != null) {
+          await showShareBottomSheet(context, selectedTabId: tabId);
+        }
       },
+      icon: const Icon(Icons.share),
     );
   }
 }
@@ -688,7 +671,7 @@ class NavigationMenuButton extends StatelessWidget {
       onTap: () async {
         await showBrowserMenuSheet(context);
       },
-      child: const Icon(Icons.menu),
+      child: const Icon(Icons.more_vert),
     );
   }
 }
