@@ -21,7 +21,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -84,6 +83,7 @@ class BrowserView extends StatefulHookConsumerWidget {
 class _BrowserViewState extends ConsumerState<BrowserView>
     with WidgetsBindingObserver {
   Timer? _periodicScreenshotUpdate;
+  final Completer<void> _initializationCompleter = Completer<void>();
 
   //This is managed by widget state changes to resume a timer
   bool _timerPaused = false;
@@ -109,7 +109,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final initializationCompleter = useMemoized(() => Completer());
 
     useOnInitialization(() async {
       await ref
@@ -154,112 +153,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     final hasTab = ref.watch(
       selectedTabProvider.select((value) => value != null),
-    );
-
-    ref.listen(
-      selectedTabStateProvider.select(
-        (state) => (tabId: state?.id, isLoading: state?.isLoading),
-      ),
-      (previous, next) {
-        if (previous?.tabId != next.tabId || next.isLoading == true) {
-          _periodicScreenshotUpdate?.cancel();
-          _periodicScreenshotUpdate = null;
-          _timerPaused = false;
-        }
-
-        if (next.isLoading == false &&
-            (_periodicScreenshotUpdate?.isActive ?? false) == false) {
-          _timerPaused = false;
-          _periodicScreenshotUpdate?.cancel();
-          _periodicScreenshotUpdate = Timer.periodic(
-            widget.screenshotPeriod,
-            _timerTick,
-          );
-        }
-      },
-    );
-
-    ref.listen(feedRequestedProvider, (previous, next) async {
-      if (next.value.mapNotNull(Uri.tryParse) case final Uri url) {
-        if (GoRouterState.of(context).topRoute?.name != FeedAddRoute.name) {
-          if (ref.read(addFeedDialogBlockingProvider.notifier).canPush(url)) {
-            await FeedAddRoute(uri: url.toString()).push(context);
-          }
-        }
-      }
-    });
-
-    ref.listen(
-      engineBoundIntentStreamProvider,
-      (previous, next) async {
-        await initializationCompleter.future;
-
-        next.whenData((sharedContent) async {
-          final router = await ref.read(routerProvider.future);
-          final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-          switch (settings.tabIntentOpenSetting) {
-            case TabIntentOpenSetting.regular:
-            case TabIntentOpenSetting.private:
-              switch (sharedContent) {
-                case SharedUrl():
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: sharedContent.url,
-                        tabMode:
-                            settings.tabIntentOpenSetting ==
-                                TabIntentOpenSetting.private
-                            ? TabMode.private
-                            : TabMode.regular,
-                        launchedFromIntent: true,
-                        selectTab: true,
-                      );
-                case SharedText():
-                  final bang =
-                      ref.read(selectedBangDataProvider()) ??
-                      await ref.read(defaultSearchBangDataProvider.future);
-
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: bang?.getTemplateUrl(sharedContent.text),
-                        tabMode:
-                            settings.tabIntentOpenSetting ==
-                                TabIntentOpenSetting.private
-                            ? TabMode.private
-                            : TabMode.regular,
-                        launchedFromIntent: true,
-                        selectTab: true,
-                      );
-              }
-            case TabIntentOpenSetting.ask:
-              switch (sharedContent) {
-                case SharedUrl():
-                  final route = OpenSharedContentRoute(
-                    sharedUrl: sharedContent.url.toString(),
-                  );
-                  await router.push(route.location);
-                case SharedText():
-                  final route = SearchRoute(
-                    tabType:
-                        ref.read(selectedTabTypeProvider) ??
-                        settings.effectiveDefaultCreateTabType,
-                    searchText: sharedContent.text,
-                    launchedFromIntent: true, //launched from intent
-                  );
-                  await router.push(route.location);
-              }
-          }
-        });
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to engineBoundIntentStreamProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
     );
 
     final topRoute = ref.watch(currentTopRouteProvider);
@@ -329,7 +222,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
               postInitializationStep: () async {
                 await widget.postInitializationStep?.call();
 
-                if (!initializationCompleter.isCompleted) {
+                if (!_initializationCompleter.isCompleted) {
                   const quickActions = QuickActions();
 
                   //Debounce: https://github.com/flutter/flutter/issues/131121
@@ -394,7 +287,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       ),
                   ]);
 
-                  initializationCompleter.complete();
+                  _initializationCompleter.complete();
                 }
               },
             ),
@@ -421,6 +314,112 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     });
 
     WidgetsBinding.instance.addObserver(this);
+
+    ref.listenManual(
+      selectedTabStateProvider.select(
+        (state) => (tabId: state?.id, isLoading: state?.isLoading),
+      ),
+      (previous, next) {
+        if (previous?.tabId != next.tabId || next.isLoading == true) {
+          _periodicScreenshotUpdate?.cancel();
+          _periodicScreenshotUpdate = null;
+          _timerPaused = false;
+        }
+
+        if (next.isLoading == false &&
+            (_periodicScreenshotUpdate?.isActive ?? false) == false) {
+          _timerPaused = false;
+          _periodicScreenshotUpdate?.cancel();
+          _periodicScreenshotUpdate = Timer.periodic(
+            widget.screenshotPeriod,
+            _timerTick,
+          );
+        }
+      },
+    );
+
+    ref.listenManual(feedRequestedProvider, (previous, next) async {
+      if (next.value.mapNotNull(Uri.tryParse) case final Uri url) {
+        if (GoRouterState.of(context).topRoute?.name != FeedAddRoute.name) {
+          if (ref.read(addFeedDialogBlockingProvider.notifier).canPush(url)) {
+            await FeedAddRoute(uri: url.toString()).push(context);
+          }
+        }
+      }
+    });
+
+    ref.listenManual(
+      engineBoundIntentStreamProvider,
+      (previous, next) async {
+        await _initializationCompleter.future;
+
+        next.whenData((sharedContent) async {
+          final router = await ref.read(routerProvider.future);
+          final settings = ref.read(generalSettingsWithDefaultsProvider);
+
+          switch (settings.tabIntentOpenSetting) {
+            case TabIntentOpenSetting.regular:
+            case TabIntentOpenSetting.private:
+              switch (sharedContent) {
+                case SharedUrl():
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(
+                        url: sharedContent.url,
+                        tabMode:
+                            settings.tabIntentOpenSetting ==
+                                TabIntentOpenSetting.private
+                            ? TabMode.private
+                            : TabMode.regular,
+                        launchedFromIntent: true,
+                        selectTab: true,
+                      );
+                case SharedText():
+                  final bang =
+                      ref.read(selectedBangDataProvider()) ??
+                      await ref.read(defaultSearchBangDataProvider.future);
+
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .addTab(
+                        url: bang?.getTemplateUrl(sharedContent.text),
+                        tabMode:
+                            settings.tabIntentOpenSetting ==
+                                TabIntentOpenSetting.private
+                            ? TabMode.private
+                            : TabMode.regular,
+                        launchedFromIntent: true,
+                        selectTab: true,
+                      );
+              }
+            case TabIntentOpenSetting.ask:
+              switch (sharedContent) {
+                case SharedUrl():
+                  final route = OpenSharedContentRoute(
+                    sharedUrl: sharedContent.url.toString(),
+                  );
+                  await router.push(route.location);
+                case SharedText():
+                  final route = SearchRoute(
+                    tabType:
+                        ref.read(selectedTabTypeProvider) ??
+                        settings.effectiveDefaultCreateTabType,
+                    searchText: sharedContent.text,
+                    launchedFromIntent: true, //launched from intent
+                  );
+                  await router.push(route.location);
+              }
+          }
+        });
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to engineBoundIntentStreamProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
 
     //Initialize and register dependencies
     ref.listenManual(
