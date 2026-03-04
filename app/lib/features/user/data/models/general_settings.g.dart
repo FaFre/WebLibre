@@ -59,6 +59,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
 
+  GeneralSettings tabBarLayout(TabBarLayout tabBarLayout);
+
   GeneralSettings quickTabSwitcherMode(
     QuickTabSwitcherMode quickTabSwitcherMode,
   );
@@ -140,6 +142,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabBarShowContextualBar,
     bool tabBarShowQuickTabSwitcherBar,
     TabBarPosition tabBarPosition,
+    TabBarLayout tabBarLayout,
     QuickTabSwitcherMode quickTabSwitcherMode,
     bool pullToRefreshEnabled,
     bool useExternalDownloadManager,
@@ -259,6 +262,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition) =>
       call(tabBarPosition: tabBarPosition);
+
+  @override
+  GeneralSettings tabBarLayout(TabBarLayout tabBarLayout) =>
+      call(tabBarLayout: tabBarLayout);
 
   @override
   GeneralSettings quickTabSwitcherMode(
@@ -386,6 +393,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarShowQuickTabSwitcherBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
+    Object? tabBarLayout = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
@@ -533,6 +541,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarPosition
           // ignore: cast_nullable_to_non_nullable
           : tabBarPosition as TabBarPosition,
+      tabBarLayout:
+          tabBarLayout == const $CopyWithPlaceholder() || tabBarLayout == null
+          ? _value.tabBarLayout
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarLayout as TabBarLayout,
       quickTabSwitcherMode:
           quickTabSwitcherMode == const $CopyWithPlaceholder() ||
               quickTabSwitcherMode == null
@@ -727,6 +740,10 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabBarPositionEnumMap,
     json['tabBarPosition'],
   ),
+  tabBarLayout: $enumDecodeNullable(
+    _$TabBarLayoutEnumMap,
+    json['tabBarLayout'],
+  ),
   quickTabSwitcherMode: $enumDecodeNullable(
     _$QuickTabSwitcherModeEnumMap,
     json['quickTabSwitcherMode'],
@@ -795,6 +812,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
   'tabBarShowQuickTabSwitcherBar': instance.tabBarShowQuickTabSwitcherBar,
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
+  'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
   'quickTabSwitcherMode':
       _$QuickTabSwitcherModeEnumMap[instance.quickTabSwitcherMode]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
@@ -866,6 +884,11 @@ const _$TabBarSwipeActionEnumMap = {
 const _$TabBarPositionEnumMap = {
   TabBarPosition.top: 'top',
   TabBarPosition.bottom: 'bottom',
+};
+
+const _$TabBarLayoutEnumMap = {
+  TabBarLayout.withTitle: 'withTitle',
+  TabBarLayout.compact: 'compact',
 };
 
 const _$QuickTabSwitcherModeEnumMap = {

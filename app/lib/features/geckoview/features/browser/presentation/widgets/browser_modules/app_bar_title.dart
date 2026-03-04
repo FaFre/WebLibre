@@ -35,6 +35,141 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
+class CompactAppBarTitle extends HookConsumerWidget {
+  const CompactAppBarTitle({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final appColors = AppColors.of(context);
+
+    final tabState = ref.watch(selectedTabStateProvider);
+    final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
+    final showSiteSettingsBadge = ref.watch(
+      showSiteSettingsBadgeProvider.select((value) => value.value == true),
+    );
+
+    if (tabState == null) {
+      return const SizedBox.shrink();
+    }
+
+    final icon = useMemoized(() {
+      if (tabState.url.isHttp) {
+        return Icon(
+          MdiIcons.lockOff,
+          color: Theme.of(context).colorScheme.error,
+          size: 16,
+        );
+      } else if (tabState.readerableState.active) {
+        return const Icon(MdiIcons.lockMinus, size: 16);
+      } else if (!tabState.securityInfoState.secure) {
+        return Icon(
+          MdiIcons.lockAlert,
+          color: Theme.of(context).colorScheme.errorContainer,
+          size: 16,
+        );
+      } else if (!tabState.isLoading) {
+        return const Icon(MdiIcons.lock, size: 16);
+      } else {
+        return const Icon(MdiIcons.timerSand, size: 16);
+      }
+    }, [tabState]);
+
+    return Row(
+      children: [
+        ToolbarButton(
+          onTap: () {
+            ref
+                .read(bottomSheetControllerProvider.notifier)
+                .show(SiteSettingsSheet(tabState: tabState));
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                TabIcon(tabState: tabState, iconSize: 24),
+                Positioned(
+                  top: -4,
+                  right: -4,
+                  child: Icon(
+                    MdiIcons.shieldHalfFull,
+                    size: 10,
+                    color: showSiteSettingsBadge
+                        ? appColors.warningAmber
+                        : Colors.green,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () async {
+              final searchText = tabState.url.scheme == 'about'
+                  ? ''
+                  : tabState.url.toString();
+
+              await SearchRoute(
+                tabId: tabState.id,
+                searchText: searchText.isEmpty
+                    ? SearchRoute.emptySearchText
+                    : searchText,
+                tabType: tabState.tabMode.toTabType(),
+              ).push(context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (tabState.tabMode is PrivateTabMode) ...[
+                    Icon(
+                      MdiIcons.dominoMask,
+                      color: appColors.privateTabPurple,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                  ] else if (tabState.tabMode is IsolatedTabMode) ...[
+                    Icon(
+                      MdiIcons.snowflake,
+                      color: appColors.isolatedTabTeal,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                  if (isTabTuneledAsync.hasValue &&
+                      isTabTuneledAsync.value == true) ...[
+                    const Icon(MdiIcons.tunnelOutline, size: 16),
+                    const SizedBox(width: 4),
+                  ],
+                  icon,
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: UriBreadcrumb(
+                      uri: tabState.url,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8.0),
+      ],
+    );
+  }
+}
+
 class AppBarTitle extends HookConsumerWidget {
   const AppBarTitle({super.key});
 

@@ -291,7 +291,9 @@ class BrowserTabBar extends HookConsumerWidget {
                     : null,
                 title:
                     (selectedTabId != null && displayedSheet is! ViewTabsSheet)
-                    ? const AppBarTitle()
+                    ? settings.tabBarLayout == TabBarLayout.compact
+                        ? const CompactAppBarTitle()
+                        : const AppBarTitle()
                     : null,
                 actions: [
                   if (selectedTabId != null && displayedSheet is! ViewTabsSheet)

@@ -76,6 +76,7 @@ class _TabBarLayoutSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Tab Bar Layout'),
         _TabBarPositionSection(),
+        _TabBarLayoutModeSection(),
         _ShowContextualTabBarTile(),
         _AutoHideTabBarTile(),
         _BottomSheetTabViewTile(),
@@ -277,6 +278,59 @@ class _TabBarPositionSection extends HookConsumerWidget {
                   value: TabBarPosition.bottom,
                   title: Text('Bottom'),
                   subtitle: Text('Tab bar with auto-hide support'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TabBarLayoutModeSection extends HookConsumerWidget {
+  const _TabBarLayoutModeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabBarLayout = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabBarLayout),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Tab Bar Style'),
+            leading: Icon(MdiIcons.tabUnselected),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: tabBarLayout,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.tabBarLayout(value),
+                    );
+              }
+            },
+            child: const Column(
+              children: [
+                RadioListTile.adaptive(
+                  value: TabBarLayout.withTitle,
+                  title: Text('With Title'),
+                  subtitle: Text('Shows page title and URL breadcrumb'),
+                ),
+                RadioListTile.adaptive(
+                  value: TabBarLayout.compact,
+                  title: Text('Compact'),
+                  subtitle: Text('Centered URL pill without page title'),
                 ),
               ],
             ),

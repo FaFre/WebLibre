@@ -42,6 +42,8 @@ enum TabIntentOpenSetting { regular, private, ask }
 
 enum TabBarPosition { top, bottom }
 
+enum TabBarLayout { withTitle, compact }
+
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
   history('Browsing history'),
@@ -82,6 +84,7 @@ class GeneralSettings with FastEquatable {
   final bool tabBarShowContextualBar;
   final bool tabBarShowQuickTabSwitcherBar;
   final TabBarPosition tabBarPosition;
+  final TabBarLayout tabBarLayout;
   final QuickTabSwitcherMode quickTabSwitcherMode;
   final bool pullToRefreshEnabled;
   final bool useExternalDownloadManager;
@@ -127,6 +130,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarShowContextualBar,
     required this.tabBarShowQuickTabSwitcherBar,
     required this.tabBarPosition,
+    required this.tabBarLayout,
     required this.quickTabSwitcherMode,
     required this.pullToRefreshEnabled,
     required this.useExternalDownloadManager,
@@ -173,6 +177,7 @@ class GeneralSettings with FastEquatable {
     bool? tabBarShowContextualBar,
     bool? tabBarShowQuickTabSwitcherBar,
     TabBarPosition? tabBarPosition,
+    TabBarLayout? tabBarLayout,
     QuickTabSwitcherMode? quickTabSwitcherMode,
     bool? pullToRefreshEnabled,
     bool? useExternalDownloadManager,
@@ -219,6 +224,7 @@ class GeneralSettings with FastEquatable {
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
+       tabBarLayout = tabBarLayout ?? TabBarLayout.withTitle,
        quickTabSwitcherMode =
            quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
@@ -292,6 +298,7 @@ class GeneralSettings with FastEquatable {
     tabBarShowContextualBar,
     tabBarShowQuickTabSwitcherBar,
     tabBarPosition,
+    tabBarLayout,
     quickTabSwitcherMode,
     pullToRefreshEnabled,
     useExternalDownloadManager,
