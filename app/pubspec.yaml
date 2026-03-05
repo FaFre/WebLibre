@@ -15,7 +15,7 @@ dependencies:
   copy_with_extension: ^11.0.0
   country_codes: ^3.3.0
   country_flags: ^4.1.2
-  crypto: ^3.0.6
+  crypto: ^3.0.7
   cryptography_flutter: ^2.3.4
   device_info_plus: ^12.3.0
   drift: ^2.31.0
@@ -51,7 +51,7 @@ dependencies:
   lexo_rank:
     git:
       url: https://github.com/FaFre/lexo_rank.git
-  local_auth: ^3.0.0
+  local_auth: ^3.0.1
   locale_resolver:
     path: ../packages/locale_resolver
   logger: ^2.6.2
@@ -95,7 +95,7 @@ dependencies:
   uuid: ^4.5.3
 
 dev_dependencies:
-  build_runner: ^2.11.1
+  build_runner: ^2.12.2
   copy_with_extension_gen: ^11.0.0
   flutter_launcher_icons: ^0.14.4
   flutter_test:

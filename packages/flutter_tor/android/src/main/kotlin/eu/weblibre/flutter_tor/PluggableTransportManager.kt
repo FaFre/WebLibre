@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import IPtProxy.Controller
 import IPtProxy.IPtProxy
-import IPtProxy.OnTransportStopped
+import IPtProxy.OnTransportEvents
 import java.io.File
 
 /**
@@ -28,7 +28,20 @@ class PluggableTransportManager(private val context: Context) {
     private val stateDir = File(context.cacheDir, "iptproxy")
     private val activeTransports = mutableSetOf<String>()
 
-    private val statusCallback = object : OnTransportStopped {
+    private val statusCallback = object : OnTransportEvents {
+        override fun connected(name: String?) {
+            if (name != null) {
+                Log.d(TAG, "$name connected")
+            }
+        }
+
+        override fun error(name: String?, exception: Exception?) {
+            if (name != null) {
+                activeTransports.remove(name)
+            }
+            Log.e(TAG, "${name ?: "transport"} reported error: ${exception?.message}", exception)
+        }
+
         override fun stopped(name: String?, exception: Exception?) {
             if (name != null) {
                 activeTransports.remove(name)
