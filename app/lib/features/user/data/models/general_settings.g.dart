@@ -9,6 +9,8 @@ part of 'general_settings.dart';
 abstract class _$GeneralSettingsCWProxy {
   GeneralSettings themeMode(ThemeMode themeMode);
 
+  GeneralSettings uiScaleFactor(double uiScaleFactor);
+
   GeneralSettings enableReadability(bool enableReadability);
 
   GeneralSettings enforceReadability(bool enforceReadability);
@@ -122,6 +124,7 @@ abstract class _$GeneralSettingsCWProxy {
   /// ```
   GeneralSettings call({
     ThemeMode themeMode,
+    double uiScaleFactor,
     bool enableReadability,
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
@@ -177,6 +180,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
 
   @override
   GeneralSettings themeMode(ThemeMode themeMode) => call(themeMode: themeMode);
+
+  @override
+  GeneralSettings uiScaleFactor(double uiScaleFactor) =>
+      call(uiScaleFactor: uiScaleFactor);
 
   @override
   GeneralSettings enableReadability(bool enableReadability) =>
@@ -373,6 +380,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   /// ```
   GeneralSettings call({
     Object? themeMode = const $CopyWithPlaceholder(),
+    Object? uiScaleFactor = const $CopyWithPlaceholder(),
     Object? enableReadability = const $CopyWithPlaceholder(),
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
@@ -423,6 +431,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.themeMode
           // ignore: cast_nullable_to_non_nullable
           : themeMode as ThemeMode,
+      uiScaleFactor:
+          uiScaleFactor == const $CopyWithPlaceholder() || uiScaleFactor == null
+          ? _value.uiScaleFactor
+          // ignore: cast_nullable_to_non_nullable
+          : uiScaleFactor as double,
       enableReadability:
           enableReadability == const $CopyWithPlaceholder() ||
               enableReadability == null
@@ -697,6 +710,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   Map<String, dynamic> json,
 ) => GeneralSettings.withDefaults(
   themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
+  uiScaleFactor: (json['uiScaleFactor'] as num?)?.toDouble(),
   enableReadability: json['enableReadability'] as bool?,
   enforceReadability: json['enforceReadability'] as bool?,
   deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
@@ -784,6 +798,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   GeneralSettings instance,
 ) => <String, dynamic>{
   'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
+  'uiScaleFactor': instance.uiScaleFactor,
   'enableReadability': instance.enableReadability,
   'enforceReadability': instance.enforceReadability,
   'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit

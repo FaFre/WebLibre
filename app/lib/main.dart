@@ -128,6 +128,11 @@ class _MainWidget extends HookConsumerWidget {
     final themeMode = ref.watch(
       generalSettingsWithDefaultsProvider.select((value) => value.themeMode),
     );
+    final uiScaleFactor = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.uiScaleFactor,
+      ),
+    );
 
     useOnInitialization(() async {
       await CountryCodes.init();
@@ -255,6 +260,7 @@ class _MainWidget extends HookConsumerWidget {
             extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
           ),
           themeMode: themeMode,
+          uiScaleFactor: uiScaleFactor,
         );
       },
     );

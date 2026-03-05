@@ -34,6 +34,11 @@ const _fallbackSearchProvider = BangKey(
 );
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
+const defaultUiScaleFactor = 1.0;
+const minUiScaleFactor = 0.5;
+const maxUiScaleFactor = 1.5;
+const uiScaleFactorStep = 0.05;
+
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
 enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
@@ -62,6 +67,7 @@ enum DeleteBrowsingDataType {
 @JsonSerializable(includeIfNull: true, constructor: 'withDefaults')
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
+  final double uiScaleFactor;
   final bool enableReadability;
   final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
@@ -110,6 +116,7 @@ class GeneralSettings with FastEquatable {
 
   GeneralSettings({
     required this.themeMode,
+    required this.uiScaleFactor,
     required this.enableReadability,
     required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
@@ -157,6 +164,7 @@ class GeneralSettings with FastEquatable {
 
   GeneralSettings.withDefaults({
     ThemeMode? themeMode,
+    double? uiScaleFactor,
     bool? enableReadability,
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
@@ -201,6 +209,7 @@ class GeneralSettings with FastEquatable {
     bool? unshortenerEnabled,
     String? unshortenerToken,
   }) : themeMode = themeMode ?? ThemeMode.dark,
+       uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
@@ -278,6 +287,7 @@ class GeneralSettings with FastEquatable {
   @override
   List<Object?> get hashParameters => [
     themeMode,
+    uiScaleFactor,
     enableReadability,
     enforceReadability,
     deleteBrowsingDataOnQuit,

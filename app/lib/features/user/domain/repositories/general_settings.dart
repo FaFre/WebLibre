@@ -48,6 +48,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'uiScaleFactor': settings['uiScaleFactor']?.readAs(
+        DriftSqlType.double,
+        db.typeMapping,
+      ),
       'enableReadability': settings['enableReadability']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

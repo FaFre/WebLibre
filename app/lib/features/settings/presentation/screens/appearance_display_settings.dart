@@ -19,6 +19,7 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -63,10 +64,87 @@ class _VisualSection extends StatelessWidget {
     return const Column(
       children: [
         SettingSection(name: 'Visual'),
+        _UiZoomSection(),
         _ThemeSection(),
       ],
     );
   }
+}
+
+class _UiZoomSection extends HookConsumerWidget {
+  const _UiZoomSection();
+
+  static final _sliderDivisions =
+      ((maxUiScaleFactor - minUiScaleFactor) / uiScaleFactorStep).round();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final uiScaleFactor = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.uiScaleFactor),
+    );
+    final sliderValue = useState(uiScaleFactor);
+
+    useEffect(() {
+      sliderValue.value = uiScaleFactor;
+      return null;
+    }, [uiScaleFactor]);
+
+    final sliderLabel = '${(sliderValue.value * 100).round()}%';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('User Interface Zoom'),
+            subtitle: Text('Make the user interface smaller or larger'),
+            leading: Icon(Icons.zoom_in),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Row(
+            children: [
+              Text(sliderLabel, style: Theme.of(context).textTheme.titleLarge),
+              Expanded(
+                child: Slider(
+                  min: minUiScaleFactor,
+                  max: maxUiScaleFactor,
+                  divisions: _sliderDivisions,
+                  label: sliderLabel,
+                  value: sliderValue.value.clamp(
+                    minUiScaleFactor,
+                    maxUiScaleFactor,
+                  ),
+                  onChanged: (value) {
+                    sliderValue.value = value;
+                  },
+                  onChangeEnd: (value) async {
+                    final normalized = _normalizeUiScale(value);
+                    sliderValue.value = normalized;
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (currentSettings) => currentSettings.copyWith
+                              .uiScaleFactor(normalized),
+                        );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+double _normalizeUiScale(double value) {
+  final clampedValue = value.clamp(minUiScaleFactor, maxUiScaleFactor);
+  final stepIndex = ((clampedValue - minUiScaleFactor) / uiScaleFactorStep)
+      .round();
+  final normalized = minUiScaleFactor + (stepIndex * uiScaleFactorStep);
+  return normalized.clamp(minUiScaleFactor, maxUiScaleFactor);
 }
 
 class _TabBarSection extends StatelessWidget {
