@@ -26,6 +26,56 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/containe
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 
+class TabsActionButtonView extends StatelessWidget {
+  const TabsActionButtonView({
+    super.key,
+    required this.isActive,
+    required this.tabCountText,
+    this.showSkeleton = false,
+    this.onTap,
+    this.onDoubleTap,
+    this.onLongPress,
+  });
+
+  final bool isActive;
+  final String tabCountText;
+  final bool showSkeleton;
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor = isActive
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurfaceVariant;
+
+    final text = Text(
+      tabCountText,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14.0,
+        color: iconColor,
+      ),
+    );
+
+    return ToolbarButton(
+      onTap: onTap,
+      onDoubleTap: onDoubleTap,
+      onLongPress: onLongPress,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(width: 2.0, color: iconColor),
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        constraints: const BoxConstraints(minWidth: 25.0),
+        child: Center(child: showSkeleton ? Skeletonizer(child: text) : text),
+      ),
+    );
+  }
+}
+
 class TabsActionButton extends HookConsumerWidget {
   final bool isActive;
   final VoidCallback? onTap;
@@ -42,78 +92,32 @@ class TabsActionButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
     final tabCount = isActive
         // ignore: provider_parameters
         ? ref.watch(containerTabCountProvider(ContainerFilterDisabled()))
         : ref.watch(selectedContainerTabCountProvider);
 
-    final iconColor = isActive
-        ? theme.colorScheme.primary
-        : theme.colorScheme.onSurfaceVariant;
+    final tabCountText = tabCount.when(
+      skipLoadingOnReload: true,
+      data: (count) => count.toString(),
+      loading: () => tabCount.hasValue ? tabCount.value.toString() : '0',
+      error: (error, stackTrace) {
+        logger.e(
+          'Could not determine tab count',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        return '-1';
+      },
+    );
 
-    return ToolbarButton(
+    return TabsActionButtonView(
+      isActive: isActive,
+      tabCountText: tabCountText,
+      showSkeleton: tabCount.isLoading && !tabCount.hasValue,
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(width: 2.0, color: iconColor),
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        constraints: const BoxConstraints(minWidth: 25.0),
-        child: Center(
-          child: tabCount.when(
-            skipLoadingOnReload: true,
-            data: (count) {
-              return Text(
-                count.toString(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
-                  color: iconColor,
-                ),
-              );
-            },
-            loading: () => (tabCount.hasValue)
-                ? Text(
-                    tabCount.value.toString(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
-                      color: iconColor,
-                    ),
-                  )
-                : Skeletonizer(
-                    child: Text(
-                      '0',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                        color: iconColor,
-                      ),
-                    ),
-                  ),
-            error: (error, stackTrace) {
-              logger.e(
-                'Could not determine tab count',
-                error: error,
-                stackTrace: stackTrace,
-              );
-
-              return Text(
-                '-1',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.0,
-                  color: iconColor,
-                ),
-              );
-            },
-          ),
-        ),
-      ),
     );
   }
 }

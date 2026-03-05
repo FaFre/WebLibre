@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -27,6 +26,7 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
@@ -35,14 +35,11 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
-class CompactAppBarTitle extends HookConsumerWidget {
+class CompactAppBarTitle extends ConsumerWidget {
   const CompactAppBarTitle({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final appColors = AppColors.of(context);
-
     final tabState = ref.watch(selectedTabStateProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
     final showSiteSettingsBadge = ref.watch(
@@ -53,42 +50,60 @@ class CompactAppBarTitle extends HookConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final icon = useMemoized(() {
-      if (tabState.url.isHttp) {
-        return Icon(
-          MdiIcons.lockOff,
-          color: Theme.of(context).colorScheme.error,
-          size: 16,
-        );
-      } else if (tabState.readerableState.active) {
-        return const Icon(MdiIcons.lockMinus, size: 16);
-      } else if (!tabState.securityInfoState.secure) {
-        return Icon(
-          MdiIcons.lockAlert,
-          color: Theme.of(context).colorScheme.errorContainer,
-          size: 16,
-        );
-      } else if (!tabState.isLoading) {
-        return const Icon(MdiIcons.lock, size: 16);
-      } else {
-        return const Icon(MdiIcons.timerSand, size: 16);
-      }
-    }, [tabState]);
+    return CompactAppBarTitleView(
+      tabState: tabState,
+      isTabTunneled:
+          isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
+      showSiteSettingsBadge: showSiteSettingsBadge,
+      onSiteSettingsTap: () {
+        ref
+            .read(bottomSheetControllerProvider.notifier)
+            .show(SiteSettingsSheet(tabState: tabState));
+      },
+      onTitleTap: () async {
+        await SearchRoute(
+          tabId: tabState.id,
+          searchText: _searchTextForTab(tabState),
+          tabType: tabState.tabMode.toTabType(),
+        ).push(context);
+      },
+    );
+  }
+}
+
+class CompactAppBarTitleView extends StatelessWidget {
+  const CompactAppBarTitleView({
+    super.key,
+    required this.tabState,
+    required this.isTabTunneled,
+    required this.showSiteSettingsBadge,
+    required this.onSiteSettingsTap,
+    required this.onTitleTap,
+    this.tabIcon,
+  });
+
+  final TabState tabState;
+  final bool isTabTunneled;
+  final bool showSiteSettingsBadge;
+  final VoidCallback onSiteSettingsTap;
+  final VoidCallback onTitleTap;
+  final Widget? tabIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = AppColors.of(context);
 
     return Row(
       children: [
         ToolbarButton(
-          onTap: () {
-            ref
-                .read(bottomSheetControllerProvider.notifier)
-                .show(SiteSettingsSheet(tabState: tabState));
-          },
+          onTap: onSiteSettingsTap,
           child: Padding(
             padding: const EdgeInsets.only(right: 4.0),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                TabIcon(tabState: tabState, iconSize: 24),
+                tabIcon ?? TabIcon(tabState: tabState, iconSize: 24),
                 Positioned(
                   top: -4,
                   right: -4,
@@ -106,19 +121,7 @@ class CompactAppBarTitle extends HookConsumerWidget {
         ),
         Expanded(
           child: GestureDetector(
-            onTap: () async {
-              final searchText = tabState.url.scheme == 'about'
-                  ? ''
-                  : tabState.url.toString();
-
-              await SearchRoute(
-                tabId: tabState.id,
-                searchText: searchText.isEmpty
-                    ? SearchRoute.emptySearchText
-                    : searchText,
-                tabType: tabState.tabMode.toTabType(),
-              ).push(context);
-            },
+            onTap: onTitleTap,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
@@ -144,12 +147,11 @@ class CompactAppBarTitle extends HookConsumerWidget {
                     ),
                     const SizedBox(width: 4),
                   ],
-                  if (isTabTuneledAsync.hasValue &&
-                      isTabTuneledAsync.value == true) ...[
+                  if (isTabTunneled) ...[
                     const Icon(MdiIcons.tunnelOutline, size: 16),
                     const SizedBox(width: 4),
                   ],
-                  icon,
+                  _SecurityStatusIcon(tabState: tabState, size: 16),
                   const SizedBox(width: 6),
                   Flexible(
                     child: UriBreadcrumb(
@@ -170,14 +172,11 @@ class CompactAppBarTitle extends HookConsumerWidget {
   }
 }
 
-class AppBarTitle extends HookConsumerWidget {
+class AppBarTitle extends ConsumerWidget {
   const AppBarTitle({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final appColors = AppColors.of(context);
-
     final tabState = ref.watch(selectedTabStateProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
     final showSiteSettingsBadge = ref.watch(
@@ -188,42 +187,60 @@ class AppBarTitle extends HookConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final icon = useMemoized(() {
-      if (tabState.url.isHttp) {
-        return Icon(
-          MdiIcons.lockOff,
-          color: Theme.of(context).colorScheme.error,
-          size: 14,
-        );
-      } else if (tabState.readerableState.active) {
-        return const Icon(MdiIcons.lockMinus, size: 14);
-      } else if (!tabState.securityInfoState.secure) {
-        return Icon(
-          MdiIcons.lockAlert,
-          color: Theme.of(context).colorScheme.errorContainer,
-          size: 14,
-        );
-      } else if (!tabState.isLoading) {
-        return const Icon(MdiIcons.lock, size: 14);
-      } else {
-        return const Icon(MdiIcons.timerSand, size: 14);
-      }
-    }, [tabState]);
+    return AppBarTitleView(
+      tabState: tabState,
+      isTabTunneled:
+          isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
+      showSiteSettingsBadge: showSiteSettingsBadge,
+      onSiteSettingsTap: () {
+        ref
+            .read(bottomSheetControllerProvider.notifier)
+            .show(SiteSettingsSheet(tabState: tabState));
+      },
+      onTitleTap: () async {
+        await SearchRoute(
+          tabId: tabState.id,
+          searchText: _searchTextForTab(tabState),
+          tabType: tabState.tabMode.toTabType(),
+        ).push(context);
+      },
+    );
+  }
+}
+
+class AppBarTitleView extends StatelessWidget {
+  const AppBarTitleView({
+    super.key,
+    required this.tabState,
+    required this.isTabTunneled,
+    required this.showSiteSettingsBadge,
+    required this.onSiteSettingsTap,
+    required this.onTitleTap,
+    this.tabIcon,
+  });
+
+  final TabState tabState;
+  final bool isTabTunneled;
+  final bool showSiteSettingsBadge;
+  final VoidCallback onSiteSettingsTap;
+  final VoidCallback onTitleTap;
+  final Widget? tabIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = AppColors.of(context);
 
     return Row(
       children: [
         ToolbarButton(
-          onTap: () {
-            ref
-                .read(bottomSheetControllerProvider.notifier)
-                .show(SiteSettingsSheet(tabState: tabState));
-          },
+          onTap: onSiteSettingsTap,
           child: Padding(
             padding: const EdgeInsets.only(right: 4.0),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                TabIcon(tabState: tabState, iconSize: 24),
+                tabIcon ?? TabIcon(tabState: tabState, iconSize: 24),
                 Positioned(
                   top: -4,
                   right: -4,
@@ -239,23 +256,9 @@ class AppBarTitle extends HookConsumerWidget {
             ),
           ),
         ),
-        // Title/URL tap → opens search screen
         Expanded(
           child: GestureDetector(
-            onTap: () async {
-              // Don't pre-fill for internal URLs
-              final searchText = tabState.url.scheme == 'about'
-                  ? ''
-                  : tabState.url.toString();
-
-              await SearchRoute(
-                tabId: tabState.id,
-                searchText: searchText.isEmpty
-                    ? SearchRoute.emptySearchText
-                    : searchText,
-                tabType: tabState.tabMode.toTabType(),
-              ).push(context);
-            },
+            onTap: onTitleTap,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -273,7 +276,6 @@ class AppBarTitle extends HookConsumerWidget {
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
-                      // mode: TextScrollMode.bouncing,
                       velocity: const Velocity(pixelsPerSecond: Offset(75, 0)),
                       delayBefore: const Duration(milliseconds: 500),
                       pauseBetween: const Duration(milliseconds: 5000),
@@ -302,12 +304,11 @@ class AppBarTitle extends HookConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                     ],
-                    if (isTabTuneledAsync.hasValue &&
-                        isTabTuneledAsync.value == true) ...[
+                    if (isTabTunneled) ...[
                       const Icon(MdiIcons.tunnelOutline, size: 14),
                       const SizedBox(width: 4),
                     ],
-                    icon,
+                    _SecurityStatusIcon(tabState: tabState, size: 14),
                     const SizedBox(width: 4),
                     Expanded(
                       child: UriBreadcrumb(
@@ -327,4 +328,42 @@ class AppBarTitle extends HookConsumerWidget {
       ],
     );
   }
+}
+
+class _SecurityStatusIcon extends StatelessWidget {
+  const _SecurityStatusIcon({required this.tabState, required this.size});
+
+  final TabState tabState;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    if (tabState.url.isHttp) {
+      return Icon(
+        MdiIcons.lockOff,
+        color: Theme.of(context).colorScheme.error,
+        size: size,
+      );
+    } else if (tabState.readerableState.active) {
+      return Icon(MdiIcons.lockMinus, size: size);
+    } else if (!tabState.securityInfoState.secure) {
+      return Icon(
+        MdiIcons.lockAlert,
+        color: Theme.of(context).colorScheme.errorContainer,
+        size: size,
+      );
+    } else if (!tabState.isLoading) {
+      return Icon(MdiIcons.lock, size: size);
+    }
+
+    return Icon(MdiIcons.timerSand, size: size);
+  }
+}
+
+String _searchTextForTab(TabState tabState) {
+  final searchText = tabState.url.scheme == 'about'
+      ? ''
+      : tabState.url.toString();
+
+  return searchText.isEmpty ? SearchRoute.emptySearchText : searchText;
 }

@@ -27,12 +27,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -60,7 +58,7 @@ import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
-class BrowserTopAppBar extends HookConsumerWidget {
+class BrowserTopAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
@@ -85,7 +83,7 @@ class BrowserTopAppBar extends HookConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return SafeArea(
       child: SizedBox(height: preferredSize.height, child: _tabBar),
     );
@@ -94,7 +92,7 @@ class BrowserTopAppBar extends HookConsumerWidget {
   Size get preferredSize => _size;
 }
 
-class BrowserBottomAppBar extends HookConsumerWidget {
+class BrowserBottomAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
@@ -121,7 +119,7 @@ class BrowserBottomAppBar extends HookConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Material(
@@ -205,8 +203,97 @@ class BrowserTabBar extends HookConsumerWidget {
 
     final dragStartPosition = useRef(Offset.zero);
 
-    return GestureDetector(
-      // Tap handling moved to AppBarTitle for split icon/title behavior
+    final showTabTitle =
+        selectedTabId != null && displayedSheet is! ViewTabsSheet;
+
+    final backgroundColor =
+        (settings.showContainerUi &&
+            containerColor != null &&
+            displayedSheet is! ViewTabsSheet)
+        ? ContainerColors.forAppBar(containerColor)
+        : null;
+
+    return BrowserTabBarView(
+      showMainToolbar: showMainToolbar,
+      showContextualToolbar: showContextualToolbar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      displayAppBar: displayAppBar,
+      displayQuickTabSwitcher: displayQuickTabSwitcher,
+      backgroundColor: backgroundColor,
+      title: showTabTitle
+          ? settings.tabBarLayout == TabBarLayout.compact
+                ? const CompactAppBarTitle()
+                : const AppBarTitle()
+          : null,
+      actions: [
+        if (showTabTitle)
+          Consumer(
+            builder: (context, ref, child) {
+              final tabBarReaderView = ref.watch(
+                generalSettingsWithDefaultsProvider.select(
+                  (value) => value.tabBarReaderView,
+                ),
+              );
+
+              final readerabilityStateActive = ref.watch(
+                selectedTabStateProvider.select(
+                  (state) =>
+                      (state?.readerableState ?? ReaderableState.$default())
+                          .active,
+                ),
+              );
+
+              return Visibility(
+                visible: tabBarReaderView || readerabilityStateActive,
+                child: ReaderButton(
+                  buttonBuilder: (isLoading, readerActive, icon) =>
+                      ToolbarButton(
+                        onTap: isLoading
+                            ? null
+                            : () async {
+                                await ref
+                                    .read(
+                                      readerableScreenControllerProvider
+                                          .notifier,
+                                    )
+                                    .toggleReaderView(!readerActive);
+                              },
+                        child: icon,
+                      ),
+                ),
+              );
+            },
+          ),
+        if (showExtensionShortcut)
+          ExtensionShortcutMenu(
+            controller: extensionMenuController,
+            child: ToolbarButton(
+              onTap: () {
+                if (extensionMenuController.isOpen) {
+                  extensionMenuController.close();
+                } else {
+                  extensionMenuController.open();
+                }
+              },
+              child: const Icon(MdiIcons.puzzle),
+            ),
+          ),
+        if (showMainToolbarTabsCount)
+          TabsCountButton(
+            selectedTabId: selectedTabId,
+            displayedSheet: displayedSheet,
+            showLongPressMenu: true,
+          ),
+        if (showMainToolbarNavigationButton)
+          NavigationMenuButton(selectedTabId: selectedTabId),
+      ],
+      quickTabSwitcher: QuickTabSwitcher(
+        quickTabSwitcherMode: quickTabSwitcherMode,
+      ),
+      contextualToolbar: ContextualToolbar(
+        selectedTabId: selectedTabId,
+        displayedSheet: displayedSheet,
+      ),
       onHorizontalDragStart: (details) {
         dragStartPosition.value = details.globalPosition;
       },
@@ -262,6 +349,52 @@ class BrowserTabBar extends HookConsumerWidget {
               .dismiss();
         }
       },
+    );
+  }
+}
+
+class BrowserTabBarView extends StatelessWidget {
+  const BrowserTabBarView({
+    super.key,
+    required this.showMainToolbar,
+    required this.showContextualToolbar,
+    required this.showQuickTabSwitcherBar,
+    required this.displayAppBar,
+    required this.displayQuickTabSwitcher,
+    required this.backgroundColor,
+    required this.title,
+    required this.actions,
+    required this.quickTabSwitcher,
+    required this.contextualToolbar,
+    this.onHorizontalDragStart,
+    this.onHorizontalDragEnd,
+    this.onVerticalDragStart,
+    this.onVerticalDragEnd,
+  });
+
+  final bool showMainToolbar;
+  final bool showContextualToolbar;
+  final bool showQuickTabSwitcherBar;
+  final bool displayAppBar;
+  final bool displayQuickTabSwitcher;
+  final Color? backgroundColor;
+  final Widget? title;
+  final List<Widget> actions;
+  final Widget quickTabSwitcher;
+  final Widget contextualToolbar;
+  final GestureDragStartCallback? onHorizontalDragStart;
+  final GestureDragEndCallback? onHorizontalDragEnd;
+  final GestureDragStartCallback? onVerticalDragStart;
+  final GestureDragEndCallback? onVerticalDragEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      // Tap handling moved to AppBarTitle for split icon/title behavior
+      onHorizontalDragStart: onHorizontalDragStart,
+      onHorizontalDragEnd: onHorizontalDragEnd,
+      onVerticalDragStart: onVerticalDragStart,
+      onVerticalDragEnd: onVerticalDragEnd,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -269,9 +402,7 @@ class BrowserTabBar extends HookConsumerWidget {
             Visibility(
               visible: displayQuickTabSwitcher,
               maintainState: true,
-              child: QuickTabSwitcher(
-                quickTabSwitcherMode: quickTabSwitcherMode,
-              ),
+              child: quickTabSwitcher,
             ),
           if (showMainToolbar)
             Visibility(
@@ -283,95 +414,19 @@ class BrowserTabBar extends HookConsumerWidget {
                 titleSpacing: 0.0,
                 leadingWidth: 40.0,
                 toolbarHeight: kToolbarHeight,
-                backgroundColor:
-                    (settings.showContainerUi &&
-                        containerColor != null &&
-                        displayedSheet is! ViewTabsSheet)
-                    ? ContainerColors.forAppBar(containerColor)
-                    : null,
-                title:
-                    (selectedTabId != null && displayedSheet is! ViewTabsSheet)
-                    ? settings.tabBarLayout == TabBarLayout.compact
-                        ? const CompactAppBarTitle()
-                        : const AppBarTitle()
-                    : null,
-                actions: [
-                  if (selectedTabId != null && displayedSheet is! ViewTabsSheet)
-                    Consumer(
-                      builder: (context, ref, child) {
-                        final tabBarReaderView = ref.watch(
-                          generalSettingsWithDefaultsProvider.select(
-                            (value) => value.tabBarReaderView,
-                          ),
-                        );
-
-                        final readerabilityStateActive = ref.watch(
-                          selectedTabStateProvider.select(
-                            (state) =>
-                                (state?.readerableState ??
-                                        ReaderableState.$default())
-                                    .active,
-                          ),
-                        );
-
-                        return Visibility(
-                          visible: tabBarReaderView || readerabilityStateActive,
-                          child: ReaderButton(
-                            buttonBuilder: (isLoading, readerActive, icon) =>
-                                ToolbarButton(
-                                  onTap: isLoading
-                                      ? null
-                                      : () async {
-                                          await ref
-                                              .read(
-                                                readerableScreenControllerProvider
-                                                    .notifier,
-                                              )
-                                              .toggleReaderView(!readerActive);
-                                        },
-                                  child: icon,
-                                ),
-                          ),
-                        );
-                      },
-                    ),
-                  if (showExtensionShortcut)
-                    ExtensionShortcutMenu(
-                      controller: extensionMenuController,
-                      child: ToolbarButton(
-                        onTap: () {
-                          if (extensionMenuController.isOpen) {
-                            extensionMenuController.close();
-                          } else {
-                            extensionMenuController.open();
-                          }
-                        },
-                        child: const Icon(MdiIcons.puzzle),
-                      ),
-                    ),
-                  if (showMainToolbarTabsCount)
-                    TabsCountButton(
-                      selectedTabId: selectedTabId,
-                      displayedSheet: displayedSheet,
-                      showLongPressMenu: true,
-                    ),
-                  if (showMainToolbarNavigationButton)
-                    NavigationMenuButton(selectedTabId: selectedTabId),
-                ],
+                backgroundColor: backgroundColor,
+                title: title,
+                actions: actions,
               ),
             ),
-          if (showContextualToolbar)
-            ContextualToolbar(
-              selectedTabId: selectedTabId,
-              displayedSheet: displayedSheet,
-            ),
+          if (showContextualToolbar) contextualToolbar,
         ],
       ),
     );
   }
 }
 
-class _QuickTabItem with FastEquatable {
+class QuickTabSwitcherItem with FastEquatable {
   final Color? color;
   final String id;
   final TabMode tabMode;
@@ -379,9 +434,9 @@ class _QuickTabItem with FastEquatable {
   final bool isPinned;
   final String title;
   final Uri url;
-  final TabState? tabState;
+  final Widget avatar;
 
-  _QuickTabItem({
+  QuickTabSwitcherItem({
     required this.color,
     required this.id,
     required this.tabMode,
@@ -389,7 +444,7 @@ class _QuickTabItem with FastEquatable {
     required this.isPinned,
     required this.title,
     required this.url,
-    required this.tabState,
+    required this.avatar,
   });
 
   @override
@@ -401,7 +456,7 @@ class _QuickTabItem with FastEquatable {
     isPinned,
     title,
     url,
-    tabState,
+    avatar,
   ];
 }
 
@@ -419,35 +474,71 @@ class ContextualToolbar extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(tabStateProvider(selectedTabId));
 
+    return ContextualToolbarView(
+      canGoBack:
+          tabState?.historyState.canGoBack == true ||
+          tabState?.isLoading == true,
+      canGoForward: tabState?.historyState.canGoForward == true,
+      onBookmarksTap: () async {
+        await BookmarkListRoute(entryGuid: BookmarkRoot.root.id).push(context);
+      },
+      backButton: NavigateBackButton(
+        selectedTabId: selectedTabId,
+        isLoading: tabState?.isLoading ?? false,
+      ),
+      forwardButton: NavigateForwardButton(selectedTabId: selectedTabId),
+      shareButton: ShareMenuButton(selectedTabId: selectedTabId),
+      addTabButton: const AddTabButton(),
+      tabsCountButton: TabsCountButton(
+        selectedTabId: selectedTabId,
+        displayedSheet: displayedSheet,
+        showLongPressMenu: false,
+      ),
+      navigationButton: NavigationMenuButton(selectedTabId: selectedTabId),
+    );
+  }
+}
+
+class ContextualToolbarView extends StatelessWidget {
+  const ContextualToolbarView({
+    super.key,
+    required this.canGoBack,
+    required this.canGoForward,
+    required this.onBookmarksTap,
+    required this.backButton,
+    required this.forwardButton,
+    required this.shareButton,
+    required this.addTabButton,
+    required this.tabsCountButton,
+    required this.navigationButton,
+  });
+
+  final bool canGoBack;
+  final bool canGoForward;
+  final VoidCallback onBookmarksTap;
+  final Widget backButton;
+  final Widget forwardButton;
+  final Widget shareButton;
+  final Widget addTabButton;
+  final Widget tabsCountButton;
+  final Widget navigationButton;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        if (tabState?.historyState.canGoBack == true ||
-            tabState?.isLoading == true)
-          NavigateBackButton(
-            selectedTabId: selectedTabId,
-            isLoading: tabState?.isLoading ?? false,
-          )
+        if (canGoBack)
+          backButton
         else
           IconButton(
-            onPressed: () async {
-              await BookmarkListRoute(
-                entryGuid: BookmarkRoot.root.id,
-              ).push(context);
-            },
+            onPressed: onBookmarksTap,
             icon: const Icon(MdiIcons.bookmarkMultiple),
           ),
-        if (tabState?.historyState.canGoForward == true)
-          NavigateForwardButton(selectedTabId: selectedTabId)
-        else
-          ShareMenuButton(selectedTabId: selectedTabId),
-        const AddTabButton(),
-        TabsCountButton(
-          selectedTabId: selectedTabId,
-          displayedSheet: displayedSheet,
-          showLongPressMenu: false,
-        ),
-        NavigationMenuButton(selectedTabId: selectedTabId),
+        if (canGoForward) forwardButton else shareButton,
+        addTabButton,
+        tabsCountButton,
+        navigationButton,
       ],
     );
   }
@@ -460,7 +551,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appColors = AppColors.of(context);
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
     );
@@ -484,8 +574,8 @@ class QuickTabSwitcher extends HookConsumerWidget {
         .watch(quickTabSwitcherHistorySuggestionsProvider(quickTabSwitcherMode))
         .value;
     final availableItems = tabStates.value
-        .map<_QuickTabItem>(
-          (state) => _QuickTabItem(
+        .map<QuickTabSwitcherItem>(
+          (state) => QuickTabSwitcherItem(
             id: state.$1.id,
             title: state.$1.titleOrAuthority,
             tabMode: state.$1.tabMode,
@@ -493,14 +583,14 @@ class QuickTabSwitcher extends HookConsumerWidget {
             isPinned: pinnedTabIds?.contains(state.$1.id) ?? false,
             url: state.$1.url,
             color: state.$2?.color,
-            tabState: state.$1,
+            avatar: TabIcon(tabState: state.$1, iconSize: 20),
           ),
         )
         .followedBy(
-          (historySuggestions ?? []).map<_QuickTabItem>((state) {
+          (historySuggestions ?? []).map<QuickTabSwitcherItem>((state) {
             final url = Uri.parse(state.url);
 
-            return _QuickTabItem(
+            return QuickTabSwitcherItem(
               id: state.url,
               title: state.title ?? url.authority,
               tabMode: TabMode.regular,
@@ -508,136 +598,164 @@ class QuickTabSwitcher extends HookConsumerWidget {
               isPinned: false,
               url: url,
               color: null,
-              tabState: null,
+              avatar: UrlIcon([url], iconSize: 20),
             );
           }),
         )
         .toList();
 
+    final chipScrollController = useScrollController();
+
+    return QuickTabSwitcherView(
+      availableItems: availableItems,
+      scrollController: chipScrollController,
+      showTitles: showTitles,
+      showIsolatedTabUi: showIsolatedTabUi,
+      onSelected: (item) async {
+        final animation = chipScrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutBack,
+        );
+        if (item.isHistory) {
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(url: item.url, tabMode: TabMode.regular, selectTab: true);
+        } else {
+          await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
+        }
+        await animation;
+      },
+      itemWrapBuilder: (child, item) {
+        if (item.isHistory) {
+          return child;
+        }
+
+        return TabMenu(
+          selectedTabId: item.id,
+          enableFindInPage: false,
+          enableFetchFeeds: false,
+          enableDesktopMode: false,
+          enableReaderMode: false,
+          enableReloadButton: false,
+          enableNavigationButtons: false,
+          enableAddToHomeScreen: false,
+          enablePinTab: effectiveMode == QuickTabSwitcherMode.containerTabs,
+          builder: (context, controller, _) {
+            return InkWell(
+              onLongPress: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              child: child,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class QuickTabSwitcherView extends StatelessWidget {
+  const QuickTabSwitcherView({
+    super.key,
+    required this.availableItems,
+    required this.scrollController,
+    required this.showTitles,
+    required this.showIsolatedTabUi,
+    required this.onSelected,
+    required this.itemWrapBuilder,
+  });
+
+  final List<QuickTabSwitcherItem> availableItems;
+  final ScrollController scrollController;
+  final bool showTitles;
+  final bool showIsolatedTabUi;
+  final Future<void> Function(QuickTabSwitcherItem item) onSelected;
+  final Widget Function(Widget child, QuickTabSwitcherItem item)
+  itemWrapBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = AppColors.of(context);
+
     if (availableItems.isEmpty) {
       return const SizedBox.shrink();
     }
-
-    final chipScrollController = useScrollController();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: SizedBox(
         height: 48,
         width: double.maxFinite,
-        child: SelectableChips<_QuickTabItem, _QuickTabItem, String>(
-          enableDelete: false,
-          scrollController: chipScrollController,
-          itemId: (item) => item.id,
-          labelPadding: (item) =>
-              (!showTitles &&
-                  !item.isHistory &&
-                  !item.isPinned &&
-                  item.tabMode is! PrivateTabMode &&
-                  item.tabMode is! IsolatedTabMode)
-              ? EdgeInsets.zero
-              : null,
-          itemLabel: (item) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (item.isHistory || showTitles)
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 64),
-                    child: Text(item.title),
-                  ),
-                if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Icon(
-                      MdiIcons.snowflake,
-                      color: appColors.isolatedTabTeal,
-                      size: 20,
-                    ),
-                  )
-                else if (item.tabMode is PrivateTabMode)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Icon(
-                      MdiIcons.dominoMask,
-                      color: appColors.privateTabPurple,
-                      size: 20,
-                    ),
-                  ),
-                if (item.isPinned)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Icon(
-                      MdiIcons.pin,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 20,
-                    ),
-                  ),
-                if (item.isHistory)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Icon(MdiIcons.history, size: 20),
-                  ),
-              ],
-            );
-          },
-          itemAvatar: (item) =>
-              item.tabState.mapNotNull(
-                (tabState) => TabIcon(tabState: tabState, iconSize: 20),
-              ) ??
-              UrlIcon([item.url], iconSize: 20),
-          itemBackgroundColor: (item) =>
-              item.color != null ? ContainerColors.forChip(item.color!) : null,
-          onSelected: (item) async {
-            final animation = chipScrollController.animateTo(
-              0,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutBack,
-            );
-            if (item.isHistory) {
-              await ref
-                  .read(tabRepositoryProvider.notifier)
-                  .addTab(
-                    url: item.url,
-                    tabMode: TabMode.regular,
-                    selectTab: true,
-                  );
-            } else {
-              await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
-            }
-            await animation;
-          },
-          itemWrap: (child, item) {
-            if (item.isHistory) {
-              return child;
-            }
-
-            return TabMenu(
-              selectedTabId: item.id,
-              enableFindInPage: false,
-              enableFetchFeeds: false,
-              enableDesktopMode: false,
-              enableReaderMode: false,
-              enableReloadButton: false,
-              enableNavigationButtons: false,
-              enableAddToHomeScreen: false,
-              enablePinTab: effectiveMode == QuickTabSwitcherMode.containerTabs,
-              builder: (context, controller, _) {
-                return InkWell(
-                  onLongPress: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  child: child,
+        child:
+            SelectableChips<QuickTabSwitcherItem, QuickTabSwitcherItem, String>(
+              enableDelete: false,
+              scrollController: scrollController,
+              itemId: (item) => item.id,
+              labelPadding: (item) =>
+                  (!showTitles &&
+                      !item.isHistory &&
+                      !item.isPinned &&
+                      item.tabMode is! PrivateTabMode &&
+                      item.tabMode is! IsolatedTabMode)
+                  ? EdgeInsets.zero
+                  : null,
+              itemLabel: (item) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (item.isHistory || showTitles)
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 64),
+                        child: Text(item.title),
+                      ),
+                    if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Icon(
+                          MdiIcons.snowflake,
+                          color: appColors.isolatedTabTeal,
+                          size: 20,
+                        ),
+                      )
+                    else if (item.tabMode is PrivateTabMode)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Icon(
+                          MdiIcons.dominoMask,
+                          color: appColors.privateTabPurple,
+                          size: 20,
+                        ),
+                      ),
+                    if (item.isPinned)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Icon(
+                          MdiIcons.pin,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
+                      ),
+                    if (item.isHistory)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Icon(MdiIcons.history, size: 20),
+                      ),
+                  ],
                 );
               },
-            );
-          },
-          availableItems: availableItems,
-        ),
+              itemAvatar: (item) => item.avatar,
+              itemBackgroundColor: (item) => item.color != null
+                  ? ContainerColors.forChip(item.color!)
+                  : null,
+              onSelected: onSelected,
+              itemWrap: itemWrapBuilder,
+              availableItems: availableItems,
+            ),
       ),
     );
   }
@@ -650,15 +768,25 @@ class ShareMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return ShareMenuButtonView(
       onPressed: () async {
         final tabId = selectedTabId;
         if (tabId != null) {
           await showShareBottomSheet(context, selectedTabId: tabId);
         }
       },
-      icon: const Icon(Icons.share),
     );
+  }
+}
+
+class ShareMenuButtonView extends StatelessWidget {
+  const ShareMenuButtonView({super.key, this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(onPressed: onPressed, icon: const Icon(Icons.share));
   }
 }
 
@@ -669,12 +797,22 @@ class NavigationMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ToolbarButton(
+    return NavigationMenuButtonView(
       onTap: () async {
         await showBrowserMenuSheet(context);
       },
-      child: const Icon(Icons.more_vert),
     );
+  }
+}
+
+class NavigationMenuButtonView extends StatelessWidget {
+  const NavigationMenuButtonView({super.key, this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ToolbarButton(onTap: onTap, child: const Icon(Icons.more_vert));
   }
 }
 
@@ -687,7 +825,7 @@ class AddTabButton extends HookConsumerWidget {
 
     return TabCreationMenu(
       controller: tabMenuController,
-      child: IconButton(
+      child: AddTabButtonView(
         onPressed: () async {
           final settings = ref.read(generalSettingsWithDefaultsProvider);
 
@@ -701,7 +839,6 @@ class AddTabButton extends HookConsumerWidget {
             const BrowserRoute().go(context);
           }
         },
-        icon: const Icon(MdiIcons.tabPlus),
         onLongPress: () {
           if (tabMenuController.isOpen) {
             tabMenuController.close();
@@ -711,6 +848,53 @@ class AddTabButton extends HookConsumerWidget {
         },
       ),
     );
+  }
+}
+
+class AddTabButtonView extends StatelessWidget {
+  const AddTabButtonView({super.key, this.onPressed, this.onLongPress});
+
+  final VoidCallback? onPressed;
+  final VoidCallback? onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: const Icon(MdiIcons.tabPlus),
+      onLongPress: onLongPress,
+    );
+  }
+}
+
+class TabsCountButtonView extends StatelessWidget {
+  const TabsCountButtonView({
+    super.key,
+    required this.isActive,
+    required this.onTap,
+    this.onLongPress,
+    this.buttonBuilder,
+  });
+
+  final bool isActive;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final Widget Function(
+    bool isActive,
+    VoidCallback onTap,
+    VoidCallback? onLongPress,
+  )?
+  buttonBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return (buttonBuilder != null)
+        ? buttonBuilder!(isActive, onTap, onLongPress)
+        : TabsActionButton(
+            isActive: isActive,
+            onTap: onTap,
+            onLongPress: onLongPress,
+          );
   }
 }
 
@@ -732,7 +916,7 @@ class TabsCountButton extends HookConsumerWidget {
 
     return TabCreationMenu(
       controller: tabMenuController,
-      child: TabsActionButton(
+      child: TabsCountButtonView(
         isActive: displayedSheet is ViewTabsSheet,
         onTap: () async {
           final tabViewBottomSheet = ref
