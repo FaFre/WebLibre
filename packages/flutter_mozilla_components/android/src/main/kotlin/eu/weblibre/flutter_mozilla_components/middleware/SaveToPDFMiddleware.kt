@@ -24,6 +24,15 @@ class SaveToPDFMiddleware : Middleware<BrowserState, BrowserAction> {
             is EngineAction.SaveToPdfExceptionAction -> {
                 logger.error("Unable to save PDF", action.throwable)
             }
+            is EngineAction.PrintContentAction -> {
+                next(action)
+            }
+            is EngineAction.PrintContentCompletedAction -> {
+                logger.info("Print completed successfully")
+            }
+            is EngineAction.PrintContentExceptionAction -> {
+                logger.error("Unable to print content", action.throwable)
+            }
             else -> {
                 next(action)
             }

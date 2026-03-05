@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/find_result.d
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/translation.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 part 'tab.g.dart';
@@ -75,6 +76,7 @@ class TabState extends WebPageInfo {
   final HistoryState historyState;
   final ReaderableState readerableState;
   final FindResultState findResultState;
+  final TranslationState translationState;
 
   TabState({
     required this.id,
@@ -93,6 +95,7 @@ class TabState extends WebPageInfo {
     required this.historyState,
     required this.readerableState,
     required this.findResultState,
+    required this.translationState,
   }) : super(title: title.trim());
 
   factory TabState.$default(String tabId) => TabState(
@@ -111,6 +114,7 @@ class TabState extends WebPageInfo {
     historyState: HistoryState.$default(),
     readerableState: ReaderableState.$default(),
     findResultState: FindResultState.$default(),
+    translationState: TranslationState.$default(),
   );
 
   @override
@@ -130,5 +134,6 @@ class TabState extends WebPageInfo {
     historyState,
     readerableState,
     findResultState,
+    translationState,
   ];
 }

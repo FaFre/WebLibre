@@ -31,12 +31,14 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
@@ -577,10 +579,53 @@ class TabMenu extends HookConsumerWidget {
                 },
               ),
               SaveToPdfMenuItemButton(selectedTabId: selectedTabId),
+              PrintMenuItemButton(selectedTabId: selectedTabId),
             ],
             leadingIcon: const Icon(MdiIcons.fileExport),
             child: const Text('Export'),
           ),
+        Consumer(
+          builder: (context, ref, child) {
+            final engineState = ref.watch(translationEngineStateProvider);
+            final translationState = ref.watch(
+              tabStateProvider(selectedTabId)
+                  .select((s) => s?.translationState),
+            );
+            final readerActive = ref.watch(
+              tabStateProvider(selectedTabId)
+                  .select((s) => s?.readerableState.active ?? false),
+            );
+
+            // Hide when reader mode is active (Fenix-aligned)
+            if (readerActive || engineState?.isEngineSupported != true) {
+              return const SizedBox.shrink();
+            }
+
+            final isTranslated = translationState?.isTranslated ?? false;
+
+            return MenuItemButton(
+              closeOnActivate: false,
+              leadingIcon: Icon(
+                Icons.translate,
+                color: isTranslated
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+              ),
+              onPressed: () async {
+                controller.close();
+                if (context.mounted) {
+                  await showTranslationBottomSheet(
+                    context,
+                    selectedTabId: selectedTabId,
+                  );
+                }
+              },
+              child: Text(
+                isTranslated ? 'Translated' : 'Translate Page',
+              ),
+            );
+          },
+        ),
         if (enablePinTab)
           Consumer(
             builder: (context, childRef, child) {

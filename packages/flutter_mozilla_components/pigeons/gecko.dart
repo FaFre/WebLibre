@@ -16,6 +16,77 @@ class TranslationOptions {
   TranslationOptions({this.downloadModel = true});
 }
 
+/// A language supported by the translation engine.
+class TranslationLanguage {
+  final String code;
+  final String localizedDisplayName;
+
+  TranslationLanguage({required this.code, required this.localizedDisplayName});
+}
+
+/// Detected languages for a page.
+class TranslationDetectedLanguages {
+  final String? documentLangTag;
+  final bool? supportedDocumentLang;
+  final String? userPreferredLangTag;
+
+  TranslationDetectedLanguages({
+    this.documentLangTag,
+    this.supportedDocumentLang,
+    this.userPreferredLangTag,
+  });
+}
+
+/// A from/to language pair for translation.
+class TranslationPair {
+  final String fromLanguage;
+  final String toLanguage;
+
+  TranslationPair({required this.fromLanguage, required this.toLanguage});
+}
+
+/// Browser-level translation engine state (global).
+class TranslationEngineStateData {
+  final bool? isEngineSupported;
+  final List<TranslationLanguage?>? fromLanguages;
+  final List<TranslationLanguage?>? toLanguages;
+
+  TranslationEngineStateData({
+    this.isEngineSupported,
+    this.fromLanguages,
+    this.toLanguages,
+  });
+}
+
+/// Per-tab translation state.
+class TabTranslationStateData {
+  final String tabId;
+  final bool isTranslated;
+  final bool isTranslateProcessing;
+  final bool isOfferTranslate;
+  final bool isExpectedTranslate;
+  final String? detectedLanguageCode;
+  final String? userPreferredLanguageCode;
+  final String? requestedFromLanguage;
+  final String? requestedToLanguage;
+  final String? translationErrorName;
+  final bool? displayError;
+
+  TabTranslationStateData({
+    required this.tabId,
+    required this.isTranslated,
+    required this.isTranslateProcessing,
+    required this.isOfferTranslate,
+    required this.isExpectedTranslate,
+    this.detectedLanguageCode,
+    this.userPreferredLanguageCode,
+    this.requestedFromLanguage,
+    this.requestedToLanguage,
+    this.translationErrorName,
+    this.displayError,
+  });
+}
+
 /// Value type that represents the state of reader mode/view.
 class ReaderState {
   /// Whether or not the current page can be transformed to
@@ -1256,6 +1327,7 @@ abstract class GeckoTabsApi {
     required bool onPageExtensionsChange,
     required bool onBrowserExtensionIcons,
     required bool onPageExtensionIcons,
+    required bool onTranslationStateChange,
   });
 
   void selectTab({required String tabId});
@@ -1562,6 +1634,15 @@ abstract class GeckoStateEvents {
   void onMlProgress(int sequence, MlProgressData progress);
 
   void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest);
+
+  void onTranslationEngineStateChange(
+    int sequence,
+    TranslationEngineStateData state,
+  );
+  void onTabTranslationStateChange(
+    int sequence,
+    TabTranslationStateData state,
+  );
 }
 
 @FlutterApi()

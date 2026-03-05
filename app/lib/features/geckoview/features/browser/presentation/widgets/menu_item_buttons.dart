@@ -109,6 +109,36 @@ class SaveToPdfMenuItemButton extends HookConsumerWidget {
   }
 }
 
+class PrintMenuItemButton extends HookConsumerWidget {
+  const PrintMenuItemButton({super.key, required this.selectedTabId});
+
+  final String? selectedTabId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MenuItemButton(
+      leadingIcon: const Icon(MdiIcons.printer),
+      closeOnActivate: false,
+      onPressed: () async {
+        try {
+          await ref
+              .read(tabSessionProvider(tabId: selectedTabId).notifier)
+              .printContent();
+        } catch (e) {
+          if (context.mounted) {
+            ui_helper.showErrorMessage(context, 'Failed to print page');
+          }
+        }
+
+        if (context.mounted) {
+          MenuController.maybeOf(context)?.close();
+        }
+      },
+      child: const Text('Print'),
+    );
+  }
+}
+
 class ShareMarkdownActionMenuItemButton extends HookConsumerWidget {
   const ShareMarkdownActionMenuItemButton({
     super.key,

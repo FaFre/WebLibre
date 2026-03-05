@@ -27,6 +27,9 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ReaderableState
 import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation
 import eu.weblibre.flutter_mozilla_components.pigeons.SecurityInfoState
 import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
+import eu.weblibre.flutter_mozilla_components.pigeons.TabTranslationStateData
+import eu.weblibre.flutter_mozilla_components.pigeons.TranslationEngineStateData
+import eu.weblibre.flutter_mozilla_components.pigeons.TranslationLanguage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -39,6 +42,7 @@ import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.action.EngineAction
 import mozilla.components.browser.state.action.TabListAction
+import mozilla.components.browser.state.action.TranslationsAction
 import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.LastMediaAccessState
@@ -55,6 +59,7 @@ import org.json.JSONObject
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import mozilla.components.feature.addons.logger
 import mozilla.components.concept.engine.EngineSession
+import mozilla.components.concept.engine.translate.TranslationOperation
 
 class GeckoTabsApiImpl : GeckoTabsApi {
     companion object {
@@ -185,6 +190,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         onPageExtensionsChange: Boolean,
         onBrowserExtensionIcons: Boolean,
         onPageExtensionIcons: Boolean,
+        onTranslationStateChange: Boolean,
     ) {
         try {
             val tabs = components.core.store.state.tabs.map { it.copy() }
@@ -293,8 +299,82 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     onPageExtensionIcons
                 )
             }
+
+            // Sync translation events
+            if (onTranslationStateChange) {
+                syncTranslationEvents(tabs)
+            }
         } catch (e: Exception) {
             logger.error("$TAG: Failed to sync events", e)
+        }
+    }
+
+    private fun syncTranslationEvents(tabs: List<mozilla.components.browser.state.state.TabSessionState>) {
+        try {
+            val browserState = components.core.store.state
+
+            // Retry initialization when support status is still unknown.
+            if (browserState.translationEngine.isEngineSupported == null) {
+                components.core.store.dispatch(TranslationsAction.InitTranslationsBrowserState)
+            }
+
+            // Fetch supported languages when engine is supported but languages are still missing.
+            if (
+                browserState.translationEngine.isEngineSupported == true &&
+                (
+                    browserState.translationEngine.supportedLanguages?.fromLanguages == null ||
+                        browserState.translationEngine.supportedLanguages?.toLanguages == null
+                    )
+            ) {
+                components.core.store.dispatch(
+                    TranslationsAction.OperationRequestedAction(
+                        tabId = browserState.selectedTabId,
+                        operation = TranslationOperation.FETCH_SUPPORTED_LANGUAGES,
+                    )
+                )
+            }
+
+            val translationEngine = browserState.translationEngine
+
+            // Emit browser-level engine state
+            val fromLanguages = translationEngine.supportedLanguages?.fromLanguages?.map { lang ->
+                TranslationLanguage(code = lang.code, localizedDisplayName = lang.localizedDisplayName ?: lang.code)
+            }
+            val toLanguages = translationEngine.supportedLanguages?.toLanguages?.map { lang ->
+                TranslationLanguage(code = lang.code, localizedDisplayName = lang.localizedDisplayName ?: lang.code)
+            }
+
+            components.flutterEvents.onTranslationEngineStateChange(
+                EventSequence.next(),
+                TranslationEngineStateData(
+                    isEngineSupported = translationEngine.isEngineSupported,
+                    fromLanguages = fromLanguages,
+                    toLanguages = toLanguages,
+                )
+            ) { }
+
+            // Emit per-tab translation state
+            tabs.forEach { tab ->
+                val translationsState = tab.translationsState
+                components.flutterEvents.onTabTranslationStateChange(
+                    EventSequence.next(),
+                    TabTranslationStateData(
+                        tabId = tab.id,
+                        isTranslated = translationsState.isTranslated,
+                        isTranslateProcessing = translationsState.isTranslateProcessing,
+                        isOfferTranslate = translationsState.isOfferTranslate,
+                        isExpectedTranslate = translationsState.isExpectedTranslate,
+                        detectedLanguageCode = translationsState.translationEngineState?.detectedLanguages?.documentLangTag,
+                        userPreferredLanguageCode = translationsState.translationEngineState?.detectedLanguages?.userPreferredLangTag,
+                        requestedFromLanguage = translationsState.translationEngineState?.requestedTranslationPair?.fromLanguage,
+                        requestedToLanguage = translationsState.translationEngineState?.requestedTranslationPair?.toLanguage,
+                        translationErrorName = translationsState.translationError?.errorName,
+                        displayError = translationsState.translationError?.displayError,
+                    )
+                ) { }
+            }
+        } catch (e: Exception) {
+            logger.error("$TAG: Failed to sync translation events", e)
         }
     }
 

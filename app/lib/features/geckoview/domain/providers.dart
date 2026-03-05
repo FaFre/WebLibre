@@ -239,6 +239,27 @@ Stream<MlProgressData> mlProgressEvents(Ref ref) {
   return service.mlProgressEvents;
 }
 
+/// Translation engine state (browser-level: supported languages, engine availability)
+@Riverpod(keepAlive: true)
+class TranslationEngineState extends _$TranslationEngineState {
+  @override
+  TranslationEngineStateData? build() {
+    final eventService = ref.watch(eventServiceProvider);
+
+    final sub = eventService.translationEngineEvents.listen((value) {
+      if (ref.mounted) {
+        state = value;
+      }
+    });
+
+    ref.onDispose(() async {
+      await sub.cancel();
+    });
+
+    return eventService.translationEngineEvents.valueOrNull;
+  }
+}
+
 /// Tracks active ML model downloads
 @Riverpod()
 class MlDownloadState extends _$MlDownloadState {

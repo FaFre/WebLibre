@@ -389,6 +389,72 @@ final class MlProgressEventsProvider
 
 String _$mlProgressEventsHash() => r'41c1e6aece7f9ee2bebe5d189c6bec753c2fefc8';
 
+/// Translation engine state (browser-level: supported languages, engine availability)
+
+@ProviderFor(TranslationEngineState)
+final translationEngineStateProvider = TranslationEngineStateProvider._();
+
+/// Translation engine state (browser-level: supported languages, engine availability)
+final class TranslationEngineStateProvider
+    extends
+        $NotifierProvider<TranslationEngineState, TranslationEngineStateData?> {
+  /// Translation engine state (browser-level: supported languages, engine availability)
+  TranslationEngineStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'translationEngineStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$translationEngineStateHash();
+
+  @$internal
+  @override
+  TranslationEngineState create() => TranslationEngineState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TranslationEngineStateData? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TranslationEngineStateData?>(value),
+    );
+  }
+}
+
+String _$translationEngineStateHash() =>
+    r'04592e18715b0e237e9bc027287a880a4bb023da';
+
+/// Translation engine state (browser-level: supported languages, engine availability)
+
+abstract class _$TranslationEngineState
+    extends $Notifier<TranslationEngineStateData?> {
+  TranslationEngineStateData? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref
+            as $Ref<TranslationEngineStateData?, TranslationEngineStateData?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                TranslationEngineStateData?,
+                TranslationEngineStateData?
+              >,
+              TranslationEngineStateData?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 /// Tracks active ML model downloads
 
 @ProviderFor(MlDownloadState)

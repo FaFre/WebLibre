@@ -76,6 +76,26 @@ class TabSession extends _$TabSession {
     return _sessionService.saveToPdf();
   }
 
+  Future<void> printContent() {
+    return _sessionService.printContent();
+  }
+
+  Future<void> translate({
+    required String fromLanguage,
+    required String toLanguage,
+    bool? downloadModel,
+  }) {
+    return _sessionService.translate(
+      fromLanguage: fromLanguage,
+      toLanguage: toLanguage,
+      options: TranslationOptions(downloadModel: downloadModel ?? true),
+    );
+  }
+
+  Future<void> translateRestore() {
+    return _sessionService.translateRestore();
+  }
+
   @override
   void build({required String? tabId}) {
     _sessionService = (tabId != null)

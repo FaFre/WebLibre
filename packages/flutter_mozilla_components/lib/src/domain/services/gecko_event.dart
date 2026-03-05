@@ -21,6 +21,8 @@ typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
 typedef LongPressEvent = ({String tabId, HitResult hitResult});
 typedef ScrollEvent = ({String tabId, int scrollY});
 typedef ManifestUpdateEvent = ({String tabId, PwaManifest? manifest});
+typedef TabTranslationEvent = ({String tabId, TabTranslationStateData state});
+typedef TranslationEngineEvent = TranslationEngineStateData;
 
 class GeckoEventService extends GeckoStateEvents {
   // Stream controllers
@@ -46,6 +48,9 @@ class GeckoEventService extends GeckoStateEvents {
   final _tabAddedSubject = PublishSubject<String>();
   final _mlProgressSubject = PublishSubject<MlProgressData>();
   final _manifestUpdateSubject = PublishSubject<ManifestUpdateEvent>();
+  final _translationEngineSubject =
+      BehaviorSubject<TranslationEngineEvent>();
+  final _tabTranslationSubject = ReplaySubject<TabTranslationEvent>();
 
   // Event streams
   ValueStream<bool> get viewReadyStateEvents => _viewStateSubject.stream;
@@ -72,6 +77,10 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<MlProgressData> get mlProgressEvents => _mlProgressSubject.stream;
   Stream<ManifestUpdateEvent> get manifestUpdateEvents =>
       _manifestUpdateSubject.stream;
+  ValueStream<TranslationEngineEvent> get translationEngineEvents =>
+      _translationEngineSubject.stream;
+  Stream<TabTranslationEvent> get tabTranslationEvents =>
+      _tabTranslationSubject.stream;
 
   @override
   void onViewReadyStateChange(int sequence, bool state) {
@@ -210,6 +219,25 @@ class GeckoEventService extends GeckoStateEvents {
     ));
   }
 
+  @override
+  void onTranslationEngineStateChange(
+    int sequence,
+    TranslationEngineStateData state,
+  ) {
+    _translationEngineSubject.addWhenMoreRecent(sequence, null, state);
+  }
+
+  @override
+  void onTabTranslationStateChange(
+    int sequence,
+    TabTranslationStateData state,
+  ) {
+    _tabTranslationSubject.addWhenMoreRecent(sequence, state.tabId, (
+      tabId: state.tabId,
+      state: state,
+    ));
+  }
+
   GeckoEventService.setUp({
     BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
@@ -241,5 +269,7 @@ class GeckoEventService extends GeckoStateEvents {
     await _siteAssignementSubject.close();
     await _mlProgressSubject.close();
     await _manifestUpdateSubject.close();
+    await _translationEngineSubject.close();
+    await _tabTranslationSubject.close();
   }
 }

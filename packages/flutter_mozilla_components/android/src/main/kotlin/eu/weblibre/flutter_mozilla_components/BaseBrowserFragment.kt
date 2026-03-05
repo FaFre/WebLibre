@@ -227,8 +227,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             val engineView = createEngine(components)
             fragmentEngineView = engineView  // Track for lifecycle management
-            val originalContext = ActivityContextWrapper.getOriginalContext(requireActivity())
-                ?.let { ProfileContext(it, components.profileApplicationContext.relativePath) }
+            val originalContext =
+                ActivityContextWrapper.getOriginalContext(requireActivity()) ?: requireActivity()
             val engineNativeView = engineView.asView()
             engineNativeView.layoutParams = layoutParams
 

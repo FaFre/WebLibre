@@ -49,6 +49,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
@@ -395,6 +396,9 @@ class _PageActionsCard extends HookConsumerWidget {
           },
         ),
 
+        // Translate Page
+        _TranslatePageTile(selectedTabId: selectedTabId),
+
         // Add to Home Screen (conditional)
         _AddToHomeScreenTile(selectedTabId: selectedTabId),
       ],
@@ -567,6 +571,48 @@ class _AddToHomeScreenTile extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _TranslatePageTile extends ConsumerWidget {
+  final String selectedTabId;
+
+  const _TranslatePageTile({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final engineState = ref.watch(translationEngineStateProvider);
+    final translationState = ref.watch(
+      tabStateProvider(selectedTabId).select((s) => s?.translationState),
+    );
+    final readerActive = ref.watch(
+      tabStateProvider(selectedTabId)
+          .select((s) => s?.readerableState.active ?? false),
+    );
+
+    // Hide when reader mode is active (Fenix-aligned)
+    if (readerActive || engineState?.isEngineSupported != true) {
+      return const SizedBox.shrink();
+    }
+
+    final isTranslated = translationState?.isTranslated ?? false;
+
+    return ListTile(
+      leading: Icon(
+        Icons.translate,
+        color: isTranslated ? Theme.of(context).colorScheme.primary : null,
+      ),
+      title: Text(isTranslated ? 'Translated' : 'Translate Page'),
+      onTap: () async {
+        Navigator.pop(context);
+        if (context.mounted) {
+          await showTranslationBottomSheet(
+            context,
+            selectedTabId: selectedTabId,
+          );
+        }
+      },
     );
   }
 }
@@ -1382,6 +1428,24 @@ class _ExportExpansion extends ConsumerWidget {
               await ref
                   .read(tabSessionProvider(tabId: selectedTabId).notifier)
                   .saveToPdf();
+              if (context.mounted) Navigator.pop(context);
+            },
+          ),
+
+          // Print
+          _buildSubTile(
+            'Print',
+            icon: MdiIcons.printer,
+            onTap: () async {
+              try {
+                await ref
+                    .read(tabSessionProvider(tabId: selectedTabId).notifier)
+                    .printContent();
+              } catch (e) {
+                if (context.mounted) {
+                  ui_helper.showErrorMessage(context, 'Failed to print page');
+                }
+              }
               if (context.mounted) Navigator.pop(context);
             },
           ),

@@ -37,6 +37,8 @@ abstract class _$TabStateCWProxy {
 
   TabState findResultState(FindResultState findResultState);
 
+  TabState translationState(TranslationState translationState);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
   ///
@@ -60,6 +62,7 @@ abstract class _$TabStateCWProxy {
     HistoryState historyState,
     ReaderableState readerableState,
     FindResultState findResultState,
+    TranslationState translationState,
   });
 }
 
@@ -121,6 +124,10 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
       call(findResultState: findResultState);
 
   @override
+  TabState translationState(TranslationState translationState) =>
+      call(translationState: translationState);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
   ///
@@ -144,6 +151,7 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
     Object? historyState = const $CopyWithPlaceholder(),
     Object? readerableState = const $CopyWithPlaceholder(),
     Object? findResultState = const $CopyWithPlaceholder(),
+    Object? translationState = const $CopyWithPlaceholder(),
   }) {
     return TabState(
       id: _value.id,
@@ -217,6 +225,12 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
           ? _value.findResultState
           // ignore: cast_nullable_to_non_nullable
           : findResultState as FindResultState,
+      translationState:
+          translationState == const $CopyWithPlaceholder() ||
+              translationState == null
+          ? _value.translationState
+          // ignore: cast_nullable_to_non_nullable
+          : translationState as TranslationState,
     );
   }
 }

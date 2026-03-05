@@ -29,6 +29,7 @@ class GeckoTabService {
     bool onPageExtensionsChange = false,
     bool onBrowserExtensionIcons = false,
     bool onPageExtensionIcons = false,
+    bool onTranslationStateChange = false,
   }) {
     return _api.syncEvents(
       onSelectedTabChange: onSelectedTabChange,
@@ -44,6 +45,7 @@ class GeckoTabService {
       onPageExtensionsChange: onPageExtensionsChange,
       onBrowserExtensionIcons: onBrowserExtensionIcons,
       onPageExtensionIcons: onPageExtensionIcons,
+      onTranslationStateChange: onTranslationStateChange,
     );
   }
 

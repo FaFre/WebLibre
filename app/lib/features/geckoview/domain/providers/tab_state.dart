@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/history.dart'
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/translation.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
@@ -203,6 +204,16 @@ class TabStates extends _$TabStates {
       );
   }
 
+  void _onTabTranslationStateChange(TabTranslationEvent event) {
+    final TabTranslationEvent(:tabId, :state) = event;
+
+    final current = this.state[tabId] ?? TabState.$default(tabId);
+    this.state = {...this.state}
+      ..[tabId] = current.copyWith.translationState(
+        TranslationState.fromData(state),
+      );
+  }
+
   void _onFindResultsChange(FindResultsEvent event) {
     final FindResultsEvent(:tabId, :results) = event;
     final current = state[tabId] ?? TabState.$default(tabId);
@@ -317,6 +328,18 @@ class TabStates extends _$TabStates {
               );
             },
           ),
+      eventService.tabTranslationEvents.listen(
+        (event) {
+          _onTabTranslationStateChange(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e(
+            'Error in tab translation events',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      ),
     ];
 
     ref.listen(
@@ -331,6 +354,7 @@ class TabStates extends _$TabStates {
             onSecurityInfoStateChange: true,
             onHistoryStateChange: true,
             onFindResults: true,
+            onTranslationStateChange: true,
           );
         }
       },
