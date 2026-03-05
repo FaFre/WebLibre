@@ -69,6 +69,7 @@ import 'package:weblibre/features/settings/presentation/screens/locale_settings.
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_content_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/tab_bar_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/tabs_behavior_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/tracking_protection_exceptions.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';

@@ -21,6 +21,7 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -42,7 +43,8 @@ class AppearanceDisplaySettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
                 _VisualSection(),
-                _TabBarLayoutSection(),
+                _TabBarSection(),
+                _TabViewSection(),
                 _GesturesSection(),
               ],
             );
@@ -67,99 +69,50 @@ class _VisualSection extends StatelessWidget {
   }
 }
 
-class _TabBarLayoutSection extends StatelessWidget {
-  const _TabBarLayoutSection();
+class _TabBarSection extends StatelessWidget {
+  const _TabBarSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Tab Bar Layout'),
-        _TabBarPositionSection(),
-        _TabBarLayoutModeSection(),
-        _ShowContextualTabBarTile(),
-        _AutoHideTabBarTile(),
-        _BottomSheetTabViewTile(),
-        _TabListShowFaviconsTile(),
-        _ShowQuickTabSwitcherBarTile(),
-        _QuickTabSwitcherModeSection(),
-        _QuickTabSwitcherHistorySuggestionsTile(),
-        _QuickTabSwitcherShowTitlesTile(),
+        SettingSection(name: 'Tab Bar'),
+        _TabBarSettingsTile(),
       ],
     );
   }
 }
 
-class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
-  const _QuickTabSwitcherShowTitlesTile();
+class _TabViewSection extends StatelessWidget {
+  const _TabViewSection();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final quickTabSwitcherShowTitles = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowTitles,
-      ),
-    );
-    final tabBarShowQuickTabSwitcherBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowQuickTabSwitcherBar,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Titles in Quick Tab Switcher'),
-      subtitle: const Text(
-        'Display tab titles alongside icons in the quick tab switcher bar',
-      ),
-      secondary: const Icon(MdiIcons.textRecognition),
-      value: quickTabSwitcherShowTitles,
-      onChanged: tabBarShowQuickTabSwitcherBar
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .quickTabSwitcherShowTitles(value),
-                  );
-            }
-          : null,
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Tab View'),
+        _BottomSheetTabViewTile(),
+        _TabListShowFaviconsTile(),
+      ],
     );
   }
 }
 
-class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
-  const _QuickTabSwitcherHistorySuggestionsTile();
+class _TabBarSettingsTile extends StatelessWidget {
+  const _TabBarSettingsTile();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showHistorySuggestions = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowHistorySuggestions,
-      ),
-    );
-    final tabBarShowQuickTabSwitcherBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowQuickTabSwitcherBar,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('History Fallback in Quick Tab Switcher'),
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('Customize Tab Bar'),
       subtitle: const Text(
-        'Use browsing history suggestions when no tab chips are available',
+        'Layout, contextual bar, quick switcher, and preview',
       ),
-      secondary: const Icon(MdiIcons.history),
-      value: showHistorySuggestions,
-      onChanged: tabBarShowQuickTabSwitcherBar
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .quickTabSwitcherShowHistorySuggestions(value),
-                  );
-            }
-          : null,
+      leading: const Icon(MdiIcons.tabUnselected),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await TabBarSettingsRoute().push(context);
+      },
     );
   }
 }
@@ -231,251 +184,6 @@ class _ThemeSection extends HookConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _TabBarPositionSection extends HookConsumerWidget {
-  const _TabBarPositionSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarPosition),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Tab Bar Position'),
-            leading: Icon(MdiIcons.dockWindow),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: tabBarPosition,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabBarPosition(value),
-                    );
-              }
-            },
-            child: const Column(
-              children: [
-                RadioListTile.adaptive(
-                  value: TabBarPosition.top,
-                  title: Text('Top'),
-                  subtitle: Text('Persistent tab bar without auto-hide'),
-                ),
-                RadioListTile.adaptive(
-                  value: TabBarPosition.bottom,
-                  title: Text('Bottom'),
-                  subtitle: Text('Tab bar with auto-hide support'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabBarLayoutModeSection extends HookConsumerWidget {
-  const _TabBarLayoutModeSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarLayout = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarLayout),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Tab Bar Style'),
-            leading: Icon(MdiIcons.tabUnselected),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: tabBarLayout,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabBarLayout(value),
-                    );
-              }
-            },
-            child: const Column(
-              children: [
-                RadioListTile.adaptive(
-                  value: TabBarLayout.withTitle,
-                  title: Text('With Title'),
-                  subtitle: Text('Shows page title and URL breadcrumb'),
-                ),
-                RadioListTile.adaptive(
-                  value: TabBarLayout.compact,
-                  title: Text('Compact'),
-                  subtitle: Text('Centered URL pill without page title'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ShowContextualTabBarTile extends HookConsumerWidget {
-  const _ShowContextualTabBarTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarShowContextualBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowContextualBar,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Contextual Tab Bar'),
-      subtitle: const Text(
-        'Show additional bottom toolbar for navigation and actions',
-      ),
-      secondary: const Icon(MdiIcons.dockBottom),
-      value: tabBarShowContextualBar,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.tabBarShowContextualBar(value),
-            );
-      },
-    );
-  }
-}
-
-class _ShowQuickTabSwitcherBarTile extends HookConsumerWidget {
-  const _ShowQuickTabSwitcherBarTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarShowQuickTabSwitcherBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowQuickTabSwitcherBar,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Quick Tab Switcher Bar'),
-      subtitle: const Text(
-        'Show additional toolbar to quickly switch to recently used tabs',
-      ),
-      secondary: const Icon(MdiIcons.dockBottom),
-      value: tabBarShowQuickTabSwitcherBar,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.tabBarShowQuickTabSwitcherBar(value),
-            );
-      },
-    );
-  }
-}
-
-class _QuickTabSwitcherModeSection extends HookConsumerWidget {
-  const _QuickTabSwitcherModeSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final quickTabSwitcherMode = settings.effectiveUiQuickTabSwitcherMode();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Quick Tab Switcher Mode'),
-            leading: Icon(MdiIcons.folderSettings),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: quickTabSwitcherMode,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.quickTabSwitcherMode(value),
-                    );
-              }
-            },
-            child: Column(
-              children: [
-                const RadioListTile.adaptive(
-                  value: QuickTabSwitcherMode.lastUsedTabs,
-                  title: Text('Recently Used Tabs'),
-                  subtitle: Text('Recently used tabs across all containers'),
-                ),
-                if (settings.showContainerUi)
-                  const RadioListTile.adaptive(
-                    value: QuickTabSwitcherMode.containerTabs,
-                    title: Text('Container Tabs'),
-                    subtitle: Text('Ordered tabs of the selected container'),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AutoHideTabBarTile extends HookConsumerWidget {
-  const _AutoHideTabBarTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final autoHideTabBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.autoHideTabBar),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Auto Hide Tab Bar'),
-      subtitle: const Text('Hide tab bar when scrolling'),
-      secondary: const Icon(MdiIcons.folderHidden),
-      value: autoHideTabBar,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.autoHideTabBar(value),
-            );
-      },
     );
   }
 }

@@ -100,7 +100,6 @@ class _TabInteractionSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Tab Interaction'),
         _TabBarSwipeBehaviorSection(),
-        _ShowExtensionShortcutTile(),
       ],
     );
   }
@@ -353,34 +352,6 @@ class _ShowIsolatedTabUiTile extends HookConsumerWidget {
           }
           return updated;
         });
-      },
-    );
-  }
-}
-
-class _ShowExtensionShortcutTile extends HookConsumerWidget {
-  const _ShowExtensionShortcutTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showExtensionShortcut = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.showExtensionShortcut,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Extension Shortcut'),
-      subtitle: const Text('Display an extension menu directly on the tab bar'),
-      secondary: const Icon(MdiIcons.puzzleHeart),
-      value: showExtensionShortcut,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.showExtensionShortcut(value),
-            );
       },
     );
   }

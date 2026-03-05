@@ -27,6 +27,10 @@ part of 'routes.dart';
       name: 'AppearanceDisplaySettingsRoute',
       path: 'appearance_display',
     ),
+    TypedGoRoute<TabBarSettingsRoute>(
+      name: 'TabBarSettingsRoute',
+      path: 'tab_bar',
+    ),
     TypedGoRoute<PrivacySecuritySettingsRoute>(
       name: 'PrivacySecuritySettingsRoute',
       path: 'privacy_security',
@@ -103,6 +107,13 @@ class AppearanceDisplaySettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const AppearanceDisplaySettingsScreen();
+  }
+}
+
+class TabBarSettingsRoute extends GoRouteData with $TabBarSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const TabBarSettingsScreen();
   }
 }
 

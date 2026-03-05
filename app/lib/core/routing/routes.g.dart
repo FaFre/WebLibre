@@ -1380,6 +1380,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $AppearanceDisplaySettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'tab_bar',
+      name: 'TabBarSettingsRoute',
+      factory: $TabBarSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'privacy_security',
       name: 'PrivacySecuritySettingsRoute',
       factory: $PrivacySecuritySettingsRoute._fromState,
@@ -1500,6 +1505,27 @@ mixin $AppearanceDisplaySettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/appearance_display');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TabBarSettingsRoute on GoRouteData {
+  static TabBarSettingsRoute _fromState(GoRouterState state) =>
+      TabBarSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/tab_bar');
 
   @override
   void go(BuildContext context) => context.go(location);
