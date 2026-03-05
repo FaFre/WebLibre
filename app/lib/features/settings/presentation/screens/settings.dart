@@ -58,6 +58,7 @@ class _AppearanceDisplayTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         title: const Text('Appearance & Display'),
@@ -82,6 +83,7 @@ class _PrivacySecurityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         title: const Text('Privacy & Security'),
@@ -106,6 +108,7 @@ class _SearchContentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         title: const Text('Search & Content'),
@@ -130,6 +133,7 @@ class _TabsBehaviorTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         title: const Text('Tabs & Behavior'),
@@ -154,6 +158,7 @@ class _FingerprintingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         title: const Text('Fingerprinting'),
@@ -178,6 +183,7 @@ class _SyncTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         title: const Text('Firefox Sync'),
@@ -202,6 +208,7 @@ class _AdvancedTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         title: const Text('Advanced'),

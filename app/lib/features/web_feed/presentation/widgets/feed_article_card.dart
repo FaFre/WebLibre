@@ -62,6 +62,7 @@ class FeedArticleCard extends HookConsumerWidget {
     };
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {

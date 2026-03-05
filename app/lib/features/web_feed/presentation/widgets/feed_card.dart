@@ -41,6 +41,7 @@ class FeedCard extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () async {
@@ -97,8 +98,8 @@ class FeedCard extends HookConsumerWidget {
 
                     child: TagsHorizontalList(tags: feed.tags!),
                   ),
-                const Divider(),
               ],
+              const Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
