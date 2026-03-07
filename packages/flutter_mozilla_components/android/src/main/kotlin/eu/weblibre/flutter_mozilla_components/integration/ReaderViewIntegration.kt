@@ -31,6 +31,7 @@ class ReaderViewIntegration(
     private val readerViewEvents: ReaderViewEventsImpl,
     readerViewController: ReaderViewController
 ) : LifecycleAwareFeature, UserInteractionHandler {
+    private var listenerRegistered = false
 
     private val controllerListener = object : ReaderViewControllerListener {
         override fun onReaderViewToggled(enabled: Boolean) {
@@ -51,10 +52,6 @@ class ReaderViewIntegration(
         }
     }
 
-    init {
-        readerViewEvents.addListener(controllerListener)
-    }
-
     private val feature = ReaderViewFeature(context, engine, store, view)
     // Will be event based in flutter
 //    { available, active ->
@@ -66,11 +63,18 @@ class ReaderViewIntegration(
 //    }
 
     override fun start() {
+        if (!listenerRegistered) {
+            readerViewEvents.addListener(controllerListener)
+            listenerRegistered = true
+        }
         feature.start()
     }
 
     override fun stop() {
-        readerViewEvents.removeListener(controllerListener)
+        if (listenerRegistered) {
+            readerViewEvents.removeListener(controllerListener)
+            listenerRegistered = false
+        }
         feature.stop()
     }
 
