@@ -53,7 +53,7 @@ class SearchField extends HookConsumerWidget {
     required this.onSubmitted,
     required this.activeBang,
     required this.showSuggestions,
-    this.label,
+    required this.label,
     this.focusNode,
     this.maxLines = 1,
     this.minLines = 1,
@@ -121,7 +121,7 @@ class SearchField extends HookConsumerWidget {
                 child: UrlIcon([activeBang!.getDefaultUrl()], iconSize: 24.0),
               )
             : null,
-        label: label ?? const Text('Search'),
+        label: label,
         hint: hint,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         suffixIcon: hasText

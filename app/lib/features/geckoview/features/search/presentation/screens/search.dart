@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/full_search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
@@ -381,8 +382,7 @@ class SearchScreen extends HookConsumerWidget {
                       focusNode: searchFocusNode,
                       maxLines: isEditMode ? 3 : 1,
                       autofocus: true,
-                      label: const Text('Address / Search'),
-                      hint: const Text('Search or type URL'),
+                      label: const Text('Search or enter URL'),
                       unfocusOnTapOutside: false,
                       onSubmitted: (value) async {
                         if (value.isNotEmpty) {
@@ -491,6 +491,41 @@ class SearchScreen extends HookConsumerWidget {
                 domain: isEditMode ? existingTabState.url.host : null,
               ),
               TabSearch(searchTextListenable: sampledSearchText),
+              BookmarkSearch(
+                searchTextListenable: sampledSearchText,
+                onUriSelected: (uri) async {
+                  if (isEditMode) {
+                    await ref
+                        .read(tabSessionProvider(tabId: tabId).notifier)
+                        .loadUrl(url: uri);
+                  } else {
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .addTab(
+                          url: uri,
+                          tabMode: effectiveTabMode,
+                          parentId: (selectedTabType.value == TabType.child)
+                              ? ref.read(selectedTabProvider)
+                              : null,
+                          launchedFromIntent: launchedFromIntent,
+                          selectTab: true,
+                          containerSelection: selectedContainer == null
+                              ? const TabContainerSelection.unassigned()
+                              : TabContainerSelection.specific(
+                                  selectedContainer,
+                                ),
+                        );
+                  }
+
+                  if (context.mounted) {
+                    ref
+                        .read(bottomSheetControllerProvider.notifier)
+                        .requestDismiss();
+
+                    const BrowserRoute().go(context);
+                  }
+                },
+              ),
               FeedSearch(searchTextNotifier: sampledSearchText),
               HistorySuggestions(
                 searchTextListenable: sampledSearchText,

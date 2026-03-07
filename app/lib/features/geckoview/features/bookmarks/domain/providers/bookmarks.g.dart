@@ -53,6 +53,59 @@ abstract class _$BookmarksSearch extends $StreamNotifier<Set<String>> {
   }
 }
 
+@ProviderFor(BookmarkSearchResults)
+final bookmarkSearchResultsProvider = BookmarkSearchResultsProvider._();
+
+final class BookmarkSearchResultsProvider
+    extends $NotifierProvider<BookmarkSearchResults, List<BookmarkEntry>> {
+  BookmarkSearchResultsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bookmarkSearchResultsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bookmarkSearchResultsHash();
+
+  @$internal
+  @override
+  BookmarkSearchResults create() => BookmarkSearchResults();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<BookmarkEntry> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<BookmarkEntry>>(value),
+    );
+  }
+}
+
+String _$bookmarkSearchResultsHash() =>
+    r'f1413466db26c1e3407501453b8cec97504a771d';
+
+abstract class _$BookmarkSearchResults extends $Notifier<List<BookmarkEntry>> {
+  List<BookmarkEntry> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<List<BookmarkEntry>, List<BookmarkEntry>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<BookmarkEntry>, List<BookmarkEntry>>,
+              List<BookmarkEntry>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(bookmarks)
 final bookmarksProvider = BookmarksFamily._();
 

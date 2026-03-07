@@ -126,6 +126,29 @@ class BookmarksSearch extends _$BookmarksSearch {
 }
 
 @Riverpod()
+class BookmarkSearchResults extends _$BookmarkSearchResults {
+  final _service = GeckoBookmarksService();
+
+  Future<void> search(String query, {int limit = 10}) async {
+    if (query.isEmpty) {
+      state = [];
+      return;
+    }
+
+    final results = await _service.searchBookmarks(query, limit: limit);
+    state = results
+        .map(BookmarkItem.parseRecursive)
+        .whereType<BookmarkEntry>()
+        .toList();
+  }
+
+  @override
+  List<BookmarkEntry> build() {
+    return [];
+  }
+}
+
+@Riverpod()
 AsyncValue<T?> bookmarks<T extends BookmarkItem>(
   Ref ref,
   String entryGuid, {
