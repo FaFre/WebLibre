@@ -42,6 +42,7 @@ class SearchField extends HookConsumerWidget {
   final int? minLines;
   final bool unfocusOnTapOutside;
   final GlobalKey? textFieldKey;
+  final Widget? hint;
 
   final BangData? activeBang;
   final bool showBangIcon;
@@ -60,6 +61,7 @@ class SearchField extends HookConsumerWidget {
     this.showBangIcon = true,
     this.autofocus = false,
     this.textFieldKey,
+    this.hint,
   });
 
   @override
@@ -120,7 +122,7 @@ class SearchField extends HookConsumerWidget {
               )
             : null,
         label: label ?? const Text('Search'),
-        // hintText: 'Ask anything...',
+        hint: hint,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         suffixIcon: hasText
             ? IconButton(

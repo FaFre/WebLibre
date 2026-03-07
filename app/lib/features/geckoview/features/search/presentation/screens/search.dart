@@ -381,9 +381,8 @@ class SearchScreen extends HookConsumerWidget {
                       focusNode: searchFocusNode,
                       maxLines: isEditMode ? 3 : 1,
                       autofocus: true,
-                      label: (activeBang != null)
-                          ? const Text('Search')
-                          : const Text('Address / Search'),
+                      label: const Text('Address / Search'),
+                      hint: const Text('Search or type URL'),
                       unfocusOnTapOutside: false,
                       onSubmitted: (value) async {
                         if (value.isNotEmpty) {
