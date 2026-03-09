@@ -150,12 +150,32 @@ class SearchScreen extends HookConsumerWidget {
       initialSearchText?.isNotEmpty == true,
     );
 
-    useOnListenableChange(searchTextController, () {
-      hasUserProvidedInput.value = searchTextController.text.isNotEmpty;
+    // Track if we started with a URL (edit mode) to show empty state initially
+    final startedWithUrl = useMemoized(() {
+      if (initialSearchText == null || initialSearchText!.isEmpty) return false;
+      return classifyAddressBarInput(initialSearchText!)
+          is NavigateInputClassification;
     });
+    final hasUserModifiedInput = useState(false);
+    final isUrlInput = useState(false);
+
+    useOnListenableChangeSelector(
+      searchTextController,
+      () => searchTextController.text,
+      () {
+        final text = searchTextController.text;
+        hasUserProvidedInput.value = text.isNotEmpty;
+        if (startedWithUrl) {
+          hasUserModifiedInput.value = text != initialSearchText;
+        }
+        isUrlInput.value = text.isNotEmpty &&
+            classifyAddressBarInput(text) is NavigateInputClassification;
+      },
+    );
 
     final showNoInputSections =
-        !hasUserProvidedInput.value && searchTextController.text.isEmpty;
+        (startedWithUrl && !hasUserModifiedInput.value) ||
+        (!hasUserProvidedInput.value && searchTextController.text.isEmpty);
 
     final searchFocusNode = useFocusNode();
     final textFieldKey = useMemoized(() => GlobalKey());
@@ -225,9 +245,13 @@ class SearchScreen extends HookConsumerWidget {
       return null;
     }, [textFieldKey, isEditMode]);
 
-    useOnListenableChange(isEditMode ? searchTextController : null, () {
-      measureHeightWithRetry(); // ignore: discarded_futures
-    });
+    useOnListenableChangeSelector(
+      isEditMode ? searchTextController : null,
+      () => searchTextController.text,
+      () {
+        measureHeightWithRetry(); // ignore: discarded_futures
+      },
+    );
 
     useOnAppLifecycleStateChange((previous, current) {
       switch (current) {
@@ -635,14 +659,17 @@ class SearchScreen extends HookConsumerWidget {
                   group: SearchModuleGroup.emptyState,
                 ),
               ] else ...[
-                FullSearchTermSuggestions(
-                  searchTextController: searchTextController,
-                  activeBang: activeBang,
-                  submitSearch: submitSearch,
-                  domain: isEditMode ? existingTabState.url.host : null,
-                ),
+                if (!isUrlInput.value)
+                  FullSearchTermSuggestions(
+                    searchTextController: searchTextController,
+                    activeBang: activeBang,
+                    submitSearch: submitSearch,
+                    domain: isEditMode ? existingTabState.url.host : null,
+                  ),
                 for (final entry in searchOrder)
-                  if (searchWidgets.containsKey(entry.type))
+                  if (searchWidgets.containsKey(entry.type) &&
+                      (!isUrlInput.value ||
+                          entry.type != SearchModuleType.articles))
                     searchWidgets[entry.type]!,
                 const _CustomizeSectionsButton(
                   group: SearchModuleGroup.search,
