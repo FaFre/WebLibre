@@ -133,6 +133,11 @@ class _MainWidget extends HookConsumerWidget {
         (value) => value.uiScaleFactor,
       ),
     );
+    final disableAnimations = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.disableAnimations,
+      ),
+    );
 
     useOnInitialization(() async {
       await CountryCodes.init();
@@ -261,6 +266,7 @@ class _MainWidget extends HookConsumerWidget {
           ),
           themeMode: themeMode,
           uiScaleFactor: uiScaleFactor,
+          disableAnimations: disableAnimations,
         );
       },
     );

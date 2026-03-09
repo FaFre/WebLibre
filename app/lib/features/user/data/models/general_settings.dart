@@ -68,6 +68,7 @@ enum DeleteBrowsingDataType {
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
   final double uiScaleFactor;
+  final bool disableAnimations;
   final bool enableReadability;
   final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
@@ -117,6 +118,7 @@ class GeneralSettings with FastEquatable {
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
+    required this.disableAnimations,
     required this.enableReadability,
     required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
@@ -165,6 +167,7 @@ class GeneralSettings with FastEquatable {
   GeneralSettings.withDefaults({
     ThemeMode? themeMode,
     double? uiScaleFactor,
+    bool? disableAnimations,
     bool? enableReadability,
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
@@ -210,6 +213,7 @@ class GeneralSettings with FastEquatable {
     String? unshortenerToken,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
+       disableAnimations = disableAnimations ?? false,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
@@ -288,6 +292,7 @@ class GeneralSettings with FastEquatable {
   List<Object?> get hashParameters => [
     themeMode,
     uiScaleFactor,
+    disableAnimations,
     enableReadability,
     enforceReadability,
     deleteBrowsingDataOnQuit,

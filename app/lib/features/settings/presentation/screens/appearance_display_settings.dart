@@ -65,6 +65,7 @@ class _VisualSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Visual'),
         _UiZoomSection(),
+        _DisableAnimationsTile(),
         _ThemeSection(),
       ],
     );
@@ -145,6 +146,32 @@ double _normalizeUiScale(double value) {
       .round();
   final normalized = minUiScaleFactor + (stepIndex * uiScaleFactorStep);
   return normalized.clamp(minUiScaleFactor, maxUiScaleFactor);
+}
+
+class _DisableAnimationsTile extends HookConsumerWidget {
+  const _DisableAnimationsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final disableAnimations = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.disableAnimations),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Disable Animations'),
+      subtitle: const Text('Reduce motion and turn off app animations'),
+      secondary: const Icon(Icons.animation),
+      value: disableAnimations,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.disableAnimations(value),
+            );
+      },
+    );
+  }
 }
 
 class _TabBarSection extends StatelessWidget {

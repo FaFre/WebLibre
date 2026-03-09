@@ -52,6 +52,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.double,
         db.typeMapping,
       ),
+      'disableAnimations': settings['disableAnimations']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
       'enableReadability': settings['enableReadability']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,
