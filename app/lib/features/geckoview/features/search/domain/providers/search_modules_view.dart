@@ -31,7 +31,62 @@ enum SearchModuleType {
   recentHistory,
   recentArticles,
   recentTabs,
-  containers,
+  containers;
+
+  String get label => switch (this) {
+    tabs => 'Tabs',
+    articles => 'Articles',
+    bookmarks => 'Bookmarks',
+    history => 'History',
+    historyHighlights => 'History Highlights',
+    topSites => 'Top Sites',
+    recentHistory => 'Recent History',
+    recentArticles => 'Recent Articles',
+    recentTabs => 'Recent Tabs',
+    containers => 'Containers',
+  };
+}
+
+enum SearchModuleGroup {
+  emptyState(
+    key: 'EmptyStateModuleOrder',
+    defaultModules: [
+      SearchModuleType.topSites,
+      SearchModuleType.recentArticles,
+      SearchModuleType.recentTabs,
+      SearchModuleType.recentHistory,
+      SearchModuleType.historyHighlights,
+      SearchModuleType.containers,
+    ],
+  ),
+  search(
+    key: 'SearchModuleOrder',
+    defaultModules: [
+      SearchModuleType.tabs,
+      SearchModuleType.bookmarks,
+      SearchModuleType.articles,
+      SearchModuleType.history,
+    ],
+  );
+
+  const SearchModuleGroup({required this.key, required this.defaultModules});
+  final String key;
+  final List<SearchModuleType> defaultModules;
+}
+
+extension SearchModuleTypeGroup on SearchModuleType {
+  SearchModuleGroup get group => switch (this) {
+    SearchModuleType.topSites ||
+    SearchModuleType.recentArticles ||
+    SearchModuleType.recentTabs ||
+    SearchModuleType.recentHistory ||
+    SearchModuleType.historyHighlights ||
+    SearchModuleType.containers => SearchModuleGroup.emptyState,
+    SearchModuleType.tabs ||
+    SearchModuleType.bookmarks ||
+    SearchModuleType.articles ||
+    SearchModuleType.history => SearchModuleGroup.search,
+  };
 }
 
 enum SearchModuleDisplayState { preview, expanded, collapsed }
@@ -66,4 +121,14 @@ class SearchModuleDisplayStateController
   SearchModuleDisplayState build(SearchModuleType module) {
     return SearchModuleDisplayState.preview;
   }
+}
+
+@Riverpod()
+class SearchReorderMode extends _$SearchReorderMode {
+  // ignore: use_setters_to_change_properties
+  void activate(SearchModuleGroup group) => state = group;
+  void deactivate() => state = null;
+
+  @override
+  SearchModuleGroup? build() => null;
 }

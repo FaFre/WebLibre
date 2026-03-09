@@ -119,3 +119,55 @@ abstract class _$SearchModuleDisplayStateController
     element.handleCreate(ref, () => build(_$args));
   }
 }
+
+@ProviderFor(SearchReorderMode)
+final searchReorderModeProvider = SearchReorderModeProvider._();
+
+final class SearchReorderModeProvider
+    extends $NotifierProvider<SearchReorderMode, SearchModuleGroup?> {
+  SearchReorderModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'searchReorderModeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$searchReorderModeHash();
+
+  @$internal
+  @override
+  SearchReorderMode create() => SearchReorderMode();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SearchModuleGroup? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SearchModuleGroup?>(value),
+    );
+  }
+}
+
+String _$searchReorderModeHash() => r'eda188e53e5b5f1a331ce94c3cb8808c79e358d3';
+
+abstract class _$SearchReorderMode extends $Notifier<SearchModuleGroup?> {
+  SearchModuleGroup? build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<SearchModuleGroup?, SearchModuleGroup?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<SearchModuleGroup?, SearchModuleGroup?>,
+              SearchModuleGroup?,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

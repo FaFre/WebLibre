@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_header.dart';
 
@@ -63,6 +64,15 @@ class SearchModuleSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final moduleOrder = ref.watch(
+      searchModuleOrderProvider(moduleType.group),
+    );
+    final isVisible = moduleOrder
+        .any((e) => e.type == moduleType && e.visible);
+    if (!isVisible) {
+      return MultiSliver(children: const []);
+    }
+
     final displayState = ref.watch(
       searchModuleDisplayStateControllerProvider(moduleType),
     );
@@ -102,6 +112,9 @@ class SearchModuleSection extends ConsumerWidget {
                     ).notifier,
                   )
                   .toggleExpansion(),
+              onLongPress: () => ref
+                  .read(searchReorderModeProvider.notifier)
+                  .activate(moduleType.group),
             ),
           ),
         ),

@@ -33,14 +33,18 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/containers_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/history_highlights_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_feed_articles_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_tabs_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/top_sites_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/full_search_suggestions.dart';
@@ -305,6 +309,125 @@ class SearchScreen extends HookConsumerWidget {
       }
     }
 
+    final reorderGroup = ref.watch(searchReorderModeProvider);
+
+    final emptyStateOrder = ref.watch(
+      searchModuleOrderProvider(SearchModuleGroup.emptyState),
+    );
+    final searchOrder = ref.watch(
+      searchModuleOrderProvider(SearchModuleGroup.search),
+    );
+
+    Future<void> openUriInTab(Uri uri) async {
+      if (isEditMode) {
+        await ref
+            .read(tabSessionProvider(tabId: tabId).notifier)
+            .loadUrl(url: uri);
+      } else {
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .addTab(
+              url: uri,
+              tabMode: effectiveTabMode,
+              parentId: (selectedTabType.value == TabType.child)
+                  ? ref.read(selectedTabProvider)
+                  : null,
+              launchedFromIntent: launchedFromIntent,
+              selectTab: true,
+              containerSelection: selectedContainer == null
+                  ? const TabContainerSelection.unassigned()
+                  : TabContainerSelection.specific(selectedContainer),
+            );
+      }
+
+      if (context.mounted) {
+        ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+        const BrowserRoute().go(context);
+      }
+    }
+
+    final emptyStateWidgets = <SearchModuleType, Widget>{
+      SearchModuleType.topSites: TopSitesSection(
+        onUriSelected: openUriInTab,
+      ),
+      SearchModuleType.recentArticles: RecentFeedArticlesSection(
+        onArticleSelected: (article) {
+          unawaited(
+            FeedArticleRoute(articleId: article.id).push(context),
+          );
+        },
+      ),
+      SearchModuleType.recentTabs: RecentTabsSection(
+        onTabSelected: (tabId) async {
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .selectTab(tabId);
+
+          if (context.mounted) {
+            ref
+                .read(bottomSheetControllerProvider.notifier)
+                .requestDismiss();
+            const BrowserRoute().go(context);
+          }
+        },
+      ),
+      SearchModuleType.recentHistory: RecentHistorySection(
+        onUriSelected: openUriInTab,
+      ),
+      SearchModuleType.historyHighlights: HistoryHighlightsSection(
+        onUriSelected: openUriInTab,
+      ),
+      SearchModuleType.containers: ContainersSection(
+        onContainerSelected: (container) async {
+          final result = await ref
+              .read(selectedContainerProvider.notifier)
+              .setContainerId(container.id);
+
+          if (!context.mounted) return;
+
+          if (result == SetContainerResult.successHasProxy) {
+            final shouldStartProxy = await ref
+                .read(startProxyControllerProvider.notifier)
+                .shouldPromptProxyStart();
+
+            if (context.mounted && shouldStartProxy) {
+              final dialogResult = await showDialog<bool>(
+                context: context,
+                builder: (_) => const TorDialog(),
+              );
+
+              if (dialogResult == true) {
+                await ref
+                    .read(startProxyControllerProvider.notifier)
+                    .startProxy();
+              }
+            }
+          }
+
+          if (context.mounted && result != SetContainerResult.failed) {
+            const TabViewRoute().go(context);
+          }
+        },
+      ),
+    };
+
+    final searchWidgets = <SearchModuleType, Widget>{
+      SearchModuleType.tabs: TabSearch(
+        searchTextListenable: sampledSearchText,
+      ),
+      SearchModuleType.bookmarks: BookmarkSearch(
+        searchTextListenable: sampledSearchText,
+        onUriSelected: openUriInTab,
+      ),
+      SearchModuleType.articles: FeedSearch(
+        searchTextNotifier: sampledSearchText,
+      ),
+      SearchModuleType.history: HistorySuggestions(
+        searchTextListenable: sampledSearchText,
+        onUriSelected: openUriInTab,
+      ),
+    };
+
     return Scaffold(
       body: SafeArea(
         child: Form(
@@ -502,214 +625,55 @@ class SearchScreen extends HookConsumerWidget {
               SliverToBoxAdapter(
                 child: ClipboardFillLink(controller: searchTextController),
               ),
-              if (showNoInputSections) ...[
-                TopSitesSection(
-                  onUriSelected: (uri) async {
-                    if (isEditMode) {
-                      await ref
-                          .read(tabSessionProvider(tabId: tabId).notifier)
-                          .loadUrl(url: uri);
-                    } else {
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(
-                            url: uri,
-                            tabMode: effectiveTabMode,
-                            parentId: (selectedTabType.value == TabType.child)
-                                ? ref.read(selectedTabProvider)
-                                : null,
-                            launchedFromIntent: launchedFromIntent,
-                            selectTab: true,
-                            containerSelection: selectedContainer == null
-                                ? const TabContainerSelection.unassigned()
-                                : TabContainerSelection.specific(
-                                    selectedContainer,
-                                  ),
-                          );
-                    }
-
-                    if (context.mounted) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .requestDismiss();
-
-                      const BrowserRoute().go(context);
-                    }
-                  },
-                ),
-                RecentFeedArticlesSection(
-                  onArticleSelected: (article) {
-                    unawaited(
-                      FeedArticleRoute(articleId: article.id).push(context),
-                    );
-                  },
-                ),
-                RecentTabsSection(
-                  onTabSelected: (tabId) async {
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .selectTab(tabId);
-
-                    if (context.mounted) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .requestDismiss();
-
-                      const BrowserRoute().go(context);
-                    }
-                  },
-                ),
-                RecentHistorySection(
-                  onUriSelected: (uri) async {
-                    if (isEditMode) {
-                      await ref
-                          .read(tabSessionProvider(tabId: tabId).notifier)
-                          .loadUrl(url: uri);
-                    } else {
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(
-                            url: uri,
-                            tabMode: effectiveTabMode,
-                            parentId: (selectedTabType.value == TabType.child)
-                                ? ref.read(selectedTabProvider)
-                                : null,
-                            launchedFromIntent: launchedFromIntent,
-                            selectTab: true,
-                            containerSelection: selectedContainer == null
-                                ? const TabContainerSelection.unassigned()
-                                : TabContainerSelection.specific(
-                                    selectedContainer,
-                                  ),
-                          );
-                    }
-
-                    if (context.mounted) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .requestDismiss();
-
-                      const BrowserRoute().go(context);
-                    }
-                  },
-                ),
-                ContainersSection(
-                  onContainerSelected: (container) async {
-                    final result = await ref
-                        .read(selectedContainerProvider.notifier)
-                        .setContainerId(container.id);
-
-                    if (!context.mounted) return;
-
-                    if (result == SetContainerResult.successHasProxy) {
-                      final shouldStartProxy = await ref
-                          .read(startProxyControllerProvider.notifier)
-                          .shouldPromptProxyStart();
-
-                      if (context.mounted && shouldStartProxy) {
-                        final dialogResult = await showDialog<bool>(
-                          context: context,
-                          builder: (_) => const TorDialog(),
-                        );
-
-                        if (dialogResult == true) {
-                          await ref
-                              .read(startProxyControllerProvider.notifier)
-                              .startProxy();
-                        }
-                      }
-                    }
-
-                    if (context.mounted &&
-                        result != SetContainerResult.failed) {
-                      const TabViewRoute().go(context);
-                    }
-                  },
-                ),
-              ],
-              if (!showNoInputSections) ...[
+              if (reorderGroup != null)
+                SearchModuleReorderView(group: reorderGroup)
+              else if (showNoInputSections) ...[
+                for (final entry in emptyStateOrder)
+                  if (emptyStateWidgets.containsKey(entry.type))
+                    emptyStateWidgets[entry.type]!,
+                if (!emptyStateOrder.any((e) => e.visible))
+                  const _CustomizeSectionsButton(
+                    group: SearchModuleGroup.emptyState,
+                  ),
+              ] else ...[
                 FullSearchTermSuggestions(
                   searchTextController: searchTextController,
                   activeBang: activeBang,
                   submitSearch: submitSearch,
                   domain: isEditMode ? existingTabState.url.host : null,
                 ),
-                TabSearch(searchTextListenable: sampledSearchText),
-                BookmarkSearch(
-                  searchTextListenable: sampledSearchText,
-                  onUriSelected: (uri) async {
-                    if (isEditMode) {
-                      await ref
-                          .read(tabSessionProvider(tabId: tabId).notifier)
-                          .loadUrl(url: uri);
-                    } else {
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(
-                            url: uri,
-                            tabMode: effectiveTabMode,
-                            parentId: (selectedTabType.value == TabType.child)
-                                ? ref.read(selectedTabProvider)
-                                : null,
-                            launchedFromIntent: launchedFromIntent,
-                            selectTab: true,
-                            containerSelection: selectedContainer == null
-                                ? const TabContainerSelection.unassigned()
-                                : TabContainerSelection.specific(
-                                    selectedContainer,
-                                  ),
-                          );
-                    }
-
-                    if (context.mounted) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .requestDismiss();
-
-                      const BrowserRoute().go(context);
-                    }
-                  },
-                ),
-                FeedSearch(searchTextNotifier: sampledSearchText),
-                HistorySuggestions(
-                  searchTextListenable: sampledSearchText,
-                  onUriSelected: (uri) async {
-                    if (isEditMode) {
-                      // Load into existing tab
-                      await ref
-                          .read(tabSessionProvider(tabId: tabId).notifier)
-                          .loadUrl(url: uri);
-                    } else {
-                      // Create new tab
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(
-                            url: uri,
-                            tabMode: effectiveTabMode,
-                            parentId: (selectedTabType.value == TabType.child)
-                                ? ref.read(selectedTabProvider)
-                                : null,
-                            launchedFromIntent: launchedFromIntent,
-                            selectTab: true,
-                            containerSelection: selectedContainer == null
-                                ? const TabContainerSelection.unassigned()
-                                : TabContainerSelection.specific(
-                                    selectedContainer,
-                                  ),
-                          );
-                    }
-
-                    if (context.mounted) {
-                      ref
-                          .read(bottomSheetControllerProvider.notifier)
-                          .requestDismiss();
-
-                      const BrowserRoute().go(context);
-                    }
-                  },
-                ),
+                for (final entry in searchOrder)
+                  if (searchWidgets.containsKey(entry.type))
+                    searchWidgets[entry.type]!,
+                if (!searchOrder.any((e) => e.visible))
+                  const _CustomizeSectionsButton(
+                    group: SearchModuleGroup.search,
+                  ),
               ],
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomizeSectionsButton extends ConsumerWidget {
+  final SearchModuleGroup group;
+
+  const _CustomizeSectionsButton({required this.group});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SliverToBoxAdapter(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 24),
+          child: TextButton.icon(
+            onPressed: () =>
+                ref.read(searchReorderModeProvider.notifier).activate(group),
+            icon: const Icon(Icons.tune, size: 18),
+            label: const Text('Customize sections'),
           ),
         ),
       ),

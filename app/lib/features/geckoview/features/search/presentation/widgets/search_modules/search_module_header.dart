@@ -37,6 +37,9 @@ class SearchModuleHeader extends StatelessWidget {
   /// The trailing button is hidden when totalCount <= this value.
   final int previewLimit;
 
+  /// Called when the header is long-pressed (e.g. to enter reorder mode).
+  final VoidCallback? onLongPress;
+
   const SearchModuleHeader({
     super.key,
     required this.title,
@@ -46,6 +49,7 @@ class SearchModuleHeader extends StatelessWidget {
     required this.onToggleExpansion,
     this.headerTrailing,
     this.previewLimit = 3,
+    this.onLongPress,
   });
 
   @override
@@ -61,6 +65,7 @@ class SearchModuleHeader extends StatelessWidget {
           Expanded(
             child: InkWell(
               onTap: onToggleCollapse,
+              onLongPress: onLongPress,
               borderRadius: BorderRadius.circular(8),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
