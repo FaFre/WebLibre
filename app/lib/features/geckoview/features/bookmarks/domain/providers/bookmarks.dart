@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -105,11 +106,16 @@ class BookmarksSearch extends _$BookmarksSearch {
 
   Future<void> search(String query, {int limit = 10}) async {
     if (query.isNotEmpty) {
-      await _service.searchBookmarks(query, limit: limit).then((value) {
-        if (!_streamController.isClosed) {
-          _streamController.add(value.map((e) => e.guid).toSet());
-        }
-      });
+      try {
+        await _service.searchBookmarks(query, limit: limit).then((value) {
+          if (!_streamController.isClosed) {
+            _streamController.add(value.map((e) => e.guid).toSet());
+          }
+        });
+      } on PlatformException catch (e) {
+        if (e.code == 'OperationInterrupted') return;
+        rethrow;
+      }
     }
   }
 
@@ -135,12 +141,17 @@ class BookmarkSearchResults extends _$BookmarkSearchResults {
       return;
     }
 
-    final results = await _service.searchBookmarks(query, limit: limit);
-    if (!ref.mounted) return;
-    state = results
-        .map(BookmarkItem.parseRecursive)
-        .whereType<BookmarkEntry>()
-        .toList();
+    try {
+      final results = await _service.searchBookmarks(query, limit: limit);
+      if (!ref.mounted) return;
+      state = results
+          .map(BookmarkItem.parseRecursive)
+          .whereType<BookmarkEntry>()
+          .toList();
+    } on PlatformException catch (e) {
+      if (e.code == 'OperationInterrupted') return;
+      rethrow;
+    }
   }
 
   @override

@@ -33,7 +33,7 @@ final class BookmarksSearchProvider
   BookmarksSearch create() => BookmarksSearch();
 }
 
-String _$bookmarksSearchHash() => r'ac2ce51c4fd66c2c0e25bdf2475cf2fba57c9e0c';
+String _$bookmarksSearchHash() => r'41053cbc1014e0fdd04d9510bf15c9896a9f752d';
 
 abstract class _$BookmarksSearch extends $StreamNotifier<Set<String>> {
   Stream<Set<String>> build();
@@ -86,7 +86,7 @@ final class BookmarkSearchResultsProvider
 }
 
 String _$bookmarkSearchResultsHash() =>
-    r'44af94b2234c817b08b0bde2dc68f9ab8d2d0a9a';
+    r'49ebd21a137bc09bbd67b692aacb2554b8364564';
 
 abstract class _$BookmarkSearchResults extends $Notifier<List<BookmarkEntry>> {
   List<BookmarkEntry> build();
