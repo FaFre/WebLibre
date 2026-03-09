@@ -239,9 +239,18 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                   } else if (targetIndex >= items.length - 1) {
                     key = await repo.getTrailingOrderKey();
                   } else if (targetIndex < oldIndex) {
-                    key = (await repo.getOrderKeyAfterSite(
-                      items[targetIndex - 1].id!,
-                    ))!;
+                    final previousId = items[targetIndex - 1].id;
+                    final nextId = items[targetIndex + 1].id;
+                    final afterPrevious = previousId == null
+                        ? null
+                        : await repo.getOrderKeyAfterSite(previousId);
+                    if (afterPrevious != null) {
+                      key = afterPrevious;
+                    } else if (nextId != null) {
+                      key = await repo.getOrderKeyBeforeSite(nextId);
+                    } else {
+                      key = await repo.getTrailingOrderKey();
+                    }
                   } else {
                     key = await repo.getOrderKeyBeforeSite(
                       items[targetIndex + 1].id!,
