@@ -168,7 +168,8 @@ class SearchScreen extends HookConsumerWidget {
         if (startedWithUrl) {
           hasUserModifiedInput.value = text != initialSearchText;
         }
-        isUrlInput.value = text.isNotEmpty &&
+        isUrlInput.value =
+            text.isNotEmpty &&
             classifyAddressBarInput(text) is NavigateInputClassification;
       },
     );
@@ -371,26 +372,18 @@ class SearchScreen extends HookConsumerWidget {
     }
 
     final emptyStateWidgets = <SearchModuleType, Widget>{
-      SearchModuleType.topSites: TopSitesSection(
-        onUriSelected: openUriInTab,
-      ),
+      SearchModuleType.topSites: TopSitesSection(onUriSelected: openUriInTab),
       SearchModuleType.recentArticles: RecentFeedArticlesSection(
         onArticleSelected: (article) {
-          unawaited(
-            FeedArticleRoute(articleId: article.id).push(context),
-          );
+          FeedArticleRoute(articleId: article.id).pushReplacement(context);
         },
       ),
       SearchModuleType.recentTabs: RecentTabsSection(
         onTabSelected: (tabId) async {
-          await ref
-              .read(tabRepositoryProvider.notifier)
-              .selectTab(tabId);
+          await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
 
           if (context.mounted) {
-            ref
-                .read(bottomSheetControllerProvider.notifier)
-                .requestDismiss();
+            ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
             const BrowserRoute().go(context);
           }
         },
@@ -436,9 +429,7 @@ class SearchScreen extends HookConsumerWidget {
     };
 
     final searchWidgets = <SearchModuleType, Widget>{
-      SearchModuleType.tabs: TabSearch(
-        searchTextListenable: sampledSearchText,
-      ),
+      SearchModuleType.tabs: TabSearch(searchTextListenable: sampledSearchText),
       SearchModuleType.bookmarks: BookmarkSearch(
         searchTextListenable: sampledSearchText,
         onUriSelected: openUriInTab,
@@ -671,9 +662,7 @@ class SearchScreen extends HookConsumerWidget {
                       (!isUrlInput.value ||
                           entry.type != SearchModuleType.articles))
                     searchWidgets[entry.type]!,
-                const _CustomizeSectionsButton(
-                  group: SearchModuleGroup.search,
-                ),
+                const _CustomizeSectionsButton(group: SearchModuleGroup.search),
               ],
             ],
           ),

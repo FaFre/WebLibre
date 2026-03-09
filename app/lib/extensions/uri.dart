@@ -29,4 +29,14 @@ extension UriX on Uri {
   bool get isHttp => isScheme('http');
   bool get isHttps => isScheme('https');
   bool get isHttpOrHttps => isHttp || isHttps;
+
+  /// Removes a bare root path (`/`) when there is no query or fragment, so
+  /// that `https://example.com/` and `https://example.com` are treated as
+  /// equivalent.
+  Uri get normalized {
+    if (path == '/' && !hasQuery && !hasFragment) {
+      return replace(path: '');
+    }
+    return this;
+  }
 }

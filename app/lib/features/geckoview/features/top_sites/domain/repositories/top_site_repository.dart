@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/entities/stored_top_site_source.dart';
@@ -55,7 +56,7 @@ class TopSiteRepository extends _$TopSiteRepository {
           TopSiteCompanion.insert(
             id: uuid.v7(),
             title: seeds[i].title,
-            url: seeds[i].url,
+            url: seeds[i].url.normalized,
             source: StoredTopSiteSource.seeded,
             orderKey: orderKey,
             createdAt: now,
@@ -80,7 +81,9 @@ class TopSiteRepository extends _$TopSiteRepository {
     final remaining = targetCount - persisted.length;
     final historyItems = await _getHistoryItems(
       limit: remaining,
-      excludeUrls: persisted.map((s) => s.url.toString()).toSet(),
+      excludeUrls: persisted
+          .map((s) => s.url.normalized.toString())
+          .toSet(),
     );
 
     return [...persisted, ...historyItems];
@@ -103,7 +106,9 @@ class TopSiteRepository extends _$TopSiteRepository {
       final remaining = targetCount - persistedItems.length;
       final historyItems = await _getHistoryItems(
         limit: remaining,
-        excludeUrls: persistedItems.map((s) => s.url.toString()).toSet(),
+        excludeUrls: persistedItems
+            .map((s) => s.url.normalized.toString())
+            .toSet(),
       );
 
       return [...persistedItems, ...historyItems];
@@ -259,7 +264,7 @@ class TopSiteRepository extends _$TopSiteRepository {
       final uri = Uri.tryParse(site.url);
       if (uri == null) continue;
 
-      if (excludeUrls.contains(uri.toString())) continue;
+      if (excludeUrls.contains(uri.normalized.toString())) continue;
 
       final title = (site.title?.trim().isNotEmpty == true)
           ? site.title!.trim()

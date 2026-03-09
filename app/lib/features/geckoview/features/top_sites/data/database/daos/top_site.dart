@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/top_site.drift.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/definitions.drift.dart';
@@ -42,7 +43,8 @@ class TopSiteDao extends DatabaseAccessor<TopSiteDatabase>
   }
 
   Future<TopSiteData?> getPersistedTopSiteByUrl(Uri url) {
-    return (db.topSite.select()..where((t) => t.url.equalsValue(url)))
+    return (db.topSite.select()
+          ..where((t) => t.url.equalsValue(url.normalized)))
         .getSingleOrNull();
   }
 
@@ -63,7 +65,7 @@ class TopSiteDao extends DatabaseAccessor<TopSiteDatabase>
       TopSiteCompanion.insert(
         id: id,
         title: title,
-        url: url,
+        url: url.normalized,
         source: StoredTopSiteSource.pinned,
         orderKey: orderKey,
         createdAt: DateTime.now(),
@@ -83,7 +85,7 @@ class TopSiteDao extends DatabaseAccessor<TopSiteDatabase>
     required Uri url,
   }) {
     return (db.topSite.update()..where((t) => t.id.equals(id))).write(
-      TopSiteCompanion(title: Value(title), url: Value(url)),
+      TopSiteCompanion(title: Value(title), url: Value(url.normalized)),
     );
   }
 
