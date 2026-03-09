@@ -1,0 +1,65 @@
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/features/geckoview/features/top_sites/data/entities/stored_top_site_source.dart';
+
+CREATE TABLE top_site (
+  id TEXT PRIMARY KEY NOT NULL,
+  title TEXT NOT NULL,
+  url TEXT NOT NULL MAPPED BY `const UriConverter()`,
+  source ENUM(StoredTopSiteSource) NOT NULL,
+  order_key TEXT NOT NULL,
+  created_at DATETIME NOT NULL,
+  UNIQUE(url)
+);
+
+CREATE INDEX idx_top_site_order_key ON top_site(order_key);
+
+CREATE TABLE top_site_seed_state (
+  seed_id TEXT PRIMARY KEY NOT NULL,
+  applied_at DATETIME NOT NULL
+);
+
+leadingOrderKey(:bucket AS INTEGER):
+  SELECT lexo_rank_previous(
+    :bucket,
+    (
+      SELECT order_key
+      FROM top_site
+      ORDER BY order_key
+      LIMIT 1
+    )
+  );
+
+trailingOrderKey(:bucket AS INTEGER):
+  SELECT lexo_rank_next(
+    :bucket,
+    (
+      SELECT order_key
+      FROM top_site
+      ORDER BY order_key DESC
+      LIMIT 1
+    )
+  );
+
+orderKeyAfterSite(:site_id AS TEXT):
+  WITH ordered_table AS (
+    SELECT
+      id,
+      order_key,
+      LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
+    FROM top_site
+  )
+  SELECT lexo_rank_reorder_after(order_key, next_order_key)
+  FROM ordered_table
+  WHERE id = :site_id;
+
+orderKeyBeforeSite(:site_id AS TEXT):
+  WITH ordered_table AS (
+    SELECT
+      id,
+      order_key,
+      LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
+    FROM top_site
+  )
+  SELECT lexo_rank_reorder_before(order_key, prev_order_key)
+  FROM ordered_table
+  WHERE id = :site_id;

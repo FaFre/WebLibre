@@ -72,9 +72,7 @@ class UrlListTile extends StatelessWidget {
             child: Row(
               children: [
                 leading ??
-                    RepaintBoundary(
-                      child: UrlIcon([uri], iconSize: iconSize),
-                    ),
+                    RepaintBoundary(child: UrlIcon([uri], iconSize: iconSize)),
                 const SizedBox(width: 14.0),
                 Expanded(
                   child: Column(
