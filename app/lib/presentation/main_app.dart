@@ -55,6 +55,9 @@ class MainApp extends HookConsumerWidget {
             theme: theme,
             darkTheme: darkTheme,
             themeMode: themeMode,
+            themeAnimationStyle: disableAnimations
+                ? AnimationStyle.noAnimation
+                : null,
             builder: (context, child) {
               return _AppMediaQueryOverrides(
                 uiScaleFactor: uiScaleFactor,
@@ -85,6 +88,9 @@ class MainApp extends HookConsumerWidget {
           theme: theme,
           darkTheme: darkTheme,
           themeMode: themeMode,
+          themeAnimationStyle: disableAnimations
+              ? AnimationStyle.noAnimation
+              : null,
           routerConfig: router.value,
           builder: (context, child) {
             return _AppMediaQueryOverrides(
@@ -103,6 +109,9 @@ class MainApp extends HookConsumerWidget {
           theme: theme,
           darkTheme: darkTheme,
           themeMode: themeMode,
+          themeAnimationStyle: disableAnimations
+              ? AnimationStyle.noAnimation
+              : null,
           builder: (context, child) {
             return _AppMediaQueryOverrides(
               uiScaleFactor: uiScaleFactor,

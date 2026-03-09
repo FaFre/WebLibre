@@ -81,6 +81,31 @@ bool _hasBrokenSurfaceContainerColors(ColorScheme scheme) {
       scheme.surfaceContainerHighest == scheme.surface;
 }
 
+class _NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _NoAnimationPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
+  }
+}
+
+const _noAnimationPageTransitionsTheme = PageTransitionsTheme(
+  builders: {
+    TargetPlatform.android: _NoAnimationPageTransitionsBuilder(),
+    TargetPlatform.iOS: _NoAnimationPageTransitionsBuilder(),
+    TargetPlatform.linux: _NoAnimationPageTransitionsBuilder(),
+    TargetPlatform.macOS: _NoAnimationPageTransitionsBuilder(),
+    TargetPlatform.windows: _NoAnimationPageTransitionsBuilder(),
+  },
+);
+
 class _MainWidget extends HookConsumerWidget {
   const _MainWidget();
 
@@ -257,11 +282,17 @@ class _MainWidget extends HookConsumerWidget {
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: lightColorScheme,
+            pageTransitionsTheme: disableAnimations
+                ? _noAnimationPageTransitionsTheme
+                : null,
             extensions: const <ThemeExtension<dynamic>>[AppColors.light],
           ),
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: darkColorScheme,
+            pageTransitionsTheme: disableAnimations
+                ? _noAnimationPageTransitionsTheme
+                : null,
             extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
           ),
           themeMode: themeMode,

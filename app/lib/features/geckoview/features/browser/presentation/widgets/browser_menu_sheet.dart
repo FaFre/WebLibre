@@ -618,10 +618,7 @@ class _PinTopSiteTile extends HookConsumerWidget {
           } else {
             await ref
                 .read(topSiteRepositoryProvider.notifier)
-                .addPinnedSite(
-                  title: tabState.titleOrAuthority,
-                  url: url,
-                );
+                .addPinnedSite(title: tabState.titleOrAuthority, url: url);
             if (context.mounted) {
               ui_helper.showInfoMessage(context, 'Pinned to Top Sites');
             }
@@ -1932,19 +1929,21 @@ class _SyncTile extends HookConsumerWidget {
     );
     final isSyncing = syncStarted || syncInfo?.syncing == true;
 
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+
     final controller = useAnimationController(
-      duration: const Duration(seconds: 2),
+      duration: disableAnimations ? Duration.zero : const Duration(seconds: 2),
     );
 
     useEffect(() {
-      if (isSyncing) {
+      if (isSyncing && !disableAnimations) {
         unawaited(controller.repeat());
       } else {
         controller.stop();
         controller.reset();
       }
       return null;
-    }, [isSyncing]);
+    }, [isSyncing, disableAnimations]);
 
     return ListTile(
       leading: RotationTransition(

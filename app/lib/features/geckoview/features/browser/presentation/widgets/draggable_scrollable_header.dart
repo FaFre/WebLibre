@@ -74,6 +74,11 @@ class _DraggableScrollableHeaderState extends State<DraggableScrollableHeader>
     double targetSize, {
     Duration? customDuration,
   }) async {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      widget.controller.jumpTo(targetSize);
+      return;
+    }
+
     if (customDuration != null) {
       _animationController.duration = customDuration;
     } else {

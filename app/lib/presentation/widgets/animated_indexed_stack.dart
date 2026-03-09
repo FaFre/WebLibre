@@ -129,10 +129,28 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
   /// The entry which is currently at the top of the stack.
   _ChildEntry? _currentEntry;
 
+  bool _disableAnimations = false;
+
+  Duration get _effectiveDuration =>
+      _disableAnimations ? Duration.zero : widget.duration;
+
   @override
   void initState() {
     super.initState();
     _updateEntriesList();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    if (disableAnimations != _disableAnimations) {
+      _disableAnimations = disableAnimations;
+      for (final entry in _entries) {
+        entry.primaryController.duration = _effectiveDuration;
+        entry.secondaryController.duration = _effectiveDuration;
+      }
+    }
   }
 
   @override
@@ -207,8 +225,8 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
         // If we find an existing entry, we update its child widget and reuse it.
         // This ensures it continues to use the same global key and animation controllers.
         existingEntry.child = child;
-        existingEntry.primaryController.duration = widget.duration;
-        existingEntry.secondaryController.duration = widget.duration;
+        existingEntry.primaryController.duration = _effectiveDuration;
+        existingEntry.secondaryController.duration = _effectiveDuration;
         entry = existingEntry;
       } else {
         entry = _newEntry(child);
@@ -299,11 +317,11 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
     key: GlobalKey(),
     child: child,
     primaryController: AnimationController(
-      duration: widget.duration,
+      duration: _effectiveDuration,
       vsync: this,
     ),
     secondaryController: AnimationController(
-      duration: widget.duration,
+      duration: _effectiveDuration,
       vsync: this,
     ),
   );

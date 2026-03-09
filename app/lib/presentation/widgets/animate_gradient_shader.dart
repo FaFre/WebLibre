@@ -120,10 +120,22 @@ class _AnimateGradientShaderState extends State<AnimateGradientShader>
   List<Color> primaryColors = [];
   List<Color> secondaryColors = [];
 
+  bool _disableAnimations = false;
+
   @override
   void initState() {
     _initialize();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    if (disableAnimations != _disableAnimations) {
+      _disableAnimations = disableAnimations;
+      _setAnimations();
+    }
   }
 
   @override
@@ -222,10 +234,15 @@ class _AnimateGradientShaderState extends State<AnimateGradientShader>
   void _setAnimations() {
     _controller?.dispose();
     _controller =
-        (widget.controller ??
-              AnimationController(vsync: this, duration: widget.duration))
-          // ignore: discarded_futures
-          ..repeat(reverse: widget.reverse);
+        widget.controller ??
+        AnimationController(vsync: this, duration: widget.duration);
+
+    if (_disableAnimations) {
+      _controller!.value = 0;
+    } else {
+      // ignore: discarded_futures
+      _controller!.repeat(reverse: widget.reverse);
+    }
 
     _animation = CurvedAnimation(parent: _controller!, curve: Curves.easeInOut);
   }

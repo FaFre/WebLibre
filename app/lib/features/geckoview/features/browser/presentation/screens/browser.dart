@@ -76,8 +76,10 @@ class _AnimatedToolbar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+
     final controller = useAnimationController(
-      duration: _kAnimationDuration,
+      duration: disableAnimations ? Duration.zero : _kAnimationDuration,
       initialValue: visible ? 1.0 : 0.0,
     );
 

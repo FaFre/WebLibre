@@ -53,19 +53,21 @@ class SyncSettingsScreen extends HookConsumerWidget {
       return 'Last synced: $formattedDate';
     }, [syncInfo, isSyncing]);
 
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+
     final syncController = useAnimationController(
-      duration: const Duration(seconds: 2),
+      duration: disableAnimations ? Duration.zero : const Duration(seconds: 2),
     );
 
     useEffect(() {
-      if (isSyncing) {
+      if (isSyncing && !disableAnimations) {
         unawaited(syncController.repeat());
       } else {
         syncController.stop();
         syncController.reset();
       }
       return null;
-    }, [isSyncing]);
+    }, [isSyncing, disableAnimations]);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Firefox Sync')),
