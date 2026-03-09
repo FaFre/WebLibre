@@ -63,6 +63,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
@@ -383,6 +384,10 @@ class _PageActionsCard extends HookConsumerWidget {
         ),
         _buildDivider(),
 
+        // Pin/Unpin Top Site
+        _PinTopSiteTile(selectedTabId: selectedTabId),
+        _buildDivider(),
+
         // Find in page
         ListTile(
           leading: const Icon(Icons.search),
@@ -571,6 +576,62 @@ class _AddToHomeScreenTile extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _PinTopSiteTile extends HookConsumerWidget {
+  final String selectedTabId;
+
+  const _PinTopSiteTile({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabState = ref.watch(tabStateProvider(selectedTabId));
+    final url = tabState?.url;
+
+    final isPinned = useCachedFuture(
+      () => url != null
+          ? ref
+                .read(topSiteRepositoryProvider.notifier)
+                .isPersistedTopSiteUrl(url)
+          : Future.value(false),
+      [url],
+    );
+
+    final pinned = isPinned.data ?? false;
+
+    return ListTile(
+      leading: Icon(pinned ? MdiIcons.pinOff : MdiIcons.pin),
+      title: Text(pinned ? 'Unpin from Top Sites' : 'Pin to Top Sites'),
+      onTap: () async {
+        if (tabState == null || url == null) return;
+        Navigator.pop(context);
+        try {
+          if (pinned) {
+            await ref
+                .read(topSiteRepositoryProvider.notifier)
+                .unpinSiteByUrl(url);
+            if (context.mounted) {
+              ui_helper.showInfoMessage(context, 'Unpinned from Top Sites');
+            }
+          } else {
+            await ref
+                .read(topSiteRepositoryProvider.notifier)
+                .addPinnedSite(
+                  title: tabState.titleOrAuthority,
+                  url: url,
+                );
+            if (context.mounted) {
+              ui_helper.showInfoMessage(context, 'Pinned to Top Sites');
+            }
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ui_helper.showErrorMessage(context, 'Failed to update Top Sites');
+          }
+        }
+      },
     );
   }
 }

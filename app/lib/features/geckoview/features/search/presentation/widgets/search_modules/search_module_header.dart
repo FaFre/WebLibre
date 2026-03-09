@@ -30,6 +30,9 @@ class SearchModuleHeader extends StatelessWidget {
   final VoidCallback onToggleCollapse;
   final VoidCallback onToggleExpansion;
 
+  /// Optional widget placed between the title area and the trailing button.
+  final Widget? headerTrailing;
+
   /// The maximum number of items shown in preview mode.
   /// The trailing button is hidden when totalCount <= this value.
   final int previewLimit;
@@ -41,6 +44,7 @@ class SearchModuleHeader extends StatelessWidget {
     required this.displayState,
     required this.onToggleCollapse,
     required this.onToggleExpansion,
+    this.headerTrailing,
     this.previewLimit = 3,
   });
 
@@ -83,6 +87,7 @@ class SearchModuleHeader extends StatelessWidget {
               ),
             ),
           ),
+          if (headerTrailing != null) headerTrailing!,
           if (showTrailing)
             TextButton(
               onPressed: onToggleExpansion,

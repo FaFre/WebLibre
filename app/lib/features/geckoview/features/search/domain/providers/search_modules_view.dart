@@ -27,6 +27,7 @@ enum SearchModuleType {
   bookmarks,
   history,
   historyHighlights,
+  topSites,
   recentHistory,
   recentArticles,
   recentTabs,

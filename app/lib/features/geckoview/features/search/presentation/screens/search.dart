@@ -36,10 +36,10 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/containers_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/history_highlights_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_feed_articles_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_tabs_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/top_sites_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
@@ -503,7 +503,7 @@ class SearchScreen extends HookConsumerWidget {
                 child: ClipboardFillLink(controller: searchTextController),
               ),
               if (showNoInputSections) ...[
-                HistoryHighlightsSection(
+                TopSitesSection(
                   onUriSelected: (uri) async {
                     if (isEditMode) {
                       await ref
@@ -539,7 +539,9 @@ class SearchScreen extends HookConsumerWidget {
                 ),
                 RecentFeedArticlesSection(
                   onArticleSelected: (article) {
-                    FeedArticleRoute(articleId: article.id).go(context);
+                    unawaited(
+                      FeedArticleRoute(articleId: article.id).push(context),
+                    );
                   },
                 ),
                 RecentTabsSection(

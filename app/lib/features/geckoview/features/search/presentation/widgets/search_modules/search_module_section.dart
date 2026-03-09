@@ -39,6 +39,12 @@ class SearchModuleSection extends ConsumerWidget {
   /// [isCollapsed] indicates whether the section is fully collapsed (no items).
   /// [visibleCount] is the number of items to display (0 when collapsed,
   /// limited in preview, or all when expanded).
+  /// Optional widget placed in the header between title and trailing button.
+  final Widget? headerTrailing;
+
+  /// The maximum number of items shown in preview mode for this section.
+  final int previewLimit;
+
   final List<Widget> Function({
     required bool isCollapsed,
     required int visibleCount,
@@ -51,6 +57,8 @@ class SearchModuleSection extends ConsumerWidget {
     required this.moduleType,
     required this.totalCount,
     required this.contentSliverBuilder,
+    this.headerTrailing,
+    this.previewLimit = previewItemsPerModule,
   });
 
   @override
@@ -62,10 +70,10 @@ class SearchModuleSection extends ConsumerWidget {
     final isCollapsed = displayState == SearchModuleDisplayState.collapsed;
     final showAllItems =
         displayState == SearchModuleDisplayState.expanded ||
-        totalCount <= previewItemsPerModule;
+        totalCount <= previewLimit;
     final visibleCount = isCollapsed
         ? 0
-        : (showAllItems ? totalCount : previewItemsPerModule);
+        : (showAllItems ? totalCount : previewLimit);
 
     return MultiSliver(
       pushPinnedChildren: true,
@@ -78,6 +86,8 @@ class SearchModuleSection extends ConsumerWidget {
               title: title,
               totalCount: totalCount,
               displayState: displayState,
+              headerTrailing: isCollapsed ? null : headerTrailing,
+              previewLimit: previewLimit,
               onToggleCollapse: () => ref
                   .read(
                     searchModuleDisplayStateControllerProvider(

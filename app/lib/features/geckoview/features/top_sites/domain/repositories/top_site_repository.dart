@@ -69,12 +69,15 @@ class TopSiteRepository extends _$TopSiteRepository {
 
   Future<List<TopSiteItem>> getTopSites({int limit = 8}) async {
     final persisted = await _getPersistedItems();
+    final targetCount = limit < 0 ? 0 : limit;
 
-    if (persisted.length >= limit) {
-      return persisted.take(limit).toList();
+    // Always keep all persisted items. The limit is only used as a history
+    // padding target.
+    if (persisted.length >= targetCount) {
+      return persisted;
     }
 
-    final remaining = limit - persisted.length;
+    final remaining = targetCount - persisted.length;
     final historyItems = await _getHistoryItems(
       limit: remaining,
       excludeUrls: persisted.map((s) => s.url.toString()).toSet(),
@@ -89,12 +92,15 @@ class TopSiteRepository extends _$TopSiteRepository {
       persistedRows,
     ) async {
       final persistedItems = persistedRows.map(_mapPersistedRow).toList();
+      final targetCount = limit < 0 ? 0 : limit;
 
-      if (persistedItems.length >= limit) {
-        return persistedItems.take(limit).toList();
+      // Always keep all persisted items. The limit is only used as a history
+      // padding target.
+      if (persistedItems.length >= targetCount) {
+        return persistedItems;
       }
 
-      final remaining = limit - persistedItems.length;
+      final remaining = targetCount - persistedItems.length;
       final historyItems = await _getHistoryItems(
         limit: remaining,
         excludeUrls: persistedItems.map((s) => s.url.toString()).toSet(),
@@ -160,6 +166,35 @@ class TopSiteRepository extends _$TopSiteRepository {
 
   Future<void> removePersistedSite(String id) {
     return ref.read(topSiteDatabaseProvider).topSiteDao.deletePersistedSite(id);
+  }
+
+  Future<TopSiteItem?> getPersistedTopSiteByUrl(Uri url) async {
+    final row = await ref
+        .read(topSiteDatabaseProvider)
+        .topSiteDao
+        .getPersistedTopSiteByUrl(url);
+    return row != null ? _mapPersistedRow(row) : null;
+  }
+
+  Future<bool> isPersistedTopSiteUrl(Uri url) async {
+    final row = await ref
+        .read(topSiteDatabaseProvider)
+        .topSiteDao
+        .getPersistedTopSiteByUrl(url);
+    return row != null;
+  }
+
+  Future<bool> unpinSiteByUrl(Uri url) async {
+    final row = await ref
+        .read(topSiteDatabaseProvider)
+        .topSiteDao
+        .getPersistedTopSiteByUrl(url);
+    if (row == null) return false;
+    await ref
+        .read(topSiteDatabaseProvider)
+        .topSiteDao
+        .deletePersistedSite(row.id);
+    return true;
   }
 
   Future<void> assignOrderKey(String id, String orderKey) {
