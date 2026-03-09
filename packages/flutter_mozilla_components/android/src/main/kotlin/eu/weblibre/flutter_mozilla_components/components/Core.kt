@@ -21,6 +21,8 @@ import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
@@ -193,10 +195,15 @@ class Core(
         FileUploadsDirCleaner { context.cacheDir }
     }
 
+    val historyMetadataService by lazy {
+        HistoryMetadataService(storage = historyStorage)
+    }
+
     @OptIn(FlowPreview::class)
     val store by lazy {
         BrowserStore(
             middleware = listOf(
+                HistoryMetadataMiddleware(historyMetadataService),
                 FlutterEventMiddleware(flutterEvents),
                 DownloadMiddleware(context, DownloadService::class.java, { false }),
                 ThumbnailsMiddleware(thumbnailStorage),

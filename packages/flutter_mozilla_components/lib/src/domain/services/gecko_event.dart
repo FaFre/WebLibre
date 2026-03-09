@@ -48,8 +48,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _tabAddedSubject = PublishSubject<String>();
   final _mlProgressSubject = PublishSubject<MlProgressData>();
   final _manifestUpdateSubject = PublishSubject<ManifestUpdateEvent>();
-  final _translationEngineSubject =
-      BehaviorSubject<TranslationEngineEvent>();
+  final _translationEngineSubject = BehaviorSubject<TranslationEngineEvent>();
   final _tabTranslationSubject = ReplaySubject<TabTranslationEvent>();
 
   // Event streams

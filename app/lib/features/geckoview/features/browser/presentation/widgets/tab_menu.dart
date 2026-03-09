@@ -588,12 +588,14 @@ class TabMenu extends HookConsumerWidget {
           builder: (context, ref, child) {
             final engineState = ref.watch(translationEngineStateProvider);
             final translationState = ref.watch(
-              tabStateProvider(selectedTabId)
-                  .select((s) => s?.translationState),
+              tabStateProvider(
+                selectedTabId,
+              ).select((s) => s?.translationState),
             );
             final readerActive = ref.watch(
-              tabStateProvider(selectedTabId)
-                  .select((s) => s?.readerableState.active ?? false),
+              tabStateProvider(
+                selectedTabId,
+              ).select((s) => s?.readerableState.active ?? false),
             );
 
             // Hide when reader mode is active (Fenix-aligned)
@@ -620,9 +622,7 @@ class TabMenu extends HookConsumerWidget {
                   );
                 }
               },
-              child: Text(
-                isTranslated ? 'Translated' : 'Translate Page',
-              ),
+              child: Text(isTranslated ? 'Translated' : 'Translate Page'),
             );
           },
         ),

@@ -42,6 +42,8 @@ import mozilla.components.support.webextensions.WebExtensionSupport
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+private const val HISTORY_METADATA_MAX_AGE_IN_MS = 14L * 24 * 60 * 60 * 1000 // 14 days
+
 object GlobalComponents {
     private var _components: Components? = null
     private var currentMode: ComponentsMode? = null
@@ -202,6 +204,10 @@ object GlobalComponents {
 
             try {
                 GlobalPlacesDependencyProvider.initialize(newComponents.core.historyStorage)
+
+                newComponents.core.historyMetadataService.cleanup(
+                    System.currentTimeMillis() - HISTORY_METADATA_MAX_AGE_IN_MS,
+                )
 
                 GlobalAddonDependencyProvider.initialize(
                     newComponents.core.addonManager,

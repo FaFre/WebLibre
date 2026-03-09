@@ -2,6 +2,8 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
+import eu.weblibre.flutter_mozilla_components.pigeons.HistoryHighlight
+import eu.weblibre.flutter_mozilla_components.pigeons.HistoryHighlightWeights
 import eu.weblibre.flutter_mozilla_components.pigeons.VisitInfo
 import eu.weblibre.flutter_mozilla_components.pigeons.VisitType
 import kotlinx.coroutines.CoroutineScope
@@ -203,6 +205,34 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
                 components.core.historyStorage.deleteVisitsBetween(startMillis, endMillis);
 
                 callback(Result.success(Unit))
+            }
+        }
+    }
+
+    override fun getHistoryHighlights(
+        weights: HistoryHighlightWeights,
+        limit: Long,
+        callback: (Result<List<HistoryHighlight>>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                val conceptWeights = mozilla.components.concept.storage.HistoryHighlightWeights(
+                    viewTime = weights.viewTime,
+                    frequency = weights.frequency,
+                )
+                val highlights = components.core.historyStorage.getHistoryHighlights(
+                    conceptWeights,
+                    limit.toInt(),
+                ).map {
+                    HistoryHighlight(
+                        score = it.score,
+                        placeId = it.placeId.toLong(),
+                        url = it.url,
+                        title = it.title,
+                        previewImageUrl = it.previewImageUrl,
+                    )
+                }
+                callback(Result.success(highlights))
             }
         }
     }

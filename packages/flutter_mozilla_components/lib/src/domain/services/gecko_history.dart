@@ -60,4 +60,11 @@ class GeckoHistoryService {
       end.millisecondsSinceEpoch,
     );
   }
+
+  Future<List<HistoryHighlight>> getHistoryHighlights({
+    required HistoryHighlightWeights weights,
+    required int limit,
+  }) {
+    return _api.getHistoryHighlights(weights, limit);
+  }
 }

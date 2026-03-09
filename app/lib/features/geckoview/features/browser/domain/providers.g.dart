@@ -430,11 +430,11 @@ final fifoTabStatesProvider = FifoTabStatesProvider._();
 final class FifoTabStatesProvider
     extends
         $FunctionalProvider<
-          EquatableValue<List<TabStateWirthContainer>>,
-          EquatableValue<List<TabStateWirthContainer>>,
-          EquatableValue<List<TabStateWirthContainer>>
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>
         >
-    with $Provider<EquatableValue<List<TabStateWirthContainer>>> {
+    with $Provider<EquatableValue<List<TabStateWithContainer>>> {
   FifoTabStatesProvider._()
     : super(
         from: null,
@@ -451,30 +451,30 @@ final class FifoTabStatesProvider
 
   @$internal
   @override
-  $ProviderElement<EquatableValue<List<TabStateWirthContainer>>> $createElement(
+  $ProviderElement<EquatableValue<List<TabStateWithContainer>>> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  EquatableValue<List<TabStateWirthContainer>> create(Ref ref) {
+  EquatableValue<List<TabStateWithContainer>> create(Ref ref) {
     return fifoTabStates(ref);
   }
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(
-    EquatableValue<List<TabStateWirthContainer>> value,
+    EquatableValue<List<TabStateWithContainer>> value,
   ) {
     return $ProviderOverride(
       origin: this,
       providerOverride:
-          $SyncValueProvider<EquatableValue<List<TabStateWirthContainer>>>(
+          $SyncValueProvider<EquatableValue<List<TabStateWithContainer>>>(
             value,
           ),
     );
   }
 }
 
-String _$fifoTabStatesHash() => r'03298f30559d55e986d97a17d517b9a9abb89be4';
+String _$fifoTabStatesHash() => r'f8dc69382d307bc83193a3b839a16313e9c1ab69';
 
 @ProviderFor(selectedContainerTabStatesWithContainer)
 final selectedContainerTabStatesWithContainerProvider =
@@ -483,11 +483,11 @@ final selectedContainerTabStatesWithContainerProvider =
 final class SelectedContainerTabStatesWithContainerProvider
     extends
         $FunctionalProvider<
-          EquatableValue<List<TabStateWirthContainer>>,
-          EquatableValue<List<TabStateWirthContainer>>,
-          EquatableValue<List<TabStateWirthContainer>>
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>
         >
-    with $Provider<EquatableValue<List<TabStateWirthContainer>>> {
+    with $Provider<EquatableValue<List<TabStateWithContainer>>> {
   SelectedContainerTabStatesWithContainerProvider._()
     : super(
         from: null,
@@ -505,23 +505,23 @@ final class SelectedContainerTabStatesWithContainerProvider
 
   @$internal
   @override
-  $ProviderElement<EquatableValue<List<TabStateWirthContainer>>> $createElement(
+  $ProviderElement<EquatableValue<List<TabStateWithContainer>>> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  EquatableValue<List<TabStateWirthContainer>> create(Ref ref) {
+  EquatableValue<List<TabStateWithContainer>> create(Ref ref) {
     return selectedContainerTabStatesWithContainer(ref);
   }
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(
-    EquatableValue<List<TabStateWirthContainer>> value,
+    EquatableValue<List<TabStateWithContainer>> value,
   ) {
     return $ProviderOverride(
       origin: this,
       providerOverride:
-          $SyncValueProvider<EquatableValue<List<TabStateWirthContainer>>>(
+          $SyncValueProvider<EquatableValue<List<TabStateWithContainer>>>(
             value,
           ),
     );
@@ -529,7 +529,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'e2dc85fc72ee29736d8fdaabb1abadd23cc4bac0';
+    r'187e408857ddc5fe08f8e5344beb510c3c39abe1';
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -537,11 +537,11 @@ final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
 final class QuickTabSwitcherTabStatesProvider
     extends
         $FunctionalProvider<
-          EquatableValue<List<TabStateWirthContainer>>,
-          EquatableValue<List<TabStateWirthContainer>>,
-          EquatableValue<List<TabStateWirthContainer>>
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>
         >
-    with $Provider<EquatableValue<List<TabStateWirthContainer>>> {
+    with $Provider<EquatableValue<List<TabStateWithContainer>>> {
   QuickTabSwitcherTabStatesProvider._({
     required QuickTabSwitcherTabStatesFamily super.from,
     required QuickTabSwitcherMode super.argument,
@@ -565,24 +565,24 @@ final class QuickTabSwitcherTabStatesProvider
 
   @$internal
   @override
-  $ProviderElement<EquatableValue<List<TabStateWirthContainer>>> $createElement(
+  $ProviderElement<EquatableValue<List<TabStateWithContainer>>> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  EquatableValue<List<TabStateWirthContainer>> create(Ref ref) {
+  EquatableValue<List<TabStateWithContainer>> create(Ref ref) {
     final argument = this.argument as QuickTabSwitcherMode;
     return quickTabSwitcherTabStates(ref, argument);
   }
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(
-    EquatableValue<List<TabStateWirthContainer>> value,
+    EquatableValue<List<TabStateWithContainer>> value,
   ) {
     return $ProviderOverride(
       origin: this,
       providerOverride:
-          $SyncValueProvider<EquatableValue<List<TabStateWirthContainer>>>(
+          $SyncValueProvider<EquatableValue<List<TabStateWithContainer>>>(
             value,
           ),
     );
@@ -601,12 +601,12 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'df990fb96cca62a272572c925028725f81a0e96b';
+    r'2627bcd25718472f0c8057e836d76bdaa7317c1c';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
         $FunctionalFamilyOverride<
-          EquatableValue<List<TabStateWirthContainer>>,
+          EquatableValue<List<TabStateWithContainer>>,
           QuickTabSwitcherMode
         > {
   QuickTabSwitcherTabStatesFamily._()

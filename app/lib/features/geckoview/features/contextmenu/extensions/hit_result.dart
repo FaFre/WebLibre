@@ -132,8 +132,10 @@ extension HitResultX on HitResult {
   HitResult withCleanedLink(String cleanedUrl) {
     return switch (this) {
       UnknownHitResult() => UnknownHitResult(src: cleanedUrl),
-      ImageSrcHitResult(:final src) =>
-        ImageSrcHitResult(src: src, uri: cleanedUrl),
+      ImageSrcHitResult(:final src) => ImageSrcHitResult(
+        src: src,
+        uri: cleanedUrl,
+      ),
       _ => this,
     };
   }

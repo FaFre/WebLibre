@@ -47,7 +47,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 
 part 'providers.g.dart';
 
-typedef TabStateWirthContainer = (TabState, ContainerData?);
+typedef TabStateWithContainer = (TabState, ContainerData?);
 
 @Riverpod()
 bool canManualTabReorder(Ref ref) {
@@ -175,7 +175,7 @@ EquatableValue<Map<String, TabState>> containerTabStates(
 }
 
 @Riverpod(keepAlive: true)
-EquatableValue<List<TabStateWirthContainer>> fifoTabStates(Ref ref) {
+EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
   final containerData = ref
       .watch(watchContainersWithCountProvider.select((value) => value.value))
       .mapNotNull(
@@ -202,7 +202,7 @@ EquatableValue<List<TabStateWirthContainer>> fifoTabStates(Ref ref) {
 }
 
 @Riverpod()
-EquatableValue<List<TabStateWirthContainer>>
+EquatableValue<List<TabStateWithContainer>>
 selectedContainerTabStatesWithContainer(Ref ref) {
   final filter = ref.watch(
     selectedContainerProvider.select(
@@ -256,7 +256,7 @@ selectedContainerTabStatesWithContainer(Ref ref) {
 }
 
 @Riverpod()
-EquatableValue<List<TabStateWirthContainer>> quickTabSwitcherTabStates(
+EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
   Ref ref,
   QuickTabSwitcherMode mode,
 ) {

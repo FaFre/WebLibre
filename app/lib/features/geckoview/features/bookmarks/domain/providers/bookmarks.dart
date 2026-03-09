@@ -136,6 +136,7 @@ class BookmarkSearchResults extends _$BookmarkSearchResults {
     }
 
     final results = await _service.searchBookmarks(query, limit: limit);
+    if (!ref.mounted) return;
     state = results
         .map(BookmarkItem.parseRecursive)
         .whereType<BookmarkEntry>()

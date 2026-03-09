@@ -65,6 +65,8 @@ export 'src/pigeons/gecko.g.dart'
         GeckoSuggestionType,
         GeckoTrackingProtectionApi,
         GeoHitResult,
+        HistoryHighlight,
+        HistoryHighlightWeights,
         HistoryMetadataKey,
         HitResult,
         HttpsOnlyMode,

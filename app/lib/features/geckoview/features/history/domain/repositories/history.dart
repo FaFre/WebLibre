@@ -56,6 +56,20 @@ class HistoryRepository extends _$HistoryRepository {
     return _service.deleteVisit(info);
   }
 
+  Future<List<HistoryHighlight>> getHistoryHighlights({
+    double viewTimeWeight = 10.0,
+    double frequencyWeight = 4.0,
+    required int limit,
+  }) {
+    return _service.getHistoryHighlights(
+      weights: HistoryHighlightWeights(
+        viewTime: viewTimeWeight,
+        frequency: frequencyWeight,
+      ),
+      limit: limit,
+    );
+  }
+
   @override
   void build() {}
 }

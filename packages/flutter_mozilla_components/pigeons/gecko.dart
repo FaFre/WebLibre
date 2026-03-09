@@ -534,6 +534,29 @@ class VisitInfo {
   );
 }
 
+class HistoryHighlightWeights {
+  final double viewTime;
+  final double frequency;
+
+  HistoryHighlightWeights(this.viewTime, this.frequency);
+}
+
+class HistoryHighlight {
+  final double score;
+  final int placeId;
+  final String url;
+  final String? title;
+  final String? previewImageUrl;
+
+  HistoryHighlight(
+    this.score,
+    this.placeId,
+    this.url,
+    this.title,
+    this.previewImageUrl,
+  );
+}
+
 class HistoryItem {
   final String url;
   final String title;
@@ -1639,10 +1662,7 @@ abstract class GeckoStateEvents {
     int sequence,
     TranslationEngineStateData state,
   );
-  void onTabTranslationStateChange(
-    int sequence,
-    TabTranslationStateData state,
-  );
+  void onTabTranslationStateChange(int sequence, TabTranslationStateData state);
 }
 
 @FlutterApi()
@@ -1797,6 +1817,12 @@ abstract class GeckoHistoryApi {
 
   @async
   void deleteVisitsBetween(int startMillis, int endMillis);
+
+  @async
+  List<HistoryHighlight> getHistoryHighlights(
+    HistoryHighlightWeights weights,
+    int limit,
+  );
 }
 
 @HostApi()

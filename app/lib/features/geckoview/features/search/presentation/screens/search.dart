@@ -35,6 +35,11 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/containers_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/history_highlights_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_feed_articles_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_tabs_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
@@ -45,6 +50,8 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolatio
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
+import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
+import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
@@ -135,6 +142,17 @@ class SearchScreen extends HookConsumerWidget {
       source: searchTextController,
       sampleDuration: const Duration(milliseconds: 150),
     );
+    final hasUserProvidedInput = useState(
+      initialSearchText?.isNotEmpty == true,
+    );
+
+    useOnListenableChange(searchTextController, () {
+      hasUserProvidedInput.value = searchTextController.text.isNotEmpty;
+    });
+
+    final showNoInputSections =
+        !hasUserProvidedInput.value && searchTextController.text.isEmpty;
+
     final searchFocusNode = useFocusNode();
     final textFieldKey = useMemoized(() => GlobalKey());
     final preferredHeight = useState<double>(kToolbarHeight);
@@ -484,86 +502,211 @@ class SearchScreen extends HookConsumerWidget {
               SliverToBoxAdapter(
                 child: ClipboardFillLink(controller: searchTextController),
               ),
-              FullSearchTermSuggestions(
-                searchTextController: searchTextController,
-                activeBang: activeBang,
-                submitSearch: submitSearch,
-                domain: isEditMode ? existingTabState.url.host : null,
-              ),
-              TabSearch(searchTextListenable: sampledSearchText),
-              BookmarkSearch(
-                searchTextListenable: sampledSearchText,
-                onUriSelected: (uri) async {
-                  if (isEditMode) {
-                    await ref
-                        .read(tabSessionProvider(tabId: tabId).notifier)
-                        .loadUrl(url: uri);
-                  } else {
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: uri,
-                          tabMode: effectiveTabMode,
-                          parentId: (selectedTabType.value == TabType.child)
-                              ? ref.read(selectedTabProvider)
-                              : null,
-                          launchedFromIntent: launchedFromIntent,
-                          selectTab: true,
-                          containerSelection: selectedContainer == null
-                              ? const TabContainerSelection.unassigned()
-                              : TabContainerSelection.specific(
-                                  selectedContainer,
-                                ),
-                        );
-                  }
+              if (showNoInputSections) ...[
+                HistoryHighlightsSection(
+                  onUriSelected: (uri) async {
+                    if (isEditMode) {
+                      await ref
+                          .read(tabSessionProvider(tabId: tabId).notifier)
+                          .loadUrl(url: uri);
+                    } else {
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(
+                            url: uri,
+                            tabMode: effectiveTabMode,
+                            parentId: (selectedTabType.value == TabType.child)
+                                ? ref.read(selectedTabProvider)
+                                : null,
+                            launchedFromIntent: launchedFromIntent,
+                            selectTab: true,
+                            containerSelection: selectedContainer == null
+                                ? const TabContainerSelection.unassigned()
+                                : TabContainerSelection.specific(
+                                    selectedContainer,
+                                  ),
+                          );
+                    }
 
-                  if (context.mounted) {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
+                    if (context.mounted) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .requestDismiss();
 
-                    const BrowserRoute().go(context);
-                  }
-                },
-              ),
-              FeedSearch(searchTextNotifier: sampledSearchText),
-              HistorySuggestions(
-                searchTextListenable: sampledSearchText,
-                onUriSelected: (uri) async {
-                  if (isEditMode) {
-                    // Load into existing tab
-                    await ref
-                        .read(tabSessionProvider(tabId: tabId).notifier)
-                        .loadUrl(url: uri);
-                  } else {
-                    // Create new tab
+                      const BrowserRoute().go(context);
+                    }
+                  },
+                ),
+                RecentFeedArticlesSection(
+                  onArticleSelected: (article) {
+                    FeedArticleRoute(articleId: article.id).go(context);
+                  },
+                ),
+                RecentTabsSection(
+                  onTabSelected: (tabId) async {
                     await ref
                         .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: uri,
-                          tabMode: effectiveTabMode,
-                          parentId: (selectedTabType.value == TabType.child)
-                              ? ref.read(selectedTabProvider)
-                              : null,
-                          launchedFromIntent: launchedFromIntent,
-                          selectTab: true,
-                          containerSelection: selectedContainer == null
-                              ? const TabContainerSelection.unassigned()
-                              : TabContainerSelection.specific(
-                                  selectedContainer,
-                                ),
+                        .selectTab(tabId);
+
+                    if (context.mounted) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .requestDismiss();
+
+                      const BrowserRoute().go(context);
+                    }
+                  },
+                ),
+                RecentHistorySection(
+                  onUriSelected: (uri) async {
+                    if (isEditMode) {
+                      await ref
+                          .read(tabSessionProvider(tabId: tabId).notifier)
+                          .loadUrl(url: uri);
+                    } else {
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(
+                            url: uri,
+                            tabMode: effectiveTabMode,
+                            parentId: (selectedTabType.value == TabType.child)
+                                ? ref.read(selectedTabProvider)
+                                : null,
+                            launchedFromIntent: launchedFromIntent,
+                            selectTab: true,
+                            containerSelection: selectedContainer == null
+                                ? const TabContainerSelection.unassigned()
+                                : TabContainerSelection.specific(
+                                    selectedContainer,
+                                  ),
+                          );
+                    }
+
+                    if (context.mounted) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .requestDismiss();
+
+                      const BrowserRoute().go(context);
+                    }
+                  },
+                ),
+                ContainersSection(
+                  onContainerSelected: (container) async {
+                    final result = await ref
+                        .read(selectedContainerProvider.notifier)
+                        .setContainerId(container.id);
+
+                    if (!context.mounted) return;
+
+                    if (result == SetContainerResult.successHasProxy) {
+                      final shouldStartProxy = await ref
+                          .read(startProxyControllerProvider.notifier)
+                          .shouldPromptProxyStart();
+
+                      if (context.mounted && shouldStartProxy) {
+                        final dialogResult = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => const TorDialog(),
                         );
-                  }
 
-                  if (context.mounted) {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
+                        if (dialogResult == true) {
+                          await ref
+                              .read(startProxyControllerProvider.notifier)
+                              .startProxy();
+                        }
+                      }
+                    }
 
-                    const BrowserRoute().go(context);
-                  }
-                },
-              ),
+                    if (context.mounted &&
+                        result != SetContainerResult.failed) {
+                      const TabViewRoute().go(context);
+                    }
+                  },
+                ),
+              ],
+              if (!showNoInputSections) ...[
+                FullSearchTermSuggestions(
+                  searchTextController: searchTextController,
+                  activeBang: activeBang,
+                  submitSearch: submitSearch,
+                  domain: isEditMode ? existingTabState.url.host : null,
+                ),
+                TabSearch(searchTextListenable: sampledSearchText),
+                BookmarkSearch(
+                  searchTextListenable: sampledSearchText,
+                  onUriSelected: (uri) async {
+                    if (isEditMode) {
+                      await ref
+                          .read(tabSessionProvider(tabId: tabId).notifier)
+                          .loadUrl(url: uri);
+                    } else {
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(
+                            url: uri,
+                            tabMode: effectiveTabMode,
+                            parentId: (selectedTabType.value == TabType.child)
+                                ? ref.read(selectedTabProvider)
+                                : null,
+                            launchedFromIntent: launchedFromIntent,
+                            selectTab: true,
+                            containerSelection: selectedContainer == null
+                                ? const TabContainerSelection.unassigned()
+                                : TabContainerSelection.specific(
+                                    selectedContainer,
+                                  ),
+                          );
+                    }
+
+                    if (context.mounted) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .requestDismiss();
+
+                      const BrowserRoute().go(context);
+                    }
+                  },
+                ),
+                FeedSearch(searchTextNotifier: sampledSearchText),
+                HistorySuggestions(
+                  searchTextListenable: sampledSearchText,
+                  onUriSelected: (uri) async {
+                    if (isEditMode) {
+                      // Load into existing tab
+                      await ref
+                          .read(tabSessionProvider(tabId: tabId).notifier)
+                          .loadUrl(url: uri);
+                    } else {
+                      // Create new tab
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(
+                            url: uri,
+                            tabMode: effectiveTabMode,
+                            parentId: (selectedTabType.value == TabType.child)
+                                ? ref.read(selectedTabProvider)
+                                : null,
+                            launchedFromIntent: launchedFromIntent,
+                            selectTab: true,
+                            containerSelection: selectedContainer == null
+                                ? const TabContainerSelection.unassigned()
+                                : TabContainerSelection.specific(
+                                    selectedContainer,
+                                  ),
+                          );
+                    }
+
+                    if (context.mounted) {
+                      ref
+                          .read(bottomSheetControllerProvider.notifier)
+                          .requestDismiss();
+
+                      const BrowserRoute().go(context);
+                    }
+                  },
+                ),
+              ],
             ],
           ),
         ),

@@ -66,8 +66,7 @@ class TranslationState with FastEquatable {
         displayError: data.displayError,
       );
 
-  bool get hasError =>
-      translationErrorName != null && (displayError ?? true);
+  bool get hasError => translationErrorName != null && (displayError ?? true);
 
   @override
   List<Object?> get hashParameters => [

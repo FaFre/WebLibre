@@ -86,7 +86,7 @@ final class BookmarkSearchResultsProvider
 }
 
 String _$bookmarkSearchResultsHash() =>
-    r'f1413466db26c1e3407501453b8cec97504a771d';
+    r'44af94b2234c817b08b0bde2dc68f9ab8d2d0a9a';
 
 abstract class _$BookmarkSearchResults extends $Notifier<List<BookmarkEntry>> {
   List<BookmarkEntry> build();

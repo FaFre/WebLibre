@@ -587,8 +587,9 @@ class _TranslatePageTile extends ConsumerWidget {
       tabStateProvider(selectedTabId).select((s) => s?.translationState),
     );
     final readerActive = ref.watch(
-      tabStateProvider(selectedTabId)
-          .select((s) => s?.readerableState.active ?? false),
+      tabStateProvider(
+        selectedTabId,
+      ).select((s) => s?.readerableState.active ?? false),
     );
 
     // Hide when reader mode is active (Fenix-aligned)

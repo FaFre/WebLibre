@@ -21,7 +21,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'search_modules_view.g.dart';
 
-enum SearchModuleType { tabs, articles, bookmarks, history }
+enum SearchModuleType {
+  tabs,
+  articles,
+  bookmarks,
+  history,
+  historyHighlights,
+  recentHistory,
+  recentArticles,
+  recentTabs,
+  containers,
+}
 
 enum SearchModuleDisplayState { preview, expanded, collapsed }
 
