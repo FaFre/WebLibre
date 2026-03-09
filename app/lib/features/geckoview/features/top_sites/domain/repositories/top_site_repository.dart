@@ -248,32 +248,25 @@ class TopSiteRepository extends _$TopSiteRepository {
     required int limit,
     required Set<String> excludeUrls,
   }) async {
-    final highlights = await ref
+    final frecentSites = await ref
         .read(historyRepositoryProvider.notifier)
-        .getHistoryHighlights(limit: limit + excludeUrls.length);
+        .getTopFrecentSites(limit: limit + excludeUrls.length);
 
     final items = <TopSiteItem>[];
-    for (final h in highlights) {
+    for (final site in frecentSites) {
       if (items.length >= limit) break;
 
-      final uri = Uri.tryParse(h.url);
+      final uri = Uri.tryParse(site.url);
       if (uri == null) continue;
 
       if (excludeUrls.contains(uri.toString())) continue;
 
-      final title = (h.title?.trim().isNotEmpty == true)
-          ? h.title!.trim()
+      final title = (site.title?.trim().isNotEmpty == true)
+          ? site.title!.trim()
           : uri.host;
 
       items.add(
-        TopSiteItem(
-          title: title,
-          url: uri,
-          source: TopSiteSource.history,
-          previewImageUrl: h.previewImageUrl,
-          historyScore: h.score,
-          historyPlaceId: h.placeId,
-        ),
+        TopSiteItem(title: title, url: uri, source: TopSiteSource.history),
       );
     }
 

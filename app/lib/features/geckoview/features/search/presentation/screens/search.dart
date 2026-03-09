@@ -631,10 +631,9 @@ class SearchScreen extends HookConsumerWidget {
                 for (final entry in emptyStateOrder)
                   if (emptyStateWidgets.containsKey(entry.type))
                     emptyStateWidgets[entry.type]!,
-                if (!emptyStateOrder.any((e) => e.visible))
-                  const _CustomizeSectionsButton(
-                    group: SearchModuleGroup.emptyState,
-                  ),
+                const _CustomizeSectionsButton(
+                  group: SearchModuleGroup.emptyState,
+                ),
               ] else ...[
                 FullSearchTermSuggestions(
                   searchTextController: searchTextController,
@@ -645,10 +644,9 @@ class SearchScreen extends HookConsumerWidget {
                 for (final entry in searchOrder)
                   if (searchWidgets.containsKey(entry.type))
                     searchWidgets[entry.type]!,
-                if (!searchOrder.any((e) => e.visible))
-                  const _CustomizeSectionsButton(
-                    group: SearchModuleGroup.search,
-                  ),
+                const _CustomizeSectionsButton(
+                  group: SearchModuleGroup.search,
+                ),
               ],
             ],
           ),

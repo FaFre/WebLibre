@@ -70,6 +70,17 @@ class HistoryRepository extends _$HistoryRepository {
     );
   }
 
+  Future<List<TopFrecentSiteInfo>> getTopFrecentSites({
+    required int limit,
+    FrecencyThresholdOption frecencyThreshold =
+        FrecencyThresholdOption.skipOneTimePages,
+  }) {
+    return _service.getTopFrecentSites(
+      limit: limit,
+      frecencyThreshold: frecencyThreshold,
+    );
+  }
+
   @override
   void build() {}
 }

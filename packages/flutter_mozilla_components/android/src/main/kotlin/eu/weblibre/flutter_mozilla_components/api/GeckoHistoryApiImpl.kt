@@ -2,8 +2,10 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
+import eu.weblibre.flutter_mozilla_components.pigeons.FrecencyThresholdOption
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryHighlight
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryHighlightWeights
+import eu.weblibre.flutter_mozilla_components.pigeons.TopFrecentSiteInfo
 import eu.weblibre.flutter_mozilla_components.pigeons.VisitInfo
 import eu.weblibre.flutter_mozilla_components.pigeons.VisitType
 import kotlinx.coroutines.CoroutineScope
@@ -233,6 +235,33 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
                     )
                 }
                 callback(Result.success(highlights))
+            }
+        }
+    }
+
+    override fun getTopFrecentSites(
+        limit: Long,
+        frecencyThreshold: FrecencyThresholdOption,
+        callback: (Result<List<TopFrecentSiteInfo>>) -> Unit
+    ) {
+        coroutineScope.launch {
+            withContext(Dispatchers.Main) {
+                val conceptThreshold = when (frecencyThreshold) {
+                    FrecencyThresholdOption.NONE ->
+                        mozilla.components.concept.storage.FrecencyThresholdOption.NONE
+                    FrecencyThresholdOption.SKIP_ONE_TIME_PAGES ->
+                        mozilla.components.concept.storage.FrecencyThresholdOption.SKIP_ONE_TIME_PAGES
+                }
+                val sites = components.core.historyStorage.getTopFrecentSites(
+                    limit.toInt(),
+                    conceptThreshold,
+                ).map {
+                    TopFrecentSiteInfo(
+                        url = it.url,
+                        title = it.title,
+                    )
+                }
+                callback(Result.success(sites))
             }
         }
     }

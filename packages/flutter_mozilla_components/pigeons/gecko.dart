@@ -557,6 +557,15 @@ class HistoryHighlight {
   );
 }
 
+class TopFrecentSiteInfo {
+  final String url;
+  final String? title;
+
+  TopFrecentSiteInfo(this.url, this.title);
+}
+
+enum FrecencyThresholdOption { none, skipOneTimePages }
+
 class HistoryItem {
   final String url;
   final String title;
@@ -1822,6 +1831,12 @@ abstract class GeckoHistoryApi {
   List<HistoryHighlight> getHistoryHighlights(
     HistoryHighlightWeights weights,
     int limit,
+  );
+
+  @async
+  List<TopFrecentSiteInfo> getTopFrecentSites(
+    int limit,
+    FrecencyThresholdOption frecencyThreshold,
   );
 }
 

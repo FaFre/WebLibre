@@ -67,4 +67,11 @@ class GeckoHistoryService {
   }) {
     return _api.getHistoryHighlights(weights, limit);
   }
+
+  Future<List<TopFrecentSiteInfo>> getTopFrecentSites({
+    required int limit,
+    required FrecencyThresholdOption frecencyThreshold,
+  }) {
+    return _api.getTopFrecentSites(limit, frecencyThreshold);
+  }
 }
