@@ -30,6 +30,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/smart_bang_selector.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 
 class FullSearchTermSuggestions extends HookConsumerWidget {
   final TextEditingController searchTextController;
@@ -62,11 +63,15 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
       persistedBoolProvider(PersistedBoolKey.searchSuggestionsExpanded),
     );
 
-    useOnListenableChange(searchTextController, () {
-      ref
-          .read(searchSuggestionsProvider().notifier)
-          .addQuery(searchTextController.text);
-    });
+    useOnListenableChangeSelector(
+      searchTextController,
+      () => searchTextController.text,
+      () {
+        ref
+            .read(searchSuggestionsProvider().notifier)
+            .addQuery(searchTextController.text);
+      },
+    );
 
     final showHistory =
         !searchTextIsNotEmpty && (searchHistory.value.isNotEmpty);

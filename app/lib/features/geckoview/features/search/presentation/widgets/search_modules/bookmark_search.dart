@@ -19,11 +19,11 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -42,11 +42,15 @@ class BookmarkSearch extends HookConsumerWidget {
     final bookmarkResults = ref.watch(bookmarkSearchResultsProvider);
     final totalResults = bookmarkResults.length;
 
-    useOnListenableChange(searchTextListenable, () async {
-      await ref
-          .read(bookmarkSearchResultsProvider.notifier)
-          .search(searchTextListenable.value.text);
-    });
+    useOnListenableChangeSelector(
+      searchTextListenable,
+      () => searchTextListenable.value.text,
+      () async {
+        await ref
+            .read(bookmarkSearchResultsProvider.notifier)
+            .search(searchTextListenable.value.text);
+      },
+    );
 
     if (bookmarkResults.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());

@@ -19,7 +19,6 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -33,6 +32,7 @@ import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/extensions/atom.dart';
 import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/text_highlight.dart';
@@ -52,17 +52,21 @@ class FeedSearch extends HookConsumerWidget {
     final articlesAsync = ref.watch(articleSearchProvider(null));
     final totalResults = articlesAsync.value?.length ?? 0;
 
-    useOnListenableChange(searchTextNotifier, () async {
-      await ref
-          .read(articleSearchProvider(null).notifier)
-          .search(
-            searchTextNotifier.value.text,
-            // ignore: avoid_redundant_argument_values dont break things
-            matchPrefix: _matchPrefix,
-            // ignore: avoid_redundant_argument_values dont break things
-            matchSuffix: _matchSuffix,
-          );
-    });
+    useOnListenableChangeSelector(
+      searchTextNotifier,
+      () => searchTextNotifier.value.text,
+      () async {
+        await ref
+            .read(articleSearchProvider(null).notifier)
+            .search(
+              searchTextNotifier.value.text,
+              // ignore: avoid_redundant_argument_values dont break things
+              matchPrefix: _matchPrefix,
+              // ignore: avoid_redundant_argument_values dont break things
+              matchSuffix: _matchSuffix,
+            );
+      },
+    );
 
     if (articlesAsync.hasValue && (articlesAsync.value.isEmpty)) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());

@@ -58,7 +58,7 @@ final class SearchModuleOrderProvider
   }
 }
 
-String _$searchModuleOrderHash() => r'7e7822de86688cf87dff1c9991bc2551dc44e002';
+String _$searchModuleOrderHash() => r'eeea86534497671a12c1383cbf251a8df797c1fc';
 
 final class SearchModuleOrderFamily extends $Family
     with

@@ -40,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -109,21 +110,27 @@ class TabSearch extends HookConsumerWidget {
       }),
     );
 
-    useOnListenableChange(searchTextListenable, () async {
-      if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.search))) {
-        await ref
-            .read(
-              tabSearchRepositoryProvider(TabSearchPartition.search).notifier,
-            )
-            .addQuery(
-              searchTextListenable.value.text,
-              // ignore: avoid_redundant_argument_values dont break things
-              matchPrefix: _matchPrefix,
-              // ignore: avoid_redundant_argument_values dont break things
-              matchSuffix: _matchSuffix,
-            );
-      }
-    });
+    useOnListenableChangeSelector(
+      searchTextListenable,
+      () => searchTextListenable.value.text,
+      () async {
+        if (ref.exists(
+          tabSearchRepositoryProvider(TabSearchPartition.search),
+        )) {
+          await ref
+              .read(
+                tabSearchRepositoryProvider(TabSearchPartition.search).notifier,
+              )
+              .addQuery(
+                searchTextListenable.value.text,
+                // ignore: avoid_redundant_argument_values dont break things
+                matchPrefix: _matchPrefix,
+                // ignore: avoid_redundant_argument_values dont break things
+                matchSuffix: _matchSuffix,
+              );
+        }
+      },
+    );
 
     if (tabSearchResults.value.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());

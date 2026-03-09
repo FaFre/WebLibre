@@ -30,6 +30,7 @@ import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
@@ -94,9 +95,15 @@ class SmartBangSelector extends HookConsumerWidget {
     final globalBangs = searchBangs.isNotEmpty ? searchBangs : frequentBangs;
 
     // Trigger search when text changes
-    useOnListenableChange(searchTextController, () {
-      ref.read(seamlessBangProvider.notifier).search(searchTextController.text);
-    });
+    useOnListenableChangeSelector(
+      searchTextController,
+      () => searchTextController.text,
+      () {
+        ref
+            .read(seamlessBangProvider.notifier)
+            .search(searchTextController.text);
+      },
+    );
 
     // Determine if we should show tabs
     final showTabs = isEditMode && siteBangs.isNotEmpty;

@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -48,13 +49,17 @@ class HistorySuggestions extends HookConsumerWidget {
     final historySuggestionsAsync = ref.watch(engineHistorySuggestionsProvider);
     final totalResults = historySuggestionsAsync.value?.length ?? 0;
 
-    useOnListenableChange(searchTextListenable, () async {
-      if (ref.exists(engineSuggestionsProvider)) {
-        await ref
-            .watch(engineSuggestionsProvider.notifier)
-            .addQuery(searchTextListenable.value.text);
-      }
-    });
+    useOnListenableChangeSelector(
+      searchTextListenable,
+      () => searchTextListenable.value.text,
+      () async {
+        if (ref.exists(engineSuggestionsProvider)) {
+          await ref
+              .read(engineSuggestionsProvider.notifier)
+              .addQuery(searchTextListenable.value.text);
+        }
+      },
+    );
 
     if (historySuggestionsAsync.hasValue &&
         (historySuggestionsAsync.value.isEmpty)) {

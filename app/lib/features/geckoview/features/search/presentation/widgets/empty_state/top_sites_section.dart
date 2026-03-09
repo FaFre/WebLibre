@@ -378,7 +378,7 @@ class _TopSiteGridTile extends StatelessWidget {
                   const textLines = 2;
                   const gap = 6.0;
                   const minIconSize = 18.0;
-                  const textHeightPadding = 2.0;
+                  const textHeightPadding = 16.0;
                   final minTextHeight = lineHeight + textHeightPadding;
                   final maxTextHeight =
                       lineHeight * textLines + textHeightPadding;

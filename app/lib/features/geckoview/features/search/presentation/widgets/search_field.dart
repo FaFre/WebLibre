@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
@@ -79,26 +80,31 @@ class SearchField extends HookConsumerWidget {
     final lastText = useRef<String>(textEditingController.text);
 
     if (showSuggestions) {
-      useOnListenableChange(textEditingController, () async {
-        if (textEditingController.text.isEmpty) {
-          suggestion.value = null;
-        } else if (textEditingController.text != lastText.value) {
-          final isDeleting =
-              textEditingController.text.length < lastText.value.length;
-
-          if (isDeleting) {
+      useOnListenableChangeSelector(
+        textEditingController,
+        () => textEditingController.text,
+        () async {
+          final text = textEditingController.text;
+          if (text.isEmpty) {
             suggestion.value = null;
           } else {
-            final result = await ref
-                .read(engineSuggestionsProvider.notifier)
-                .getAutocompleteSuggestion(textEditingController.text);
+            final isDeleting = text.length < lastText.value.length;
 
-            suggestion.value = result;
+            if (isDeleting) {
+              suggestion.value = null;
+            } else {
+              await ref
+                  .read(engineSuggestionsProvider.notifier)
+                  .getAutocompleteSuggestion(text)
+                  .then((result) {
+                    suggestion.value = result;
+                  });
+            }
           }
-        }
 
-        lastText.value = textEditingController.text;
-      });
+          lastText.value = text;
+        },
+      );
     }
 
     return AutoSuggestTextField(

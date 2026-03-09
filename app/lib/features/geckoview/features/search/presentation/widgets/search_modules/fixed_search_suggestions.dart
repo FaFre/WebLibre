@@ -25,6 +25,7 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
+import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 class FixedSearchTermSuggestions extends HookConsumerWidget {
@@ -59,13 +60,17 @@ class FixedSearchTermSuggestions extends HookConsumerWidget {
 
     final searchSuggestions = ref.watch(searchSuggestionsProvider());
 
-    useOnListenableChange(searchTextController, () {
-      if (ref.exists(searchSuggestionsProvider())) {
-        ref
-            .read(searchSuggestionsProvider().notifier)
-            .addQuery(searchTextController.text);
-      }
-    });
+    useOnListenableChangeSelector(
+      searchTextController,
+      () => searchTextController.text,
+      () {
+        if (ref.exists(searchSuggestionsProvider())) {
+          ref
+              .read(searchSuggestionsProvider().notifier)
+              .addQuery(searchTextController.text);
+        }
+      },
+    );
 
     final prioritizedSuggestions = isSuggestableText
         ? [
