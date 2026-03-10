@@ -25,7 +25,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 class AppearanceDisplaySettingsScreen extends StatelessWidget {
@@ -44,6 +46,7 @@ class AppearanceDisplaySettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
                 _VisualSection(),
+                _WebContentSection(),
                 _TabBarSection(),
                 _TabViewSection(),
                 _GesturesSection(),
@@ -397,6 +400,229 @@ class _DoubleBackCloseTabTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.doubleBackCloseTab(value),
+            );
+      },
+    );
+  }
+}
+
+class _WebContentSection extends StatelessWidget {
+  const _WebContentSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Web Content'),
+        _WebFontsEnabledTile(),
+        _AutomaticFontSizeAdjustmentTile(),
+        _FontSizeFactorSlider(),
+        _FontInflationTile(),
+        _InputAutoZoomEnabledTile(),
+      ],
+    );
+  }
+}
+
+class _WebFontsEnabledTile extends HookConsumerWidget {
+  const _WebFontsEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final webFontsEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.webFontsEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Web Fonts'),
+      subtitle: const Text('Allow websites to use custom fonts'),
+      secondary: const Icon(MdiIcons.formatFont),
+      value: webFontsEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.webFontsEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _AutomaticFontSizeAdjustmentTile extends HookConsumerWidget {
+  const _AutomaticFontSizeAdjustmentTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final automaticFontSizeAdjustment = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.automaticFontSizeAdjustment,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Automatic Font Size'),
+      subtitle: const Text(
+        'Automatically adjust font size based on system settings. Disable to manually control font size factor and inflation.',
+      ),
+      secondary: const Icon(MdiIcons.formatFontSizeIncrease),
+      value: automaticFontSizeAdjustment,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.automaticFontSizeAdjustment(value),
+            );
+      },
+    );
+  }
+}
+
+class _FontSizeFactorSlider extends HookConsumerWidget {
+  const _FontSizeFactorSlider();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final automaticFontSizeAdjustment = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.automaticFontSizeAdjustment,
+      ),
+    );
+    final fontSizeFactor = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.fontSizeFactor),
+    );
+    final sliderValue = useState(fontSizeFactor);
+
+    useEffect(() {
+      sliderValue.value = fontSizeFactor;
+      return null;
+    }, [fontSizeFactor]);
+
+    final sliderLabel = '${(sliderValue.value * 100).round()}%';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: const Text('Font Size Factor'),
+            subtitle: Text(
+              automaticFontSizeAdjustment
+                  ? 'Disabled while automatic font size is enabled'
+                  : 'Scale web page text size',
+            ),
+            leading: const Icon(MdiIcons.formatSize),
+            contentPadding: EdgeInsets.zero,
+            enabled: !automaticFontSizeAdjustment,
+          ),
+          Row(
+            children: [
+              Text(
+                sliderLabel,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: automaticFontSizeAdjustment
+                      ? Theme.of(context).disabledColor
+                      : null,
+                ),
+              ),
+              Expanded(
+                child: Slider(
+                  min: 0.5,
+                  max: 3.0,
+                  divisions: 25,
+                  label: sliderLabel,
+                  value: sliderValue.value.clamp(0.5, 3.0),
+                  onChanged: automaticFontSizeAdjustment
+                      ? null
+                      : (value) {
+                          sliderValue.value = value;
+                        },
+                  onChangeEnd: automaticFontSizeAdjustment
+                      ? null
+                      : (value) async {
+                          final rounded =
+                              (value * 10).round() / 10;
+                          sliderValue.value = rounded;
+                          await ref
+                              .read(
+                                saveEngineSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .fontSizeFactor(rounded),
+                              );
+                        },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FontInflationTile extends HookConsumerWidget {
+  const _FontInflationTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final automaticFontSizeAdjustment = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.automaticFontSizeAdjustment,
+      ),
+    );
+    final fontInflationEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.fontInflationEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Font Inflation'),
+      subtitle: Text(
+        automaticFontSizeAdjustment
+            ? 'Disabled while automatic font size is enabled'
+            : 'Enlarge text on pages that lack a mobile viewport meta tag',
+      ),
+      secondary: const Icon(MdiIcons.formatTextVariantOutline),
+      value: fontInflationEnabled,
+      onChanged: automaticFontSizeAdjustment
+          ? null
+          : (value) async {
+              await ref
+                  .read(saveEngineSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.fontInflationEnabled(value),
+                  );
+            },
+    );
+  }
+}
+
+class _InputAutoZoomEnabledTile extends HookConsumerWidget {
+  const _InputAutoZoomEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final inputAutoZoomEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.inputAutoZoomEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Input Auto Zoom'),
+      subtitle: const Text('Automatically zoom in when focusing text inputs'),
+      secondary: const Icon(MdiIcons.formTextbox),
+      value: inputAutoZoomEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.inputAutoZoomEnabled(value),
             );
       },
     );

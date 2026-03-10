@@ -29,8 +29,10 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/exit_app.dart';
 
 class PrivacySecuritySettingsScreen extends StatelessWidget {
   const PrivacySecuritySettingsScreen({super.key});
@@ -51,6 +53,7 @@ class PrivacySecuritySettingsScreen extends StatelessWidget {
                 _TrackingProtectionSection(),
                 _OpenLinkModulesSection(),
                 _ConnectionSecuritySection(),
+                _LocalNetworkAccessSection(),
                 _DataManagementSection(),
                 _AdvancedSection(),
               ],
@@ -200,6 +203,9 @@ class _AdvancedSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Advanced'),
         _WebEngineHardeningTile(),
+        _FissionEnabledTile(),
+        _IsolatedProcessEnabledTile(),
+        _AppZygoteProcessEnabledTile(),
       ],
     );
   }
@@ -650,6 +656,9 @@ class _BounceTrackingProtectionTile extends HookConsumerWidget {
                         : BounceTrackingProtectionMode.disabled,
                   ),
             );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
       },
     );
   }
@@ -729,6 +738,220 @@ class _WebEngineHardeningTile extends StatelessWidget {
       onTap: () async {
         await WebEngineHardeningRoute().push(context);
       },
+    );
+  }
+}
+
+class _FissionEnabledTile extends HookConsumerWidget {
+  const _FissionEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final fissionEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.fissionEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Fission (Site Isolation)'),
+      subtitle: const Text(
+        'Isolates each site into a separate OS process for improved security. Requires app restart.',
+      ),
+      secondary: const Icon(MdiIcons.shieldHalfFull),
+      value: fissionEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.fissionEnabled(value),
+            );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
+      },
+    );
+  }
+}
+
+class _IsolatedProcessEnabledTile extends HookConsumerWidget {
+  const _IsolatedProcessEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isolatedProcessEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.isolatedProcessEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Isolated Content Process'),
+      subtitle: const Text(
+        'Run web content in an isolated process. Requires app restart.',
+      ),
+      secondary: const Icon(MdiIcons.shieldCheck),
+      value: isolatedProcessEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.isolatedProcessEnabled(value),
+            );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
+      },
+    );
+  }
+}
+
+class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
+  const _AppZygoteProcessEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appZygoteProcessEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.appZygoteProcessEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('App Zygote Process'),
+      subtitle: const Text(
+        'Preload content service via App Zygote for faster isolated process startup. Requires Android 10+ and app restart.',
+      ),
+      secondary: const Icon(MdiIcons.rocketLaunch),
+      value: appZygoteProcessEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.appZygoteProcessEnabled(value),
+            );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
+      },
+    );
+  }
+}
+
+Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
+  final result = await showQuitBrowserDialog(context);
+  if (result == true && context.mounted) {
+    await exitApp(ProviderScope.containerOf(context));
+  }
+}
+
+class _LocalNetworkAccessSection extends StatelessWidget {
+  const _LocalNetworkAccessSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Local Network / Device Access Blocking'),
+        _LnaEnabledTile(),
+        _LnaBlockingTile(),
+        _LnaBlockTrackersTile(),
+      ],
+    );
+  }
+}
+
+class _LnaEnabledTile extends HookConsumerWidget {
+  const _LnaEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lnaEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Local Network Access'),
+      subtitle: const Text(
+        'Enable local network and device access blocking',
+      ),
+      secondary: const Icon(MdiIcons.lanDisconnect),
+      value: lnaEnabled ?? false,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.lnaEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _LnaBlockingTile extends HookConsumerWidget {
+  const _LnaBlockingTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lnaEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
+    );
+    final lnaBlocking = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.lnaBlocking),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Block Local Network Requests'),
+      subtitle: const Text(
+        'Block web page requests to local network addresses',
+      ),
+      secondary: const Icon(MdiIcons.shieldLockOpen),
+      value: lnaBlocking ?? false,
+      onChanged: lnaEnabled == true
+          ? (value) async {
+              await ref
+                  .read(saveEngineSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.lnaBlocking(value),
+                  );
+            }
+          : null,
+    );
+  }
+}
+
+class _LnaBlockTrackersTile extends HookConsumerWidget {
+  const _LnaBlockTrackersTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lnaEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
+    );
+    final lnaBlockTrackers = ref.watch(
+      engineSettingsWithDefaultsProvider.select((s) => s.lnaBlockTrackers),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Block Local Network Trackers'),
+      subtitle: const Text(
+        'Block trackers from accessing local network resources',
+      ),
+      secondary: const Icon(MdiIcons.shieldBug),
+      value: lnaBlockTrackers ?? false,
+      onChanged: lnaEnabled == true
+          ? (value) async {
+              await ref
+                  .read(saveEngineSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.lnaBlockTrackers(value),
+                  );
+            }
+          : null,
     );
   }
 }

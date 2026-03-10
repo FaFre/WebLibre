@@ -135,6 +135,56 @@ class GeckoEngineSettingsService {
     );
   }
 
+  // Web Content Settings
+  Future<void> webFontsEnabled(bool state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(webFontsEnabled: state),
+    );
+  }
+
+  Future<void> automaticFontSizeAdjustment(bool state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(automaticFontSizeAdjustment: state),
+    );
+  }
+
+  Future<void> fontSizeFactor(double state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(fontSizeFactor: state),
+    );
+  }
+
+  Future<void> fontInflationEnabled(bool state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(fontInflationEnabled: state),
+    );
+  }
+
+  Future<void> inputAutoZoomEnabled(bool state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(inputAutoZoomEnabled: state),
+    );
+  }
+
+  // LNA Settings
+  Future<void> lnaBlocking(bool? state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(lnaBlocking: state),
+    );
+  }
+
+  Future<void> lnaBlockTrackers(bool? state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(lnaBlockTrackers: state),
+    );
+  }
+
+  Future<void> lnaEnabled(bool? state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(lnaEnabled: state),
+    );
+  }
+
   Future<void> setPullToRefreshEnabled(bool enabled) {
     return _api.setPullToRefreshEnabled(enabled);
   }

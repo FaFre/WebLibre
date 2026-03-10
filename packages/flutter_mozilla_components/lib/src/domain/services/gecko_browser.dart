@@ -23,8 +23,9 @@ class GeckoBrowserService {
     ContentBlocking contentBlocking,
     AddonCollection? addonCollection,
     String? fxaServerOverride,
-    String? syncTokenServerOverride,
-  ) {
+    String? syncTokenServerOverride, [
+    GeckoEngineSettings? startupSettings,
+  ]) {
     return _api.initialize(
       profileFolder,
       logLevel,
@@ -32,6 +33,7 @@ class GeckoBrowserService {
       addonCollection,
       fxaServerOverride,
       syncTokenServerOverride,
+      startupSettings,
     );
   }
 

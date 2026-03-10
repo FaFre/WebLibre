@@ -12,6 +12,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -76,6 +77,9 @@ object GlobalComponents {
 
     // External download manager setting
     var useExternalDownloadManager: Boolean = false
+
+    // Startup settings for builder-only GeckoRuntimeSettings (fission, process isolation, etc.)
+    var startupSettings: GeckoEngineSettings? = null
 
     fun shouldOpenLinksInApp(isExternalSession: Boolean = false): Boolean {
         return when (engineSettingsApi!!.getAppLinksMode()) {

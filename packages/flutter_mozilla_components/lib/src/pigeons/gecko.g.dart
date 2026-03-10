@@ -2710,6 +2710,20 @@ class GeckoEngineSettings {
     this.suspectedFingerprintersScope,
     this.allowListBaseline,
     this.allowListConvenience,
+    this.webFontsEnabled,
+    this.automaticFontSizeAdjustment,
+    this.fontSizeFactor,
+    this.fontInflationEnabled,
+    this.displayDensityOverride,
+    this.screenWidthOverride,
+    this.screenHeightOverride,
+    this.inputAutoZoomEnabled,
+    this.fissionEnabled,
+    this.isolatedProcessEnabled,
+    this.appZygoteProcessEnabled,
+    this.lnaBlocking,
+    this.lnaBlockTrackers,
+    this.lnaEnabled,
   });
 
   bool? javascriptEnabled;
@@ -2778,6 +2792,34 @@ class GeckoEngineSettings {
   /// Allow convenience tracking protection exceptions (fixes minor issues)
   bool? allowListConvenience;
 
+  bool? webFontsEnabled;
+
+  bool? automaticFontSizeAdjustment;
+
+  double? fontSizeFactor;
+
+  bool? fontInflationEnabled;
+
+  double? displayDensityOverride;
+
+  int? screenWidthOverride;
+
+  int? screenHeightOverride;
+
+  bool? inputAutoZoomEnabled;
+
+  bool? fissionEnabled;
+
+  bool? isolatedProcessEnabled;
+
+  bool? appZygoteProcessEnabled;
+
+  bool? lnaBlocking;
+
+  bool? lnaBlockTrackers;
+
+  bool? lnaEnabled;
+
   List<Object?> _toList() {
     return <Object?>[
       javascriptEnabled,
@@ -2807,6 +2849,20 @@ class GeckoEngineSettings {
       suspectedFingerprintersScope,
       allowListBaseline,
       allowListConvenience,
+      webFontsEnabled,
+      automaticFontSizeAdjustment,
+      fontSizeFactor,
+      fontInflationEnabled,
+      displayDensityOverride,
+      screenWidthOverride,
+      screenHeightOverride,
+      inputAutoZoomEnabled,
+      fissionEnabled,
+      isolatedProcessEnabled,
+      appZygoteProcessEnabled,
+      lnaBlocking,
+      lnaBlockTrackers,
+      lnaEnabled,
     ];
   }
 
@@ -2843,6 +2899,20 @@ class GeckoEngineSettings {
       suspectedFingerprintersScope: result[24] as TrackingScope?,
       allowListBaseline: result[25] as bool?,
       allowListConvenience: result[26] as bool?,
+      webFontsEnabled: result[27] as bool?,
+      automaticFontSizeAdjustment: result[28] as bool?,
+      fontSizeFactor: result[29] as double?,
+      fontInflationEnabled: result[30] as bool?,
+      displayDensityOverride: result[31] as double?,
+      screenWidthOverride: result[32] as int?,
+      screenHeightOverride: result[33] as int?,
+      inputAutoZoomEnabled: result[34] as bool?,
+      fissionEnabled: result[35] as bool?,
+      isolatedProcessEnabled: result[36] as bool?,
+      appZygoteProcessEnabled: result[37] as bool?,
+      lnaBlocking: result[38] as bool?,
+      lnaBlockTrackers: result[39] as bool?,
+      lnaEnabled: result[40] as bool?,
     );
   }
 
@@ -5584,14 +5654,14 @@ class GeckoBrowserApi {
     }
   }
 
-  Future<void> initialize(String profileFolder, LogLevel logLevel, ContentBlocking contentBlocking, AddonCollection? addonCollection, String? fxaServerOverride, String? syncTokenServerOverride) async {
+  Future<void> initialize(String profileFolder, LogLevel logLevel, ContentBlocking contentBlocking, AddonCollection? addonCollection, String? fxaServerOverride, String? syncTokenServerOverride, GeckoEngineSettings? startupSettings) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileFolder, logLevel, contentBlocking, addonCollection, fxaServerOverride, syncTokenServerOverride]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileFolder, logLevel, contentBlocking, addonCollection, fxaServerOverride, syncTokenServerOverride, startupSettings]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
       throw _createConnectionError(pigeonVar_channelName);

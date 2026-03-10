@@ -242,6 +242,34 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
 //            components.core.engineSettings.automaticLanguageAdjustment = false
             components.core.runtime.settings.locales = settings.locales.toTypedArray()
         }
+
+        // Web Content Settings
+        if(settings.webFontsEnabled != null) {
+            components.core.engineSettings.webFontsEnabled = settings.webFontsEnabled
+        }
+        if(settings.automaticFontSizeAdjustment != null) {
+            components.core.engineSettings.automaticFontSizeAdjustment = settings.automaticFontSizeAdjustment
+        }
+        if(settings.fontSizeFactor != null && settings.automaticFontSizeAdjustment != true) {
+            components.core.engineSettings.fontSizeFactor = settings.fontSizeFactor.toFloat()
+        }
+        if(settings.fontInflationEnabled != null && settings.automaticFontSizeAdjustment != true) {
+            components.core.engineSettings.fontInflationEnabled = settings.fontInflationEnabled
+        }
+        if(settings.inputAutoZoomEnabled != null) {
+            components.core.runtime.settings.inputAutoZoomEnabled = settings.inputAutoZoomEnabled
+        }
+
+        // LNA Settings
+        if(settings.lnaBlocking != null) {
+            components.core.engineSettings.lnaBlockingEnabled = settings.lnaBlocking
+        }
+        if(settings.lnaBlockTrackers != null) {
+            components.core.engineSettings.lnaTrackerBlockingEnabled = settings.lnaBlockTrackers
+        }
+        if(settings.lnaEnabled != null) {
+            components.core.engineSettings.lnaFeatureEnabled = settings.lnaEnabled
+        }
     }
 
     override fun updateRuntimeSettings(settings: GeckoEngineSettings) {
@@ -311,6 +339,36 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         }
         if(settings.fingerprintingProtectionOverrides != null) {
             components.core.engine.settings.fingerprintingProtectionOverrides = components.core.engineSettings.fingerprintingProtectionOverrides
+        }
+
+        // Web Content runtime settings
+        if(settings.webFontsEnabled != null) {
+            components.core.engine.settings.webFontsEnabled = components.core.engineSettings.webFontsEnabled
+            reloadSession = true
+        }
+        if(settings.automaticFontSizeAdjustment != null) {
+            components.core.engine.settings.automaticFontSizeAdjustment = components.core.engineSettings.automaticFontSizeAdjustment
+        }
+        if(settings.fontSizeFactor != null) {
+            components.core.engine.settings.fontSizeFactor = components.core.engineSettings.fontSizeFactor
+            reloadSession = true
+        }
+        if(settings.fontInflationEnabled != null) {
+            components.core.engine.settings.fontInflationEnabled = components.core.engineSettings.fontInflationEnabled
+            reloadSession = true
+        }
+        // LNA settings
+        if(settings.lnaEnabled != null) {
+            components.core.engine.settings.lnaFeatureEnabled = components.core.engineSettings.lnaFeatureEnabled
+            reloadSession = true
+        }
+        if(settings.lnaBlocking != null) {
+            components.core.engine.settings.lnaBlockingEnabled = components.core.engineSettings.lnaBlockingEnabled
+            reloadSession = true
+        }
+        if(settings.lnaBlockTrackers != null) {
+            components.core.engine.settings.lnaTrackerBlockingEnabled = components.core.engineSettings.lnaTrackerBlockingEnabled
+            reloadSession = true
         }
 
         if(reloadSession) {

@@ -182,6 +182,7 @@ class _MainWidget extends HookConsumerWidget {
           engineSettings.addonCollection,
           generalSettings.syncServerOverride,
           generalSettings.syncTokenServerOverride,
+          engineSettings,
         );
       } on PlatformException catch (e, s) {
         logger.e(

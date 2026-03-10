@@ -236,6 +236,44 @@ class EngineSettingsReplicationService
                     settings.locales.join(','),
                   );
             }
+            // Web Content Settings
+            if (previous.value?.webFontsEnabled !=
+                settings.webFontsEnabled) {
+              await _service.webFontsEnabled(settings.webFontsEnabled);
+            }
+            if (previous.value?.automaticFontSizeAdjustment !=
+                settings.automaticFontSizeAdjustment) {
+              await _service.automaticFontSizeAdjustment(
+                settings.automaticFontSizeAdjustment,
+              );
+            }
+            if (previous.value?.fontSizeFactor !=
+                settings.fontSizeFactor) {
+              await _service.fontSizeFactor(settings.fontSizeFactor);
+            }
+            if (previous.value?.fontInflationEnabled !=
+                settings.fontInflationEnabled) {
+              await _service.fontInflationEnabled(
+                settings.fontInflationEnabled,
+              );
+            }
+            if (previous.value?.inputAutoZoomEnabled !=
+                settings.inputAutoZoomEnabled) {
+              await _service.inputAutoZoomEnabled(
+                settings.inputAutoZoomEnabled,
+              );
+            }
+            // LNA Settings
+            if (previous.value?.lnaBlocking != settings.lnaBlocking) {
+              await _service.lnaBlocking(settings.lnaBlocking);
+            }
+            if (previous.value?.lnaBlockTrackers !=
+                settings.lnaBlockTrackers) {
+              await _service.lnaBlockTrackers(settings.lnaBlockTrackers);
+            }
+            if (previous.value?.lnaEnabled != settings.lnaEnabled) {
+              await _service.lnaEnabled(settings.lnaEnabled);
+            }
           } else {
             await _service.setDefaultSettings(settings);
             await ref

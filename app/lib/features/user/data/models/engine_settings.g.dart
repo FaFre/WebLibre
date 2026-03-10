@@ -95,6 +95,34 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings allowListConvenience(bool? allowListConvenience);
 
+  EngineSettings webFontsEnabled(bool? webFontsEnabled);
+
+  EngineSettings automaticFontSizeAdjustment(bool? automaticFontSizeAdjustment);
+
+  EngineSettings fontSizeFactor(double? fontSizeFactor);
+
+  EngineSettings fontInflationEnabled(bool? fontInflationEnabled);
+
+  EngineSettings displayDensityOverride(double? displayDensityOverride);
+
+  EngineSettings screenWidthOverride(int? screenWidthOverride);
+
+  EngineSettings screenHeightOverride(int? screenHeightOverride);
+
+  EngineSettings inputAutoZoomEnabled(bool? inputAutoZoomEnabled);
+
+  EngineSettings fissionEnabled(bool? fissionEnabled);
+
+  EngineSettings isolatedProcessEnabled(bool? isolatedProcessEnabled);
+
+  EngineSettings appZygoteProcessEnabled(bool? appZygoteProcessEnabled);
+
+  EngineSettings lnaBlocking(bool? lnaBlocking);
+
+  EngineSettings lnaBlockTrackers(bool? lnaBlockTrackers);
+
+  EngineSettings lnaEnabled(bool? lnaEnabled);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -136,6 +164,20 @@ abstract class _$EngineSettingsCWProxy {
     TrackingScope? suspectedFingerprintersScope,
     bool? allowListBaseline,
     bool? allowListConvenience,
+    bool? webFontsEnabled,
+    bool? automaticFontSizeAdjustment,
+    double? fontSizeFactor,
+    bool? fontInflationEnabled,
+    double? displayDensityOverride,
+    int? screenWidthOverride,
+    int? screenHeightOverride,
+    bool? inputAutoZoomEnabled,
+    bool? fissionEnabled,
+    bool? isolatedProcessEnabled,
+    bool? appZygoteProcessEnabled,
+    bool? lnaBlocking,
+    bool? lnaBlockTrackers,
+    bool? lnaEnabled,
   });
 }
 
@@ -297,6 +339,62 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
       call(allowListConvenience: allowListConvenience);
 
   @override
+  EngineSettings webFontsEnabled(bool? webFontsEnabled) =>
+      call(webFontsEnabled: webFontsEnabled);
+
+  @override
+  EngineSettings automaticFontSizeAdjustment(
+    bool? automaticFontSizeAdjustment,
+  ) => call(automaticFontSizeAdjustment: automaticFontSizeAdjustment);
+
+  @override
+  EngineSettings fontSizeFactor(double? fontSizeFactor) =>
+      call(fontSizeFactor: fontSizeFactor);
+
+  @override
+  EngineSettings fontInflationEnabled(bool? fontInflationEnabled) =>
+      call(fontInflationEnabled: fontInflationEnabled);
+
+  @override
+  EngineSettings displayDensityOverride(double? displayDensityOverride) =>
+      call(displayDensityOverride: displayDensityOverride);
+
+  @override
+  EngineSettings screenWidthOverride(int? screenWidthOverride) =>
+      call(screenWidthOverride: screenWidthOverride);
+
+  @override
+  EngineSettings screenHeightOverride(int? screenHeightOverride) =>
+      call(screenHeightOverride: screenHeightOverride);
+
+  @override
+  EngineSettings inputAutoZoomEnabled(bool? inputAutoZoomEnabled) =>
+      call(inputAutoZoomEnabled: inputAutoZoomEnabled);
+
+  @override
+  EngineSettings fissionEnabled(bool? fissionEnabled) =>
+      call(fissionEnabled: fissionEnabled);
+
+  @override
+  EngineSettings isolatedProcessEnabled(bool? isolatedProcessEnabled) =>
+      call(isolatedProcessEnabled: isolatedProcessEnabled);
+
+  @override
+  EngineSettings appZygoteProcessEnabled(bool? appZygoteProcessEnabled) =>
+      call(appZygoteProcessEnabled: appZygoteProcessEnabled);
+
+  @override
+  EngineSettings lnaBlocking(bool? lnaBlocking) =>
+      call(lnaBlocking: lnaBlocking);
+
+  @override
+  EngineSettings lnaBlockTrackers(bool? lnaBlockTrackers) =>
+      call(lnaBlockTrackers: lnaBlockTrackers);
+
+  @override
+  EngineSettings lnaEnabled(bool? lnaEnabled) => call(lnaEnabled: lnaEnabled);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -340,6 +438,20 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? suspectedFingerprintersScope = const $CopyWithPlaceholder(),
     Object? allowListBaseline = const $CopyWithPlaceholder(),
     Object? allowListConvenience = const $CopyWithPlaceholder(),
+    Object? webFontsEnabled = const $CopyWithPlaceholder(),
+    Object? automaticFontSizeAdjustment = const $CopyWithPlaceholder(),
+    Object? fontSizeFactor = const $CopyWithPlaceholder(),
+    Object? fontInflationEnabled = const $CopyWithPlaceholder(),
+    Object? displayDensityOverride = const $CopyWithPlaceholder(),
+    Object? screenWidthOverride = const $CopyWithPlaceholder(),
+    Object? screenHeightOverride = const $CopyWithPlaceholder(),
+    Object? inputAutoZoomEnabled = const $CopyWithPlaceholder(),
+    Object? fissionEnabled = const $CopyWithPlaceholder(),
+    Object? isolatedProcessEnabled = const $CopyWithPlaceholder(),
+    Object? appZygoteProcessEnabled = const $CopyWithPlaceholder(),
+    Object? lnaBlocking = const $CopyWithPlaceholder(),
+    Object? lnaBlockTrackers = const $CopyWithPlaceholder(),
+    Object? lnaEnabled = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -502,6 +614,66 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.allowListConvenience
           // ignore: cast_nullable_to_non_nullable
           : allowListConvenience as bool?,
+      webFontsEnabled: webFontsEnabled == const $CopyWithPlaceholder()
+          ? _value.webFontsEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : webFontsEnabled as bool?,
+      automaticFontSizeAdjustment:
+          automaticFontSizeAdjustment == const $CopyWithPlaceholder()
+          ? _value.automaticFontSizeAdjustment
+          // ignore: cast_nullable_to_non_nullable
+          : automaticFontSizeAdjustment as bool?,
+      fontSizeFactor: fontSizeFactor == const $CopyWithPlaceholder()
+          ? _value.fontSizeFactor
+          // ignore: cast_nullable_to_non_nullable
+          : fontSizeFactor as double?,
+      fontInflationEnabled: fontInflationEnabled == const $CopyWithPlaceholder()
+          ? _value.fontInflationEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : fontInflationEnabled as bool?,
+      displayDensityOverride:
+          displayDensityOverride == const $CopyWithPlaceholder()
+          ? _value.displayDensityOverride
+          // ignore: cast_nullable_to_non_nullable
+          : displayDensityOverride as double?,
+      screenWidthOverride: screenWidthOverride == const $CopyWithPlaceholder()
+          ? _value.screenWidthOverride
+          // ignore: cast_nullable_to_non_nullable
+          : screenWidthOverride as int?,
+      screenHeightOverride: screenHeightOverride == const $CopyWithPlaceholder()
+          ? _value.screenHeightOverride
+          // ignore: cast_nullable_to_non_nullable
+          : screenHeightOverride as int?,
+      inputAutoZoomEnabled: inputAutoZoomEnabled == const $CopyWithPlaceholder()
+          ? _value.inputAutoZoomEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : inputAutoZoomEnabled as bool?,
+      fissionEnabled: fissionEnabled == const $CopyWithPlaceholder()
+          ? _value.fissionEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : fissionEnabled as bool?,
+      isolatedProcessEnabled:
+          isolatedProcessEnabled == const $CopyWithPlaceholder()
+          ? _value.isolatedProcessEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : isolatedProcessEnabled as bool?,
+      appZygoteProcessEnabled:
+          appZygoteProcessEnabled == const $CopyWithPlaceholder()
+          ? _value.appZygoteProcessEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : appZygoteProcessEnabled as bool?,
+      lnaBlocking: lnaBlocking == const $CopyWithPlaceholder()
+          ? _value.lnaBlocking
+          // ignore: cast_nullable_to_non_nullable
+          : lnaBlocking as bool?,
+      lnaBlockTrackers: lnaBlockTrackers == const $CopyWithPlaceholder()
+          ? _value.lnaBlockTrackers
+          // ignore: cast_nullable_to_non_nullable
+          : lnaBlockTrackers as bool?,
+      lnaEnabled: lnaEnabled == const $CopyWithPlaceholder()
+          ? _value.lnaEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : lnaEnabled as bool?,
     );
   }
 }
@@ -517,88 +689,102 @@ extension $EngineSettingsCopyWith on EngineSettings {
 // JsonSerializableGenerator
 // **************************************************************************
 
-EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
-    EngineSettings.withDefaults(
-      javascriptEnabled: json['javascriptEnabled'] as bool?,
-      trackingProtectionPolicy: $enumDecodeNullable(
-        _$TrackingProtectionPolicyEnumMap,
-        json['trackingProtectionPolicy'],
-      ),
-      httpsOnlyMode: $enumDecodeNullable(
-        _$HttpsOnlyModeEnumMap,
-        json['httpsOnlyMode'],
-      ),
-      globalPrivacyControlEnabled: json['globalPrivacyControlEnabled'] as bool?,
-      preferredColorScheme: $enumDecodeNullable(
-        _$ColorSchemeEnumMap,
-        json['preferredColorScheme'],
-      ),
-      cookieBannerHandlingMode: $enumDecodeNullable(
-        _$CookieBannerHandlingModeEnumMap,
-        json['cookieBannerHandlingMode'],
-      ),
-      cookieBannerHandlingModePrivateBrowsing: $enumDecodeNullable(
-        _$CookieBannerHandlingModeEnumMap,
-        json['cookieBannerHandlingModePrivateBrowsing'],
-      ),
-      cookieBannerHandlingGlobalRules:
-          json['cookieBannerHandlingGlobalRules'] as bool?,
-      cookieBannerHandlingGlobalRulesSubFrames:
-          json['cookieBannerHandlingGlobalRulesSubFrames'] as bool?,
-      webContentIsolationStrategy: $enumDecodeNullable(
-        _$WebContentIsolationStrategyEnumMap,
-        json['webContentIsolationStrategy'],
-      ),
-      queryParameterStripping: $enumDecodeNullable(
-        _$QueryParameterStrippingEnumMap,
-        json['queryParameterStripping'],
-      ),
-      bounceTrackingProtectionMode: $enumDecodeNullable(
-        _$BounceTrackingProtectionModeEnumMap,
-        json['bounceTrackingProtectionMode'],
-      ),
-      userAgent: json['userAgent'] as String?,
-      enterpriseRootsEnabled: json['enterpriseRootsEnabled'] as bool?,
-      addonCollection: EngineSettings._addonCollectionFromJson(
-        json['addonCollection'] as String?,
-      ),
-      dohSettingsMode: $enumDecodeNullable(
-        _$DohSettingsModeEnumMap,
-        json['dohSettingsMode'],
-      ),
-      dohProviderUrl: json['dohProviderUrl'] as String?,
-      dohDefaultProviderUrl: json['dohDefaultProviderUrl'] as String?,
-      dohExceptionsList: (json['dohExceptionsList'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      fingerprintingProtectionOverrides:
-          json['fingerprintingProtectionOverrides'] as String?,
-      enablePdfJs: json['enablePdfJs'] as bool?,
-      locales: (json['locales'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      blockCookies: json['blockCookies'] as bool?,
-      customCookiePolicy: $enumDecodeNullable(
-        _$CustomCookiePolicyEnumMap,
-        json['customCookiePolicy'],
-      ),
-      blockTrackingContent: json['blockTrackingContent'] as bool?,
-      trackingContentScope: $enumDecodeNullable(
-        _$TrackingScopeEnumMap,
-        json['trackingContentScope'],
-      ),
-      blockCryptominers: json['blockCryptominers'] as bool?,
-      blockFingerprinters: json['blockFingerprinters'] as bool?,
-      blockRedirectTrackers: json['blockRedirectTrackers'] as bool?,
-      blockSuspectedFingerprinters:
-          json['blockSuspectedFingerprinters'] as bool?,
-      suspectedFingerprintersScope: $enumDecodeNullable(
-        _$TrackingScopeEnumMap,
-        json['suspectedFingerprintersScope'],
-      ),
-      allowListBaseline: json['allowListBaseline'] as bool?,
-      allowListConvenience: json['allowListConvenience'] as bool?,
-    );
+EngineSettings _$EngineSettingsFromJson(
+  Map<String, dynamic> json,
+) => EngineSettings.withDefaults(
+  javascriptEnabled: json['javascriptEnabled'] as bool?,
+  trackingProtectionPolicy: $enumDecodeNullable(
+    _$TrackingProtectionPolicyEnumMap,
+    json['trackingProtectionPolicy'],
+  ),
+  httpsOnlyMode: $enumDecodeNullable(
+    _$HttpsOnlyModeEnumMap,
+    json['httpsOnlyMode'],
+  ),
+  globalPrivacyControlEnabled: json['globalPrivacyControlEnabled'] as bool?,
+  preferredColorScheme: $enumDecodeNullable(
+    _$ColorSchemeEnumMap,
+    json['preferredColorScheme'],
+  ),
+  cookieBannerHandlingMode: $enumDecodeNullable(
+    _$CookieBannerHandlingModeEnumMap,
+    json['cookieBannerHandlingMode'],
+  ),
+  cookieBannerHandlingModePrivateBrowsing: $enumDecodeNullable(
+    _$CookieBannerHandlingModeEnumMap,
+    json['cookieBannerHandlingModePrivateBrowsing'],
+  ),
+  cookieBannerHandlingGlobalRules:
+      json['cookieBannerHandlingGlobalRules'] as bool?,
+  cookieBannerHandlingGlobalRulesSubFrames:
+      json['cookieBannerHandlingGlobalRulesSubFrames'] as bool?,
+  webContentIsolationStrategy: $enumDecodeNullable(
+    _$WebContentIsolationStrategyEnumMap,
+    json['webContentIsolationStrategy'],
+  ),
+  queryParameterStripping: $enumDecodeNullable(
+    _$QueryParameterStrippingEnumMap,
+    json['queryParameterStripping'],
+  ),
+  bounceTrackingProtectionMode: $enumDecodeNullable(
+    _$BounceTrackingProtectionModeEnumMap,
+    json['bounceTrackingProtectionMode'],
+  ),
+  userAgent: json['userAgent'] as String?,
+  enterpriseRootsEnabled: json['enterpriseRootsEnabled'] as bool?,
+  addonCollection: EngineSettings._addonCollectionFromJson(
+    json['addonCollection'] as String?,
+  ),
+  dohSettingsMode: $enumDecodeNullable(
+    _$DohSettingsModeEnumMap,
+    json['dohSettingsMode'],
+  ),
+  dohProviderUrl: json['dohProviderUrl'] as String?,
+  dohDefaultProviderUrl: json['dohDefaultProviderUrl'] as String?,
+  dohExceptionsList: (json['dohExceptionsList'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  fingerprintingProtectionOverrides:
+      json['fingerprintingProtectionOverrides'] as String?,
+  enablePdfJs: json['enablePdfJs'] as bool?,
+  locales: (json['locales'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  blockCookies: json['blockCookies'] as bool?,
+  customCookiePolicy: $enumDecodeNullable(
+    _$CustomCookiePolicyEnumMap,
+    json['customCookiePolicy'],
+  ),
+  blockTrackingContent: json['blockTrackingContent'] as bool?,
+  trackingContentScope: $enumDecodeNullable(
+    _$TrackingScopeEnumMap,
+    json['trackingContentScope'],
+  ),
+  blockCryptominers: json['blockCryptominers'] as bool?,
+  blockFingerprinters: json['blockFingerprinters'] as bool?,
+  blockRedirectTrackers: json['blockRedirectTrackers'] as bool?,
+  blockSuspectedFingerprinters: json['blockSuspectedFingerprinters'] as bool?,
+  suspectedFingerprintersScope: $enumDecodeNullable(
+    _$TrackingScopeEnumMap,
+    json['suspectedFingerprintersScope'],
+  ),
+  allowListBaseline: json['allowListBaseline'] as bool?,
+  allowListConvenience: json['allowListConvenience'] as bool?,
+  webFontsEnabled: json['webFontsEnabled'] as bool?,
+  automaticFontSizeAdjustment: json['automaticFontSizeAdjustment'] as bool?,
+  fontSizeFactor: (json['fontSizeFactor'] as num?)?.toDouble(),
+  fontInflationEnabled: json['fontInflationEnabled'] as bool?,
+  displayDensityOverride: (json['displayDensityOverride'] as num?)?.toDouble(),
+  screenWidthOverride: (json['screenWidthOverride'] as num?)?.toInt(),
+  screenHeightOverride: (json['screenHeightOverride'] as num?)?.toInt(),
+  inputAutoZoomEnabled: json['inputAutoZoomEnabled'] as bool?,
+  fissionEnabled: json['fissionEnabled'] as bool?,
+  isolatedProcessEnabled: json['isolatedProcessEnabled'] as bool?,
+  appZygoteProcessEnabled: json['appZygoteProcessEnabled'] as bool?,
+  lnaBlocking: json['lnaBlocking'] as bool?,
+  lnaBlockTrackers: json['lnaBlockTrackers'] as bool?,
+  lnaEnabled: json['lnaEnabled'] as bool?,
+);
 
 Map<String, dynamic> _$EngineSettingsToJson(
   EngineSettings instance,
@@ -606,6 +792,12 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'userAgent': instance.userAgent,
   'fingerprintingProtectionOverrides':
       instance.fingerprintingProtectionOverrides,
+  'displayDensityOverride': instance.displayDensityOverride,
+  'screenWidthOverride': instance.screenWidthOverride,
+  'screenHeightOverride': instance.screenHeightOverride,
+  'lnaBlocking': instance.lnaBlocking,
+  'lnaBlockTrackers': instance.lnaBlockTrackers,
+  'lnaEnabled': instance.lnaEnabled,
   'javascriptEnabled': instance.javascriptEnabled,
   'trackingProtectionPolicy':
       _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,
@@ -639,6 +831,14 @@ Map<String, dynamic> _$EngineSettingsToJson(
       _$TrackingScopeEnumMap[instance.suspectedFingerprintersScope]!,
   'allowListBaseline': instance.allowListBaseline,
   'allowListConvenience': instance.allowListConvenience,
+  'webFontsEnabled': instance.webFontsEnabled,
+  'automaticFontSizeAdjustment': instance.automaticFontSizeAdjustment,
+  'fontSizeFactor': instance.fontSizeFactor,
+  'fontInflationEnabled': instance.fontInflationEnabled,
+  'inputAutoZoomEnabled': instance.inputAutoZoomEnabled,
+  'fissionEnabled': instance.fissionEnabled,
+  'isolatedProcessEnabled': instance.isolatedProcessEnabled,
+  'appZygoteProcessEnabled': instance.appZygoteProcessEnabled,
   'queryParameterStripping':
       _$QueryParameterStrippingEnumMap[instance.queryParameterStripping]!,
   'bounceTrackingProtectionMode':

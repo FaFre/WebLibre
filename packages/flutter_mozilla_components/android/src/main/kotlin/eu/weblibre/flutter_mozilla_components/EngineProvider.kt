@@ -77,11 +77,24 @@ object EngineProvider {
             // About config it's no longer enabled by default
             builder.aboutConfigEnabled(true)
             builder.extensionsProcessEnabled(true)
-            builder.extensionsWebAPIEnabled(true)
+            builder.extensionsWebAPIEnabled(false)
             //builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
             builder.consoleOutput(components.logLevel == Log.Priority.DEBUG)
             builder.contentBlocking(contentBlocking.build())
             builder.locales(arrayOf("en-US", "en")) // Will be overridden later
+
+            // Apply builder-only settings from startup config
+            GlobalComponents.startupSettings?.let { settings ->
+                settings.fissionEnabled?.let { builder.fissionEnabled(it) }
+                settings.isolatedProcessEnabled?.let { builder.isolatedProcessEnabled(it) }
+                settings.appZygoteProcessEnabled?.let { builder.appZygoteProcessEnabled(it) }
+                settings.displayDensityOverride?.let { builder.displayDensityOverride(it.toFloat()) }
+                val screenWidth = settings.screenWidthOverride
+                val screenHeight = settings.screenHeightOverride
+                if (screenWidth != null && screenHeight != null && screenWidth > 0 && screenHeight > 0) {
+                    builder.screenSizeOverride(screenWidth.toInt(), screenHeight.toInt())
+                }
+            }
 
             runtime = GeckoRuntime.create(context, builder.build())
         }

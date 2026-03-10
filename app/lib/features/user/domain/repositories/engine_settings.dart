@@ -168,6 +168,63 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      // Web Content Settings
+      'webFontsEnabled': settings['webFontsEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'automaticFontSizeAdjustment': settings['automaticFontSizeAdjustment']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'fontSizeFactor': settings['fontSizeFactor']?.readAs(
+        DriftSqlType.double,
+        db.typeMapping,
+      ),
+      'fontInflationEnabled': settings['fontInflationEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'displayDensityOverride': settings['displayDensityOverride']?.readAs(
+        DriftSqlType.double,
+        db.typeMapping,
+      ),
+      'screenWidthOverride': settings['screenWidthOverride']?.readAs(
+        DriftSqlType.int,
+        db.typeMapping,
+      ),
+      'screenHeightOverride': settings['screenHeightOverride']?.readAs(
+        DriftSqlType.int,
+        db.typeMapping,
+      ),
+      'inputAutoZoomEnabled': settings['inputAutoZoomEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      // Process Isolation Settings
+      'fissionEnabled': settings['fissionEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'isolatedProcessEnabled': settings['isolatedProcessEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'appZygoteProcessEnabled': settings['appZygoteProcessEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      // LNA Settings
+      'lnaBlocking': settings['lnaBlocking']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'lnaBlockTrackers': settings['lnaBlockTrackers']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'lnaEnabled': settings['lnaEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

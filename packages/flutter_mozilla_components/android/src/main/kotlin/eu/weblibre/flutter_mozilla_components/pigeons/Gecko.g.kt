@@ -2291,7 +2291,21 @@ data class GeckoEngineSettings (
   /** Allow baseline tracking protection exceptions (prevents major site breakage) */
   val allowListBaseline: Boolean? = null,
   /** Allow convenience tracking protection exceptions (fixes minor issues) */
-  val allowListConvenience: Boolean? = null
+  val allowListConvenience: Boolean? = null,
+  val webFontsEnabled: Boolean? = null,
+  val automaticFontSizeAdjustment: Boolean? = null,
+  val fontSizeFactor: Double? = null,
+  val fontInflationEnabled: Boolean? = null,
+  val displayDensityOverride: Double? = null,
+  val screenWidthOverride: Long? = null,
+  val screenHeightOverride: Long? = null,
+  val inputAutoZoomEnabled: Boolean? = null,
+  val fissionEnabled: Boolean? = null,
+  val isolatedProcessEnabled: Boolean? = null,
+  val appZygoteProcessEnabled: Boolean? = null,
+  val lnaBlocking: Boolean? = null,
+  val lnaBlockTrackers: Boolean? = null,
+  val lnaEnabled: Boolean? = null
 )
  {
   companion object {
@@ -2323,7 +2337,21 @@ data class GeckoEngineSettings (
       val suspectedFingerprintersScope = pigeonVar_list[24] as TrackingScope?
       val allowListBaseline = pigeonVar_list[25] as Boolean?
       val allowListConvenience = pigeonVar_list[26] as Boolean?
-      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides, locales, blockCookies, customCookiePolicy, blockTrackingContent, trackingContentScope, blockCryptominers, blockFingerprinters, blockRedirectTrackers, blockSuspectedFingerprinters, suspectedFingerprintersScope, allowListBaseline, allowListConvenience)
+      val webFontsEnabled = pigeonVar_list[27] as Boolean?
+      val automaticFontSizeAdjustment = pigeonVar_list[28] as Boolean?
+      val fontSizeFactor = pigeonVar_list[29] as Double?
+      val fontInflationEnabled = pigeonVar_list[30] as Boolean?
+      val displayDensityOverride = pigeonVar_list[31] as Double?
+      val screenWidthOverride = pigeonVar_list[32] as Long?
+      val screenHeightOverride = pigeonVar_list[33] as Long?
+      val inputAutoZoomEnabled = pigeonVar_list[34] as Boolean?
+      val fissionEnabled = pigeonVar_list[35] as Boolean?
+      val isolatedProcessEnabled = pigeonVar_list[36] as Boolean?
+      val appZygoteProcessEnabled = pigeonVar_list[37] as Boolean?
+      val lnaBlocking = pigeonVar_list[38] as Boolean?
+      val lnaBlockTrackers = pigeonVar_list[39] as Boolean?
+      val lnaEnabled = pigeonVar_list[40] as Boolean?
+      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides, locales, blockCookies, customCookiePolicy, blockTrackingContent, trackingContentScope, blockCryptominers, blockFingerprinters, blockRedirectTrackers, blockSuspectedFingerprinters, suspectedFingerprintersScope, allowListBaseline, allowListConvenience, webFontsEnabled, automaticFontSizeAdjustment, fontSizeFactor, fontInflationEnabled, displayDensityOverride, screenWidthOverride, screenHeightOverride, inputAutoZoomEnabled, fissionEnabled, isolatedProcessEnabled, appZygoteProcessEnabled, lnaBlocking, lnaBlockTrackers, lnaEnabled)
     }
   }
   fun toList(): List<Any?> {
@@ -2355,6 +2383,20 @@ data class GeckoEngineSettings (
       suspectedFingerprintersScope,
       allowListBaseline,
       allowListConvenience,
+      webFontsEnabled,
+      automaticFontSizeAdjustment,
+      fontSizeFactor,
+      fontInflationEnabled,
+      displayDensityOverride,
+      screenWidthOverride,
+      screenHeightOverride,
+      inputAutoZoomEnabled,
+      fissionEnabled,
+      isolatedProcessEnabled,
+      appZygoteProcessEnabled,
+      lnaBlocking,
+      lnaBlockTrackers,
+      lnaEnabled,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -4793,7 +4835,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
   fun getGeckoVersion(): String
-  fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?, fxaServerOverride: String?, syncTokenServerOverride: String?)
+  fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?, fxaServerOverride: String?, syncTokenServerOverride: String?, startupSettings: GeckoEngineSettings?)
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
   fun openInCustomTab(url: String, private: Boolean, contextId: String?)
@@ -4833,8 +4875,9 @@ interface GeckoBrowserApi {
             val addonCollectionArg = args[3] as AddonCollection?
             val fxaServerOverrideArg = args[4] as String?
             val syncTokenServerOverrideArg = args[5] as String?
+            val startupSettingsArg = args[6] as GeckoEngineSettings?
             val wrapped: List<Any?> = try {
-              api.initialize(profileFolderArg, logLevelArg, contentBlockingArg, addonCollectionArg, fxaServerOverrideArg, syncTokenServerOverrideArg)
+              api.initialize(profileFolderArg, logLevelArg, contentBlockingArg, addonCollectionArg, fxaServerOverrideArg, syncTokenServerOverrideArg, startupSettingsArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

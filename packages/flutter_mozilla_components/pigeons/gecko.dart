@@ -878,6 +878,26 @@ class GeckoEngineSettings {
   /// Allow convenience tracking protection exceptions (fixes minor issues)
   final bool? allowListConvenience;
 
+  // Web Content Settings
+  final bool? webFontsEnabled;
+  final bool? automaticFontSizeAdjustment;
+  final double? fontSizeFactor;
+  final bool? fontInflationEnabled;
+  final double? displayDensityOverride;
+  final int? screenWidthOverride;
+  final int? screenHeightOverride;
+  final bool? inputAutoZoomEnabled;
+
+  // Process Isolation Settings (require app restart)
+  final bool? fissionEnabled;
+  final bool? isolatedProcessEnabled;
+  final bool? appZygoteProcessEnabled;
+
+  // Local Network Access (LNA) Settings
+  final bool? lnaBlocking;
+  final bool? lnaBlockTrackers;
+  final bool? lnaEnabled;
+
   GeckoEngineSettings(
     this.javascriptEnabled,
     this.trackingProtectionPolicy,
@@ -906,6 +926,20 @@ class GeckoEngineSettings {
     this.suspectedFingerprintersScope,
     this.allowListBaseline,
     this.allowListConvenience,
+    this.webFontsEnabled,
+    this.automaticFontSizeAdjustment,
+    this.fontSizeFactor,
+    this.fontInflationEnabled,
+    this.displayDensityOverride,
+    this.screenWidthOverride,
+    this.screenHeightOverride,
+    this.inputAutoZoomEnabled,
+    this.fissionEnabled,
+    this.isolatedProcessEnabled,
+    this.appZygoteProcessEnabled,
+    this.lnaBlocking,
+    this.lnaBlockTrackers,
+    this.lnaEnabled,
   );
 }
 
@@ -1103,6 +1137,7 @@ abstract class GeckoBrowserApi {
     AddonCollection? addonCollection,
     String? fxaServerOverride,
     String? syncTokenServerOverride,
+    GeckoEngineSettings? startupSettings,
   );
   bool showNativeFragment();
   void onTrimMemory(int level);

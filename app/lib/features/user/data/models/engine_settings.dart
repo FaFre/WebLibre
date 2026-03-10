@@ -104,6 +104,26 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @override
   bool get allowListConvenience => super.allowListConvenience!;
 
+  // Web Content Settings
+  @override
+  bool get webFontsEnabled => super.webFontsEnabled!;
+  @override
+  bool get automaticFontSizeAdjustment => super.automaticFontSizeAdjustment!;
+  @override
+  double get fontSizeFactor => super.fontSizeFactor!;
+  @override
+  bool get fontInflationEnabled => super.fontInflationEnabled!;
+  @override
+  bool get inputAutoZoomEnabled => super.inputAutoZoomEnabled!;
+
+  // Process Isolation Settings (require app restart)
+  @override
+  bool get fissionEnabled => super.fissionEnabled!;
+  @override
+  bool get isolatedProcessEnabled => super.isolatedProcessEnabled!;
+  @override
+  bool get appZygoteProcessEnabled => super.appZygoteProcessEnabled!;
+
   final QueryParameterStripping queryParameterStripping;
 
   final BounceTrackingProtectionMode bounceTrackingProtectionMode;
@@ -171,6 +191,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.suspectedFingerprintersScope,
     required super.allowListBaseline,
     required super.allowListConvenience,
+    required super.webFontsEnabled,
+    required super.automaticFontSizeAdjustment,
+    required super.fontSizeFactor,
+    required super.fontInflationEnabled,
+    required super.displayDensityOverride,
+    required super.screenWidthOverride,
+    required super.screenHeightOverride,
+    required super.inputAutoZoomEnabled,
+    required super.fissionEnabled,
+    required super.isolatedProcessEnabled,
+    required super.appZygoteProcessEnabled,
+    required super.lnaBlocking,
+    required super.lnaBlockTrackers,
+    required super.lnaEnabled,
   });
 
   EngineSettings.withDefaults({
@@ -207,6 +241,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     TrackingScope? suspectedFingerprintersScope,
     bool? allowListBaseline,
     bool? allowListConvenience,
+    bool? webFontsEnabled,
+    bool? automaticFontSizeAdjustment,
+    double? fontSizeFactor,
+    bool? fontInflationEnabled,
+    double? displayDensityOverride,
+    int? screenWidthOverride,
+    int? screenHeightOverride,
+    bool? inputAutoZoomEnabled,
+    bool? fissionEnabled,
+    bool? isolatedProcessEnabled,
+    bool? appZygoteProcessEnabled,
+    bool? lnaBlocking,
+    bool? lnaBlockTrackers,
+    bool? lnaEnabled,
   }) : queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.disabled,
        bounceTrackingProtectionMode =
@@ -259,6 +307,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
              suspectedFingerprintersScope ?? TrackingScope.all,
          allowListBaseline: allowListBaseline ?? true,
          allowListConvenience: allowListConvenience ?? false,
+         webFontsEnabled: webFontsEnabled ?? true,
+         automaticFontSizeAdjustment: automaticFontSizeAdjustment ?? true,
+         fontSizeFactor: fontSizeFactor ?? 1.0,
+         fontInflationEnabled: fontInflationEnabled ?? false,
+         displayDensityOverride: displayDensityOverride,
+         screenWidthOverride: screenWidthOverride,
+         screenHeightOverride: screenHeightOverride,
+         inputAutoZoomEnabled: inputAutoZoomEnabled ?? true,
+         fissionEnabled: fissionEnabled ?? true,
+         isolatedProcessEnabled: isolatedProcessEnabled ?? false,
+         appZygoteProcessEnabled: appZygoteProcessEnabled ?? false,
+         lnaBlocking: lnaBlocking,
+         lnaBlockTrackers: lnaBlockTrackers,
+         lnaEnabled: lnaEnabled,
        );
 
   static AddonCollection? _addonCollectionFromJson(String? json) =>
@@ -309,5 +371,19 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     suspectedFingerprintersScope,
     allowListBaseline,
     allowListConvenience,
+    webFontsEnabled,
+    automaticFontSizeAdjustment,
+    fontSizeFactor,
+    fontInflationEnabled,
+    displayDensityOverride,
+    screenWidthOverride,
+    screenHeightOverride,
+    inputAutoZoomEnabled,
+    fissionEnabled,
+    isolatedProcessEnabled,
+    appZygoteProcessEnabled,
+    lnaBlocking,
+    lnaBlockTrackers,
+    lnaEnabled,
   ];
 }
